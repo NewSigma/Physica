@@ -92,7 +92,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    __device__ Pack device_obj<RValueVector<Derived>>::packet(size_t index) const {
+    __device__ Pack device_obj<RValueVector<Derived>>::packet(size_t index) const noexcept {
         assert(index + Pack::size() <= getLength());
         if constexpr (Scalar<Pack>)
             return calc(index);
@@ -102,7 +102,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    __device__ Pack device_obj<RValueVector<Derived>>::packetPartial(size_t index, [[maybe_unused]] size_t count) const {
+    __device__ Pack device_obj<RValueVector<Derived>>::packet(size_t index, [[maybe_unused]] size_t count) const noexcept {
         assert(index + Pack::size() <= getLength());
         assert(count == 1 && "[Error]: No need to call partial version");
         if constexpr (Scalar<Pack>)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -43,9 +43,9 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const { return abs(Base::getExpr().calc_value(index)); }
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const;
+        [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
+        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
         void reverse(const auto& grad) const noexcept;
 
         [[nodiscard]] T max() const;
@@ -59,7 +59,7 @@ namespace Physica {
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Abs, V>::packet(size_t index) const {
+    Pack VectorExpr<ExprID::Abs, V>::packet(size_t index) const noexcept {
         if constexpr (isComplexV)
             return sqrt(Base::getExpr().squaredNorms().template packet<Pack>(index));
         else
@@ -68,11 +68,11 @@ namespace Physica {
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Abs, V>::packetPartial(size_t index, size_t count) const {
+    Pack VectorExpr<ExprID::Abs, V>::packet(size_t index, size_t count) const noexcept {
         if constexpr (isComplexV)
-            return sqrt(Base::getExpr().squaredNorms().template packetPartial<Pack>(index, count));
+            return sqrt(Base::getExpr().squaredNorms().template packet<Pack>(index, count));
         else
-            return abs(Base::getExpr().template packetPartial<Pack>(index, count));
+            return abs(Base::getExpr().template packet<Pack>(index, count));
     }
 
     template<Vector V>

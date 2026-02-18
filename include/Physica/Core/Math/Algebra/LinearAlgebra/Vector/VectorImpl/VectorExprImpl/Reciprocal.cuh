@@ -35,13 +35,13 @@ namespace Physica {
         }
 
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index) const {
+        [[nodiscard]] __device__ Pack packet(size_t index) const noexcept {
             return Pack(1) / Base::getExpr().template packet<Pack>(index);
         }
 
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const {
-            return Pack(1) / Base::getExpr().template packetPartial<Pack>(index, count);
+        [[nodiscard]] __device__ Pack packet(size_t index, size_t count) const noexcept {
+            return Pack(1) / Base::getExpr().template packet<Pack>(index, count);
         }
     };
 

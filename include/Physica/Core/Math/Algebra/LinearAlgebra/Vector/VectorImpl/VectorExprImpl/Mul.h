@@ -51,9 +51,9 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const;
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const;
+        [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
+        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
 
         [[nodiscard]] T sum() const { return getLHS().sum() * getRHS(); }
 
@@ -142,14 +142,14 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Mul, V, U>::packet(size_t index) const {
+    Pack VectorExpr<ExprID::Mul, V, U>::packet(size_t index) const noexcept {
         return getLHS().template packet<Pack>(index) * Pack(getRHS());
     }
 
     template<Vector V, Scalar U>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Mul, V, U>::packetPartial(size_t index, size_t count) const {
-        return getLHS().template packetPartial<Pack>(index, count) * Pack(getRHS());
+    Pack VectorExpr<ExprID::Mul, V, U>::packet(size_t index, size_t count) const noexcept {
+        return getLHS().template packet<Pack>(index, count) * Pack(getRHS());
     }
 
     template<Vector V, Scalar U>
@@ -232,7 +232,7 @@ namespace Physica {
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
+        [[nodiscard]] Pack packet(size_t index, size_t count) const;
 
         using Base::reverse;
         void reverse(const auto& grad) const noexcept;
@@ -299,8 +299,8 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Mul, V1, V2>::packetPartial(size_t index, size_t count) const {
-        return Base::getLHS().template packetPartial<Pack>(index, count) * Base::getRHS().template packetPartial<Pack>(index, count);
+    Pack VectorExpr<ExprID::Mul, V1, V2>::packet(size_t index, size_t count) const {
+        return Base::getLHS().template packet<Pack>(index, count) * Base::getRHS().template packet<Pack>(index, count);
     }
 
     template<Vector V1, Vector V2>

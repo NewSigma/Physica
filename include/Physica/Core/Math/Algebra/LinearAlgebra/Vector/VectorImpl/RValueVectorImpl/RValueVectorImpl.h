@@ -130,7 +130,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    Pack RValueVector<Derived>::packetPartial(size_t index, size_t count) const noexcept {
+    Pack RValueVector<Derived>::packet(size_t index, size_t count) const noexcept {
         using U = Traits<Pack>::ScalarType;
         assert(index + count <= getLength() && "[Error]: Index out of range");
         if constexpr (Diffable<U>) {
@@ -138,8 +138,8 @@ namespace Physica {
             if constexpr (isForwardDiff) {
                 using GradPacket = Pack::GradType;
                 const auto& x = Base::getDerived();
-                auto values = x.values().template packetPartial<ValuePacket>(index, count);
-                auto grads = x.grads().template packetPartial<GradPacket>(index, count);
+                auto values = x.values().template packet<ValuePacket>(index, count);
+                auto grads = x.grads().template packet<GradPacket>(index, count);
                 return Pack(std::move(values), std::move(grads));
             }
             else {
@@ -424,7 +424,7 @@ namespace Physica {
                 constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
                 if constexpr (i != SizeAtCompile) {
                     constexpr size_t count = SizeAtCompile - i;
-                    buffer += v.template packetPartial<PacketType>(i, count);
+                    buffer += v.template packet<PacketType>(i, count);
                 }
             }
             else {
@@ -436,7 +436,7 @@ namespace Physica {
 
                 if (to != length) {
                     const size_t count = length - i;
-                    buffer += v.template packetPartial<PacketType>(i, count);
+                    buffer += v.template packet<PacketType>(i, count);
                 }
             }
             co_return buffer.sum();

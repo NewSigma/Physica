@@ -49,7 +49,7 @@ namespace Physica {
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const noexcept;
+        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
 
         [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
         /* Getters */
@@ -70,8 +70,8 @@ namespace Physica {
 
     template<Vector V>
     template<Packet Pack>
-    Pack Conjugate<V>::packetPartial(size_t index, size_t count) const noexcept {
-        return vec.template packetPartial<Pack>(index, count).conjugate();
+    Pack Conjugate<V>::packet(size_t index, size_t count) const noexcept {
+        return vec.template packet<Pack>(index, count).conjugate();
     }
 
     template<Vector V>

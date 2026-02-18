@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -36,7 +36,7 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const { return cbrt(Base::getExpr().calc_value(index)); }
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const requires(!CUDA<V>) {
+        [[nodiscard]] Pack packet(size_t index) const noexcept requires(!CUDA<V>) {
             Pack result = Base::getExpr().template packet<Pack>(index);
             for (size_t i = 0; i < static_cast<size_t>(Pack::size()); ++i)
                 result.insert(i, cbrt(result[i]));
@@ -44,8 +44,8 @@ namespace Physica {
         }
 
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
-            Pack result = Base::getExpr().template packetPartial<Pack>(index, count);
+        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept {
+            Pack result = Base::getExpr().template packet<Pack>(index, count);
             for (size_t i = 0; i < count; ++i)
                 result.insert(i, cbrt(result[i]));
             return result;

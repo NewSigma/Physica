@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -50,9 +50,9 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).squaredNorm(); }
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const;
+        [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
+        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
         void reverse(const Scalar auto& grad) const noexcept;
 
         [[nodiscard]] auto values() const noexcept { return v.values().squaredNorms(); }
@@ -62,7 +62,7 @@ namespace Physica {
 
     template<class V>
     template<Packet Pack>
-    Pack SquaredNormVector<V>::packet(size_t index) const {
+    Pack SquaredNormVector<V>::packet(size_t index) const noexcept {
         if constexpr (isComplexV) {
             static_assert(!isReverseDiff, "[Error]: Not implemented");
             constexpr size_t MaxSize = BestPacket<ComplexType, Dynamic>::Size;
@@ -86,7 +86,7 @@ namespace Physica {
 
     template<class V>
     template<Packet Pack>
-    Pack SquaredNormVector<V>::packetPartial(size_t index, size_t count) const {
+    Pack SquaredNormVector<V>::packet(size_t index, size_t count) const noexcept {
         assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
         if constexpr (isComplexV) {
             static_assert(!isReverseDiff, "[Error]: Not implemented");
@@ -94,7 +94,7 @@ namespace Physica {
             constexpr size_t Size = Pack::size();
             if constexpr (Size <= MaxSize) {
                 using PacketType = SIMD<ComplexType, Size>;
-                const auto x2 = PacketType::asComplex(v.template packetPartial<PacketType>(index, count).squaredNorm());
+                const auto x2 = PacketType::asComplex(v.template packet<PacketType>(index, count).squaredNorm());
                 return Pack(x2.real());
             }
             else {
@@ -105,16 +105,16 @@ namespace Physica {
                 if (count >= HalfSize)
                     x2 = PacketType::asComplex(v.template packet<PacketType>(index).squaredNorm());
                 else
-                    x2 = PacketType::asComplex(v.template packetPartial<PacketType>(index, count).squaredNorm());
+                    x2 = PacketType::asComplex(v.template packet<PacketType>(index, count).squaredNorm());
 
                 if (count <= HalfSize)
                     return Pack(x2.real(), SIMD<T, HalfSize>(0));
-                const auto y2 = PacketType::asComplex(v.template packetPartial<PacketType>(index + HalfSize, count - HalfSize).squaredNorm());
+                const auto y2 = PacketType::asComplex(v.template packet<PacketType>(index + HalfSize, count - HalfSize).squaredNorm());
                 return Pack(x2.real(), y2.real());
             }
         }
         else
-            return square(v.template packetPartial<Pack>(index, count));
+            return square(v.template packet<Pack>(index, count));
     }
 
     template<class V>

@@ -48,11 +48,11 @@ namespace Physica {
         using Base::operator+=;
         /* Operations */
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index) const;
+        [[nodiscard]] __device__ Pack packet(size_t index) const noexcept;
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const;
-        __device__ void writePacket(size_t index, Packet auto packet);
-        __device__ void writePacketPartial(size_t index, size_t count, Packet auto packet);
+        [[nodiscard]] __device__ Pack packet(size_t index, size_t count) const noexcept;
+        __device__ void writePacket(size_t index, Packet auto packet) noexcept;
+        __device__ void writePacket(size_t index, size_t count, Packet auto packet) noexcept;
         void reverse(const auto& grad) const noexcept;
 
         template<Vector V> void toHost(CompactVector<V>& obj) const;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -38,13 +38,13 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const { return tanh(Base::getExpr().calc_value(index)); }
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const {
+        [[nodiscard]] Pack packet(size_t index) const noexcept {
             return tanh(Base::getExpr().template packet<Pack>(index));
         }
 
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
-            return tanh(Base::getExpr().template packetPartial<Pack>(index, count));
+        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept {
+            return tanh(Base::getExpr().template packet<Pack>(index, count));
         }
 
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;

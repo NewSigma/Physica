@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -33,13 +33,13 @@ namespace Physica {
         [[nodiscard]] T calc(size_t s) const { return T(getLHS().calc(s) > getRHS().calc(s)); }
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const {
+        [[nodiscard]] Pack packet(size_t index) const noexcept {
             return getLHS().template packet<Pack>(index) > getRHS().template packet<Pack>(index);
         }
 
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
-            return getLHS().template packetPartial<Pack>(index, count) > getRHS().template packetPartial<Pack>(index, count);
+        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept {
+            return getLHS().template packet<Pack>(index, count) > getRHS().template packet<Pack>(index, count);
         }
         /* Getters */
         using Base::getLHS;
@@ -63,8 +63,8 @@ namespace Physica {
         }
 
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
-            return getLHS().template packetPartial<Pack>(index, count) > Pack(getRHS());
+        [[nodiscard]] Pack packet(size_t index, size_t count) const {
+            return getLHS().template packet<Pack>(index, count) > Pack(getRHS());
         }
         /* Getters */
         using Base::getLHS;

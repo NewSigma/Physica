@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -37,9 +37,9 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t s) const;
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const;
+        [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
+        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
     };
 
     template<class U, class V>
@@ -66,7 +66,7 @@ namespace Physica {
 
     template<class U, class V>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Div, U, V>::packet(size_t index) const {
+    Pack VectorExpr<ExprID::Div, U, V>::packet(size_t index) const noexcept {
         if constexpr (Vector<U>)
             return Base::getLHS().template packet<Pack>(index) * Pack(reciprocal(Base::getRHS()));
         else {
@@ -78,11 +78,11 @@ namespace Physica {
 
     template<class U, class V>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Div, U, V>::packetPartial(size_t index, size_t count) const {
+    Pack VectorExpr<ExprID::Div, U, V>::packet(size_t index, size_t count) const noexcept {
         if constexpr (Vector<U>)
-            return Base::getLHS().template packetPartial<Pack>(index, count) * Pack(reciprocal(Base::getRHS()));
+            return Base::getLHS().template packet<Pack>(index, count) * Pack(reciprocal(Base::getRHS()));
         else {
-            auto div = Base::getRHS().template packetPartial<Pack>(index, count);
+            auto div = Base::getRHS().template packet<Pack>(index, count);
             for (size_t i = 0; i < count; ++i)
                 assert(!div[i].isZero() && "[Error]: Divide by zero");
             return (Pack(Base::getLHS()) / div).cutoff(count);
@@ -103,9 +103,9 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t s) const;
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const;
+        [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
+        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
     };
 
     template<Vector V1, Vector V2>
@@ -122,7 +122,7 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Div, V1, V2>::packet(size_t index) const {
+    Pack VectorExpr<ExprID::Div, V1, V2>::packet(size_t index) const noexcept {
         auto div = Base::getRHS().template packet<Pack>(index);
         assert(!div.isZero().horizontal_or() && "[Error]: Divide by zero");
         return Base::getLHS().template packet<Pack>(index) / div;
@@ -130,9 +130,9 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Div, V1, V2>::packetPartial(size_t index, size_t count) const {
-        const auto pack1 = Base::getLHS().template packetPartial<Pack>(index, count);
-        const auto pack2 = Base::getRHS().template packetPartial<Pack>(index, count);
+    Pack VectorExpr<ExprID::Div, V1, V2>::packet(size_t index, size_t count) const noexcept {
+        const auto pack1 = Base::getLHS().template packet<Pack>(index, count);
+        const auto pack2 = Base::getRHS().template packet<Pack>(index, count);
         for (size_t i = 0; i < count; ++i)
             assert(!pack2[i].isZero() && "[Error]: Divide by zero");
         return (pack1 / pack2).cutoff(count);

@@ -45,13 +45,13 @@ namespace Physica {
         }
 
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index) const {
+        [[nodiscard]] __device__ Pack packet(size_t index) const noexcept {
             return Base::getLHS().template packet<Pack>(index) + Pack(Base::getRHS());
         }
 
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const {
-            return Base::getLHS().template packetPartial<Pack>(index, count) + Pack(Base::getRHS());
+        [[nodiscard]] __device__ Pack packet(size_t index, size_t count) const noexcept {
+            return Base::getLHS().template packet<Pack>(index, count) + Pack(Base::getRHS());
         }
 
         using Base::reverse;
@@ -89,15 +89,15 @@ namespace Physica {
         }
 
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index) const {
+        [[nodiscard]] __device__ Pack packet(size_t index) const noexcept {
             return Base::getLHS().template packet<Pack>(index)
                  + Base::getRHS().template packet<Pack>(index);
         }
 
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const {
-            return Base::getLHS().template packetPartial<Pack>(index, count)
-                 + Base::getRHS().template packetPartial<Pack>(index, count);
+        [[nodiscard]] __device__ Pack packet(size_t index, size_t count) const noexcept {
+            return Base::getLHS().template packet<Pack>(index, count)
+                 + Base::getRHS().template packet<Pack>(index, count);
         }
 
         using Base::reverse;

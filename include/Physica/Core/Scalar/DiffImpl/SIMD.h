@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -96,10 +96,10 @@ namespace Physica {
         /* Operations */
         ValueType reverse(GradType grad = 1) const noexcept;
 
-        void load(ConstPtrTy p);
-        void load_partial(ConstPtrTy p, int n);
-        void store(PtrTy p) const;
-        void store_partial(PtrTy p, int n) const;
+        void load(ConstPtrTy p) noexcept;
+        void load(ConstPtrTy p, int n) noexcept;
+        void store(PtrTy p) const noexcept;
+        void store(PtrTy p, int n) const noexcept;
 
         This& cutoff(int count);
         [[nodiscard]] FullRealType swapRealImag() const noexcept;

@@ -97,8 +97,8 @@ namespace Physica {
             }
             if (to != length) {
                 const size_t count = length - i;
-                PacketType p1 = v1.template packetPartial<PacketType>(i, count);
-                PacketType p2 = v2.template packetPartial<PacketType>(i, count);
+                PacketType p1 = v1.template packet<PacketType>(i, count);
+                PacketType p2 = v2.template packet<PacketType>(i, count);
                 buffer = fma(p1, p2, buffer);
             }
             co_return buffer.sum();

@@ -37,9 +37,9 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t s) const;
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const;
+        [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
+        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
 
         void reverse(const Vector auto& grad) const noexcept;
 
@@ -69,7 +69,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Add, V, U>::packet(size_t index) const {
+    Pack VectorExpr<ExprID::Add, V, U>::packet(size_t index) const noexcept {
         if constexpr (lowerToFMA())
             return fma(getLHS().getLHS().template packet<Pack>(index),
                        getLHS().getRHS().template packet<Pack>(index),
@@ -80,13 +80,13 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Add, V, U>::packetPartial(size_t index, size_t count) const {
+    Pack VectorExpr<ExprID::Add, V, U>::packet(size_t index, size_t count) const noexcept {
         if constexpr (lowerToFMA())
-            return fma(getLHS().getLHS().template packetPartial<Pack>(index, count),
-                       getLHS().getRHS().template packetPartial<Pack>(index, count),
+            return fma(getLHS().getLHS().template packet<Pack>(index, count),
+                       getLHS().getRHS().template packet<Pack>(index, count),
                        Pack(getRHS(), count));
         else
-            return getLHS().template packetPartial<Pack>(index, count) + Pack(getRHS(), count);
+            return getLHS().template packet<Pack>(index, count) + Pack(getRHS(), count);
     }
 
     template<Vector V, Scalar U>
@@ -139,7 +139,7 @@ namespace Physica {
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
+        [[nodiscard]] Pack packet(size_t index, size_t count) const;
 
         void reverse(const auto& grad) const noexcept;
 
@@ -228,21 +228,21 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Add, V1, V2>::packetPartial(size_t index, size_t count) const {
+    Pack VectorExpr<ExprID::Add, V1, V2>::packet(size_t index, size_t count) const {
         if constexpr (lowerToFMA()) {
             if constexpr (Scalar<decltype(getLHS().getRHS())>) {
-                return fma(getLHS().getLHS().template packetPartial<Pack>(index, count),
+                return fma(getLHS().getLHS().template packet<Pack>(index, count),
                            Pack(getLHS().getRHS()).cutoff(count),
-                           getRHS().template packetPartial<Pack>(index, count));
+                           getRHS().template packet<Pack>(index, count));
             }
             else {
-                return fma(getLHS().getLHS().template packetPartial<Pack>(index, count),
-                           getLHS().getRHS().template packetPartial<Pack>(index, count),
-                           getRHS().template packetPartial<Pack>(index, count));
+                return fma(getLHS().getLHS().template packet<Pack>(index, count),
+                           getLHS().getRHS().template packet<Pack>(index, count),
+                           getRHS().template packet<Pack>(index, count));
             }
         }
         else
-            return getLHS().template packetPartial<Pack>(index, count) + getRHS().template packetPartial<Pack>(index, count);
+            return getLHS().template packet<Pack>(index, count) + getRHS().template packet<Pack>(index, count);
     }
 
     template<Vector V1, Vector V2>

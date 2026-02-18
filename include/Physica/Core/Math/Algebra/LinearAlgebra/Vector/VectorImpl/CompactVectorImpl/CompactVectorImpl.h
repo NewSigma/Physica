@@ -65,7 +65,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    Pack CompactVector<Derived>::packet(size_t index) const {
+    Pack CompactVector<Derived>::packet(size_t index) const noexcept {
         assert(index + Pack::size() <= Base::getLength());
         if constexpr (std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>) {
             Pack packet{};
@@ -78,21 +78,21 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    Pack CompactVector<Derived>::packetPartial(size_t index, size_t count) const {
+    Pack CompactVector<Derived>::packet(size_t index, size_t count) const noexcept {
         assert(index + count <= Base::getLength());
         assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
         if constexpr (std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>) {
             Pack packet{};
-            packet.load_partial(Base::data_ptr(index), count);
+            packet.load(Base::data_ptr(index), count);
             return packet;
         }
         else
-            return Base::template packetPartial<Pack>(index, count);
+            return Base::template packet<Pack>(index, count);
     }
 
     template<class Derived>
     template<Packet Pack>
-    void CompactVector<Derived>::writePacket(size_t index, const Pack packet) {
+    void CompactVector<Derived>::writePacket(size_t index, const Pack packet) noexcept {
         constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>;
         if constexpr (isSameScalar)
             packet.store(Base::data_ptr(index));
@@ -102,13 +102,13 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    void CompactVector<Derived>::writePacketPartial(size_t index, size_t count, const Pack packet) {
+    void CompactVector<Derived>::writePacket(size_t index, size_t count, const Pack packet) noexcept {
         assert(index + count <= Base::getLength());
         assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
         if constexpr (std::same_as<ScalarType, typename Traits<Pack>::ScalarType>)
-            packet.store_partial(Base::data_ptr(index), count);
+            packet.store(Base::data_ptr(index), count);
         else
-            Base::template writePacketPartial<Pack>(index, count, packet);
+            Base::template writePacket<Pack>(index, count, packet);
     }
 
     template<class Derived>

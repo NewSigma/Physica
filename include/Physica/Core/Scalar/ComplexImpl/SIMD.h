@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -79,9 +79,9 @@ namespace Physica {
         void operator/=(SIMD other) { *this = *this / other; }
         /* Operations */
         void load(const ScalarType* p) noexcept;
-        void load_partial(const ScalarType* p, int n) noexcept;
+        void load(const ScalarType* p, int n) noexcept;
         void store(ScalarType* p) const noexcept;
-        void store_partial(ScalarType* p, int n) const noexcept;
+        void store(ScalarType* p, int n) const noexcept;
 
         This& cutoff(int count);
 

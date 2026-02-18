@@ -157,13 +157,13 @@ namespace Physica {
     }
     /**
      * Adapted from [1], we require a more strict range of \param n.
-     * SIMD<T, Size>::store_partial() is similar
+     * SIMD<T, Size>::store() is similar
      *
      * Reference:
      * [1] vectorclass2; https://github.com/vectorclass/version2
      */
     template<Scalar T, int Size>
-    void SIMD<T, Size>::load_partial(const T* p, int n) & noexcept {
+    void SIMD<T, Size>::load(const T* p, int n) & noexcept {
         assert(0 < n && n < Size && "[Error]: Invalid size for partial operation");
         if constexpr (T::Prec == Float32) {
             if constexpr (Size == 4) {
@@ -194,7 +194,7 @@ namespace Physica {
                 else {
                     HalfType low{}, high{};
                     if (n < 4) {
-                        low.load_partial(p, n);
+                        low.load(p, n);
                         high = HalfType::zeros();
                     }
                     else if (n == 4) {
@@ -203,7 +203,7 @@ namespace Physica {
                     }
                     else {
                         low.load(p);
-                        high.load_partial(p + 4, n - 4);
+                        high.load(p + 4, n - 4);
                     }
                     *this = This(low, high);
                 }
@@ -223,7 +223,7 @@ namespace Physica {
                 else {
                     HalfType low{}, high{};
                     if (n < 2) {
-                        low.load_partial(p, 1);
+                        low.load(p, 1);
                         high = HalfType::zeros();
                     }
                     else if (n == 2) {
@@ -232,7 +232,7 @@ namespace Physica {
                     }
                     else {
                         low.load(p);
-                        high.load_partial(p + 2, 1);
+                        high.load(p + 2, 1);
                     }
                     *this = This(low, high);
                 }
@@ -250,7 +250,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    void SIMD<T, Size>::store_partial(T* p, int n) const noexcept {
+    void SIMD<T, Size>::store(T* p, int n) const noexcept {
         assert(0 < n && n < Size && "[Error]: Invalid size for partial operation");
         if constexpr (T::Prec == Float32) {
             if constexpr (Size == 4) {
@@ -279,12 +279,12 @@ namespace Physica {
                     _mm256_mask_storeu_ps((float*)p, __mmask8((1U << n) - 1), *this);
                 else {
                     if (n < 4)
-                        getLow().store_partial(p, n);
+                        getLow().store(p, n);
                     else if (n == 4)
                         getLow().store(p);
                     else {
                         getLow().store(p);
-                        getHigh().store_partial(p + 4, n - 4);
+                        getHigh().store(p + 4, n - 4);
                     }
                 }
             }
@@ -302,12 +302,12 @@ namespace Physica {
                     _mm256_mask_storeu_pd((double*)p, __mmask8((1U << n) - 1), *this);
                 else {
                     if (n < 2)
-                        getLow().store_partial(p, 1);
+                        getLow().store(p, 1);
                     else if (n == 2)
                         getLow().store(p);
                     else {
                         getLow().store(p);
-                        getHigh().store_partial(p + 2, 1);
+                        getHigh().store(p + 2, 1);
                     }
                 }
             }

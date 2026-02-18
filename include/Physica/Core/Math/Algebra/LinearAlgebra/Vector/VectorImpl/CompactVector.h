@@ -61,10 +61,10 @@ namespace Physica {
         void assign(Vector auto&& v) const noexcept;
         void assign_mkl(Vector auto& v) const noexcept;
 
-        template<Packet Pack> [[nodiscard]] Pack packet(size_t index) const;
-        template<Packet Pack> [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
-        template<Packet Pack> void writePacket(size_t index, Pack packet);
-        template<Packet Pack> void writePacketPartial(size_t index, size_t count, Pack packet);
+        template<Packet Pack> [[nodiscard]] Pack packet(size_t index) const noexcept;
+        template<Packet Pack> [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
+        template<Packet Pack> void writePacket(size_t index, Pack packet) noexcept;
+        template<Packet Pack> void writePacket(size_t index, size_t count, Pack packet) noexcept;
 
         template<Vector V> void toDevice(device_obj<CompactVector<V>>& obj) const;
         template<Vector V> void toDeviceAsync(device_obj<CompactVector<V>>& obj) const;

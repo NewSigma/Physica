@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -40,11 +40,11 @@ namespace Physica {
         }
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const { return sec(Base::getExpr().template packet<Pack>(index)); }
+        [[nodiscard]] Pack packet(size_t index) const noexcept { return sec(Base::getExpr().template packet<Pack>(index)); }
 
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
-            return sec(Base::getExpr().template packetPartial<Pack>(index, count)).cutoff(count);
+        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept {
+            return sec(Base::getExpr().template packet<Pack>(index, count)).cutoff(count);
         }
     };
 

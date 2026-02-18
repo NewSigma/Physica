@@ -42,10 +42,10 @@ namespace Physica {
         This& operator=(const This& v);
         This& operator=(This&& v) noexcept;
         /* Operations */
-        template<Packet Pack> [[nodiscard]] Pack packet(size_t index) const;
-        template<Packet Pack> [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
-        void writePacket(size_t index, Packet auto packet);
-        void writePacketPartial(size_t index, size_t count, Packet auto packet);
+        template<Packet Pack> [[nodiscard]] Pack packet(size_t index) const noexcept;
+        template<Packet Pack> [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
+        void writePacket(size_t index, Packet auto packet) noexcept;
+        void writePacket(size_t index, size_t count, Packet auto packet) noexcept;
 
         template<size_t Length_ = Dynamic>
         [[nodiscard]] auto head(this auto&&, size_t to = Length_) noexcept;
@@ -91,24 +91,24 @@ namespace Physica {
 
     template<Vector V, size_t Length>
     template<Packet Pack>
-    Pack CompactVectorBlock<V, Length>::packet(size_t index) const {
+    Pack CompactVectorBlock<V, Length>::packet(size_t index) const noexcept {
         return vec.template packet<Pack>(from + index);
     }
 
     template<Vector V, size_t Length>
     template<Packet Pack>
-    Pack CompactVectorBlock<V, Length>::packetPartial(size_t index, size_t count) const {
-        return vec.template packetPartial<Pack>(from + index, count);
+    Pack CompactVectorBlock<V, Length>::packet(size_t index, size_t count) const noexcept {
+        return vec.template packet<Pack>(from + index, count);
     }
 
     template<Vector V, size_t Length>
-    void CompactVectorBlock<V, Length>::writePacket(size_t index, const Packet auto packet) {
+    void CompactVectorBlock<V, Length>::writePacket(size_t index, const Packet auto packet) noexcept {
         return vec.writePacket(from + index, packet);
     }
 
     template<Vector V, size_t Length>
-    void CompactVectorBlock<V, Length>::writePacketPartial(size_t index, size_t count, const Packet auto packet) {
-        return vec.writePacketPartial(from + index, count, packet);
+    void CompactVectorBlock<V, Length>::writePacket(size_t index, size_t count, const Packet auto packet) noexcept {
+        return vec.writePacket(from + index, count, packet);
     }
 
     template<Vector V, size_t Length>

@@ -1,5 +1,7 @@
 # Physica
 
+[![License](https://img.shields.io/badge/License-GPL_3.0-blue.svg)](https://opensource.org/license/gpl-3-0) [![Linux](https://img.shields.io/badge/os-Linux-green.svg)](https://shields.io/)
+
 *Physica* is a high-performance and scalable C++ template library, dedicated to providing a rapid iteration platform for new algorithms. It provides the following two main features:
 
 - Differentiable linear algebra library that leverages SIMD and GPU acceleration

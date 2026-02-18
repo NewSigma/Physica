@@ -108,27 +108,27 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, int Size>
-    void SIMD<Diff<T, Mode, Order>, Size>::load(ConstPtrTy p) {
+    void SIMD<Diff<T, Mode, Order>, Size>::load(ConstPtrTy p) noexcept {
         values.load(p.value_ptr());
         grads.load(p.grad_ptr());
     }
 
     template<Scalar T, DiffMode Mode, int Order, int Size>
-    void SIMD<Diff<T, Mode, Order>, Size>::load_partial(ConstPtrTy p, int n) {
-        values.load_partial(p.value_ptr(), n);
-        grads.load_partial(p.grad_ptr(), n);
+    void SIMD<Diff<T, Mode, Order>, Size>::load(ConstPtrTy p, int n) noexcept {
+        values.load(p.value_ptr(), n);
+        grads.load(p.grad_ptr(), n);
     }
 
     template<Scalar T, DiffMode Mode, int Order, int Size>
-    void SIMD<Diff<T, Mode, Order>, Size>::store(PtrTy p) const {
+    void SIMD<Diff<T, Mode, Order>, Size>::store(PtrTy p) const noexcept {
         values.store(p.value_ptr());
         grads.store(p.grad_ptr());
     }
 
     template<Scalar T, DiffMode Mode, int Order, int Size>
-    void SIMD<Diff<T, Mode, Order>, Size>::store_partial(PtrTy p, int n) const {
-        values.store_partial(p.value_ptr(), n);
-        grads.store_partial(p.grad_ptr(), n);
+    void SIMD<Diff<T, Mode, Order>, Size>::store(PtrTy p, int n) const noexcept {
+        values.store(p.value_ptr(), n);
+        grads.store(p.grad_ptr(), n);
     }
 
     template<Scalar T, DiffMode Mode, int Order, int Size>

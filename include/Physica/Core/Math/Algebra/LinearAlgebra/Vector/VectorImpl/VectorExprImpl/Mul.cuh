@@ -41,9 +41,9 @@ namespace Physica {
         [[nodiscard]] __device__ Tv calc_value(size_t index) const;
 
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index) const;
+        [[nodiscard]] __device__ Pack packet(size_t index) const noexcept;
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const;
+        [[nodiscard]] __device__ Pack packet(size_t index, size_t count) const noexcept;
     };
 
     template<Vector V, Scalar U>
@@ -99,14 +99,14 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     template<Packet Pack>
-    __device__ Pack device_obj<VectorExpr<ExprID::Mul, V, U>>::packet(size_t index) const {
+    __device__ Pack device_obj<VectorExpr<ExprID::Mul, V, U>>::packet(size_t index) const noexcept {
         return Base::getLHS().template packet<Pack>(index) * Pack(Base::getRHS());
     }
 
     template<Vector V, Scalar U>
     template<Packet Pack>
-    __device__ Pack device_obj<VectorExpr<ExprID::Mul, V, U>>::packetPartial(size_t index, size_t count) const {
-           return Base::getLHS().template packetPartial<Pack>(index, count) * Pack(Base::getRHS());
+    __device__ Pack device_obj<VectorExpr<ExprID::Mul, V, U>>::packet(size_t index, size_t count) const noexcept {
+           return Base::getLHS().template packet<Pack>(index, count) * Pack(Base::getRHS());
     }
 
     template<Vector V1, Vector V2>
@@ -123,15 +123,15 @@ namespace Physica {
         }
 
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index) const {
+        [[nodiscard]] __device__ Pack packet(size_t index) const noexcept {
             return Base::getLHS().template packet<Pack>(index)
                  * Base::getRHS().template packet<Pack>(index);
         }
 
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const {
-            return Base::getLHS().template packetPartial<Pack>(index, count)
-                 * Base::getRHS().template packetPartial<Pack>(index, count);
+        [[nodiscard]] __device__ Pack packet(size_t index, size_t count) const noexcept {
+            return Base::getLHS().template packet<Pack>(index, count)
+                 * Base::getRHS().template packet<Pack>(index, count);
         }
     };
 

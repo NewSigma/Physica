@@ -115,10 +115,10 @@ namespace Physica {
         template<int MaskOrder>
         [[nodiscard]] __host__ __device__ auto mask() const noexcept;
 
-        __host__ __device__ Derived& load(ConstPtrTy p);
-        __host__ __device__ void store(PtrTy p) const;
-        [[noreturn]] __host__ __device__ Derived& load_partial(ConstPtrTy p, int n);
-        [[noreturn]] __host__ __device__ void store_partial(PtrTy p, int n) const;
+        [[nodiscard]] __host__ __device__ Derived& load(ConstPtrTy p) noexcept;
+        __host__ __device__ void store(PtrTy p) const noexcept;
+        [[noreturn]] __host__ __device__ Derived& load(ConstPtrTy p, int n) noexcept;
+        [[noreturn]] __host__ __device__ void store(PtrTy p, int n) const noexcept;
         void insert(int index, ScalarType value);
 
         [[nodiscard]] __host__ __device__ RealType real() const noexcept;
@@ -299,24 +299,24 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ Derived& ScalarBase<Derived>::load(ConstPtrTy p) {
+    __host__ __device__ Derived& ScalarBase<Derived>::load(ConstPtrTy p) noexcept {
         this->getDerived() = (*p).value();
         return this->getDerived();
     }
 
     template<class Derived>
-    __host__ __device__ void ScalarBase<Derived>::store(PtrTy p) const {
+    __host__ __device__ void ScalarBase<Derived>::store(PtrTy p) const noexcept {
         *p = this->getDerived().value();
     }
 
     template<class Derived>
-    __host__ __device__ Derived& ScalarBase<Derived>::load_partial(ConstPtrTy, [[maybe_unused]] int n) {
+    __host__ __device__ Derived& ScalarBase<Derived>::load(ConstPtrTy, [[maybe_unused]] int n) noexcept {
         assert(false && "[Error]: No partial operation for single scalar");
         unreachable();
     }
 
     template<class Derived>
-    __host__ __device__ void ScalarBase<Derived>::store_partial(PtrTy, [[maybe_unused]] int n) const {
+    __host__ __device__ void ScalarBase<Derived>::store(PtrTy, [[maybe_unused]] int n) const noexcept {
         assert(false && "[Error]: No partial operation for single scalar");
         unreachable();
     }

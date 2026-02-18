@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -37,9 +37,9 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const;
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const;
+        [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
+        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
 
         void reverse(const Vector auto& grad) const noexcept;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
@@ -55,7 +55,7 @@ namespace Physica {
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Reciprocal, V>::packet(size_t index) const {
+    Pack VectorExpr<ExprID::Reciprocal, V>::packet(size_t index) const noexcept {
         auto x = Base::getExpr().template packet<Pack>(index);
         assert(!x.isZero().horizontal_or() && "[Error]: Divide by zero");
         return reciprocal(x);
@@ -63,8 +63,8 @@ namespace Physica {
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Reciprocal, V>::packetPartial(size_t index, size_t count) const {
-        auto x = reciprocal(Base::getExpr().template packetPartial<Pack>(index, count)).cutoff(count);
+    Pack VectorExpr<ExprID::Reciprocal, V>::packet(size_t index, size_t count) const noexcept {
+        auto x = reciprocal(Base::getExpr().template packet<Pack>(index, count)).cutoff(count);
         assert(x.isFinite().horizontal_and() && "[Error]: Divide by zero");
         return x;
     }

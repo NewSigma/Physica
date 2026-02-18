@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -91,9 +91,9 @@ namespace Physica {
         [[nodiscard]] auto operator<=(const SIMD other) const { return !(*this > other); }
         /* Operations */
         void load(const T* p) & noexcept;
-        void load_partial(const T* p, int n) & noexcept;
+        void load(const T* p, int n) & noexcept;
         void store(T* p) const noexcept;
-        void store_partial(T* p, int n) const noexcept;
+        void store(T* p, int n) const noexcept;
         void insert(int index, const T& value);
         template<int... Order> SIMD shuffle() const;
         template<int... Order> SIMD permute() const;

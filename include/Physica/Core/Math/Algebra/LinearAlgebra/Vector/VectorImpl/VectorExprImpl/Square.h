@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -40,9 +40,9 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const;
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const;
+        [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
+        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
 
         void reverse(const auto& grad) const noexcept;
         using Base::reverse;
@@ -70,14 +70,14 @@ namespace Physica {
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Square, V>::packet(size_t index) const {
+    Pack VectorExpr<ExprID::Square, V>::packet(size_t index) const noexcept {
         return square(getExpr().template packet<Pack>(index));
     }
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Square, V>::packetPartial(size_t index, size_t count) const {
-        return square(getExpr().template packetPartial<Pack>(index, count));
+    Pack VectorExpr<ExprID::Square, V>::packet(size_t index, size_t count) const noexcept {
+        return square(getExpr().template packet<Pack>(index, count));
     }
 
     template<Vector V>
