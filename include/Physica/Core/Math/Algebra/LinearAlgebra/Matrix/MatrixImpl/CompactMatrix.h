@@ -19,17 +19,17 @@
 #pragma once
 
 #include "LValueMatrix.h"
-#include "ContinuousMatrixImpl/ContinuousMatrixBlock.h"
+#include "CompactMatrixImpl/CompactMatrixBlock.h"
 
 namespace Physica {
     template<class> class FlattenC;
     /**
-     * A ContinuousMatrix has its elements on major direction distributed continuously.
+     * \class CompactMatrix has its elements on major direction distributed Compactly.
      */
     template<class Derived>
-    class ContinuousMatrix : public LValueMatrix<Derived> {
+    class CompactMatrix : public LValueMatrix<Derived> {
         using Base = LValueMatrix<Derived>;
-        using This = ContinuousMatrix<Derived>;
+        using This = CompactMatrix<Derived>;
     public:
         using typename Base::ScalarType;
         using Base::RowAtCompile;
@@ -43,7 +43,7 @@ namespace Physica {
         constexpr static bool isRowMatrix = MatrixMajor::isRowMatrix<This>();
         constexpr static bool isColMatrix = MatrixMajor::isColMatrix<This>();
     public:
-        ~ContinuousMatrix() = default;
+        ~CompactMatrix() = default;
         /* Operators */
         This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) noexcept = delete;
@@ -55,8 +55,8 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign_base(Matrix auto&& __restrict target) const __restrict noexcept;
 
-        template<Matrix M> void toDevice(device_obj<ContinuousMatrix<M>>& obj) const;
-        template<Matrix M> void toDeviceAsync(device_obj<ContinuousMatrix<M>>& obj) const;
+        template<Matrix M> void toDevice(device_obj<CompactMatrix<M>>& obj) const;
+        template<Matrix M> void toDeviceAsync(device_obj<CompactMatrix<M>>& obj) const;
         [[nodiscard]] auto toNumpy() const;
 
         [[nodiscard]] auto row(this auto&&, size_t r) noexcept;
@@ -104,19 +104,19 @@ namespace Physica {
         [[nodiscard]] auto data() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t r, size_t c) noexcept;
     protected:
-        ContinuousMatrix() = default;
-        ContinuousMatrix(const This&) = default;
-        ContinuousMatrix(This&&) noexcept = default;
+        CompactMatrix() = default;
+        CompactMatrix(const This&) = default;
+        CompactMatrix(This&&) noexcept = default;
     };
 }
 
 namespace Physica {
     template<class Derived>
-    class Traits<ContinuousMatrix<Derived>> : public Traits<Derived> {};
+    class Traits<CompactMatrix<Derived>> : public Traits<Derived> {};
 }
 
-#include "ContinuousMatrixImpl/ContinuousMatrixImpl.h" // IWYU pragma: export
-#include "ContinuousMatrixImpl/Flatten.h"
+#include "CompactMatrixImpl/CompactMatrixImpl.h" // IWYU pragma: export
+#include "CompactMatrixImpl/Flatten.h"
 #ifdef PHYSICA_MKL
-    #include "ContinuousMatrixImpl/ContinuousMatrix_MKL.h"
+    #include "CompactMatrixImpl/CompactMatrix_MKL.h"
 #endif

@@ -19,11 +19,11 @@
 #pragma once
 
 #include "Physica/Core/Utils/Container/Array.h"
-#include "VectorImpl/ContinuousVector.h"
+#include "VectorImpl/CompactVector.h"
 
 namespace Physica {
     template<Scalar T, size_t Length = Dynamic, class Allocator = HostAllocator<T, alignof(typename BestPacket<T, Length>::Type)>>
-    class DenseVector : public ContinuousVector<DenseVector<T, Length, Allocator>>
+    class DenseVector : public CompactVector<DenseVector<T, Length, Allocator>>
                       , public CRCoro<DenseVector<T, Length, Allocator>>
                       , public Array<T, Length, Allocator> {
         constexpr static size_t DefaultAlign = alignof(typename BestPacket<T, Length>::Type);
@@ -32,7 +32,7 @@ namespace Physica {
         using Coro = CRCoro<This>;
     public:
         using promise_type = Coro::promise_type;
-        using Base = ContinuousVector<This>;
+        using Base = CompactVector<This>;
         using Storage = Array<T, Length, Allocator>;
         using device_obj_type = device_obj<This>;
         using typename Base::ScalarType;

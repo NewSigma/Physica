@@ -18,14 +18,14 @@
  */
 #pragma once
 
-#include "ContinuousMatrix.h"
+#include "CompactMatrix.h"
 #include "LValueMatrix.cuh"
-#include "ContinuousMatrixImpl/ContinuousMatrixBlock.cuh"
+#include "CompactMatrixImpl/CompactMatrixBlock.cuh"
 
 namespace Physica {
     template<class Derived>
-    class device_obj<ContinuousMatrix<Derived>> : public device_obj<LValueMatrix<Derived>> {
-        using host_obj = ContinuousMatrix<Derived>;
+    class device_obj<CompactMatrix<Derived>> : public device_obj<LValueMatrix<Derived>> {
+        using host_obj = CompactMatrix<Derived>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueMatrix<Derived>>;
     public:
@@ -44,8 +44,8 @@ namespace Physica {
         This& operator=(This&& obj) noexcept = delete;
         using Base::operator=;
         /* Operations */
-        template<Matrix M> void toHost(ContinuousMatrix<M>& obj) const;
-        template<Matrix M> void toHostAsync(ContinuousMatrix<M>& obj) const;
+        template<Matrix M> void toHost(CompactMatrix<M>& obj) const;
+        template<Matrix M> void toHostAsync(CompactMatrix<M>& obj) const;
 
         [[nodiscard]] __host__ __device__ auto row(this auto&&, size_t r) noexcept;
         [[nodiscard]] __host__ __device__ auto col(this auto&&, size_t c) noexcept;
@@ -95,5 +95,5 @@ namespace Physica {
     };
 }
 
-#include "ContinuousMatrixImpl/ContinuousMatrixImpl.cuh"
-#include "ContinuousMatrixImpl/Flatten.cuh"
+#include "CompactMatrixImpl/CompactMatrixImpl.cuh"
+#include "CompactMatrixImpl/Flatten.cuh"

@@ -19,11 +19,11 @@
 #pragma once
 
 #include <nanobind/ndarray.h>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/ContinuousVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/CompactVector.h"
 
 namespace Physica {
     template<class Derived>
-    auto ContinuousVector<Derived>::toNumpy() const {
+    auto CompactVector<Derived>::toNumpy() const {
         using namespace nanobind;
         using T = ScalarType::MachineType;
         using ResultType = ndarray<T, numpy>;

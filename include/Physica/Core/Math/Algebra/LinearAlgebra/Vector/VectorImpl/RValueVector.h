@@ -26,9 +26,9 @@
 
 namespace Physica {
     template<class Derived> class LValueVector;
-    template<class Derived> class ContinuousVector;
+    template<class Derived> class CompactVector;
     template<class Derived> class RValueMatrix;
-    template<class Derived> class ContinuousMatrix;
+    template<class Derived> class CompactMatrix;
     template<class> class Transpose;
     template<class> class Conjugate;
     template<class> class Hermite;
@@ -77,8 +77,8 @@ namespace Physica {
             constexpr static bool value = HasMKL()
                                        && std::same_as<T, typename U2::ScalarType>
                                        && (T::Prec == Float16 || T::Prec == Float32 || T::Prec == Float64)
-                                       && U1::IsContinuous
-                                       && U2::IsContinuous
+                                       && U1::IsCompact
+                                       && U2::IsCompact
                                        && !Diffable<U1>
                                        && (EnableSIMD<U1, U2>::SizeAtCompile == Dynamic);
         };
@@ -100,7 +100,7 @@ namespace Physica {
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isDiffable = ScalarType::isDiffable;
         constexpr static bool isComplex = ScalarType::isComplex;
-        constexpr static bool IsContinuous = requires{ std::declval<Derived>().data(); };
+        constexpr static bool IsCompact = requires{ std::declval<Derived>().data(); };
     protected:
         using T = ScalarType;
         using Tr = T::RealType;

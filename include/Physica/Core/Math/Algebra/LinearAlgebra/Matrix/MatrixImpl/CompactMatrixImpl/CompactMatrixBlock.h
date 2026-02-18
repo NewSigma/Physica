@@ -18,27 +18,27 @@
  */
 #pragma once
 
-#include "../ContinuousMatrix.h"
+#include "../CompactMatrix.h"
 
 namespace Physica {
-    template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class ContinuousMatrixBlock;
+    template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class CompactMatrixBlock;
 
     template<Matrix M, size_t Col>
-    class ContinuousMatrixBlock<M, 1, Col> : public ContinuousVector<ContinuousMatrixBlock<M, 1, Col>> {
+    class CompactMatrixBlock<M, 1, Col> : public CompactVector<CompactMatrixBlock<M, 1, Col>> {
         static_assert(MatrixMajor::isRowMatrix<M>(), "[Error]: Col major does not have continuous row");
-        using This = ContinuousMatrixBlock<M, 1, Col>;
-        using Base = ContinuousVector<This>;
+        using This = CompactMatrixBlock<M, 1, Col>;
+        using Base = CompactVector<This>;
     private:
         LazyDestroy<M> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount_, size_t fromCol, size_t colCount);
-        ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol, size_t colCount);
-        ContinuousMatrixBlock(const This&) = default;
-        ContinuousMatrixBlock(This&&) noexcept = default;
-        ~ContinuousMatrixBlock() = default;
+        CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount_, size_t fromCol, size_t colCount);
+        CompactMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol, size_t colCount);
+        CompactMatrixBlock(const This&) = default;
+        CompactMatrixBlock(This&&) noexcept = default;
+        ~CompactMatrixBlock() = default;
         /* Operators */
         This& operator=(const This& m) { Base::operator=(m); return *this; }
         This& operator=(This&& m) noexcept { return *this = m; }
@@ -58,13 +58,13 @@ namespace Physica {
     };
 
     template<Matrix M, size_t Col>
-    ContinuousMatrixBlock<M, 1, Col>::ContinuousMatrixBlock(M&& mat_, size_t fromRow, [[maybe_unused]] size_t rowCount, size_t fromCol, size_t colCount)
-            : ContinuousMatrixBlock(std::forward<M>(mat_), fromRow, fromCol, colCount) {
+    CompactMatrixBlock<M, 1, Col>::CompactMatrixBlock(M&& mat_, size_t fromRow, [[maybe_unused]] size_t rowCount, size_t fromCol, size_t colCount)
+            : CompactMatrixBlock(std::forward<M>(mat_), fromRow, fromCol, colCount) {
         assert(rowCount == 1);
     }
 
     template<Matrix M, size_t Col>
-    ContinuousMatrixBlock<M, 1, Col>::ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol, size_t colCount)
+    CompactMatrixBlock<M, 1, Col>::CompactMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol, size_t colCount)
             : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , fromCol(fromCol)
@@ -74,47 +74,47 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Col>
-    auto&& ContinuousMatrixBlock<M, 1, Col>::row(this auto&& self, [[maybe_unused]] size_t r) noexcept {
+    auto&& CompactMatrixBlock<M, 1, Col>::row(this auto&& self, [[maybe_unused]] size_t r) noexcept {
         assert(r == 0);
         return self;
     }
 
     template<Matrix M, size_t Col>
-    auto ContinuousMatrixBlock<M, 1, Col>::values(this auto&& self) noexcept {
+    auto CompactMatrixBlock<M, 1, Col>::values(this auto&& self) noexcept {
         decltype(auto) v = propagate_rvalue_reference<decltype(self), M>(self.mat.values());
         using M1 = decltype(v);
-        return ContinuousMatrixBlock<M1, 1, Col>(v, self.fromRow, self.fromCol, self.getLength());
+        return CompactMatrixBlock<M1, 1, Col>(v, self.fromRow, self.fromCol, self.getLength());
     }
 
     template<Matrix M, size_t Col>
     template<int GradOrder>
-    auto ContinuousMatrixBlock<M, 1, Col>::grads(this auto&& self) noexcept {
+    auto CompactMatrixBlock<M, 1, Col>::grads(this auto&& self) noexcept {
         decltype(auto) g = propagate_rvalue_reference<decltype(self), M>(self.mat.template grads<GradOrder>());
         using M1 = decltype(g);
-        return ContinuousMatrixBlock<M1, 1, Col>(g, self.fromRow, self.fromCol, self.getLength());
+        return CompactMatrixBlock<M1, 1, Col>(g, self.fromRow, self.fromCol, self.getLength());
     }
 
     template<Matrix M, size_t Col>
-    auto ContinuousMatrixBlock<M, 1, Col>::data(this auto&& self) noexcept {
+    auto CompactMatrixBlock<M, 1, Col>::data(this auto&& self) noexcept {
         return self.mat.data_ptr(self.fromRow, self.fromCol);
     }
 
     template<Matrix M, size_t Row>
-    class ContinuousMatrixBlock<M, Row, 1> : public ContinuousVector<ContinuousMatrixBlock<M, Row, 1>> {
+    class CompactMatrixBlock<M, Row, 1> : public CompactVector<CompactMatrixBlock<M, Row, 1>> {
         static_assert(MatrixMajor::isColMatrix<M>(), "[Error]: Row major does not have continuous col");
-        using This = ContinuousMatrixBlock<M, Row, 1>;
-        using Base = ContinuousVector<This>;
+        using This = CompactMatrixBlock<M, Row, 1>;
+        using Base = CompactVector<This>;
     private:
         LazyDestroy<M> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
     public:
-        ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount);
-        ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol);
-        ContinuousMatrixBlock(const This&) = default;
-        ContinuousMatrixBlock(This&&) noexcept = default;
-        ~ContinuousMatrixBlock() = default;
+        CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount);
+        CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol);
+        CompactMatrixBlock(const This&) = default;
+        CompactMatrixBlock(This&&) noexcept = default;
+        ~CompactMatrixBlock() = default;
         /* Operators */
         This& operator=(const This& m) { Base::operator=(m); return *this; }
         This& operator=(This&& m) noexcept { return *this = m; }
@@ -134,13 +134,13 @@ namespace Physica {
     };
 
     template<Matrix M, size_t Row>
-    ContinuousMatrixBlock<M, Row, 1>::ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount)
-            : ContinuousMatrixBlock(std::forward<M>(mat_), fromRow, rowCount, fromCol) {
+    CompactMatrixBlock<M, Row, 1>::CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount)
+            : CompactMatrixBlock(std::forward<M>(mat_), fromRow, rowCount, fromCol) {
         assert(colCount == 1);
     }
 
     template<Matrix M, size_t Row>
-    ContinuousMatrixBlock<M, Row, 1>::ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol)
+    CompactMatrixBlock<M, Row, 1>::CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol)
             : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , rowCount(rowCount)
@@ -150,44 +150,44 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row>
-    auto&& ContinuousMatrixBlock<M, Row, 1>::col(this auto&& self, [[maybe_unused]] size_t c) noexcept {
+    auto&& CompactMatrixBlock<M, Row, 1>::col(this auto&& self, [[maybe_unused]] size_t c) noexcept {
         assert(c == 0);
         return self;
     }
 
     template<Matrix M, size_t Row>
-    auto ContinuousMatrixBlock<M, Row, 1>::values(this auto&& self) noexcept {
+    auto CompactMatrixBlock<M, Row, 1>::values(this auto&& self) noexcept {
         decltype(auto) v = propagate_rvalue_reference<decltype(self), M>(self.mat.values());
         using M1 = decltype(v);
-        return ContinuousMatrixBlock<M1, Row, 1>(v, self.fromRow, self.getLength(), self.fromCol);
+        return CompactMatrixBlock<M1, Row, 1>(v, self.fromRow, self.getLength(), self.fromCol);
     }
 
     template<Matrix M, size_t Row>
     template<int GradOrder>
-    auto ContinuousMatrixBlock<M, Row, 1>::grads(this auto&& self) noexcept {
+    auto CompactMatrixBlock<M, Row, 1>::grads(this auto&& self) noexcept {
         decltype(auto) g = propagate_rvalue_reference<decltype(self), M>(self.mat.template grads<GradOrder>());
         using M1 = decltype(g);
-        return ContinuousMatrixBlock<M1, Row, 1>(g, self.fromRow, self.getLength(), self.fromCol);
+        return CompactMatrixBlock<M1, Row, 1>(g, self.fromRow, self.getLength(), self.fromCol);
     }
 
     template<Matrix M, size_t Row>
-    auto ContinuousMatrixBlock<M, Row, 1>::data(this auto&& self) noexcept {
+    auto CompactMatrixBlock<M, Row, 1>::data(this auto&& self) noexcept {
         return self.mat.data_ptr(self.fromRow, self.fromCol);
     }
 
     template<Matrix M>
-    class ContinuousMatrixBlock<M, 1, 1> : public ContinuousVector<ContinuousMatrixBlock<M, 1, 1>> {
-        using This = ContinuousMatrixBlock<M, 1, 1>;
-        using Base = ContinuousVector<This>;
+    class CompactMatrixBlock<M, 1, 1> : public CompactVector<CompactMatrixBlock<M, 1, 1>> {
+        using This = CompactMatrixBlock<M, 1, 1>;
+        using Base = CompactVector<This>;
     private:
         LazyDestroy<M> mat;
         size_t fromRow;
         size_t fromCol;
     public:
-        ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol);
-        ContinuousMatrixBlock(const This&) = default;
-        ContinuousMatrixBlock(This&&) noexcept = default;
-        ~ContinuousMatrixBlock() = default;
+        CompactMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol);
+        CompactMatrixBlock(const This&) = default;
+        CompactMatrixBlock(This&&) noexcept = default;
+        ~CompactMatrixBlock() = default;
         /* Operators */
         This& operator=(const This& m) { Base::operator=(m); return *this; }
         This& operator=(This&& m) noexcept { return *this = m; }
@@ -208,7 +208,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    ContinuousMatrixBlock<M, 1, 1>::ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol)
+    CompactMatrixBlock<M, 1, 1>::CompactMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol)
             : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , fromCol(fromCol) {
@@ -217,40 +217,40 @@ namespace Physica {
     }
 
     template<Matrix M>
-    auto&& ContinuousMatrixBlock<M, 1, 1>::row(this auto&& self, [[maybe_unused]] size_t r) noexcept {
+    auto&& CompactMatrixBlock<M, 1, 1>::row(this auto&& self, [[maybe_unused]] size_t r) noexcept {
         assert(r == 0);
         return self;
     }
 
     template<Matrix M>
-    auto&& ContinuousMatrixBlock<M, 1, 1>::col(this auto&& self, [[maybe_unused]] size_t c) noexcept {
+    auto&& CompactMatrixBlock<M, 1, 1>::col(this auto&& self, [[maybe_unused]] size_t c) noexcept {
         assert(c == 0);
         return self;
     }
 
     template<Matrix M>
-    auto ContinuousMatrixBlock<M, 1, 1>::values(this auto&& self) noexcept {
+    auto CompactMatrixBlock<M, 1, 1>::values(this auto&& self) noexcept {
         decltype(auto) v = propagate_rvalue_reference<decltype(self), M>(self.mat.values());
         using M1 = decltype(v);
-        return ContinuousMatrixBlock<M1, 1, 1>(v, self.fromRow, 1, self.fromCol);
+        return CompactMatrixBlock<M1, 1, 1>(v, self.fromRow, 1, self.fromCol);
     }
 
     template<Matrix M>
     template<int GradOrder>
-    auto ContinuousMatrixBlock<M, 1, 1>::grads(this auto&& self) noexcept {
+    auto CompactMatrixBlock<M, 1, 1>::grads(this auto&& self) noexcept {
         decltype(auto) g = propagate_rvalue_reference<decltype(self), M>(self.mat.template grads<GradOrder>());
         using M1 = decltype(g);
-        return ContinuousMatrixBlock<M1, 1, 1>(g, self.fromRow, 1, self.fromCol);
+        return CompactMatrixBlock<M1, 1, 1>(g, self.fromRow, 1, self.fromCol);
     }
 
     template<Matrix M>
-    [[nodiscard]] auto ContinuousMatrixBlock<M, 1, 1>::data(this auto&& self) noexcept {
+    [[nodiscard]] auto CompactMatrixBlock<M, 1, 1>::data(this auto&& self) noexcept {
         return self.mat.data_ptr(self.fromRow, self.fromCol);
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    class ContinuousMatrixBlock<M, Row, Col> : public LValueMatrix<ContinuousMatrixBlock<M, Row, Col>> {
-        using This = ContinuousMatrixBlock<M, Row, Col>;
+    class CompactMatrixBlock<M, Row, Col> : public LValueMatrix<CompactMatrixBlock<M, Row, Col>> {
+        using This = CompactMatrixBlock<M, Row, Col>;
         using Base = LValueMatrix<This>;
     private:
         LazyDestroy<M> mat;
@@ -259,10 +259,10 @@ namespace Physica {
         size_t fromCol;
         size_t colCount;
     public:
-        ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
-        ContinuousMatrixBlock(const This&) = default;
-        ContinuousMatrixBlock(This&&) noexcept = default;
-        ~ContinuousMatrixBlock() = default;
+        CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
+        CompactMatrixBlock(const This&) = default;
+        CompactMatrixBlock(This&&) noexcept = default;
+        ~CompactMatrixBlock() = default;
         /* Operators */
         This& operator=(const This& m) { Base::operator=(m); return *this; }
         This& operator=(This&& m) noexcept { return *this = m; }
@@ -297,7 +297,7 @@ namespace Physica {
     };
 
     template<Matrix M, size_t Row, size_t Col>
-    ContinuousMatrixBlock<M, Row, Col>::ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
+    CompactMatrixBlock<M, Row, Col>::CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
             : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , rowCount(rowCount)
@@ -309,148 +309,148 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::row(this auto&& self, size_t r) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::row(this auto&& self, size_t r) noexcept {
         assert(r < self.getRow());
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         if constexpr (MatrixMajor::isRowMatrix<M>())
-            return ContinuousMatrixBlock<M1, 1, Col>(std::forward<M1>(m), self.fromRow + r, self.fromCol, self.getCol());
+            return CompactMatrixBlock<M1, 1, Col>(std::forward<M1>(m), self.fromRow + r, self.fromCol, self.getCol());
         else
             return LMatrixBlock<M1, 1, Col>(std::forward<M1>(m), self.fromRow + r, self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::col(this auto&& self, size_t c) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::col(this auto&& self, size_t c) noexcept {
         assert(c < self.getCol());
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         if constexpr (MatrixMajor::isColMatrix<M>())
-            return ContinuousMatrixBlock<M1, Row, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c);
+            return CompactMatrixBlock<M1, Row, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c);
         else
             return LMatrixBlock<M1, Row, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c);
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
         Base::checkBlock(self, fromRow, rowCount, 0, self.getCol());
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + fromRow, rowCount, self.fromCol, self.getCol());
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + fromRow, rowCount, self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::topRows(this auto&& self, size_t to) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::topRows(this auto&& self, size_t to) noexcept {
         Base::checkBlock(self, 0, to, 0, self.getCol());
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, to, self.fromCol, self.getCol());
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, to, self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::bottomRows(this auto&& self, size_t from) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::bottomRows(this auto&& self, size_t from) noexcept {
         Base::checkBlock(self, from, self.getRow() - from, 0, self.getCol());
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + from, self.getRow() - from, self.fromCol, self.getCol());
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + from, self.getRow() - from, self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
         Base::checkBlock(self, 0, self.getRow(), fromCol, colCount);
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + fromCol, colCount);
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + fromCol, colCount);
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::leftCols(this auto&& self, size_t to) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::leftCols(this auto&& self, size_t to) noexcept {
         Base::checkBlock(self, 0, self.getRow(), 0, to);
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol, to);
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol, to);
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::rightCols(this auto&& self, size_t from) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::rightCols(this auto&& self, size_t from) noexcept {
         Base::checkBlock(self, 0, self.getRow(), from, self.getCol() - from);
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + from, self.getCol() - from);
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + from, self.getCol() - from);
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
         Base::checkBlock(self, 0, toRow, 0, toCol);
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, toRow, self.fromCol, toCol);
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, toRow, self.fromCol, toCol);
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::topLeftCorner(this auto&& self, size_t to) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::topLeftCorner(this auto&& self, size_t to) noexcept {
         Base::checkBlock(self, 0, to, 0, to);
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, to, self.fromCol, to);
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, to, self.fromCol, to);
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
         Base::checkBlock(self, 0, toRow, fromCol, self.getCol() - fromCol);
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, toRow, self.fromCol + fromCol, self.getCol() - fromCol);
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, toRow, self.fromCol + fromCol, self.getCol() - fromCol);
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
         Base::checkBlock(self, fromRow, self.getRow() - fromRow, 0, toCol);
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol, toCol);
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol, toCol);
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
         Base::checkBlock(self, fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol + fromCol, self.getCol() - fromCol);
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol + fromCol, self.getCol() - fromCol);
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::bottomRightCorner(this auto&& self, size_t from) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::bottomRightCorner(this auto&& self, size_t from) noexcept {
         Base::checkBlock(self, from, self.getRow() - from, from, self.getCol() - from);
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + from, self.getRow() - from, self.fromCol + from, self.getCol() - from);
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + from, self.getRow() - from, self.fromCol + from, self.getCol() - from);
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
         Base::checkBlock(self, fromRow, rowCount, fromCol, colCount);
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + fromRow, rowCount, self.fromCol + fromCol, colCount);
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + fromRow, rowCount, self.fromCol + fromCol, colCount);
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::values(this auto&& self) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::values(this auto&& self) noexcept {
         decltype(auto) v = propagate_rvalue_reference<decltype(self), M>(self.mat.values());
         using M1 = decltype(v);
-        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(v), self.fromRow, self.getRow(), self.fromCol, self.getCol());
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(v), self.fromRow, self.getRow(), self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
     template<int GradOrder>
-    auto ContinuousMatrixBlock<M, Row, Col>::grads(this auto&& self) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::grads(this auto&& self) noexcept {
         decltype(auto) g = propagate_rvalue_reference<decltype(self), M>(self.mat.template grads<GradOrder>());
         using M1 = decltype(g);
-        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(g), self.fromRow, self.getRow(), self.fromCol, self.getCol());
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(g), self.fromRow, self.getRow(), self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<M, Row, Col>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+    auto CompactMatrixBlock<M, Row, Col>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
         assert(row < self.getRow());
         assert(col < self.getCol());
         return self.mat.data_ptr(row + self.fromRow, col + self.fromCol);
@@ -459,7 +459,7 @@ namespace Physica {
 
 namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
-    class Traits<ContinuousMatrixBlock<M, Row, Col>> {
+    class Traits<CompactMatrixBlock<M, Row, Col>> {
         using M1 = std::remove_cvref<M>::type;
     public:
         using ScalarType = M1::ScalarType;

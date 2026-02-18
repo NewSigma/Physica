@@ -19,19 +19,19 @@
 #pragma once
 
 #include "DenseVector.h"
-#include "VectorImpl/ContinuousVector.cuh"
+#include "VectorImpl/CompactVector.cuh"
 #include "Physica/Core/Utils/Container/Array.cuh"
 
 namespace Physica {
     template<Scalar T, size_t Length, class Allocator>
     class device_obj<DenseVector<T, Length, Allocator>>
-            : public device_obj<ContinuousVector<DenseVector<T, Length, Allocator>>>
+            : public device_obj<CompactVector<DenseVector<T, Length, Allocator>>>
             , public CRCoro<device_obj<DenseVector<T, Length, Allocator>>>
             , public device_obj<Array<T, Length, Allocator>> {
         static_assert(!Diffable<T>, "[Error]: Use diffable vector instead");
         using host_obj = DenseVector<T, Length, Allocator>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<ContinuousVector<host_obj>>;
+        using Base = device_obj<CompactVector<host_obj>>;
         using Coro = CRCoro<This>;
         using Storage = device_obj<Array<T, Length, Allocator>>;
     public:

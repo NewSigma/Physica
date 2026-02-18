@@ -34,9 +34,9 @@ LinearAlgebra模块提供有SIMD和GPU加速的可微线性代数功能。
 
 - 右值对象(RValueVector, RValueMatrix, ...)
 - 左值对象(LValueVector, LValueMatrix, ...)
-- 连续对象(ContinuousVector, ContinuousMatrix, ...)
+- 紧凑对象(CompactVector, CompactMatrix, ...)
 
-以密集向量为例, 继承关系为DenseVector -> ContinuousVector -> LValueVector -> RValueVector
+以稠密向量为例, 继承关系为DenseVector -> CompactVector -> LValueVector -> RValueVector
 
 **右值对象**:
 
@@ -63,18 +63,18 @@ Scalar* LValueVector::data_ptr(size_t index) { ... }
 Scalar LValueVector::calc(size_t index) { return *data_ptr(index); }
 ```
 
-**连续对象**:
+**紧凑对象**:
 
-连续对象的唯一核心操作:
+紧凑对象的唯一核心操作:
 
 ``` C++
-Scalar* ContinuousVector::data() { ... }
+Scalar* CompactVector::data() { ... }
 ```
 
-连续对象是元素在内存上连续分布的
+紧凑对象是元素在内存上连续分布的
 
 ``` C++
-Scalar* ContinuousVector::data_ptr(size_t index) { return data() + index; }
+Scalar* CompactVector::data_ptr(size_t index) { return data() + index; }
 ```
 
 ## 模板表达式
@@ -137,7 +137,7 @@ concept Matrix = ...;
 
 $$\mathbf{y = x}$$
 
-对于密集向量，使用for逐元素赋值，或使用SIMD以Packet为最小单位以提高指令吞吐量。可以断言，对任意正确的实现，其开销不大于for循环或SIMD实现。
+对于稠密向量，使用for逐元素赋值，或使用SIMD以Packet为最小单位以提高指令吞吐量。可以断言，对任意正确的实现，其开销不大于for循环或SIMD实现。
 
 存在特殊情况，包括但不限于稀疏结构、对称性等，使得模板特化的性能高于for循环或SIMD。
 

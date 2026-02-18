@@ -18,19 +18,19 @@
  */
 #pragma once
 
-#include "../ContinuousMatrix.cuh"
+#include "../CompactMatrix.cuh"
 
 namespace Physica {
     template<class Derived>
     template<Matrix M>
-    void device_obj<ContinuousMatrix<Derived>>::toHost(ContinuousMatrix<M>& obj) const {
+    void device_obj<CompactMatrix<Derived>>::toHost(CompactMatrix<M>& obj) const {
         toHostAsync(obj);
         CUDAContext::getInstance().wait();
     }
 
     template<class Derived>
     template<Matrix M>
-    void device_obj<ContinuousMatrix<Derived>>::toHostAsync(ContinuousMatrix<M>& obj) const {
+    void device_obj<CompactMatrix<Derived>>::toHostAsync(CompactMatrix<M>& obj) const {
         static_assert(std::same_as<ScalarType, typename M::ScalarType>, "[Error]: Incompatible ScalarType");
         obj.resize(Base::getRow(), Base::getCol());
 
@@ -46,30 +46,30 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::row(this auto&& self, size_t r) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::row(this auto&& self, size_t r) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         const bool IsMat1x1 = Base::ColAtCompile == 1;
         if constexpr (IsMat1x1)
-            return device_obj<ContinuousMatrixBlock<M, 1, 1>>(std::forward<Self>(self), r, 0);
+            return device_obj<CompactMatrixBlock<M, 1, 1>>(std::forward<Self>(self), r, 0);
         else {
             if constexpr (isRowMatrix)
-                return device_obj<ContinuousMatrixBlock<M, 1, ColAtCompile>>(std::forward<Self>(self), r, 0, self.getCol());
+                return device_obj<CompactMatrixBlock<M, 1, ColAtCompile>>(std::forward<Self>(self), r, 0, self.getCol());
             else
                 return device_obj<LMatrixBlock<M, 1, ColAtCompile>>(std::forward<Self>(self), r, 0, self.getCol());
         }
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::col(this auto&& self, size_t c) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::col(this auto&& self, size_t c) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         const bool IsMat1x1 = Base::RowAtCompile == 1;
         if constexpr (IsMat1x1)
-            return device_obj<ContinuousMatrixBlock<M, 1, 1>>(std::forward<Self>(self), 0, c);
+            return device_obj<CompactMatrixBlock<M, 1, 1>>(std::forward<Self>(self), 0, c);
         else {
             if constexpr (isColMatrix)
-                return device_obj<ContinuousMatrixBlock<M, RowAtCompile, 1>>(std::forward<Self>(self), 0, self.getRow(), c);
+                return device_obj<CompactMatrixBlock<M, RowAtCompile, 1>>(std::forward<Self>(self), 0, self.getRow(), c);
             else
                 return device_obj<LMatrixBlock<M, RowAtCompile, 1>>(std::forward<Self>(self), 0, self.getRow(), c);
         }
@@ -77,147 +77,147 @@ namespace Physica {
 
     template<class Derived>
     template<size_t Row>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<ContinuousMatrixBlock<M, Row, ColAtCompile>>(std::forward<Self>(self), fromRow, rowCount, 0, self.getCol());
+        return device_obj<CompactMatrixBlock<M, Row, ColAtCompile>>(std::forward<Self>(self), fromRow, rowCount, 0, self.getCol());
     }
 
     template<class Derived>
     template<size_t Row>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::topRows(this auto&& self, size_t to) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::topRows(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<ContinuousMatrixBlock<M, Row, ColAtCompile>>(std::forward<Self>(self), 0, to, 0, self.getCol());
+        return device_obj<CompactMatrixBlock<M, Row, ColAtCompile>>(std::forward<Self>(self), 0, to, 0, self.getCol());
     }
 
     template<class Derived>
     template<size_t Row>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::bottomRows(this auto&& self, size_t from) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::bottomRows(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<ContinuousMatrixBlock<M, Row, ColAtCompile>>(std::forward<Self>(self), from, self.getRow() - from, 0, self.getCol());
+        return device_obj<CompactMatrixBlock<M, Row, ColAtCompile>>(std::forward<Self>(self), from, self.getRow() - from, 0, self.getCol());
     }
 
     template<class Derived>
     template<size_t Col>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<ContinuousMatrixBlock<M, RowAtCompile, Col>>(std::forward<Self>(self), 0, self.getRow(), fromCol, colCount);
+        return device_obj<CompactMatrixBlock<M, RowAtCompile, Col>>(std::forward<Self>(self), 0, self.getRow(), fromCol, colCount);
     }
 
     template<class Derived>
     template<size_t Col>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::leftCols(this auto&& self, size_t to) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::leftCols(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<ContinuousMatrixBlock<M, RowAtCompile, Col>>(std::forward<Self>(self), 0, self.getRow(), 0, to);
+        return device_obj<CompactMatrixBlock<M, RowAtCompile, Col>>(std::forward<Self>(self), 0, self.getRow(), 0, to);
     }
 
     template<class Derived>
     template<size_t Col>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::rightCols(this auto&& self, size_t from) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::rightCols(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<ContinuousMatrixBlock<M, RowAtCompile, Col>>(std::forward<Self>(self), 0, self.getRow(), from, self.getCol() - from);
+        return device_obj<CompactMatrixBlock<M, RowAtCompile, Col>>(std::forward<Self>(self), 0, self.getRow(), from, self.getCol() - from);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(std::forward<Self>(self), 0, toRow, 0, toCol);
+        return device_obj<CompactMatrixBlock<M, Row, Col>>(std::forward<Self>(self), 0, toRow, 0, toCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::topLeftCorner(this auto&& self, size_t to) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::topLeftCorner(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(std::forward<Self>(self), 0, to, 0, to);
+        return device_obj<CompactMatrixBlock<M, Row, Col>>(std::forward<Self>(self), 0, to, 0, to);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(std::forward<Self>(self), 0, toRow, fromCol, self.getRow() - fromCol);
+        return device_obj<CompactMatrixBlock<M, Row, Col>>(std::forward<Self>(self), 0, toRow, fromCol, self.getRow() - fromCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, 0, toCol);
+        return device_obj<CompactMatrixBlock<M, Row, Col>>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, 0, toCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
+        return device_obj<CompactMatrixBlock<M, Row, Col>>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::bottomRightCorner(this auto&& self, size_t from) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::bottomRightCorner(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(std::forward<Self>(self), from, self.getRow() - from, from, self.getCol() - from);
+        return device_obj<CompactMatrixBlock<M, Row, Col>>(std::forward<Self>(self), from, self.getRow() - from, from, self.getCol() - from);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(std::forward<Self>(self), fromRow, rowCount, fromCol, colCount);
+        return device_obj<CompactMatrixBlock<M, Row, Col>>(std::forward<Self>(self), fromRow, rowCount, fromCol, colCount);
     }
 
     template<class Derived>
-    auto device_obj<ContinuousMatrix<Derived>>::flatten() {
+    auto device_obj<CompactMatrix<Derived>>::flatten() {
         return device_obj<FlattenC<Derived>>(Base::getDerived());
     }
 
     template<class Derived>
-    const auto device_obj<ContinuousMatrix<Derived>>::flatten() const {
+    const auto device_obj<CompactMatrix<Derived>>::flatten() const {
         return device_obj<FlattenC<Derived>>(const_cast<This&>(*this));
     }
 
     template<class Derived>
-    void device_obj<ContinuousMatrix<Derived>>::zeros() {
+    void device_obj<CompactMatrix<Derived>>::zeros() {
         Base::getDerived().flatten().zeros();
     }
 
     template<class Derived>
     template<RNG R>
-    void device_obj<ContinuousMatrix<Derived>>::random_uniform() {
+    void device_obj<CompactMatrix<Derived>>::random_uniform() {
         Base::getDerived().flatten().template random_uniform<R>();
     }
 
     template<class Derived>
     template<RNG R>
-    void device_obj<ContinuousMatrix<Derived>>::random_normal() {
+    void device_obj<CompactMatrix<Derived>>::random_normal() {
         Base::getDerived().flatten().template random_normal<R>();
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::data() noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::data() noexcept {
         return Base::getDerived().data();
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::data() const noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::data() const noexcept {
         return Base::getDerived().data();
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::data_ptr(this auto&& self, size_t r, size_t c) noexcept {
+    __host__ __device__ auto device_obj<CompactMatrix<Derived>>::data_ptr(this auto&& self, size_t r, size_t c) noexcept {
         assert(r < self.getRow());
         assert(c < self.getCol());
         if constexpr (isRowMatrix)
@@ -228,7 +228,7 @@ namespace Physica {
 
     template<class Derived>
     template<Matrix M>
-    void ContinuousMatrix<Derived>::toDevice(device_obj<ContinuousMatrix<M>>& obj) const {
+    void CompactMatrix<Derived>::toDevice(device_obj<CompactMatrix<M>>& obj) const {
         toDeviceAsync(obj);
         if constexpr (!std::is_trivially_copy_constructible<M>::value)
             CUDAContext::getInstance().wait();
@@ -236,7 +236,7 @@ namespace Physica {
 
     template<class Derived>
     template<Matrix M>
-    void ContinuousMatrix<Derived>::toDeviceAsync(device_obj<ContinuousMatrix<M>>& obj) const {
+    void CompactMatrix<Derived>::toDeviceAsync(device_obj<CompactMatrix<M>>& obj) const {
         static_assert(std::is_same<T, typename M::ScalarType>::value,
                 "[Error]: ScalarType inconsistent, additional buffer is necessary");
         obj.resize(Base::getRow(), Base::getCol());

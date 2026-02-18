@@ -33,9 +33,9 @@ namespace {
         expect(std::format("{}", x) == "(0)"); // Signed zero is ignored
     }
     /**
-     * A continuous matrix is continuous in either row or column.
+     * A compact matrix is compact either in row or in column.
      */
-    void continuousRowCol() noexcept {
+    void CompactRowCol() noexcept {
         constexpr int Size = 8;
         using T = float32;
         auto& rng = RandomSource::getInstance();
@@ -122,7 +122,7 @@ namespace {
 
 int main() {
     formatTest();
-    continuousRowCol();
+    CompactRowCol();
     testHDF5();
     assign_mkl();
     return 0;

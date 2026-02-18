@@ -19,14 +19,14 @@
 #pragma once
 
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
-#include "ContinuousVector.h"
+#include "CompactVector.h"
 #include "LValueVector.cuh"
-#include "ContinuousVectorImpl/ContinuousVectorBlock.cuh"
+#include "CompactVectorImpl/CompactVectorBlock.cuh"
 
 namespace Physica {
     template<class Derived>
-    class device_obj<ContinuousVector<Derived>> : public device_obj<LValueVector<Derived>> {
-        using host_obj = ContinuousVector<Derived>;
+    class device_obj<CompactVector<Derived>> : public device_obj<LValueVector<Derived>> {
+        using host_obj = CompactVector<Derived>;
         using Base = device_obj<LValueVector<Derived>>;
         using This = device_obj<host_obj>;
     public:
@@ -55,8 +55,8 @@ namespace Physica {
         __device__ void writePacketPartial(size_t index, size_t count, Packet auto packet);
         void reverse(const auto& grad) const noexcept;
 
-        template<Vector V> void toHost(ContinuousVector<V>& obj) const;
-        template<Vector V> void toHostAsync(ContinuousVector<V>& obj) const;
+        template<Vector V> void toHost(CompactVector<V>& obj) const;
+        template<Vector V> void toHostAsync(CompactVector<V>& obj) const;
 
         template<size_t Length = Dynamic>
         [[nodiscard]] __host__ __device__ auto head(this auto&&, size_t to) noexcept;
@@ -84,5 +84,5 @@ namespace Physica {
     };
 }
 
-#include "ContinuousVectorImpl/ContinuousVectorImpl.cuh"
-#include "ContinuousVectorImpl/ContinuousVectorBlock.cuh"
+#include "CompactVectorImpl/CompactVectorImpl.cuh"
+#include "CompactVectorImpl/CompactVectorBlock.cuh"

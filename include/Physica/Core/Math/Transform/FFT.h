@@ -21,7 +21,7 @@
 #include <fftw3.h>
 #include "Physica/Core/Scalar/Complex.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/ContinuousMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/CompactMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/TensorImpl/LValueTensor.h"
 #include "FFTImpl/FFTRSpace.h"
 #include "FFTImpl/FFTKSpace.h"

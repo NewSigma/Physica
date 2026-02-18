@@ -19,12 +19,12 @@
 #pragma once
 
 #include "mkl_lapacke.h"
-#include "../ContinuousMatrix.h"
+#include "../CompactMatrix.h"
 
 namespace Physica {
     template<class Derived>
-    void ContinuousMatrix<Derived>::assign_mkl(Matrix auto&& target) const noexcept {
-        static_assert(std::remove_cvref_t<decltype(target)>::IsContinuous, "[Error]: MKL expects continuous matrix");
+    void CompactMatrix<Derived>::assign_mkl(Matrix auto&& target) const noexcept {
+        static_assert(std::remove_cvref_t<decltype(target)>::IsCompact, "[Error]: MKL expects compact matrix");
         static_assert(!MatrixMajor::isSameMajor<This, decltype(target)>(), "[Error]: Do not need transpose, use assign_base() instead");
         using Tm = Base::Tm;
         target.assert_assign_mkl(Base::getDerived());
@@ -54,7 +54,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto ContinuousMatrix<Derived>::balance_mkl() -> VectorND<T> {
+    auto CompactMatrix<Derived>::balance_mkl() -> VectorND<T> {
         Base::assert_balance();
 
         constexpr int Layout = MatrixMajor::getMajor<Derived>() == MatrixMajor::Row ? CblasRowMajor : CblasColMajor;

@@ -19,19 +19,19 @@
 #pragma once
 
 #include "Physica/Core/Utils/Container/Array2D.cuh"
-#include "MatrixImpl/ContinuousMatrix.cuh"
+#include "MatrixImpl/CompactMatrix.cuh"
 #include "DenseMatrix.h"
 
 namespace Physica {
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     class device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>
-            : public device_obj<ContinuousMatrix<DenseMatrix<T, Major, Row, Col, Allocator>>>
+            : public device_obj<CompactMatrix<DenseMatrix<T, Major, Row, Col, Allocator>>>
             , public CRCoro<device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>>
             , public device_obj<Array2D<T, Major, Row, Col, Allocator>> {
         static_assert(!Diffable<T>, "[Error]: Use diffable matrix instead");
         using host_obj = DenseMatrix<T, Major, Row, Col, Allocator>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<ContinuousMatrix<DenseMatrix<T, Major, Row, Col, Allocator>>>;
+        using Base = device_obj<CompactMatrix<DenseMatrix<T, Major, Row, Col, Allocator>>>;
         using Coro = CRCoro<This>;
         using Storage = device_obj<Array2D<T, Major, Row, Col, Allocator>>;
     protected:

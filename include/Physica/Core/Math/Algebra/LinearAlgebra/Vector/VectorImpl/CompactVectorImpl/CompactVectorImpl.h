@@ -19,11 +19,11 @@
 #pragma once
 
 #include "Physica/Core/Exception/MKL/VSL.h"
-#include "../ContinuousVector.h"
+#include "../CompactVector.h"
 
 namespace Physica {
     template<class Derived>
-    auto ContinuousVector<Derived>::operator=(Scalar auto x) noexcept -> Derived& {
+    auto CompactVector<Derived>::operator=(Scalar auto x) noexcept -> Derived& {
         if constexpr (SizeAtCompile == Dynamic) {
             if (x.isZero())
                 zeros();
@@ -33,11 +33,11 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    void ContinuousVector<Derived>::assign(Vector auto&& v) const noexcept {
+    void CompactVector<Derived>::assign(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
         constexpr bool SameScalar = std::same_as<T, typename V::ScalarType>;
         constexpr bool Copyable = std::is_trivially_copyable<T>::value;
-        if constexpr (V::IsContinuous && SameScalar && Copyable) {
+        if constexpr (V::IsCompact && SameScalar && Copyable) {
             if constexpr (isDiffable) {
                 auto& x = Base::getDerived();
                 x.values().template assign<P>(v.values());
@@ -65,7 +65,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    Pack ContinuousVector<Derived>::packet(size_t index) const {
+    Pack CompactVector<Derived>::packet(size_t index) const {
         assert(index + Pack::size() <= Base::getLength());
         if constexpr (std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>) {
             Pack packet{};
@@ -78,7 +78,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    Pack ContinuousVector<Derived>::packetPartial(size_t index, size_t count) const {
+    Pack CompactVector<Derived>::packetPartial(size_t index, size_t count) const {
         assert(index + count <= Base::getLength());
         assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
         if constexpr (std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>) {
@@ -92,7 +92,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    void ContinuousVector<Derived>::writePacket(size_t index, const Pack packet) {
+    void CompactVector<Derived>::writePacket(size_t index, const Pack packet) {
         constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>;
         if constexpr (isSameScalar)
             packet.store(Base::data_ptr(index));
@@ -102,7 +102,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    void ContinuousVector<Derived>::writePacketPartial(size_t index, size_t count, const Pack packet) {
+    void CompactVector<Derived>::writePacketPartial(size_t index, size_t count, const Pack packet) {
         assert(index + count <= Base::getLength());
         assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
         if constexpr (std::same_as<ScalarType, typename Traits<Pack>::ScalarType>)
@@ -113,27 +113,27 @@ namespace Physica {
 
     template<class Derived>
     template<size_t Length>
-    auto ContinuousVector<Derived>::head(this auto&& self, size_t to) noexcept {
+    auto CompactVector<Derived>::head(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
-        return ContinuousVectorBlock<Self, Length>(std::forward<Self>(self), 0, to);
+        return CompactVectorBlock<Self, Length>(std::forward<Self>(self), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    auto ContinuousVector<Derived>::tail(this auto&& self, size_t from) noexcept {
+    auto CompactVector<Derived>::tail(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
-        return ContinuousVectorBlock<Self, Length>(std::forward<Self>(self), from);
+        return CompactVectorBlock<Self, Length>(std::forward<Self>(self), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    auto ContinuousVector<Derived>::segment(this auto&& self, size_t from, size_t to) noexcept {
+    auto CompactVector<Derived>::segment(this auto&& self, size_t from, size_t to) noexcept {
         using Self = decltype(self);
-        return ContinuousVectorBlock<Self, Length>(std::forward<Self>(self), from, to);
+        return CompactVectorBlock<Self, Length>(std::forward<Self>(self), from, to);
     }
 
     template<class Derived>
-    auto ContinuousVector<Derived>::norm1() const noexcept -> CoDiff<Tr> {
+    auto CompactVector<Derived>::norm1() const noexcept -> CoDiff<Tr> {
         constexpr bool SmallVector = 0 < SizeAtCompile && SizeAtCompile <= 128;
         if constexpr (Internal::EnableMKL<Derived>::value && !SmallVector) {
             bool isSmallVector = Base::getLength() <= 128;
@@ -144,24 +144,24 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto ContinuousVector<Derived>::norm1_base() const noexcept -> CoDiff<Tr> {
+    auto CompactVector<Derived>::norm1_base() const noexcept -> CoDiff<Tr> {
         return Base::norm1();
     }
 
     template<class Derived>
-    auto ContinuousVector<Derived>::norm2() const noexcept -> CoDiff<Tr> {
+    auto CompactVector<Derived>::norm2() const noexcept -> CoDiff<Tr> {
         return norm2_base();
     }
 
     template<class Derived>
-    auto ContinuousVector<Derived>::norm2_base() const noexcept -> CoDiff<Tr> {
+    auto CompactVector<Derived>::norm2_base() const noexcept -> CoDiff<Tr> {
         return Base::norm2();
     }
     /**
      * Prefer zeros() over simply assigning zeros for better performance.
      */
     template<class Derived>
-    void ContinuousVector<Derived>::zeros() {
+    void CompactVector<Derived>::zeros() {
         if constexpr (Diffable<T>) {
             Base::getDerived().values().zeros();
             Base::getDerived().grads().zeros();
@@ -172,12 +172,12 @@ namespace Physica {
             Base::template operator=<T>(T(0));
     }
     /**
-     * Read any continuous object and fetch enough scalars to fill self
+     * Read any Compact object and fetch enough scalars to fill self
      *
      * E.g. In optimization problems, we convert between complex vectors and real vectors.
      */
     template<class Derived>
-    void ContinuousVector<Derived>::read(const auto& obj) noexcept {
+    void CompactVector<Derived>::read(const auto& obj) noexcept {
         using O = decltype(obj);
         if constexpr (Vector<O>) {
             using U = std::remove_cvref_t<O>::ScalarType;
@@ -194,7 +194,7 @@ namespace Physica {
 
     template<class Derived>
     template<RNG R>
-    void ContinuousVector<Derived>::random_uniform() {
+    void CompactVector<Derived>::random_uniform() {
         if constexpr (R::MKL_Ready) {
             [[maybe_unused]] auto& gen = R::getInstance();
             [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1) * (Base::isForwardDiff ? 2 : 1);
@@ -211,7 +211,7 @@ namespace Physica {
 
     template<class Derived>
     template<RNG R>
-    void ContinuousVector<Derived>::random_normal() {
+    void CompactVector<Derived>::random_normal() {
         if constexpr (R::MKL_Ready && !isForwardDiff) {
             [[maybe_unused]] auto& gen = R::getInstance();
             [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
@@ -228,7 +228,7 @@ namespace Physica {
 
 #ifdef PHYSICA_HDF5
     template<class Derived>
-    auto ContinuousVector<Derived>::read(const H5Loc& loc, const char* name) -> const DataSetType {
+    auto CompactVector<Derived>::read(const H5Loc& loc, const char* name) -> const DataSetType {
         const auto dataset = loc.openDataSet<DataDim>(name);
         const size_t length = dataset.getSize(0);
         Base::resize(length);
@@ -247,7 +247,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto ContinuousVector<Derived>::write(H5Loc& loc, const char* name) const -> DataSetType {
+    auto CompactVector<Derived>::write(H5Loc& loc, const char* name) const -> DataSetType {
         const size_t length = Base::getLength();
         const auto memSpace = H5DataSpace<1>(length);
         DataSpaceType fileSpace;
@@ -275,17 +275,17 @@ namespace Physica {
 #endif
 
     template<class Derived>
-    auto ContinuousVector<Derived>::data() noexcept {
+    auto CompactVector<Derived>::data() noexcept {
         return Base::getDerived().data();
     }
 
     template<class Derived>
-    auto ContinuousVector<Derived>::data() const noexcept {
+    auto CompactVector<Derived>::data() const noexcept {
         return Base::getDerived().data();
     }
 
     template<class Derived>
-    auto ContinuousVector<Derived>::data_ptr(this auto&& self, size_t index) noexcept {
+    auto CompactVector<Derived>::data_ptr(this auto&& self, size_t index) noexcept {
         return self.data() + index;
     }
 }

@@ -18,16 +18,16 @@
  */
 #pragma once
 
-#include "../ContinuousMatrix.h"
+#include "../CompactMatrix.h"
 
 namespace Physica {
     template<Matrix M>
-    class FlattenC<M> : public ContinuousVector<FlattenC<M>> {
+    class FlattenC<M> : public CompactVector<FlattenC<M>> {
         using This = FlattenC<M>;
 
         LazyDestroy<M> mat;
     public:
-        using Base = ContinuousVector<This>;
+        using Base = CompactVector<This>;
     public:
         FlattenC(M&& mat_) : mat(std::forward<M>(mat_)) {}
         FlattenC(const This&) = default;

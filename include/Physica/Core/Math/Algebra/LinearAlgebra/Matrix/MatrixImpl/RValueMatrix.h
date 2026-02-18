@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<class Derived> class LValueMatrix;
-    template<class Derived> class ContinuousMatrix;
+    template<class Derived> class CompactMatrix;
     template<class, bool ReduceCol> class MatrixSum;
     template<Matrix> class DiagVectorR;
     template<class> class Inverse;
@@ -54,8 +54,8 @@ namespace Physica {
                                        && std::same_as<T1, T2>
                                        && !Diffable<T1>
                                        && (T1::Prec == Float32 || T2::Prec == Float64)
-                                       && U1::IsContinuous
-                                       && U2::IsContinuous;
+                                       && U1::IsCompact
+                                       && U2::IsCompact;
         };
     }
     /**
@@ -76,7 +76,7 @@ namespace Physica {
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isDiffable = ScalarType::isDiffable;
         constexpr static bool isComplex = ScalarType::isComplex;
-        constexpr static bool IsContinuous = requires{ std::declval<Derived>().data(); };
+        constexpr static bool IsCompact = requires{ std::declval<Derived>().data(); };
     protected:
         using T = ScalarType;
         using Tr = T::RealType;

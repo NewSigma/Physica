@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "ContinuousVectorImpl/ContinuousVectorBlock.h"
+#include "CompactVectorImpl/CompactVectorBlock.h"
 
 namespace Physica {
     template<class Derived>
-    class ContinuousVector : public LValueVector<Derived> {
+    class CompactVector : public LValueVector<Derived> {
         using Base = LValueVector<Derived>;
-        using This = ContinuousVector<Derived>;
+        using This = CompactVector<Derived>;
     public:
         using typename Base::ScalarType;
         using typename Base::PacketType;
@@ -49,7 +49,7 @@ namespace Physica {
 
         using ValuesRtnTy = std::conditional<Diffable<ScalarType>, ValueVector<This>, Derived&>::type;
     public:
-        ~ContinuousVector() = default;
+        ~CompactVector() = default;
         /* Operators */
         This& operator=(const This& v) = delete;
         This& operator=(This&& v) noexcept = delete;
@@ -66,8 +66,8 @@ namespace Physica {
         template<Packet Pack> void writePacket(size_t index, Pack packet);
         template<Packet Pack> void writePacketPartial(size_t index, size_t count, Pack packet);
 
-        template<Vector V> void toDevice(device_obj<ContinuousVector<V>>& obj) const;
-        template<Vector V> void toDeviceAsync(device_obj<ContinuousVector<V>>& obj) const;
+        template<Vector V> void toDevice(device_obj<CompactVector<V>>& obj) const;
+        template<Vector V> void toDeviceAsync(device_obj<CompactVector<V>>& obj) const;
         [[nodiscard]] auto toNumpy() const;
 
         template<size_t Length = Dynamic>
@@ -111,15 +111,15 @@ namespace Physica {
         [[nodiscard]] auto data() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
     protected:
-        ContinuousVector() = default;
-        ContinuousVector(const This&) = default;
-        ContinuousVector(This&&) noexcept = default;
+        CompactVector() = default;
+        CompactVector(const This&) = default;
+        CompactVector(This&&) noexcept = default;
         /* Friends */
-        friend class device_obj<ContinuousVector<Derived>>;
+        friend class device_obj<CompactVector<Derived>>;
     };
 }
 
-#include "ContinuousVectorImpl/ContinuousVectorImpl.h"
+#include "CompactVectorImpl/CompactVectorImpl.h"
 #ifdef PHYSICA_MKL
-    #include "ContinuousVectorImpl/ContinuousVector_MKL.h"
+    #include "CompactVectorImpl/CompactVector_MKL.h"
 #endif

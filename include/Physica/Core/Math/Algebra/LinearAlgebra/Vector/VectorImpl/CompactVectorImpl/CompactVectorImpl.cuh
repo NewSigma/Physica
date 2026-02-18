@@ -18,11 +18,11 @@
  */
 #pragma once
 
-#include "../ContinuousVector.cuh"
+#include "../CompactVector.cuh"
 
 namespace Physica {
     template<class Derived>
-    auto device_obj<ContinuousVector<Derived>>::operator=(Scalar auto x) -> device_obj<Derived>& {
+    auto device_obj<CompactVector<Derived>>::operator=(Scalar auto x) -> device_obj<Derived>& {
         if constexpr (Base::SizeAtCompile == Dynamic) {
             if (x.isZero())
                 zeros();
@@ -31,7 +31,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    void device_obj<ContinuousVector<Derived>>::reverse(const auto& grad) const noexcept {
+    void device_obj<CompactVector<Derived>>::reverse(const auto& grad) const noexcept {
         static_assert(isReverseDiff);
         using U = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename T::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
@@ -53,14 +53,14 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V>
-    void device_obj<ContinuousVector<Derived>>::toHost(ContinuousVector<V>& obj) const {
+    void device_obj<CompactVector<Derived>>::toHost(CompactVector<V>& obj) const {
         toHostAsync(obj);
         CUDAContext::getInstance().wait();
     }
 
     template<class Derived>
     template<Vector V>
-    void device_obj<ContinuousVector<Derived>>::toHostAsync(ContinuousVector<V>& obj) const {
+    void device_obj<CompactVector<Derived>>::toHostAsync(CompactVector<V>& obj) const {
         static_assert(std::same_as<ScalarType, typename V::ScalarType>, "[Error]: Incompatible ScalarType");
         const size_t length = Base::getLength();
         const size_t size = length * sizeof(T);
@@ -77,7 +77,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    __device__ Pack device_obj<ContinuousVector<Derived>>::packet(size_t index) const {
+    __device__ Pack device_obj<CompactVector<Derived>>::packet(size_t index) const {
         Pack packet{};
         if constexpr (isReverseDiff)
             packet.load(Base::data_ptr(index).value_ptr());
@@ -88,7 +88,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    __device__ Pack device_obj<ContinuousVector<Derived>>::packetPartial(size_t index, size_t count) const  {
+    __device__ Pack device_obj<CompactVector<Derived>>::packetPartial(size_t index, size_t count) const  {
         assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
         assert(index + count <= Base::getLength());
         Pack packet{};
@@ -101,7 +101,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    __device__ void device_obj<ContinuousVector<Derived>>::writePacket(size_t index, const Pack packet) {
+    __device__ void device_obj<CompactVector<Derived>>::writePacket(size_t index, const Pack packet) {
         using T1 = std::conditional<isReverseDiff, Tv, T>::type;
         using LocalPacket = std::conditional<Pack::size() == 1, T1, SIMD<T1, Pack::size()>>::type;
         if constexpr (isReverseDiff)
@@ -112,7 +112,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    __device__ void device_obj<ContinuousVector<Derived>>::writePacketPartial(size_t index, size_t count, const Pack packet) {
+    __device__ void device_obj<CompactVector<Derived>>::writePacketPartial(size_t index, size_t count, const Pack packet) {
         assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
         assert(index + count <= Base::getLength());
         using T1 = std::conditional<isReverseDiff, Tv, T>::type;
@@ -125,30 +125,30 @@ namespace Physica {
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ auto device_obj<ContinuousVector<Derived>>::head(this auto&& self, size_t to) noexcept {
+    __host__ __device__ auto device_obj<CompactVector<Derived>>::head(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         using V = remove_device_obj<Self>::type;
-        return device_obj<ContinuousVectorBlock<V, Length>>(std::forward<Self>(self), 0, to);
+        return device_obj<CompactVectorBlock<V, Length>>(std::forward<Self>(self), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ auto device_obj<ContinuousVector<Derived>>::tail(this auto&& self, size_t from) noexcept {
+    __host__ __device__ auto device_obj<CompactVector<Derived>>::tail(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         using V = remove_device_obj<Self>::type;
-        return device_obj<ContinuousVectorBlock<V, Length>>(std::forward<Self>(self), from);
+        return device_obj<CompactVectorBlock<V, Length>>(std::forward<Self>(self), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ auto device_obj<ContinuousVector<Derived>>::segment(this auto&& self, size_t from, size_t to) noexcept {
+    __host__ __device__ auto device_obj<CompactVector<Derived>>::segment(this auto&& self, size_t from, size_t to) noexcept {
         using Self = decltype(self);
         using V = remove_device_obj<Self>::type;
-        return device_obj<ContinuousVectorBlock<V, Length>>(std::forward<Self>(self), from, to);
+        return device_obj<CompactVectorBlock<V, Length>>(std::forward<Self>(self), from, to);
     }
 
     template<class Derived>
-    void device_obj<ContinuousVector<Derived>>::zeros() {
+    void device_obj<CompactVector<Derived>>::zeros() {
         if constexpr (Diffable<T>) {
             Base::getDerived().values().zeros();
             Base::getDerived().grads().zeros();
@@ -159,7 +159,7 @@ namespace Physica {
 
     template<class Derived>
     template<RNG R>
-    void device_obj<ContinuousVector<Derived>>::random_uniform() {
+    void device_obj<CompactVector<Derived>>::random_uniform() {
         if constexpr (R::cuRAND_Ready) {
             auto& rng = R::getInstance();
             check(curandSetStream(rng, CUDAContext::getInstance()));
@@ -177,7 +177,7 @@ namespace Physica {
 
     template<class Derived>
     template<RNG R>
-    void device_obj<ContinuousVector<Derived>>::random_normal() {
+    void device_obj<CompactVector<Derived>>::random_normal() {
         if constexpr (R::cuRAND_Ready) {
             auto& rng = R::getInstance();
             check(curandSetStream(rng, CUDAContext::getInstance()));
@@ -195,7 +195,7 @@ namespace Physica {
 
 #ifdef PHYSICA_HDF5
     template<class Derived>
-    auto device_obj<ContinuousVector<Derived>>::read(const H5Loc& loc, const char* name) -> const DataSetType {
+    auto device_obj<CompactVector<Derived>>::read(const H5Loc& loc, const char* name) -> const DataSetType {
         VectorND<T> buffer{};
         auto dataset = buffer.read(loc, name);
         buffer.toDeviceAsync(*this);
@@ -203,7 +203,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto device_obj<ContinuousVector<Derived>>::write(H5Loc& loc, const char* name) const -> DataSetType {
+    auto device_obj<CompactVector<Derived>>::write(H5Loc& loc, const char* name) const -> DataSetType {
         VectorND<T> buffer{};
         toHost(buffer);
         return buffer.write(loc, name);
@@ -211,23 +211,23 @@ namespace Physica {
 #endif
 
     template<class Derived>
-    __host__ __device__ auto device_obj<ContinuousVector<Derived>>::data() noexcept {
+    __host__ __device__ auto device_obj<CompactVector<Derived>>::data() noexcept {
         return Base::getDerived().data();
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<ContinuousVector<Derived>>::data() const noexcept {
+    __host__ __device__ auto device_obj<CompactVector<Derived>>::data() const noexcept {
         return Base::getDerived().data();
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<ContinuousVector<Derived>>::data_ptr(this auto&& self, size_t index) noexcept {
+    __host__ __device__ auto device_obj<CompactVector<Derived>>::data_ptr(this auto&& self, size_t index) noexcept {
         return self.data() + index;
     }
 
     template<class Derived>
     template<Vector V>
-    void ContinuousVector<Derived>::toDevice(device_obj<ContinuousVector<V>>& obj) const {
+    void CompactVector<Derived>::toDevice(device_obj<CompactVector<V>>& obj) const {
         toDeviceAsync(obj);
         if constexpr (!std::is_trivially_copy_constructible<V>::value)
             CUDAContext::getInstance().wait();
@@ -235,7 +235,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V>
-    void ContinuousVector<Derived>::toDeviceAsync(device_obj<ContinuousVector<V>>& obj) const {
+    void CompactVector<Derived>::toDeviceAsync(device_obj<CompactVector<V>>& obj) const {
         static_assert(std::is_same<T, typename V::ScalarType>::value,
                 "[Error]: Type inconsistent between source and target, please cast instead of memcpy");
         const size_t length = Base::getLength();

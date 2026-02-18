@@ -18,22 +18,22 @@
  */
 #pragma once
 
-#include "../ContinuousMatrix.h"
+#include "../CompactMatrix.h"
 
 namespace Physica {
     template<class Derived>
     template<ExecutePolicy P>
-    void ContinuousMatrix<Derived>::assign(Matrix auto&& m) const noexcept {
+    void CompactMatrix<Derived>::assign(Matrix auto&& m) const noexcept {
         assign_base<P>(m);
     }
 
     template<class Derived>
     template<ExecutePolicy P>
-    void ContinuousMatrix<Derived>::assign_base(Matrix auto&& __restrict target) const __restrict noexcept {
+    void CompactMatrix<Derived>::assign_base(Matrix auto&& __restrict target) const __restrict noexcept {
         using M = decltype(target);
         const auto& self = Base::getDerived();
         if constexpr (MatrixMajor::isSameMajor<Derived, decltype(target)>()) {
-            if constexpr (std::remove_cvref_t<M>::IsContinuous)
+            if constexpr (std::remove_cvref_t<M>::IsCompact)
                 self.flatten().template assign<P>(target.flatten());
             else
                 Base::template assign<P>(target);
@@ -53,28 +53,28 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto ContinuousMatrix<Derived>::row(this auto&& self, size_t r) noexcept {
+    auto CompactMatrix<Derived>::row(this auto&& self, size_t r) noexcept {
         using Self = decltype(self);
         const bool IsMat1x1 = Base::ColAtCompile == 1;
         if constexpr (IsMat1x1)
-            return ContinuousMatrixBlock<Self, 1, 1>(std::forward<Self>(self), r, 0);
+            return CompactMatrixBlock<Self, 1, 1>(std::forward<Self>(self), r, 0);
         else {
             if constexpr (isRowMatrix)
-                return ContinuousMatrixBlock<Self, 1, ColAtCompile>(std::forward<Self>(self), r, 0, self.getCol());
+                return CompactMatrixBlock<Self, 1, ColAtCompile>(std::forward<Self>(self), r, 0, self.getCol());
             else
                 return LMatrixBlock<Self, 1, ColAtCompile>(std::forward<Self>(self), r, 0, self.getCol());
         }
     }
 
     template<class Derived>
-    auto ContinuousMatrix<Derived>::col(this auto&& self, size_t c) noexcept {
+    auto CompactMatrix<Derived>::col(this auto&& self, size_t c) noexcept {
         using Self = decltype(self);
         const bool IsMat1x1 = Base::RowAtCompile == 1;
         if constexpr (IsMat1x1)
-            return ContinuousMatrixBlock<Self, 1, 1>(std::forward<Self>(self), 0, c);
+            return CompactMatrixBlock<Self, 1, 1>(std::forward<Self>(self), 0, c);
         else {
             if constexpr (isColMatrix)
-                return ContinuousMatrixBlock<Self, RowAtCompile, 1>(std::forward<Self>(self), 0, self.getRow(), c);
+                return CompactMatrixBlock<Self, RowAtCompile, 1>(std::forward<Self>(self), 0, self.getRow(), c);
             else
                 return LMatrixBlock<Self, RowAtCompile, 1>(std::forward<Self>(self), 0, self.getRow(), c);
         }
@@ -82,108 +82,108 @@ namespace Physica {
 
     template<class Derived>
     template<size_t Row>
-    auto ContinuousMatrix<Derived>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
+    auto CompactMatrix<Derived>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
         using Self = decltype(self);
-        return ContinuousMatrixBlock<Self, Row, ColAtCompile>(std::forward<Self>(self), fromRow, rowCount, 0, self.getCol());
+        return CompactMatrixBlock<Self, Row, ColAtCompile>(std::forward<Self>(self), fromRow, rowCount, 0, self.getCol());
     }
 
     template<class Derived>
     template<size_t Row>
-    auto ContinuousMatrix<Derived>::topRows(this auto&& self, size_t to) noexcept {
+    auto CompactMatrix<Derived>::topRows(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
-        return ContinuousMatrixBlock<Self, Row, ColAtCompile>(std::forward<Self>(self), 0, to, 0, self.getCol());
+        return CompactMatrixBlock<Self, Row, ColAtCompile>(std::forward<Self>(self), 0, to, 0, self.getCol());
     }
 
     template<class Derived>
     template<size_t Row>
-    auto ContinuousMatrix<Derived>::bottomRows(this auto&& self, size_t from) noexcept {
+    auto CompactMatrix<Derived>::bottomRows(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
-        return ContinuousMatrixBlock<Self, Row, ColAtCompile>(std::forward<Self>(self), from, self.getRow() - from, 0, self.getCol());
+        return CompactMatrixBlock<Self, Row, ColAtCompile>(std::forward<Self>(self), from, self.getRow() - from, 0, self.getCol());
     }
 
     template<class Derived>
     template<size_t Col>
-    auto ContinuousMatrix<Derived>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
+    auto CompactMatrix<Derived>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
         using Self = decltype(self);
-        return ContinuousMatrixBlock<Self, RowAtCompile, Col>(std::forward<Self>(self), 0, self.getRow(), fromCol, colCount);
+        return CompactMatrixBlock<Self, RowAtCompile, Col>(std::forward<Self>(self), 0, self.getRow(), fromCol, colCount);
     }
 
     template<class Derived>
     template<size_t Col>
-    auto ContinuousMatrix<Derived>::leftCols(this auto&& self, size_t to) noexcept {
+    auto CompactMatrix<Derived>::leftCols(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
-        return ContinuousMatrixBlock<Self, RowAtCompile, Col>(std::forward<Self>(self), 0, self.getRow(), 0, to);
+        return CompactMatrixBlock<Self, RowAtCompile, Col>(std::forward<Self>(self), 0, self.getRow(), 0, to);
     }
 
     template<class Derived>
     template<size_t Col>
-    auto ContinuousMatrix<Derived>::rightCols(this auto&& self, size_t from) noexcept {
+    auto CompactMatrix<Derived>::rightCols(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
-        return ContinuousMatrixBlock<Self, RowAtCompile, Col>(std::forward<Self>(self), 0, self.getRow(), from, self.getCol() - from);
+        return CompactMatrixBlock<Self, RowAtCompile, Col>(std::forward<Self>(self), 0, self.getRow(), from, self.getCol() - from);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    auto ContinuousMatrix<Derived>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
+    auto CompactMatrix<Derived>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
         using Self = decltype(self);
-        return ContinuousMatrixBlock<Self, Row, Col>(std::forward<Self>(self), 0, toRow, 0, toCol);
+        return CompactMatrixBlock<Self, Row, Col>(std::forward<Self>(self), 0, toRow, 0, toCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    auto ContinuousMatrix<Derived>::topLeftCorner(this auto&& self, size_t to) noexcept {
+    auto CompactMatrix<Derived>::topLeftCorner(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
-        return ContinuousMatrixBlock<Self, Row, Col>(std::forward<Self>(self), 0, to, 0, to);
+        return CompactMatrixBlock<Self, Row, Col>(std::forward<Self>(self), 0, to, 0, to);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    auto ContinuousMatrix<Derived>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
+    auto CompactMatrix<Derived>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
         using Self = decltype(self);
-        return ContinuousMatrixBlock<Self, Row, Col>(std::forward<Self>(self), 0, toRow, fromCol, self.getRow() - fromCol);
+        return CompactMatrixBlock<Self, Row, Col>(std::forward<Self>(self), 0, toRow, fromCol, self.getRow() - fromCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    auto ContinuousMatrix<Derived>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
+    auto CompactMatrix<Derived>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
         using Self = decltype(self);
-        return ContinuousMatrixBlock<Self, Row, Col>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, 0, toCol);
+        return CompactMatrixBlock<Self, Row, Col>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, 0, toCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    auto ContinuousMatrix<Derived>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
+    auto CompactMatrix<Derived>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
         using Self = decltype(self);
-        return ContinuousMatrixBlock<Self, Row, Col>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
+        return CompactMatrixBlock<Self, Row, Col>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    auto ContinuousMatrix<Derived>::bottomRightCorner(this auto&& self, size_t from) noexcept {
+    auto CompactMatrix<Derived>::bottomRightCorner(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
-        return ContinuousMatrixBlock<Self, Row, Col>(std::forward<Self>(self), from, self.getRow() - from, from, self.getCol() - from);
+        return CompactMatrixBlock<Self, Row, Col>(std::forward<Self>(self), from, self.getRow() - from, from, self.getCol() - from);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    auto ContinuousMatrix<Derived>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+    auto CompactMatrix<Derived>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
         using Self = decltype(self);
-        return ContinuousMatrixBlock<Self, Row, Col>(std::forward<Self>(self), fromRow, rowCount, fromCol, colCount);
+        return CompactMatrixBlock<Self, Row, Col>(std::forward<Self>(self), fromRow, rowCount, fromCol, colCount);
     }
 
     template<class Derived>
-    auto ContinuousMatrix<Derived>::flatten(this auto&& self) noexcept {
+    auto CompactMatrix<Derived>::flatten(this auto&& self) noexcept {
         using Self = decltype(self);
         return FlattenC<Self>(std::forward<Self>(self));
     }
 
     template<class Derived>
-    void ContinuousMatrix<Derived>::zeros() {
+    void CompactMatrix<Derived>::zeros() {
         Base::getDerived().flatten().zeros();
     }
 
     template<class Derived>
-    void ContinuousMatrix<Derived>::read(const auto& obj) noexcept {
+    void CompactMatrix<Derived>::read(const auto& obj) noexcept {
         using O = decltype(obj);
         if constexpr(Vector<O>)
             Base::getDerived().flatten().read(obj);
@@ -195,19 +195,19 @@ namespace Physica {
 
     template<class Derived>
     template<RNG R>
-    void ContinuousMatrix<Derived>::random_uniform() {
+    void CompactMatrix<Derived>::random_uniform() {
         Base::getDerived().flatten().template random_uniform<R>();
     }
 
     template<class Derived>
     template<RNG R>
-    void ContinuousMatrix<Derived>::random_normal() {
+    void CompactMatrix<Derived>::random_normal() {
         Base::getDerived().flatten().template random_normal<R>();
     }
 
 #ifdef PHYSICA_HDF5
     template<class Derived>
-    const H5DataSet<2> ContinuousMatrix<Derived>::read(const H5Loc& loc, const char* name) {
+    const H5DataSet<2> CompactMatrix<Derived>::read(const H5Loc& loc, const char* name) {
         const auto dataset = loc.openDataSet<2>(name);
         const size_t maxMajor = dataset.getSize(0);
         const size_t maxMinor = dataset.getSize(1);
@@ -226,7 +226,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    H5DataSet<2> ContinuousMatrix<Derived>::write(H5Loc& loc, const char* name) const {
+    H5DataSet<2> CompactMatrix<Derived>::write(H5Loc& loc, const char* name) const {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
         const auto space = H5DataSpace<2>({maxMajor, maxMinor});
@@ -250,17 +250,17 @@ namespace Physica {
 #endif
 
     template<class Derived>
-    auto ContinuousMatrix<Derived>::data() noexcept {
+    auto CompactMatrix<Derived>::data() noexcept {
         return Base::getDerived().data();
     }
 
     template<class Derived>
-    auto ContinuousMatrix<Derived>::data() const noexcept {
+    auto CompactMatrix<Derived>::data() const noexcept {
         return Base::getDerived().data();
     }
 
     template<class Derived>
-    auto ContinuousMatrix<Derived>::data_ptr(this auto&& self, size_t r, size_t c) noexcept {
+    auto CompactMatrix<Derived>::data_ptr(this auto&& self, size_t r, size_t c) noexcept {
         assert(r < self.getRow());
         assert(c < self.getCol());
         if constexpr (isRowMatrix)

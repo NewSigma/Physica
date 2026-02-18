@@ -24,11 +24,11 @@
 namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     class device_obj<DenseVector<Diff<T, Mode, Order>>>
-            : public device_obj<ContinuousVector<DenseVector<Diff<T, Mode, Order>>>>
+            : public device_obj<CompactVector<DenseVector<Diff<T, Mode, Order>>>>
             , public std::conditional<Mode == DiffMode::Forward, CRCoro<device_obj<DenseVector<Diff<T, Mode, Order>>>>, PlainStruct<void>>::type {
         using host_obj = DenseVector<Diff<T, Mode, Order>>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<ContinuousVector<host_obj>>;
+        using Base = device_obj<CompactVector<host_obj>>;
     public:
         using typename Base::ScalarType;
         using Base::MaxThreadsPerBlock;

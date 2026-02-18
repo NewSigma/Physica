@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Utils/Container/Array2D.h"
-#include "MatrixImpl/ContinuousMatrix.h"
+#include "MatrixImpl/CompactMatrix.h"
 
 namespace Physica {
     template<Scalar T,
@@ -27,11 +27,11 @@ namespace Physica {
              size_t Row = Dynamic,
              size_t Col = Dynamic,
              class Allocator = HostAllocator<T>>
-    class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, Major, Row, Col, Allocator>>
+    class DenseMatrix : public CompactMatrix<DenseMatrix<T, Major, Row, Col, Allocator>>
                       , public CRCoro<DenseMatrix<T, Major, Row, Col, Allocator>>
                       , public Array2D<T, Major, Row, Col, Allocator> {
         using This = DenseMatrix<T, Major, Row, Col, Allocator>;
-        using Base = ContinuousMatrix<This>;
+        using Base = CompactMatrix<This>;
         using Storage = Array2D<T, Major, Row, Col, Allocator>;
         using Base::isReverseDiff;
     public:

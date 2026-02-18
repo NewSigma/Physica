@@ -19,11 +19,11 @@
 #pragma once
 
 #include <nanobind/ndarray.h>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/ContinuousMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/CompactMatrix.h"
 
 namespace Physica {
     template<class Derived>
-    auto ContinuousMatrix<Derived>::toNumpy() const {
+    auto CompactMatrix<Derived>::toNumpy() const {
         using namespace nanobind;
         constexpr auto Major = MatrixMajor::getMajor<Derived>() == MatrixMajor::Row ? c_config : f_contig;
         using T = ScalarType::MachineType;

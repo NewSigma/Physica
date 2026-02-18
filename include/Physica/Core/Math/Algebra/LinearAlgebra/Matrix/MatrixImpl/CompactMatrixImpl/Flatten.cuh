@@ -18,19 +18,19 @@
  */
 #pragma once
 
-#include "../ContinuousMatrix.cuh"
+#include "../CompactMatrix.cuh"
 #include "Flatten.h"
 
 namespace Physica {
     template<Matrix M>
-    class device_obj<FlattenC<M>> : public device_obj<ContinuousVector<FlattenC<M>>> {
+    class device_obj<FlattenC<M>> : public device_obj<CompactVector<FlattenC<M>>> {
         using host_obj = FlattenC<M>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<ContinuousVector<host_obj>>;
+        using Base = device_obj<CompactVector<host_obj>>;
 
         device_obj<M>& mat;
     public:
-        device_obj(device_obj<ContinuousMatrix<M>>& mat_) : mat(mat_.getDerived()) {}
+        device_obj(device_obj<CompactMatrix<M>>& mat_) : mat(mat_.getDerived()) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;

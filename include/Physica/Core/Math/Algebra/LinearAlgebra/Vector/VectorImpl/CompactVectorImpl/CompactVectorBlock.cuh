@@ -18,14 +18,14 @@
  */
 #pragma once
 
-#include "../ContinuousVector.cuh"
+#include "../CompactVector.cuh"
 
 namespace Physica {
     template<Vector V, size_t Length>
-    class device_obj<ContinuousVectorBlock<V, Length>> : public device_obj<ContinuousVector<ContinuousVectorBlock<V, Length>>> {
-        using host_obj = ContinuousVectorBlock<V, Length>;
+    class device_obj<CompactVectorBlock<V, Length>> : public device_obj<CompactVector<CompactVectorBlock<V, Length>>> {
+        using host_obj = CompactVectorBlock<V, Length>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<ContinuousVector<host_obj>>;
+        using Base = device_obj<CompactVector<host_obj>>;
         using Ref = add_device_obj<V>::type;
     private:
         Physica::PlainStruct<add_device_obj_t<std::remove_reference_t<V>>> vec;
@@ -61,7 +61,7 @@ namespace Physica {
     };
 
     template<Vector V, size_t Length>
-    __host__ __device__ device_obj<ContinuousVectorBlock<V, Length>>::device_obj(Ref vec, size_t from, size_t to)
+    __host__ __device__ device_obj<CompactVectorBlock<V, Length>>::device_obj(Ref vec, size_t from, size_t to)
             : vec(asStruct(vec)), from(from), to(to) {
         assert(from < to);
         assert(to <= vec.getLength());
@@ -69,56 +69,56 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    __host__ __device__ device_obj<ContinuousVectorBlock<V, Length>>::device_obj(Ref vec, size_t from)
+    __host__ __device__ device_obj<CompactVectorBlock<V, Length>>::device_obj(Ref vec, size_t from)
             : device_obj(vec, from, vec.getLength()) {}
 
     template<Vector V, size_t Length>
-    auto device_obj<ContinuousVectorBlock<V, Length>>::operator=(const This& obj) -> This& {
+    auto device_obj<CompactVectorBlock<V, Length>>::operator=(const This& obj) -> This& {
         Base::template operator=<This>(obj);
         return *this;
     }
 
     template<Vector V, size_t Length>
-    auto device_obj<ContinuousVectorBlock<V, Length>>::operator=(This&& obj) noexcept -> This& {
+    auto device_obj<CompactVectorBlock<V, Length>>::operator=(This&& obj) noexcept -> This& {
         Base::template operator=<This>(std::move(obj));
         return *this;
     }
 
     template<Vector V, size_t Length>
     template<size_t Length_>
-    __host__ __device__ auto device_obj<ContinuousVectorBlock<V, Length>>::head(this auto&& self, size_t to) noexcept {
-        return device_obj<ContinuousVectorBlock<V, Length_>>(self.vec, self.from, self.from + to);
+    __host__ __device__ auto device_obj<CompactVectorBlock<V, Length>>::head(this auto&& self, size_t to) noexcept {
+        return device_obj<CompactVectorBlock<V, Length_>>(self.vec, self.from, self.from + to);
     }
 
     template<Vector V, size_t Length>
     template<size_t Length_>
-    __host__ __device__ auto device_obj<ContinuousVectorBlock<V, Length>>::tail(this auto&& self, size_t from) noexcept {
-        return device_obj<ContinuousVectorBlock<V, Length_>>(self.vec, self.from + from, self.to);
+    __host__ __device__ auto device_obj<CompactVectorBlock<V, Length>>::tail(this auto&& self, size_t from) noexcept {
+        return device_obj<CompactVectorBlock<V, Length_>>(self.vec, self.from + from, self.to);
     }
 
     template<Vector V, size_t Length>
     template<size_t Length_>
-    __host__ __device__ auto device_obj<ContinuousVectorBlock<V, Length>>::segment(this auto&& self, size_t from, size_t to) noexcept {
-        return device_obj<ContinuousVectorBlock<V, Length_>>(self.vec, self.from + from, self.from + to);
+    __host__ __device__ auto device_obj<CompactVectorBlock<V, Length>>::segment(this auto&& self, size_t from, size_t to) noexcept {
+        return device_obj<CompactVectorBlock<V, Length_>>(self.vec, self.from + from, self.from + to);
     }
 
     template<Vector V, size_t Length>
-    auto device_obj<ContinuousVectorBlock<V, Length>>::values(this auto&& self) noexcept {
+    auto device_obj<CompactVectorBlock<V, Length>>::values(this auto&& self) noexcept {
         auto&& v = self.vec.getDerived().values();
         using V1 = remove_device_obj<std::remove_reference_t<decltype(v)>>::type;
-        return device_obj<ContinuousVectorBlock<V1, Length>>(v, self.from, self.to);
+        return device_obj<CompactVectorBlock<V1, Length>>(v, self.from, self.to);
     }
 
     template<Vector V, size_t Length>
     template<int GradOrder>
-    auto device_obj<ContinuousVectorBlock<V, Length>>::grads(this auto&& self) noexcept {
+    auto device_obj<CompactVectorBlock<V, Length>>::grads(this auto&& self) noexcept {
         auto&& g = self.vec.template grads<GradOrder>();
         using V1 = remove_device_obj<std::remove_reference_t<decltype(g)>>::type;
-        return ContinuousVectorBlock<V1, Length>(g, self.from, self.to);
+        return CompactVectorBlock<V1, Length>(g, self.from, self.to);
     }
 
     template<Vector V, size_t Length>
-    __host__ __device__ size_t device_obj<ContinuousVectorBlock<V, Length>>::getLength() const noexcept {
+    __host__ __device__ size_t device_obj<CompactVectorBlock<V, Length>>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         else
@@ -126,12 +126,12 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    __host__ __device__ auto device_obj<ContinuousVectorBlock<V, Length>>::data(this auto&& self) noexcept {
+    __host__ __device__ auto device_obj<CompactVectorBlock<V, Length>>::data(this auto&& self) noexcept {
         return self.vec.getDerived().data() + self.from;
     }
 }
 
 namespace Physica {
     template<Vector V, size_t Length>
-    class Traits<device_obj<ContinuousVectorBlock<V, Length>>> : public Traits<ContinuousVectorBlock<V, Length>> {};
+    class Traits<device_obj<CompactVectorBlock<V, Length>>> : public Traits<CompactVectorBlock<V, Length>> {};
 }

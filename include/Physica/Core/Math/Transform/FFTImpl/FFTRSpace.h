@@ -26,10 +26,10 @@ namespace Physica {
     template<class Derived>
     class FFTRSpace<Derived, 1>
             : public CRTPBase<FFTRSpace<Derived, 1>>
-            , public ContinuousVector<FFTRSpace<Derived, 1>> {
+            , public CompactVector<FFTRSpace<Derived, 1>> {
         using This = FFTRSpace<Derived, 1>;
         using Base = CRTPBase<This>;
-        using VectorBase = ContinuousVector<This>;
+        using VectorBase = CompactVector<This>;
     public:
         using typename VectorBase::ScalarType;
         using VectorBase::isComplex;

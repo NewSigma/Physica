@@ -18,11 +18,11 @@
  */
 #pragma once
 
-#include "../ContinuousVector.h"
+#include "../CompactVector.h"
 
 namespace Physica {
     template<class Derived>
-    void ContinuousVector<Derived>::assign_mkl(Vector auto& v) const noexcept {
+    void CompactVector<Derived>::assign_mkl(Vector auto& v) const noexcept {
         v.assert_assign_mkl(Base::getDerived());
         const size_t n = Base::getLength();
         const void* x = data();
@@ -42,7 +42,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto ContinuousVector<Derived>::norm1_mkl() const noexcept -> Tr {
+    auto CompactVector<Derived>::norm1_mkl() const noexcept -> Tr {
         const size_t n = Base::getLength();
         const void* x = data();
         if constexpr (T::isComplex) {
@@ -64,7 +64,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto ContinuousVector<Derived>::norm2_mkl() const noexcept -> Tr {
+    auto CompactVector<Derived>::norm2_mkl() const noexcept -> Tr {
         const size_t n = Base::getLength();
         const void* x = data();
         if constexpr (T::isComplex) {
