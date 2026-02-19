@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -40,18 +40,16 @@ namespace Physica {
     public:
         __host__ __device__ explicit PtrIteratorF(pointer p) : p(p) {}
         __host__ __device__ PtrIteratorF(const This& ite) : p(ite.p) {}
+        PtrIteratorF(This&&) noexcept = default;
         ~PtrIteratorF() = default;
         /* Operators */
         This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
+        [[nodiscard]] __host__ __device__ bool operator==(const This& other) const noexcept { return p == other.p; }
+        [[nodiscard]] __host__ __device__ auto operator<=>(const This& other) const noexcept { return p <=> other.p; }
         [[nodiscard]] __host__ __device__ This operator+(difference_type n) const { return This(p + n); }
         [[nodiscard]] __host__ __device__ This operator-(difference_type n) const { return This(p - n); }
-        [[nodiscard]] __host__ __device__ bool operator<(const This& ite) const { return p < ite.p; }
-        [[nodiscard]] __host__ __device__ bool operator>(const This& ite) const { return p > ite.p; }
-        [[nodiscard]] __host__ __device__ bool operator<=(const This& ite) const { return !(p > ite.p); }
-        [[nodiscard]] __host__ __device__ bool operator>=(const This& ite) const { return !(p < ite.p); }
         [[nodiscard]] __host__ __device__ difference_type operator-(const This& ite) const { return p - ite.p; }
-        [[nodiscard]] __host__ __device__ bool operator==(const This& ite) const noexcept { return p == ite.p; }
-        [[nodiscard]] __host__ __device__ bool operator!=(const This& ite) const noexcept { return p != ite.p; }
         __host__ __device__ This& operator++() { ++p; return *this; }
         __host__ __device__ const This operator++(int) { return This(p++); }
         __host__ __device__ This& operator--() { --p; return *this; }
@@ -76,9 +74,11 @@ namespace Physica {
     public:
         __host__ __device__ explicit PtrIteratorR(pointer p) : p(p) {}
         __host__ __device__ PtrIteratorR(const This& ite) : p(ite.p) {}
+        PtrIteratorR(This&&) noexcept = default;
         ~PtrIteratorR() = default;
         /* Operators */
         This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
         [[nodiscard]] __host__ __device__ bool operator==(const This& ite) const noexcept { return p == ite.p; }
         [[nodiscard]] __host__ __device__ bool operator!=(const This& ite) const noexcept { return p != ite.p; }
         __host__ __device__ This& operator++() { --p; return *this; }

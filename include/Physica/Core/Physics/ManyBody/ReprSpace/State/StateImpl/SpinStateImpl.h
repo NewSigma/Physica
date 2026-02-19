@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,6 +28,11 @@ namespace Physica {
     template<int Dim, int NumSite>
     bool SpinState<Dim, NumSite>::operator==(const This& other) const noexcept {
         return occupyBits == other.occupyBits;
+    }
+
+    template<int Dim, int NumSite>
+    auto SpinState<Dim, NumSite>::operator<=>(const This& other) const noexcept {
+        return occupyBits <=> other.occupyBits;
     }
 
     template<int Dim, int NumSite>

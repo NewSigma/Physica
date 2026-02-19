@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,21 +27,16 @@ namespace Physica {
             : spinUp(spinUp_), spinDown(spinDown_) {}
 
     template<int Dim, int NumSite>
-    bool FermiState<Dim, NumSite>::operator>(const This& other) const noexcept {
-        if (spinUp > other.spinUp)
-            return true;
-        if (spinUp == other.spinUp)
-            return spinDown > other.spinDown;
-        return false;
+    bool FermiState<Dim, NumSite>::operator==(const This& other) const noexcept {
+        return (spinUp == other.spinUp) && (spinDown == other.spinDown);
     }
 
     template<int Dim, int NumSite>
-    bool FermiState<Dim, NumSite>::operator<(const This& other) const noexcept {
-        if (spinUp < other.spinUp)
-            return true;
-        if (spinUp == other.spinUp)
-            return spinDown < other.spinDown;
-        return false;
+    auto FermiState<Dim, NumSite>::operator<=>(const This& other) const noexcept {
+        auto order = spinUp <=> other.spinUp;
+        if (order != 0)
+            return order;
+        return spinDown <=> other.spinDown;
     }
 
     template<int Dim, int NumSite>

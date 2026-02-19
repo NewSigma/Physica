@@ -66,10 +66,11 @@ namespace Physica {
         constexpr ~Real() = default;
         /* Operators */
         using Base::operator=;
-        using Base::operator>;
-        using Base::operator<;
+        using Base::operator<=>;
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
+        [[nodiscard]] __host__ __device__ constexpr bool operator==(const Real& other) const noexcept { return f == other.f; }
+        [[nodiscard]] __host__ __device__ constexpr auto operator<=>(const Real& other) const noexcept;
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return f; }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return f; }
         [[nodiscard]] __host__ __device__ constexpr Real operator+(const Real& s) const noexcept;
@@ -79,9 +80,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ Real operator<<(int i) const { return Real(std::ldexp(f, i)); }
         [[nodiscard]] __host__ __device__ Real operator>>(int i) const { return Real(std::ldexp(f, -i)); }
         [[nodiscard]] __host__ __device__ Real operator-() const noexcept { return Real(-f); }
-        [[nodiscard]] __host__ __device__ constexpr bool operator>(const Real& s) const noexcept { return f > s.f; }
-        [[nodiscard]] __host__ __device__ constexpr bool operator<(const Real& s) const noexcept { return f < s.f; }
-        [[nodiscard]] __host__ __device__ constexpr bool operator==(const Real& s) const noexcept { return f == s.f; }
         PHYSICA_API friend std::istream& operator>>(std::istream& is, Real& scalar);
         /* Operations */
         [[nodiscard]] __host__ __device__ inline Real mod() const noexcept;
@@ -116,6 +114,17 @@ namespace Physica {
 
     template<Scalar T>
     __host__ __device__ Real<Float32>::Real(const T& x) requires(!T::isComplex && !Diffable<T>) : f(float(x)) {}
+
+    __host__ __device__ constexpr auto Real<Float32>::operator<=>(const Real& other) const noexcept {
+        auto order = f <=> other.f;
+        if (order == std::partial_ordering::equivalent)
+            return std::strong_ordering::equivalent;
+        if (order == std::partial_ordering::less)
+            return std::strong_ordering::less;
+        if (order == std::partial_ordering::greater)
+            return std::strong_ordering::greater;
+        unreachable("Encounter NAN");
+    }
 
     __host__ __device__ constexpr auto Real<Float32>::operator+(const Real& s) const noexcept -> Real {
         return Real(f + s.f);

@@ -22,6 +22,7 @@
 
 using namespace Physica;
 using T = float64;
+using RandomSource = Random<>;
 
 namespace {
     void testForwardFunc() {
@@ -132,6 +133,15 @@ namespace {
             expect(scalarNear(x.grad(), (x.value() - 1.0) * 2.0, 1E-15));
             expect(scalarNear(y.grad(), (y.value() - 2.0) * 2.0, 1E-15));
         }
+    }
+
+    void testCompare() noexcept {
+        using dfloat = Diff<float32, DiffMode::Forward>;
+        auto xv = float32::random_uniform<RandomSource>();
+        auto yv = float32::random_uniform<RandomSource>();
+        auto x = dfloat(xv, float32::random_uniform<RandomSource>());
+        auto y = dfloat(yv, float32::random_uniform<RandomSource>());
+        expect((x <=> y) == (xv <=> yv));
     }
 }
 

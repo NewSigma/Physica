@@ -66,10 +66,11 @@ namespace Physica {
         constexpr ~Real() = default;
         /* Operators */
         using Base::operator=;
-        using Base::operator>;
-        using Base::operator<;
+        using Base::operator<=>;
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
+        [[nodiscard]] __host__ __device__ bool operator==(const Real& other) const noexcept { return h == other.h; }
+        [[nodiscard]] __host__ __device__ auto operator<=>(const Real& other) const noexcept;
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return h; }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return h; }
         [[nodiscard]] __host__ __device__ Real operator+(const Real& s) const noexcept { return Real(h + s.h); }
@@ -77,9 +78,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ Real operator*(const Real& s) const noexcept { return Real(h * s.h); }
         [[nodiscard]] __host__ __device__ Real operator/(const Real& s) const noexcept;
         [[nodiscard]] __host__ __device__ Real operator-() const noexcept { return Real(-h); }
-        [[nodiscard]] __host__ __device__ bool operator>(const Real& s) const noexcept { return h > s.h; }
-        [[nodiscard]] __host__ __device__ bool operator<(const Real& s) const noexcept { return h < s.h; }
-        [[nodiscard]] __host__ __device__ bool operator==(const Real& s) const noexcept { return h == s.h; }
         /* Operations */
         using Base::random_uniform;
         using Base::random_normal;
@@ -104,6 +102,16 @@ namespace Physica {
 
     template<Scalar T>
     __host__ __device__ Real<Float16>::Real(const T& x) requires(!T::isComplex && !Diffable<T>) : h(x.toMachine()) {}
+
+    __host__ __device__ inline auto Real<Float16>::operator<=>(const Real& other) const noexcept {
+        if (h == other.h)
+            return std::strong_ordering::equal;
+        if (h < other.h)
+            return std::strong_ordering::less;
+        if (h > other.h)
+            return std::strong_ordering::greater;
+        unreachable("Encounter NAN");
+    }
 
     __host__ __device__ inline Real<Float16> Real<Float16>::operator/(const This& s) const noexcept {
         assert(!s.isZero() && "[Error]: Divide by zero");

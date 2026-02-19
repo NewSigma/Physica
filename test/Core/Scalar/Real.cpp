@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,13 +20,20 @@
 
 using namespace Physica;
 
+namespace {
+    // We handle type casts in the CRTP base class. Test that we do not accidentally fall into infinite recursion.
+    [[gnu::noinline]] void infiniteCompare(Scalar auto x, Scalar auto y) noexcept {
+        std::ignore = x < y;
+        std::ignore = x > y;
+        std::ignore = x <= y;
+        std::ignore = x >= y;
+    }
+}
+
 int main() {
     static_assert(std::formattable<float32, char>);
     static_assert(std::formattable<float64, char>);
-    // We handle type casts in the CRTP base class. Test that we do not accidentally fall into infinite recursion.
-    std::ignore = float32(0) < float64(0);
-    std::ignore = float32(0) > float64(0);
-    std::ignore = float32(0) <= float64(0);
-    std::ignore = float32(0) >= float64(0);
+    static_assert(std::same_as<std::strong_ordering, decltype(float32() <=> float32())>);
+    infiniteCompare(float32(0), float64(0)); // Always x = y = 0, we make it a function to silent useless comparison warning
     return 0;
 }

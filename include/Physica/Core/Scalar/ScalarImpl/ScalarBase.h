@@ -98,17 +98,9 @@ namespace Physica {
         __host__ __device__ void operator*=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
         template<Scalar U>
         __host__ __device__ void operator/=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
-        __host__ __device__ bool operator>(float s) const noexcept;
-        __host__ __device__ bool operator<(float s) const noexcept;
-        __host__ __device__ bool operator>(double s) const noexcept;
-        __host__ __device__ bool operator<(double s) const noexcept;
-        template<Scalar T>
-        __host__ __device__ bool operator>(const T& x) const noexcept;
-        template<Scalar T>
-        __host__ __device__ bool operator<(const T& x) const noexcept;
-        __host__ __device__ bool operator>=(const Scalar auto& x) const noexcept;
-        __host__ __device__ bool operator<=(const Scalar auto& x) const noexcept;
-        __host__ __device__ bool operator!=(const Scalar auto& x) const noexcept;
+        [[nodiscard]] __host__ __device__ auto operator<=>(this const auto& x, float y) noexcept;
+        [[nodiscard]] __host__ __device__ auto operator<=>(this const auto& x, double y) noexcept;
+        [[nodiscard]] __host__ __device__ auto operator<=>(this const auto& x, const Scalar auto& y) noexcept;
         /* Operations */
         [[nodiscard]] ScalarType calc() const;
 
@@ -230,58 +222,24 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ bool ScalarBase<Derived>::operator>(float s) const noexcept {
+    __host__ __device__ auto ScalarBase<Derived>::operator<=>(this const auto& x, float y) noexcept {
         checkComplexCompare();
-        return float(value()) > s;
+        return float(x.value()) <=> y;
     }
 
     template<class Derived>
-    __host__ __device__ bool ScalarBase<Derived>::operator<(float s) const noexcept {
+    __host__ __device__ auto ScalarBase<Derived>::operator<=>(this const auto& x, double y) noexcept {
         checkComplexCompare();
-        return float(value()) < s;
+        return double(x.value()) <=> y;
     }
 
     template<class Derived>
-    __host__ __device__ bool ScalarBase<Derived>::operator>(double s) const noexcept {
-        checkComplexCompare();
-        return double(value()) > s;
-    }
-
-    template<class Derived>
-    __host__ __device__ bool ScalarBase<Derived>::operator<(double s) const noexcept {
-        checkComplexCompare();
-        return double(value()) < s;
-    }
-
-    template<class Derived>
-    template<Scalar T>
-    __host__ __device__ bool ScalarBase<Derived>::operator>(const T& x) const noexcept {
-        static_assert(isDiffable || T::isDiffable || !std::same_as<Derived, T>, "[Error]: We handle type casts here");
-        using U = Internal::BinaryScalarOpRtnTy<ValueType, typename T::ValueType>::Type;
-        return U(value()) > U(x.value());
-    }
-
-    template<class Derived>
-    template<Scalar T>
-    __host__ __device__ bool ScalarBase<Derived>::operator<(const T& x) const noexcept {
-        static_assert(isDiffable || T::isDiffable || !std::same_as<Derived, T>, "[Error]: We handle type casts here");
-        using U = Internal::BinaryScalarOpRtnTy<ValueType, typename T::ValueType>::Type;
-        return U(value()) < U(x.value());
-    }
-
-    template<class Derived>
-    __host__ __device__ bool ScalarBase<Derived>::operator>=(const Scalar auto& x) const noexcept {
-        return !Base::getDerived().operator<(x);
-    }
-
-    template<class Derived>
-    __host__ __device__ bool ScalarBase<Derived>::operator<=(const Scalar auto& x) const noexcept {
-        return !Base::getDerived().operator>(x);
-    }
-
-    template<class Derived>
-    __host__ __device__ bool ScalarBase<Derived>::operator!=(const Scalar auto& x) const noexcept {
-        return !Base::getDerived().operator==(x);
+    __host__ __device__ auto ScalarBase<Derived>::operator<=>(this const auto& x, const Scalar auto& y) noexcept {
+        using X = std::remove_cvref<decltype(x)>::type;
+        using Y = std::remove_cvref<decltype(y)>::type;
+        static_assert(X::isDiffable || Y::isDiffable || !std::same_as<X, Y>, "[Error]: This function handles type casts only");
+        using Z = Internal::BinaryScalarOpRtnTy<typename X::ValueType, typename Y::ValueType>::Type;
+        return Z(x.value()) <=> Z(y.value());
     }
 
     template<class Derived>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -46,17 +46,13 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
+        [[nodiscard]] __host__ __device__ bool operator==(const This& other) const noexcept;
+        [[nodiscard]] __host__ __device__ auto operator<=>(const This& other) const noexcept;
         [[nodiscard]] __host__ __device__ This operator+(difference_type n) const noexcept;
-        [[nodiscard]] __host__ __device__ This& operator+=(difference_type n) const noexcept;
+        __host__ __device__ This& operator+=(difference_type n) noexcept;
         [[nodiscard]] __host__ __device__ This operator-(difference_type n) const noexcept;
-        [[nodiscard]] __host__ __device__ This& operator-=(difference_type n) const noexcept;
+        __host__ __device__ This& operator-=(difference_type n) noexcept;
         [[nodiscard]] __host__ __device__ difference_type operator-(const This& ite) const noexcept;
-        [[nodiscard]] __host__ __device__ bool operator<(const This& ite) const noexcept;
-        [[nodiscard]] __host__ __device__ bool operator>(const This& ite) const noexcept;
-        [[nodiscard]] __host__ __device__ bool operator<=(const This& ite) const noexcept;
-        [[nodiscard]] __host__ __device__ bool operator>=(const This& ite) const noexcept;
-        [[nodiscard]] __host__ __device__ bool operator==(const This& ite) const noexcept;
-        [[nodiscard]] __host__ __device__ bool operator!=(const This& ite) const noexcept;
         __host__ __device__ This& operator++() noexcept;
         __host__ __device__ This operator++(int) noexcept;
         __host__ __device__ This& operator--() noexcept;

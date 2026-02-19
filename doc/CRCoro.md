@@ -94,8 +94,3 @@ int main() {
     return 0;
 }
 ```
-
-## Reference
-
-[1] 118074; https://gcc.gnu.org/bugzilla/show_bug.cgi?id=118074
-[2] CWG2563; https://cplusplus.github.io/CWG/issues/2563.html

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -40,13 +40,9 @@ namespace Physica {
         ~SpinState() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] bool operator[](int8_t site) const noexcept { return isOccupy(site); }
         [[nodiscard]] bool operator==(const This& other) const noexcept;
-        [[nodiscard]] bool operator!=(const This& other) const noexcept { return !(*this == other); }
-        [[nodiscard]] bool operator>(const This& other) const noexcept { return occupyBits > other.occupyBits; }
-        [[nodiscard]] bool operator<(const This& other) const noexcept { return occupyBits < other.occupyBits; }
-        [[nodiscard]] bool operator>=(const This& other) const noexcept { return occupyBits >= other.occupyBits; }
-        [[nodiscard]] bool operator<=(const This& other) const noexcept { return occupyBits <= other.occupyBits; }
+        [[nodiscard]] auto operator<=>(const This& other) const noexcept;
+        [[nodiscard]] bool operator[](int8_t site) const noexcept { return isOccupy(site); }
         [[nodiscard]] This operator<<(int shift) const noexcept;
         [[nodiscard]] This operator>>(int shift) const noexcept;
         [[nodiscard]] This operator&(const This& psi) const noexcept;

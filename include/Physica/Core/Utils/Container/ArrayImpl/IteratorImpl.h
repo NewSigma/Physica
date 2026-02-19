@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,13 +28,24 @@ namespace Physica {
     __host__ __device__ PtrIteratorF<Container>::PtrIteratorF(const This& ite) noexcept : p(ite.p) {}
 
     template<class Container>
+    __host__ __device__ bool PtrIteratorF<Container>::operator==(const This& other) const noexcept {
+        return p == other.p;
+    }
+
+    template<class Container>
+    __host__ __device__ auto PtrIteratorF<Container>::operator<=>(const This& other) const noexcept {
+        return p <=> other.p;
+    }
+
+    template<class Container>
     __host__ __device__ auto PtrIteratorF<Container>::operator+(difference_type n) const noexcept -> This {
         return This(p + n);
     }
 
     template<class Container>
-    __host__ __device__ auto PtrIteratorF<Container>::operator+=(difference_type n) const noexcept -> This& {
-        return *this = operator+(n);
+    __host__ __device__ auto PtrIteratorF<Container>::operator+=(difference_type n) noexcept -> This& {
+        p += n;
+        return *this;
     }
 
     template<class Container>
@@ -43,43 +54,14 @@ namespace Physica {
     }
 
     template<class Container>
-    __host__ __device__ auto PtrIteratorF<Container>::operator-=(difference_type n) const noexcept -> This& {
-        return *this = operator-(n);
+    __host__ __device__ auto PtrIteratorF<Container>::operator-=(difference_type n) noexcept -> This& {
+        p -= n;
+        return *this;
     }
 
     template<class Container>
     __host__ __device__ auto PtrIteratorF<Container>::operator-(const This& ite) const noexcept -> difference_type {
         return p - ite.p;
-    }
-
-    template<class Container>
-    __host__ __device__ bool PtrIteratorF<Container>::operator<(const This& ite) const noexcept {
-        return p < ite.p;
-    }
-
-    template<class Container>
-    __host__ __device__ bool PtrIteratorF<Container>::operator>(const This& ite) const noexcept {
-        return p > ite.p;
-    }
-
-    template<class Container>
-    __host__ __device__ bool PtrIteratorF<Container>::operator<=(const This& ite) const noexcept {
-        return !(p > ite.p);
-    }
-
-    template<class Container>
-    __host__ __device__ bool PtrIteratorF<Container>::operator>=(const This& ite) const noexcept {
-        return !(p < ite.p);
-    }
-
-    template<class Container>
-    __host__ __device__ bool PtrIteratorF<Container>::operator==(const This& ite) const noexcept {
-        return p == ite.p;
-    }
-
-    template<class Container>
-    __host__ __device__ bool PtrIteratorF<Container>::operator!=(const This& ite) const noexcept {
-        return p != ite.p;
     }
 
     template<class Container>

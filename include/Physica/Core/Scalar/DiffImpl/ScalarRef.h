@@ -53,7 +53,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ operator T() const requires(!ReverseDiff<T>);
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(T(*this)); }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(T(*this)); }
-        using Base::operator!=;
         __host__ __device__ bool operator>(double s) const noexcept { return T(*this) > s; }
         __host__ __device__ bool operator<(double s) const noexcept { return T(*this) < s; }
         __host__ __device__ bool operator>(const Scalar auto& s) const noexcept { return T(*this) > s; }
