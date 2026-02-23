@@ -19,9 +19,9 @@
 #pragma once
 
 #include <cstdlib>
-#include <coroutine>
 #include <utility>
 #include "CRTPBase.h"
+#include "Physica/Core/Utils/Suspend.h"
 
 namespace Physica {
     /**
@@ -44,9 +44,9 @@ namespace Physica {
         using promise_type = T;
     public:
         auto get_return_object() noexcept { return RValueWrapper(&Base::getDerived()); }
-        auto initial_suspend() noexcept { return std::suspend_never{}; }
+        auto initial_suspend() noexcept { return suspend_never{}; }
         void await_transform(auto&&) noexcept = delete("[Error]: CRCoro never suspends");
-        auto final_suspend() noexcept { return std::suspend_never{}; }
+        auto final_suspend() noexcept { return suspend_never{}; }
         void return_value(T&& x) noexcept { Base::getDerived() = std::move(x); }
         [[noreturn]] void unhandled_exception() { throw; }
     protected:

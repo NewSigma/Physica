@@ -735,7 +735,7 @@ namespace Physica {
         assert(type == Type::Direct);
         lattice *= factor;
         if constexpr (ReverseDiff<T>) {
-            co_await std::suspend_always{};
+            co_await suspend_always{};
             factor.reverse(lattice.grads().sum());
         }
         co_return;
@@ -748,7 +748,7 @@ namespace Physica {
         lattice *= factor;
         pos *= factor;
         if constexpr (ReverseDiff<T>) {
-            co_await std::suspend_always{};
+            co_await suspend_always{};
             factor.reverse(lattice.grads().sum() + pos.grads().sum());
         }
         co_return;

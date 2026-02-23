@@ -28,9 +28,9 @@ namespace Physica {
 
         struct Promise {
             Task get_return_object() noexcept { return {}; }
-            std::suspend_never initial_suspend() noexcept { return {}; }
+            auto initial_suspend() noexcept { return suspend_never{}; }
             void await_transform(auto&&) noexcept = delete;
-            std::suspend_never final_suspend() noexcept { return {}; }
+            auto final_suspend() noexcept { return suspend_never{}; }
             void return_void() noexcept {}
             [[noreturn]] void unhandled_exception() { throw; }
         };

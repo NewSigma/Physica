@@ -26,6 +26,7 @@
 #include <coroutine>
 #include "Physica/Core/Utils/Builtin.h"
 #include "Physica/Core/Utils/MetaProgramming.h"
+#include "Physica/Core/Utils/Suspend.h"
 
 namespace Physica {
     enum FloatPrec : char {
@@ -173,8 +174,8 @@ namespace Physica {
         public:
             auto get_return_object() noexcept { return std::coroutine_handle<Promise>::from_promise(*this); };
             static std::nullptr_t get_return_object_on_allocation_failure() noexcept { unreachable("Expect coro frame is small"); }
-            static std::suspend_never initial_suspend() noexcept { return {}; }
-            static std::suspend_always final_suspend() noexcept { return {}; }
+            static auto initial_suspend() noexcept { return suspend_never{}; }
+            static auto final_suspend() noexcept { return suspend_always{}; }
             void return_void() noexcept {}
             [[noreturn]] static void unhandled_exception() { throw; }
         };

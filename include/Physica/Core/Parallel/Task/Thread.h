@@ -22,6 +22,7 @@
 #include <exception>
 #include "Physica/Core/Parallel/ThreadPool.h"
 #include "Physica/Core/Utils/Builtin.h"
+#include "Physica/Core/Utils/Suspend.h"
 #include "TaskBase.h"
 
 namespace Physica {
@@ -30,18 +31,18 @@ namespace Physica {
         using This = Task<Thread>;
         using Base = TaskBase;
 
-        struct ThreadAwaiter : public std::suspend_always {
-            static void await_suspend(std::coroutine_handle<> handle) noexcept {
-                ThreadPool::getInstance().schedule(handle);
-            }
-        };
-
         struct Promise {
+            struct ThreadAwaiter : public suspend_always {
+                static void await_suspend(std::coroutine_handle<> handle) noexcept {
+                    ThreadPool::getInstance().schedule(handle);
+                }
+            };
+
             std::exception_ptr ex = nullptr;
         public:
             Task get_return_object() noexcept { return std::coroutine_handle<Promise>::from_promise(*this); }
-            ThreadAwaiter initial_suspend() noexcept { return {}; }
-            std::suspend_always final_suspend() noexcept { return {}; }
+            auto initial_suspend() noexcept { return ThreadAwaiter{}; }
+            auto final_suspend() noexcept { return suspend_always{}; }
             void return_void() noexcept {}
             void unhandled_exception() noexcept { ex = std::current_exception(); }
         };
@@ -112,7 +113,7 @@ namespace Physica {
             }(fn, i);
         }
 
-        co_await std::suspend_always{};
+        co_await suspend_always{};
         std::exception_ptr firstEx = nullptr;
         for (auto& task : tasks) {
             auto ex = task.wait(std::nothrow);
@@ -140,7 +141,7 @@ namespace Physica {
             }(fn, Task<Thread>::splitJob(num_loop, part, i));
         }
 
-        co_await std::suspend_always{};
+        co_await suspend_always{};
         std::exception_ptr firstEx = nullptr;
         for (auto& task : tasks) {
             auto ex = task.wait(std::nothrow);

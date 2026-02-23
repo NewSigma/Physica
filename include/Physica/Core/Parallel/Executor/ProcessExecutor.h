@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -66,7 +66,7 @@ namespace Physica {
             const unsigned int next_to = to + maxLoopPerCore;
             to = next_to > loopCount ? loopCount : next_to;
         }
-        co_await std::suspend_always{};
+        co_await suspend_always{};
 
         for (auto& future : futures)
             std::ignore = future.wait();

@@ -19,22 +19,22 @@
 #pragma once
 
 #include <coroutine>
-#include <utility>
 
 namespace Physica {
-    /**
-     * co_await \class suspend_promise fetches current coroutine handle
-     */
-    struct suspend_promise : public std::suspend_always {
-        std::coroutine_handle<> handle;
+    // Clang implements await_suspend using an intrinsic. We provide the necessary information to help with optimization.
+    template<bool Ready>
+    struct StaticSuspend {
+        // Discard the handle, suspension does not escape coroutine frame
+        struct NoEscape {
+            NoEscape(auto) {}
+        };
 
-        bool await_suspend(std::coroutine_handle<> handle_) noexcept {
-            handle = handle_;
-            return false;
-        }
-
-        [[nodiscard]] std::coroutine_handle<> await_resume() const noexcept {
-            return handle;
-        }
+        // Static member function, suspension does not escape awaiter
+        constexpr static bool await_ready() noexcept { return Ready; }
+        constexpr static void await_suspend(NoEscape) noexcept {}
+        constexpr static void await_resume() noexcept {}
     };
+
+    using suspend_always = StaticSuspend<false>;
+    using suspend_never = StaticSuspend<true>;
 }

@@ -42,12 +42,10 @@ namespace Physica {
         else
             *pObj = T(std::forward<decltype(arg)>(arg).values());
 
-        struct awaiter : public std::suspend_always {
+        struct awaiter : public suspend_always {
             Promise& promise;
 
             explicit awaiter(Promise& promise) : promise(promise) {}
-
-            static void await_suspend(std::coroutine_handle<>) noexcept {} // Making it static helps the compiler recognize that it does not cross suspension points.
             [[nodiscard]] T& await_resume() const noexcept { return *(promise.pObj); }
         };
         return awaiter(*this);

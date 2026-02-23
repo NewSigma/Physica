@@ -32,8 +32,8 @@ namespace Physica {
             std::exception_ptr ex = nullptr;
         public:
             Task get_return_object() noexcept { return std::coroutine_handle<Promise>::from_promise(*this); }
-            std::suspend_never initial_suspend() noexcept { return {}; }
-            std::suspend_always final_suspend() noexcept { return {}; }
+            auto initial_suspend() noexcept { return suspend_never{}; }
+            auto final_suspend() noexcept { return suspend_always{}; }
             void return_void() noexcept {}
             void unhandled_exception() noexcept { ex = std::current_exception(); }
         };

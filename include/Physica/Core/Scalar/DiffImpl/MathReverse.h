@@ -135,7 +135,7 @@ namespace Physica {
         LazyDestroy<U&&> cos_ = std::forward<U>(cos_result);
         sin_ = s;
         cos_ = c;
-        co_await std::suspend_always{};
+        co_await suspend_always{};
     }
 
     template<Scalar T>
