@@ -31,7 +31,6 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tc;
-        using typename Base::Tm;
     private:
         PlainStruct<add_device_obj_t<std::remove_reference_t<M1>>> trig;
         PlainStruct<add_device_obj_t<std::remove_reference_t<M2>>> rhs;
@@ -58,6 +57,7 @@ namespace Physica {
     template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)
     void device_obj<GEMM<M1, M2>>::assign(Matrix auto& target) const {
         using M = std::remove_cvref_t<decltype(target)>;
+        using Tm = decltype(std::declval<T>().toMKL());
         constexpr auto Side = CUBLAS_SIDE_LEFT;
         constexpr auto Uplo = Traits<M1>::Upper ? CUBLAS_FILL_MODE_UPPER : CUBLAS_FILL_MODE_LOWER;
         constexpr auto TransA = CUBLAS_OP_N;

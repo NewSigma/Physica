@@ -45,7 +45,6 @@ namespace Physica {
     public:        
         using typename Base::T;
         using typename Base::Tv;
-        using typename Base::Tm;
     public:
         Transpose(M&& mat_) : mat(std::forward<M>(mat_)) {}
         Transpose(const This&) = default;

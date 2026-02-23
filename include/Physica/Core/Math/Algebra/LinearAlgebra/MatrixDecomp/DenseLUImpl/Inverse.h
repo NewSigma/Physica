@@ -28,8 +28,6 @@ namespace Physica {
         using Base = RValueMatrix<This>;
     public:
         using Base::isComplex;
-    protected:
-        using typename Base::Tm;
     private:
         const LU& lu;
     public:

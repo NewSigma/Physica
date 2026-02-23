@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -175,7 +175,7 @@ namespace Physica {
     template<Scalar T>
     auto device_obj<DenseQR<T>>::getMatrixQ() -> device_obj<MatrixND<T>> {
         static_assert(!isComplex, "[Error]: Not implemented");
-        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
+        using Tm = decltype(std::declval<T>().toCUDA());
 
         auto& ctx = CUDAContext::getInstance();
         const size_t m = getRow();

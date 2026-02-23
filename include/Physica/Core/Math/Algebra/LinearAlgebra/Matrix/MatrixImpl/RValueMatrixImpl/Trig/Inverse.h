@@ -29,7 +29,6 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Trv;
         using typename Base::Tc;
-        using typename Base::Tm;
     private:
         LazyDestroy<M> trig;
     public:

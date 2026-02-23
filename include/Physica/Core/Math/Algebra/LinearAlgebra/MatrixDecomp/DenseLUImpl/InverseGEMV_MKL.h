@@ -23,6 +23,7 @@
 namespace Physica {
     template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
     void GEMV<M, V>::assign_mkl(Vector auto& target) const {
+        using Tm = decltype(std::declval<T>().toMKL());
         v.assign(target);
 
         constexpr int Layout = LAPACK_COL_MAJOR;

@@ -29,7 +29,6 @@ namespace Physica {
         using Base = LayerBase<This>;
 
         using Tv = T::ValueType;
-        using Tm = T::MachineType;
         using BiasType = std::conditional<WithBias, VectorND<T>, PlainStruct<void>>::type;
     public:
         template<Scalar U>
@@ -185,31 +184,43 @@ namespace Physica {
     template<Scalar T, bool WithBias>
     template<RNG R>
     void LinearLayer<T, WithBias>::random_xavier_uniform(Tv gain) {
-        const auto factor = (gain * sqrt(Tv(6) / Tv(getInputDim() + getOutputDim()))).toMachine();
-        std::uniform_real_distribution<Tm> dist(-factor, factor);
-        weights.template random_any<R, decltype(dist)>(dist);
-        if constexpr (WithBias)
-            bias.template random_any<R, decltype(dist)>(dist);
+        const auto factor = gain * sqrt(Tv(6) / Tv(getInputDim() + getOutputDim()));
+        {
+            auto& values = weights.values();
+            values.template random_uniform<R>();
+            values = values * (factor * Tv(2)) - factor;
+        }
+        if constexpr (WithBias) {
+            auto& values = bias.values();
+            values.template random_uniform<R>();
+            values = values * (factor * Tv(2)) - factor;
+        }
     }
 
     template<Scalar T, bool WithBias>
     template<RNG R>
     void LinearLayer<T, WithBias>::random_xavier_normal(Tv gain) {
-        const auto deviation = (gain * sqrt(Tv(2) / Tv(getInputDim() + getOutputDim()))).toMachine();
-        std::normal_distribution<Tm> dist(0, deviation);
-        weights.template random_any<R, decltype(dist)>(dist);
+        const auto deviation = gain * sqrt(Tv(2) / Tv(getInputDim() + getOutputDim()));
+        random_normal<R>();
+        weights.values() *= deviation;
         if constexpr (WithBias)
-            bias.template random_any<R, decltype(dist)>(dist);
+            bias.values() *= deviation;
     }
 
     template<Scalar T, bool WithBias>
     template<RNG R>
     void LinearLayer<T, WithBias>::random_kaiming_uniform(Tv gain) {
-        const Tm bound = (gain * sqrt(Tv(3) / Tv(getInputDim()))).toMachine();
-        std::uniform_real_distribution<Tm> dist(-bound, bound);
-        weights.template random_any<R, decltype(dist)>(dist);
-        if constexpr (WithBias)
-            bias.template random_any<R, decltype(dist)>(dist);
+        const auto bound = gain * sqrt(Tv(3) / Tv(getInputDim()));
+        {
+            auto& values = weights.values();
+            values.template random_uniform<R>();
+            values = values * (bound * Tv(2)) - bound;
+        }
+        if constexpr (WithBias) {
+            auto& values = bias.values();
+            values.template random_uniform<R>();
+            values = values * (bound * Tv(2)) - bound;
+        }
     }
 
     template<Scalar T, bool WithBias>

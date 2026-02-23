@@ -213,7 +213,6 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
-        using typename Base::Tm;
     public:
         using Base::Base;
         /* Operations */

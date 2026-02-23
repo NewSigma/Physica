@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,7 +23,7 @@
 namespace Physica {
     template<Vector V>
     void VectorExpr<ExprID::Square, V>::assign_mkl(Vector auto& v) const noexcept {
-        using Tm = T::MachineType;
+        using Tm = decltype(std::declval<T>().toMKL());
         v.assert_assign_mkl(Base::getExpr());
 
         size_t n = Base::getLength();

@@ -28,7 +28,6 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
-        using typename Base::Tm;
     private:
         LazyDestroy<V> vec;
     public:

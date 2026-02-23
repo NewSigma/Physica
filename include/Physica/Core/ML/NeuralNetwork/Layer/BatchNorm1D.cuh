@@ -34,7 +34,6 @@ namespace Physica {
         using This = device_obj<BatchNorm1D<T>>;
         using Base = device_obj<LayerBase<BatchNorm1D<T>>>;
         using Tv = T::ValueType;
-        using Tm = T::MachineType;
         constexpr static Tv Epsilon = std::numeric_limits<Tv>::epsilon();
         constexpr static Tv Momentum = 0.1;
     public:
@@ -149,9 +148,10 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     void device_obj<BatchNorm1D<T>>::random_xavier_uniform(Tv gain) {
-        const auto factor = (gain * sqrt(Tv(3) / Tv(getLength()))).toMachine();
-        std::uniform_real_distribution<Tm> dist(-factor, factor);
-        beta.template random_any<R, decltype(dist)>(dist);
+        const auto factor = gain * sqrt(Tv(3) / Tv(getLength()));
+        auto& values = beta.values();
+        values.template random_uniform<R>();
+        values = values * (factor * Tv(2)) - factor;
     }
 
     template<Scalar T>

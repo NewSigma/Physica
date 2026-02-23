@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,6 +25,7 @@ namespace Physica {
     template<Scalar T, bool Pivot>
     void DenseQR<T, Pivot>::compute_mkl(const Matrix auto& source) {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
+        using Tm = decltype(std::declval<T>().toMKL());
         assert(getRow() == source.getRow());
         assert(getCol() == source.getCol());
         working = source;
@@ -73,6 +74,7 @@ namespace Physica {
     template<Scalar T, bool Pivot>
     auto DenseQR<T, Pivot>::getMatrixQ_mkl() const -> MatrixND<T> {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
+        using Tm = decltype(std::declval<T>().toMKL());
         constexpr int Layout = LAPACK_COL_MAJOR;
         const size_t m = getRow();
         const size_t n = m;

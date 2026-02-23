@@ -31,7 +31,6 @@ namespace Physica {
         using typename Base::Tr;
         using typename Base::Tv;
         using typename Base::Trv;
-        using typename Base::Tm;
     private:
         LazyDestroy<M> mat;
     public:

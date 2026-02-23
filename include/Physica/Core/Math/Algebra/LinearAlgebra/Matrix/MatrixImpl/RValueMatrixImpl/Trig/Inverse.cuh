@@ -30,7 +30,6 @@ namespace Physica {
         using Ref = add_device_obj<M>::type;
     protected:
         using typename Base::T;
-        using typename Base::Tm;
     private:
         constexpr static cudaDataType DataType = CUDAContext::getDataType<T>();
 
@@ -74,6 +73,7 @@ namespace Physica {
 
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
     void device_obj<Inverse<M>>::assign_cusolver(Matrix auto& target) const {
+        using Tm = decltype(std::declval<T>().toCUDA());
         getExpr().assign(target);
 
         auto& ctx = CUDAContext::getInstance();

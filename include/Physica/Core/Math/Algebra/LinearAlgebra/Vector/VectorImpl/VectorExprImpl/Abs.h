@@ -28,7 +28,6 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
-        using typename Base::Tm;
     private:
         constexpr static bool isComplexV = std::remove_cvref_t<V>::isComplex;
         constexpr static bool isReverseDiff = Base::isReverseDiff;

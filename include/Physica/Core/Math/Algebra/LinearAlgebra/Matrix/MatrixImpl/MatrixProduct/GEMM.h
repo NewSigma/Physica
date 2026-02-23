@@ -33,7 +33,6 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
-        using typename Base::Tm;
     private:
         LazyDestroy<M1> mat1;
         LazyDestroy<M2> mat2;

@@ -28,7 +28,6 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
-        using typename Base::Tm;
         using Base::isReverseDiff;
     public:
         using Base::Base;
@@ -62,6 +61,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     void device_obj<VectorExpr<ExprID::Mul, V, U>>::device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_add_cublas(Vector auto&& v) const noexcept {
+        using Tm = decltype(std::declval<T>().toCUDA());
         v.assert_assign(Base::getLHS());
 
         auto& ctx = CUDAContext::getInstance();

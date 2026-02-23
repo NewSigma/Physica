@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,7 +24,7 @@
 namespace Physica {
     template<Vector V1, Vector V2>
     InnerDot<V1, V2>::ScalarType InnerDot<V1, V2>::calc_mkl() const noexcept {
-        using Tm = ScalarType::MachineType;
+        using Tm = decltype(std::declval<ScalarType>().toMKL());
         const auto* p1 = reinterpret_cast<const Tm*>(v1.data());
         const auto* p2 = reinterpret_cast<const Tm*>(v2.data());
         if constexpr (ScalarType::isComplex) {

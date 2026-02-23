@@ -34,7 +34,6 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
-        using typename Base::Tm;
     private:
         PlainStruct<add_device_obj_t<std::remove_reference_t<M1>>> mat1;
         PlainStruct<add_device_obj_t<std::remove_reference_t<M2>>> mat2;
@@ -116,6 +115,7 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     template<bool AssignAdd>
     void device_obj<GEMM<M1, M2>>::assign_impl_cublas(Matrix auto& target) const {
+        using Tm = decltype(std::declval<T>().toCUDA());
         constexpr bool IsDeviceMatrix = Traits<M1>::SizeAtCompile == Dynamic && Traits<M2>::SizeAtCompile == Dynamic;
         constexpr bool isTranspose1 = is_transpose<M1>::value;
         constexpr bool isTranspose2 = is_transpose<M2>::value;

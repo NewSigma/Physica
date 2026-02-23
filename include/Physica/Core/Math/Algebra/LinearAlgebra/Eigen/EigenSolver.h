@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -38,7 +38,6 @@ namespace Physica {
 
         using Tr = T::RealType;
         using Tc = Tr::ComplexType;
-        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
         using WorkingMatrix = Schur<T, Order>::WorkingMatrix;
     public:
         using EigenvalueVector = DenseVector<Tc, Order>;

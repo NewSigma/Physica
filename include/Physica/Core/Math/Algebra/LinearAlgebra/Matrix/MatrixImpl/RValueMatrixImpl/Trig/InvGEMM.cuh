@@ -57,7 +57,7 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<MatrixTrig, typename Traits<M1>::ExprType>)
     void device_obj<GEMM<M1, M2>>::assign(Matrix auto& target) const {
-        using Tm = std::conditional<Base::isComplex, typename Tc::cuBLAS_Complex, typename T::MachineType>::type;
+        using Tm = decltype(std::declval<T>().toCUDA());
         getRHS().assign(target);
 
         auto& ctx = CUDAContext::getInstance();

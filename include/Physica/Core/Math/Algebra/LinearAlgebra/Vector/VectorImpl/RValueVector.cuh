@@ -48,8 +48,6 @@ namespace Physica {
         using Trv = Tr::ValueType;
         using Tc = T::ComplexType;
         using Tcv = Tc::ValueType;
-
-        using Tm = std::conditional<isComplex, typename Tcv::cuBLAS_Complex, typename T::MachineType>::type;
     public:
         ~device_obj() = default;
         /* Operators */

@@ -26,7 +26,6 @@ namespace Physica {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
         using typename Base::T;
-        using typename Base::Tm;
 
         LazyDestroy<M> m;
         LazyDestroy<V> v;

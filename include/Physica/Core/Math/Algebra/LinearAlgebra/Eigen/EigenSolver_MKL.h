@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,6 +25,7 @@ namespace Physica {
     template<Scalar T, size_t Order>
     void EigenSolver<T, Order>::compute_mkl(const Matrix auto& source) {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
+        using Tm = decltype(std::declval<T>().toMKL());
         constexpr int Major = MatrixMajor::isColMatrix<decltype(source)>() ? MatrixMajor::Col : MatrixMajor::Row;
         constexpr int Layout = Major == MatrixMajor::Col ? LAPACK_COL_MAJOR : LAPACK_ROW_MAJOR;
         using WorkingMatrixMKL = DenseMatrix<T, Major>;

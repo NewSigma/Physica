@@ -83,8 +83,8 @@ namespace Physica {
         using Base::random_normal;
         __host__ __device__ void swap(Real& __restrict s) noexcept { std::swap(h, s.h); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ half toMachine() const noexcept { return h; }
-        [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return h == half(0); }
+        [[nodiscard]] __host__ __device__ constexpr half toMachine() const noexcept { return h; }
+        [[nodiscard]] __host__ __device__ constexpr bool isZero() const noexcept { return h == half(0); }
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return h > half(0); }
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return h < half(0); }
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return __hisinf(h) == 0; }

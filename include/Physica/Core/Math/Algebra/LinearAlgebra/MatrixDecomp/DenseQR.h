@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -40,7 +40,6 @@ namespace Physica {
         using Trv = Tr::ValueType;
         using Tc = T::ComplexType;
         using Tv = T::ValueType;
-        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
         using PermType = std::conditional<Pivot, PermMatrix<Tr>, PlainStruct<void>>::type;
     private:
         MatrixND<T> working;

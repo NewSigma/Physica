@@ -30,7 +30,6 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
-        using typename Base::Tm;
     private:
         PlainStruct<add_device_obj_t<std::remove_reference_t<V>>> vec;
     public:

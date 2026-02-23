@@ -40,7 +40,6 @@ namespace Physica {
         using typename Base::Tv;
         using typename Base::Tr;
         using typename Base::Trv;
-        using Tm = Tr::MachineType;
     private:
         constexpr static int MaxNumTaylorTerm = 55;
         constexpr static int MaxNormOrder = 8;
@@ -79,7 +78,7 @@ namespace Physica {
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     private:
-        constexpr static Tm calcTheta(int numTaylorTerm);
+        constexpr static Trv calcTheta(int numTaylorTerm);
     };
 
     template<Matrix M, Vector V>
@@ -154,16 +153,16 @@ namespace Physica {
     template<Matrix M, Vector V>
     template<ExecutePolicy P>
     auto MatExpVecProd<M, V>::calcParam(Tr traceMu) const -> ParamPair {
-        constexpr static Tm NormLimit = ((2 * MaxNormOrder * (MaxNormOrder + 3)) * calcTheta(MaxNumTaylorTerm)) / MaxNumTaylorTerm;
+        constexpr static Trv NormLimit = (Trv(2 * MaxNormOrder * (MaxNormOrder + 3)) * calcTheta(MaxNumTaylorTerm)) / MaxNumTaylorTerm;
         const auto matI = IdentityMatrix<Trv>(getLength());
         const Tr norm1 = (mexp.getMatrix() - matI * traceMu).template norm1_power<P>(MaxNormIteration);
-        const bool isSmallNorm = Tm(norm1) <= NormLimit;
+        const bool isSmallNorm = norm1.value() <= NormLimit;
         int cost = std::numeric_limits<int>::max();
         int numMinCostTerm = 0;
         if (isSmallNorm) {
             int numSplit = 1;
             for (int numTerm = 1; numTerm <= MaxNumTaylorTerm; ++numTerm) {
-                const int split = int(Tm(norm1) / calcTheta(numTerm)) + 1;
+                const int split = int((norm1.value() / calcTheta(numTerm)).toMachine()) + 1;
                 const int temp = numTerm * split;
                 if (cost > temp) {
                     cost = temp;
@@ -182,9 +181,9 @@ namespace Physica {
         }
 
         for (int order = 2; order <= MaxNormOrder; ++order) {
-            const Tm powerNorm = std::max(powerNorms[order - 2], powerNorms[order - 1]).toMachine();
+            const Trv powerNorm = std::max(powerNorms[order - 2], powerNorms[order - 1]);
             for (int numTerm = order * (order - 1) - 1; numTerm <= MaxNumTaylorTerm; ++numTerm) {
-                const int temp = numTerm * int(powerNorm / calcTheta(numTerm)) + numTerm;
+                const int temp = numTerm * int((powerNorm / calcTheta(numTerm)).toMachine()) + numTerm;
                 if (cost > temp) {
                     cost = temp;
                     numMinCostTerm = numTerm;
@@ -205,7 +204,7 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V>
-    constexpr auto MatExpVecProd<M, V>::calcTheta(int numTaylorTerm) -> Tm {
+    constexpr auto MatExpVecProd<M, V>::calcTheta(int numTaylorTerm) -> Trv {
         assert(1 <= numTaylorTerm && numTaylorTerm <= MaxNumTaylorTerm && "[Error]: Invalid param");
         const int bufferIndex = (numTaylorTerm - 1) / 5; 
         return (T::Prec == Float) ? ThetaFloat32[bufferIndex] : ThetaFloat64[bufferIndex];

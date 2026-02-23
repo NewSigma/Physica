@@ -26,7 +26,7 @@ namespace Physica {
     void CompactMatrix<Derived>::assign_mkl(Matrix auto&& target) const noexcept {
         static_assert(std::remove_cvref_t<decltype(target)>::IsCompact, "[Error]: MKL expects compact matrix");
         static_assert(!MatrixMajor::isSameMajor<This, decltype(target)>(), "[Error]: Do not need transpose, use assign_base() instead");
-        using Tm = Base::Tm;
+        using Tm = decltype(std::declval<T>().toMKL());
         target.assert_assign_mkl(Base::getDerived());
 
         constexpr char ordering = 'R'; // Ordering does not matter
@@ -55,6 +55,7 @@ namespace Physica {
 
     template<class Derived>
     auto CompactMatrix<Derived>::balance_mkl() -> VectorND<T> {
+        using Tm = decltype(std::declval<T>().toMKL());
         Base::assert_balance();
 
         constexpr int Layout = MatrixMajor::getMajor<Derived>() == MatrixMajor::Row ? CblasRowMajor : CblasColMajor;

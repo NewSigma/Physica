@@ -29,8 +29,6 @@ namespace Physica {
         using host_obj = LinearLayer<T, WithBias>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LayerBase<host_obj>>;
-
-        using Tm = T::MachineType;
         using BiasType = std::conditional<WithBias, device_obj<VectorND<T>>, PlainStruct<void>>::type;
     public:
         template<Scalar U>
@@ -238,11 +236,17 @@ namespace Physica {
     template<Scalar T, bool WithBias>
     template<RNG R>
     void device_obj<LinearLayer<T, WithBias>>::random_xavier_uniform(Tv gain) {
-        const auto factor = (gain * sqrt(Tv(6) / Tv(getInputDim() + getOutputDim()))).toMachine();
-        std::uniform_real_distribution<Tm> dist(-factor, factor);
-        weights.template random_any<R, decltype(dist)>(dist);
-        if constexpr (WithBias)
-            bias.template random_any<R, decltype(dist)>(dist);
+        const auto factor = gain * sqrt(Tv(6) / Tv(getInputDim() + getOutputDim()));
+        {
+            auto& values = weights.values();
+            values.template random_uniform<R>();
+            values = values * (factor * Tv(2)) - factor;
+        }
+        if constexpr (WithBias) {
+            auto& values = bias.values();
+            values.template random_uniform<R>();
+            values = values * (factor * Tv(2)) - factor;
+        }
     }
     
     template<Scalar T, bool WithBias>
@@ -258,11 +262,17 @@ namespace Physica {
     template<Scalar T, bool WithBias>
     template<RNG R>
     void device_obj<LinearLayer<T, WithBias>>::random_kaiming_uniform(Tv gain) {
-        const Tm bound = (gain * sqrt(Tv(3) / Tv(getInputDim()))).toMachine();
-        std::uniform_real_distribution<Tm> dist(-bound, bound);
-        weights.template random_any<R, decltype(dist)>(dist);
-        if constexpr (WithBias)
-            bias.template random_any<R, decltype(dist)>(dist);
+        const auto bound = gain * sqrt(Tv(3) / Tv(getInputDim()));
+        {
+            auto& values = weights.values();
+            values.template random_uniform<R>();
+            values = values * (bound * Tv(2)) - bound;
+        }
+        if constexpr (WithBias) {
+            auto& values = bias.values();
+            values.template random_uniform<R>();
+            values = values * (bound * Tv(2)) - bound;
+        }
     }
 
     template<Scalar T, bool WithBias>

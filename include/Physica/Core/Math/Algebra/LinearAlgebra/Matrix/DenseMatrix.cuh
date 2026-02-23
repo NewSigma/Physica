@@ -36,7 +36,6 @@ namespace Physica {
         using Storage = device_obj<Array2D<T, Major, Row, Col, Allocator>>;
     protected:
         using typename Base::Tv;
-        using Tm = T::MachineType;
     public:
         device_obj() = default;
         explicit device_obj(const host_obj& mat);

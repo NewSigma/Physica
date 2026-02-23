@@ -89,7 +89,9 @@ namespace Physica {
         __host__ __device__ void swap(Real& __restrict s) noexcept { std::swap(d, s.d); }
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr double toMachine() const noexcept { return d; }
-        [[nodiscard]] __host__ __device__ bool isZero() const noexcept{ return d == 0; }
+        [[nodiscard]] __host__ __device__ constexpr double toMKL() const noexcept { return toMachine(); }
+        [[nodiscard]] __host__ __device__ constexpr double toCUDA() const noexcept { return toMachine(); }
+        [[nodiscard]] __host__ __device__ constexpr bool isZero() const noexcept{ return d == 0; }
         [[nodiscard]] __host__ __device__ inline bool isSubNormal() const noexcept;
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return d > 0; }
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return d < 0; }
