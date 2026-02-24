@@ -7,5 +7,6 @@ physica_add_test(AP ML/AP.cpp)
 add_subdirectory(Parallel)
 ## Utils
 physica_add_test(Array Utils/Array.cpp)
+physica_add_test(Range Utils/Range.cpp)
 
 add_subdirectory(Physics)
