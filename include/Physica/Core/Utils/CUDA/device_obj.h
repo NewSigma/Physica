@@ -95,10 +95,10 @@ namespace Physica {
     using add_device_obj_t = add_device_obj<T>::type;
 
     template<class T>
-    concept CUDA = is_device_obj<T>::value;
+    concept DeviceObj = is_device_obj<T>::value;
 
-    template<CUDA T>
+    template<DeviceObj T>
     class device_obj<T> {
-        static_assert(!CUDA<T>, "[Error]: Nested device_obj is not allowed");
+        static_assert(!DeviceObj<T>, "[Error]: Nested device_obj is not allowed");
     };
 }

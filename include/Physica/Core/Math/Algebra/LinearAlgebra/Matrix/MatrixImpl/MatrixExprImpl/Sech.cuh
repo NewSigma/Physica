@@ -50,7 +50,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    [[nodiscard]] __host__ __device__ auto sech_elem(M&& m) noexcept requires(CUDA<M>) {
+    [[nodiscard]] __host__ __device__ auto sech_elem(M&& m) noexcept requires(DeviceObj<M>) {
         return device_obj<MatrixExpr<ExprID::Sech, remove_device_obj_t<M&&>>>(std::forward<M>(m));
     }
 }

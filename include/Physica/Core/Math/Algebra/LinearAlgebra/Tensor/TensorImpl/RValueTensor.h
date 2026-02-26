@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,7 +34,7 @@ namespace Physica {
 
     template<class Derived>
     class RValueTensor : public CRTPBase<RValueTensor<Derived>>, public TensorBase {
-        static_assert(!CUDA<Derived>, "[Error]: device_obj<> must be outside RValueTensor<>");
+        static_assert(!DeviceObj<Derived>, "[Error]: device_obj<> must be outside RValueTensor<>");
         using This = RValueTensor<Derived>;
         using Base = CRTPBase<This>;
     public:

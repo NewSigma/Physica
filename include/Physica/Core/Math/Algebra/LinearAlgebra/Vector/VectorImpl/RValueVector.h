@@ -58,7 +58,7 @@ namespace Physica {
             constexpr static bool value = []() consteval noexcept {
                 constexpr bool isSameScalar = std::same_as<typename T1::ValueType, typename T2::ValueType>;
                 constexpr bool isScalar = PacketType::size() == 1;
-                constexpr bool isCUDA = CUDA<V1> || CUDA<V2>;
+                constexpr bool isCUDA = DeviceObj<V1> || DeviceObj<V2>;
                 constexpr bool isFloat16 = ResultType::Prec == Float16;
                 // Only use FP16 SIMD for device:
                 // 1. Other packet types do not work for CUDA
@@ -88,7 +88,7 @@ namespace Physica {
      */
     template<class Derived>
     class RValueVector : public CRTPBase<RValueVector<Derived>> {
-        static_assert(!CUDA<Derived>, "[Error]: device_obj<> must be outside RValueVector<>");
+        static_assert(!DeviceObj<Derived>, "[Error]: device_obj<> must be outside RValueVector<>");
         using This = RValueVector<Derived>;
         using Base = CRTPBase<This>;
     public:

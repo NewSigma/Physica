@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Vector V1, Vector V2>
-    __device__ auto operator*(const V1& v1, const V2& v2) requires(CUDA<V1> && CUDA<V2>) {
+    __device__ auto operator*(const V1& v1, const V2& v2) requires(DeviceObj<V1> && DeviceObj<V2>) {
         using T1 = V1::ScalarType;
         using T2 = V2::ScalarType;
         using ScalarType = InnerDot<V1, V2>::ScalarType;

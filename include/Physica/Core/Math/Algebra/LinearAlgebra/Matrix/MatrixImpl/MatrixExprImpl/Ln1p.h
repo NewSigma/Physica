@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -94,7 +94,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    [[nodiscard]] auto ln1p_elem(M&& m) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto ln1p_elem(M&& m) noexcept requires(!DeviceObj<M>) {
         return MatrixExpr<ExprID::Ln1p, M&&>(std::forward<M>(m));
     }
 }

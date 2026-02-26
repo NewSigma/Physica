@@ -311,7 +311,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::cross(const Vector auto& v) const noexcept requires(CUDA<decltype(v)>) {
+    __device__ auto device_obj<RValueVector<Derived>>::cross(const Vector auto& v) const noexcept {
+        static_assert(is_device_obj_v<decltype(v)>, "[Error]: host-device mismatch");
         return device_obj<CrossProduct<Derived, decltype(v)>>(*this, v);
     }
 
@@ -420,7 +421,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ consteval void device_obj<RValueVector<Derived>>::static_assert_assign(const Vector auto& source) noexcept {
-        static_assert(SizeAtCompile != Dynamic || CUDA<decltype(source)>, "[Error]: Host object cannot be assigned to dynamic device object");
+        static_assert(SizeAtCompile != Dynamic || DeviceObj<decltype(source)>, "[Error]: Host object cannot be assigned to dynamic device object");
         host_obj::static_assert_assign(source);
     }
 

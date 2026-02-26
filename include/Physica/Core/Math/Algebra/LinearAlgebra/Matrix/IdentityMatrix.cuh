@@ -89,7 +89,7 @@ namespace Physica {
     template<Scalar T, size_t Order>
     template<Vector V>
     __host__ __device__ V&& device_obj<IdentityMatrix<T, Order>>::operator*(V&& v) const noexcept {
-        static_assert(CUDA<V>);
+        static_assert(DeviceObj<V>);
         assert(getCol() == v.getLength());
         return std::forward<V>(v);
     }

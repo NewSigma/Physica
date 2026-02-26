@@ -150,7 +150,7 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    [[nodiscard]] auto kronecker(M1&& m1, M2&& m2) noexcept requires(!CUDA<M1> && !CUDA<M2>) {
+    [[nodiscard]] auto kronecker(M1&& m1, M2&& m2) noexcept requires(!DeviceObj<M1> && !DeviceObj<M2>) {
         return Kronecker<M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

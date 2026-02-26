@@ -60,7 +60,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    [[nodiscard]] auto ln_elem(M&& m) noexcept requires(CUDA<M>) {
+    [[nodiscard]] auto ln_elem(M&& m) noexcept requires(DeviceObj<M>) {
         return device_obj<MatrixExpr<ExprID::Ln, remove_device_obj_t<M&&>>>(std::forward<M>(m));
     }
 }

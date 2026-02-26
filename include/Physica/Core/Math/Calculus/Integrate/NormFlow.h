@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -212,7 +212,7 @@ namespace Physica {
 
                 lnJs.toHostAsync(lnJv);
                 x = from_d + hadamard(coeff_d, x);
-                constexpr bool DeviceEval = CUDA<decltype(nn(x))>;
+                constexpr bool DeviceEval = DeviceObj<decltype(nn(x))>;
                 if constexpr (DeviceEval)
                     nn(x).toHost(seg);
                 else

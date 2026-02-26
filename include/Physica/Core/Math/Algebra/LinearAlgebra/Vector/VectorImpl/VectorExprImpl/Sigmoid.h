@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -36,7 +36,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    [[nodiscard]] auto sigmoid(V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto sigmoid(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Sigmoid, V&&>(std::forward<V>(v));
     }
 }

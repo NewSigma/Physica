@@ -552,7 +552,6 @@ namespace Physica {
     template<Scalar T>
     void operator>>=(T& x, int bits) { x = x >> bits; }
 
-
     template<Scalar T>
     [[nodiscard]] bool absCompare(const T& x, const T& y) {
         if constexpr (T::isComplex)

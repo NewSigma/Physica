@@ -29,13 +29,13 @@ namespace Physica {
         constexpr static size_t DefaultAlign = alignof(typename BestPacket<T, Length>::Type);
         static_assert(std::allocator_traits<Allocator>::Align % DefaultAlign == 0, "[Error]: Bad alignment for SIMD");
         using This = DenseVector<T, Length, Allocator>;
+        using Base = CompactVector<This>;
         using Coro = CRCoro<This>;
     public:
-        using promise_type = Coro::promise_type;
-        using Base = CompactVector<This>;
+        using typename Base::ScalarType;
+        using typename Coro::promise_type;
         using Storage = Array<T, Length, Allocator>;
         using device_obj_type = device_obj<This>;
-        using typename Base::ScalarType;
         using Base::SizeAtCompile;
         using Base::isReverseDiff;
     protected:

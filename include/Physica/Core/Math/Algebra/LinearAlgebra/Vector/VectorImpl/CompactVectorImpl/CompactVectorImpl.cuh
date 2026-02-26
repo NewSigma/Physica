@@ -38,7 +38,7 @@ namespace Physica {
         if constexpr (Scalar<U>)
             Base::getConstCastDerived().grads() += grad;
         else {
-            static_assert(CUDA<U>, "[Error]: Cannot pass host grad to device");
+            static_assert(DeviceObj<U>, "[Error]: Cannot pass host grad to device");
             if constexpr (Vector<U>) {
                 assert(Base::getLength() == grad.getLength());
                 Base::getConstCastDerived().grads() += grad;

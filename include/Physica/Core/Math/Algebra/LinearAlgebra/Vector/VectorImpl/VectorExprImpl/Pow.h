@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -48,7 +48,7 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    [[nodiscard]] auto pow(V&& v, U&& x) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto pow(V&& v, U&& x) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Pow, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
     }
 }

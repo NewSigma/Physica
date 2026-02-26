@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -146,27 +146,27 @@ namespace Physica {
     }
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] auto operator+(M&& m, U&& x) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto operator+(M&& m, U&& x) noexcept requires(!DeviceObj<M>) {
         return MatrixExpr<ExprID::Add, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] auto operator+(U&& x, M&& m) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto operator+(U&& x, M&& m) noexcept requires(!DeviceObj<M>) {
         return std::forward<M>(m) + std::forward<U>(x);
     }
 
-    template<Matrix M, Vector U>
-    [[nodiscard]] auto operator+(M&& m, U&& x) noexcept requires(!CUDA<M> && !CUDA<U>) {
-        return MatrixExpr<ExprID::Add, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
+    template<Matrix M, Vector V>
+    [[nodiscard]] auto operator+(M&& m, V&& x) noexcept requires(!DeviceObj<M> && !DeviceObj<V>) {
+        return MatrixExpr<ExprID::Add, M&&, V&&>(std::forward<M>(m), std::forward<V>(x));
     }
 
-    template<Matrix M, Vector U>
-    [[nodiscard]] auto operator+(U&& x, M&& m) noexcept requires(!CUDA<M> && !CUDA<U>) {
-        return std::forward<M>(m) + std::forward<U>(x);
+    template<Matrix M, Vector V>
+    [[nodiscard]] auto operator+(V&& x, M&& m) noexcept requires(!DeviceObj<M> && !DeviceObj<V>) {
+        return std::forward<M>(m) + std::forward<V>(x);
     }
 
     template<Matrix M1, Matrix M2>
-    [[nodiscard]] auto operator+(M1&& m1, M2&& m2) noexcept requires(!CUDA<M1> && !CUDA<M2>) {
+    [[nodiscard]] auto operator+(M1&& m1, M2&& m2) noexcept requires(!DeviceObj<M1> && !DeviceObj<M2>) {
         return MatrixExpr<ExprID::Add, M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

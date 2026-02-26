@@ -78,7 +78,7 @@ namespace Physica {
     template<Scalar T, bool Pivot>
     void device_obj<DenseLU<T, Pivot>>::compute(const Matrix auto& source) {
         assert(source.isSquare());
-        if constexpr (CUDA<decltype(source)>)
+        if constexpr (DeviceObj<decltype(source)>)
             source.assign(working);
         else
             source.toDeviceAsync(working);

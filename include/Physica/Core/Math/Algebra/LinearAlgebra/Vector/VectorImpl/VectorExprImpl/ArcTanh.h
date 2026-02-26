@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -37,7 +37,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    [[nodiscard]] auto arctanh(V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto arctanh(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::ArcTanh, V&&>(std::forward<V>(v));
     }
 }

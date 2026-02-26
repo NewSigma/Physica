@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -100,7 +100,7 @@ namespace Physica {
         using M = std::remove_cvref<decltype(source)>::type;
         if constexpr (std::same_as<M, SparseMatrix<T>>)
             source.toDeviceAsync(spmat);
-        else if constexpr (CUDA<M>)
+        else if constexpr (DeviceObj<M>)
             spmat = source;
         else
             spmat = SparseMatrix<T>(source);

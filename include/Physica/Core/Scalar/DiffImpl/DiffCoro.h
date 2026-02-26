@@ -64,7 +64,7 @@ namespace Physica {
         DiffCoro(ReverseDiff auto&& expr) noexcept requires(!is_codiff<decltype(expr)>::value); // Codiff will delegate to the move constructor
         DiffCoro(const This& other) = delete;
         DiffCoro(This&& other) noexcept;
-        ~DiffCoro();
+        [[gnu::nodebug]] ~DiffCoro();
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&& obj) noexcept;
@@ -75,7 +75,7 @@ namespace Physica {
     private:
         DiffCoro(Promise& p) noexcept;
         /* Operations */
-        void reverse_impl() noexcept;
+        [[gnu::nodebug]] void reverse_impl() noexcept;
         [[nodiscard]] static This compute(ReverseDiff auto&& expr) noexcept;
     };
 

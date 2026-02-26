@@ -112,7 +112,7 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    [[nodiscard]] auto operator*(const V1& v1, const V2& v2) noexcept requires(!CUDA<V1> && !CUDA<V2>) {
+    [[nodiscard]] auto operator*(const V1& v1, const V2& v2) noexcept requires(!DeviceObj<V1> && !DeviceObj<V2>) {
         return InnerDot<V1, V2>(v1, v2).calc();
     }
 }

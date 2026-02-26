@@ -36,7 +36,7 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const { return cbrt(Base::getExpr().calc_value(index)); }
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const noexcept requires(!CUDA<V>) {
+        [[nodiscard]] Pack packet(size_t index) const noexcept {
             Pack result = Base::getExpr().template packet<Pack>(index);
             for (size_t i = 0; i < static_cast<size_t>(Pack::size()); ++i)
                 result.insert(i, cbrt(result[i]));
