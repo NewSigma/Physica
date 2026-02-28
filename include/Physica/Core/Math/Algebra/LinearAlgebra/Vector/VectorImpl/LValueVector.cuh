@@ -61,18 +61,11 @@ namespace Physica {
         template<size_t Length = Dynamic>
         [[nodiscard]] __host__ __device__ auto segment(this auto&&, size_t from, size_t to) noexcept;
 
-        template<Matrix M>
-        [[nodiscard]] __host__ __device__ auto reshape(const M& mat) noexcept;
-        template<Matrix M>
-        [[nodiscard]] __host__ __device__ const auto reshape(const M& mat) const noexcept;
+        [[nodiscard]] __host__ __device__ auto reshape_like(this auto&& self, const Matrix auto& mat) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ auto reshape_col(size_t row, size_t col) noexcept;
+        [[nodiscard]] __host__ __device__ auto reshape_col(this auto&& self, size_t row, size_t col) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto reshape_col(size_t row, size_t col) const noexcept;
-        template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ auto reshape_row(size_t row, size_t col) noexcept;
-        template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto reshape_row(size_t row, size_t col) const noexcept;
+        [[nodiscard]] __host__ __device__ auto reshape_row(this auto&& self, size_t row, size_t col) noexcept;
 
         template<RNG R>
         void random_uniform();

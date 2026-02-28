@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Scalar/Complex.h"
@@ -184,6 +185,14 @@ namespace {
 
         a = y.grads();
         expect(a[0] == T(0.3));
+    }
+
+    void reshapeTest() {
+        using T = float32;
+        MatrixND<T> two(3, 3, 2);
+        auto x = VectorND<T>::random_uniform<RandomSource>(two.getSize());
+        MatrixND<T> y = hadamard(two, x.reshape_like(two));
+        expect(vectorNear(y.flatten(), x * T(2), uint64_t(0)));
     }
 }
 

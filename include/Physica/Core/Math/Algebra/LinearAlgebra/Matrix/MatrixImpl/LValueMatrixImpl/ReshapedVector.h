@@ -31,11 +31,11 @@ namespace Physica {
     public:
         using typename Base::ScalarType;
     private:
-        V& v;
+        LazyDestroy<V> v;
         size_t r;
         size_t c;
     public:
-        LValueReshapedVector(V& v_, size_t r_, size_t c_);
+        LValueReshapedVector(V&& v_, size_t r_, size_t c_);
         LValueReshapedVector(const This&) = default;
         LValueReshapedVector(This&&) noexcept = default;
         ~LValueReshapedVector() = default;
@@ -53,8 +53,8 @@ namespace Physica {
     };
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    LValueReshapedVector<V, MatrixMajor, Row, Col>::LValueReshapedVector(V& v_, size_t r_, size_t c_)
-            : v(v_), r(r_), c(c_) {
+    LValueReshapedVector<V, MatrixMajor, Row, Col>::LValueReshapedVector(V&& v_, size_t r_, size_t c_)
+            : v(std::forward<V>(v_)), r(r_), c(c_) {
         assert(r == Row || Row == Dynamic);
         assert(c == Col || Col == Dynamic);
         assert(r * c == v.getLength());
@@ -91,41 +91,27 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Matrix M>
-    auto LValueVector<Derived>::reshape(const M& mat) noexcept {
-        using ResultType = LValueReshapedVector<Derived, MatrixMajor::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>;
-        return ResultType(Base::getDerived(), mat.getRow(), mat.getCol());
-    }
-
-    template<class Derived>
-    template<Matrix M>
-    const auto LValueVector<Derived>::reshape(const M& mat) const noexcept {
-        using ResultType = LValueReshapedVector<Derived, MatrixMajor::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>;
-        return ResultType(Base::getConstCastDerived(), mat.getRow(), mat.getCol());
+    auto LValueVector<Derived>::reshape_like(this auto&& self, const Matrix auto& mat) noexcept {
+        using Self = decltype(self);
+        using M = std::remove_cvref_t<decltype(mat)>;
+        constexpr auto Major = MatrixMajor::getMajor<M>();
+        static_assert(Major != MatrixMajor::BothMajor, "[Error]: Cannot infer major from this matrix");
+        using ResultType = LValueReshapedVector<Self, MatrixMajor::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>;
+        return ResultType(std::forward<Self>(self), mat.getRow(), mat.getCol());
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    auto LValueVector<Derived>::reshape_col(size_t row, size_t col) noexcept {
-        return LValueReshapedVector<Derived, MatrixMajor::Col, Row, Col>(Base::getDerived(), row, col);
+    auto LValueVector<Derived>::reshape_col(this auto&& self, size_t row, size_t col) noexcept {
+        using Self = decltype(self);
+        return LValueReshapedVector<Self, MatrixMajor::Col, Row, Col>(std::forward<Self>(self), row, col);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    const auto LValueVector<Derived>::reshape_col(size_t row, size_t col) const noexcept {
-        return LValueReshapedVector<Derived, MatrixMajor::Col, Row, Col>(Base::getConstCastDerived(), row, col);
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    auto LValueVector<Derived>::reshape_row(size_t row, size_t col) noexcept {
-        return LValueReshapedVector<Derived, MatrixMajor::Row, Row, Col>(Base::getDerived(), row, col);
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    const auto LValueVector<Derived>::reshape_row(size_t row, size_t col) const noexcept {
-        return LValueReshapedVector<Derived, MatrixMajor::Row, Row, Col>(Base::getConstCastDerived(), row, col);
+    auto LValueVector<Derived>::reshape_row(this auto&& self, size_t row, size_t col) noexcept {
+        using Self = decltype(self);
+        return LValueReshapedVector<Self, MatrixMajor::Row, Row, Col>(std::forward<Self>(self), row, col);
     }
 }
 

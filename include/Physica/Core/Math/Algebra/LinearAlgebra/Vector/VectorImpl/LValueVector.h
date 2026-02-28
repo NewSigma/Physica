@@ -77,18 +77,11 @@ namespace Physica {
         template<size_t Length = Dynamic>
         [[nodiscard]] auto segment(this auto&&, size_t from, size_t to) noexcept;
 
-        template<Matrix M>
-        [[nodiscard]] auto reshape(const M& mat) noexcept;
-        template<Matrix M>
-        [[nodiscard]] const auto reshape(const M& mat) const noexcept;
+        [[nodiscard]] auto reshape_like(this auto&& self, const Matrix auto& mat) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] auto reshape_col(size_t row, size_t col) noexcept;
+        [[nodiscard]] auto reshape_col(this auto&& self, size_t row, size_t col) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] const auto reshape_col(size_t row, size_t col) const noexcept;
-        template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] auto reshape_row(size_t row, size_t col) noexcept;
-        template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] const auto reshape_row(size_t row, size_t col) const noexcept;
+        [[nodiscard]] auto reshape_row(this auto&& self, size_t row, size_t col) noexcept;
 
         void zeros() noexcept;
         void clamp_min(Tv minimum);

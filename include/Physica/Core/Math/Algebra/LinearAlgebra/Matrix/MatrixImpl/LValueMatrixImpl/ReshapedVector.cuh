@@ -28,14 +28,15 @@ namespace Physica {
         using host_obj = LValueReshapedVector<V, MatrixMajor, Row, Col>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueMatrix<host_obj>>;
+        using Ref = add_device_obj<V>::type;
     public:
         using typename Base::ScalarType;
     private:
-        device_obj<V>& v;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<V>>> v;
         size_t r;
         size_t c;
     public:
-    __host__ __device__ device_obj(device_obj<V>& v_, size_t r_, size_t c_);
+    __host__ __device__ device_obj(Ref v_, size_t r_, size_t c_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -48,12 +49,12 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
-        [[nodiscard]] ScalarType sum() const { return v.sum(); }
+        [[nodiscard]] ScalarType sum() const { return v.getDerived().sum(); }
     };
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    __host__ __device__ device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>::device_obj(device_obj<V>& v_, size_t r_, size_t c_)
-            : v(v_), r(r_), c(c_) {
+    __host__ __device__ device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>::device_obj(Ref v_, size_t r_, size_t c_)
+            : v(asStruct(v_)), r(r_), c(c_) {
         assert(r == Row || Row == Dynamic);
         assert(c == Col || Col == Dynamic);
         assert(r * c == v.getLength());
@@ -84,47 +85,35 @@ namespace Physica {
     __host__ __device__ auto device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
         assert(row < self.getRow() && col < self.getCol());
         if constexpr (MatrixMajor::isColMatrix<This>())
-            return self.v.data_ptr(col * self.getRow() + row);
+            return self.v.getDerived().data_ptr(col * self.getRow() + row);
         else
-            return self.v.data_ptr(row * self.getCol() + col);
+            return self.v.getDerived().data_ptr(row * self.getCol() + col);
     }
 
     template<class Derived>
-    template<Matrix M>
-    __host__ __device__ auto device_obj<LValueVector<Derived>>::reshape(const M& mat) noexcept {
-        using ResultType = device_obj<LValueReshapedVector<Derived, MatrixMajor::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>>;
-        return ResultType(Base::getDerived(), mat.getRow(), mat.getCol());
-    }
-
-    template<class Derived>
-    template<Matrix M>
-    __host__ __device__ const auto device_obj<LValueVector<Derived>>::reshape(const M& mat) const noexcept {
-        using ResultType = device_obj<LValueReshapedVector<Derived, MatrixMajor::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>>;
-        return ResultType(Base::getConstCastDerived(), mat.getRow(), mat.getCol());
+    __host__ __device__ auto device_obj<LValueVector<Derived>>::reshape_like(this auto&& self, const Matrix auto& mat) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        constexpr auto Major = MatrixMajor::getMajor<M>();
+        static_assert(Major != MatrixMajor::BothMajor, "[Error]: Cannot infer major from this matrix");
+        using ResultType = device_obj<LValueReshapedVector<M, Major, M::RowAtCompile, M::ColAtCompile>>;
+        return ResultType(std::forward<Self>(self), mat.getRow(), mat.getCol());
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ auto device_obj<LValueVector<Derived>>::reshape_col(size_t row, size_t col) noexcept {
-        return device_obj<LValueReshapedVector<Derived, MatrixMajor::Col, Row, Col>>(Base::getDerived(), row, col);
+    __host__ __device__ auto device_obj<LValueVector<Derived>>::reshape_col(this auto&& self, size_t row, size_t col) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<LValueReshapedVector<M, MatrixMajor::Col, Row, Col>>(std::forward<Self>(self), row, col);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ const auto device_obj<LValueVector<Derived>>::reshape_col(size_t row, size_t col) const noexcept {
-        return device_obj<LValueReshapedVector<Derived, MatrixMajor::Col, Row, Col>>(Base::getConstCastDerived(), row, col);
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    __host__ __device__ auto device_obj<LValueVector<Derived>>::reshape_row(size_t row, size_t col) noexcept {
-        return device_obj<LValueReshapedVector<Derived, MatrixMajor::Row, Row, Col>>(Base::getDerived(), row, col);
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    __host__ __device__ const auto device_obj<LValueVector<Derived>>::reshape_row(size_t row, size_t col) const noexcept {
-        return device_obj<LValueReshapedVector<Derived, MatrixMajor::Row, Row, Col>>(Base::getConstCastDerived(), row, col);
+    __host__ __device__ auto device_obj<LValueVector<Derived>>::reshape_row(this auto&& self, size_t row, size_t col) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<LValueReshapedVector<M, MatrixMajor::Row, Row, Col>>(std::forward<Self>(self), row, col);
     }
 }
 

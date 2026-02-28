@@ -16,13 +16,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Test.h"
 
 using namespace Physica;
+using RandomSource = Random<>;
+
+namespace {
+    void argminTest() {
+        const auto x = VectorND<float32>::random_uniform<Random<>>(16);
+        expect(x.min() == x[x.argmin()]);
+    }
+
+    void reshapeTest() {
+        using T = float32;
+        auto id = IdentityMatrix<T>(3);
+        auto x = VectorND<T>::random_uniform<RandomSource>(id.getSize());
+        MatrixND<T> y = id * (x + x).reshape_col(3, 3);
+        expect(vectorNear(y.flatten(), x * T(2), uint64_t(0)));
+    }
+}
 
 int main() {
-    const auto x = VectorND<float32>::random_uniform<Random<>>(16);
-    expect(x.min() == x[x.argmin()]);
+    argminTest();
+    reshapeTest();
     return 0;
 }

@@ -181,7 +181,7 @@ namespace Physica {
         Tr householder(Vector auto& __restrict target) const __restrict;
 
         template<Matrix M>
-        [[nodiscard]] auto reshape(const M& mat) const noexcept;
+        [[nodiscard]] auto reshape_like(const M& mat) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] auto reshape_col(size_t row, size_t col) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>

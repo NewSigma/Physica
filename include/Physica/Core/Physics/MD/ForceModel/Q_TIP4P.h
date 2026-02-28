@@ -152,7 +152,7 @@ namespace Physica {
         MDCellType copy = cell;
         const auto permute = sortPosition(copy);
         const VectorND<T> sort_f = force<P>(copy);
-        const PositionMatrix unsort_f = permute.inv() * sort_f.reshape(cell.getPos());
+        const PositionMatrix unsort_f = permute.inv() * sort_f.reshape_like(cell.getPos());
         return unsort_f.flatten();
     }
 
@@ -192,7 +192,7 @@ namespace Physica {
         MDCellType copy = cell;
         const auto permute = sortPosition(copy);
         const VectorND<T> sort_f = force_short<P>(copy);
-        const PositionMatrix unsort_f = permute.inv() * sort_f.reshape(cell.getPos());
+        const PositionMatrix unsort_f = permute.inv() * sort_f.reshape_like(cell.getPos());
         return unsort_f.flatten();
     }
 
@@ -210,7 +210,7 @@ namespace Physica {
         MDCellType copy = cell;
         const auto permute = sortPosition(copy);
         const VectorND<T> sort_f = force_long<P>(copy);
-        const PositionMatrix unsort_f = permute.inv() * sort_f.reshape(cell.getPos());
+        const PositionMatrix unsort_f = permute.inv() * sort_f.reshape_like(cell.getPos());
         return unsort_f.flatten();
     }
     /**

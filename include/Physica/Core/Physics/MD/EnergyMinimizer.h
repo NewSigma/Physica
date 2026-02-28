@@ -78,7 +78,7 @@ namespace Physica {
         const auto func = makePosStepFunc(model);
         const auto grad = makePosStepGrad<P>(model);
         optimizer.step(func, grad);
-        cell.setPos(optimizer.getArgX().reshape(cell.getPos()));
+        cell.setPos(optimizer.getArgX().reshape_like(cell.getPos()));
     }
 
     template<Scalar T, unsigned int Dim>
@@ -120,7 +120,7 @@ namespace Physica {
     template<Scalar T, unsigned int Dim>
     auto EnergyMinimizer<T, Dim>::makePosStepFunc(const auto& forceModel) {
         auto func = [this, &forceModel](const VectorType& v) -> T {
-            const auto temp = MDCellType(cell.getLattice(), v.reshape(cell.getPos()), cell.getMassVec());
+            const auto temp = MDCellType(cell.getLattice(), v.reshape_like(cell.getPos()), cell.getMassVec());
             return forceModel.potentialV(temp);
         };
         return func;
@@ -130,7 +130,7 @@ namespace Physica {
     template<ExecutePolicy P>
     auto EnergyMinimizer<T, Dim>::makePosStepGrad(const auto& forceModel) {
         const auto grad = [this, &forceModel](const VectorType& v) -> VectorType {
-            const auto temp = MDCellType(cell.getLattice(), v.reshape(cell.getPos()), cell.getMassVec());
+            const auto temp = MDCellType(cell.getLattice(), v.reshape_like(cell.getPos()), cell.getMassVec());
             return -forceModel.template force<P, true>(temp);
         };
         return grad;

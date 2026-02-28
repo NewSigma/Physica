@@ -40,8 +40,8 @@ namespace Physica {
         ~IdentityMatrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        template<Vector V>
-        [[nodiscard]] V&& operator*(V&& v) const noexcept;
+        [[nodiscard]] auto&& operator*(Vector auto&& v) const noexcept;
+        [[nodiscard]] auto&& operator*(Matrix auto&& m) const noexcept;
         /* Operations */
         void assign(Matrix auto&& target) const;
 
@@ -70,10 +70,17 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<Vector V>
-    V&& IdentityMatrix<T, Order>::operator*(V&& v) const noexcept {
+    auto&& IdentityMatrix<T, Order>::operator*(Vector auto&& v) const noexcept {
+        using RHS = decltype(v);
         assert(getCol() == v.getLength());
-        return std::forward<V>(v);
+        return std::forward<RHS>(v);
+    }
+
+    template<Scalar T, size_t Order>
+    auto&& IdentityMatrix<T, Order>::operator*(Matrix auto&& m) const noexcept {
+        using RHS = decltype(m);
+        assert(getCol() == m.getRow());
+        return std::forward<RHS>(m);
     }
 
     template<Scalar T, size_t Order>
