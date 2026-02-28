@@ -96,7 +96,7 @@ Clang::PartialTranslationUnit& Clang::compile(const char* moduleName) {
     ptu.unitDecl = ctx.getTranslationUnitDecl();
     /* Make module */ {
         CodeGenerator& codeGen = getCodeGen();
-        ptu.unitModule = codeGen.ReleaseModule();
+        ptu.unitModule = std::unique_ptr<llvm::Module>(codeGen.ReleaseModule());
         ptu.unitModule->setModuleIdentifier(moduleName);
         codeGen.StartModule(DummyFile, ptu.unitModule->getContext());
     }

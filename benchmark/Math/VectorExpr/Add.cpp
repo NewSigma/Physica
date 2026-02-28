@@ -53,6 +53,18 @@ namespace {
     }
 
     template<Scalar T>
+    void add_scalar3(benchmark::State& state) {
+        const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto expr = a * T(0.1) + T(0.2);
+        VectorND<T> buffer(size);
+        for (auto _ : state) {
+            PHYSICA_BENCH(expr.assign(buffer));
+            benchmark::DoNotOptimize(buffer);
+            benchmark::ClobberMemory();
+        }
+    }
+
+    template<Scalar T>
     void add_scalar_inplace(benchmark::State& state) {
         const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
         auto expr = a * T(0.1);
@@ -94,6 +106,7 @@ namespace {
 
 BENCHMARK(add_scalar1<float64>)->Name("add scalar1");
 BENCHMARK(add_scalar2<float64>)->Name("add scalar2");
+BENCHMARK(add_scalar3<float64>)->Name("add scalar3");
 BENCHMARK(add_scalar_inplace<float64>)->Name("add scalar inplace");
 BENCHMARK(add_vector<float64>)->Name("add vector");
 BENCHMARK(add_vector_inplace<float64>)->Name("add vector inplace");

@@ -53,16 +53,32 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     auto VectorExpr<ExprID::Add, V, U>::calc(size_t s) const -> CoDiff<T> {
-        if constexpr (lowerToFMA())
-            return fma(getLHS().getLHS().calc(s), getLHS().getRHS().calc(s), getRHS());
+        if constexpr (lowerToFMA()) {
+            T a = getLHS().getLHS().calc(s);
+            T b;
+            if constexpr (Scalar<decltype(getLHS().getRHS())>)
+                b = getLHS().getRHS();
+            else
+                b = getLHS().getRHS().calc(s);
+            T c = getRHS();
+            return fma(a, b, c);
+        }
         else
             return getLHS().calc(s) + getRHS();
     }
 
     template<Vector V, Scalar U>
     auto VectorExpr<ExprID::Add, V, U>::calc_value(size_t s) const -> Tv {
-        if constexpr (lowerToFMA())
-            return fma(getLHS().getLHS().calc_value(s), getLHS().getRHS().calc_value(s), getRHS().value());
+        if constexpr (lowerToFMA()) {
+            Tv a = getLHS().getLHS().calc_value(s);
+            Tv b;
+            if constexpr (Scalar<decltype(getLHS().getRHS())>)
+                b = getLHS().getRHS().value();
+            else
+                b = getLHS().getRHS().calc_value(s);
+            Tv c = getRHS().value();
+            return fma(a, b, c);
+        }
         else
             return getLHS().calc_value(s) + getRHS().value();
     }
@@ -70,10 +86,16 @@ namespace Physica {
     template<Vector V, Scalar U>
     template<Packet Pack>
     Pack VectorExpr<ExprID::Add, V, U>::packet(size_t index) const noexcept {
-        if constexpr (lowerToFMA())
-            return fma(getLHS().getLHS().template packet<Pack>(index),
-                       getLHS().getRHS().template packet<Pack>(index),
-                       Pack(getRHS()));
+        if constexpr (lowerToFMA()) {
+            Pack a = getLHS().getLHS().template packet<Pack>(index);
+            Pack b;
+            if constexpr (Scalar<decltype(getLHS().getRHS())>)
+                b = Pack(getLHS().getRHS());
+            else
+                b = getLHS().getRHS().template packet<Pack>(index);
+            Pack c = Pack(getRHS());
+            return fma(a, b, c);
+        }
         else
             return getLHS().template packet<Pack>(index) + Pack(getRHS());
     }
@@ -81,10 +103,16 @@ namespace Physica {
     template<Vector V, Scalar U>
     template<Packet Pack>
     Pack VectorExpr<ExprID::Add, V, U>::packet(size_t index, size_t count) const noexcept {
-        if constexpr (lowerToFMA())
-            return fma(getLHS().getLHS().template packet<Pack>(index, count),
-                       getLHS().getRHS().template packet<Pack>(index, count),
-                       Pack(getRHS(), count));
+        if constexpr (lowerToFMA()) {
+            Pack a = getLHS().getLHS().template packet<Pack>(index, count);
+            Pack b;
+            if constexpr (Scalar<decltype(getLHS().getRHS())>)
+                b = Pack(getLHS().getRHS());
+            else
+                b = getLHS().getRHS().template packet<Pack>(index, count);
+            Pack c = Pack(getRHS(), count);
+            return fma(a, b, c);
+        }
         else
             return getLHS().template packet<Pack>(index, count) + Pack(getRHS(), count);
     }
@@ -186,10 +214,14 @@ namespace Physica {
     template<Vector V1, Vector V2>
     auto VectorExpr<ExprID::Add, V1, V2>::calc(size_t s) const -> CoDiff<T> {
         if constexpr (lowerToFMA()) {
+            T a = getLHS().getLHS().calc(s);
+            T b;
             if constexpr (Scalar<decltype(getLHS().getRHS())>)
-                return fma(getLHS().getLHS().calc(s), getLHS().getRHS(), getRHS().calc(s));
+                b = getLHS().getRHS();
             else
-                return fma(getLHS().getLHS().calc(s), getLHS().getRHS().calc(s), getRHS().calc(s));
+                b = getLHS().getRHS().calc(s);
+            T c = getRHS().calc(s);
+            return fma(a, b, c);
         }
         else
             return getLHS().calc(s) + getRHS().calc(s);
@@ -198,10 +230,14 @@ namespace Physica {
     template<Vector V1, Vector V2>
     auto VectorExpr<ExprID::Add, V1, V2>::calc_value(size_t s) const -> Tv {
         if constexpr (lowerToFMA()) {
+            Tv a = getLHS().getLHS().calc_value(s);
+            Tv b;
             if constexpr (Scalar<decltype(getLHS().getRHS())>)
-                return fma(getLHS().getLHS().calc(s), getLHS().getRHS().value(), getRHS().calc(s));
+                b = getLHS().getRHS().value();
             else
-                return fma(getLHS().getLHS().calc_value(s), getLHS().getRHS().calc_value(s), getRHS().calc_value(s));
+                b = getLHS().getRHS().calc_value(s);
+            Tv c = getRHS().calc_value(s);
+            return fma(a, b, c);
         }
         else
             return getLHS().calc_value(s) + getRHS().calc_value(s);
@@ -211,16 +247,14 @@ namespace Physica {
     template<Packet Pack>
     Pack VectorExpr<ExprID::Add, V1, V2>::packet(size_t index) const {
         if constexpr (lowerToFMA()) {
-            if constexpr (Scalar<decltype(getLHS().getRHS())>) {
-                return fma(getLHS().getLHS().template packet<Pack>(index),
-                           Pack(getLHS().getRHS()),
-                           getRHS().template packet<Pack>(index));
-            }
-            else {
-                return fma(getLHS().getLHS().template packet<Pack>(index),
-                           getLHS().getRHS().template packet<Pack>(index),
-                           getRHS().template packet<Pack>(index));
-            }
+            Pack a = getLHS().getLHS().template packet<Pack>(index);
+            Pack b;
+            if constexpr (Scalar<decltype(getLHS().getRHS())>)
+                b = Pack(getLHS().getRHS());
+            else
+                b = getLHS().getRHS().template packet<Pack>(index);
+            Pack c = getRHS().template packet<Pack>(index);
+            return fma(a, b, c);
         }
         else
             return getLHS().template packet<Pack>(index) + getRHS().template packet<Pack>(index);
@@ -230,16 +264,14 @@ namespace Physica {
     template<Packet Pack>
     Pack VectorExpr<ExprID::Add, V1, V2>::packet(size_t index, size_t count) const {
         if constexpr (lowerToFMA()) {
-            if constexpr (Scalar<decltype(getLHS().getRHS())>) {
-                return fma(getLHS().getLHS().template packet<Pack>(index, count),
-                           Pack(getLHS().getRHS()).cutoff(count),
-                           getRHS().template packet<Pack>(index, count));
-            }
-            else {
-                return fma(getLHS().getLHS().template packet<Pack>(index, count),
-                           getLHS().getRHS().template packet<Pack>(index, count),
-                           getRHS().template packet<Pack>(index, count));
-            }
+            Pack a = getLHS().getLHS().template packet<Pack>(index, count);
+            Pack b;
+            if constexpr (Scalar<decltype(getLHS().getRHS())>)
+                b = Pack(getLHS().getRHS());
+            else
+                b = getLHS().getRHS().template packet<Pack>(index, count);
+            Pack c = getRHS().template packet<Pack>(index);
+            return fma(a, b, c);
         }
         else
             return getLHS().template packet<Pack>(index, count) + getRHS().template packet<Pack>(index, count);

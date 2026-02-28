@@ -19,6 +19,7 @@
 #pragma once
 
 #include "TaskBase.h"
+#include "Physica/Core/Utils/Suspend.h"
 
 namespace Physica {
     template<>

@@ -38,9 +38,6 @@ namespace Physica {
         using Base::isReverseDiff;
     protected:
         using typename Base::T;
-    private:
-        constexpr static bool isRowMatrix = MatrixMajor::isRowMatrix<This>();
-        constexpr static bool isColMatrix = MatrixMajor::isColMatrix<This>();
     public:
         ~CompactMatrix() = default;
         /* Operators */

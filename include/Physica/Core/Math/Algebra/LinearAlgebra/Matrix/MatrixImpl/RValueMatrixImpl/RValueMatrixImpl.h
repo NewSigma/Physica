@@ -374,7 +374,7 @@ namespace Physica {
 
     template<class Derived>
     auto RValueMatrix<Derived>::lnSumExp() const -> CoDiff<T> {
-        return flatten().lnSumExp();
+        return Base::getDerived().flatten().lnSumExp();
     }
 
     template<class Derived>

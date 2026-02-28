@@ -48,59 +48,57 @@ namespace Physica {
     public:
         MatrixMajor() = delete;
         /* Static members */
-        template<class MatrixType>
+        template<class M>
         consteval static bool isColMatrix() noexcept {
-            return (Traits<MatrixType>::Major & Col) != 0;
+            return (Traits<M>::Major & Col) != 0;
         }
 
-        template<class MatrixType>
+        template<class M>
         consteval static bool isRowMatrix() noexcept {
-            return (Traits<MatrixType>::Major & Row) != 0;
+            return (Traits<M>::Major & Row) != 0;
         }
 
-        template<class MatrixType>
+        template<class M>
         consteval static bool isBothMajor() noexcept {
-            return Traits<MatrixType>::Major == BothMajor;
+            return Traits<M>::Major == BothMajor;
         }
 
-        template<class MatrixType>
+        template<class M>
         consteval static int getMajor() noexcept {
-            return Traits<MatrixType>::Major;
+            return Traits<M>::Major;
         }
 
-        template<class MatrixType1, class MatrixType2>
+        template<class M1, class M2>
         consteval static bool isSameMajor() noexcept {
-            return getMajor<MatrixType1>() == getMajor<MatrixType2>();
+            return getMajor<M1>() == getMajor<M2>();
         }
 
-        template<class MatrixType>
+        template<class M>
         [[nodiscard]] constexpr static size_t selectMajor(size_t row, size_t col) noexcept {
-            return isColMatrix<MatrixType>() ? col : row;
+            return isColMatrix<M>() ? col : row;
         }
 
-        template<class MatrixType>
+        template<class M>
         [[nodiscard]] constexpr static size_t selectMinor(size_t row, size_t col) noexcept {
-            return isColMatrix<MatrixType>() ? row : col;
+            return isColMatrix<M>() ? row : col;
         }
 
-        template<class MatrixType>
-        [[nodiscard]] constexpr static size_t getMaxMajor(const MatrixType& mat) noexcept {
-            return isColMatrix<MatrixType>() ? mat.getCol() : mat.getRow();
+        [[nodiscard]] constexpr static size_t getMaxMajor(const Matrix auto& mat) noexcept {
+            return isColMatrix<decltype(mat)>() ? mat.getCol() : mat.getRow();
         }
 
-        template<class MatrixType>
-        [[nodiscard]] constexpr static size_t getMaxMinor(const MatrixType& mat) noexcept {
-            return isColMatrix<MatrixType>() ? mat.getRow() : mat.getCol();
+        [[nodiscard]] constexpr static size_t getMaxMinor(const Matrix auto& mat) noexcept {
+            return isColMatrix<decltype(mat)>() ? mat.getRow() : mat.getCol();
         }
 
-        template<class MatrixType>
+        template<class M>
         [[nodiscard]] constexpr static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept {
-            return isColMatrix<MatrixType>() ? minor : major;
+            return isColMatrix<M>() ? minor : major;
         }
 
-        template<class MatrixType>
+        template<class M>
         [[nodiscard]] constexpr static size_t colFromMajorMinor(size_t major, size_t minor) noexcept {
-            return isColMatrix<MatrixType>() ? major : minor;
+            return isColMatrix<M>() ? major : minor;
         }
     };
 }

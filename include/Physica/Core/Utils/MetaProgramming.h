@@ -104,14 +104,14 @@ namespace Physica {
     }
     /**
      * Consider:
-     * 1. A view that holds lifetime of data
+     * 1. A view that owns data
      * 2. We would like to move the data and create a new view
      * This function returns correct type if the move is eligible.
      *
      * \returns a rvalue reference if both is rvalue reference, otherwise a lvalue reference
      */
     template<class T1, class T2>
-    constexpr decltype(auto) propagate_rvalue_reference(auto&& x) noexcept {
+    [[nodiscard, gnu::nodebug]] constexpr decltype(auto) propagate_rvalue_reference(auto&& x) noexcept {
         static_assert(std::is_reference<T1>::value);
         static_assert(std::is_reference<T2>::value);
         if constexpr (std::is_rvalue_reference_v<T1> && std::is_rvalue_reference_v<T2>)

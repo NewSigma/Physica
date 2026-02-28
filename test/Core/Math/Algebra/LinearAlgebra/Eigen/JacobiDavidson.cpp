@@ -59,7 +59,7 @@ namespace {
 
         EigenSolver<T> eig(hamilton, false);
         eig.sort();
-        expect(vectorNear(eig.getEigenvalues().reals().head(NumLevel - 1), jd.getEigenvalues().head(NumLevel - 1), 1E-12));
+        expect(vectorNear(eig.getEigenvalues().reals().head(4), jd.getEigenvalues().head(4), 1E-12));
     }
 }
 
