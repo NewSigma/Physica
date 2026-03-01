@@ -23,7 +23,7 @@
 namespace Physica {
     template<class T, size_t Align>
     T* HostAllocator<T, Align>::reallocate_mimalloc(T* p, size_t new_size, [[maybe_unused]] size_t old_size) noexcept {
-        assert(new_size > 0 && "[Error]: Allocate nothing");
+        assert(new_size > 0 && "[Error]: Reject bad pattern");
         assert(p != nullptr || old_size == 0); // According to [1], the behavior is well defined now
         void* new_p{};
         if constexpr (OverAlign)

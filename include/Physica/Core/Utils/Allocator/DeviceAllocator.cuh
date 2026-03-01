@@ -46,7 +46,6 @@ namespace Physica {
 
     template<class T>
     __host__ __device__ auto DeviceAllocator<T>::allocate(size_t n) -> pointer {
-        assert(n > 0 && "[Error]: Allocate nothing");
         size_t size = n * sizeof(value_type);
         void* p{};
         if constexpr (IsDevice())

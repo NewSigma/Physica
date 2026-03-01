@@ -36,16 +36,27 @@ namespace {
         static_assert(std::ranges::common_range<C>);
         static_assert(std::ranges::viewable_range<C>);
     }
+
+    void structuredBinding() {
+        Array<long, 3> arr{1, 2, 3};
+        auto [x, y, z] = arr;
+        expect(x == 1);
+        expect(y == 2);
+        expect(z == 3);
+    }
+
+    void emptyCopy() {
+        // Test that we allow copying an empty array. This is useful when we default-initialize members of an object.
+        Array<int> arr{};
+        Array<int> copy = arr;
+        expect(copy.getCapacity() == 0);
+    }
 }
 
 int main() {
     rangeTest<Array<long, 3>>();
     rangeTest<Array<long>>();
-    // Test structured binding
-    Array<long, 3> arr{1, 2, 3};
-    auto [x, y, z] = arr;
-    expect(x == 1);
-    expect(y == 2);
-    expect(z == 3);
+    structuredBinding();
+    emptyCopy();
     return 0;
 }

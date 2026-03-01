@@ -50,7 +50,6 @@ namespace Physica {
 
     template<class T, size_t Align>
     T* MMapAllocator<T, Align>::allocate(size_t n) {
-        assert(n > 0 && "[Error]: Allocate nothing");
         size_t size = calcSize(n);
         constexpr int Prot = PROT_READ | PROT_WRITE;
         constexpr int Flag = MAP_PRIVATE;
@@ -70,7 +69,7 @@ namespace Physica {
 
     template<class T, size_t Align>
     T* MMapAllocator<T, Align>::reallocate(T* p, size_t new_size, size_t old_size) {
-        assert(new_size > 0 && "[Error]: Allocate nothing");
+        assert(new_size > 0 && "[Error]: Reject bad pattern");
         assert(p != nullptr || old_size == 0);
         T* new_p = allocate(new_size);
         memcpy((void*)new_p, p, std::min(new_size, old_size) * sizeof(T));
@@ -80,7 +79,6 @@ namespace Physica {
 
     template<class T, size_t Align>
     size_t MMapAllocator<T, Align>::calcSize(size_t n) noexcept {
-        assert(n > 0 && "[Error]: Allocate nothing");
         size_t size = n * sizeof(T);
         if constexpr (OverAlign)
             size = (size + Align - 1) & ~(Align - 1);

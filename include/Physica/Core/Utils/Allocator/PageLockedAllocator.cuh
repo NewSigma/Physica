@@ -50,7 +50,6 @@ namespace Physica {
 
     template<class T>
     auto PageLockedAllocator<T>::allocate(size_t n) -> pointer {
-        assert(n > 0 && "[Error]: Allocate nothing");
         pointer p{};
         check(cudaMallocHost(&p, n * sizeof(value_type)));
         return p;
@@ -64,7 +63,7 @@ namespace Physica {
 
     template<class T>
     T* PageLockedAllocator<T>::reallocate(T* p, size_t new_size, [[maybe_unused]] size_t old_size) {
-        assert(new_size > 0 && "[Error]: Allocate nothing");
+        assert(new_size > 0 && "[Error]: Reject bad pattern");
         assert(p != nullptr || old_size == 0);
         T* new_p = allocate(new_size);
         memcpy((void*)new_p, p, std::min(new_size, old_size) * sizeof(T));
