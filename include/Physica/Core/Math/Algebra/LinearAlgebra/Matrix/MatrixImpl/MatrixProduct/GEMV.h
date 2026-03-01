@@ -53,7 +53,8 @@ namespace Physica {
         using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
 
-        [[nodiscard]] auto values() const noexcept { return mat.values() * vec.values(); }
+        [[nodiscard]] auto values(this auto&& self) noexcept;
+        [[nodiscard]] auto grads(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
@@ -128,6 +129,28 @@ namespace Physica {
             else
                 vec.reverse(mat.values().transpose() * g);
         }
+    }
+
+    template<Matrix M, Vector V>
+    auto GEMV<M, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
+    }
+
+    template<Matrix M, Vector V>
+    auto GEMV<M, V>::grads(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (Base::isForwardDiff) {
+            if constexpr (ForwardDiff<M> && ForwardDiff<V>)
+                return std::forward<Self>(self).getLHS().grads() * std::forward<Self>(self).getRHS().values()
+                     + std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().grads();
+            else if constexpr (ForwardDiff<M>)
+                return std::forward<Self>(self).getLHS().grads() * std::forward<Self>(self).getRHS().values();
+            else
+                return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().grads();
+        }
+        else
+            return self.Base::grads();
     }
 
     template<Matrix M, Vector V>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -41,9 +41,22 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
+        [[nodiscard]] auto grads(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
     };
+
+    template<Matrix M>
+    auto FlattenR<M>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat).values().flatten();
+    }
+
+    template<Matrix M>
+    auto FlattenR<M>::grads(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat).grads().flatten();
+    }
 
     template<Matrix M>
     auto FlattenR<M>::calc(size_t index) const -> T {

@@ -39,10 +39,23 @@ namespace Physica {
         /* Operations */
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
+        [[nodiscard]] auto grads(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
     };
+
+    template<Matrix M>
+    auto FlattenL<M>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat).values().flatten();
+    }
+
+    template<Matrix M>
+    auto FlattenL<M>::grads(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat).grads().flatten();
+    }
 
     template<Matrix M>
     auto FlattenL<M>::data_ptr(this auto&& self, size_t index) noexcept {
