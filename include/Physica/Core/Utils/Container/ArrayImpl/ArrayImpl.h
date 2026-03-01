@@ -264,12 +264,9 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::swap(This& __restrict obj) noexcept {
+    void Array<T, Dynamic, Allocator>::swap(This& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        // FIXME: Make use of trivially_relocatable once we dump to CXX26
-        std::swap(arr, obj.arr);
-        std::swap(length, obj.length);
-        std::swap(capacity, obj.capacity);
+        memswap(this, &obj);
     }
 
     template<class T, class Allocator>

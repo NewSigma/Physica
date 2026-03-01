@@ -39,16 +39,14 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ### swap函数原型
 
-参考[3]中的swap函数原型，进一步规定swap不可与自身发生交换，即任意对象T的swap函数的一般实现为
+实践中发现自交换常导致Bug，参考[3]中的swap函数原型，进一步规定swap不可与自身发生交换，即任意对象T的swap函数的一般实现为
 
 ``` C++
-void T::swap(T& __restrict obj) noexcept {  
+void T::swap(T& obj) noexcept {  
     assert(this != &obj && "[Error]: Self swap is likely a bug");  
     /* Details */  
 }
 ```
-
-实践中发现Self swap常导致Bug，通过添加__restrict帮助编译器优化和提供编译期Self swap警告
 
 ## 其他C++特性
 

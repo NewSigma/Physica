@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cassert>
+#include <cstring>
 #include "Physica/Macro.h"
 
 namespace Physica {
@@ -45,5 +46,15 @@ namespace Physica {
     [[gnu::always_inline, gnu::nodebug]] __host__ __device__ inline void assume(bool predicate) noexcept {
         assert(predicate && "[Error]: Bad assumption");
         [[assume(predicate)]];
+    }
+
+    template<class T>
+    void memswap(T* a, T* b) noexcept {
+        // FIXME: static_assert trivially_relocatable once we dump to CXX26
+        assert(a != b && "[Error]: Self swap is likely a bug");
+        alignas(T) std::array<std::byte, sizeof(T)> buffer;
+        memcpy(buffer.data(), (void*)a, buffer.size());
+        memcpy((void*)a, (void*)b, buffer.size());
+        memcpy((void*)b, buffer.data(), buffer.size());
     }
 }

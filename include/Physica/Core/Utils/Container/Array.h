@@ -128,7 +128,7 @@ namespace Physica {
 
         using Base::read;
         using Base::write;
-        void swap(This& __restrict obj) noexcept;
+        void swap(This& obj) noexcept;
         /* Getters */
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
