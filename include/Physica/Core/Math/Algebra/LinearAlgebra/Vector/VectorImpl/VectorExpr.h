@@ -170,8 +170,6 @@ namespace Physica {
 #include "VectorExprImpl/Mul.h"
 #include "VectorExprImpl/Div.h"
 #include "VectorExprImpl/Minus.h"
-#include "VectorExprImpl/More.h"
-#include "VectorExprImpl/MoreEq.h"
 #include "VectorExprImpl/Reciprocal.h"
 #include "VectorExprImpl/Sqrt.h"
 #include "VectorExprImpl/Cbrt.h"

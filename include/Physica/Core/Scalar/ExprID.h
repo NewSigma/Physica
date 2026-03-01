@@ -30,8 +30,6 @@ namespace Physica {
         Div,
         MulAdd,
         Sum,
-        More,
-        MoreEq,
         Reciprocal,
         Sqrt,
         Cbrt,
