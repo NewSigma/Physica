@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -151,6 +151,7 @@ namespace Physica {
 
     template<Scalar T, size_t Length, class Allocator>
     auto DenseVector<T, Length, Allocator>::generate(std::invocable<size_t> auto fn) -> This {
+        static_assert(Length != Dynamic, "[Error]: Cannot infer length");
         return This(Storage::generate(std::move(fn)));
     }
 

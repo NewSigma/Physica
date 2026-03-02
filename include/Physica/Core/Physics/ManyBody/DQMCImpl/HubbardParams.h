@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -69,6 +69,8 @@ namespace Physica {
         [[nodiscard]] Tr getRepelU() const noexcept { return repelU; }
         [[nodiscard]] Tr getChemMu() const noexcept { return chemMu; }
         [[nodiscard]] const auto& getLnSpinWeights() const noexcept { return lnSpinWeights; }
+        /* Setters */
+        void setChemMu(Tr chemMu_);
         /* Static members */
         [[nodiscard]] static Tr calcAlpha(Tr beta, Tr repelU, int numSplit) noexcept;
         [[nodiscard]] static Tr calcBetaMu(Tr beta, Tr repelU, Tr chemMu) noexcept;
@@ -132,6 +134,12 @@ namespace Physica {
     template<Scalar T>
     auto HubbardParams<T>::calcBetaMu(Tr beta, Tr repelU, Tr chemMu) noexcept -> Tr {
         return beta * (chemMu - repelU * Tr(0.5));
+    }
+
+    template<Scalar T>
+    void HubbardParams<T>::setChemMu(Tr chemMu_) {
+        chemMu = chemMu_;
+        makeLnSpinWeights();
     }
 
     template<Scalar T>
