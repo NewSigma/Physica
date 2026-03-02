@@ -49,6 +49,10 @@ namespace Physica {
 
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
+        template<Packet Pack>
+        [[nodiscard]] Pack packet(size_t index) const noexcept;
+        template<Packet Pack>
+        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
 
         using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
@@ -103,6 +107,38 @@ namespace Physica {
     template<Matrix M, Vector V>
     auto GEMV<M, V>::calc_value(size_t index) const -> Tv {
         return mat.values().row(index) * vec.values();
+    }
+
+    template<Matrix M, Vector V>
+    template<Packet Pack>
+    Pack GEMV<M, V>::packet(size_t index) const noexcept {
+        if constexpr (Diffable<T>)
+            return Base::template packet<Pack>(index);
+        else if constexpr (MatrixMajor::isColMatrix<M>()) {
+            size_t length = vec.getLength();
+            Pack result = Pack::zeros();
+            for (size_t i = 0; i < length; ++i)
+                result += mat.col(i).template packet<Pack>(index) * Pack(vec.calc(i));
+            return result;
+        }
+        else
+            return Base::template packet<Pack>(index);
+    }
+
+    template<Matrix M, Vector V>
+    template<Packet Pack>
+    Pack GEMV<M, V>::packet(size_t index, size_t count) const noexcept {
+        if constexpr (Diffable<T>)
+            return Base::template packet<Pack>(index, count);
+        if constexpr (MatrixMajor::isColMatrix<M>()) {
+            size_t length = vec.getLength();
+            Pack result = Pack::zeros();
+            for (size_t i = 0; i < length; ++i)
+                result += mat.col(i).template packet<Pack>(index, count) * Pack(vec.calc(i));
+            return result;
+        }
+        else
+            return Base::template packet<Pack>(index, count);
     }
 
     template<Matrix M, Vector V>
