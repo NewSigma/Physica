@@ -43,7 +43,7 @@ namespace Physica {
     };
 
     template<Matrix M, Vector V> requires(instanceof_tx<SparseMatrix, M>)
-    GEMV<M, V>::GEMV(M&& mat_, V&& vec_) : mat(mat_), vec(vec_) {
+    GEMV<M, V>::GEMV(M&& mat_, V&& vec_) : mat(std::forward<M>(mat_)), vec(std::forward<V>(vec_)) {
         assert(mat.getCol() == vec.getLength());
     }
 

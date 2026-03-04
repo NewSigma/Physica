@@ -25,10 +25,10 @@ namespace Physica {
     __device__ auto operator*(const V1& v1, const V2& v2) requires(DeviceObj<V1> && DeviceObj<V2>) {
         using T1 = V1::ScalarType;
         using T2 = V2::ScalarType;
-        using ScalarType = InnerDot<V1, V2>::ScalarType;
+        using T = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
 
         assert(v1.getLength() == v2.getLength() && "[Error]: Dimensions do not match");
-        ScalarType result = 0;
+        T result = 0;
         for (size_t i = 0; i < v1.getLength(); ++i) {
             if constexpr (std::same_as<T1, T2>)
                 result = fma(v1.calc(i), v2.calc(i), result);

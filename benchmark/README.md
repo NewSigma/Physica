@@ -1,6 +1,11 @@
 # Physica Benchmark
 
-*Physica Benchmarks* are used for monitoring performance regression. Since performance testing is highly dependent on the platform, the test results are for reference only.$^{[1]}$。
+*Physica Benchmarks* is devoted to
+
+- Select backend based on benchmark data
+- Monitor performance regression
+
+Since performance testing is highly dependent on the platform, the test results are for reference only.$^{[1]}$。
 
 ## Notes
 

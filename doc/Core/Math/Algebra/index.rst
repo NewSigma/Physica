@@ -1,5 +1,5 @@
 ..
-    Copyright 2024-2026 Weibo He.
+    Copyright 2024 Weibo He.
 
     This file is part of Physica.
 
@@ -17,6 +17,5 @@ Math
 .. toctree::
    :maxdepth: 1
 
-   Algebra/index.rst
-   Calculus/index.rst
-   NextCombination
+   LinearAlgebra/index.rst
+   Canonicalization

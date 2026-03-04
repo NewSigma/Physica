@@ -19,23 +19,16 @@
 #pragma once
 
 #include "../RValueVector.h"
+#include "Physica/Core/Math/Algebra/Canonicalization.h"
 
 namespace Physica {
     template<Vector V1, Vector V2>
     class InnerDot {
         using This = InnerDot<V1, V2>;
-        using Helper = Internal::EnableSIMD<V1, V2>;
-        constexpr static size_t SizeAtCompile = Helper::SizeAtCompile;
-        constexpr static bool isFastPacket1 = Traits<V1>::FastPacket;
-        constexpr static bool isFastPacket2 = Traits<V2>::FastPacket;
-        constexpr static bool enableSIMD = isFastPacket1 && isFastPacket2 && Helper::value;
-    public:
         using T1 = V1::ScalarType;
         using T2 = V2::ScalarType;
-        using ScalarType = Helper::ResultType;
-        using PacketType = Helper::PacketType;
-        constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
-        constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
+        using T = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
+        using Tr = T::RealType;
     private:
         const V1& v1;
         const V2& v2;
@@ -49,8 +42,11 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         auto calc() const noexcept;
-        CoDiff<ScalarType> calc_base() const noexcept;
-        ScalarType calc_mkl() const noexcept;
+        T calc_mkl() const noexcept;
+        CoDiff<T> calc_base() const noexcept;
+    private:
+        T calc_base_simd_trivial() const noexcept;
+        T calc_base_trivial() const noexcept;
     };
 
     template<Vector V1, Vector V2>
@@ -60,14 +56,14 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     auto InnerDot<V1, V2>::calc() const noexcept {
-        if constexpr (isForwardDiff) {
+        if constexpr (T::isForwardDiff) {
             if constexpr (!V1::isForwardDiff)
-                return ScalarType(v2.values() * v1, v2.grads() * v1);
+                return T(v2.values() * v1, v2.grads() * v1);
             else if constexpr (!V2::isForwardDiff)
-                return ScalarType(v1.values() * v2, v1.grads() * v2);
+                return T(v1.values() * v2, v1.grads() * v2);
             else {
-                constexpr static int Order = ScalarType::Order - 1;
-                return ScalarType(v1.values() * v2.values(), toDiffMaskVector<V2, Order>(v2) * v1.grads() + toDiffMaskVector<V1, Order>(v1) * v2.grads());
+                constexpr static int Order = T::Order - 1;
+                return T(v1.values() * v2.values(), toDiffMaskVector<V2, Order>(v2) * v1.grads() + toDiffMaskVector<V1, Order>(v1) * v2.grads());
             }
         }
         else if constexpr (Internal::EnableMKL<V1, V2>::value)
@@ -77,43 +73,62 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    auto InnerDot<V1, V2>::calc_base() const noexcept -> CoDiff<ScalarType> {
-        if constexpr (isReverseDiff) {
+    auto InnerDot<V1, V2>::calc_base() const noexcept -> CoDiff<T> {
+        constexpr static bool isFastPacket = Traits<V1>::FastPacket && Traits<V2>::FastPacket;
+        if constexpr (T::isReverseDiff) {
             auto& result = co_yield v1.values() * v2.values();
             if constexpr (ReverseDiff<V1>)
                 v1.reverse(v2.values() * result.grad());
             if constexpr (ReverseDiff<V2>)
                 v2.reverse(v1.values() * result.grad());
         }
-        else if constexpr (enableSIMD) {
-            const size_t length = v1.getLength();
-            size_t i = 0;
-            const size_t to = length / PacketType::size() * PacketType::size();
-            auto buffer = PacketType::zeros();
-            for (; i < to; i += PacketType::size()) {
-                PacketType p1 = v1.template packet<PacketType>(i);
-                PacketType p2 = v2.template packet<PacketType>(i);
-                buffer = fma(p1, p2, buffer);
-            }
-            if (to != length) {
-                const size_t count = length - i;
-                PacketType p1 = v1.template packet<PacketType>(i, count);
-                PacketType p2 = v2.template packet<PacketType>(i, count);
-                buffer = fma(p1, p2, buffer);
-            }
-            co_return buffer.sum();
+        else if constexpr (isFastPacket) {
+            if constexpr (Internal::EnableSIMD<V1, V2>::value)
+                co_return calc_base_simd_trivial();
+            else
+                co_return calc_base_trivial();
         }
-        else {
-            auto result = ScalarType(0);
-            for(size_t i = 0; i < v1.getLength(); ++i)
-                result += v1.calc(i) * v2.calc(i);
-            co_return std::move(result);
+        else
+            co_return calc_base_trivial();
+    }
+
+    template<Vector V1, Vector V2>
+    auto InnerDot<V1, V2>::calc_base_simd_trivial() const noexcept -> T {
+        using Pack = Internal::EnableSIMD<V1, V2>::PacketType;
+        const size_t length = v1.getLength();
+        size_t i = 0;
+        const size_t to = length / Pack::size() * Pack::size();
+        auto buffer = Pack::zeros();
+        for (; i < to; i += Pack::size()) {
+            Pack p1 = v1.template packet<Pack>(i);
+            Pack p2 = v2.template packet<Pack>(i);
+            buffer = fma(p1, p2, buffer);
         }
+        if (to != length) {
+            const size_t count = length - i;
+            Pack p1 = v1.template packet<Pack>(i, count);
+            Pack p2 = v2.template packet<Pack>(i, count);
+            buffer = fma(p1, p2, buffer);
+        }
+        return buffer.sum();
+    }
+    /**
+     * Fallback if we do not know how to lower the inner dot
+     */
+    template<Vector V1, Vector V2>
+    auto InnerDot<V1, V2>::calc_base_trivial() const noexcept -> T {
+        auto result = T(0);
+        for(size_t i = 0; i < v1.getLength(); ++i)
+            result += v1.calc(i) * v2.calc(i);
+        return result;
     }
 
     template<Vector V1, Vector V2>
     [[nodiscard]] auto operator*(const V1& v1, const V2& v2) noexcept requires(!DeviceObj<V1> && !DeviceObj<V2>) {
-        return InnerDot<V1, V2>(v1, v2).calc();
+        if constexpr (!canonicalized(v1, v2))
+            return InnerDot<V2, V1>(v2, v1).calc();
+        else
+            return InnerDot<V1, V2>(v1, v2).calc();
     }
 }
 

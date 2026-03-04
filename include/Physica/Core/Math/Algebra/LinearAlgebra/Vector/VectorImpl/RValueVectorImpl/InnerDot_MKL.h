@@ -23,23 +23,23 @@
 
 namespace Physica {
     template<Vector V1, Vector V2>
-    InnerDot<V1, V2>::ScalarType InnerDot<V1, V2>::calc_mkl() const noexcept {
-        using Tm = decltype(std::declval<ScalarType>().toMKL());
+    auto InnerDot<V1, V2>::calc_mkl() const noexcept -> T {
+        using Tm = decltype(std::declval<T>().toMKL());
         const auto* p1 = reinterpret_cast<const Tm*>(v1.data());
         const auto* p2 = reinterpret_cast<const Tm*>(v2.data());
-        if constexpr (ScalarType::isComplex) {
-            ScalarType result;
-            if constexpr (ScalarType::Prec == Float32)
+        if constexpr (T::isComplex) {
+            T result;
+            if constexpr (T::Prec == Float32)
                 cblas_cdotu_sub_64(v1.getLength(), p1, 1, p2, 1, &result);
             else
                 cblas_zdotu_sub_64(v1.getLength(), p1, 1, p2, 1, &result);
             return result;
         }
         else {
-            if constexpr (ScalarType::Prec == Float32)
-                return ScalarType(cblas_sdot_64(v1.getLength(), p1, 1, p2, 1));
+            if constexpr (T::Prec == Float32)
+                return T(cblas_sdot_64(v1.getLength(), p1, 1, p2, 1));
             else
-                return ScalarType(cblas_ddot_64(v1.getLength(), p1, 1, p2, 1));
+                return T(cblas_ddot_64(v1.getLength(), p1, 1, p2, 1));
         }
     }
 }

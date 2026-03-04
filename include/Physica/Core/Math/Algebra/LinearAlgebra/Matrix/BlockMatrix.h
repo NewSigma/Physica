@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -50,7 +50,7 @@ namespace Physica {
         [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
     private:
         void updateEnds();
-        size_t findBlock(size_t globalIndex) const;
+        [[nodiscard]] size_t findBlock(size_t globalIndex) const;
     };
 
     template<Matrix M>

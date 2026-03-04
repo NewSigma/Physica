@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -50,6 +50,18 @@ namespace {
             benchmark::DoNotOptimize(dot);
         }
     }
+    // Benchmark that we correct lower complex-real vector inner dot
+    void innerDot_complex_real(benchmark::State& state) {
+        const VectorND<cfloat64> v1 = VectorND<cfloat64>::template random_uniform<RandomSource>(1024);
+        const VectorND<float64> v2 = VectorND<float64>::template random_uniform<RandomSource>(1024);
+        auto dot = InnerDot(v1, v2);
+        for (auto _ : state) {
+            cfloat64 y{};
+            PHYSICA_BENCH(y = dot.calc_base());
+            benchmark::DoNotOptimize(y);
+            benchmark::DoNotOptimize(dot);
+        }
+    }
 }
 
 BENCHMARK(innerDot<float32>)->Name("innerDot float32")
@@ -91,3 +103,5 @@ BENCHMARK(innerDot_base<cfloat64>)->Name("innerDot base cfloat64")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
+
+BENCHMARK(innerDot_complex_real)->Name("innerDot complex-real");
