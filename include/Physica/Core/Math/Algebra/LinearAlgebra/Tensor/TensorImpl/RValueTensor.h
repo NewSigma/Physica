@@ -43,7 +43,6 @@ namespace Physica {
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
-        constexpr static bool IsCompact = requires{ std::declval<Derived>().data(); };
 
         using IndexType = Array<size_t, NDim>;
     protected:
@@ -79,6 +78,7 @@ namespace Physica {
         [[nodiscard]] IndexType getShape() const noexcept;
         [[nodiscard]] size_t getSize() const noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         using TensorBase::forPointIndexInTensor;
         template<Scalar T, bool IsUnitLattice>
         static void forPointIndexInTensor(const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, std::invocable<Vector3D<T>, Index3D> auto fn);

@@ -24,7 +24,7 @@
 namespace Physica {
     template<class Derived>
     void CompactMatrix<Derived>::assign_mkl(Matrix auto&& target) const noexcept {
-        static_assert(std::remove_cvref_t<decltype(target)>::IsCompact, "[Error]: MKL expects compact matrix");
+        static_assert(std::remove_cvref_t<decltype(target)>::isCompact(), "[Error]: MKL expects compact matrix");
         static_assert(!MatrixMajor::isSameMajor<This, decltype(target)>(), "[Error]: Do not need transpose, use assign_base() instead");
         using Tm = decltype(std::declval<T>().toMKL());
         target.assert_assign_mkl(Base::getDerived());

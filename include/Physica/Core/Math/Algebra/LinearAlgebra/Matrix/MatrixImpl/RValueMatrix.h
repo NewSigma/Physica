@@ -54,8 +54,8 @@ namespace Physica {
                                        && std::same_as<T1, T2>
                                        && !Diffable<T1>
                                        && (T1::Prec == Float32 || T2::Prec == Float64)
-                                       && U1::IsCompact
-                                       && U2::IsCompact;
+                                       && U1::isCompact()
+                                       && U2::isCompact();
         };
     }
     /**
@@ -76,7 +76,6 @@ namespace Physica {
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isDiffable = ScalarType::isDiffable;
         constexpr static bool isComplex = ScalarType::isComplex;
-        constexpr static bool IsCompact = requires{ std::declval<Derived>().data(); };
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
@@ -180,6 +179,7 @@ namespace Physica {
         [[nodiscard]] bool isHermite() const noexcept;
         [[nodiscard]] bool isFinite() const noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] consteval static bool isStaticSymm() noexcept;
         [[nodiscard]] consteval static bool isStaticHermite() noexcept;
         [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixMajor::rowFromMajorMinor<Derived>(major, minor); }

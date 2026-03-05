@@ -77,8 +77,8 @@ namespace Physica {
             constexpr static bool value = HasMKL()
                                        && std::same_as<T, typename U2::ScalarType>
                                        && (T::Prec == Float16 || T::Prec == Float32 || T::Prec == Float64)
-                                       && U1::IsCompact
-                                       && U2::IsCompact
+                                       && U1::isCompact()
+                                       && U2::isCompact()
                                        && !Diffable<U1>
                                        && (EnableSIMD<U1, U2>::SizeAtCompile == Dynamic);
         };
@@ -100,7 +100,6 @@ namespace Physica {
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isDiffable = ScalarType::isDiffable;
         constexpr static bool isComplex = ScalarType::isComplex;
-        constexpr static bool IsCompact = requires{ std::declval<Derived>().data(); };
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
@@ -197,9 +196,10 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
+        [[nodiscard]] consteval static size_t maxSizeAtCompile(const Vector auto& other) noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Scalar auto& source) noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Vector auto& source) noexcept;
-        [[nodiscard]] consteval static size_t maxSizeAtCompile(const Vector auto& other) noexcept;
     protected:
         RValueVector() = default;
         RValueVector(const This&) = default;

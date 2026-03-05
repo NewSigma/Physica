@@ -41,7 +41,6 @@ namespace Physica {
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isDiffable = ScalarType::isDiffable;
         constexpr static bool isComplex = ScalarType::isComplex;
-        constexpr static bool IsCompact = host_obj::IsCompact;
         constexpr static size_t MaxThreadsPerBlock = 256;
     protected:
         using T = ScalarType;
@@ -119,6 +118,7 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ bool isSquare() const noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept { return host_obj::isCompact(); }
         [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] __host__ __device__ static KernelConfig makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept;

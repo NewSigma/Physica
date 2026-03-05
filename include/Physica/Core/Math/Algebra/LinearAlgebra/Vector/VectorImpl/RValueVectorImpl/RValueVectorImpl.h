@@ -695,6 +695,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool RValueVector<Derived>::isCompact() noexcept {
+        return requires{ std::declval<Derived>().data(); };
+    }
+
+    template<class Derived>
+    consteval size_t RValueVector<Derived>::maxSizeAtCompile(const Vector auto& other) noexcept {
+        return std::max(SizeAtCompile, std::remove_cvref_t<decltype(other)>::SizeAtCompile);
+    }
+
+    template<class Derived>
     __host__ __device__ consteval void RValueVector<Derived>::static_assert_assign(const Scalar auto& source) noexcept {
         using U = std::remove_cvref<decltype(source)>::type;
         T::template static_assert_assign<U>();
@@ -709,11 +719,6 @@ namespace Physica {
 
         using U = Src::ScalarType;
         T::template static_assert_assign<U>();
-    }
-
-    template<class Derived>
-    consteval size_t RValueVector<Derived>::maxSizeAtCompile(const Vector auto& other) noexcept {
-        return std::max(SizeAtCompile, std::remove_cvref_t<decltype(other)>::SizeAtCompile);
     }
 
     template<class Derived>

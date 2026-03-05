@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -108,6 +108,11 @@ namespace Physica {
         for (int i = 1; i < NDim; ++i)
             size *= dim(i);
         return size;
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueTensor<Derived>::isCompact() noexcept {
+        return requires{ std::declval<Derived>().data(); };
     }
 
     template<class Derived>

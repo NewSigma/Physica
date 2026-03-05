@@ -552,6 +552,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool RValueMatrix<Derived>::isCompact() noexcept {
+        return requires{ std::declval<Derived>().data(); };
+    }
+
+    template<class Derived>
     __host__ __device__ consteval void RValueMatrix<Derived>::static_assert_assign(const Scalar auto& source) noexcept {
         using U = std::remove_cvref<decltype(source)>::type;
         T::template static_assert_assign<U>();

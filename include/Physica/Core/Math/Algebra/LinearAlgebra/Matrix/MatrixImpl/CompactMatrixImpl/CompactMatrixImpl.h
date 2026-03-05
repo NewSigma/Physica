@@ -33,7 +33,7 @@ namespace Physica {
         using M = decltype(target);
         const auto& self = Base::getDerived();
         if constexpr (MatrixMajor::isSameMajor<Derived, decltype(target)>()) {
-            if constexpr (std::remove_cvref_t<M>::IsCompact)
+            if constexpr (std::remove_cvref_t<M>::isCompact())
                 self.flatten().template assign<P>(target.flatten());
             else
                 Base::template assign<P>(target);

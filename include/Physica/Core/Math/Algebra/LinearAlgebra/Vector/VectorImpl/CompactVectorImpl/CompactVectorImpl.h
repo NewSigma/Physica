@@ -37,7 +37,7 @@ namespace Physica {
         using V = std::remove_cvref<decltype(v)>::type;
         constexpr bool SameScalar = std::same_as<T, typename V::ScalarType>;
         constexpr bool Copyable = std::is_trivially_copyable<T>::value;
-        if constexpr (V::IsCompact && SameScalar && Copyable) {
+        if constexpr (V::isCompact() && SameScalar && Copyable) {
             if constexpr (isDiffable) {
                 auto& x = Base::getDerived();
                 x.values().template assign<P>(v.values());

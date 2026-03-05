@@ -107,12 +107,6 @@ namespace Physica {
         template<int MaskOrder>
         [[nodiscard]] __host__ __device__ auto mask() const noexcept;
 
-        [[nodiscard]] __host__ __device__ Derived& load(ConstPtrTy p) noexcept;
-        __host__ __device__ void store(PtrTy p) const noexcept;
-        [[noreturn]] __host__ __device__ Derived& load(ConstPtrTy p, int n) noexcept;
-        [[noreturn]] __host__ __device__ void store(PtrTy p, int n) const noexcept;
-        void insert(int index, ScalarType value);
-
         [[nodiscard]] __host__ __device__ RealType real() const noexcept;
         [[nodiscard]] __host__ __device__ RealType imag() const noexcept;
         [[nodiscard]] __host__ __device__ ScalarType conjugate() const noexcept;
@@ -254,35 +248,6 @@ namespace Physica {
             return calc().template mask<MaskOrder>();
         else
             return Base::getDerived();
-    }
-
-    template<class Derived>
-    __host__ __device__ Derived& ScalarBase<Derived>::load(ConstPtrTy p) noexcept {
-        this->getDerived() = (*p).value();
-        return this->getDerived();
-    }
-
-    template<class Derived>
-    __host__ __device__ void ScalarBase<Derived>::store(PtrTy p) const noexcept {
-        *p = this->getDerived().value();
-    }
-
-    template<class Derived>
-    __host__ __device__ Derived& ScalarBase<Derived>::load(ConstPtrTy, [[maybe_unused]] int n) noexcept {
-        assert(false && "[Error]: No partial operation for single scalar");
-        unreachable();
-    }
-
-    template<class Derived>
-    __host__ __device__ void ScalarBase<Derived>::store(PtrTy, [[maybe_unused]] int n) const noexcept {
-        assert(false && "[Error]: No partial operation for single scalar");
-        unreachable();
-    }
-
-    template<class Derived>
-    void ScalarBase<Derived>::insert([[maybe_unused]] int index, ScalarType value) {
-        assert(index == 0);
-        this->getDerived() = ScalarType(value);
     }
 
     template<class Derived>
