@@ -185,7 +185,7 @@ namespace Physica {
         if constexpr (Length != Dynamic) {
             constexpr size_t to = Length / PacketSize * PacketSize;
             for (size_t i = 0; i < to; i += PacketSize)
-                v.writePacket(i, fma(lhs.template packet<Pack>(i), rhs, v.template packet<Pack>(i)));
+                v.writePacket(fma(lhs.template packet<Pack>(i), rhs, v.template packet<Pack>(i)), i);
 
             for (size_t i = Length - Length % PacketSize; i < Length; ++i)
                 v[i] = fma(getLHS().calc(i), T(getRHS()), v[i]);
@@ -195,7 +195,7 @@ namespace Physica {
             const size_t to = length / PacketSize * PacketSize;
             size_t i = 0;
             for (; i < to; i += PacketSize)
-                v.writePacket(i, fma(lhs.template packet<Pack>(i), rhs, v.template packet<Pack>(i)));
+                v.writePacket(fma(lhs.template packet<Pack>(i), rhs, v.template packet<Pack>(i)), i);
 
             for (; i < length; ++i)
                 v[i] = fma(getLHS().calc(i), T(getRHS()), v[i]);
@@ -342,7 +342,7 @@ namespace Physica {
         if constexpr (Length != Dynamic) {
             constexpr size_t to = Length / PacketSize * PacketSize;
             for (size_t i = 0; i < to; i += PacketSize)
-                v.writePacket(i, fma(lhs.template packet<Pack>(i), rhs.template packet<Pack>(i), v.template packet<Pack>(i)));
+                v.writePacket(fma(lhs.template packet<Pack>(i), rhs.template packet<Pack>(i), v.template packet<Pack>(i)), i);
 
             for (size_t i = Length - Length % PacketSize; i < Length; ++i)
                 v[i] = fma(getLHS().calc(i), getRHS().calc(i), v[i]);
@@ -352,7 +352,7 @@ namespace Physica {
             const size_t to = length / PacketSize * PacketSize;
             size_t i = 0;
             for (; i < to; i += PacketSize)
-                v.writePacket(i, fma(lhs.template packet<Pack>(i), rhs.template packet<Pack>(i), v.template packet<Pack>(i)));
+                v.writePacket(fma(lhs.template packet<Pack>(i), rhs.template packet<Pack>(i), v.template packet<Pack>(i)), i);
 
             for (; i < length; ++i)
                 v[i] = fma(getLHS().calc(i), getRHS().calc(i), v[i]);

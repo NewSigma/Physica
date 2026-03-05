@@ -44,8 +44,8 @@ namespace Physica {
         /* Operations */
         template<Packet Pack> [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack> [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
-        void writePacket(size_t index, Packet auto packet) noexcept;
-        void writePacket(size_t index, size_t count, Packet auto packet) noexcept;
+        void writePacket(Packet auto packet, size_t index) noexcept;
+        void writePacket(Packet auto packet, size_t index, size_t count) noexcept;
 
         template<size_t Length_ = Dynamic>
         [[nodiscard]] auto head(this auto&&, size_t to = Length_) noexcept;
@@ -102,13 +102,13 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    void CompactVectorBlock<V, Length>::writePacket(size_t index, const Packet auto packet) noexcept {
-        return vec.writePacket(from + index, packet);
+    void CompactVectorBlock<V, Length>::writePacket(Packet auto packet, size_t index) noexcept {
+        return vec.writePacket(packet, from + index);
     }
 
     template<Vector V, size_t Length>
-    void CompactVectorBlock<V, Length>::writePacket(size_t index, size_t count, const Packet auto packet) noexcept {
-        return vec.writePacket(from + index, count, packet);
+    void CompactVectorBlock<V, Length>::writePacket(Packet auto packet, size_t index, size_t count) noexcept {
+        return vec.writePacket(packet, from + index, count);
     }
 
     template<Vector V, size_t Length>

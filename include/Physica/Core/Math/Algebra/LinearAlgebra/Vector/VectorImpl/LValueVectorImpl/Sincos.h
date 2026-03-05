@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -49,8 +49,8 @@ namespace Physica {
             PacketType s_buffer, c_buffer;
             for (; i < to; i += PacketType::size()) {
                 sincos(x.template packet<PacketType>(i), s_buffer, c_buffer);
-                s.writePacket(i, s_buffer);
-                c.writePacket(i, c_buffer);
+                s.writePacket(s_buffer, i);
+                c.writePacket(c_buffer, i);
             }
 
             for (; i < length; ++i)

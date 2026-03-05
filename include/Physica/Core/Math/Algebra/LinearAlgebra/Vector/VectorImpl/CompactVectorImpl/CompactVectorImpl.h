@@ -91,24 +91,22 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Packet Pack>
-    void CompactVector<Derived>::writePacket(size_t index, const Pack packet) noexcept {
-        constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>;
+    void CompactVector<Derived>::writePacket(Packet auto packet, size_t index) noexcept {
+        constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Traits<decltype(packet)>::ScalarType>;
         if constexpr (isSameScalar)
             packet.store(Base::data_ptr(index));
         else
-            Base::template writePacket<Pack>(index, packet);
+            Base::writePacket(packet, index);
     }
 
     template<class Derived>
-    template<Packet Pack>
-    void CompactVector<Derived>::writePacket(size_t index, size_t count, const Pack packet) noexcept {
+    void CompactVector<Derived>::writePacket(Packet auto packet, size_t index, size_t count) noexcept {
         assert(index + count <= Base::getLength());
-        assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
-        if constexpr (std::same_as<ScalarType, typename Traits<Pack>::ScalarType>)
+        assert(0 < count && count < packet.size() && "[Error]: Invalid size for partial operation");
+        if constexpr (std::same_as<ScalarType, typename Traits<decltype(packet)>::ScalarType>)
             packet.store(Base::data_ptr(index), count);
         else
-            Base::template writePacket<Pack>(index, count, packet);
+            Base::writePacket(packet, index, count);
     }
 
     template<class Derived>

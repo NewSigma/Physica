@@ -747,7 +747,7 @@ namespace Physica {
         if constexpr (Length != Dynamic) {
             constexpr size_t to = Length / PacketSize * PacketSize;
             for (size_t i = 0; i < to; i += PacketSize)
-                v.writePacket(i, v0.template packet<Pack>(i));
+                v.writePacket(v0.template packet<Pack>(i), i);
 
             for (size_t i = Length - Length % PacketSize; i < Length; ++i)
                 v[i] = v0.calc(i);
@@ -758,7 +758,7 @@ namespace Physica {
             if constexpr (P == Sequential) {
                 size_t i = 0;
                 for (; i < to; i += PacketSize)
-                    v.writePacket(i, v0.template packet<Pack>(i));
+                    v.writePacket(v0.template packet<Pack>(i), i);
 
                 for (; i < length; ++i)
                     v[i] = v0.calc(i);
@@ -767,7 +767,7 @@ namespace Physica {
                 const size_t numLoop = to / PacketSize;
                 auto future = parallel_for<P>([&, this](size_t i) {
                     const size_t i1 = i * PacketSize;
-                    v.writePacket(i1, v0.template packet<Pack>(i1));
+                    v.writePacket(v0.template packet<Pack>(i1), i1);
                 }, numLoop, 0);
 
                 for (size_t i = to; i < length; ++i)
@@ -797,7 +797,7 @@ namespace Physica {
         if constexpr (Length != Dynamic) {
             constexpr size_t to = Length / PacketSize * PacketSize;
             for (size_t i = 0; i < to; i += PacketSize)
-                v.writePacket(i, v.template packet<Pack>(i) + v0.template packet<Pack>(i));
+                v.writePacket(v.template packet<Pack>(i) + v0.template packet<Pack>(i), i);
 
             for (size_t i = Length - Length % PacketSize; i < Length; ++i)
                 v[i] += v0.calc(i);
@@ -807,7 +807,7 @@ namespace Physica {
             const size_t to = length / PacketSize * PacketSize;
             size_t i = 0;
             for (; i < to; i += PacketSize)
-                v.writePacket(i, v.template packet<Pack>(i) + v0.template packet<Pack>(i));
+                v.writePacket(v.template packet<Pack>(i) + v0.template packet<Pack>(i), i);
 
             for (; i < length; ++i)
                 v[i] += v0.calc(i);

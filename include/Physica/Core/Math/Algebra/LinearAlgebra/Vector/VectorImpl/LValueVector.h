@@ -61,8 +61,8 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] decltype(auto) calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
-        void writePacket(size_t index, Packet auto packet) noexcept;
-        void writePacket(size_t index, size_t count, Packet auto packet) noexcept;
+        void writePacket(Packet auto packet, size_t index) noexcept;
+        void writePacket(Packet auto packet, size_t index, size_t count) noexcept;
 
         [[nodiscard]] CoDiff<T> sum() const;
 

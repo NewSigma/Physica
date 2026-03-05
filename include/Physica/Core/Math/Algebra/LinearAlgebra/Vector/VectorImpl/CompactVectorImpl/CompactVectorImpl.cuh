@@ -100,10 +100,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Packet Pack>
-    __device__ void device_obj<CompactVector<Derived>>::writePacket(size_t index, const Pack packet) noexcept {
+    __device__ void device_obj<CompactVector<Derived>>::writePacket(const Packet auto packet, size_t index) noexcept {
         using T1 = std::conditional<isReverseDiff, Tv, T>::type;
-        using LocalPacket = std::conditional<Pack::size() == 1, T1, SIMD<T1, Pack::size()>>::type;
+        using LocalPacket = std::conditional<packet.size() == 1, T1, SIMD<T1, packet.size()>>::type;
         if constexpr (isReverseDiff)
             LocalPacket(packet).store(Base::data_ptr(index).value_ptr());
         else
@@ -111,12 +110,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Packet Pack>
-    __device__ void device_obj<CompactVector<Derived>>::writePacket(size_t index, size_t count, const Pack packet) noexcept {
-        assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
+    __device__ void device_obj<CompactVector<Derived>>::writePacket(const Packet auto packet, size_t index, size_t count) noexcept {
+        assert(0 < count && count < packet.size() && "[Error]: Invalid size for partial operation");
         assert(index + count <= Base::getLength());
         using T1 = std::conditional<isReverseDiff, Tv, T>::type;
-        using LocalPacket = std::conditional<Pack::size() == 1, T1, SIMD<T1, Pack::size()>>::type;
+        using LocalPacket = std::conditional<packet.size() == 1, T1, SIMD<T1, packet.ize()>>::type;
         if constexpr (isReverseDiff)
             LocalPacket(packet).store(Base::data_ptr(index).value_ptr(), count);
         else

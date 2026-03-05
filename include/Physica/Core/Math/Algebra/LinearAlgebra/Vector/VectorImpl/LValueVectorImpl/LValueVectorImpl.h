@@ -95,7 +95,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    void LValueVector<Derived>::writePacket(size_t index, const Packet auto packet) noexcept {
+    void LValueVector<Derived>::writePacket(const Packet auto packet, size_t index) noexcept {
         using Pack = std::remove_cvref_t<decltype(packet)>;
         using U = Traits<Pack>::ScalarType;
         if constexpr (U::isForwardDiff) {
@@ -111,7 +111,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    void LValueVector<Derived>::writePacket(size_t index, size_t count, const Packet auto packet) noexcept {
+    void LValueVector<Derived>::writePacket(const Packet auto packet, size_t index, size_t count) noexcept {
         using Pack = std::remove_cvref_t<decltype(packet)>;
         using U = Traits<Pack>::ScalarType;
         if constexpr (U::isForwardDiff) {

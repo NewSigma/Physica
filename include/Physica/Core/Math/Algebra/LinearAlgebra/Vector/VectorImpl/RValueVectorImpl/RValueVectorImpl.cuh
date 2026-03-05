@@ -439,7 +439,7 @@ namespace Physica {
             if constexpr (Length != Dynamic) {
                 constexpr size_t to = Length / PacketSize * PacketSize;
                 for (size_t i = 0; i < to; i += PacketSize)
-                    target.writePacket(i, v0.template packet<PacketType>(i));
+                    target.writePacket(v0.template packet<PacketType>(i), i);
 
                 for (size_t i = Length - Length % PacketSize; i < Length; ++i)
                     target[i] = v0.calc(i);
@@ -449,7 +449,7 @@ namespace Physica {
                 const size_t to = length / PacketSize * PacketSize;
                 size_t i = 0;
                 for (; i < to; i += PacketSize)
-                    target.writePacket(i, v0.template packet<PacketType>(i));
+                    target.writePacket(v0.template packet<PacketType>(i), i);
 
                 for (; i < length; ++i)
                     target[i] = v0.calc(i);
