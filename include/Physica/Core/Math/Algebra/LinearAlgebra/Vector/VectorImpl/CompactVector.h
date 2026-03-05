@@ -19,6 +19,7 @@
 #pragma once
 
 #include "CompactVectorImpl/CompactVectorBlock.h"
+#include "CompactVectorImpl/CompactVectorPacker.h"
 
 namespace Physica {
     template<class Derived>
@@ -27,7 +28,6 @@ namespace Physica {
         using This = CompactVector<Derived>;
     public:
         using typename Base::ScalarType;
-        using typename Base::PacketType;
         using Base::SizeAtCompile;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
@@ -65,6 +65,8 @@ namespace Physica {
         template<Packet Pack> [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
         void writePacket(Packet auto packet, size_t index) noexcept;
         void writePacket(Packet auto packet, size_t index, size_t count) noexcept;
+        template<Packet Pack = typename Base::PacketType>
+        [[nodiscard]] auto packets() const noexcept;
 
         template<Vector V> void toDevice(device_obj<CompactVector<V>>& obj) const;
         template<Vector V> void toDeviceAsync(device_obj<CompactVector<V>>& obj) const;

@@ -127,6 +127,12 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<Packet Pack>
+    auto LValueVector<Derived>::packets() const noexcept {
+        return LVectorPacker<Derived, Pack>(Base::getDerived());
+    }
+
+    template<class Derived>
     auto LValueVector<Derived>::sum() const -> CoDiff<T> {
         if constexpr (isReverseDiff) {
             auto& result = co_yield Base::getDerived().values().sum();

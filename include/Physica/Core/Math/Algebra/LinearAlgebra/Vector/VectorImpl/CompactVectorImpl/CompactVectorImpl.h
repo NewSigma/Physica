@@ -110,6 +110,12 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<Packet Pack>
+    auto CompactVector<Derived>::packets() const noexcept {
+        return CompactVectorPacker<Derived, Pack>(Base::getDerived());
+    }
+
+    template<class Derived>
     template<size_t Length>
     auto CompactVector<Derived>::head(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);

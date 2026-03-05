@@ -163,6 +163,12 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<Packet Pack>
+    auto RValueVector<Derived>::packets() const noexcept {
+        return RVectorPacker<Derived, Pack>(Base::getDerived());
+    }
+
+    template<class Derived>
     void RValueVector<Derived>::reverse(const Vector auto&, const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff);
         Base::getDerived().reverse(grad);

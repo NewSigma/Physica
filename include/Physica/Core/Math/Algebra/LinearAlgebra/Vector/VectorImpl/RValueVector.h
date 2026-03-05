@@ -23,6 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Parallel/Parallel.h"
 #include "RValueVectorImpl/RVectorBlock.h"
+#include "RValueVectorImpl/RVectorPacker.h"
 
 namespace Physica {
     template<class Derived> class LValueVector;
@@ -32,7 +33,7 @@ namespace Physica {
     template<class> class Transpose;
     template<class> class Conjugate;
     template<class> class Hermite;
-    template<Vector V1, Vector V2> class CrossProduct;
+    template<Vector, Vector> class CrossProduct;
     template<class T> class RealVectorR;
     template<class T> class ImagVector;
     template<class T> class SquaredNormVector;
@@ -129,6 +130,8 @@ namespace Physica {
         [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
+        template<Packet Pack = PacketType>
+        [[nodiscard]] auto packets() const noexcept;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
 
         void resize(const Vector auto& x) { resize(x.getLength()); }
