@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 Weibo He.
+ * Copyright 2019-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -35,6 +35,8 @@ namespace Physica {
 
         constexpr static bool HasRDSEED = @HasRDSEED@;
         constexpr static bool HasRDRAND = @HasRDRAND@;
+        /* Tunable */
+        constexpr static int NumUnrollDefault = 8;
     };
 
     class CUDADevAttr final {

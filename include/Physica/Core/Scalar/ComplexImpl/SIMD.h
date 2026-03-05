@@ -108,7 +108,7 @@ namespace Physica {
         [[nodiscard]] static SIMD zeros() noexcept;
         template<RNG R>
         [[nodiscard]] static SIMD random_uniform() { return asComplex(FullRealType::template random_uniform<R>()); }
-        [[nodiscard]] static SIMD asComplex(FullRealType reals);
+        [[nodiscard, gnu::always_inline]] static SIMD asComplex(FullRealType reals) noexcept;
     };
 }
 

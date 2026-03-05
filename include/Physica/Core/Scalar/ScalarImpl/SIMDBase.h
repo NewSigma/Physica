@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -49,8 +49,8 @@ namespace Physica {
         [[nodiscard]] FullRealType scatterRealImag() const noexcept;
         /* Getters */
         [[nodiscard]] constexpr static int size() noexcept { return TraitsType::Size; }
-        [[nodiscard]] ValueType value() const;
-        [[nodiscard]] FullRealType asReal() const;
+        [[nodiscard]] ValueType value() const noexcept;
+        [[nodiscard]] FullRealType asReal() const noexcept;
     protected:
         constexpr SIMDBase() = default;
         constexpr SIMDBase(const This&) = default;
@@ -120,7 +120,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto SIMDBase<Derived>::value() const -> ValueType {
+    auto SIMDBase<Derived>::value() const noexcept -> ValueType {
         if constexpr (isDiffable)
             return Base::getDerived_host().value();
         else
@@ -128,7 +128,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto SIMDBase<Derived>::asReal() const -> FullRealType {
+    auto SIMDBase<Derived>::asReal() const noexcept -> FullRealType {
         if constexpr (isComplex)
             return Base::getDerived_host().asReal();
         else

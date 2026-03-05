@@ -210,9 +210,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    auto SIMD<Complex<T>, Size>::asComplex(FullRealType reals) -> SIMD {
-        This result{};
-        static_cast<FullRealType&>(result) = std::move(reals);
-        return result;
+    auto SIMD<Complex<T>, Size>::asComplex(FullRealType reals) noexcept -> SIMD {
+        return static_cast<This&>(reals);
     }
 }

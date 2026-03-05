@@ -20,6 +20,7 @@
 
 #include "../RValueVector.h"
 #include "Physica/Core/Math/Algebra/Canonicalization.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/Utils/Unroller.h"
 
 namespace Physica {
     template<Vector V1, Vector V2>
@@ -46,6 +47,7 @@ namespace Physica {
         CoDiff<T> calc_base() const noexcept;
     private:
         T calc_base_simd_trivial() const noexcept;
+        T calc_base_simd_complex_real() const noexcept;
         T calc_base_trivial() const noexcept;
     };
 
@@ -85,6 +87,8 @@ namespace Physica {
         else if constexpr (isFastPacket) {
             if constexpr (Internal::EnableSIMD<V1, V2>::value)
                 co_return calc_base_simd_trivial();
+            else if constexpr (T1::isComplex && std::same_as<typename T1::RealType, T2>)
+                co_return calc_base_simd_complex_real();
             else
                 co_return calc_base_trivial();
         }
@@ -111,6 +115,27 @@ namespace Physica {
             buffer = fma(p1, p2, buffer);
         }
         return buffer.sum();
+    }
+
+    template<Vector V1, Vector V2>
+    auto InnerDot<V1, V2>::calc_base_simd_complex_real() const noexcept -> T {
+        using Pack = V1::PacketType;
+        using FullRealPack = Pack::FullRealType;
+        using HalfRealPack = SIMD<Tr, FullRealPack::size() / 2>;
+        const size_t length = v1.getLength();
+        auto unroller = Unroller<Pack, HostDevAttr::NumUnrollDefault>();
+        size_t i = unroller.loop_recursive([packer1 = v1.template packets<Pack>(),
+                                            packer2 = v2.template packets<HalfRealPack>()](Pack buffer, size_t index) noexcept {
+            auto p1 = packer1.load(index).asReal();
+            auto half = packer2.load(index);
+            auto p2 = FullRealPack(half, half).scatterRealImag();
+            return Pack::asComplex(fma(p1, p2, buffer.asReal()));
+        }, length);
+
+        T result = unroller.sum().sum();
+        for (; i < length; ++i)
+            result += v1.calc(i) * v2.calc(i);
+        return result;
     }
     /**
      * Fallback if we do not know how to lower the inner dot
