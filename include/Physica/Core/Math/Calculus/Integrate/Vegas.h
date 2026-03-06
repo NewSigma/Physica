@@ -36,6 +36,7 @@ namespace Physica {
         using This = Vegas<T, TakeLn>;
         using Base = AdaptiveBase<T, TakeLn>;
     protected:
+        using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tv::RealType;
     private:

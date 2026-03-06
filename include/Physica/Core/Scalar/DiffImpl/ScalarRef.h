@@ -27,6 +27,7 @@ namespace Physica {
         using Base = ScalarBase<This>;
         using Storage = ScalarPtr<T>;
 
+        using Tr = std::remove_const_t<T>::RealType;
         using Tv = std::remove_const_t<T>::ValueType;
         using Tg = std::remove_const_t<T>::GradType;
         constexpr static bool IsConst = std::is_const_v<T>;
@@ -70,6 +71,7 @@ namespace Physica {
         /* Getters */
         using Storage::value_ptr;
         using Storage::grad_ptr;
+        [[nodiscard]] __host__ __device__ auto real_ptr(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ decltype(auto) value() const noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ decltype(auto) grad() const noexcept;
@@ -158,6 +160,14 @@ namespace Physica {
     __host__ __device__ void ScalarRef<T>::swap(T& obj) noexcept {
         static_assert(!IsConst, "[Error]: Cannot modify const reference");
         obj.swap(*this);
+    }
+
+    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    __host__ __device__ auto ScalarRef<T>::real_ptr(this auto&& self) noexcept {
+        if constexpr (T::isComplex)
+            return ScalarPtr<Tr>(self.value().real_ptr(), self.grad().real_ptr());
+        else
+            return &self;
     }
 
     template<Scalar T> requires(instanceof_tx<Diff, T>)

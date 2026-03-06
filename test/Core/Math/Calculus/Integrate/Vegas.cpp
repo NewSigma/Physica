@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,16 +24,17 @@
 using namespace Physica;
 using RandomSource = Random<MT19937, 12345>;
 using T = float64;
+using Tc = cfloat64;
 /**
  * Reference:
  * [1] J. Comput. Phys. 439, 110386 (2021); https://doi.org/10.1016/j.jcp.2021.110386
  */
-int main() {
-    const Vector4D<T> r1{1.0 / 3, 0.5, 0.5, 0.5};
-    const Vector4D<T> r2{2.0 / 3, 0.5, 0.5, 0.5};
-    /* Eq.26 of [1] */ {
+namespace {
+    void reference1() {
+        const Vector4D<T> r1{1.0 / 3, 0.5, 0.5, 0.5};
+        const Vector4D<T> r2{2.0 / 3, 0.5, 0.5, 0.5};
         auto func = [&](const VectorND<T>& x) {
-            return exp(T(-100) * (x - r1).squaredNorm()) + exp(T(-100) * (x - r2).squaredNorm());
+            return exp(T(-100) * (x - r1).squaredNorm()) + exp(T(-100) * (x - r2).squaredNorm()); // Eq.26 of [1]
         };
         auto vegas = Vegas<T, false>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 10000);
         vegas.integral<RandomSource>(func);
@@ -43,12 +44,15 @@ int main() {
         const T result = vegas.calcMean();
         expect(abs(answer - result) < T(2) * vegas.calcDevia());
     }
-    /* Eq.28 of [1] */ {
+
+    void reference2() {
+        const Vector4D<T> r1{1.0 / 3, 0.5, 0.5, 0.5};
+        const Vector4D<T> r2{2.0 / 3, 0.5, 0.5, 0.5};
         constexpr double R = 2.0 / 30;
         auto func = [&](const VectorND<T>& x) {
             const bool flag1 = (x - r1).squaredNorm() < T(R * R);
             const bool flag2 = (x - r2).squaredNorm() < T(R * R);
-            return T((flag1 || flag2) ? 1 : 0);
+            return T((flag1 || flag2) ? 1 : 0); // Eq.28 of [1]
         };
         auto vegas = Vegas<T, false>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 100000, 1000, 0.2);
         vegas.integral<RandomSource>(func);
@@ -57,7 +61,9 @@ int main() {
         const T result = vegas.calcMean();
         expect(abs(answer - result) < T(2) * vegas.calcDevia());
     }
-    {
+
+    void lnVegasTest() {
+        const Vector4D<T> r1{1.0 / 3, 0.5, 0.5, 0.5};
         auto func = [&](const VectorND<T>& x) {
             return T(-100) * (x - r1).squaredNorm();
         };
@@ -69,5 +75,18 @@ int main() {
         const T result = exp(vegas.calcLnMean());
         expect(abs(answer - result) < T(2) * exp(vegas.calcLnDevia()));
     }
+
+    void complexTest() {
+        auto vegas = Vegas<Tc, false>({0}, {1}, 50, 1000);
+        vegas.integral<RandomSource>([&](const VectorND<T>& x) { return Tc(x[0], -x[0]); });
+        // syntax only
+    }
+}
+
+int main() {
+    reference1();
+    reference2();
+    lnVegasTest();
+    complexTest();
     return 0;
 }

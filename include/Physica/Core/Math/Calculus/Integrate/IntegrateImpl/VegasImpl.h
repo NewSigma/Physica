@@ -149,7 +149,6 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     auto Vegas<T, TakeLn>::compress(Vector auto&& vars) -> Trv {
-        assert(vars.min().isPositive());
         const auto sum = vars.sum();
         const bool noData = sum.isZero();
         if (noData)
@@ -163,7 +162,7 @@ namespace Physica {
             vars[i + 1] = buffer.template segment<3>(i, i + 3) * kernel;
         vars[i + 1] = fma(Trv(7.0 / 8), buffer[i + 1], Trv(1.0 / 8) * buffer[i]);
 
-        vars = pow(divide(vars - Trv(1), ln(vars)), compressRate);
+        vars = pow(divide(vars - Trv(1), ln(vars + Trv(std::numeric_limits<T>::min()))), compressRate);
         return vars.mean();
     }
 
@@ -267,11 +266,11 @@ namespace Physica {
             const T lny = fn(x);
             assert(lny.isFinite() && "[Error]: Bad value");
             T lnxy = lny + ln(deltas).sum();
-            lnxy.value() = fma(Trv(getDim()), ln(Trv(getNumPoint())), lnxy.value());
+            lnxy.value().real() = fma(Trv(getDim()), ln(Trv(getNumPoint())), lnxy.value().real());
             samples[n] = lnxy;
         }, numSample, 0).wait();
 
-        Tv maxSample;
+        Trv maxSample;
         if constexpr (T::isComplex)
             maxSample = samples.reals().max().value();
         else
@@ -293,6 +292,6 @@ namespace Physica {
 
         mean = ln(mean) + maxSample;
         var = ln(var + Trv(std::numeric_limits<T>::min()));
-        var.value() = fma(Trv(2), maxSample, var.value());
+        var.value().real() = fma(Trv(2), maxSample, var.value().real());
     }
 }
