@@ -132,10 +132,17 @@ namespace Physica {
             return Pack::asComplex(fma(p1, p2, buffer.asReal()));
         }, length);
 
-        T result = unroller.sum().sum();
-        for (; i < length; ++i)
-            result += v1.calc(i) * v2.calc(i);
-        return result;
+        T result1 = unroller.sum().sum();
+        T result2 = 0;
+        for (; i < length; ++i) {
+            if constexpr (T::enableSIMD)
+                result2.writePacket(fma(v1.calc(i).packet(), SIMD<Tr, 2>(v2.calc(i)), result2.packet().asReal()));
+            else {
+                result2.real() = fma(v1.calc(i).real(), v2.calc(i), result2.real());
+                result2.imag() = fma(v1.calc(i).imag(), v2.calc(i), result2.imag());
+            }
+        }
+        return result1 + result2;
     }
     /**
      * Fallback if we do not know how to lower the inner dot
