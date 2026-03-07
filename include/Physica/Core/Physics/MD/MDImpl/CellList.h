@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,8 +19,8 @@
 #pragma once
 
 #include <forward_list>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/PeriodIndex3D.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
+#include "Physica/Core/Physics/SolidState/PeriodIndex3D.h"
 #include "Physica/Core/Utils/Container/ArrayND.h"
 
 namespace Physica {

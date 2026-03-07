@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/PeriodIndex3D.h"
 #include "Physica/Core/Math/Optimization/OptimizationImpl/QuadraticSearch.h"
+#include "Physica/Core/Physics/SolidState/PeriodIndex3D.h"
 #include "Physica/Core/Parallel/Parallel.h"
 #include "PhononSolver.h"
 

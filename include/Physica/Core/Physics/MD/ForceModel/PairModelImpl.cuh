@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include "Physica/PlainStruct.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/PeriodIndex3D.h"
+#include "Physica/Core/Physics/SolidState/PeriodIndex3D.h"
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
+#include "Physica/PlainStruct.h"
 #include "PairModel.cuh"
 
 namespace Physica {

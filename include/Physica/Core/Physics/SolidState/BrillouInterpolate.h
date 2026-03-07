@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,9 +19,9 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/PeriodIndex3D.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/CuboidLinear.h"
 #include "Physica/Core/Physics/SolidState/PeriodicCell.h"
+#include "Physica/Core/Physics/SolidState/PeriodIndex3D.h"
 
 namespace Physica {
     /**
