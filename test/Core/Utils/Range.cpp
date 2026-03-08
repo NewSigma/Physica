@@ -37,13 +37,22 @@ namespace {
 
 int main() {
     std::array<int, 3> a{1, 2, 3};
-    array_nosize b{};
+    array_nosize b{{3, 1, 2}};
     auto view = zip(a, b);
-    using V = decltype(view);
-    static_assert(std::ranges::input_range<V>);
-    static_assert(std::ranges::view<V>);
+    /* Test size */ {
+        using V = decltype(view);
+        static_assert(std::ranges::input_range<V>);
+        static_assert(std::ranges::view<V>);
 
-    b.flag = false;
-    expect(view.size() == 3);
+        b.flag = false;
+        expect(view.size() == 3);
+    }
+    /* unzip */ {
+        auto [va, vb] = view;
+        expect(va[2] == vb[0]);
+
+        auto [ia, ib] = ++view.begin();
+        expect(*ia == 2 && *ib == 1);
+    }
     return 0;
 }
