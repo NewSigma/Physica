@@ -69,12 +69,12 @@ namespace Physica {
         /* Operations */
         void schedule(Handle handle) noexcept;
         [[nodiscard]] Handle steal() noexcept;
+        void shouldExit() noexcept;
         void waitExit();
         void restart();
-        /* Setters */
-        void shouldExit() noexcept;
+        /* Getters */
+        [[nodiscard]] int getNumThreads() const noexcept { return (int)thread_data.getLength(); }
         /* Static Members */
-        [[nodiscard]] static int getNumThreads() noexcept;
         [[nodiscard]] static This& getInstance() noexcept;
         [[nodiscard]] static int getThreadID() noexcept;
         [[nodiscard]] static bool isMainThread() noexcept { return getThreadID() == MainThreadID; }

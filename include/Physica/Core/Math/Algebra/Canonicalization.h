@@ -35,9 +35,11 @@ namespace Physica {
 
         using E1 = std::remove_cvref_t<decltype(expr1)>;
         using E2 = std::remove_cvref_t<decltype(expr2)>;
-        if constexpr (!E1::isComplex && E2::isComplex)
+        if constexpr (E1::isSparse() && !E2::isSparse())
             return false;
         if constexpr (!E1::isDiffable && E2::isDiffable)
+            return false;
+        if constexpr (!E1::isComplex && E2::isComplex)
             return false;
         return true;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,13 +29,18 @@ namespace Physica {
         using NonZeroPair = std::pair<size_t, ScalarType>;
     public:
         /* Getters */
+        [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         [[nodiscard]] NonZeroPair calcNonZero(size_t index) const { return Base::getDerived().calcNonZero(index); }
         [[nodiscard]] size_t getNumNonZero() const noexcept { return Base::getDerived().getNumNonZero(); }
     };
 
+    template<class Derived>
+    __host__ __device__ consteval bool RSparseVector<Derived>::isSparse() noexcept {
+        return true;
+    }
+
     template<Vector V1, Vector V2>
-    Internal::BinaryScalarOpRtnTy<typename V1::ScalarType, typename V2::ScalarType>::Type
-    operator*(const RSparseVector<V1>& v1, const V2& v2) {
+    auto operator*(const RSparseVector<V1>& v1, const V2& v2) {
         using ResultType = Internal::BinaryScalarOpRtnTy<typename V1::ScalarType, typename V2::ScalarType>::Type;
         assert(v1.getLength() == v2.getLength());
         ResultType result(0);
@@ -47,23 +52,17 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    Internal::BinaryScalarOpRtnTy<typename V1::ScalarType, typename V2::ScalarType>::Type
-    operator*(const V1& v1, const RSparseVector<V2>& v2) {
-        return v2 * v1;
-    }
-
-    template<Vector V, Vector U>
-    void operator+=(V& v1, const U& v2) requires Sparse<U> {
-        using ResultType = V::ScalarType;
+    void operator+=(V1& v1, const V2& v2) requires(V2::isSparse()) {
+        using ResultType = V1::ScalarType;
         for (size_t i = 0; i < v2.getNumNonZero(); ++i) {
             const auto pair = v2.calcNonZero(i);
             v1[pair.first] += ResultType(pair.second);
         }
     }
 
-    template<Vector V, Vector U>
-    void operator-=(V& v1, const U& v2) requires Sparse<U> {
-        using ResultType = V::ScalarType;
+    template<Vector V1, Vector V2>
+    void operator-=(V1& v1, const V2& v2) requires(V2::isSparse()) {
+        using ResultType = V1::ScalarType;
         for (size_t i = 0; i < v2.getNumNonZero(); ++i) {
             const auto pair = v2.calcNonZero(i);
             v1[pair.first] -= ResultType(pair.second);

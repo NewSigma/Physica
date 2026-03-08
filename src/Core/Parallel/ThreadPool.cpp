@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Parallel/ThreadPool.h"
-#include <memory>
 #include <xmmintrin.h>
 #ifdef PHYSICA_MKL
     #include <mkl_vml.h>
@@ -49,7 +48,7 @@ namespace {
 
     [[maybe_unused]] const GlobalEnv init{};
 
-    int getNumProcesser() noexcept {
+    int getNumProcessor() noexcept {
     #ifdef __linux__
         return get_nprocs();
     #else
@@ -71,19 +70,12 @@ namespace {
         return static_cast<uint32_t>((current ^ (current >> 22U)) >> (22U + (current >> 61U)));
     }
 
-    struct ThreadInfo {
-        int id;
-        uint64_t randState;
-    };
-
-    ThreadInfo& getThreadInfo() noexcept {
-        thread_local static std::unique_ptr<ThreadInfo> info = nullptr;
-        if (info == nullptr) {
-            info = std::make_unique<ThreadInfo>();
-            info->id = ThreadPool::MainThreadID;
-            info->randState = std::hash<std::thread::id>()(std::this_thread::get_id());
-        }
-        return *info;
+    auto& getThreadInfo() noexcept {
+        thread_local static struct ThreadInfo {
+            int id = ThreadPool::MainThreadID;
+            uint64_t randState = std::hash<std::thread::id>()(std::this_thread::get_id());
+        } info{};
+        return info;
     }
 }
 
@@ -167,16 +159,14 @@ void ThreadPool::shouldExit() noexcept {
     cond.notify_all();
 }
 
-int ThreadPool::getNumThreads() noexcept {
-    int numProcesser = getNumProcesser();
-    int num = ThreadPool::numThreadRequired;
-    if (num == 0 || num > numProcesser)
-        num = std::max(1, numProcesser * 3 / 4);
-    return num;
-}
-
 auto ThreadPool::getInstance() noexcept -> This& {
-    static ThreadPool pool(getNumThreads());
+    static ThreadPool pool([]() {
+        int numProcesser = getNumProcessor();
+        int num = ThreadPool::numThreadRequired;
+        if (num == 0 || num > numProcesser)
+            num = std::max(1, numProcesser * 3 / 4);
+        return num;
+    }());
     return pool;
 }
 

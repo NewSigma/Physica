@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,9 +28,6 @@ H5File::H5File(
         const H5::FileCreatPropList& create_plist,
         const H5::FileAccPropList& access_plist)
         : Base(name, openflag_, create_plist, access_plist), openflag(openflag_) {}
-
-H5File::H5File(const This& obj)
-        : Base(obj), openflag(obj.openflag) {}
 
 H5DataSet<1> H5File::createDataSet(const std::string& filepath, const std::string& name) {
     std::ifstream fin(filepath);

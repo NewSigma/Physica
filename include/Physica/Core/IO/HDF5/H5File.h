@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -39,12 +39,12 @@ namespace Physica {
         unsigned int openflag;
     public:
         H5File() = default;
-        H5File(const This& obj);
+        H5File(const This& obj) = delete;
         H5File(This&&) noexcept = delete;
         virtual ~H5File() = default;
         /* Operators */
-        This& operator=(const This&) = default;
-        This& operator=(This&&) noexcept = default;
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         using Loc::exists;
         using Loc::createDataSet;
