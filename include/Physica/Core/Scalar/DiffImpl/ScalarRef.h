@@ -22,10 +22,9 @@
 
 namespace Physica {
     template<Scalar T> requires(instanceof_tx<Diff, T>)
-    class ScalarRef<T> : public ScalarBase<ScalarRef<T>>, private ScalarPtr<T> {
+    class ScalarRef<T> : public ScalarBase<ScalarRef<T>> {
         using This = ScalarRef<T>;
         using Base = ScalarBase<This>;
-        using Storage = ScalarPtr<T>;
 
         using Tr = std::remove_const_t<T>::RealType;
         using Tv = std::remove_const_t<T>::ValueType;
@@ -36,9 +35,11 @@ namespace Physica {
         using Base::Mode;
         using Base::Order;
         using typename Base::GradType;
+    private:
+        ScalarPtr<T> ptr;
     public:
         ScalarRef() = default;
-        __host__ __device__ explicit ScalarRef(ScalarPtr<T> ptr);
+        __host__ __device__ explicit ScalarRef(ScalarPtr<T> ptr_) noexcept;
         ScalarRef(const This&) = default;
         ScalarRef(This&&) noexcept = default;
         ~ScalarRef() = default;
@@ -49,19 +50,12 @@ namespace Physica {
         __host__ __device__ This& operator=(int x);
         __host__ __device__ This& operator=(double x);
         [[nodiscard]] __host__ __device__ bool operator==(const This& other) const;
+        using Base::operator<=>;
 
         [[nodiscard]] __host__ __device__ operator ScalarRef<const T>() const noexcept requires(!IsConst);
         [[nodiscard]] __host__ __device__ operator T() const requires(!ReverseDiff<T>);
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(T(*this)); }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(T(*this)); }
-        __host__ __device__ bool operator>(double s) const noexcept { return T(*this) > s; }
-        __host__ __device__ bool operator<(double s) const noexcept { return T(*this) < s; }
-        __host__ __device__ bool operator>(const Scalar auto& s) const noexcept { return T(*this) > s; }
-        __host__ __device__ bool operator<(const Scalar auto& s) const noexcept { return T(*this) < s; }
-        template<Scalar U>
-        __host__ __device__ bool operator>(const ScalarRef<U>& s) const noexcept { return operator>(U(s)); }
-        template<Scalar U>
-        __host__ __device__ bool operator<(const ScalarRef<U>& s) const noexcept { return operator<(U(s)); }
         /* Operations */
         __host__ __device__ T reverse(GradType grad = 1) const noexcept;
         __host__ __device__ void zero_grad();
@@ -69,8 +63,9 @@ namespace Physica {
         __host__ __device__ void swap(This&& obj) noexcept;
         __host__ __device__ void swap(T& obj) noexcept;
         /* Getters */
-        using Storage::value_ptr;
-        using Storage::grad_ptr;
+        [[nodiscard]] __host__ __device__ auto value_ptr() const noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] __host__ __device__ auto grad_ptr() const noexcept;
         [[nodiscard]] __host__ __device__ auto real_ptr(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ decltype(auto) value() const noexcept;
         template<int GradOrder = 1>
@@ -78,7 +73,7 @@ namespace Physica {
     };
 
     template<Scalar T> requires(instanceof_tx<Diff, T>)
-    __host__ __device__ ScalarRef<T>::ScalarRef(ScalarPtr<T> ptr) : Storage(ptr) {}
+    __host__ __device__ ScalarRef<T>::ScalarRef(ScalarPtr<T> ptr_) noexcept : ptr(ptr_) {}
 
     template<Scalar T> requires(instanceof_tx<Diff, T>)
     __host__ __device__ auto ScalarRef<T>::operator=(const This& other) -> This& {
@@ -163,6 +158,17 @@ namespace Physica {
     }
 
     template<Scalar T> requires(instanceof_tx<Diff, T>)
+    __host__ __device__ auto ScalarRef<T>::value_ptr() const noexcept {
+        return ptr.value_ptr();
+    }
+
+    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<int GradOrder>
+    __host__ __device__ auto ScalarRef<T>::grad_ptr() const noexcept {
+        return ptr.template grad_ptr<GradOrder>();
+    }
+
+    template<Scalar T> requires(instanceof_tx<Diff, T>)
     __host__ __device__ auto ScalarRef<T>::real_ptr(this auto&& self) noexcept {
         if constexpr (T::isComplex)
             return ScalarPtr<Tr>(self.value().real_ptr(), self.grad().real_ptr());
@@ -178,7 +184,7 @@ namespace Physica {
     template<Scalar T> requires(instanceof_tx<Diff, T>)
     template<int GradOrder>
     __host__ __device__ decltype(auto) ScalarRef<T>::grad() const noexcept {
-        return *Storage::template grad_ptr<GradOrder>();
+        return *(ptr.template grad_ptr<GradOrder>());
     }
 
     template<Scalar T>
