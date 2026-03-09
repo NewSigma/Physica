@@ -124,10 +124,11 @@ namespace Physica {
         using HalfRealPack = SIMD<Tr, FullRealPack::size() / 2>;
         const size_t length = v1.getLength();
         auto unroller = Unroller<Pack, HostDevAttr::NumUnrollDefault>();
-        size_t i = unroller.loop_recursive([packer1 = v1.template packets<Pack>(),
-                                            packer2 = v2.template packets<HalfRealPack>()](Pack buffer, size_t index) noexcept {
-            auto p1 = packer1.load(index).asReal();
-            auto half = packer2.load(index);
+        auto view1 = v1.view();
+        auto view2 = v2.view();
+        size_t i = unroller.loop_recursive([ite1 = view1.begin(), ite2 = view2.begin()](Pack buffer, size_t index) noexcept {
+            auto p1 = (ite1 + index).template load<Pack>().asReal();
+            auto half = (ite2 + index).template load<HalfRealPack>();
             auto p2 = FullRealPack(half, half).scatterRealImag();
             return Pack::asComplex(fma(p1, p2, buffer.asReal()));
         }, length);

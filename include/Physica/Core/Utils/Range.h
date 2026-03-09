@@ -57,7 +57,11 @@ namespace Physica {
             [[nodiscard]] constexpr This operator+(difference_type n) const noexcept;
             [[nodiscard]] constexpr This operator-(difference_type n) const noexcept;
             [[nodiscard]] constexpr difference_type operator-(const This& other) const noexcept;
-            /* Operations */
+            /* Getters */
+            template<size_t N>
+            [[nodiscard]] constexpr auto& get(this auto&&) noexcept;
+            /* Friends */
+            friend constexpr This operator+(difference_type n, const This& ite) noexcept { return ite + n; }
             friend constexpr auto iter_move(const This& ite) noexcept {
                 return std::apply([](auto&... ites) {
                     return std::make_tuple(std::ranges::iter_move(ites)...);
@@ -68,9 +72,6 @@ namespace Physica {
                     (std::ranges::iter_swap(std::get<Is>(lhs.current), std::get<Is>(rhs.current)), ...);
                 }(std::make_index_sequence<sizeof...(Vs)>{});
             }
-            /* Getters */
-            template<size_t N>
-            [[nodiscard]] constexpr auto& get(this auto&&) noexcept;
         };
 
         template<class Tuple, std::ranges::view... Vs>

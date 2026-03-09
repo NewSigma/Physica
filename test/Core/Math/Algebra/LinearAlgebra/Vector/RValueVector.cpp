@@ -25,12 +25,12 @@ using namespace Physica;
 using RandomSource = Random<>;
 
 namespace {
-    void packerTest() noexcept {
+    void viewTest() noexcept {
         auto a = VectorND<float32>::random_uniform<Random<>>(16);
         auto b = VectorND<float32>::random_uniform<Random<>>(16);
-        auto packets = (a + b).packets();
+        auto v = (a + b).view();
 
-        using R = decltype(packets);
+        using R = decltype(v);
         static_assert(std::ranges::sized_range<R>);
         static_assert(std::ranges::common_range<R>);
         static_assert(std::ranges::forward_range<R>);
@@ -53,7 +53,7 @@ namespace {
 }
 
 int main() {
-    packerTest();
+    viewTest();
     argminTest();
     reshapeTest();
     return 0;

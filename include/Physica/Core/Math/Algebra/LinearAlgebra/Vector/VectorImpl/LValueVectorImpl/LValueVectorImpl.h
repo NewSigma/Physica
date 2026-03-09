@@ -127,9 +127,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Packet Pack>
-    auto LValueVector<Derived>::packets() const noexcept {
-        return LVectorPacker<Derived, Pack>(Base::getDerived());
+    constexpr auto LValueVector<Derived>::view(this auto&& self) noexcept {
+        return LVectorView<std::remove_reference_t<decltype(self)>>(self);
     }
 
     template<class Derived>

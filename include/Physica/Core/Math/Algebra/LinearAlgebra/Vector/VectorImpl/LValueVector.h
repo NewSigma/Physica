@@ -20,7 +20,7 @@
 
 #include "RValueVector.h"
 #include "LValueVectorImpl/LVectorBlock.h"
-#include "LValueVectorImpl/LVectorPacker.h"
+#include "LValueVectorImpl/LVectorView.h"
 
 namespace Physica {
     template<class V> class RealVectorL;
@@ -64,8 +64,7 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const;
         void writePacket(Packet auto packet, size_t index) noexcept;
         void writePacket(Packet auto packet, size_t index, size_t count) noexcept;
-        template<Packet Pack = typename Base::PacketType>
-        [[nodiscard]] auto packets() const noexcept;
+        [[nodiscard]] constexpr auto view(this auto&&) noexcept;
 
         [[nodiscard]] CoDiff<T> sum() const;
 

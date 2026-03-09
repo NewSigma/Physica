@@ -19,6 +19,7 @@
 #pragma once
 
 #include "FormatedVector.h"
+#include "Physica/Core/Utils/Range.h"
 
 namespace Physica {
     template<class Derived>
@@ -163,9 +164,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Packet Pack>
-    auto RValueVector<Derived>::packets() const noexcept {
-        return RVectorPacker<Derived, Pack>(Base::getDerived());
+    constexpr auto RValueVector<Derived>::view(this auto&& self) noexcept {
+        return RVectorView<std::remove_reference_t<decltype(self)>>(self);
     }
 
     template<class Derived>

@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Parallel/Parallel.h"
 #include "RValueVectorImpl/RVectorBlock.h"
-#include "RValueVectorImpl/RVectorPacker.h"
+#include "RValueVectorImpl/RVectorView.h"
 
 namespace Physica {
     template<class Derived> class LValueVector;
@@ -130,8 +130,7 @@ namespace Physica {
         [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
-        template<Packet Pack = PacketType>
-        [[nodiscard]] auto packets() const noexcept;
+        [[nodiscard]] constexpr auto view(this auto&&) noexcept;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
 
         void resize(const Vector auto& x) { resize(x.getLength()); }
