@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/RValueVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/Utils/Unroller.h"
 
 namespace Physica {
     template<class V>
@@ -54,6 +55,8 @@ namespace Physica {
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
         void reverse(const Scalar auto& grad) const noexcept;
+
+        [[nodiscard]] CoDiff<T> sum() const noexcept;
 
         [[nodiscard]] auto values() const noexcept { return v.values().squaredNorms(); }
         /* Getters */
@@ -121,6 +124,28 @@ namespace Physica {
     void SquaredNormVector<V>::reverse(const Scalar auto& grad) const noexcept {
         static_assert(isReverseDiff);
         v.reverse(Tv(2) * grad * v.values());
+    }
+
+    template<class V>
+    auto SquaredNormVector<V>::sum() const noexcept -> CoDiff<T> {
+        if constexpr (!isReverseDiff && !isComplexV && Internal::EnableSIMD<V>::value) {
+            assert(getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
+            auto view = v.view();
+            auto unroller = Unroller<PacketType, HostDevAttr::NumUnrollDefault>();
+            size_t i = unroller.loop_recursive([ite = view.begin()](PacketType buffer, size_t index) noexcept {
+                auto pack = (ite + index).template load<PacketType>();
+                return fma(pack, pack, buffer);
+            }, getLength());
+
+            T result = unroller.sum().sum();
+            for (auto ite = view.begin() + i; ite < view.end(); ++ite) {
+                T x = *ite;
+                result = fma(x, x, result);
+            }
+            return result;
+        }
+        else
+            return Base::sum();
     }
 }
 
