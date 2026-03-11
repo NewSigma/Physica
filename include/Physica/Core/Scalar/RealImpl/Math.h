@@ -33,10 +33,7 @@ namespace Physica {
 
     template<FloatPrec Prec>
     __host__ __device__ Real<Prec> abs(const Real<Prec>& x) noexcept {
-        if constexpr (Prec == Float32)
-            return Real<Prec>(::fabsf(x.toMachine()));
-        else
-            return Real<Prec>(::fabs(x.toMachine()));
+        return Real<Prec>(std::abs(x.toMachine()));
     }
 
     template<FloatPrec Prec>

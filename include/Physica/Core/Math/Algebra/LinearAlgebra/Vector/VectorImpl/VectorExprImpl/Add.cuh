@@ -24,6 +24,7 @@ namespace Physica {
     template<Vector V, Scalar U>
     class device_obj<VectorExpr<ExprID::Add, V, U>>
             : public device_obj<BinaryVectorExpr<ExprID::Add, V, U>> {
+        using host_obj = VectorExpr<ExprID::Add, V, U>;
         using Base = device_obj<BinaryVectorExpr<ExprID::Add, V, U>>;
     public:
         using Base::isReverseDiff;
@@ -32,42 +33,71 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
-        /* Getters */
-        [[nodiscard]] __device__ T calc(size_t index) const {
-            if constexpr (isReverseDiff)
-                return calc_value(index);
-            else
-                return Base::getLHS().calc(index) + Base::getRHS();
-        }
-
-        [[nodiscard]] __device__ Tv calc_value(size_t index) const {
-            return Base::getLHS().calc_value(index) + Base::getRHS().value();
-        }
+        /* Operations */
+        [[nodiscard]] __device__ T calc(size_t index) const;
+        [[nodiscard]] __device__ Tv calc_value(size_t index) const;
 
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index) const noexcept {
-            return Base::getLHS().template packet<Pack>(index) + Pack(Base::getRHS());
-        }
-
+        [[nodiscard]] __device__ Pack packet(size_t index) const noexcept;
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index, size_t count) const noexcept {
-            return Base::getLHS().template packet<Pack>(index, count) + Pack(Base::getRHS());
-        }
+        [[nodiscard]] __device__ Pack packet(size_t index, size_t count) const noexcept;
 
         using Base::reverse;
-        void reverse(const Vector auto& grad) const noexcept {
-            static_assert(isReverseDiff);
-            const auto& g = grad.values();
-            if constexpr (ReverseDiff<V>)
-                Base::getLHS().reverse(g);
-            if constexpr (ReverseDiff<U>)
-                Base::getRHS().reverse(g.sum());
-        }
+        void reverse(const Vector auto& grad) const noexcept;
+        /* Getters */
+        using Base::getLHS;
+        using Base::getRHS;
     };
+
+    template<Vector V, Scalar U>
+    [[nodiscard]] __device__ auto device_obj<VectorExpr<ExprID::Add, V, U>>::calc(size_t index) const -> T {
+        if constexpr (host_obj::lowerToFMA()) {
+            T a = getLHS().getLHS().calc(index);
+            T b;
+            if constexpr (Scalar<decltype(getLHS().getRHS())>)
+                b = getLHS().getRHS();
+            else
+                b = getLHS().getRHS().calc(index);
+            T c = getRHS();
+            return fma(a, b, c);
+        }
+        else if constexpr (isReverseDiff)
+            return calc_value(index);
+        else
+            return Base::getLHS().calc(index) + Base::getRHS();
+    }
+
+    template<Vector V, Scalar U>
+    [[nodiscard]] __device__ auto device_obj<VectorExpr<ExprID::Add, V, U>>::calc_value(size_t index) const -> Tv {
+        return Base::getLHS().calc_value(index) + Base::getRHS().value();
+    }
+
+    template<Vector V, Scalar U>
+    template<Packet Pack>
+    [[nodiscard]] __device__ Pack device_obj<VectorExpr<ExprID::Add, V, U>>::packet(size_t index) const noexcept {
+        return Base::getLHS().template packet<Pack>(index) + Pack(Base::getRHS());
+    }
+
+    template<Vector V, Scalar U>
+    template<Packet Pack>
+    [[nodiscard]] __device__ Pack device_obj<VectorExpr<ExprID::Add, V, U>>::packet(size_t index, size_t count) const noexcept {
+        return Base::getLHS().template packet<Pack>(index, count) + Pack(Base::getRHS());
+    }
+
+    template<Vector V, Scalar U>
+    void device_obj<VectorExpr<ExprID::Add, V, U>>::reverse(const Vector auto& grad) const noexcept {
+        static_assert(isReverseDiff);
+        const auto& g = grad.values();
+        if constexpr (ReverseDiff<V>)
+            Base::getLHS().reverse(g);
+        if constexpr (ReverseDiff<U>)
+            Base::getRHS().reverse(g.sum());
+    }
 
     template<Vector V1, Vector V2>
     class device_obj<VectorExpr<ExprID::Add, V1, V2>>
             : public device_obj<BinaryVectorExpr<ExprID::Add, V1, V2>> {
+        using host_obj = VectorExpr<ExprID::Add, V1, V2>;
         using Base = device_obj<BinaryVectorExpr<ExprID::Add, V1, V2>>;
     public:
         using Base::isReverseDiff;
@@ -76,34 +106,59 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
-        /* Getters */
-        [[nodiscard]] __device__ T calc(size_t index) const {
-            if constexpr (isReverseDiff)
-                return calc_value(index);
-            else
-                return Base::getLHS().calc(index) + Base::getRHS().calc(index);
-        }
-
-        [[nodiscard]] __device__ Tv calc_value(size_t index) const {
-            return Base::getLHS().calc_value(index) + Base::getRHS().calc_value(index);
-        }
+        /* Operations */
+        [[nodiscard]] __device__ T calc(size_t index) const;
+        [[nodiscard]] __device__ Tv calc_value(size_t index) const;
 
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index) const noexcept {
-            return Base::getLHS().template packet<Pack>(index)
-                 + Base::getRHS().template packet<Pack>(index);
-        }
-
+        [[nodiscard]] __device__ Pack packet(size_t index) const noexcept;
         template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index, size_t count) const noexcept {
-            return Base::getLHS().template packet<Pack>(index, count)
-                 + Base::getRHS().template packet<Pack>(index, count);
-        }
+        [[nodiscard]] __device__ Pack packet(size_t index, size_t count) const noexcept;
 
         using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
         auto values() const noexcept { return Base::getLHS().values() + Base::getRHS().values(); }
+        /* Getters */
+        using Base::getLHS;
+        using Base::getRHS;
     };
+
+    template<Vector V1, Vector V2>
+    __device__ auto device_obj<VectorExpr<ExprID::Add, V1, V2>>::calc(size_t index) const -> T {
+        if constexpr (host_obj::lowerToFMA()) {
+            T a = getLHS().getLHS().calc(index);
+            T b;
+            if constexpr (Scalar<decltype(getLHS().getRHS())>)
+                b = getLHS().getRHS();
+            else
+                b = getLHS().getRHS().calc(index);
+            T c = getRHS().calc(index);
+            return fma(a, b, c);
+        }
+        else if constexpr (isReverseDiff)
+            return calc_value(index);
+        else
+            return Base::getLHS().calc(index) + Base::getRHS().calc(index);
+    }
+
+    template<Vector V1, Vector V2>
+    __device__ auto device_obj<VectorExpr<ExprID::Add, V1, V2>>::calc_value(size_t index) const -> Tv {
+        return Base::getLHS().calc_value(index) + Base::getRHS().calc_value(index);
+    }
+
+    template<Vector V1, Vector V2>
+    template<Packet Pack>
+    __device__ Pack device_obj<VectorExpr<ExprID::Add, V1, V2>>::packet(size_t index) const noexcept {
+        return Base::getLHS().template packet<Pack>(index)
+             + Base::getRHS().template packet<Pack>(index);
+    }
+
+    template<Vector V1, Vector V2>
+    template<Packet Pack>
+    __device__ Pack device_obj<VectorExpr<ExprID::Add, V1, V2>>::packet(size_t index, size_t count) const noexcept {
+        return Base::getLHS().template packet<Pack>(index, count)
+             + Base::getRHS().template packet<Pack>(index, count);
+    }
 
     template<Vector V1, Vector V2>
     void device_obj<VectorExpr<ExprID::Add, V1, V2>>::reverse(const Vector auto& grad) const noexcept {

@@ -19,6 +19,7 @@
 #pragma once
 
 #include "../VectorExpr.cuh"
+#include "Physica/Core/Parallel/ThreadBlock.cuh"
 
 namespace Physica {
     template<Vector V, Scalar U>
@@ -31,9 +32,10 @@ namespace Physica {
         using Base::isReverseDiff;
     public:
         using Base::Base;
-        /* Getters */
+        /* Operations */
         __host__ __device__ void assign_add(Vector auto&& v) const;
         __device__ void assign_add(Vector auto&& v, const ThreadBlock& block) const;
+        __host__ __device__ void assign_add_base(Vector auto&& v) const;
         void assign_add_cublas(Vector auto&& v) const noexcept;
 
         [[nodiscard]] __device__ T calc(size_t index) const;
@@ -43,11 +45,18 @@ namespace Physica {
         [[nodiscard]] __device__ Pack packet(size_t index) const noexcept;
         template<Packet Pack>
         [[nodiscard]] __device__ Pack packet(size_t index, size_t count) const noexcept;
+
+        [[nodiscard]] __host__ __device__ T sum() const { return getLHS().sum() * getRHS(); }
+        /* Getters */
+        using Base::getLHS;
+        using Base::getRHS;
+    private:
+        __host__ __device__ void assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept;
     };
 
     template<Vector V, Scalar U>
     __host__ __device__ void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_add(Vector auto&& v) const {
-        Base::assign_add(v);
+        assign_add_base(v);
     }
 
     template<Vector V, Scalar U>
@@ -60,7 +69,22 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    void device_obj<VectorExpr<ExprID::Mul, V, U>>::device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_add_cublas(Vector auto&& v) const noexcept {
+    __host__ __device__ void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_add_base(Vector auto&& v) const {
+        using Source = std::remove_cvref<V>::type;
+        using Target = std::remove_cvref<decltype(v)>::type;
+        using T1 = Source::ScalarType;
+        using T2 = Target::ScalarType;
+        constexpr bool LowerToFMA = std::same_as<T1, T2>;
+        if constexpr (LowerToFMA) {
+            v.assert_assign(Base::getDerived());
+            assign_fma_for(v);
+        }
+        else
+            Base::assign_add(v);
+    }
+
+    template<Vector V, Scalar U>
+    void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_add_cublas(Vector auto&& v) const noexcept {
         using Tm = decltype(std::declval<T>().toCUDA());
         v.assert_assign(Base::getLHS());
 
@@ -109,32 +133,121 @@ namespace Physica {
            return Base::getLHS().template packet<Pack>(index, count) * Pack(Base::getRHS());
     }
 
+    template<Vector V, Scalar U>
+    __host__ __device__ void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept {
+        if (IsHost()) {
+            auto fn = [source_ = asStruct(*this), target_ = asStruct(v)] __device__() mutable {
+                const auto& source = source_.getDerived();
+                auto& target = target_.getDerived();
+                size_t length = source.getLength();
+                uint32_t i = blockIdx.x * blockDim.x + threadIdx.x;
+                if (i < length) {
+                    if constexpr (isReverseDiff)
+                        target[i] = fma(source.getLHS().calc_value(i), Tv(source.getRHS().value()), target[i]);
+                    else
+                        target[i] = fma(source.getLHS().calc(i), T(source.getRHS().value()), target[i]);
+                }
+            };
+            CUDAExecutor::launch<Base::MaxThreadsPerBlock>(fn, Base::makeKernelConfig());
+        }
+
+        if constexpr (IsDevice()) {
+            for (size_t i = 0; i < Base::getLength(); ++i) {
+                if constexpr (isReverseDiff)
+                    v[i] = fma(getLHS().calc_value(i), Tv(getRHS().value()), v[i]);
+                else
+                    v[i] = fma(getLHS().calc(i), T(getRHS().value()), v[i]);
+            }
+        }
+    }
+    ////////////////////////////////////////////////////////////////////
     template<Vector V1, Vector V2>
     class device_obj<VectorExpr<ExprID::Mul, V1, V2>>
             : public device_obj<BinaryVectorExpr<ExprID::Mul, V1, V2>> {
+        using This = device_obj<VectorExpr<ExprID::Mul, V1, V2>>;
         using Base = device_obj<BinaryVectorExpr<ExprID::Mul, V1, V2>>;
     protected:
         using typename Base::T;
     public:
         using Base::Base;
+        /* Operations */
+        __host__ __device__ void assign_add(Vector auto&& v) const;
+
+        [[nodiscard]] __device__ T calc(size_t index) const;
+
+        template<Packet Pack>
+        [[nodiscard]] __device__ Pack packet(size_t index) const noexcept;
+        template<Packet Pack>
+        [[nodiscard]] __device__ Pack packet(size_t index, size_t count) const noexcept;
         /* Getters */
-        [[nodiscard]] __device__ T calc(size_t index) const {
-            return Base::getLHS().calc(index) * Base::getRHS().calc(index);
-        }
-
-        template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index) const noexcept {
-            return Base::getLHS().template packet<Pack>(index)
-                 * Base::getRHS().template packet<Pack>(index);
-        }
-
-        template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index, size_t count) const noexcept {
-            return Base::getLHS().template packet<Pack>(index, count)
-                 * Base::getRHS().template packet<Pack>(index, count);
-        }
+        using Base::getLHS;
+        using Base::getRHS;
+    private:
+        __host__ __device__ void assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept;
     };
 
+    template<Vector V1, Vector V2>
+    __host__ __device__ void device_obj<VectorExpr<ExprID::Mul, V1, V2>>::assign_add(Vector auto&& v) const {
+        using Target = std::remove_cvref_t<decltype(v)>;
+        using T1 = std::remove_cvref_t<V1>::ScalarType;
+        using T2 = std::remove_cvref_t<V2>::ScalarType;
+        using U = Target::ScalarType;
+        constexpr bool LowerToFMA = std::same_as<T1, T2> && std::same_as<T, U>;
+        if constexpr (LowerToFMA) {
+            v.assert_assign(Base::getDerived());
+            assign_fma_for(v);
+        }
+        else
+            Base::assign_add(v);
+    }
+
+    template<Vector V1, Vector V2>
+    __device__ auto device_obj<VectorExpr<ExprID::Mul, V1, V2>>::calc(size_t index) const -> T {
+        return Base::getLHS().calc(index) * Base::getRHS().calc(index);
+    }
+
+    template<Vector V1, Vector V2>
+    template<Packet Pack>
+    __device__ Pack device_obj<VectorExpr<ExprID::Mul, V1, V2>>::packet(size_t index) const noexcept {
+           return Base::getLHS().template packet<Pack>(index)
+             * Base::getRHS().template packet<Pack>(index);
+    }
+
+    template<Vector V1, Vector V2>
+    template<Packet Pack>
+    __device__ Pack device_obj<VectorExpr<ExprID::Mul, V1, V2>>::packet(size_t index, size_t count) const noexcept {
+        return Base::getLHS().template packet<Pack>(index, count)
+             * Base::getRHS().template packet<Pack>(index, count);
+    }
+
+    template<Vector V1, Vector V2>
+    __host__ __device__ void device_obj<VectorExpr<ExprID::Mul, V1, V2>>::assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept {
+        if (IsHost()) {
+            auto fn = [source_ = asStruct(*this), target_ = asStruct(v)] __device__() mutable {
+                const auto& source = source_.getDerived();
+                auto& target = target_.getDerived();
+                size_t length = source.getLength();
+                uint32_t i = blockIdx.x * blockDim.x + threadIdx.x;
+                if (i < length) {
+                    if constexpr (Base::isReverseDiff)
+                        target[i] = fma(source.getLHS().calc_value(i), Tv(source.getRHS().calc_value(i)), target[i]);
+                    else
+                        target[i] = fma(source.getLHS().calc(i), T(source.getRHS().calc(i)), target[i]);
+                }
+            };
+            CUDAExecutor::launch<Base::MaxThreadsPerBlock>(fn, Base::makeKernelConfig());
+        }
+
+        if constexpr (IsDevice()) {
+            for (size_t i = 0; i < Base::getLength(); ++i) {
+                if constexpr (Base::isReverseDiff)
+                    v[i] = fma(getLHS().calc_value(i), Tv(getRHS().calc_value(i)), v[i]);
+                else
+                    v[i] = fma(getLHS().calc(i), T(getRHS().calc(i)), v[i]);
+            }
+        }
+    }
+    ////////////////////////////////////////////////////////////////////
     template<Vector V, Scalar U>
     [[nodiscard]] __host__ __device__ auto operator*(V&& v, U&& x) noexcept requires(DeviceObj<V>) {
         return device_obj<VectorExpr<ExprID::Mul, remove_device_obj_t<V&&>, U&&>>(std::forward<V>(v), std::forward<U>(x));

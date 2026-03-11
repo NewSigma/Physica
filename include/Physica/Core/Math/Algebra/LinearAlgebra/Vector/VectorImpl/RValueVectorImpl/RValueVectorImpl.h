@@ -706,7 +706,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    consteval size_t RValueVector<Derived>::maxSizeAtCompile(const Vector auto& other) noexcept {
+    __host__ __device__ consteval size_t RValueVector<Derived>::maxSizeAtCompile(const Vector auto& other) noexcept {
         return std::max(SizeAtCompile, std::remove_cvref_t<decltype(other)>::SizeAtCompile);
     }
 

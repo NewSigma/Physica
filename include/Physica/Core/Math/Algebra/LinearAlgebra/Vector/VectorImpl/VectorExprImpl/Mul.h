@@ -118,9 +118,7 @@ namespace Physica {
         if constexpr (LowerToFMA) {
             v.assert_assign(Base::getDerived());
             if constexpr (Internal::EnableSIMD<Source, Target>::value && !isReverseDiff) {
-                constexpr size_t Length1 = Source::SizeAtCompile;
-                constexpr size_t Length2 = Target::SizeAtCompile;
-                constexpr size_t Length = std::max(Length1, Length2);
+                constexpr size_t Length = Base::maxSizeAtCompile(v);
                 assign_fma_simd<Target, Length>(v);
             }
             else
@@ -201,7 +199,7 @@ namespace Physica {
                 v[i] = fma(getLHS().calc(i), T(getRHS()), v[i]);
         }
     }
-
+    ////////////////////////////////////////////////////////////////////
     template<Vector V1, Vector V2>
     class VectorExpr<ExprID::Mul, V1, V2>
             : public BinaryVectorExpr<ExprID::Mul, V1, V2> {
@@ -358,7 +356,7 @@ namespace Physica {
                 v[i] = fma(getLHS().calc(i), getRHS().calc(i), v[i]);
         }
     }
-
+    ////////////////////////////////////////////////////////////////////
     template<Vector V, Scalar U>
     [[nodiscard]] auto operator*(V&& v, U&& x) noexcept requires(!DeviceObj<V>) {
         using RtnTy = VectorExpr<ExprID::Mul, V&&, U&&>;

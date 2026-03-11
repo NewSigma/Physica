@@ -33,8 +33,8 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<T> calc(size_t s) const;
-        [[nodiscard]] Tv calc_value(size_t s) const;
+        [[nodiscard]] CoDiff<T> calc(size_t index) const;
+        [[nodiscard]] Tv calc_value(size_t index) const;
 
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const noexcept;
@@ -47,40 +47,39 @@ namespace Physica {
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
-    private:
-        consteval static bool lowerToFMA() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool lowerToFMA() noexcept;
     };
 
     template<Vector V, Scalar U>
-    auto VectorExpr<ExprID::Add, V, U>::calc(size_t s) const -> CoDiff<T> {
+    auto VectorExpr<ExprID::Add, V, U>::calc(size_t index) const -> CoDiff<T> {
         if constexpr (lowerToFMA()) {
-            T a = getLHS().getLHS().calc(s);
+            T a = getLHS().getLHS().calc(index);
             T b;
             if constexpr (Scalar<decltype(getLHS().getRHS())>)
                 b = getLHS().getRHS();
             else
-                b = getLHS().getRHS().calc(s);
+                b = getLHS().getRHS().calc(index);
             T c = getRHS();
             return fma(a, b, c);
         }
         else
-            return getLHS().calc(s) + getRHS();
+            return getLHS().calc(index) + getRHS();
     }
 
     template<Vector V, Scalar U>
-    auto VectorExpr<ExprID::Add, V, U>::calc_value(size_t s) const -> Tv {
+    auto VectorExpr<ExprID::Add, V, U>::calc_value(size_t index) const -> Tv {
         if constexpr (lowerToFMA()) {
-            Tv a = getLHS().getLHS().calc_value(s);
+            Tv a = getLHS().getLHS().calc_value(index);
             Tv b;
             if constexpr (Scalar<decltype(getLHS().getRHS())>)
                 b = getLHS().getRHS().value();
             else
-                b = getLHS().getRHS().calc_value(s);
+                b = getLHS().getRHS().calc_value(index);
             Tv c = getRHS().value();
             return fma(a, b, c);
         }
         else
-            return getLHS().calc_value(s) + getRHS().value();
+            return getLHS().calc_value(index) + getRHS().value();
     }
 
     template<Vector V, Scalar U>
@@ -161,8 +160,8 @@ namespace Physica {
         void assign(Vector auto&& v) const;
         void assign_mkl(Vector auto& v) const noexcept;
 
-        [[nodiscard]] CoDiff<T> calc(size_t s) const;
-        [[nodiscard]] Tv calc_value(size_t s) const;
+        [[nodiscard]] CoDiff<T> calc(size_t index) const;
+        [[nodiscard]] Tv calc_value(size_t index) const;
 
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const;
@@ -175,8 +174,7 @@ namespace Physica {
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
-    private:
-        consteval static bool lowerToFMA() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool lowerToFMA() noexcept;
     };
 
     template<Vector V1, Vector V2>
@@ -212,35 +210,35 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    auto VectorExpr<ExprID::Add, V1, V2>::calc(size_t s) const -> CoDiff<T> {
+    auto VectorExpr<ExprID::Add, V1, V2>::calc(size_t index) const -> CoDiff<T> {
         if constexpr (lowerToFMA()) {
-            T a = getLHS().getLHS().calc(s);
+            T a = getLHS().getLHS().calc(index);
             T b;
             if constexpr (Scalar<decltype(getLHS().getRHS())>)
                 b = getLHS().getRHS();
             else
-                b = getLHS().getRHS().calc(s);
-            T c = getRHS().calc(s);
+                b = getLHS().getRHS().calc(index);
+            T c = getRHS().calc(index);
             return fma(a, b, c);
         }
         else
-            return getLHS().calc(s) + getRHS().calc(s);
+            return getLHS().calc(index) + getRHS().calc(index);
     }
 
     template<Vector V1, Vector V2>
-    auto VectorExpr<ExprID::Add, V1, V2>::calc_value(size_t s) const -> Tv {
+    auto VectorExpr<ExprID::Add, V1, V2>::calc_value(size_t index) const -> Tv {
         if constexpr (lowerToFMA()) {
-            Tv a = getLHS().getLHS().calc_value(s);
+            Tv a = getLHS().getLHS().calc_value(index);
             Tv b;
             if constexpr (Scalar<decltype(getLHS().getRHS())>)
                 b = getLHS().getRHS().value();
             else
-                b = getLHS().getRHS().calc_value(s);
-            Tv c = getRHS().calc_value(s);
+                b = getLHS().getRHS().calc_value(index);
+            Tv c = getRHS().calc_value(index);
             return fma(a, b, c);
         }
         else
-            return getLHS().calc_value(s) + getRHS().calc_value(s);
+            return getLHS().calc_value(index) + getRHS().calc_value(index);
     }
 
     template<Vector V1, Vector V2>
