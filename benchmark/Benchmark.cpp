@@ -18,8 +18,10 @@
  */
 #include <algorithm>
 #include <cmath>
+#include <chrono>
 #include <fstream>
 #include <iostream>
+#include <print>
 #include <unordered_map>
 #include "Physica/Core/Version.h"
 #include "Physica/Config.h"
@@ -131,8 +133,14 @@ int main(int argc, char** argv) {
     if (ReportUnrecognizedArguments(argc, argv))
         return 1;
 
-    Reporter reporter{};
-    RunSpecifiedBenchmarks(&reporter);
-    Shutdown();
+    auto start = std::chrono::steady_clock::now();
+    {
+        Reporter reporter{};
+        RunSpecifiedBenchmarks(&reporter);
+        Shutdown();
+    }
+    auto end = std::chrono::steady_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start);
+    std::println("Elapsed time: {} Min", duration.count());
     return 0;
 }

@@ -36,7 +36,7 @@ namespace {
     }
 }
 
-BENCHMARK(qr_mkl)->Name("QR mkl")
+BENCHMARK(qr_mkl)->Name("DenseQR mkl")
     ->Arg(4)
     ->Arg(8)
     ->Arg(16)

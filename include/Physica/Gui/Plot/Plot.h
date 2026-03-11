@@ -299,8 +299,8 @@ namespace Physica {
         std::sort(buffer.begin(), buffer.end());
         auto* result = new QBoxSet();
         const size_t count = v.getLength();
-        result->setValue(QBoxSet::LowerExtreme, double(*buffer.begin()));
-        result->setValue(QBoxSet::UpperExtreme, double(*buffer.rbegin()));
+        result->setValue(QBoxSet::LowerExtreme, double(buffer.front()));
+        result->setValue(QBoxSet::UpperExtreme, double(buffer.back()));
         result->setValue(QBoxSet::Median, findMedian(buffer, 0, count));
         result->setValue(QBoxSet::LowerQuartile, findMedian(buffer, 0, count / 2));
         result->setValue(QBoxSet::UpperQuartile, findMedian(buffer, (count / 2) + (count % 2), count));

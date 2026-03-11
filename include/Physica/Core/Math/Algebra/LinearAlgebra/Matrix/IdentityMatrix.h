@@ -87,7 +87,7 @@ namespace Physica {
     void IdentityMatrix<T, Order>::assign(Matrix auto&& target) const {
         target.zeros();
         for (size_t i = 0; i < getRow(); ++i)
-            target(i, i) = T(1);
+            target[i, i] = T(1);
     }
 
     template<Scalar T, size_t Order>

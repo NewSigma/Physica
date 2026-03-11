@@ -285,7 +285,7 @@ namespace Physica {
         lu[1].compute(action);
 
         Trv lnAD = 0, sgnD = 1;
-        for (const auto& spinLU : lu) {
+        for (auto& spinLU : lu) {
             lnAD += spinLU.lnAbsDet();
             sgnD *= spinLU.sgndet().real();
         }

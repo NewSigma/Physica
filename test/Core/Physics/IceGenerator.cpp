@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -65,9 +65,9 @@ namespace {
 int main() {
     IceGenerator<ScalarType> gen(makeCell(), 5.555, 2.08);
     const auto arr = Test::findBondedH(gen, 0);
-    const bool b1 = std::ranges::find(arr, 0) != arr.cend();
-    const bool b2 = std::ranges::find(arr, 6) != arr.cend();
-    const bool b3 = std::ranges::find(arr, 7) != arr.cend();
+    const bool b1 = std::ranges::find(arr, 0) != arr.end();
+    const bool b2 = std::ranges::find(arr, 6) != arr.end();
+    const bool b3 = std::ranges::find(arr, 7) != arr.end();
     expect(b1 && b2 && b3);
     return 0;
 }

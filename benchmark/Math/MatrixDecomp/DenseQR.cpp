@@ -48,7 +48,7 @@ namespace {
     }
 }
 
-BENCHMARK(qr)->Name("QR")
+BENCHMARK(qr)->Name("DenseQR")
     ->Arg(4)
     ->Arg(8)
     ->Arg(16)
@@ -57,7 +57,7 @@ BENCHMARK(qr)->Name("QR")
     ->Arg(256)
     ->Arg(1024);
 
-BENCHMARK(qr_base)->Name("QR base")
+BENCHMARK(qr_base)->Name("DenseQR base")
     ->Arg(4)
     ->Arg(8)
     ->Arg(16)

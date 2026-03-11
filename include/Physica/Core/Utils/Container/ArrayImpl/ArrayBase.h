@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,10 +20,9 @@
 
 #include <cassert>
 #include <cstddef>
-#include <type_traits>
 #include <memory>
+#include <type_traits>
 #include "Physica/CRTPBase.h"
-#include "Iterator.h"
 
 namespace Physica {
     /**
@@ -34,6 +33,8 @@ namespace Physica {
         using This = ArrayBase<Derived, Allocator>;
         using Base = CRTPBase<This>;
         using AllocatorTraits = std::allocator_traits<Allocator>;
+
+        template<class> class Iterator;
     public:
         using allocator_type = Allocator;
         using value_type = AllocatorTraits::value_type;
@@ -44,32 +45,16 @@ namespace Physica {
         using rvalue_reference = AllocatorTraits::rvalue_reference;
 
         using ElemType = Traits<Derived>::ElemType;
-    protected:
-        using IterF = PtrIteratorF<Derived>;
-        using IterR = PtrIteratorR<Derived>;
-        using IterCF = PtrIteratorF<const Derived>;
-        using IterCR = PtrIteratorR<const Derived>;
-
         static_assert(std::is_same<value_type, ElemType>::value, "[Error]: Declaration is not self consistent");
     public:
         ~ArrayBase() = default;
         /* Operators */
-        [[nodiscard]] __host__ __device__ decltype(auto) operator[](this auto&&, size_t index);
+        [[nodiscard]] __host__ __device__ auto& operator[](this auto&&, size_t index) noexcept;
         [[nodiscard]] __host__ __device__ bool operator==(const ArrayBase& array) const;
         [[nodiscard]] __host__ __device__ bool operator!=(const ArrayBase& array) const { return !(*this == array); }
         /* Iterators */
-        [[nodiscard]] __host__ __device__ auto begin() noexcept { return IterF(data()); }
-        [[nodiscard]] __host__ __device__ auto begin() const noexcept { return cbegin(); }
-        [[nodiscard]] __host__ __device__ auto cbegin() const noexcept { return IterCF(data()); }
-        [[nodiscard]] __host__ __device__ auto end() noexcept { return IterF(data() + getLength()); }
-        [[nodiscard]] __host__ __device__ auto end() const noexcept { return cend(); }
-        [[nodiscard]] __host__ __device__ auto cend() const noexcept { return IterCF(data() + getLength()); }
-        [[nodiscard]] __host__ __device__ auto rbegin() noexcept { return IterR(data() + getLength() - 1); }
-        [[nodiscard]] __host__ __device__ auto rbegin() const noexcept { return crbegin(); }
-        [[nodiscard]] __host__ __device__ auto crbegin() const noexcept { return IterCR(data() + getLength() - 1); }
-        [[nodiscard]] __host__ __device__ auto rend() noexcept { return IterR(data() - 1); }
-        [[nodiscard]] __host__ __device__ auto rend() const noexcept { return crend(); }
-        [[nodiscard]] __host__ __device__ auto crend() const noexcept { return IterCR(data() - 1); }
+        [[nodiscard]] __host__ __device__ constexpr auto begin(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr auto end(this auto&&) noexcept;
         /* Operations */
         void send(int from, int to);
         void sendrecv(int send_to, int recv_from);
@@ -86,6 +71,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ pointer data() noexcept { return Base::getDerived().data(); }
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return Base::getDerived().data(); }
         [[nodiscard]] __host__ __device__ auto* data_ptr(this auto&&, size_t index) noexcept;
+        [[nodiscard]] __host__ __device__ auto& front(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto& back(this auto&&) noexcept;
         /* Static members */
         template<class... Args>
         [[nodiscard]] __host__ __device__ consteval static bool isTrivialDefaultConstruct() noexcept;
@@ -96,6 +83,46 @@ namespace Physica {
         /* Operators */
         ArrayBase& operator=(const ArrayBase&) = default;
         ArrayBase& operator=(ArrayBase&&) noexcept = default;
+    };
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    class ArrayBase<Derived, Allocator>::Iterator {
+        using This = Iterator<Container>;
+        using ElemType = Traits<std::remove_const_t<Container>>::ElemType;
+        constexpr static bool isConst = std::is_const<Container>::value;
+    public:
+        using iterator_category = std::contiguous_iterator_tag;
+        using value_type = std::conditional<isConst, const ElemType, ElemType>::type;
+        using difference_type = std::ptrdiff_t;
+        using pointer = std::add_pointer<value_type>::type;
+        using reference = std::add_lvalue_reference<value_type>::type;
+    private:
+        pointer p;
+    public:
+        constexpr Iterator() = default;
+        __host__ __device__ constexpr explicit Iterator(pointer p) noexcept;
+        __host__ __device__ constexpr Iterator(const This& ite) noexcept;
+        constexpr ~Iterator() = default;
+        /* Operators */
+        constexpr This& operator=(const This&) = default;
+        constexpr This& operator=(This&&) noexcept = default;
+        __host__ __device__ constexpr This& operator++() noexcept;
+        __host__ __device__ constexpr This& operator--() noexcept;
+        __host__ __device__ constexpr This& operator+=(difference_type n) noexcept;
+        __host__ __device__ constexpr This& operator-=(difference_type n) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr This operator++(int) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr This operator--(int) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr reference operator*() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr pointer operator->() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr reference operator[](difference_type n) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr bool operator==(const This& other) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr auto operator<=>(const This& other) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr This operator+(difference_type n) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr This operator-(difference_type n) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr difference_type operator-(const This& other) const noexcept;
+        /* Friends */
+        __host__ __device__ friend constexpr This operator+(difference_type n, const This& ite) noexcept { return ite + n; }
     };
 }
 

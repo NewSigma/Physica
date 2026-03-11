@@ -25,7 +25,7 @@ namespace Physica {
      * A direct implementation for adaptive doping
      */
     template<Scalar T, RNG R>
-    void fastDoping(int iteration, int windowSize, T targetRho, T stepsize, HubbardParams<T>& params, auto& dqmc) {
+    void fastDoping(int iteration, int windowSize, T targetRho, T stepsize, HubbardParams<T>& params, auto& dqmc, auto&&... args) {
         assert(windowSize % 2 == 1 && "[Error]: Required to avoid divide by zero");
         assert(T(0) <= targetRho && targetRho <= T(2) && "[Error]: Invalid target");
         SiteSampler<T> sampler1(params, windowSize, SiteSampler<T>::Density);
@@ -39,7 +39,7 @@ namespace Physica {
                 params.setChemMu(mu);
             }
 
-            dqmc.template step<R>();
+            dqmc.template step<R>(std::forward<decltype(args)>(args)...);
             sampler1.sample(dqmc.getGreens(), dqmc.getRSign());
             sampler2.sample(dqmc.getGreens(), dqmc.getRSign());
         }

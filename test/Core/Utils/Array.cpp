@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,9 +24,9 @@ using namespace Physica;
 namespace {
     template<class C>
     consteval void rangeTest() noexcept {
-        using I = PtrIteratorF<C>;
+        using I = std::ranges::iterator_t<C>;
         static_assert(std::indirectly_readable<I>);
-        static_assert(std::indirectly_writable<I, long>);
+        static_assert(std::indirectly_writable<I, typename C::ElemType>);
         static_assert(std::incrementable<I>);
         static_assert(std::sized_sentinel_for<I, I>);
         static_assert(std::contiguous_iterator<I>);

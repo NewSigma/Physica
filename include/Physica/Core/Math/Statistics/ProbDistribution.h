@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -47,7 +47,7 @@ namespace Physica {
         [[nodiscard]] const auto& getBucket() const noexcept { return bucket; }
         [[nodiscard]] size_t getNumBin() const noexcept { return bucket.getLength(); }
         [[nodiscard]] T getFromPoint() const noexcept { return seperates[0]; }
-        [[nodiscard]] T getToPoint() const noexcept { return *seperates.crbegin(); }
+        [[nodiscard]] T getToPoint() const noexcept { return seperates.back(); }
     private:
         size_t calcNumSample() const;
     };

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,7 +25,7 @@
 
 namespace Physica {
     template<class Derived, class Allocator>
-    __host__ __device__ decltype(auto) ArrayBase<Derived, Allocator>::operator[](this auto&& self, size_t index) {
+    __host__ __device__ auto& ArrayBase<Derived, Allocator>::operator[](this auto&& self, size_t index) noexcept {
         assert(index < self.getLength() && "[Error]: Index overflow");
         return self.data()[index];
     }
@@ -43,9 +43,23 @@ namespace Physica {
     }
 
     template<class Derived, class Allocator>
+    __host__ __device__ constexpr auto ArrayBase<Derived, Allocator>::begin(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using Container = std::conditional<std::is_const_v<std::remove_reference_t<Self>>, const Derived, Derived>::type;
+        return Iterator<Container>(self.data());
+    }
+
+    template<class Derived, class Allocator>
+    __host__ __device__ constexpr auto ArrayBase<Derived, Allocator>::end(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using Container = std::conditional<std::is_const_v<std::remove_reference_t<Self>>, const Derived, Derived>::type;
+        return Iterator<Container>(self.data() + self.getLength());
+    }
+
+    template<class Derived, class Allocator>
     void ArrayBase<Derived, Allocator>::read(const auto& loc, const char* name) {
         const auto group = loc.openGroup(name);
-        std::array<char, 32> buffer{}; //32 is enough for uint64_t
+        std::array<char, 32> buffer{}; // 32 is enough for uint64_t
         for (size_t i = 0; i < getLength(); ++i) {
             std::sprintf(buffer.data(), "%zu", i);
             (*this)[i].read(group, buffer.data());
@@ -55,7 +69,7 @@ namespace Physica {
     template<class Derived, class Allocator>
     void ArrayBase<Derived, Allocator>::write(auto& loc, const char* name) const {
         auto group = loc.openGroup(name);
-        std::array<char, 32> buffer{}; //32 is enough for uint64_t
+        std::array<char, 32> buffer{}; // 32 is enough for uint64_t
         for (size_t i = 0; i < getLength(); ++i) {
             std::sprintf(buffer.data(), "%zu", i);
             (*this)[i].write(group, buffer.data());
@@ -69,8 +83,116 @@ namespace Physica {
     }
 
     template<class Derived, class Allocator>
+    __host__ __device__ auto& ArrayBase<Derived, Allocator>::front(this auto&& self) noexcept {
+        assert(!self.empty());
+        return self[0];
+    }
+
+    template<class Derived, class Allocator>
+    __host__ __device__ auto& ArrayBase<Derived, Allocator>::back(this auto&& self) noexcept {
+        assert(!self.empty());
+        return self[self.getLength() - 1];
+    }
+
+    template<class Derived, class Allocator>
     template<class... Args>
     __host__ __device__ consteval bool ArrayBase<Derived, Allocator>::isTrivialDefaultConstruct() noexcept {
         return (sizeof...(Args) == 0) && std::is_trivially_default_constructible<value_type>::value;
+    }
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr ArrayBase<Derived, Allocator>::Iterator<Container>::Iterator(pointer p) noexcept : p(p) {}
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr ArrayBase<Derived, Allocator>::Iterator<Container>::Iterator(const This& ite) noexcept : p(ite.p) {}
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr auto ArrayBase<Derived, Allocator>::Iterator<Container>::operator++() noexcept -> This& {
+        ++p;
+        return *this;
+    }
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr auto ArrayBase<Derived, Allocator>::Iterator<Container>::operator--() noexcept -> This& {
+        --p;
+        return *this;
+    }
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr auto ArrayBase<Derived, Allocator>::Iterator<Container>::operator+=(difference_type n) noexcept -> This& {
+        p += n;
+        return *this;
+    }
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr auto ArrayBase<Derived, Allocator>::Iterator<Container>::operator-=(difference_type n) noexcept -> This& {
+        p -= n;
+        return *this;
+    }
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr auto ArrayBase<Derived, Allocator>::Iterator<Container>::operator++(int) noexcept -> This {
+        return This(p++);
+    }
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr auto ArrayBase<Derived, Allocator>::Iterator<Container>::operator--(int) noexcept -> This {
+        return This(p--);
+    }
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr auto ArrayBase<Derived, Allocator>::Iterator<Container>::operator*() const noexcept -> reference {
+        return *p;
+    }
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr auto ArrayBase<Derived, Allocator>::Iterator<Container>::operator->() const noexcept -> pointer {
+        return p;
+    }
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr auto ArrayBase<Derived, Allocator>::Iterator<Container>::operator[](difference_type n) const noexcept -> reference {
+        return *operator+(n);
+    }
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr bool ArrayBase<Derived, Allocator>::Iterator<Container>::operator==(const This& other) const noexcept {
+        return p == other.p;
+    }
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr auto ArrayBase<Derived, Allocator>::Iterator<Container>::operator<=>(const This& other) const noexcept {
+        return p <=> other.p;
+    }
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr auto ArrayBase<Derived, Allocator>::Iterator<Container>::operator+(difference_type n) const noexcept -> This {
+        return This(p + n);
+    }
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr auto ArrayBase<Derived, Allocator>::Iterator<Container>::operator-(difference_type n) const noexcept -> This {
+        return This(p - n);
+    }
+
+    template<class Derived, class Allocator>
+    template<class Container>
+    __host__ __device__ constexpr auto ArrayBase<Derived, Allocator>::Iterator<Container>::operator-(const This& other) const noexcept -> difference_type {
+        return p - other.p;
     }
 }

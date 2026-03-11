@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -57,7 +57,8 @@ namespace Physica {
             : intrinsicDim(intrinsicDim_.getLength()) {
         const size_t length = intrinsicDim.getLength();
         correlateDim.resize(length);
-        const size_t maxDim = *std::max_element(intrinsicDim_.cbegin(), intrinsicDim_.cend());
+
+        const size_t maxDim = *std::ranges::max_element(intrinsicDim_);
         const auto data = DataMatrix::template random_uniform<R>(sampleNum, maxDim);
         for (size_t i = 0; i < length; ++i) {
             intrinsicDim[i] = ScalarType(intrinsicDim_[i]);

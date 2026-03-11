@@ -65,6 +65,8 @@ namespace Physica {
         [[nodiscard]] int getNumFreq() const noexcept { return matsubara.getOrder() / 2; }
         [[nodiscard]] int getNumSite() const noexcept { return auxField.getCol(); }
         [[nodiscard]] int getMaxBoson() const noexcept { return auxField.getRow(); }
+        [[nodiscard]] Tr getRepelU() const noexcept { return params.getRepelU(); }
+        [[nodiscard]] Tr getBeta() const noexcept { return params.getBeta(); }
         [[nodiscard]] const auto& getParams() const noexcept { return params; }
     };
 

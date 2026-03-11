@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -87,11 +87,6 @@ namespace Physica {
         using typename Base::rvalue_reference;
 
         using typename Base::ElemType;
-    protected:
-        using typename Base::IterF;
-        using typename Base::IterR;
-        using typename Base::IterCF;
-        using typename Base::IterCR;
     private:
         pointer d_data = nullptr;
         size_t length = 0;
@@ -108,20 +103,10 @@ namespace Physica {
         This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __device__ lvalue_reference operator[](size_t index) { return Base::operator[](index); }
         [[nodiscard]] __device__ const_lvalue_reference operator[](size_t index) const { return Base::operator[](index); }
-        /* Iterators */
-        __device__ auto begin() noexcept { return Base::begin(); }
-        __device__ auto begin() const noexcept { return Base::cbegin(); }
-        __device__ auto cbegin() const noexcept { return Base::cbegin(); }
-        __device__ auto end() noexcept { return Base::end(); }
-        __device__ auto end() const noexcept { return Base::cend(); }
-        __device__ auto cend() const noexcept { return Base::cend(); }
-        __device__ auto rbegin() noexcept { return Base::rbegin(); }
-        __device__ auto rbegin() const noexcept { return Base::crbegin(); }
-        __device__ auto crbegin() const noexcept { return Base::cbegin(); }
-        __device__ auto rend() noexcept { return Base::rend(); }
-        __device__ auto rend() const noexcept { return Base::crend(); }
-        __device__ auto crend() const noexcept { return Base::crend(); }
         /* Operations */
+        __device__ constexpr auto begin(this auto&&) noexcept;
+        __device__ constexpr auto end(this auto&&) noexcept;
+
         [[nodiscard]] auto toPlainHost() const;
         [[nodiscard]] host_obj toHost() const;
         [[nodiscard]] host_obj toHostAsync() const;
@@ -139,16 +124,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
         using Base::empty;
-    private:
-        /* Iterators */
-        using Base::begin;
-        using Base::cbegin;
-        using Base::end;
-        using Base::cend;
-        using Base::rbegin;
-        using Base::crbegin;
-        using Base::rend;
-        using Base::crend;
     };
 
     template<class T, class Allocator>
@@ -214,6 +189,16 @@ namespace Physica {
         alloc.deallocate(d_data, capacity);
         d_data = nullptr;
         length = capacity = 0;
+    }
+
+    template<class T, class Allocator>
+    __device__ constexpr auto device_obj<Array<T, Dynamic, Allocator>>::begin(this auto&& self) noexcept {
+        return self.Base::begin();
+    }
+
+    template<class T, class Allocator>
+    __device__ constexpr auto device_obj<Array<T, Dynamic, Allocator>>::end(this auto&& self) noexcept {
+        return self.Base::end();
     }
 
     template<class T, class Allocator>

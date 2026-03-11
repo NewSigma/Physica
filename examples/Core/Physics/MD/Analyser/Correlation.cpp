@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
     const VectorType t = VectorType::linspace(0, numStep / 100.0, numStep);
     QApplication app(argc, argv);
     {
-        Plot* plot = new Plot(0, double(*t.crbegin()) + 0.01, -0.5, 1, 2, 0.5);
+        Plot* plot = new Plot(0, double(t.back()) + 0.01, -0.5, 1, 2, 0.5);
         plot->getChart()->legend()->setAlignment(Qt::AlignTop);
         plot->getChart()->legend()->setMarkerShape(QLegend::MarkerShapeFromSeries);
         auto* axisX = plot->getAxisX();

@@ -97,7 +97,7 @@ namespace Physica {
         cellGridDim = makeGridDim(lattice, cutoff);
         cellAtomMap.resize(getNumParticle());
         cellStartOffset.resize(cellGridDim[0] * cellGridDim[1] * cellGridDim[2] + 1);
-        (*cellStartOffset.rbegin()) = getNumParticle();
+        cellStartOffset.back() = getNumParticle();
         atomCellMap.resize(getNumParticle());
 
         PeriodicCell<T, 3>::toDirect(directPos, lattice);
@@ -295,7 +295,7 @@ namespace Physica {
             Index3D& neighborIndex) {
         const size_t dimSize = cellGridDim[DimID];
         const size_t neigh = static_cast<ssize_t>(centerIndex) + deltaIndex;
-        const size_t arr[3]{dimSize - 1, neigh, 0};
+        const Array<size_t, 3> arr{dimSize - 1, neigh, 0};
         const bool isGood = neigh < dimSize;
         const bool isOverflow = neigh == dimSize;
         const int index = isGood + isOverflow * 2;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -58,7 +58,7 @@ namespace Physica {
         EigenSolver<T> eigenSolver;
         size_t iteration = 0;
     public:
-        RHFSolver(const Molecular<T>& m, const ElectronConfig& electronConfig_, size_t baseSetSize);
+        RHFSolver(const Molecular<T>& m, ElectronConfig electronConfig_, size_t baseSetSize);
         RHFSolver(const RHFSolver&) = delete;
         RHFSolver(RHFSolver&&) noexcept = delete;
         ~RHFSolver() = default;
@@ -98,9 +98,9 @@ namespace Physica {
     };
 
     template<class BaseSetType>
-    RHFSolver<BaseSetType>::RHFSolver(const Molecular<T>& m, const ElectronConfig& electronConfig_, size_t baseSetSize)
+    RHFSolver<BaseSetType>::RHFSolver(const Molecular<T>& m, ElectronConfig electronConfig_, size_t baseSetSize)
             : molecular(m)
-            , electronConfig(electronConfig_)
+            , electronConfig(std::move(electronConfig_))
             , numOccupiedOrbit(electronConfig.getNumOccupiedOrbit())
             , singleHamilton(baseSetSize)
             , overlap(baseSetSize, baseSetSize)
@@ -138,22 +138,22 @@ namespace Physica {
         iteration = 0;
         while (true) {
             auto& abs_error = fock;
-            abs_error = abs_elem(*errorMatrices.crbegin());
+            abs_error = abs_elem(errorMatrices.back());
             const bool nearConverge = abs_error.max() <= T(1E-1); // 1E-1 seleted based on experiments
             const bool doEDIIS = iteration > 0 && (iteration % EDIISBufferSize == 0) && !nearConverge;
             if (doEDIIS)
                 EDIISInterpolation(fockMatrices, densityMatrices, energyBuffer);
             else {
                 formDensityMatrix(densityMatrices, sameSpinElectronDensity);
-                formFockMatrix(fockMatrices, *densityMatrices.crbegin(), sameSpinElectronDensity);
+                formFockMatrix(fockMatrices, densityMatrices.back(), sameSpinElectronDensity);
             }
 
-            preDIIS(fockMatrices, errorMatrices, *densityMatrices.crbegin(), inv_cholesky, DIISMat);
+            preDIIS(fockMatrices, errorMatrices, densityMatrices.back(), inv_cholesky, DIISMat);
             const bool doDIIS = nearConverge && iteration >= DIISBufferSize - 1;
             if (doDIIS)
                 fock = DIISExtrapolation(fockMatrices, DIISMat);
             else
-                fock = *fockMatrices.crbegin();
+                fock = fockMatrices.back();
 
             const MatrixND<T> modifiedFock = (inv_cholesky * fock).compute() * inv_cholesky.transpose();
             eigenSolver.compute(modifiedFock);
@@ -214,7 +214,7 @@ namespace Physica {
             densityMatrices[i].swap(densityMatrices[i + 1]);
 
         const size_t baseSetSize = getBaseSetSize();
-        MatrixND<T>& electronDensity = *densityMatrices.rbegin();
+        MatrixND<T>& electronDensity = densityMatrices.back();
         for (size_t i = 0; i < baseSetSize; ++i) {
             size_t j = 0;
             for (; j < i; ++j) {
@@ -272,8 +272,8 @@ namespace Physica {
                                          const MatrixND<T>& inv_cholesky,
                                          DIISMatrix& DIISMat) {
         /* Insert next error matrix */ {
-            const MatrixND<T> term1 = (*fockMatrices.crbegin() * electronDensity).compute() * overlap;
-            const MatrixND<T> term2 = (overlap * electronDensity).compute() * (*fockMatrices.crbegin());
+            const MatrixND<T> term1 = (fockMatrices.back() * electronDensity).compute() * overlap;
+            const MatrixND<T> term2 = (overlap * electronDensity).compute() * fockMatrices.back();
             const MatrixND<T> temp = term1 - term2;
             errorMatrices[0] = (inv_cholesky * temp).compute() * inv_cholesky.transpose();
             for (size_t i = 0; i < errorMatrices.getLength() - 1; ++i)
@@ -328,8 +328,8 @@ namespace Physica {
             fockMatrices[i].swap(fockMatrices[i + 1]);
         for (size_t i = 0; i < densityMatrices.getLength() - 1; ++i)
             densityMatrices[i].swap(densityMatrices[i + 1]);
-        *fockMatrices.rbegin() = newFock;
-        *densityMatrices.rbegin() = newDensity;
+        fockMatrices.back() = newFock;
+        densityMatrices.back() = newDensity;
     }
 
     template<class BaseSetType>

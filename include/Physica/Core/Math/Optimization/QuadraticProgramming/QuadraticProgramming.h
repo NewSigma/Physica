@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -100,18 +100,17 @@ namespace Physica {
             const VectorND<T> vec_p = EQP.getSolution() - x;
             if (vec_p.norm() <= x.norm() * precision) {
                 const auto& multipliers = EQP.getMultipliers();
-                const auto minimum_ite = std::min_element(multipliers.cbegin(), multipliers.cend());
-                if (!(*minimum_ite).isNegative())
+                auto min_index = multipliers.argmin();
+                if (!multipliers[min_index].isNegative())
                     break;
-                
-                auto minimum_index = std::distance(multipliers.cbegin(), minimum_ite);
+
                 for (bool& activeConstraintFlag : activeConstraintFlags) {
                     if (activeConstraintFlag) {
-                        if (minimum_index == 0) {
+                        if (min_index == 0) {
                             activeConstraintFlag = false;
                             break;
                         }
-                        --minimum_index;
+                        --min_index;
                     }
                 }
             }

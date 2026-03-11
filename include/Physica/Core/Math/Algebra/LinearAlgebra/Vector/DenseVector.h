@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -61,15 +61,6 @@ namespace Physica {
         [[nodiscard]] auto toDeviceAsync() const;
         using Base::toDevice;
         using Base::toDeviceAsync;
-
-        using Base::begin;
-        using Base::cbegin;
-        using Base::end;
-        using Base::cend;
-        using Base::rbegin;
-        using Base::crbegin;
-        using Base::rend;
-        using Base::crend;
 
         [[nodiscard]] T skew() const;
         [[nodiscard]] T excess_kurt() const;

@@ -33,11 +33,6 @@ namespace Physica {
         using typename Base::ScalarType;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
-    protected:
-        using IterF = PtrIteratorF<This>;
-        using IterR = PtrIteratorR<This>;
-        using IterCF = PtrIteratorF<const This>;
-        using IterCR = PtrIteratorR<const This>;
     private:
         using ValueVector = DenseVector<T, Length>;
         using GradType = ScalarType::GradType;
@@ -62,15 +57,6 @@ namespace Physica {
         [[nodiscard]] bool operator==(const This& other) const;
         using Base::operator=;
         using Base::operator[];
-        /* Iterators */
-        using Base::begin;
-        using Base::cbegin;
-        using Base::end;
-        using Base::cend;
-        using Base::rbegin;
-        using Base::crbegin;
-        using Base::rend;
-        using Base::crend;
         /* Operations */
         void zero_grad();
 
@@ -116,4 +102,3 @@ namespace Physica {
 }
 
 #include "DiffVectorImpl/DiffVectorImpl.h" // IWYU pragma: export
-#include "DiffVectorImpl/Iterator.h" // IWYU pragma: export

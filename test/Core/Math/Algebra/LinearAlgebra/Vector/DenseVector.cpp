@@ -29,9 +29,9 @@ using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 namespace {
     template<Vector V>
     consteval void rangeTest() noexcept {
-        using It = PtrIteratorF<V>;
+        using It = std::ranges::iterator_t<V>;
         static_assert(std::indirectly_readable<It>);
-        static_assert(std::indirectly_writable<It, long>);
+        static_assert(std::indirectly_writable<It, typename V::ScalarType>);
         static_assert(std::incrementable<It>);
         static_assert(std::sized_sentinel_for<It, It>);
         static_assert(std::contiguous_iterator<It>);
@@ -199,7 +199,6 @@ namespace {
 int main() {
     rangeTest<Vector4D<float32>>();
     rangeTest<VectorND<float64>>();
-    rangeTest<decltype(std::declval<VectorND<float64>>().tail(0))>();
     strucBindTest();
     formatTest();
 

@@ -42,11 +42,6 @@ namespace Physica {
         using DataSetType = H5DataSet<DataDim>;
         using DataSpaceType = H5DataSpace<DataDim>;
 
-        using IterF = PtrIteratorF<Derived>;
-        using IterR = PtrIteratorR<Derived>;
-        using IterCF = PtrIteratorF<const Derived>;
-        using IterCR = PtrIteratorR<const Derived>;
-
         using ValuesRtnTy = std::conditional<Diffable<ScalarType>, ValueVector<This>, Derived&>::type;
     public:
         ~CompactVector() = default;
@@ -77,19 +72,6 @@ namespace Physica {
         [[nodiscard]] auto tail(this auto&&, size_t from) noexcept;
         template<size_t Length = Dynamic>
         [[nodiscard]] auto segment(this auto&&, size_t from, size_t to) noexcept;
-
-        [[nodiscard]] auto begin() noexcept { return IterF(data()); }
-        [[nodiscard]] auto begin() const noexcept { return cbegin(); }
-        [[nodiscard]] auto cbegin() const noexcept { return IterCF(data()); }
-        [[nodiscard]] auto end() noexcept { return IterF(data() + Base::getLength()); }
-        [[nodiscard]] auto end() const noexcept { return cend(); }
-        [[nodiscard]] auto cend() const noexcept { return IterCF(data() + Base::getLength()); }
-        [[nodiscard]] auto rbegin() noexcept { return IterR(data() + Base::getLength() - 1); }
-        [[nodiscard]] auto rbegin() const noexcept { return crbegin(); }
-        [[nodiscard]] auto crbegin() const noexcept { return IterCR(data() + Base::getLength() - 1); }
-        [[nodiscard]] auto rend() noexcept { return IterR(data() - 1); }
-        [[nodiscard]] auto rend() const noexcept { return crend(); }
-        [[nodiscard]] auto crend() const noexcept { return IterCR(data() - 1); }
 
         [[nodiscard]] CoDiff<Tr> norm1() const noexcept;
         [[nodiscard]] CoDiff<Tr> norm1_base() const noexcept;

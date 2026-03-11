@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -110,12 +110,10 @@ namespace Physica {
             //Find exemplars
             for (size_t i = 0; i < order; ++i) {
                 auto find_pos = exemplars.find(i);
-                const bool hasExemplar = find_pos != exemplars.end();
-
                 buffer = responsibility.row(i) + availabilities.row(i);
-                const auto max_pos = std::max_element(buffer.cbegin(), buffer.cend());
-                const bool isExemplar = size_t(max_pos - buffer.cbegin()) == i;
 
+                const bool hasExemplar = find_pos != exemplars.end();
+                const bool isExemplar = buffer.argmax() == i;
                 if (hasExemplar != isExemplar) {
                     if (isExemplar)
                         exemplars.insert(i);
