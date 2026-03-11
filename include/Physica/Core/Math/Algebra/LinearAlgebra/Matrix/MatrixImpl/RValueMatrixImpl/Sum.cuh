@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,9 +26,6 @@ namespace Physica {
         using host_obj = MatrixSum<M, ReduceCol>;
         using This = device_obj<MatrixSum<M, ReduceCol>>;
         using Base = device_obj<RValueVector<host_obj>>;
-    public:
-        using Base::isReverseDiff;
-        using Base::MaxThreadsPerBlock;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -71,7 +68,7 @@ namespace Physica {
 
     template<class M, bool ReduceCol>
     void device_obj<MatrixSum<M, ReduceCol>>::reverse(const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(Base::isReverseDiff);
         if constexpr (ReduceCol)
             mat.getDerived().reverse(grad);
         else

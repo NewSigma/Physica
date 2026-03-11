@@ -31,7 +31,6 @@ namespace Physica {
         using DeviceVector = device_obj<VectorND<T>>;
         using Tc = T::ComplexType;
         constexpr static bool isComplex = T::isComplex;
-        constexpr static int MaxThreadsPerBlock = DeviceVector::MaxThreadsPerBlock;
     private:
         device_obj<MatrixND<T>> working;
         DeviceVector taus;
@@ -103,7 +102,7 @@ namespace Physica {
         const size_t length = taus.getLength();
         vecD.resize(length);
 
-        const int numThread = std::min(length, (size_t)MaxThreadsPerBlock);
+        const int numThread = std::min<size_t>(length, CUDADevAttr::DefaultThreadsPerBlock);
         CUDAExecutor::launch([working_ = asStruct(working), vecD_ = asStruct(vecD)] __device__() mutable {
             auto& working = working_.getDerived();
             auto& vecD = vecD_.getDerived();

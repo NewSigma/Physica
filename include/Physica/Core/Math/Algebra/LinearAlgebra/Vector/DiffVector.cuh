@@ -31,7 +31,6 @@ namespace Physica {
         using Base = device_obj<CompactVector<host_obj>>;
     public:
         using typename Base::ScalarType;
-        using Base::MaxThreadsPerBlock;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     private:

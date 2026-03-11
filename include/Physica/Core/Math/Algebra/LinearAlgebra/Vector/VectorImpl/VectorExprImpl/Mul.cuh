@@ -92,7 +92,7 @@ namespace Physica {
         ctx.setPointerMode(false);
         const size_t n = Base::getLength();
         const auto alpha = Base::getRHS().toMachine();
-        const auto* x = reinterpret_cast<Tm*>(Base::getLHS().data());
+        const auto* x = reinterpret_cast<const Tm*>(Base::getLHS().data());
         auto* y = reinterpret_cast<Tm*>(v.data());
         if constexpr (Base::isComplex) {
             if constexpr (T::Prec == Float32)
@@ -148,7 +148,7 @@ namespace Physica {
                         target[i] = fma(source.getLHS().calc(i), T(source.getRHS().value()), target[i]);
                 }
             };
-            CUDAExecutor::launch<Base::MaxThreadsPerBlock>(fn, Base::makeKernelConfig());
+            CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(fn, Base::makeKernelConfig());
         }
 
         if constexpr (IsDevice()) {
@@ -235,7 +235,7 @@ namespace Physica {
                         target[i] = fma(source.getLHS().calc(i), T(source.getRHS().calc(i)), target[i]);
                 }
             };
-            CUDAExecutor::launch<Base::MaxThreadsPerBlock>(fn, Base::makeKernelConfig());
+            CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(fn, Base::makeKernelConfig());
         }
 
         if constexpr (IsDevice()) {

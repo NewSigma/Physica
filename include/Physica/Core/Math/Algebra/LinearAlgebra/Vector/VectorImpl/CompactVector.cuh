@@ -30,9 +30,7 @@ namespace Physica {
         using Base = device_obj<LValueVector<Derived>>;
         using This = device_obj<host_obj>;
     public:
-        using typename Base::ScalarType;
         using Base::isReverseDiff;
-        using Base::MaxThreadsPerBlock;
     protected:
         using typename Base::T;
         using typename Base::Tv;

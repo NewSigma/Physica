@@ -81,7 +81,7 @@ namespace Physica {
 
             const auto& lhs = getLHS();
             const auto& rhs = getRHS();
-            const unsigned int numThread = std::min(rhs.getSize(), rhs.MaxThreadsPerBlock);
+            const auto numThread = std::min((unsigned int)rhs.getSize(), CUDADevAttr::DefaultThreadsPerBlock);
             const unsigned int numBlockX = 1;
             const unsigned int numBlockY = lhs.getRow();
             const unsigned int numBlockZ = lhs.getCol();
@@ -108,7 +108,7 @@ namespace Physica {
 
             const auto& lhs = getLHS();
             const auto& rhs = getRHS();
-            const unsigned int numThread = std::min(rhs.getSize(), rhs.MaxThreadsPerBlock);
+            const auto numThread = std::min((unsigned int)rhs.getSize(), CUDADevAttr::DefaultThreadsPerBlock);
             const unsigned int numBlockX = 1;
             const unsigned int numBlockY = lhs.getRow();
             const unsigned int numBlockZ = lhs.getCol();

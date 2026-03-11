@@ -32,9 +32,9 @@ namespace Physica {
 
     template<class Derived>
     void device_obj<CompactVector<Derived>>::reverse(const auto& grad) const noexcept {
-        static_assert(isReverseDiff);
         using U = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename T::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
+        static_assert(isReverseDiff);
         if constexpr (Scalar<U>)
             Base::getConstCastDerived().grads() += grad;
         else {
@@ -61,7 +61,7 @@ namespace Physica {
     template<class Derived>
     template<Vector V>
     void device_obj<CompactVector<Derived>>::toHostAsync(CompactVector<V>& obj) const {
-        static_assert(std::same_as<ScalarType, typename V::ScalarType>, "[Error]: Incompatible ScalarType");
+        static_assert(std::same_as<T, typename V::ScalarType>, "[Error]: Incompatible ScalarType");
         const size_t length = Base::getLength();
         const size_t size = length * sizeof(T);
         obj.resize(length);

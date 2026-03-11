@@ -90,7 +90,7 @@ namespace Physica {
             for (int i = threadIdx.x; i < length; i += blockDim.x)
                 row[i] -= mean;
         };
-        const int numThreads = std::min(getNumBin(), weights.MaxThreadsPerBlock);
+        const int numThreads = std::min(getNumBin(), CUDADevAttr::DefaultThreadsPerBlock);
         CUDAExecutor::launch(func, KernelConfig(getDim(), numThreads), numThreads * sizeof(Tv));
     }
 

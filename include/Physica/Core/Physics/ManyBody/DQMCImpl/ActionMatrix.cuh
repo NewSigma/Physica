@@ -110,7 +110,7 @@ namespace Physica {
 
     template<Scalar T>
     void device_obj<ActionMatrix<T>>::assign_potential(Matrix auto&& target) const {
-        const unsigned int numThread = std::min<unsigned int>(getNumSite(), auxField.MaxThreadsPerBlock);
+        const unsigned int numThread = std::min<unsigned int>(getNumSite(), CUDADevAttr::DefaultThreadsPerBlock);
         const unsigned int numBlockX = 1;
         const unsigned int numBlockY = getNumFreq() * 2;
         const unsigned int numBlockZ = getNumFreq() * 2;

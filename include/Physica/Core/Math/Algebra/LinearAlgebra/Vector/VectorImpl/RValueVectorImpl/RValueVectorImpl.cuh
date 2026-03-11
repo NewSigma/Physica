@@ -43,7 +43,7 @@ namespace Physica {
                 if (index < length)
                     target[index] = source.calc(index);
             };
-            CUDAExecutor::launch<MaxThreadsPerBlock>(func, makeKernelConfig());
+            CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(func, makeKernelConfig());
         }
         else if constexpr (IsDevice())
             assign_impl(target);
@@ -68,7 +68,7 @@ namespace Physica {
                 if (index < length)
                     target[index] += source.calc(index);
             };
-            CUDAExecutor::launch<MaxThreadsPerBlock>(func, makeKernelConfig());
+            CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(func, makeKernelConfig());
         }
         else if constexpr (IsDevice())
             noImpl(__func__);
@@ -177,7 +177,7 @@ namespace Physica {
         assert(getLength() != 0);
         if (IsHost()) {
             using U = std::conditional<isReverseDiff, Tv, T>::type;
-            auto numThreads = std::min<size_t>(getLength(), MaxThreadsPerBlock);
+            auto numThreads = std::min<size_t>(getLength(), CUDADevAttr::DefaultThreadsPerBlock);
             auto buffer = device_obj<VectorND<U>>(numThreads);
             auto func = [v_ = asStruct(Base::getDerived()), buffer_ = asStruct(buffer)] __device__() mutable {
                 const auto& v = v_.getDerived();
@@ -191,7 +191,7 @@ namespace Physica {
                 }
                 buffer[threadIdx.x] = local;
             };
-            CUDAExecutor::launch<MaxThreadsPerBlock>(func, KernelConfig(1, numThreads));
+            CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(func, KernelConfig(1, numThreads));
 
             if constexpr (IsHost()) { // To silence warnings
                 CUDAExecutor::wait();
@@ -279,7 +279,7 @@ namespace Physica {
         assert(getLength() != 0);
         if (IsHost()) {
             using U = std::conditional<isReverseDiff, Tv, T>::type;
-            auto numThreads = std::min<size_t>(getLength(), MaxThreadsPerBlock);
+            auto numThreads = std::min<size_t>(getLength(), CUDADevAttr::DefaultThreadsPerBlock);
             auto buffer = device_obj<VectorND<U>>(numThreads);
             auto func = [v_ = asStruct(Base::getDerived()), buffer_ = asStruct(buffer)] __device__() mutable {
                 const auto& v = v_.getDerived();
@@ -293,7 +293,7 @@ namespace Physica {
                 }
                 buffer[threadIdx.x] = local;
             };
-            CUDAExecutor::launch<MaxThreadsPerBlock>(func, KernelConfig(1, numThreads));
+            CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(func, KernelConfig(1, numThreads));
 
             if constexpr (IsHost()) { // To silence warnings
                 CUDAExecutor::wait();
@@ -414,7 +414,8 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ KernelConfig device_obj<RValueVector<Derived>>::makeKernelConfig(size_t length) noexcept {
-        const uint32_t numThread = std::min<uint32_t>(length, MaxThreadsPerBlock);
+        assert(length > 0 && "[Error]: Do not schedule empty work");
+        const uint32_t numThread = std::min<uint32_t>(length, CUDADevAttr::DefaultThreadsPerBlock);
         const uint32_t numBlock = (length + numThread - 1) / numThread;
         return KernelConfig(numBlock, numThread);
     }

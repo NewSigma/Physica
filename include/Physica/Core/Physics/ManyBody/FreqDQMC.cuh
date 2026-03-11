@@ -255,7 +255,7 @@ namespace Physica {
                     }
                 }
             };
-            int numThread = std::min(numSite, device_obj<VectorND<T>>::MaxThreadsPerBlock);
+            int numThread = std::min<int>(numSite, CUDADevAttr::DefaultThreadsPerBlock);
             int numBlockX = getMaxBoson();
             CUDAExecutor::launch(collectForce, KernelConfig(numBlockX, numThread));
 

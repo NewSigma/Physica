@@ -100,7 +100,7 @@ namespace Physica {
             sigma = (Tv(1) - momentum) * sigma + momentum * (x.deviation(mean) + epsilon);
             normal = (x - mean) * reciprocal(sigma);
         };
-        CUDAExecutor::launch<device_obj<VectorND<T>>::MaxThreadsPerBlock>(func, gamma.makeKernelConfig());
+        CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(func, gamma.makeKernelConfig());
 
         auto result = device_obj<MatrixND<T>>(hadamard(normal, gamma.values()) + beta.values());
         if constexpr (ReverseDiff<T>) {

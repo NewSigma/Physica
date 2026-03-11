@@ -48,5 +48,7 @@ namespace Physica {
 
         static_assert(WarpSize > 0, "[Error]: Generate attributes automatically by compiling on a machine equipped with GPUs, or specify attributes based on your target device");
     #endif
+        /* Tunable */
+        constexpr static unsigned int DefaultThreadsPerBlock = 256;
     };
 }
