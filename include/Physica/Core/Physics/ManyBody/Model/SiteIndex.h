@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -35,7 +35,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] This shift(int shiftDim, size_t delta, size_t period) const noexcept;
+        [[nodiscard]] This shift(int shiftDim, ssize_t delta, size_t period) const noexcept;
         [[nodiscard]] size_t toIndex1D(This dims) const noexcept;
 
         using Base::swap;
@@ -52,10 +52,11 @@ namespace Physica {
     SiteIndex<Dim>::SiteIndex(const Base& base) : Base(base) {}
 
     template<int Dim>
-    auto SiteIndex<Dim>::shift(int shiftDim, size_t delta, size_t period) const noexcept -> This {
+    auto SiteIndex<Dim>::shift(int shiftDim, ssize_t delta, size_t period) const noexcept -> This {
         assert(shiftDim < Dim && "[Error]: Invalid dim");
+        assert(std::abs(delta) < period);
         This result = *this;
-        result[shiftDim] = (result[shiftDim] + delta) % period;
+        result[shiftDim] = (result[shiftDim] + (ssize_t(period) + delta)) % period;
         return result;
     }
 

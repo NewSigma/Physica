@@ -23,6 +23,19 @@
 #include "Physica/Macro.h"
 
 namespace Physica {
+    namespace Internal {
+        struct Undef final {
+            template<class T>
+            __host__ __device__ constexpr operator T() const noexcept {
+                std::array<char, sizeof(T)> bytes;
+                return std::bit_cast<T>(bytes);
+            }
+        };
+    }
+
+    [[gnu::const, gnu::nodebug]] __host__ __device__ constexpr auto undef() noexcept {
+        return Internal::Undef{};
+    }
     /**
      * Improvements:
      * 1. Emit assertion to help debugging
