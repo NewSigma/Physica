@@ -77,7 +77,7 @@ namespace Physica {
     auto DimEstimator::corrDimen(const Matrix auto& data, const V& radius) -> ScalarType {
         const V logCorrIntegral = ln(corrIntegral(data, radius));
         const V logR = ln(radius);
-        return LinearFit<ScalarType>::fit(logR, logCorrIntegral).first;
+        return LinearFit<ScalarType>::fit(logR, logCorrIntegral)[0];
     }
     /**
      * Helper function for distinguishing chaos and random noise, refer to [2]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/LinearSystem.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
 
 namespace Physica {
     /**
@@ -27,19 +27,17 @@ namespace Physica {
      */
     template<Scalar T>
     class LinearFit {
-        using VectorType = VectorND<T>;
-        using ScalarPair = std::pair<T, T>;
     public:
-        [[nodiscard]] static ScalarPair fit(const VectorType& x, const VectorType& y);
-        [[nodiscard]] static T relatedCoeff(const VectorType& x, const VectorType& y);
-        [[nodiscard]] static ScalarPair deviation(const VectorType& x, const VectorType& y, ScalarPair pair);
+        [[nodiscard]] static Vector2D<T> fit(const VectorND<T>& x, const VectorND<T>& y);
+        [[nodiscard]] static T relatedCoeff(const VectorND<T>& x, const VectorND<T>& y);
+        [[nodiscard]] static Vector2D<T> deviation(const VectorND<T>& x, const VectorND<T>& y, Vector2D<T> params);
 
-        [[nodiscard]] static VectorType polyfit(const VectorType& x, const VectorType& y, int order);
-        [[nodiscard]] static VectorType polyval(const VectorType& x, const VectorType& polyCoeff);
+        [[nodiscard]] static VectorND<T> polyfit(const VectorND<T>& x, const VectorND<T>& y, int order);
+        [[nodiscard]] static VectorND<T> polyval(const VectorND<T>& x, const VectorND<T>& polyCoeff);
     };
 
     template<Scalar T>
-    LinearFit<T>::ScalarPair LinearFit<T>::fit(const VectorType& x, const VectorType& y) {
+    auto LinearFit<T>::fit(const VectorND<T>& x, const VectorND<T>& y) -> Vector2D<T> {
         assert(x.getLength() == y.getLength());
         const size_t length = x.getLength();
         T xy_sum(0);
@@ -62,14 +60,13 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T LinearFit<T>::relatedCoeff(const VectorType& x, const VectorType& y) {
+    T LinearFit<T>::relatedCoeff(const VectorND<T>& x, const VectorND<T>& y) {
         return covariance(x, y) / sqrt(x.variance() * y.variance());
     }
 
     template<Scalar T>
-    LinearFit<T>::ScalarPair LinearFit<T>::deviation(
-            const VectorType& x, const VectorType& y, ScalarPair pair) {
-        const T mean_sse = square(y - pair.first * x - pair.second).sum() / T(x.getLength() - 2);
+    auto LinearFit<T>::deviation(const VectorND<T>& x, const VectorND<T>& y, Vector2D<T> params) -> Vector2D<T> {
+        const T mean_sse = square(y - params[0] * x - params[1]).sum() / T(x.getLength() - 2);
         const T mean_x = x.mean();
         const T ssx = square(x - mean_x).sum();
         const T deviation_k = sqrt(mean_sse / ssx);
@@ -81,33 +78,29 @@ namespace Physica {
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:496-499
      */
     template<Scalar T>
-    LinearFit<T>::VectorType LinearFit<T>::polyfit(const VectorType& x, const VectorType& y, int order) {
-        using MatrixType = DenseMatrix<T, MatrixMajor::Row>;
+    auto LinearFit<T>::polyfit(const VectorND<T>& x, const VectorND<T>& y, int order) -> VectorND<T> {
         assert(x.getLength() == y.getLength() && "[Error]: Dimensions do not match");
         assert(order > 1 && "[Error]: Invalid order");
         const size_t length = x.getLength();
         const int row = order + 1;
-        MatrixType working(row, row + 1);
-        VectorType x_r(length, 1);
+        DenseMatrix<T, MatrixMajor::Row> working(row, row + 1);
+        VectorND<T> x_r(length, 1);
         for (int r = 0; r < row; ++r) {
             working[r, row] = y * x_r;
-            VectorType x_c(length, 1);
+            VectorND<T> x_c(length, 1);
             for (int c = 0; c < row; ++c) {
                 working[r, c] = x_r * x_c;
                 x_c = hadamard(x, x_c);
             }
             x_r = hadamard(x, x_r);
         }
-
-        LinearSystem<T> equs(std::move(working));
-        equs.gaussJordanPartial();
-        return equs.getSolution();
+        return DenseLU<T, true>(working.leftCols(row)).inv() * working.col(row);
     }
 
     template<Scalar T>
-    LinearFit<T>::VectorType LinearFit<T>::polyval(const VectorType& x, const VectorType& polyCoeff) {
-        VectorType result(x.getLength(), 0);
-        VectorType x1(x.getLength(), 1);
+    auto LinearFit<T>::polyval(const VectorND<T>& x, const VectorND<T>& polyCoeff) -> VectorND<T> {
+        VectorND<T> result(x.getLength(), 0);
+        VectorND<T> x1(x.getLength(), 1);
         for (auto coeff : polyCoeff) {
             result += coeff * x1;
             x1 = hadamard(x1, x);
