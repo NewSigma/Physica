@@ -75,6 +75,9 @@ namespace Physica {
 
         [[nodiscard]] auto transpose() const noexcept;
 
+        [[nodiscard]] auto row(size_t r) const noexcept;
+        [[nodiscard]] auto col(size_t c) const noexcept;
+
         void zeros() noexcept;
         void read(const T* __restrict p) noexcept;
         void swap(This& __restrict obj) noexcept;

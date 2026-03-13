@@ -45,7 +45,9 @@ namespace Physica {
 
         [[nodiscard]] T det() const;
         [[nodiscard]] constexpr static Trv lnAbsDet() noexcept { return Trv(0); }
+
         [[nodiscard]] PermMatrix inv() const noexcept;
+        [[nodiscard]] PermMatrix transpose() const noexcept;
         [[nodiscard]] Array<MKL_INT64> toMKL() const;
 
         void resize(size_t order);
@@ -99,6 +101,11 @@ namespace Physica {
         for (size_t i = 0; i < result.getLength(); ++i)
             result[indices[i]] = i;
         return This(std::move(result));
+    }
+
+    template<Scalar T>
+    auto PermMatrix<T>::transpose() const noexcept -> This {
+        return inv();
     }
 
     template<Scalar T>

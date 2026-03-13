@@ -31,7 +31,9 @@ namespace Physica {
 
     template<Scalar T>
     __host__ __device__ Complex<T> fma(Complex<T> x, Complex<T> y, Complex<T> z) noexcept {
-        return x * y + z;
+        T re = fma(x.imag(), -y.imag(), fma(x.real(), y.real(), z.real()));
+        T im = fma(x.imag(), y.real(), fma(x.real(), y.imag(), z.imag()));
+        return Complex<T>(re, im);
     }
 
     template<Scalar T>

@@ -31,20 +31,20 @@ namespace Physica {
         using This = CRTPBase<T>;
         using U = Traits<T>::Derived;
     public:
-        [[nodiscard, gnu::always_inline, gnu::nodebug]] U& getDerived_host() noexcept { return *static_cast<U*>(this); }
-        [[nodiscard, gnu::always_inline, gnu::nodebug]] const U& getDerived_host() const noexcept { return *static_cast<const U*>(this); }
-        [[nodiscard, gnu::always_inline, gnu::nodebug]] U& getConstCastDerived_host() const noexcept { return *static_cast<U*>(const_cast<CRTPBase*>(this)); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] constexpr U& getDerived_host() noexcept { return *static_cast<U*>(this); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] constexpr const U& getDerived_host() const noexcept { return *static_cast<const U*>(this); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] constexpr U& getConstCastDerived_host() const noexcept { return *static_cast<U*>(const_cast<CRTPBase*>(this)); }
 
-        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ U& getDerived() noexcept { return *static_cast<U*>(this); }
-        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ const U& getDerived() const noexcept { return *static_cast<const U*>(this); }
-        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ U& getConstCastDerived() const noexcept { return *static_cast<U*>(const_cast<CRTPBase*>(this)); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ constexpr U& getDerived() noexcept { return *static_cast<U*>(this); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ constexpr const U& getDerived() const noexcept { return *static_cast<const U*>(this); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ constexpr U& getConstCastDerived() const noexcept { return *static_cast<U*>(const_cast<CRTPBase*>(this)); }
     protected:
-        CRTPBase() = default;
-        CRTPBase(const This&) = default;
-        CRTPBase(This&&) noexcept = default;
+        constexpr CRTPBase() = default;
+        constexpr CRTPBase(const This&) = default;
+        constexpr CRTPBase(This&&) noexcept = default;
         ~CRTPBase() = default;
         /* Operators */
-        This& operator=(const This&) = default;
-        This& operator=(This&&) noexcept = default;
+        constexpr This& operator=(const This&) = default;
+        constexpr This& operator=(This&&) noexcept = default;
     };
 }

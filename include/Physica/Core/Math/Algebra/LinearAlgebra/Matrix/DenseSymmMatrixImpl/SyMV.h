@@ -72,10 +72,8 @@ namespace Physica {
                 const auto seg2 = v.segment(i, length);
                 target[i] += seg1 * seg2;
 
-                if (i + 1 < length) {
-                    auto seg = target.segment(i + 1, length);
-                    seg += seg1.tail(1) * v.calc(i);
-                }
+                if (i + 1 < length)
+                    (seg1.tail(1) * v.calc(i)).assign_add(target.segment(i + 1, length));
             }
         }
         else

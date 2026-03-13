@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -148,30 +148,30 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    auto Vegas<T, TakeLn>::compress(Vector auto&& vars) -> Trv {
-        const auto sum = vars.sum();
+    auto Vegas<T, TakeLn>::compress(Vector auto&& loss) -> Trv {
+        const auto sum = loss.sum();
         const bool noData = sum.isZero();
         if (noData)
             return 0;
 
-        const VectorND<Trv> buffer = vars * reciprocal(sum); // Normalized values fall into a range that is feasible for compression function.
+        const VectorND<Trv> buffer = loss * reciprocal(sum); // Normalized values fall into a range that is feasible for compression function.
         const Vector3D<Trv> kernel{1.0 / 8, 6.0 / 8, 1.0 / 8};
         size_t i = 0;
-        vars[0] = fma(Trv(7.0 / 8), buffer[0], Trv(1.0 / 8) * buffer[1]);
-        for (; i < vars.getLength() - 2; ++i)
-            vars[i + 1] = buffer.template segment<3>(i, i + 3) * kernel;
-        vars[i + 1] = fma(Trv(7.0 / 8), buffer[i + 1], Trv(1.0 / 8) * buffer[i]);
+        loss[0] = fma(Trv(7.0 / 8), buffer[0], Trv(1.0 / 8) * buffer[1]);
+        for (; i < loss.getLength() - 2; ++i)
+            loss[i + 1] = buffer.template segment<3>(i, i + 3) * kernel;
+        loss[i + 1] = fma(Trv(7.0 / 8), buffer[i + 1], Trv(1.0 / 8) * buffer[i]);
 
-        vars = pow(divide(vars - Trv(1), ln(vars + Trv(std::numeric_limits<T>::min()))), compressRate);
-        return vars.mean();
+        loss = pow(divide(loss - Trv(1), ln(loss + Trv(std::numeric_limits<T>::min()))), compressRate);
+        return loss.mean();
     }
 
     template<Scalar T, bool TakeLn>
     template<ExecutePolicy P>
     void Vegas<T, TakeLn>::refineGrid() {
         parallel_for<P>([this](size_t dim) {
-            const auto meanVar = compress(lossMat.col(dim));
-            const bool noData = meanVar.isZero();
+            const auto meanL = compress(lossMat.col(dim));
+            const bool noData = meanL.isZero();
             if (noData) [[unlikely]] // No data in the dimension, usually we should have enough samples to avoid it
                 return;
 
@@ -181,12 +181,12 @@ namespace Physica {
             Trv temp = 0;
             size_t i = 1;
             for (size_t j = 0; i < newPoints.getLength() - 1; ++i) {
-                while (temp < meanVar) {
-                    assert(j < getNumPoint() && "[Error]: Unexpected not enough vars, this is likely a bug");
+                while (temp < meanL) {
+                    assert(j < getNumPoint() && "[Error]: Unexpected not enough loss, this is likely a bug");
                     temp += lossMat[j, dim];
                     j += 1;
                 }
-                temp -= meanVar;
+                temp -= meanL;
                 Trv delta = oldPoints[j] - oldPoints[j - 1];
                 newPoints[i] = fma(temp / lossMat[j - 1, dim], -delta, oldPoints[j]);
             }
@@ -208,7 +208,7 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     template<RNG R>
-    auto Vegas<T, TakeLn>::sample(const int* indices) const -> std::pair<VectorND<Trv>, VectorND<Trv>> {
+    auto Vegas<T, TakeLn>::sample(std::span<int> indices) const -> Array<VectorND<Trv>, 2> {
         VectorND<Trv> x(getDim());
         VectorND<Trv> deltas(getDim());
         for (size_t i = 0; i < getDim(); ++i) {
@@ -219,21 +219,21 @@ namespace Physica {
         deltas -= x;
         deltas.clamp_min(std::numeric_limits<T>::min());
         x += hadamard(deltas, VectorND<Trv>::template random_uniform<R>(getDim()));
-        return std::make_pair(std::move(x), std::move(deltas));
+        return {std::move(x), std::move(deltas)};
     }
 
     template<Scalar T, bool TakeLn>
     template<RNG R, ExecutePolicy P>
     void Vegas<T, TakeLn>::trial_normal(std::invocable<VectorND<Trv>> auto fn, T& mean, T& var) {
         const int numSample = Base::getNumSample();
-        const auto indices = R::getInstance().random_int(getDim() * numSample, 0, getNumPoint() - 2);
+        Array2D<int> indices(getDim(), numSample);
+        R::getInstance().random_int(indices.asArray(), 0, getNumPoint() - 2);
         VectorND<T> samples(numSample);
         parallel_for<P>([&, this](size_t n) {
-            const auto pair = sample<R>(indices.data_ptr(n * getDim()));
-            const auto& x = pair.first;
-            const auto& deltas = pair.second;
+            const auto [x, deltas] = sample<R>(indices.col(n));
             const T y = fn(x);
             assert(y.isFinite() && "[Error]: Bad value");
+
             const T xy = y * (deltas * Trv(getNumPoint())).prod();
             samples[n] = xy;
         }, numSample, 0).wait();
@@ -244,7 +244,7 @@ namespace Physica {
 
             const auto l = xy.value().squaredNorm();
             for (size_t i = 0; i < getDim(); ++i) {
-                const auto index = indices[n * getDim() + i];
+                const auto index = indices[i, n];
                 lossMat[index, i].toNextMean(counts[index, i], l);
                 counts[index, i] += 1;
             }
@@ -257,14 +257,14 @@ namespace Physica {
     template<RNG R, ExecutePolicy P>
     void Vegas<T, TakeLn>::trial_ln(std::invocable<VectorND<Trv>> auto fn, T& mean, T& var) {
         const int numSample = Base::getNumSample();
-        const auto indices = R::getInstance().random_int(getDim() * numSample, 0, getNumPoint() - 2);
+        Array2D<int> indices(getDim(), numSample);
+        R::getInstance().random_int(indices.asArray(), 0, getNumPoint() - 2);
         VectorND<T> samples(numSample);
         parallel_for<P>([&, this](size_t n) {
-            const auto pair = sample<R>(indices.data_ptr(n * getDim()));
-            const auto& x = pair.first;
-            const auto& deltas = pair.second;
+            const auto [x, deltas] = sample<R>(indices.col(n));
             const T lny = fn(x);
             assert(lny.isFinite() && "[Error]: Bad value");
+
             T lnxy = lny + ln(deltas).sum();
             lnxy.value().real() = fma(Trv(getDim()), ln(Trv(getNumPoint())), lnxy.value().real());
             samples[n] = lnxy;
@@ -283,7 +283,7 @@ namespace Physica {
 
             const auto l = xy.value().squaredNorm();
             for (size_t i = 0; i < getDim(); ++i) {
-                const auto index = indices[n * getDim() + i];
+                const auto index = indices[i, n];
                 lossMat[index, i].toNextMean(counts[index, i], l);
                 counts[index, i] += 1;
             }

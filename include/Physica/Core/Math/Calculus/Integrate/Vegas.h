@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  * 
@@ -91,10 +91,10 @@ namespace Physica {
         template<ExecutePolicy P>
         void refineGrid();
         Trv calcGridLossImpl() const;
-        Trv compress(Vector auto&& vars);
+        Trv compress(Vector auto&& loss);
 
         template<RNG R>
-        [[nodiscard]] std::pair<VectorND<Trv>, VectorND<Trv>> sample(const int* indices) const;
+        [[nodiscard]] Array<VectorND<Trv>, 2> sample(std::span<int> indices) const;
         template<RNG R, ExecutePolicy P>
         void trial_normal(std::invocable<VectorND<Trv>> auto fn, T& mean, T& var);
         template<RNG R, ExecutePolicy P>

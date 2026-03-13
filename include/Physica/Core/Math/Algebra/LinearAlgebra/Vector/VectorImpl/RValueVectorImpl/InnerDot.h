@@ -46,9 +46,9 @@ namespace Physica {
         T calc_mkl() const noexcept;
         CoDiff<T> calc_base() const noexcept;
     private:
-        T calc_base_simd_trivial() const noexcept;
+        T calc_base_simd() const noexcept;
         T calc_base_simd_complex_real() const noexcept;
-        T calc_base_trivial() const noexcept;
+        T calc_base_fallback() const noexcept;
     };
 
     template<Vector V1, Vector V2>
@@ -86,18 +86,18 @@ namespace Physica {
         }
         else if constexpr (isFastPacket) {
             if constexpr (Internal::EnableSIMD<V1, V2>::value)
-                co_return calc_base_simd_trivial();
+                co_return calc_base_simd();
             else if constexpr (T1::isComplex && std::same_as<typename T1::RealType, T2>)
                 co_return calc_base_simd_complex_real();
             else
-                co_return calc_base_trivial();
+                co_return calc_base_fallback();
         }
         else
-            co_return calc_base_trivial();
+            co_return calc_base_fallback();
     }
 
     template<Vector V1, Vector V2>
-    auto InnerDot<V1, V2>::calc_base_simd_trivial() const noexcept -> T {
+    auto InnerDot<V1, V2>::calc_base_simd() const noexcept -> T {
         using Pack = Internal::EnableSIMD<V1, V2>::PacketType;
         const size_t length = v1.getLength();
         size_t i = 0;
@@ -149,7 +149,7 @@ namespace Physica {
      * Fallback if we do not know how to lower the inner dot
      */
     template<Vector V1, Vector V2>
-    auto InnerDot<V1, V2>::calc_base_trivial() const noexcept -> T {
+    auto InnerDot<V1, V2>::calc_base_fallback() const noexcept -> T {
         auto result = T(0);
         for(size_t i = 0; i < v1.getLength(); ++i)
             result += v1.calc(i) * v2.calc(i);

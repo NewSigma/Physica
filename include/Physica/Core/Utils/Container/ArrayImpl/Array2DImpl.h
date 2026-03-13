@@ -87,6 +87,18 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
+    auto Array2D<T, Major, Row, Col, Allocator>::row(size_t r) const noexcept {
+        static_assert(Major == MatrixMajor::Row, "[Error]: Not continuous this way");
+        return std::span<T, Col == Dynamic ? std::dynamic_extent : Col>(data_ptr(r, 0), getCol());
+    }
+
+    template<class T, int Major, size_t Row, size_t Col, class Allocator>
+    auto Array2D<T, Major, Row, Col, Allocator>::col(size_t c) const noexcept {
+        static_assert(Major == MatrixMajor::Col, "[Error]: Not continuous this way");
+        return std::span<T, Row == Dynamic ? std::dynamic_extent : Row>(data_ptr(0, c), getRow());
+    }
+
+    template<class T, int Major, size_t Row, size_t Col, class Allocator>
     void Array2D<T, Major, Row, Col, Allocator>::zeros() noexcept {
         assert(!empty());
         asArray().zeros();
