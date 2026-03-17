@@ -10,6 +10,10 @@ if(${PHYSICA_PYTHON})
     add_subdirectory(Python)
 endif()
 
+if(${PHYSICA_TRANSFORMS})
+    add_subdirectory(Transforms)
+endif()
+
 if(NOT DEFINED SKBUILD_PROJECT_VERSION)
     add_executable(Physica Physica.cpp)
     target_link_libraries(Physica PhysicaCore ${GPerfTools_LIBRARY})

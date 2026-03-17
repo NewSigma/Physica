@@ -28,6 +28,10 @@ endif()
 if(${PHYSICA_MIMALLOC})
     target_link_libraries(Physica::Core INTERFACE mimalloc)
 endif()
+
+if(${PHYSICA_TRANSFORMS})
+    target_compile_options(Physica::Core INTERFACE -fpass-plugin=$<TARGET_FILE:PhysicaTransforms> -mllvm -lifetime-move-noncoro)
+endif()
 ##############################################Gui################################################
 if(${PHYSICA_GUI})
     add_library(Physica::Gui INTERFACE IMPORTED)
