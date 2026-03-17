@@ -16,6 +16,7 @@ target_sources(Benchmark PRIVATE Parallel/ThreadPool.cpp)
 # Anonymous
 target_sources(Benchmark PRIVATE Benchmark.cpp)
 target_sources(Benchmark PRIVATE CRCoro.cpp)
+target_sources(Benchmark PRIVATE Diff.cpp)
 target_sources(Benchmark PRIVATE Mnist.cpp)
 
 get_target_property(benchmark_INCLUDE_DIR benchmark::benchmark INTERFACE_INCLUDE_DIRECTORIES)

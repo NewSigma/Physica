@@ -27,40 +27,16 @@ namespace Physica {
         static_assert(ReverseDiff<T>, "[Error]: DiffCoro binds compute graph to reverse diffable objects");
         static_assert(!is_codiff<T>::value, "[Error]: Nested DiffCoro is not allowed");
         static_assert(std::is_object<T>::value, "[Error]: Must save the return by value");
-        class Promise {
-            using This = Promise;
-
-            T* pObj;
-        public:
-            Promise() = default;
-            Promise(const This&) = delete;
-            Promise(This&&) noexcept = delete;
-            ~Promise() = default;
-            /* Operators */
-            This& operator=(const This&) noexcept = delete;
-            This& operator=(This&&) noexcept = delete;
-            /* Operations */
-            void listen(DiffCoro<T>& node) noexcept;
-
-            auto get_return_object() noexcept;
-            static std::nullptr_t get_return_object_on_allocation_failure() noexcept { unreachable("Expect coro frame is small"); }
-            auto initial_suspend() noexcept { return suspend_never{}; }
-            void await_transform(auto&&) noexcept = delete("[Error]: Differential coroutine must suspend by yielding");
-            auto final_suspend() noexcept { return suspend_never{}; }
-            auto yield_value(auto&& arg) noexcept;
-            void return_void() noexcept {}
-            [[noreturn]] void unhandled_exception() { throw; }
-        };
-
         using This = DiffCoro<T>;
         using Base = T;
+
+        class Promise;
     public:
         using promise_type = Promise;
     private:
         std::coroutine_handle<Promise> handle = nullptr;
     public:
         DiffCoro() = default;
-        DiffCoro(std::nullptr_t) noexcept {}
         DiffCoro(ReverseDiff auto&& expr) noexcept requires(!is_codiff<decltype(expr)>::value); // Codiff will delegate to the move constructor
         DiffCoro(const This& other) = delete;
         DiffCoro(This&& other) noexcept;
@@ -77,6 +53,32 @@ namespace Physica {
         /* Operations */
         [[gnu::nodebug]] void reverse_impl() noexcept;
         [[nodiscard]] static This compute(ReverseDiff auto&& expr) noexcept;
+    };
+
+    template<class T>
+    class DiffCoro<T>::Promise {
+        using This = Promise;
+
+        T* pObj;
+    public:
+        Promise() = default;
+        Promise(const This&) = delete;
+        Promise(This&&) noexcept = delete;
+        ~Promise() = default;
+        /* Operators */
+        This& operator=(const This&) noexcept = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        void listen(DiffCoro<T>& node) noexcept;
+
+        auto get_return_object() noexcept;
+        static DiffCoro<T> get_return_object_on_allocation_failure() noexcept { unreachable("Expect coro frame is small"); }
+        auto initial_suspend() noexcept { return suspend_never{}; }
+        void await_transform(auto&&) noexcept = delete("[Error]: Differential coroutine must suspend by yielding");
+        auto final_suspend() noexcept { return suspend_never{}; }
+        auto yield_value(auto&& arg) noexcept;
+        void return_void() noexcept {}
+        [[noreturn]] void unhandled_exception() { throw; }
     };
 
     template<class Predicate, class Operation, class Functor>

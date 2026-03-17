@@ -24,32 +24,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
 namespace Physica {
-    // Other nodes may take ownership of the promise
-    template<class T>
-    void DiffCoro<T>::Promise::listen(DiffCoro<T>& node) noexcept {
-        pObj = &node;
-    }
-
-    template<class T>
-    auto DiffCoro<T>::Promise::get_return_object() noexcept {
-        return DiffCoro<T>(*this);
-    };
-
-    template<class T>
-    auto DiffCoro<T>::Promise::yield_value(auto&& arg) noexcept {
-        if constexpr (Scalar<decltype(arg)>)
-            *pObj = T(arg.value());
-        else
-            *pObj = T(std::forward<decltype(arg)>(arg).values());
-
-        struct awaiter : public suspend_always {
-            Promise& promise;
-
-            explicit awaiter(Promise& promise) : promise(promise) {}
-            [[nodiscard]] T& await_resume() const noexcept { return *(promise.pObj); }
-        };
-        return awaiter(*this);
-    }
     /**
      * Lazily compute expression and construct compute graph from the result
      */
@@ -119,6 +93,32 @@ namespace Physica {
         LazyDestroy<Expr> expr_ = std::forward<Expr>(expr);
         auto& result = co_yield expr_.values();
         expr_.reverse(result.values(), result.grads());
+    }
+
+    template<class T>
+    void DiffCoro<T>::Promise::listen(DiffCoro<T>& node) noexcept {
+        pObj = &node; // Other nodes may take ownership of the promise
+    }
+
+    template<class T>
+    auto DiffCoro<T>::Promise::get_return_object() noexcept {
+        return DiffCoro<T>(*this);
+    };
+
+    template<class T>
+    auto DiffCoro<T>::Promise::yield_value(auto&& arg) noexcept {
+        if constexpr (Scalar<decltype(arg)>)
+            *pObj = T(arg.value());
+        else
+            *pObj = T(std::forward<decltype(arg)>(arg).values());
+
+        struct awaiter : public suspend_always {
+            Promise& promise;
+
+            explicit awaiter(Promise& promise) : promise(promise) {}
+            [[nodiscard]] T& await_resume() const noexcept { return *(promise.pObj); }
+        };
+        return awaiter(*this);
     }
 
     template<class Predicate, class Operation, class Functor>
