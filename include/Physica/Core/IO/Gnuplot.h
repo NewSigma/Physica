@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,7 +23,6 @@
 namespace Physica {
     class PHYSICA_API Gnuplot {
     public:
-        using VectorType = VectorND<float64>;
         using DataArray = Array<VectorND<float64>>;
     private:
         DataArray xDatas;
@@ -41,8 +40,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] const DataArray& getXDatas() const noexcept { return xDatas; }
         [[nodiscard]] const DataArray& getYDatas() const noexcept { return yDatas; }
+        /* Friends */
+        friend std::ostream& operator<<(std::ostream& os, const Gnuplot& gnuplot);
+        friend std::istream& operator>>(std::istream& is, Gnuplot& gnuplot);
     };
-
-    std::ostream& operator<<(std::ostream& os, const Gnuplot& gnuplot);
-    std::istream& operator>>(std::istream& is, Gnuplot& gnuplot);
 }

@@ -297,4 +297,14 @@ namespace Physica {
         assert(index < self.getLength() && "[Error]: Index out of range");
         return self.getDerived().data_ptr(index);
     }
+
+    template<class Derived>
+    auto& LValueVector<Derived>::front(this auto&& self) noexcept {
+        return self[0];
+    }
+
+    template<class Derived>
+    auto& LValueVector<Derived>::back(this auto&& self) noexcept {
+        return self[self.getLength() - 1];
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,8 +26,7 @@ namespace Physica {
     template<Scalar T, size_t Length, class Allocator>
     class device_obj<DenseVector<T, Length, Allocator>>
             : public device_obj<CompactVector<DenseVector<T, Length, Allocator>>>
-            , public CRCoro<device_obj<DenseVector<T, Length, Allocator>>>
-            , public device_obj<Array<T, Length, Allocator>> {
+            , public CRCoro<device_obj<DenseVector<T, Length, Allocator>>> {
         static_assert(!Diffable<T>, "[Error]: Use diffable vector instead");
         using host_obj = DenseVector<T, Length, Allocator>;
         using This = device_obj<host_obj>;
@@ -37,12 +36,15 @@ namespace Physica {
     public:
         using typename Base::ScalarType;
         using Base::SizeAtCompile;
+    private:
+        Storage storage;
     public:
         device_obj() = default;
         __host__ __device__ explicit device_obj(size_t length);
         __host__ __device__ device_obj(size_t length, T init);
-        device_obj(const host_obj& obj);
+        explicit device_obj(Storage storage) noexcept;
         __host__ __device__ device_obj(const Vector auto& v);
+        device_obj(const host_obj& obj);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -52,8 +54,8 @@ namespace Physica {
         using Base::operator[];
         /* Operations */
         void resize(const Vector auto& x);
-        using Storage::resize;
-        using Storage::zeros;
+        void resize(size_t size, auto&&... args) noexcept;
+        void reserve(size_t size) noexcept;
 
         [[nodiscard]] host_obj toHost() const;
         [[nodiscard]] host_obj toHostAsync() const;
@@ -71,12 +73,11 @@ namespace Physica {
 
         using Base::read;
         using Base::write;
+        void zeros() noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        using Storage::data;
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Storage::getLength(); }
-        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return data() + index; }
-        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return data() + index; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return storage.getLength(); }
+        [[nodiscard]] __host__ __device__ auto* data(this auto&&) noexcept;
         /* Static members */
         template<RNG R>
         [[nodiscard]] static This random_uniform(size_t len);

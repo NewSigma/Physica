@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Scalar T, size_t Length, class Allocator>
-    DenseVector<T, Length, Allocator>::DenseVector(size_t length) : Storage(length) {}
+    DenseVector<T, Length, Allocator>::DenseVector(size_t length) : storage(length) {}
 
     template<Scalar T, size_t Length, class Allocator>
     DenseVector<T, Length, Allocator>::DenseVector(size_t length, const T& init) : DenseVector(length) {
@@ -30,19 +30,55 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    DenseVector<T, Length, Allocator>::DenseVector(std::initializer_list<T> list) : Storage(std::move(list)) {}
+    DenseVector<T, Length, Allocator>::DenseVector(std::initializer_list<T> list) : storage(std::move(list)) {}
 
     template<Scalar T, size_t Length, class Allocator>
-    DenseVector<T, Length, Allocator>::DenseVector(Storage array) noexcept : Storage(std::move(array)) {}
+    DenseVector<T, Length, Allocator>::DenseVector(Array<T, Length, Allocator> storage) noexcept : storage(std::move(storage)) {}
 
     template<Scalar T, size_t Length, class Allocator>
-    DenseVector<T, Length, Allocator>::DenseVector(const Vector auto& v) : Storage(v.getLength()) {
+    DenseVector<T, Length, Allocator>::DenseVector(const Vector auto& v) : storage(v.getLength()) {
         v.assign(*this);
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    bool DenseVector<T, Length, Allocator>::operator==(const This& other) const noexcept {
+        return storage == other.storage;
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    template<size_t I>
+    constexpr auto&& DenseVector<T, Length, Allocator>::get(this auto&& self) noexcept {
+        return forward_like<decltype(self)>(self.storage).template get<I>();
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    constexpr auto DenseVector<T, Length, Allocator>::begin(this auto&& self) noexcept {
+        return self.storage.begin();
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    constexpr auto DenseVector<T, Length, Allocator>::end(this auto&& self) noexcept {
+        return self.storage.end();
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    void DenseVector<T, Length, Allocator>::append(auto&&... args) noexcept {
+        storage.append(std::forward<decltype(args)>(args)...);
     }
 
     template<Scalar T, size_t Length, class Allocator>
     void DenseVector<T, Length, Allocator>::resize(const Vector auto& x) {
         resize(x.getLength());
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    void DenseVector<T, Length, Allocator>::resize(size_t size, auto&&... args) noexcept {
+        storage.resize(size, std::forward<decltype(args)>(args)...);
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    void DenseVector<T, Length, Allocator>::reserve(size_t size) noexcept {
+        storage.reserve(size);
     }
 
     template<Scalar T, size_t Length, class Allocator>
@@ -89,10 +125,26 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
+    void DenseVector<T, Length, Allocator>::zeros() noexcept {
+        storage.zeros();
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    void DenseVector<T, Length, Allocator>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        storage.swap(obj.storage);
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
     auto DenseVector<T, Length, Allocator>::zeros(size_t len) -> This {
         This result(len);
         result.zeros();
         return result;
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    auto* DenseVector<T, Length, Allocator>::data(this auto&& self) noexcept {
+        return self.storage.data();
     }
 
     template<Scalar T, size_t Length, class Allocator>

@@ -113,6 +113,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        [[nodiscard]] bool operator!=(const Vector auto& other) const noexcept;
         [[nodiscard]] auto operator*(this auto&&, Matrix auto&& m) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
@@ -197,6 +198,7 @@ namespace Physica {
         [[nodiscard]] auto grads() const noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
+        [[nodiscard]] bool empty() const noexcept { return getLength() == 0; }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept { return false; }

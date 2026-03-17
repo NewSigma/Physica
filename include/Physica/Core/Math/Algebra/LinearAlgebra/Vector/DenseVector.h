@@ -24,39 +24,49 @@
 namespace Physica {
     template<Scalar T, size_t Length = Dynamic, class Allocator = HostAllocator<T, alignof(typename BestPacket<T, Length>::Type)>>
     class DenseVector : public CompactVector<DenseVector<T, Length, Allocator>>
-                      , public CRCoro<DenseVector<T, Length, Allocator>>
-                      , public Array<T, Length, Allocator> {
+                      , public CRCoro<DenseVector<T, Length, Allocator>> {
         constexpr static size_t DefaultAlign = alignof(typename BestPacket<T, Length>::Type);
         static_assert(std::allocator_traits<Allocator>::Align % DefaultAlign == 0, "[Error]: Bad alignment for SIMD");
         using This = DenseVector<T, Length, Allocator>;
         using Base = CompactVector<This>;
         using Coro = CRCoro<This>;
+        using Storage = Array<T, Length, Allocator>;
     public:
         using typename Base::ScalarType;
         using typename Coro::promise_type;
-        using Storage = Array<T, Length, Allocator>;
         using device_obj_type = device_obj<This>;
         using Base::SizeAtCompile;
         using Base::isReverseDiff;
     protected:
         using typename Base::Trv;
+    private:
+        Array<T, Length, Allocator> storage;
     public:
         DenseVector() = default;
         explicit DenseVector(size_t length);
         DenseVector(size_t length, const T& init);
         DenseVector(std::initializer_list<T> list);
-        explicit DenseVector(Storage array) noexcept;
+        explicit DenseVector(Storage storage) noexcept;
         DenseVector(const Vector auto& v);
         DenseVector(const This&) = default;
         DenseVector(This&&) noexcept = default;
         ~DenseVector() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
+        [[nodiscard]] bool operator==(const This& other) const noexcept;
         using Base::operator=;
         using Base::operator[];
         /* Operations */
+        template<size_t I>
+        [[nodiscard]] constexpr auto&& get(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto begin(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto end(this auto&&) noexcept;
+
+        void append(auto&&... args) noexcept;
         void resize(const Vector auto& x);
-        using Storage::resize;
+        void resize(size_t size, auto&&... args) noexcept;
+        void reserve(size_t size) noexcept;
+
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
         using Base::toDevice;
@@ -70,22 +80,20 @@ namespace Physica {
         using Base::random_normal;
         using Base::random_any;
 
+        using Base::read;
+        using Base::write;
         void linspace(T from, T to);
-        using Storage::zeros;
-        using Storage::swap;
+        void zeros() noexcept;
+        void swap(This& __restrict obj) noexcept;
 
         using Coro::get_return_object;
         using Coro::initial_suspend;
         using Coro::final_suspend;
         using Coro::return_value;
         using Coro::unhandled_exception;
-
-        using Base::read;
-        using Base::write;
         /* Getters */
-        using Storage::getLength;
-        using Storage::data;
-        using Storage::data_ptr;
+        [[nodiscard]] size_t getLength() const noexcept { return storage.getLength(); }
+        [[nodiscard]] auto* data(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] static This zeros(size_t len);
         template<RNG R>
@@ -101,6 +109,8 @@ namespace Physica {
         [[nodiscard]] static This read(size_t length, const T* __restrict p) noexcept;
         [[nodiscard]] static This generate(std::invocable<size_t> auto fn);
         [[nodiscard]] static This generate(size_t length, std::invocable<size_t> auto fn);
+        /* Friends */
+        friend class device_obj<This>;
     };
 
     template<Scalar T, size_t Length>

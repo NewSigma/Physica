@@ -77,6 +77,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ decltype(auto) reals() noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t index) noexcept;
+        [[nodiscard]] __host__ __device__ auto& front(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto& back(this auto&&) noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

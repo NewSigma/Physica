@@ -173,6 +173,7 @@ namespace Physica {
 
     template<FloatPrec Prec>
     __host__ __device__ void sincos(Real<Prec> x, Real<Prec>& __restrict sin_result, Real<Prec>& __restrict cos_result) noexcept {
+        assert(&sin_result != &cos_result);
         if constexpr (Prec == Float32)
             ::sincosf(x.toMachine(), (float*)&sin_result, (float*)&cos_result);
         else
@@ -181,6 +182,7 @@ namespace Physica {
 
     template<FloatPrec Prec>
     __host__ __device__ void sincospi(Real<Prec> x, Real<Prec>& __restrict sin_result, Real<Prec>& __restrict cos_result) noexcept {
+        assert(&sin_result != &cos_result);
     #ifdef __CUDA_ARCH__
         if constexpr (Prec == Float32)
             ::sincospif(x.toMachine(), (float*)&sin_result, (float*)&cos_result);

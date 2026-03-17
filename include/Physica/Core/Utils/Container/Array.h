@@ -90,7 +90,7 @@ namespace Physica {
 
     template<class T, class Allocator>
     class Array<T, Dynamic, Allocator> : public ArrayBase<Array<T, Dynamic, Allocator>, Allocator>
-                                             , public CRCoro<Array<T, Dynamic, Allocator>> {
+                                       , public CRCoro<Array<T, Dynamic, Allocator>> {
         using This = Array<T, Dynamic, Allocator>;
         using Base = ArrayBase<This, Allocator>;
     private:

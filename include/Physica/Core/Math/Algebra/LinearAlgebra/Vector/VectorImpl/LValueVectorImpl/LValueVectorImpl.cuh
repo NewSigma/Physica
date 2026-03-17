@@ -180,4 +180,14 @@ namespace Physica {
         assert(index < self.getLength());
         return self.getDerived().data_ptr(index);
     }
+
+    template<class Derived>
+    __host__ __device__ auto& device_obj<LValueVector<Derived>>::front(this auto&& self) noexcept {
+        return self[0];
+    }
+
+    template<class Derived>
+    __host__ __device__ auto& device_obj<LValueVector<Derived>>::back(this auto&& self) noexcept {
+        return self[self.getLength() - 1];
+    }
 }

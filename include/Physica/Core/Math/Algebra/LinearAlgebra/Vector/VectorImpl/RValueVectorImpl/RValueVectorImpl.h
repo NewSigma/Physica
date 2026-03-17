@@ -23,6 +23,11 @@
 
 namespace Physica {
     template<class Derived>
+    bool RValueVector<Derived>::operator!=(const Vector auto& other) const noexcept {
+        return !(Base::getDerived() == other);
+    }
+
+    template<class Derived>
     auto RValueVector<Derived>::operator*(this auto&& self, Matrix auto&& m) noexcept {
         using Self = decltype(self);
         using M = decltype(m);

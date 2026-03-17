@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Scalar T, size_t Length, class Allocator>
-    __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(size_t length) : Storage(length) {}
+    __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(size_t length) : storage(length) {}
 
     template<Scalar T, size_t Length, class Allocator>
     __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(size_t length, T init) : device_obj(length) {
@@ -30,10 +30,13 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    device_obj<DenseVector<T, Length, Allocator>>::device_obj(const host_obj& obj) : Storage(obj) {}
+    device_obj<DenseVector<T, Length, Allocator>>::device_obj(Storage storage) noexcept : storage(std::move(storage)) {}
 
     template<Scalar T, size_t Length, class Allocator>
-    __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(const Vector auto& v) : Storage(v.getLength()) {
+    device_obj<DenseVector<T, Length, Allocator>>::device_obj(const host_obj& obj) : storage(obj.storage) {}
+
+    template<Scalar T, size_t Length, class Allocator>
+    __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(const Vector auto& v) : storage(v.getLength()) {
         v.assign(*this);
     }
 
@@ -43,23 +46,33 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
+    void device_obj<DenseVector<T, Length, Allocator>>::resize(size_t size, auto&&... args) noexcept {
+        storage.resize(size, std::forward<decltype(args)>(args)...);
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    void device_obj<DenseVector<T, Length, Allocator>>::reserve(size_t size) noexcept {
+        storage.reserve(size);
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
     auto device_obj<DenseVector<T, Length, Allocator>>::toHost() const -> host_obj {
-        return host_obj(Storage::toHost());
+        return host_obj(storage.toHost());
     }
 
     template<Scalar T, size_t Length, class Allocator>
     auto device_obj<DenseVector<T, Length, Allocator>>::toHostAsync() const -> host_obj {
-        return host_obj(Storage::toHostAsync());
+        return host_obj(storage.toHostAsync());
     }
 
     template<Scalar T, size_t Length, class Allocator>
     void device_obj<DenseVector<T, Length, Allocator>>::toHost(host_obj& obj) const {
-        Storage::toHost(obj);
+        storage.toHost(obj.storage);
     }
 
     template<Scalar T, size_t Length, class Allocator>
     void device_obj<DenseVector<T, Length, Allocator>>::toHostAsync(host_obj& obj) const {
-        Storage::toHostAsync(obj);
+        storage.toHostAsync(obj.storage);
     }
 
     template<Scalar T, size_t Length, class Allocator>
@@ -81,9 +94,19 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
+    void device_obj<DenseVector<T, Length, Allocator>>::zeros() noexcept {
+        storage.zeros();
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
     void device_obj<DenseVector<T, Length, Allocator>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        Storage::swap(obj);
+        storage.swap(obj.storage);
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    __host__ __device__ auto* device_obj<DenseVector<T, Length, Allocator>>::data(this auto&& self) noexcept {
+        return self.storage.data();
     }
 
     template<Scalar T, size_t Length, class Allocator>

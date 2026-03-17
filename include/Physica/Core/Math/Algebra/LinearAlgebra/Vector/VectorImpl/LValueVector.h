@@ -105,6 +105,8 @@ namespace Physica {
         [[nodiscard]] auto grads() const noexcept;
         /* Getters */
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
+        [[nodiscard]] auto& front(this auto&&) noexcept;
+        [[nodiscard]] auto& back(this auto&&) noexcept;
     protected:
         LValueVector() = default;
         LValueVector(const This&) = default;

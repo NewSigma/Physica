@@ -33,8 +33,8 @@ namespace Physica {
         VectorND<T> vars;
         VectorND<Trv> loss;
     private:
-        int numRefine;
-        int numSample;
+        int numRefine{};
+        int numSample{};
     public:
         AdaptiveBase() = default;
         AdaptiveBase(VectorND<Trv> from_, VectorND<Trv> to_, int numRefine_, int numSample_);

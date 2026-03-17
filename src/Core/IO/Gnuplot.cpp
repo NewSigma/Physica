@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -36,8 +36,8 @@ std::ostream& Physica::operator<<(std::ostream& os, const Gnuplot& gnuplot) {
 }
 
 std::istream& Physica::operator>>(std::istream& is, Gnuplot& gnuplot) {
-    Gnuplot::VectorType xBuffer{};
-    Gnuplot::VectorType yBuffer{};
+    Array<float64> xBuffer{};
+    Array<float64> yBuffer{};
     while (is.good()) {
         int ch = is.peek();
         while (ch == ' ') {
@@ -65,7 +65,7 @@ std::istream& Physica::operator>>(std::istream& is, Gnuplot& gnuplot) {
             continue;
         }
 
-        double temp1, temp2;
+        double temp1{}, temp2{};
         is >> temp1 >> temp2;
         xBuffer.append(temp1);
         yBuffer.append(temp2);

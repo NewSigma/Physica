@@ -52,10 +52,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto& operator[](this auto&&, size_t index) noexcept;
         [[nodiscard]] __host__ __device__ bool operator==(const ArrayBase& array) const;
         [[nodiscard]] __host__ __device__ bool operator!=(const ArrayBase& array) const { return !(*this == array); }
-        /* Iterators */
+        /* Operations */
         [[nodiscard]] __host__ __device__ constexpr auto begin(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ constexpr auto end(this auto&&) noexcept;
-        /* Operations */
+
         void send(int from, int to);
         void sendrecv(int send_to, int recv_from);
         void bcast(int root);

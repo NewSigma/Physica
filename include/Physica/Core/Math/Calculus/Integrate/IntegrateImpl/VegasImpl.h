@@ -198,7 +198,7 @@ namespace Physica {
     template<Scalar T, bool TakeLn>
     auto Vegas<T, TakeLn>::calcGridLossImpl() const -> Trv {
         Trv sumvar = 0;
-        for (size_t i = 0; i < lossMat.getCol(); ++i) {
+        for (size_t i = 0; i < getDim(); ++i) {
             const auto col = lossMat.col(i);
             const Trv prior = col.mean();
             sumvar += sqrt(col.variance(prior) / prior.squaredNorm() / Trv(getNumPoint()));
