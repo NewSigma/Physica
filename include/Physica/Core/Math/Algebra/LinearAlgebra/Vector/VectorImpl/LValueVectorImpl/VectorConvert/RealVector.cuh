@@ -26,12 +26,13 @@ namespace Physica {
         using host_obj = RealVectorL<V>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueVector<host_obj>>;
+        using Ref = add_device_obj_t<V>;
     protected:
         using typename Base::T;
     private:
-        PlainStruct<device_obj<V>> v;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<V>>> v;
     public:
-        __host__ __device__ explicit device_obj(device_obj<V>& v_) : v(asStruct(v_)) {}
+        __host__ __device__ explicit device_obj(Ref v_) : v(asStruct(v_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;

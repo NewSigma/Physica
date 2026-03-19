@@ -272,22 +272,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    decltype(auto) LValueVector<Derived>::reals() noexcept {
+    decltype(auto) LValueVector<Derived>::reals(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (isComplex)
-            return RealVectorL<Derived>(Base::getDerived());
+            return RealVectorL<Self>(std::forward<Self>(self));
         else
-            return Base::getDerived();
-    }
-
-    template<class Derived>
-    decltype(auto) LValueVector<Derived>::reals() const noexcept {
-        return Base::getConstCastDerived().reals();
-    }
-
-    template<class Derived>
-    template<int GradOrder>
-    auto LValueVector<Derived>::grads() const noexcept {
-        return Base::template grads_impl<GradOrder>();
+            return std::forward<Self>(self);
     }
     /**
      * Add this function because we cannot simply return &(*this)[index], it is invalid to dereference a device pointer on host.

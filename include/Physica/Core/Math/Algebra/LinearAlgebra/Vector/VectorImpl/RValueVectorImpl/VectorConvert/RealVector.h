@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,14 +25,14 @@ namespace Physica {
     class RealVectorR : public RValueVector<RealVectorR<V>> {
         using This = RealVectorR<V>;
         using Base = RValueVector<This>;
-        static_assert(V::isComplex, "[Error]: Unnecessary real() call on real vector");
+        static_assert(std::remove_cvref_t<V>::isComplex, "[Error]: Unnecessary real() call on real vector");
     protected:
         using typename Base::T;
         using typename Base::Tv;
     private:
-        const V& v;
+        LazyDestroy<V> v;
     public:
-        explicit RealVectorR(const V& v_) : v(v_) {}
+        explicit RealVectorR(V&& v_) : v(std::forward<V>(v_)) {}
         RealVectorR(const This&) = default;
         RealVectorR(This&&) noexcept = default;
         ~RealVectorR() = default;
@@ -49,9 +49,10 @@ namespace Physica {
 namespace Physica {
     template<class V>
     class Traits<RealVectorR<V>> {
+        using V1 = std::remove_cvref_t<V>;
     public:
-        using ScalarType = V::ScalarType::RealType;
-        constexpr static size_t SizeAtCompile = V::SizeAtCompile;
+        using ScalarType = V1::ScalarType::RealType;
+        constexpr static size_t SizeAtCompile = V1::SizeAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = Traits<V>::FastPacket;
     };

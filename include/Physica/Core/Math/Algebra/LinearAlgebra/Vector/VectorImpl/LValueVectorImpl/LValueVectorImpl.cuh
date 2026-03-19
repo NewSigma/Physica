@@ -168,11 +168,13 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ decltype(auto) device_obj<LValueVector<Derived>>::reals() noexcept {
+    __host__ __device__ decltype(auto) device_obj<LValueVector<Derived>>::reals(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using V = remove_device_obj<Self>::type;
         if constexpr (Base::isComplex)
-            return device_obj<RealVectorL<remove_device_obj_t<Derived>>>(Base::getDerived());
+            return device_obj<RealVectorL<V>>(std::forward<Self>(self));
         else
-            return Base::getDerived();
+            return std::forward<Self>(self);
     }
 
     template<class Derived>

@@ -65,7 +65,7 @@ namespace Physica {
                 return T(v1.values() * v2, v1.grads() * v2);
             else {
                 constexpr static int Order = T::Order - 1;
-                return T(v1.values() * v2.values(), toDiffMaskVector<V2, Order>(v2) * v1.grads() + toDiffMaskVector<V1, Order>(v1) * v2.grads());
+                return T(v1.values() * v2.values(), v2.template mask<Order>() * v1.grads() + v1.template mask<Order>() * v2.grads());
             }
         }
         else if constexpr (Internal::EnableMKL<V1, V2>::value)

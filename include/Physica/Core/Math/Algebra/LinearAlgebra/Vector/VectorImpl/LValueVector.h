@@ -99,10 +99,7 @@ namespace Physica {
         template<RNG R>
         void random_any(auto& distribution);
 
-        [[nodiscard]] decltype(auto) reals() noexcept;
-        [[nodiscard]] decltype(auto) reals() const noexcept;
-        template<int GradOrder = 1>
-        [[nodiscard]] auto grads() const noexcept;
+        [[nodiscard]] decltype(auto) reals(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
         [[nodiscard]] auto& front(this auto&&) noexcept;

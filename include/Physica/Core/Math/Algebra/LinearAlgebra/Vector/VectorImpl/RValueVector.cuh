@@ -96,13 +96,13 @@ namespace Physica {
         [[nodiscard]] __device__ T mean(int tid, int numThread, T* __restrict shared) const;
         [[nodiscard]] __device__ T lnSumExp(int tid, int numThread, T* __restrict shared) const;
 
-        [[nodiscard]] __host__ __device__ decltype(auto) reals() const noexcept;
-        [[nodiscard]] __host__ __device__ auto imags() const noexcept;
-        [[nodiscard]] __host__ __device__ auto squaredNorms() const noexcept;
-        [[nodiscard]] __host__ __device__ auto norms() const noexcept;
-        [[nodiscard]] __host__ __device__ decltype(auto) values() const noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) reals(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto imags(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto squaredNorms(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto norms(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         template<int GradOrder = 1>
-        [[nodiscard]] __host__ __device__ auto grads() const noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) grads(this auto&&) noexcept;
 
         [[nodiscard]] __host__ __device__ KernelConfig makeKernelConfig() const noexcept;
         /* Getters */

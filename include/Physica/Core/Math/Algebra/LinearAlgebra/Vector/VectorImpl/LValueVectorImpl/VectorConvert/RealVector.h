@@ -28,9 +28,9 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        V& v;
+        LazyDestroy<V> v;
     public:
-        explicit RealVectorL(V& v_) : v(v_) {}
+        explicit RealVectorL(V&& v_) : v(std::forward<V>(v_)) {}
         RealVectorL(const This&) = default;
         RealVectorL(This&&) noexcept = default;
         ~RealVectorL() = default;

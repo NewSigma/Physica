@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,9 +29,9 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        const V& v;
+        LazyDestroy<V> v;
     public:
-        explicit ImagVector(const V& v_) : v(v_) {}
+        explicit ImagVector(V&& v_) : v(std::forward<V>(v_)) {}
         ImagVector(const This&) = default;
         ImagVector(This&&) noexcept = default;
         ~ImagVector() = default;
@@ -52,9 +52,9 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        const V& v;
+        LazyDestroy<V> v;
     public:
-        explicit NormVector(const V& v_) : v(v_) {}
+        explicit NormVector(V&& v_) : v(std::forward<V>(v_)) {}
         NormVector(const This&) = default;
         NormVector(This&&) noexcept = default;
         ~NormVector() = default;
@@ -74,9 +74,9 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        const V& v;
+        LazyDestroy<V> v;
     public:
-        explicit ValueVector(const V& v_) : v(v_) {}
+        explicit ValueVector(V&& v_) : v(std::forward<V>(v_)) {}
         ValueVector(const This&) = default;
         ValueVector(This&&) noexcept = default;
         ~ValueVector() = default;
@@ -97,9 +97,9 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        const V& v;
+        LazyDestroy<V> v;
     public:
-        explicit GradVector(const V& v_) : v(v_) {}
+        explicit GradVector(V&& v_) : v(std::forward<V>(v_)) {}
         GradVector(const This&) = default;
         GradVector(This&&) noexcept = default;
         ~GradVector() = default;
@@ -114,7 +114,7 @@ namespace Physica {
 
     template<class V, int MaskOrder>
     class DiffMaskVector : public RValueVector<DiffMaskVector<V, MaskOrder>> {
-        static_assert(MaskOrder < V::ScalarType::Order, "[Error]: We should return ref to original vector instead of DiffMaskVector, this is a bug");
+        static_assert(MaskOrder < std::remove_cvref_t<V>::ScalarType::Order, "[Error]: We should return ref to original vector instead of DiffMaskVector, this is a bug");
 
         using This = DiffMaskVector<V, MaskOrder>;
         using Base = RValueVector<This>;
@@ -122,9 +122,9 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        const V& v;
+        LazyDestroy<V> v;
     public:
-        DiffMaskVector(const V& v_) : v(v_) {}
+        DiffMaskVector(V&& v_) : v(std::forward<V>(v_)) {}
         DiffMaskVector(const This&) = default;
         DiffMaskVector(This&&) noexcept = default;
         ~DiffMaskVector() = default;
@@ -136,11 +136,6 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s); }
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };
-
-    template<Vector V, int MaskOrder>
-    [[nodiscard]] auto toDiffMaskVector(const RValueVector<V>& v) noexcept -> std::conditional<(MaskOrder < V::ScalarType::Order), DiffMaskVector<V, MaskOrder>, const V&>::type{
-        return v.getDerived();
-    }
 }
 
 namespace Physica {
@@ -152,31 +147,34 @@ namespace Physica {
 
     template<class V>
     class Traits<ValueVector<V>> {
+        using V1 = std::remove_cvref_t<V>;
     public:
-        using ScalarType = V::ScalarType::ValueType;
-        constexpr static size_t SizeAtCompile = V::SizeAtCompile;
+        using ScalarType = V1::ScalarType::ValueType;
+        constexpr static size_t SizeAtCompile = V1::SizeAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
     };
 
     template<class V, int GradOrder>
     class Traits<GradVector<V, GradOrder>> {
-        static_assert(V::ScalarType::isDiffable, "[Error]: Unnecessary toGradVector() call");
+        using V1 = std::remove_cvref_t<V>;
+        static_assert(V1::ScalarType::isDiffable, "[Error]: Unnecessary toGradVector() call");
     public:
-        using ScalarType = Internal::GradTypeHelper<typename V::ScalarType, GradOrder>::Type;
-        constexpr static size_t SizeAtCompile = V::SizeAtCompile;
+        using ScalarType = Internal::GradTypeHelper<typename V1::ScalarType, GradOrder>::Type;
+        constexpr static size_t SizeAtCompile = V1::SizeAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
     };
 
     template<class V, int MaskOrder>
     class Traits<DiffMaskVector<V, MaskOrder>> {
-        using U = V::ScalarType;
+        using V1 = std::remove_cvref_t<V>;
+        using U = V1::ScalarType;
         using ValueType = typename U::ValueType;
         static_assert(U::isDiffable, "[Error]: Unnecessary toDiffMaskVector() call");
     public:
         using ScalarType = std::conditional<MaskOrder == 0, ValueType, Diff<ValueType, U::Mode, MaskOrder>>::type;
-        constexpr static size_t SizeAtCompile = V::SizeAtCompile;
+        constexpr static size_t SizeAtCompile = V1::SizeAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
     };

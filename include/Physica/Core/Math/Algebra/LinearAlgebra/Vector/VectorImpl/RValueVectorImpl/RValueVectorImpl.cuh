@@ -366,40 +366,52 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ decltype(auto) device_obj<RValueVector<Derived>>::reals() const noexcept {
+    __host__ __device__ decltype(auto) device_obj<RValueVector<Derived>>::reals(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using V = remove_device_obj<Self>::type;
         if constexpr (isComplex)
-            return device_obj<RealVectorR<Derived>>(Base::getDerived());
+            return device_obj<RealVectorR<V>>(std::forward<Self>(self));
         else
-            return Base::getDerived();
+            return std::forward<Self>(self);
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<RValueVector<Derived>>::imags() const noexcept {
-        return device_obj<ImagVector<Derived>>(Base::getDerived());
+    __host__ __device__ auto device_obj<RValueVector<Derived>>::imags(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using V = remove_device_obj<Self>::type;
+        return device_obj<ImagVector<V>>(std::forward<Self>(self));
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<RValueVector<Derived>>::squaredNorms() const noexcept {
-        return device_obj<SquaredNormVector<Derived>>(Base::getDerived());
+    __host__ __device__ auto device_obj<RValueVector<Derived>>::squaredNorms(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using V = remove_device_obj<Self>::type;
+        return device_obj<SquaredNormVector<V>>(std::forward<Self>(self));
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<RValueVector<Derived>>::norms() const noexcept {
-        return device_obj<NormVector<Derived>>(Base::getDerived());
+    __host__ __device__ auto device_obj<RValueVector<Derived>>::norms(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using V = remove_device_obj<Self>::type;
+        return device_obj<NormVector<V>>(std::forward<Self>(self));
     }
 
     template<class Derived>
-    __host__ __device__ decltype(auto) device_obj<RValueVector<Derived>>::values() const noexcept {
+    __host__ __device__ decltype(auto) device_obj<RValueVector<Derived>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using V = remove_device_obj<Self>::type;
         if constexpr (isDiffable)
-            return device_obj<ValueVector<Derived>>(Base::getDerived());
+            return device_obj<ValueVector<V>>(std::forward<Self>(self));
         else
-            return Base::getDerived();
+            return std::forward<Self>(self);
     }
 
     template<class Derived>
     template<int GradOrder>
-    __host__ __device__ auto device_obj<RValueVector<Derived>>::grads() const noexcept {
-        return device_obj<GradVector<Derived, GradOrder>>(Base::getDerived());
+    __host__ __device__ decltype(auto) device_obj<RValueVector<Derived>>::grads(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using V = remove_device_obj<Self>::type;
+        return device_obj<GradVector<V, GradOrder>>(std::forward<Self>(self));
     }
 
     template<class Derived>

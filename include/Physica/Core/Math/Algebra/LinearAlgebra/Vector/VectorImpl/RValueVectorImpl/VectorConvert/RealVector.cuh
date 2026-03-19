@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,13 +26,14 @@ namespace Physica {
         using host_obj = RealVectorR<V>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
+        using Ref = add_device_obj_t<V>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     private:
-        PlainStruct<const device_obj<V>> v;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<V>>> v;
     public:
-        __host__ __device__ explicit device_obj(const device_obj<V>& v_) : v(asStruct(v_)) {}
+        __host__ __device__ explicit device_obj(Ref v_) : v(asStruct(v_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;

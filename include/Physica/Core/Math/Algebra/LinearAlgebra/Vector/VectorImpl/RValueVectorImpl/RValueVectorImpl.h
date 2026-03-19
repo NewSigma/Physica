@@ -245,7 +245,7 @@ namespace Physica {
 
     template<class Derived>
     auto RValueVector<Derived>::squaredNorm() const noexcept -> CoDiff<Tr> {
-        return squaredNorms().sum();
+        return Base::getDerived().squaredNorms().sum();
     }
 
     template<class Derived>
@@ -666,43 +666,56 @@ namespace Physica {
     }
 
     template<class Derived>
-    decltype(auto) RValueVector<Derived>::reals() const noexcept {
+    decltype(auto) RValueVector<Derived>::reals(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (isComplex)
-            return RealVectorR<Derived>(Base::getDerived());
+            return RealVectorR<Self>(std::forward<Self>(self));
         else
-            return Base::getDerived();
+            return std::forward<Self>(self);
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::imags() const noexcept {
-        return ImagVector<Derived>(Base::getDerived());
+    auto RValueVector<Derived>::imags(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return ImagVector<Self>(std::forward<Self>(self));
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::squaredNorms() const noexcept {
-        return SquaredNormVector<Derived>(Base::getDerived());
+    auto RValueVector<Derived>::squaredNorms(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return SquaredNormVector<Self>(std::forward<Self>(self));
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::norms() const noexcept {
-        return NormVector<Derived>(Base::getDerived());
+    auto RValueVector<Derived>::norms(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return NormVector<Self>(std::forward<Self>(self));
     }
 
     template<class Derived>
     decltype(auto) RValueVector<Derived>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (isDiffable)
-            return ValueVector<Derived>(self);
+            return ValueVector<Self>(std::forward<Self>(self));
         else
-            return std::forward<decltype(self)>(self);
+            return std::forward<Self>(self);
     }
 
     template<class Derived>
     template<int GradOrder>
-    auto RValueVector<Derived>::grads() const noexcept {
-        if constexpr (isReverseDiff)
-            return Base::getDerived().template grads<GradOrder>();
+    auto RValueVector<Derived>::grads(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return GradVector<Self, GradOrder>(std::forward<Self>(self));
+    }
+
+    template<class Derived>
+    template<int MaskOrder>
+    decltype(auto) RValueVector<Derived>::mask(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (MaskOrder < T::Order)
+            return DiffMaskVector<Self, MaskOrder>(std::forward<Self>(self));
         else
-            return grads_impl<GradOrder>();
+            return std::forward<Self>(self);
     }
 
     template<class Derived>
@@ -730,12 +743,6 @@ namespace Physica {
 
         using U = Src::ScalarType;
         T::template static_assert_assign<U>();
-    }
-
-    template<class Derived>
-    template<int GradOrder>
-    auto RValueVector<Derived>::grads_impl() const noexcept {
-        return GradVector<Derived, GradOrder>(Base::getDerived());
     }
 
     template<class Derived>

@@ -40,6 +40,7 @@ namespace Physica {
     template<class T> class NormVector;
     template<class T> class ValueVector;
     template<class T, int GradOrder> class GradVector;
+    template<class T, int MaskOrder> class DiffMaskVector;
     template<Vector, Matrix> class GEVM;
 
     namespace Internal {
@@ -189,13 +190,15 @@ namespace Physica {
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] auto reshape_row(size_t row, size_t col) const noexcept;
 
-        [[nodiscard]] decltype(auto) reals() const noexcept;
-        [[nodiscard]] auto imags() const noexcept;
-        [[nodiscard]] auto squaredNorms() const noexcept;
-        [[nodiscard]] auto norms() const noexcept;
+        [[nodiscard]] decltype(auto) reals(this auto&&) noexcept;
+        [[nodiscard]] auto imags(this auto&&) noexcept;
+        [[nodiscard]] auto squaredNorms(this auto&&) noexcept;
+        [[nodiscard]] auto norms(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         template<int GradOrder = 1>
-        [[nodiscard]] auto grads() const noexcept;
+        [[nodiscard]] auto grads(this auto&&) noexcept;
+        template<int MaskOrder>
+        [[nodiscard]] decltype(auto) mask(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         [[nodiscard]] bool empty() const noexcept { return getLength() == 0; }
@@ -209,9 +212,6 @@ namespace Physica {
         RValueVector() = default;
         RValueVector(const This&) = default;
         RValueVector(This&&) noexcept = default;
-        /* Operations */
-        template<int GradOrder>
-        auto grads_impl() const noexcept;
     private:
         template<ExecutePolicy P>
         void assign_for(Vector auto& __restrict v) const __restrict noexcept;
