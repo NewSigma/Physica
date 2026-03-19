@@ -57,6 +57,15 @@ namespace {
         expect(std::format("{}", x) == "{0}"); // Signed zero is ignored
     }
 
+    void reserveTest() {
+        VectorND<float64> x;
+        x.reserve(8);
+        expect(x.empty() && (x.getCapacity() == 8));
+
+        x.resize(4);
+        expect((x.getLength() == 4) && (x.getCapacity() == 8));
+    }
+
     void crossProductTest() {
         using T = float32;
         VectorND<T> v1{3.845971, 0.000000, 0.000000};
@@ -202,6 +211,7 @@ int main() {
     strucBindTest();
     formatTest();
 
+    reserveTest();
     crossProductTest();
     innerDotTest();
     hdfTest();
@@ -209,5 +219,6 @@ int main() {
     crossEntropyTest();
     softmaxTest();
     testConverts();
+    reshapeTest();
     return 0;
 }

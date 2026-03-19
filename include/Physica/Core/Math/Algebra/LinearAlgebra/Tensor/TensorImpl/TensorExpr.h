@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
 
 namespace Physica {
-    template<ExprID ID, Tensor LHS, class RHS = LHS>
+    template<ExprID ID, class LHS, class RHS = LHS>
     class TensorExpr;
 
     template<ExprID ID, class LHS, class RHS>

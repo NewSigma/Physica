@@ -22,17 +22,17 @@
 
 namespace Physica {
     template<Scalar T, bool TakeLn>
-    Vegas<T, TakeLn>::Vegas(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int numPoint, Trv compressRate, Trv mixBeta)
+    Vegas<T, TakeLn>::Vegas(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int numPoint, Trv compressRate, Trv lr)
             : Base(std::move(from), std::move(to), numRefine, numSample)
             , pointGrid(numPoint, getDim())
             , compressRate(compressRate)
-            , mixBeta(mixBeta)
+            , lr(std::move(lr))
             , lossMat(numPoint - 1, getDim())
             , counts(numPoint - 1, getDim()) {
         assert(numPoint > 2 && "[Error]: Invalid point number");
         assert(compressRate.isPositive() && "[Error]: Rate = 0 implies no grid refinement");
         assert(compressRate < Trv(2) && "[Error]: Rate should be ~ 1");
-        assert(mixBeta.isPositive() && (mixBeta <= Trv(1)) && "[Error]: Invalid beta");
+        assert(lr.isPositive() && (lr <= Trv(1)) && "[Error]: Invalid beta");
         for (size_t i = 0; i < getDim(); ++i)
             mesh_uniform(i);
     }
@@ -111,7 +111,7 @@ namespace Physica {
     const H5Group Vegas<T, TakeLn>::read(const H5Loc& loc, const char* name) {
         const auto group = Base::read(loc, name);
         group.readAttr("CompressRate", compressRate);
-        group.readAttr("MixBeta", mixBeta);
+        group.readAttr("lr", lr);
 
         pointGrid.read(group, "Grid");
         lossMat.resize(getNumPoint() - 1, getDim());
@@ -123,7 +123,7 @@ namespace Physica {
     H5Group Vegas<T, TakeLn>::write(H5Loc& loc, const char* name) const {
         auto group = Base::write(loc, name);
         group.writeAttr("CompressRate", compressRate);
-        group.writeAttr("MixBeta", mixBeta);
+        group.writeAttr("lr", lr);
 
         pointGrid.write(group, "Grid");
         return group;
@@ -136,7 +136,7 @@ namespace Physica {
         Base::swap(obj);
         pointGrid.swap(obj.pointGrid);
         compressRate.swap(obj.compressRate);
-        mixBeta.swap(obj.mixBeta);
+        lr.swap(obj.lr);
         lossMat.swap(obj.lossMat);
         counts.swap(obj.counts);
     }
@@ -172,15 +172,14 @@ namespace Physica {
         parallel_for<P>([this](size_t dim) {
             const auto meanL = compress(lossMat.col(dim));
             const bool noData = meanL.isZero();
-            if (noData) [[unlikely]] // No data in the dimension, usually we should have enough samples to avoid it
+            if (noData) [[unlikely]] // No data in the dimension, typically we should have enough samples to avoid it
                 return;
 
             auto oldPoints = pointGrid.col(dim);
             VectorND<Trv> newPoints(getNumPoint());
-            newPoints[0] = oldPoints[0];
+            newPoints.front() = oldPoints.front();
             Trv temp = 0;
-            size_t i = 1;
-            for (size_t j = 0; i < newPoints.getLength() - 1; ++i) {
+            for (size_t i = 1, j = 0; i < newPoints.getLength() - 1; ++i) {
                 while (temp < meanL) {
                     assert(j < getNumPoint() && "[Error]: Unexpected not enough loss, this is likely a bug");
                     temp += lossMat[j, dim];
@@ -190,8 +189,8 @@ namespace Physica {
                 Trv delta = oldPoints[j] - oldPoints[j - 1];
                 newPoints[i] = fma(temp / lossMat[j - 1, dim], -delta, oldPoints[j]);
             }
-            newPoints[i] = oldPoints[i];
-            oldPoints = newPoints * mixBeta + oldPoints * (Trv(1) - mixBeta);
+            newPoints.back() = oldPoints.back();
+            oldPoints = newPoints * lr + oldPoints * (Trv(1) - lr);
         }, getDim(), 0).wait();
     }
 

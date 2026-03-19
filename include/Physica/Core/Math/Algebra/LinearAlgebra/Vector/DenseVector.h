@@ -93,6 +93,7 @@ namespace Physica {
         using Coro::unhandled_exception;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return storage.getLength(); }
+        [[nodiscard]] size_t getCapacity() const noexcept { return storage.getCapacity(); }
         [[nodiscard]] auto* data(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] static This zeros(size_t len);

@@ -25,16 +25,19 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
 
 namespace Physica {
-    consteval bool canonicalizable(const auto& expr) noexcept {
-        using E = decltype(expr);
-        return Scalar<E> || Vector<E> || Matrix<E> || Tensor<E>;
+    template<class T>
+    consteval bool canonicalizable() noexcept {
+        return Scalar<T> || Vector<T> || Matrix<T> || Tensor<T>;
     }
 
-    consteval bool canonicalized(const auto& expr1, const auto& expr2) noexcept {
-        static_assert(canonicalizable(expr1) && canonicalizable(expr2));
+    consteval bool canonicalizable(const auto& expr) noexcept {
+        return canonicalizable<decltype(expr)>();
+    }
 
-        using E1 = std::remove_cvref_t<decltype(expr1)>;
-        using E2 = std::remove_cvref_t<decltype(expr2)>;
+    template<class T1, class T2>
+    consteval bool canonicalized() {
+        using E1 = std::remove_cvref_t<T1>;
+        using E2 = std::remove_cvref_t<T2>;
         if constexpr (E1::isSparse() && !E2::isSparse())
             return false;
         if constexpr (!E1::isDiffable && E2::isDiffable)
@@ -42,5 +45,10 @@ namespace Physica {
         if constexpr (!E1::isComplex && E2::isComplex)
             return false;
         return true;
+    }
+
+    consteval bool canonicalized(const auto& expr1, const auto& expr2) noexcept {
+        static_assert(canonicalizable(expr1) && canonicalizable(expr2));
+        return canonicalized<decltype(expr1), decltype(expr2)>();
     }
 }

@@ -42,7 +42,7 @@ namespace Physica {
     private:
         DenseMatrix<Trv> pointGrid;
         Trv compressRate;
-        Trv mixBeta;
+        Trv lr;
     protected:
         using Base::from;
         using Base::to;
@@ -60,7 +60,7 @@ namespace Physica {
               int numSample,
               int numPoint = 1000,
               Trv compressRate = 1.5,
-              Trv mixBeta = 1);
+              Trv lr = 1);
         Vegas(const This&) = default;
         Vegas(This&&) noexcept = default;
         ~Vegas() = default;
@@ -85,7 +85,7 @@ namespace Physica {
         [[nodiscard]] const auto& getPointGrid() const noexcept { return pointGrid; }
         [[nodiscard]] size_t getNumPoint() const noexcept { return pointGrid.getRow(); }
         /* Setters */
-        void setMixBeta(Trv beta) { mixBeta = beta; }
+        void setLearnRate(Trv lr_) { lr = lr_; }
     private:
         void pre_trial();
         template<ExecutePolicy P>
