@@ -33,7 +33,7 @@ namespace {
         using R = decltype(v);
         static_assert(std::ranges::sized_range<R>);
         static_assert(std::ranges::common_range<R>);
-        static_assert(std::ranges::forward_range<R>);
+        static_assert(std::ranges::random_access_range<R>);
         static_assert(std::ranges::constant_range<R>);
         static_assert(std::ranges::view<R>);
     }

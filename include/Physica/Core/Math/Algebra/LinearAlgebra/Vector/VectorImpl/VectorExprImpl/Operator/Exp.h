@@ -33,6 +33,11 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
+        /* Operators */
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const noexcept;
@@ -41,13 +46,20 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
 
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const noexcept;
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
-
         void reverse(const auto& grad) const noexcept;
     };
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Exp, V>::operator()(std::random_access_iterator auto input) noexcept {
+        return exp(input.template load<Pack>());
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Exp, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
+        return exp(input.template load<Pack>(count)).cutoff(count);
+    }
 
     template<Vector V>
     template<ExecutePolicy P>
@@ -73,18 +85,6 @@ namespace Physica {
     template<Vector V>
     auto VectorExpr<ExprID::Exp, V>::calc_value(size_t index) const -> Tv {
         return exp(Base::getExpr().calc_value(index));
-    }
-
-    template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Exp, V>::packet(size_t index) const noexcept {
-        return exp(Base::getExpr().template packet<Pack>(index));
-    }
-
-    template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Exp, V>::packet(size_t index, size_t count) const noexcept {
-        return exp(Base::getExpr().template packet<Pack>(index, count)).cutoff(count);
     }
 
     template<Vector V>

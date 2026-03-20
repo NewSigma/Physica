@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,6 +23,11 @@
 
 namespace Physica {
     template<Scalar T, int Size>
+    __host__ __device__ auto unit(SIMD<T, Size> x) noexcept {
+        return SIMD<T, Size>::select(x.isNegative(), SIMD<T, Size>(-1), SIMD<T, Size>(1));
+    }
+
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<T, Size> fma(const SIMD<T, Size> a, const SIMD<T, Size> b, const SIMD<T, Size> c) noexcept {
         return SIMD<T, Size>(mul_add(a.toMachine(), b.toMachine(), c.toMachine()));
     }
@@ -35,6 +40,11 @@ namespace Physica {
             return SIMD<T, Size>(abs(x.toMachine()));
         else
             noImpl(__func__);
+    }
+
+    template<Scalar T, int Size>
+    [[nodiscard]] auto relu(SIMD<T, Size> x) noexcept {
+        return SIMD<T, Size>::select(x > SIMD<T, Size>::zeros(), x, SIMD<T, Size>::zeros());
     }
 
     template<Scalar T, int Size>
@@ -67,6 +77,16 @@ namespace Physica {
     template<Scalar T, int Size>
     [[nodiscard]] auto ln1p(SIMD<T, Size> x) noexcept {
         return SIMD<T, Size>(log1p(x.toMachine()));
+    }
+
+    template<Scalar T, int Size>
+    [[nodiscard]] auto ln1pexp(SIMD<T, Size> x) noexcept {
+        return relu(x) + ln1p(exp(-abs(x)));
+    }
+
+    template<Scalar T, int Size>
+    auto sin(SIMD<T, Size> x) noexcept {
+        return SIMD<T, Size>(Physica::sin(x.toMachine()));
     }
 
     template<Scalar T, int Size>

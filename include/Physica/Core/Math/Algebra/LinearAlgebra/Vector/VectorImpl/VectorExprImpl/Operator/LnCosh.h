@@ -30,6 +30,11 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
+        /* Operators */
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const {
             return lncosh(Base::getExpr().calc(index));
@@ -38,17 +43,19 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const {
             return lncosh(Base::getExpr().calc_value(index));
         }
-
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const noexcept {
-            return lncosh(Base::getExpr().template packet<Pack>(index));
-        }
-
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept {
-            return lncosh(Base::getExpr().template packet<Pack>(index, count));
-        }
     };
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::LnCosh, V>::operator()(std::random_access_iterator auto input) noexcept {
+        return lncosh(input.template load<Pack>());
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::LnCosh, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
+        return lncosh(input.template load<Pack>(count));
+    }
 
     template<Vector V>
     [[nodiscard]] auto lncosh(V&& v) noexcept requires(!DeviceObj<V>) {

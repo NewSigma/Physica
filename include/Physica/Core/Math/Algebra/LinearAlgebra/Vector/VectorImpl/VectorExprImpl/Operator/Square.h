@@ -31,6 +31,11 @@ namespace Physica {
         using typename Base::Trv;
     public:
         using Base::Base;
+        /* Operators */
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const;
@@ -39,11 +44,6 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
 
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const noexcept;
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
-
         void reverse(const auto& grad) const noexcept;
         using Base::reverse;
 
@@ -51,6 +51,18 @@ namespace Physica {
         /* Getters */
         using Base::getExpr;
     };
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Square, V>::operator()(std::random_access_iterator auto input) noexcept {
+        return square(input.template load<Pack>());
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Square, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
+        return square(input.template load<Pack>(count));
+    }
 
     template<Vector V>
     template<ExecutePolicy P>
@@ -66,18 +78,6 @@ namespace Physica {
     template<Vector V>
     auto VectorExpr<ExprID::Square, V>::calc_value(size_t index) const -> Tv {
         return square(getExpr().calc_value(index));
-    }
-
-    template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Square, V>::packet(size_t index) const noexcept {
-        return square(getExpr().template packet<Pack>(index));
-    }
-
-    template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Square, V>::packet(size_t index, size_t count) const noexcept {
-        return square(getExpr().template packet<Pack>(index, count));
     }
 
     template<Vector V>

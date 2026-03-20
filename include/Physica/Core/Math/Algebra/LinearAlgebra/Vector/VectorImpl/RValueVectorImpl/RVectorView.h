@@ -30,7 +30,6 @@ namespace Physica {
     class RVectorView : public std::ranges::view_base {
         static_assert(!std::is_reference_v<V>);
         using This = RVectorView<V>;
-        using Base = CRTPBase<This>;
 
         class Iterator;
 

@@ -33,6 +33,11 @@ namespace Physica {
         constexpr static bool isReverseDiff = Base::isReverseDiff;
     public:
         using Base::Base;
+        /* Operators */
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const;
@@ -41,37 +46,33 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return abs(Base::getExpr().calc(index)); }
         [[nodiscard]] Tv calc_value(size_t index) const { return abs(Base::getExpr().calc_value(index)); }
 
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const noexcept;
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
         void reverse(const auto& grad) const noexcept;
 
         [[nodiscard]] T max() const;
     };
 
     template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Abs, V>::operator()(std::random_access_iterator auto input) noexcept {
+        if constexpr (isComplexV)
+            return sqrt(SquaredNormVector<V>::template operator()<Pack>(input));
+        else
+            return abs(input.template load<Pack>());
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Abs, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
+        if constexpr (isComplexV)
+            return sqrt(SquaredNormVector<V>::template operator()<Pack>(input, count));
+        else
+            return abs(input.template load<Pack>(count));
+    }
+
+    template<Vector V>
     template<ExecutePolicy P>
     void VectorExpr<ExprID::Abs, V>::assign(Vector auto&& v) const {
         Base::template assign_base<P>(v);
-    }
-
-    template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Abs, V>::packet(size_t index) const noexcept {
-        if constexpr (isComplexV)
-            return sqrt(Base::getExpr().squaredNorms().template packet<Pack>(index));
-        else
-            return abs(Base::getExpr().template packet<Pack>(index));
-    }
-
-    template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Abs, V>::packet(size_t index, size_t count) const noexcept {
-        if constexpr (isComplexV)
-            return sqrt(Base::getExpr().squaredNorms().template packet<Pack>(index, count));
-        else
-            return abs(Base::getExpr().template packet<Pack>(index, count));
     }
 
     template<Vector V>

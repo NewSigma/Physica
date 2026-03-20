@@ -32,18 +32,34 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
+        /* Operators */
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
 
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const noexcept;
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
-
         void reverse(const Vector auto& grad) const noexcept;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
     };
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Reciprocal, V>::operator()(std::random_access_iterator auto input) noexcept {
+        auto x = input.template load<Pack>();
+        assert(!x.isZero().horizontal_or() && "[Error]: Divide by zero");
+        return reciprocal(x);
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Reciprocal, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
+        auto x = reciprocal(input.template load<Pack>(count)).cutoff(count);
+        assert(x.isFinite().horizontal_and() && "[Error]: Divide by zero");
+        return x;
+    }
 
     template<Vector V>
     auto VectorExpr<ExprID::Reciprocal, V>::calc(size_t index) const -> CoDiff<T> {
@@ -52,22 +68,6 @@ namespace Physica {
 
     template<Vector V>
     auto VectorExpr<ExprID::Reciprocal, V>::calc_value(size_t index) const -> Tv { return reciprocal(Base::getExpr().calc_value(index)); }
-
-    template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Reciprocal, V>::packet(size_t index) const noexcept {
-        auto x = Base::getExpr().template packet<Pack>(index);
-        assert(!x.isZero().horizontal_or() && "[Error]: Divide by zero");
-        return reciprocal(x);
-    }
-
-    template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Reciprocal, V>::packet(size_t index, size_t count) const noexcept {
-        auto x = reciprocal(Base::getExpr().template packet<Pack>(index, count)).cutoff(count);
-        assert(x.isFinite().horizontal_and() && "[Error]: Divide by zero");
-        return x;
-    }
 
     template<Vector V>
     void VectorExpr<ExprID::Reciprocal, V>::reverse(const Vector auto& grad) const noexcept {

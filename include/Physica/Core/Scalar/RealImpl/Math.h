@@ -74,6 +74,11 @@ namespace Physica {
     __host__ __device__ Real<Prec> ln1p(const Real<Prec>& x) noexcept {
         return Real<Prec>(std::log1p(x.toMachine()));
     }
+
+    template<FloatPrec Prec>
+    Real<Prec> ln1pexp(const Real<Prec>& x) noexcept {
+        return relu(x) + ln1p(exp(-abs(x)));
+    }
     /**
      * \return log_a n
      */
@@ -335,11 +340,6 @@ namespace Physica {
     __host__ __device__ Real<Prec> arccoth(const Real<Prec>& x) noexcept {
         auto trivial = x.toMachine();
         return Real<Prec>(std::log((trivial + 1) / (trivial - 1)) / 2);
-    }
-
-    template<FloatPrec Prec>
-    Real<Prec> ln1pexp(const Real<Prec>& x) noexcept {
-        return relu(x) + ln1p(exp(-abs(x)));
     }
 
     template<FloatPrec Prec>

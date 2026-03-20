@@ -30,27 +30,33 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
+        /* Operators */
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t s) const { return cbrt(Base::getExpr().calc(s)); }
-
         [[nodiscard]] Tv calc_value(size_t index) const { return cbrt(Base::getExpr().calc_value(index)); }
-
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const noexcept {
-            Pack result = Base::getExpr().template packet<Pack>(index);
-            for (size_t i = 0; i < static_cast<size_t>(Pack::size()); ++i)
-                result.insert(i, cbrt(result[i]));
-            return result;
-        }
-
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept {
-            Pack result = Base::getExpr().template packet<Pack>(index, count);
-            for (size_t i = 0; i < count; ++i)
-                result.insert(i, cbrt(result[i]));
-            return result;
-        }
     };
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Cbrt, V>::operator()(std::random_access_iterator auto input) noexcept {
+        Pack result = input.template load<Pack>();
+        for (int i = 0; i < Pack::size(); ++i)
+            result.insert(i, cbrt(result[i]));
+        return result;
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Cbrt, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
+        Pack result = input.template packet<Pack>(count);
+        for (size_t i = 0; i < count; ++i)
+            result.insert(i, cbrt(result[i]));
+        return result;
+    }
 
     template<Vector V>
     [[nodiscard]] auto cbrt(V&& v) noexcept {

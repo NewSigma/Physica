@@ -46,6 +46,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto it) noexcept;
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto it, size_t count) noexcept;
         /* Getters */
         [[nodiscard]] CoDiff<T> calc(size_t s) const { return v.calc(s).squaredNorm(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).squaredNorm(); }
@@ -65,31 +69,33 @@ namespace Physica {
 
     template<class V>
     template<Packet Pack>
-    Pack SquaredNormVector<V>::packet(size_t index) const noexcept {
+    Pack SquaredNormVector<V>::operator()(std::random_access_iterator auto it) noexcept {
         if constexpr (isComplexV) {
             static_assert(!isReverseDiff, "[Error]: Not implemented");
             constexpr size_t MaxSize = BestPacket<Tc, Dynamic>::Size;
             constexpr size_t Size = Pack::size();
             if constexpr (Size <= MaxSize) {
                 using PacketType = SIMD<Tc, Size>;
-                const auto x2 = PacketType::asComplex(v.template packet<PacketType>(index).squaredNorm());
+                const auto x2 = PacketType::asComplex(it.template load<PacketType>().squaredNorm());
                 return Pack(x2.real());
             }
             else {
                 constexpr size_t Size1 = Size / 2;
                 using PacketType = SIMD<Tc, Size1>;
-                const auto x2 = PacketType::asComplex(v.template packet<PacketType>(index).squaredNorm());
-                const auto y2 = PacketType::asComplex(v.template packet<PacketType>(index + Size1).squaredNorm());
+                const auto x2 = PacketType::asComplex(it.template load<PacketType>().squaredNorm());
+
+                it += Size1;
+                const auto y2 = PacketType::asComplex(it.template load<PacketType>().squaredNorm());
                 return Pack(x2.real(), y2.real());
             }
         }
         else
-            return square(v.template packet<Pack>(index));
+            return square(it.template load<Pack>());
     }
 
     template<class V>
     template<Packet Pack>
-    Pack SquaredNormVector<V>::packet(size_t index, size_t count) const noexcept {
+    Pack SquaredNormVector<V>::operator()(std::random_access_iterator auto it, size_t count) noexcept {
         assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
         if constexpr (isComplexV) {
             static_assert(!isReverseDiff, "[Error]: Not implemented");
@@ -97,7 +103,7 @@ namespace Physica {
             constexpr size_t Size = Pack::size();
             if constexpr (Size <= MaxSize) {
                 using PacketType = SIMD<Tc, Size>;
-                const auto x2 = PacketType::asComplex(v.template packet<PacketType>(index, count).squaredNorm());
+                const auto x2 = PacketType::asComplex(it.template load<PacketType>(count).squaredNorm());
                 return Pack(x2.real());
             }
             else {
@@ -106,18 +112,31 @@ namespace Physica {
                 using PacketType = SIMD<Tc, HalfSize>;
                 PacketType x2{};
                 if (count >= HalfSize)
-                    x2 = PacketType::asComplex(v.template packet<PacketType>(index).squaredNorm());
+                    x2 = PacketType::asComplex(it.template load<PacketType>().squaredNorm());
                 else
-                    x2 = PacketType::asComplex(v.template packet<PacketType>(index, count).squaredNorm());
+                    x2 = PacketType::asComplex(it.template load<PacketType>(count).squaredNorm());
 
                 if (count <= HalfSize)
                     return Pack(x2.real(), SIMD<T, HalfSize>(0));
-                const auto y2 = PacketType::asComplex(v.template packet<PacketType>(index + HalfSize, count - HalfSize).squaredNorm());
+                it += HalfSize;
+                const auto y2 = PacketType::asComplex(it.template load<PacketType>(count - HalfSize).squaredNorm());
                 return Pack(x2.real(), y2.real());
             }
         }
         else
-            return square(v.template packet<Pack>(index, count));
+            return square(it.template packet<Pack>(count));
+    }
+
+    template<class V>
+    template<Packet Pack>
+    Pack SquaredNormVector<V>::packet(size_t index) const noexcept {
+        return operator()<Pack>(v.view().begin() + index);
+    }
+
+    template<class V>
+    template<Packet Pack>
+    Pack SquaredNormVector<V>::packet(size_t index, size_t count) const noexcept {
+        return operator()<Pack>(v.view().begin() + index, count);
     }
 
     template<class V>

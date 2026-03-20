@@ -132,10 +132,10 @@ namespace Physica {
         /* Operations */
         void functorTest() {
             if constexpr (Disable) {
-                const Tv r = 2;
-                const Tv r2 = square(r);
-                ewald.pot_functor(0, 1, r, r2).reverse();
-                const Tv f = ewald.force_functor(0, 1, r, r2).value();
+                const T r = 2;
+                const auto r2 = square(r);
+                ewald.pot_functor(0, 1, r, r2.value()).reverse();
+                const Tv f = ewald.force_functor(0, 1, r, r2.value()).value();
                 expect(scalarNear(-r.grad(), f, 1E-10));
             }
         }

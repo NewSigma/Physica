@@ -32,18 +32,40 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
+        /* Operators */
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
-        [[nodiscard]] CoDiff<T> calc(size_t index) const {
-            return relu(Base::getExpr().calc(index));
-        }
-
-        [[nodiscard]] Tv calc_value(size_t index) const {
-            return relu(Base::getExpr().calc_value(index));
-        }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const;
+        [[nodiscard]] Tv calc_value(size_t index) const;
 
         using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
     };
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Relu, V>::operator()(std::random_access_iterator auto input) noexcept {
+        return relu(input.template load<Pack>());
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Relu, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
+        return relu(input.template load<Pack>(count));
+    }
+
+    template<Vector V>
+    auto VectorExpr<ExprID::Relu, V>::calc(size_t index) const -> CoDiff<T> {
+        return relu(Base::getExpr().calc(index));
+    }
+
+    template<Vector V>
+    auto VectorExpr<ExprID::Relu, V>::calc_value(size_t index) const -> Tv {
+        return relu(Base::getExpr().calc_value(index));
+    }
 
     template<Vector V>
     void VectorExpr<ExprID::Relu, V>::reverse(const Vector auto& grad) const noexcept {

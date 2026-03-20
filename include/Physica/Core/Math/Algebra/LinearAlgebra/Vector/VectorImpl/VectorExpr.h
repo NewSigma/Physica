@@ -36,6 +36,8 @@ namespace Physica {
     class UnitaryVectorExpr : public RValueVector<VectorExpr<ID, V>> {
         using This = UnitaryVectorExpr<ID, V>;
         using Base = RValueVector<VectorExpr<ID, V>>;
+
+        template<std::ranges::view Operand> class View;
     private:
         LazyDestroy<V> expr;
     public:
@@ -48,12 +50,34 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] constexpr auto view() const noexcept;
+
+        template<Packet Pack>
+        [[nodiscard]] Pack packet(size_t index) const noexcept;
+        template<Packet Pack>
+        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return getExpr().getLength(); }
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
     };
+
+    template<ExprID ID, Vector V>
+    constexpr auto UnitaryVectorExpr<ID, V>::view() const noexcept {
+        return View(expr.view());
+    }
+
+    template<ExprID ID, Vector V>
+    template<Packet Pack>
+    Pack UnitaryVectorExpr<ID, V>::packet(size_t index) const noexcept {
+        return (view().begin() + index).template load<Pack>();
+    }
+
+    template<ExprID ID, Vector V>
+    template<Packet Pack>
+    Pack UnitaryVectorExpr<ID, V>::packet(size_t index, size_t count) const noexcept {
+        return (view().begin() + index).template load<Pack>(count);
+    }
 
     template<ExprID ID, Vector V>
     auto&& UnitaryVectorExpr<ID, V>::getExpr(this auto&& self) noexcept {
@@ -164,6 +188,7 @@ namespace Physica {
     class Traits<VectorExpr<ID, LHS, RHS>> : public Traits<VectorExpr<ID, RHS, LHS>> {};
 }
 
+#include "VectorExprImpl/UnitaryVectorExprView.h"
 #ifdef PHYSICA_MKL
     #include <mkl_vml.h>
 #endif

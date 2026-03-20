@@ -42,9 +42,9 @@ namespace Physica {
     public:
         static void run() {
             if constexpr (Disable) {
-                const Tv volume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
+                const T volume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
                 const unsigned int cellSize = 3;
-                auto cell = makeSystem(cellSize, volume);
+                auto cell = makeSystem(cellSize, volume.value());
                 ForceModel::sortPosition(cell);
                 ForceModel forceModel(cell, pair_cutoff, Ewald<T>{});
                 forceModel.potentialV(cell).reverse();

@@ -31,28 +31,28 @@ namespace Physica {
         using typename Base::Trv;
     public:
         using Base::Base;
+        /* Operators */
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return ln1p(Base::getExpr().calc(index)); }
         [[nodiscard]] Tv calc_value(size_t index) const { return ln1p(Base::getExpr().calc_value(index)); }
-
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const noexcept;
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
 
         void reverse(const Scalar auto& grad) const noexcept;
     };
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Ln1p, V>::packet(size_t index) const noexcept {
-        return ln1p(Base::getExpr().template packet<Pack>(index));
+    Pack VectorExpr<ExprID::Ln1p, V>::operator()(std::random_access_iterator auto input) noexcept {
+        return ln1p(input.template load<Pack>());
     }
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprID::Ln1p, V>::packet(size_t index, size_t count) const noexcept {
-        return ln1p(Base::getExpr().template packet<Pack>(index, count));
+    Pack VectorExpr<ExprID::Ln1p, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
+        return ln1p(input.template load<Pack>(count));
     }
 
     template<Vector V>

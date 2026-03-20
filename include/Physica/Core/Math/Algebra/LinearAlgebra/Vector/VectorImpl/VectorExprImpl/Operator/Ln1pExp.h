@@ -30,11 +30,27 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
+        /* Operators */
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
+        template<Packet Pack>
+        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] T calc(size_t index) const { return ln1pexp(Base::getExpr().calc(index)); }
-
         [[nodiscard]] Tv calc_value(size_t index) const { return ln1pexp(Base::getExpr().calc_value(index)); }
     };
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Ln1pExp, V>::operator()(std::random_access_iterator auto input) noexcept {
+        return ln1pexp(input.template load<Pack>());
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Ln1pExp, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
+        return ln1pexp(input.template load<Pack>(count));
+    }
 
     template<Vector V>
     [[nodiscard]] auto ln1pexp(V&& v) noexcept requires(!DeviceObj<V>) {
