@@ -40,7 +40,7 @@ namespace Physica {
     template<class T> class NormVector;
     template<class T> class ValueVector;
     template<class T, int GradOrder> class GradVector;
-    template<class T, int MaskOrder> class DiffMaskVector;
+    template<class T, int MaskOrder> class GradMaskVector;
     template<Vector, Matrix> class GEVM;
 
     namespace Internal {
@@ -198,7 +198,7 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] auto grads(this auto&&) noexcept;
         template<int MaskOrder>
-        [[nodiscard]] decltype(auto) mask(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) grads_mask(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         [[nodiscard]] bool empty() const noexcept { return getLength() == 0; }

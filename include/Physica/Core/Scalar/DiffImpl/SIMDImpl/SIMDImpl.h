@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -78,7 +78,7 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order, int Size>
     auto SIMD<Diff<T, Mode, Order>, Size>::operator*(const ScalarType& x) const -> This {
-        return This(values * x.value(), GradType(x.template mask<Order - 1>() * grad() + GradType(*this) * x.grad()));
+        return This(values * x.value(), GradType(x.template grad_mask<Order - 1>() * grad() + GradType(*this) * x.grad()));
     }
 
     template<Scalar T, DiffMode Mode, int Order, int Size>

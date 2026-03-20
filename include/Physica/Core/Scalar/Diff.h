@@ -60,9 +60,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ explicit operator double() const { return double(v); }
         [[nodiscard]] __host__ __device__ bool operator==(const This& other) const;
         /* Operations */
-        template<int MaskOrder>
-        __host__ __device__ auto mask() const noexcept;
-
         __host__ __device__ T reverse(GradType grad = 1) const noexcept;
         __host__ __device__ void zero_grad();
 
@@ -75,14 +72,14 @@ namespace Physica {
         __host__ __device__ void swap(ScalarRef<This>&& ref) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto real_ptr(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ T* value_ptr() noexcept { return &v; }
-        [[nodiscard]] __host__ __device__ GradType* grad_ptr() noexcept { return &g; }
+        [[nodiscard]] __host__ __device__ auto* value_ptr(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto* grad_ptr(this auto&&) noexcept;
 
         using Base::value;
         template<int GradOrder = 1>
-        [[nodiscard]] __host__ __device__ auto& grad() noexcept;
-        template<int GradOrder = 1>
-        [[nodiscard]] __host__ __device__ const auto& grad() const noexcept;
+        [[nodiscard]] __host__ __device__ auto& grad(this auto&&) noexcept;
+        template<int MaskOrder>
+        [[nodiscard]] __host__ __device__ auto grad_mask() const noexcept;
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept;
         /* Static members */
         [[nodiscard]] static This fromPhase(RealType phase) noexcept requires(isComplex);

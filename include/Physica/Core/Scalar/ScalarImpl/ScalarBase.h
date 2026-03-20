@@ -104,9 +104,6 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] ScalarType calc() const;
 
-        template<int MaskOrder>
-        [[nodiscard]] __host__ __device__ auto mask() const noexcept;
-
         [[nodiscard]] __host__ __device__ RealType real() const noexcept;
         [[nodiscard]] __host__ __device__ RealType imag() const noexcept;
         [[nodiscard]] __host__ __device__ ScalarType conjugate() const noexcept;
@@ -122,21 +119,17 @@ namespace Physica {
         void random_normal() noexcept;
         /* Getters */
         __host__ __device__ constexpr static size_t size() { return 1; }
-        [[nodiscard]] __host__ __device__ auto* real_ptr() noexcept;
-        [[nodiscard]] __host__ __device__ const auto* real_ptr() const noexcept;
-        [[nodiscard]] __host__ __device__ auto* value_ptr() noexcept;
-        [[nodiscard]] __host__ __device__ const auto* value_ptr() const noexcept;
+        [[nodiscard]] __host__ __device__ auto* real_ptr(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto* value_ptr(this auto&&) noexcept;
         template<int GradOrder>
-        [[nodiscard]] __host__ __device__ auto* grad_ptr() noexcept;
-        template<int GradOrder>
-        [[nodiscard]] __host__ __device__ const auto* grad_ptr() const noexcept;
+        [[nodiscard]] __host__ __device__ auto* grad_ptr(this auto&&) noexcept;
 
-        [[nodiscard]] __host__ __device__ ValueType& value() noexcept;
-        [[nodiscard]] __host__ __device__ const ValueType& value() const noexcept;
+        [[nodiscard]] __host__ __device__ auto& value(this auto&&) noexcept;
         template<int GradOrder = 1>
-        [[nodiscard]] __host__ __device__ GradRtnTy<GradOrder>& grad() noexcept;
-        template<int GradOrder = 1>
-        [[nodiscard]] __host__ __device__ const GradRtnTy<GradOrder>& grad() const noexcept;
+        [[nodiscard]] __host__ __device__ auto& grad(this auto&&) noexcept;
+        template<int MaskOrder>
+        [[nodiscard]] __host__ __device__ auto grad_mask() const noexcept;
+
         [[nodiscard]] __host__ __device__ auto isZero() const noexcept;
         [[nodiscard]] __host__ __device__ auto isSubNormal() const noexcept;
         [[nodiscard]] __host__ __device__ auto isPositive() const noexcept;
@@ -242,15 +235,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<int MaskOrder>
-    __host__ __device__ auto ScalarBase<Derived>::mask() const noexcept {
-        if constexpr (isDiffable)
-            return calc().template mask<MaskOrder>();
-        else
-            return Base::getDerived();
-    }
-
-    template<class Derived>
     __host__ __device__ auto ScalarBase<Derived>::real() const noexcept -> RealType {
         const auto& x = this->getDerived();
         if constexpr (isDiffable)
@@ -345,70 +329,52 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto* ScalarBase<Derived>::real_ptr() noexcept {
+    __host__ __device__ auto* ScalarBase<Derived>::real_ptr(this auto&& self) noexcept {
         if constexpr (isComplex)
-            return Base::getDerived().real_ptr();
+            return self.real_ptr();
         else
-            return &Base::getDerived();
+            return &self;
     }
 
     template<class Derived>
-    __host__ __device__ const auto* ScalarBase<Derived>::real_ptr() const noexcept {
-        return const_cast<This&>(*this).real_ptr();
-    }
-
-    template<class Derived>
-    __host__ __device__ auto* ScalarBase<Derived>::value_ptr() noexcept {
+    __host__ __device__ auto* ScalarBase<Derived>::value_ptr(this auto&& self) noexcept {
         if constexpr (isDiffable)
-            return Base::getDerived().value_ptr();
+            return self.value_ptr();
         else
-            return &Base::getDerived();
-    }
-
-    template<class Derived>
-    __host__ __device__ const auto* ScalarBase<Derived>::value_ptr() const noexcept {
-        return const_cast<This&>(*this).value_ptr();
+            return &self;
     }
 
     template<class Derived>
     template<int GradOrder>
-    __host__ __device__ auto* ScalarBase<Derived>::grad_ptr() noexcept {
+    __host__ __device__ auto* ScalarBase<Derived>::grad_ptr(this auto&& self) noexcept {
         static_assert(isDiffable, "[Error]: Cannot take grad ptr of a undiffable scalar");
-        return Base::getDerived().template grad_ptr<GradOrder>();
+        return self.template grad_ptr<GradOrder>();
+    }
+
+    template<class Derived>
+    __host__ __device__ auto& ScalarBase<Derived>::value(this auto&& self) noexcept {
+        return *self.value_ptr();
     }
 
     template<class Derived>
     template<int GradOrder>
-    __host__ __device__ const auto* ScalarBase<Derived>::grad_ptr() const noexcept {
-        return const_cast<This&>(*this).template grad_ptr<GradOrder>();
+    __host__ __device__  auto& ScalarBase<Derived>::grad(this auto&& self) noexcept {
+        return *self.template grad_ptr<GradOrder>();
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::value() noexcept -> ValueType& {
-        return *value_ptr();
-    }
-
-    template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::value() const noexcept -> const ValueType& {
-        return *value_ptr();
-    }
-
-    template<class Derived>
-    template<int GradOrder>
-    __host__ __device__  auto ScalarBase<Derived>::grad() noexcept -> GradRtnTy<GradOrder>& {
-        return *grad_ptr<GradOrder>();
-    }
-
-    template<class Derived>
-    template<int GradOrder>
-    __host__ __device__  auto ScalarBase<Derived>::grad() const noexcept -> const GradRtnTy<GradOrder>& {
-        return *grad_ptr<GradOrder>();
+    template<int MaskOrder>
+    __host__ __device__ auto ScalarBase<Derived>::grad_mask() const noexcept {
+        if constexpr (isDiffable)
+            return calc().template grad_mask<MaskOrder>();
+        else
+            return Base::getDerived();
     }
 
     template<class Derived>
     __host__ __device__ auto ScalarBase<Derived>::isZero() const noexcept {
         if constexpr (isDiffable)
-            return value().isZero();
+            return Base::getDerived().value().isZero();
         else
             return Base::getDerived().isZero();
     }
@@ -416,7 +382,7 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ auto ScalarBase<Derived>::isSubNormal() const noexcept {
         if constexpr (isDiffable)
-            return value().isSubNormal();
+            return Base::getDerived().value().isSubNormal();
         else
             return Base::getDerived().isSubNormal();
     }
@@ -425,7 +391,7 @@ namespace Physica {
     __host__ __device__ auto ScalarBase<Derived>::isPositive() const noexcept {
         checkComplexCompare();
         if constexpr (isDiffable)
-            return value().isPositive();
+            return Base::getDerived().value().isPositive();
         else
             return Base::getDerived().isPositive();
     }
@@ -434,7 +400,7 @@ namespace Physica {
     __host__ __device__ auto ScalarBase<Derived>::isNegative() const noexcept {
         checkComplexCompare();
         if constexpr (isDiffable)
-            return value().isNegative();
+            return Base::getDerived().value().isNegative();
         else
             return Base::getDerived().isNegative();
     }

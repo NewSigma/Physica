@@ -113,10 +113,10 @@ namespace Physica {
     };
 
     template<class V, int MaskOrder>
-    class DiffMaskVector : public RValueVector<DiffMaskVector<V, MaskOrder>> {
-        static_assert(MaskOrder < std::remove_cvref_t<V>::ScalarType::Order, "[Error]: We should return ref to original vector instead of DiffMaskVector, this is a bug");
+    class GradMaskVector : public RValueVector<GradMaskVector<V, MaskOrder>> {
+        static_assert(MaskOrder < std::remove_cvref_t<V>::ScalarType::Order, "[Error]: We should return ref to original vector instead of GradMaskVector, this is a bug");
 
-        using This = DiffMaskVector<V, MaskOrder>;
+        using This = GradMaskVector<V, MaskOrder>;
         using Base = RValueVector<This>;
     protected:
         using typename Base::T;
@@ -124,15 +124,15 @@ namespace Physica {
     private:
         LazyDestroy<V> v;
     public:
-        DiffMaskVector(V&& v_) : v(std::forward<V>(v_)) {}
-        DiffMaskVector(const This&) = default;
-        DiffMaskVector(This&&) noexcept = default;
-        ~DiffMaskVector() = default;
+        GradMaskVector(V&& v_) : v(std::forward<V>(v_)) {}
+        GradMaskVector(const This&) = default;
+        GradMaskVector(This&&) noexcept = default;
+        ~GradMaskVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] T calc(size_t s) const { return v.calc(s).template mask<MaskOrder>(); }
+        [[nodiscard]] T calc(size_t s) const { return v.calc(s).template grad_mask<MaskOrder>(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s); }
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };
@@ -158,7 +158,7 @@ namespace Physica {
     template<class V, int GradOrder>
     class Traits<GradVector<V, GradOrder>> {
         using V1 = std::remove_cvref_t<V>;
-        static_assert(V1::ScalarType::isDiffable, "[Error]: Unnecessary toGradVector() call");
+        static_assert(V1::ScalarType::isDiffable, "[Error]: Redundant GradVector");
     public:
         using ScalarType = Internal::GradTypeHelper<typename V1::ScalarType, GradOrder>::Type;
         constexpr static size_t SizeAtCompile = V1::SizeAtCompile;
@@ -167,11 +167,11 @@ namespace Physica {
     };
 
     template<class V, int MaskOrder>
-    class Traits<DiffMaskVector<V, MaskOrder>> {
+    class Traits<GradMaskVector<V, MaskOrder>> {
         using V1 = std::remove_cvref_t<V>;
         using U = V1::ScalarType;
         using ValueType = typename U::ValueType;
-        static_assert(U::isDiffable, "[Error]: Unnecessary toDiffMaskVector() call");
+        static_assert(U::isDiffable, "[Error]: Redundant GradMaskVector");
     public:
         using ScalarType = std::conditional<MaskOrder == 0, ValueType, Diff<ValueType, U::Mode, MaskOrder>>::type;
         constexpr static size_t SizeAtCompile = V1::SizeAtCompile;

@@ -33,7 +33,7 @@ namespace Physica {
         Base::template static_assert_assign<U>();
         if constexpr (Diffable<U>) {
             v = x.value();
-            g = x.grad().template mask<Order - 1>();
+            g = x.grad().template grad_mask<Order - 1>();
         }
         else {
             v = x;
@@ -44,14 +44,6 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ bool Diff<T, Mode, Order>::operator==(const This& other) const {
         return v == other.v && g == other.g;
-    }
-
-    template<Scalar T, DiffMode Mode, int Order>
-    template<int MaskOrder>
-    __host__ __device__ auto Diff<T, Mode, Order>::mask() const noexcept {
-        using MaskedType = std::conditional<MaskOrder == 0, T, Diff<typename Base::ValueType, Mode, MaskOrder>>::type;
-        using ResultType = std::conditional<(MaskOrder < Order), MaskedType, This>::type;
-        return reinterpret_cast<const ResultType&>(*this);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -97,6 +89,16 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ auto* Diff<T, Mode, Order>::value_ptr(this auto&& self) noexcept {
+        return &self.v;
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ auto* Diff<T, Mode, Order>::grad_ptr(this auto&& self) noexcept {
+        return &self.g;
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ void Diff<T, Mode, Order>::swap(ScalarRef<This>&& ref) noexcept {
         assert(ScalarPtr<This>(*this) != ScalarPtr<This>(ref) && "[Error]: Self swap is likely a bug");
         v.swap(ref.value());
@@ -105,19 +107,21 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order>
     template<int GradOrder>
-    __host__ __device__ auto& Diff<T, Mode, Order>::grad() noexcept {
+    __host__ __device__ auto& Diff<T, Mode, Order>::grad(this auto&& self) noexcept {
         static_assert(Order >= GradOrder, "[Error]: Order is not enough to calculate the required grad");
         static_assert(GradOrder > 0, "[Error]: 0 or minus order is not well defined");
         if constexpr (GradOrder == 1)
-            return g;
+            return self.g;
         else
-            return grad().template grad<GradOrder - 1>();
+            return self.grad().template grad<GradOrder - 1>();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    template<int GradOrder>
-    __host__ __device__ const auto& Diff<T, Mode, Order>::grad() const noexcept {
-        return const_cast<This&>(*this).template grad<GradOrder>();
+    template<int MaskOrder>
+    __host__ __device__ auto Diff<T, Mode, Order>::grad_mask() const noexcept {
+        using MaskedType = std::conditional<MaskOrder == 0, T, Diff<typename Base::ValueType, Mode, MaskOrder>>::type;
+        using ResultType = std::conditional<(MaskOrder < Order), MaskedType, This>::type;
+        return reinterpret_cast<const ResultType&>(*this);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -212,7 +216,7 @@ namespace Physica {
         if constexpr (Diffable<U>) {
             using GradType = ResultType::GradType;
             constexpr int GradOrder = GradType::Order;
-            return ResultType(x.value() * y.value(), GradType(y.template mask<GradOrder>() * x.grad() + x.template mask<GradOrder>() * y.grad()));
+            return ResultType(x.value() * y.value(), GradType(y.template grad_mask<GradOrder>() * x.grad() + x.template grad_mask<GradOrder>() * y.grad()));
         }
         else
             return ResultType(x.value() * y.value(), x.grad() * y.value());
@@ -236,8 +240,8 @@ namespace Physica {
         if constexpr (Diffable<U>) {
             using GradType = ResultType::GradType;
             constexpr int GradOrder = GradType::Order;
-            const auto v = reciprocal(y.template mask<GradOrder>());
-            return ResultType(x.value() * v.value(), GradType((y.template mask<GradOrder>() * x.grad() - x.template mask<GradOrder>() * y.grad()) * square(v)));
+            const auto v = reciprocal(y.template grad_mask<GradOrder>());
+            return ResultType(x.value() * v.value(), GradType((y.template grad_mask<GradOrder>() * x.grad() - x.template grad_mask<GradOrder>() * y.grad()) * square(v)));
         }
         else {
             const auto v = reciprocal(y.value());

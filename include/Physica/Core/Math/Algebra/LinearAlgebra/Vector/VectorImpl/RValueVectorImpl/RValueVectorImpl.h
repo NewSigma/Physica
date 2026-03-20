@@ -710,10 +710,10 @@ namespace Physica {
 
     template<class Derived>
     template<int MaskOrder>
-    decltype(auto) RValueVector<Derived>::mask(this auto&& self) noexcept {
+    decltype(auto) RValueVector<Derived>::grads_mask(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (MaskOrder < T::Order)
-            return DiffMaskVector<Self, MaskOrder>(std::forward<Self>(self));
+            return GradMaskVector<Self, MaskOrder>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);
     }
