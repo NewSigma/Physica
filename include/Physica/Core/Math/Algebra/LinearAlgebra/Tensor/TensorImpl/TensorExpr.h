@@ -128,5 +128,5 @@ namespace Physica {
     class Traits<TensorExpr<ID, LHS, RHS>> : public Traits<TensorExpr<ID, RHS, LHS>> {};
 }
 
-#include "TensorExprImpl/Add.h"
-#include "TensorExprImpl/Mul.h"
+#include "TensorExprImpl/Operator/Add.h"
+#include "TensorExprImpl/Operator/Mul.h"
