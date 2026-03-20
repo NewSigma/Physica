@@ -22,15 +22,15 @@
 
 namespace Physica {
     template<Scalar T, size_t Length, class Allocator>
+    device_obj<DenseVector<T, Length, Allocator>>::device_obj(Storage storage) noexcept : storage(std::move(storage)) {}
+
+    template<Scalar T, size_t Length, class Allocator>
     __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(size_t length) : storage(length) {}
 
     template<Scalar T, size_t Length, class Allocator>
     __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(size_t length, T init) : device_obj(length) {
         *this = init;
     }
-
-    template<Scalar T, size_t Length, class Allocator>
-    device_obj<DenseVector<T, Length, Allocator>>::device_obj(Storage storage) noexcept : storage(std::move(storage)) {}
 
     template<Scalar T, size_t Length, class Allocator>
     device_obj<DenseVector<T, Length, Allocator>>::device_obj(const host_obj& obj) : storage(obj.storage) {}
@@ -41,12 +41,12 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    void device_obj<DenseVector<T, Length, Allocator>>::resize(const Vector auto& x) {
+    __host__ __device__ void device_obj<DenseVector<T, Length, Allocator>>::resize(const Vector auto& x) {
         resize(x.getLength());
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    void device_obj<DenseVector<T, Length, Allocator>>::resize(size_t size, auto&&... args) noexcept {
+    __host__ __device__ void device_obj<DenseVector<T, Length, Allocator>>::resize(size_t size, auto&&... args) noexcept {
         storage.resize(size, std::forward<decltype(args)>(args)...);
     }
 

@@ -28,8 +28,7 @@ namespace Physica {
              size_t Col = Dynamic,
              class Allocator = HostAllocator<T>>
     class DenseMatrix : public CompactMatrix<DenseMatrix<T, Major, Row, Col, Allocator>>
-                      , public CRCoro<DenseMatrix<T, Major, Row, Col, Allocator>>
-                      , public Array2D<T, Major, Row, Col, Allocator> {
+                      , public CRCoro<DenseMatrix<T, Major, Row, Col, Allocator>> {
         using This = DenseMatrix<T, Major, Row, Col, Allocator>;
         using Base = CompactMatrix<This>;
         using Storage = Array2D<T, Major, Row, Col, Allocator>;
@@ -42,8 +41,11 @@ namespace Physica {
         using VectorIniter = DenseVector<T, MatrixMajor::isColMatrix<This>() ? Row : Col>;
         template<Scalar U>
         using rebind_scalar = DenseMatrix<U, Major, Row, Col, Allocator>;
+    private:
+        Storage storage;
     public:
         DenseMatrix() = default;
+        explicit DenseMatrix(Storage storage) noexcept;
         explicit DenseMatrix(size_t order);
         DenseMatrix(size_t row, size_t col);
         DenseMatrix(size_t row, size_t col, T value);
@@ -56,10 +58,11 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
-        using Base::operator[];
         /* Operations */
-        using Storage::resize;
+        void resize(size_t order);
         void resize(const Matrix auto& m, auto&&... args);
+        void resize(size_t row, size_t col, auto&&... args);
+
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
         using Base::toDevice;
@@ -68,25 +71,21 @@ namespace Physica {
         using Base::transpose;
         [[nodiscard]] auto&& flatten(this auto&&) noexcept;
 
-        using Base::row;
-        using Base::col;
         using Base::random_any;
         using Base::random_normal;
         using Base::random_uniform;
-        using Storage::zeros;
-        using Storage::swap_row;
-        using Storage::swap_col;
-        using Storage::swap;
 
         using Base::read;
+        void zeros() noexcept;
+        void swap_row(size_t r1, size_t r2) noexcept;
+        void swap_col(size_t c1, size_t c2) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
-        using Storage::data;
-        using Storage::data_ptr;
-        using Storage::getCol;
-        using Storage::getRow;
-        using Storage::getSize;
-        using Storage::getMaxMajor;
-        using Storage::getMaxMinor;
+        [[nodiscard]] auto data(this auto&&) noexcept;
+        [[nodiscard]] size_t getRow() const noexcept { return storage.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return storage.getCol(); }
+        [[nodiscard]] size_t getSize() const noexcept { return storage.getSize(); }
+        [[nodiscard]] auto&& asArray(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] static This zeros(size_t order) { return zeros(order, order); }
         [[nodiscard]] static This zeros(size_t row, size_t col);
@@ -101,8 +100,7 @@ namespace Physica {
         [[nodiscard]] static This random_any(size_t row, size_t col, auto& distribution);
         [[nodiscard]] static auto meshgrid(const Vector auto& vecX, const Vector auto& vecY) -> std::pair<This, This>;
         [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) noexcept;
-    private:
-        DenseMatrix(Storage storage) : Storage(std::move(storage)) {}
+        /* Friends */
         friend class device_obj<This>;
     };
 

@@ -24,22 +24,20 @@ namespace Physica {
 #define tparams Scalar T, int Major, size_t Row, size_t Col, class Allocator
 
     template<tparams>
-    device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::device_obj(const host_obj& mat)
-            : device_obj(mat.getRow(), mat.getCol()) {
-        mat.toDevice(*this);
-    }
+    device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::device_obj(Storage storage) noexcept
+            : storage(std::move(storage)) {}
 
     template<tparams>
     __host__ __device__ device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::device_obj(size_t order)
-            : Storage(order) {}
+            : storage(order) {}
 
     template<tparams>
     __host__ __device__ device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::device_obj(size_t row, size_t col)
-            : Storage(row, col) {}
+            : storage(row, col) {}
 
     template<tparams>
     __host__ __device__ device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::device_obj(size_t row, size_t col, T value)
-            : Storage(row, col) {
+            : storage(row, col) {
         *this = value;
     }
 
@@ -55,23 +53,60 @@ namespace Physica {
     }
 
     template<tparams>
-    __host__ __device__ void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::resize(const Matrix auto& m) {
-        Storage::resize(m.getRow(), m.getCol());
+    device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::device_obj(const host_obj& mat)
+            : device_obj(mat.getRow(), mat.getCol()) {
+        mat.toDevice(*this);
+    }
+
+    template<tparams>
+    __host__ __device__ void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::resize(size_t order) {
+        storage.resize(order);
+    }
+
+    template<tparams>
+    __host__ __device__ void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::resize(const Matrix auto& m, auto&&... args) {
+        Base::resize(m, std::forward<decltype(args)>(args)...);
+    }
+
+    template<tparams>
+    __host__ __device__ void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::resize(size_t row, size_t col, auto&&... args) {
+        storage.resize(row, col, std::forward<decltype(args)>(args)...);
     }
 
     template<tparams>
     auto device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::toHost() const -> host_obj {
-        return host_obj(Storage::toHost());
+        return host_obj(storage.toHost());
     }
 
     template<tparams>
     auto&& device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::flatten(this auto&& self) noexcept {
-        return self.asArray();
+        return forward_like<decltype(self)>(self.storage).asArray();
     }
 
     template<tparams>
     auto device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::toHostAsync() const -> host_obj {
-        return host_obj(Storage::toHostAsync());
+        return host_obj(storage.toHostAsync());
+    }
+
+    template<tparams>
+    void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::zeros() noexcept {
+        storage.zeros();
+    }
+
+    template<tparams>
+    void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        storage.swap(obj.storage);
+    }
+
+    template<tparams>
+    __host__ __device__ auto device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::data(this auto&& self) noexcept {
+        return self.storage.data();
+    }
+
+    template<tparams>
+    __host__ __device__ auto&& device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::asArray(this auto&& self) noexcept {
+        return forward_like<decltype(self)>(self.storage).asArray();
     }
 
     template<tparams>

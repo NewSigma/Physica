@@ -40,9 +40,9 @@ namespace Physica {
         Storage storage;
     public:
         device_obj() = default;
+        explicit device_obj(Storage storage) noexcept;
         __host__ __device__ explicit device_obj(size_t length);
         __host__ __device__ device_obj(size_t length, T init);
-        explicit device_obj(Storage storage) noexcept;
         __host__ __device__ device_obj(const Vector auto& v);
         device_obj(const host_obj& obj);
         device_obj(const This&) = default;
@@ -53,8 +53,8 @@ namespace Physica {
         using Base::operator=;
         using Base::operator[];
         /* Operations */
-        void resize(const Vector auto& x);
-        void resize(size_t size, auto&&... args) noexcept;
+        __host__ __device__ void resize(const Vector auto& x);
+        __host__ __device__ void resize(size_t size, auto&&... args) noexcept;
         void reserve(size_t size) noexcept;
 
         [[nodiscard]] host_obj toHost() const;

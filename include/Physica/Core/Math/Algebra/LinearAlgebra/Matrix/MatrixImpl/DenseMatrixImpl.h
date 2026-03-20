@@ -22,18 +22,21 @@
 
 namespace Physica {
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(Storage storage) noexcept : storage(std::move(storage)) {}
+
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(size_t order) : DenseMatrix(order, order) {}
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(size_t row, size_t col)
-            : Storage(row, col) {}
+            : storage(row, col) {}
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(size_t row, size_t col, T value)
-            : Storage(row, col, std::move(value)) {}
+            : storage(row, col, std::move(value)) {}
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(std::initializer_list<T> list) : Storage(std::move(list)) {}
+    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(std::initializer_list<T> list) : storage(std::move(list)) {}
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(std::initializer_list<VectorIniter> list)
@@ -41,7 +44,7 @@ namespace Physica {
                           MatrixMajor::isColMatrix<This>() ? list.size() : list.begin()->getLength()) {
         size_t major = 0;
         for (auto& v : list) {
-            assert(v.getLength() == getMaxMinor());
+            assert(v.getLength() == Base::getMaxMinor());
             if constexpr (MatrixMajor::isColMatrix<This>())
                 this->col(major) = v;
             else
@@ -63,13 +66,54 @@ namespace Physica {
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    void DenseMatrix<T, Major, Row, Col, Allocator>::resize(size_t order) {
+        storage.resize(order);
+    }
+
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     void DenseMatrix<T, Major, Row, Col, Allocator>::resize(const Matrix auto& m, auto&&... args) {
         Base::resize(m, std::forward<decltype(args)>(args)...);
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    void DenseMatrix<T, Major, Row, Col, Allocator>::resize(size_t row, size_t col, auto&&... args) {
+        storage.resize(row, col, std::forward<decltype(args)>(args)...);
+    }
+
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     auto&& DenseMatrix<T, Major, Row, Col, Allocator>::flatten(this auto&& self) noexcept {
-        return self.asArray();
+        return forward_like<decltype(self)>(self.storage).asArray();
+    }
+
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    void DenseMatrix<T, Major, Row, Col, Allocator>::zeros() noexcept {
+        storage.zeros();
+    }
+
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    void DenseMatrix<T, Major, Row, Col, Allocator>::swap_row(size_t r1, size_t r2) noexcept {
+        storage.swap_row(r1, r2);
+    }
+
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    void DenseMatrix<T, Major, Row, Col, Allocator>::swap_col(size_t c1, size_t c2) noexcept {
+        storage.swap_col(c1, c2);
+    }
+
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    void DenseMatrix<T, Major, Row, Col, Allocator>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        storage.swap(obj.storage);
+    }
+
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    auto DenseMatrix<T, Major, Row, Col, Allocator>::data(this auto&& self) noexcept {
+        return self.storage.data();
+    }
+
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    auto&& DenseMatrix<T, Major, Row, Col, Allocator>::asArray(this auto&& self) noexcept {
+        return forward_like<decltype(self)>(self.storage).asArray();
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>

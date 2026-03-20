@@ -22,6 +22,9 @@
 
 namespace Physica {
     template<Scalar T, size_t Length, class Allocator>
+    DenseVector<T, Length, Allocator>::DenseVector(Array<T, Length, Allocator> storage) noexcept : storage(std::move(storage)) {}
+
+    template<Scalar T, size_t Length, class Allocator>
     DenseVector<T, Length, Allocator>::DenseVector(size_t length) : storage(length) {}
 
     template<Scalar T, size_t Length, class Allocator>
@@ -31,9 +34,6 @@ namespace Physica {
 
     template<Scalar T, size_t Length, class Allocator>
     DenseVector<T, Length, Allocator>::DenseVector(std::initializer_list<T> list) : storage(std::move(list)) {}
-
-    template<Scalar T, size_t Length, class Allocator>
-    DenseVector<T, Length, Allocator>::DenseVector(Array<T, Length, Allocator> storage) noexcept : storage(std::move(storage)) {}
 
     template<Scalar T, size_t Length, class Allocator>
     DenseVector<T, Length, Allocator>::DenseVector(const Vector auto& v) : storage(v.getLength()) {

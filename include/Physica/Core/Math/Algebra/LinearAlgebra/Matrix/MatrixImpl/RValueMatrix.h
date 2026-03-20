@@ -171,6 +171,7 @@ namespace Physica {
         [[nodiscard]] size_t getSize() const noexcept { return getRow() * getCol(); }
         [[nodiscard]] size_t getMaxMajor() const noexcept { return MatrixMajor::getMaxMajor<Derived>(Base::getDerived()); }
         [[nodiscard]] size_t getMaxMinor() const noexcept { return MatrixMajor::getMaxMinor<Derived>(Base::getDerived()); }
+        [[nodiscard]] bool empty() const noexcept { return Base::getDerived().getSize() == 0; }
 
         [[nodiscard]] bool isOverdetermined() const noexcept;
         [[nodiscard]] bool isUnderdetermined() const noexcept;
