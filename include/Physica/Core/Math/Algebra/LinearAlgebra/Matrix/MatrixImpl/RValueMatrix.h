@@ -159,12 +159,12 @@ namespace Physica {
         [[nodiscard]] auto flatten(this auto&&) noexcept;
 
         [[nodiscard]] decltype(auto) reals(this auto&&) noexcept;
-        [[nodiscard]] auto imags() const noexcept;
-        [[nodiscard]] auto squaredNorms() const noexcept;
-        [[nodiscard]] auto norms() const noexcept;
+        [[nodiscard]] auto imags(this auto&&) noexcept;
+        [[nodiscard]] auto squaredNorms(this auto&&) noexcept;
+        [[nodiscard]] auto norms(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         template<int GradOrder = 1>
-        [[nodiscard]] decltype(auto) grads() const noexcept;
+        [[nodiscard]] decltype(auto) grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return Base::getDerived().getCol(); }
@@ -191,9 +191,6 @@ namespace Physica {
         RValueMatrix() = default;
         RValueMatrix(const This&) = default;
         RValueMatrix(This&&) noexcept = default;
-        /* Operations */
-        template<int GradOrder>
-        auto grads_impl() const noexcept;
         /* Static members */
         [[nodiscard]] consteval static int calcBlockingSize(int CacheSize) noexcept;
         __host__ __device__ static void checkBlock(const Matrix auto& m, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;

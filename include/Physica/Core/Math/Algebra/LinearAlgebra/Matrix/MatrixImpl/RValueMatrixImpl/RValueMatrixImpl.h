@@ -451,42 +451,45 @@ namespace Physica {
 
     template<class Derived>
     decltype(auto) RValueMatrix<Derived>::reals(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (isComplex)
-            return RealMatrix<Derived>(self);
+            return RealMatrix<Self>(std::forward<Self>(self));
         else
-            return std::forward<decltype(self)>(self);
+            return std::forward<Self>(self);
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::imags() const noexcept {
-        return ImagMatrix<Derived>(Base::getDerived());
+    auto RValueMatrix<Derived>::imags(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return ImagMatrix<Self>(std::forward<Self>(self));
     }
     
     template<class Derived>
-    auto RValueMatrix<Derived>::squaredNorms() const noexcept {
-        return SquaredNormMatrix<Derived>(Base::getDerived());
+    auto RValueMatrix<Derived>::squaredNorms(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return SquaredNormMatrix<Self>(std::forward<Self>(self));
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::norms() const noexcept {
-        return NormMatrix<Derived>(Base::getDerived());
+    auto RValueMatrix<Derived>::norms(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return NormMatrix<Self>(std::forward<Self>(self));
     }
 
     template<class Derived>
     decltype(auto) RValueMatrix<Derived>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (isDiffable)
-            return ValueMatrix<Derived>(self);
+            return ValueMatrix<Self>(std::forward<Self>(self));
         else
-            return std::forward<decltype(self)>(self);
+            return std::forward<Self>(self);
     }
 
     template<class Derived>
     template<int GradOrder>
-    decltype(auto) RValueMatrix<Derived>::grads() const noexcept {
-        if constexpr (isReverseDiff)
-            return Base::getDerived().template grads<GradOrder>();
-        else
-            return grads_impl<GradOrder>();
+    decltype(auto) RValueMatrix<Derived>::grads(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return GradMatrix<Self, GradOrder>(std::forward<Self>(self));
     }
 
     template<class Derived>
@@ -573,12 +576,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<int GradOrder>
-    auto RValueMatrix<Derived>::grads_impl() const noexcept {
-        return GradMatrix<Derived, GradOrder>(Base::getDerived());
-    }
-
-    template<class Derived>
     consteval int RValueMatrix<Derived>::calcBlockingSize(int CacheSize) noexcept {
         int result = 1;
         while (result * result * int(sizeof(Trv)) < CacheSize)
@@ -610,5 +607,5 @@ namespace Physica {
 #include "Hermite.h"
 #include "Flatten.h"
 #include "Trig/MatrixTrig.h"
-#include "MatrixConvert.h"
+#include "Convert/MatrixConvert.h"
 #include "ReshapedVector.h"

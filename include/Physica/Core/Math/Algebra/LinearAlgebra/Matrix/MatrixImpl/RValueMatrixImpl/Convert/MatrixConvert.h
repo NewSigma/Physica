@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "../RValueMatrix.h"
+#include "../../RValueMatrix.h"
 
 namespace Physica {
     template<class M>
@@ -29,9 +29,9 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        const M& mat;
+        LazyDestroy<M> mat;
     public:
-        RealMatrix(const M& mat_) : mat(mat_) {}
+        explicit RealMatrix(M&& mat_) : mat(std::forward<M>(mat_)) {}
         RealMatrix(const This&) = default;
         RealMatrix(This&&) noexcept = default;
         ~RealMatrix() = default;
@@ -54,9 +54,9 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        const M& mat;
+        LazyDestroy<M> mat;
     public:
-        ImagMatrix(const M& mat_) : mat(mat_) {}
+        explicit ImagMatrix(M&& mat_) : mat(std::forward<M>(mat_)) {}
         ImagMatrix(const This&) = default;
         ImagMatrix(This&&) noexcept = default;
         ~ImagMatrix() = default;
@@ -80,9 +80,9 @@ namespace Physica {
         using typename Base::Tv;
         using typename Base::Trv;
     private:
-        const M& mat;
+        LazyDestroy<M> mat;
     public:
-        SquaredNormMatrix(const M& mat_) : mat(mat_) {}
+        explicit SquaredNormMatrix(M&& mat_) : mat(std::forward<M>(mat_)) {}
         SquaredNormMatrix(const This&) = default;
         SquaredNormMatrix(This&&) noexcept = default;
         ~SquaredNormMatrix() = default;
@@ -119,9 +119,9 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        const M& mat;
+        LazyDestroy<M> mat;
     public:
-        NormMatrix(const M& mat_) : mat(mat_) {}
+        explicit NormMatrix(M&& mat_) : mat(std::forward<M>(mat_)) {}
         NormMatrix(const This&) = default;
         NormMatrix(This&&) noexcept = default;
         ~NormMatrix() = default;
@@ -143,9 +143,9 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        const M& mat;
+        LazyDestroy<M> mat;
     public:
-        ValueMatrix(const M& mat_) : mat(mat_) {}
+        explicit ValueMatrix(M&& mat_) : mat(std::forward<M>(mat_)) {}
         ValueMatrix(const This&) = default;
         ValueMatrix(This&&) noexcept = default;
         ~ValueMatrix() = default;
@@ -168,9 +168,9 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        const M& mat;
+        LazyDestroy<M> mat;
     public:
-        GradMatrix(const M& mat_) : mat(mat_) {}
+        explicit GradMatrix(M&& mat_) : mat(std::forward<M>(mat_)) {}
         GradMatrix(const This&) = default;
         GradMatrix(This&&) noexcept = default;
         ~GradMatrix() = default;
@@ -189,12 +189,13 @@ namespace Physica {
 namespace Physica {
     template<class M>
     class Traits<RealMatrix<M>> {
+        using M1 = std::remove_cvref_t<M>;
     public:
-        using ScalarType = M::ScalarType::RealType;
-        constexpr static int Major = M::Major;
-        constexpr static size_t RowAtCompile = M::RowAtCompile;
-        constexpr static size_t ColAtCompile = M::ColAtCompile;
-        constexpr static size_t SizeAtCompile = M::SizeAtCompile;
+        using ScalarType = typename M1::ScalarType::RealType;
+        constexpr static int Major = M1::Major;
+        constexpr static size_t RowAtCompile = M1::RowAtCompile;
+        constexpr static size_t ColAtCompile = M1::ColAtCompile;
+        constexpr static size_t SizeAtCompile = M1::SizeAtCompile;
     };
 
     template<class M>
@@ -208,22 +209,24 @@ namespace Physica {
 
     template<class M>
     class Traits<ValueMatrix<M>> {
+        using M1 = std::remove_cvref_t<M>;
     public:
-        using ScalarType = M::ScalarType::ValueType;
-        constexpr static int Major = M::Major;
-        constexpr static size_t RowAtCompile = M::RowAtCompile;
-        constexpr static size_t ColAtCompile = M::ColAtCompile;
-        constexpr static size_t SizeAtCompile = M::SizeAtCompile;
+        using ScalarType = typename M1::ScalarType::ValueType;
+        constexpr static int Major = M1::Major;
+        constexpr static size_t RowAtCompile = M1::RowAtCompile;
+        constexpr static size_t ColAtCompile = M1::ColAtCompile;
+        constexpr static size_t SizeAtCompile = M1::SizeAtCompile;
     };
 
     template<class M, int GradOrder>
     class Traits<GradMatrix<M, GradOrder>> {
-        static_assert(M::ScalarType::isDiffable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
+        using M1 = std::remove_cvref_t<M>;
+        static_assert(M1::ScalarType::isDiffable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
-        using ScalarType = Internal::GradTypeHelper<typename M::ScalarType, GradOrder>::Type;
-        constexpr static int Major = M::Major;
-        constexpr static size_t RowAtCompile = M::RowAtCompile;
-        constexpr static size_t ColAtCompile = M::ColAtCompile;
-        constexpr static size_t SizeAtCompile = M::SizeAtCompile;
+        using ScalarType = Internal::GradTypeHelper<typename M1::ScalarType, GradOrder>::Type;
+        constexpr static int Major = M1::Major;
+        constexpr static size_t RowAtCompile = M1::RowAtCompile;
+        constexpr static size_t ColAtCompile = M1::ColAtCompile;
+        constexpr static size_t SizeAtCompile = M1::SizeAtCompile;
     };
 }

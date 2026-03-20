@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "../RValueMatrix.cuh"
+#include "../../RValueMatrix.cuh"
 
 namespace Physica {
     template<class M>
@@ -26,13 +26,14 @@ namespace Physica {
         using host_obj = RealMatrix<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
+        using Ref = add_device_obj_t<M>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     private:
-        PlainStruct<const device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
     public:
-        __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ explicit device_obj(Ref mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -51,13 +52,14 @@ namespace Physica {
         using host_obj = ImagMatrix<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
+        using Ref = add_device_obj_t<M>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     private:
-        PlainStruct<const device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
     public:
-        __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ explicit device_obj(Ref mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -76,13 +78,16 @@ namespace Physica {
         using host_obj = SquaredNormMatrix<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
+        using Ref = add_device_obj_t<M>;
+    public:
+        using Base::isReverseDiff;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     private:
-        PlainStruct<const device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
     public:
-        __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ explicit device_obj(Ref mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -101,13 +106,14 @@ namespace Physica {
         using host_obj = NormMatrix<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
+        using Ref = add_device_obj_t<M>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     private:
-        PlainStruct<const device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
     public:
-        __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ explicit device_obj(Ref mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -126,12 +132,13 @@ namespace Physica {
         using host_obj = ValueMatrix<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
+        using Ref = add_device_obj_t<M>;
     protected:
         using typename Base::T;
     private:
-        PlainStruct<const device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
     public:
-        __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ explicit device_obj(Ref mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -150,13 +157,14 @@ namespace Physica {
         using host_obj = GradMatrix<M, GradOrder>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
+        using Ref = add_device_obj_t<M>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     private:
-        PlainStruct<const device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
     public:
-        __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ explicit device_obj(Ref mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;

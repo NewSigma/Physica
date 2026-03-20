@@ -100,12 +100,12 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto flatten() const noexcept;
 
         [[nodiscard]] __host__ __device__ decltype(auto) reals(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ auto imags() const noexcept;
-        [[nodiscard]] __host__ __device__ auto squaredNorms() const noexcept;
-        [[nodiscard]] __host__ __device__ auto norms() const noexcept;
+        [[nodiscard]] __host__ __device__ auto imags(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto squaredNorms(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto norms(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         template<int GradOrder = 1>
-        [[nodiscard]] __host__ __device__ auto grads() const noexcept;
+        [[nodiscard]] __host__ __device__ auto grads(this auto&&) noexcept;
 
         [[nodiscard]] __host__ __device__ KernelConfig makeKernelConfig() const noexcept;
         /* Getters */
@@ -144,7 +144,7 @@ namespace Physica {
 #include "RValueMatrixImpl/DiagVector.cuh"
 #include "RValueMatrixImpl/Transpose.cuh"
 #include "RValueMatrixImpl/Hermite.cuh"
-#include "RValueMatrixImpl/MatrixConvert.cuh"
+#include "RValueMatrixImpl/Convert/MatrixConvert.cuh"
 #include "MatrixProduct/GEMM.cuh"
 #include "MatrixProduct/GEMV.cuh"
 #include "MatrixProduct/GEVM.cuh"
