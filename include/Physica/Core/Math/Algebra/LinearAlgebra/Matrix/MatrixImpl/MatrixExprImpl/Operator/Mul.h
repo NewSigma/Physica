@@ -149,7 +149,10 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     [[nodiscard]] auto hadamard(M1&& m1, M2&& m2) noexcept requires(!DeviceObj<M1> && !DeviceObj<M2>) {
-        return MatrixExpr<ExprID::Mul, M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
+        if constexpr (!canonicalized(m1, m2))
+            return hadamard(std::forward<M2>(m2), std::forward<M1>(m1));
+        else
+            return MatrixExpr<ExprID::Mul, M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }
 

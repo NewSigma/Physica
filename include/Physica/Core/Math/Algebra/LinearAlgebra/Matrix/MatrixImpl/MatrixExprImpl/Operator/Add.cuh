@@ -130,6 +130,9 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     [[nodiscard]] __host__ __device__ auto operator+(M1&& m1, M2&& m2) noexcept requires(DeviceObj<M1> && DeviceObj<M2>) {
-        return device_obj<MatrixExpr<ExprID::Add, remove_device_obj_t<M1&&>, remove_device_obj_t<M2&&>>>(std::forward<M1>(m1), std::forward<M2>(m2));
+        if constexpr (!canonicalized(m1, m2))
+            return std::forward<M2>(m2) + std::forward<M1>(m1);
+        else
+            return device_obj<MatrixExpr<ExprID::Add, remove_device_obj_t<M1&&>, remove_device_obj_t<M2&&>>>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

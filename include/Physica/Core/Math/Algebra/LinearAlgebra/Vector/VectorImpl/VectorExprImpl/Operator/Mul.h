@@ -379,7 +379,9 @@ namespace Physica {
     template<Vector V1, Vector V2>
     [[nodiscard]] auto hadamard(V1&& v1, V2&& v2) noexcept requires(!DeviceObj<V1> && !DeviceObj<V2>) {
         using RtnTy = VectorExpr<ExprID::Mul, V1&&, V2&&>;
-        if constexpr (instanceof_xt<VectorExpr, V1>) {
+        if constexpr (!canonicalized(v1, v2))
+            return hadamard(std::forward<V2>(v2), std::forward<V1>(v1));
+        else if constexpr (instanceof_xt<VectorExpr, V1>) {
             using RHS1 = Traits<V1>::RHS;
             if constexpr (v1.getExprID() == ExprID::Mul && Scalar<RHS1>) // if we can lower V1
                 return hadamard(v2, v1.getLHS()) * v1.getRHS();

@@ -37,8 +37,11 @@ namespace Physica {
         }
     };
 
-    template<Tensor X1, Tensor X2>
-    [[nodiscard]] auto operator+(X1&& x, X2&& y) noexcept {
-        return TensorExpr<ExprID::Add, X1&&, X2&&>(std::forward<X1>(x), std::forward<X2>(y));
+    template<Tensor X, Tensor Y>
+    [[nodiscard]] auto operator+(X&& x, Y&& y) noexcept {
+        if constexpr (!canonicalized(x, y))
+            return std::forward<Y>(y) + std::forward<X>(x);
+        else
+            return TensorExpr<ExprID::Add, X&&, Y&&>(std::forward<X>(x), std::forward<Y>(y));
     }
 }

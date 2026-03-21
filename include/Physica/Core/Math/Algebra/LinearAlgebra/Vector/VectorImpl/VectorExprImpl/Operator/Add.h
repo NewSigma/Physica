@@ -318,7 +318,10 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     [[nodiscard]] auto operator+(V1&& v1, V2&& v2) noexcept requires(!DeviceObj<V1> && !DeviceObj<V2>) {
-        return VectorExpr<ExprID::Add, V1&&, V2&&>(std::forward<V1>(v1), std::forward<V2>(v2));
+        if constexpr (!canonicalized(v1, v2))
+            return std::forward<V2>(v2) + std::forward<V1>(v1);
+        else
+            return VectorExpr<ExprID::Add, V1&&, V2&&>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }
 

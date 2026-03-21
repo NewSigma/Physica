@@ -116,6 +116,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool RValueTensor<Derived>::isSparse() noexcept {
+        return requires{ std::declval<Derived>().getNumNonzero(); };
+    }
+
+    template<class Derived>
     template<Scalar T, bool IsUnitLattice>
     void RValueTensor<Derived>::forPointIndexInTensor(
             const RValueTensor& grid,

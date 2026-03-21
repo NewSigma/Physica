@@ -79,6 +79,7 @@ namespace Physica {
         [[nodiscard]] size_t getSize() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         using TensorBase::forPointIndexInTensor;
         template<Scalar T, bool IsUnitLattice>
         static void forPointIndexInTensor(const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, std::invocable<Vector3D<T>, Index3D> auto fn);

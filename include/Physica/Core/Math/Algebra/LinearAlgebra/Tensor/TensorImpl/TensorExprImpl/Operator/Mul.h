@@ -63,8 +63,11 @@ namespace Physica {
         return std::forward<X>(x) * std::forward<U>(y);
     }
 
-    template<Tensor X1, Tensor X2>
-    [[nodiscard]] auto hadamard(X1&& x, X2&& y) noexcept {
-        return TensorExpr<ExprID::Mul, X1&&, X2&&>(std::forward<X1>(x), std::forward<X2>(y));
+    template<Tensor X, Tensor Y>
+    [[nodiscard]] auto hadamard(X&& x, Y&& y) noexcept {
+        if constexpr (!canonicalized(x, y))
+            return hadamard(std::forward<Y>(y), std::forward<X>(x));
+        else
+            return TensorExpr<ExprID::Mul, X&&, Y&&>(std::forward<X>(x), std::forward<Y>(y));
     }
 }

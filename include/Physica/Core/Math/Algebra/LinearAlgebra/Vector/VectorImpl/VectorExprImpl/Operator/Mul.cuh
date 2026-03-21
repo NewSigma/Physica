@@ -260,6 +260,9 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     [[nodiscard]] __host__ __device__ auto hadamard(V1&& v1, V2&& v2) noexcept requires(DeviceObj<V1> && DeviceObj<V2>) {
-        return device_obj<VectorExpr<ExprID::Mul, remove_device_obj_t<V1&&>, remove_device_obj_t<V2&&>>>(std::forward<V1>(v1), std::forward<V2>(v2));
+        if constexpr (!canonicalized(v1, v2))
+            return hadamard(std::forward<V2>(v2), std::forward<V1>(v1));
+        else
+            return device_obj<VectorExpr<ExprID::Mul, remove_device_obj_t<V1&&>, remove_device_obj_t<V2&&>>>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }

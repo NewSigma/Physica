@@ -724,6 +724,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool RValueVector<Derived>::isSparse() noexcept {
+        return requires{ std::declval<Derived>().getNumNonzero(); };
+    }
+
+    template<class Derived>
     __host__ __device__ consteval size_t RValueVector<Derived>::maxSizeAtCompile(const Vector auto& other) noexcept {
         return std::max(SizeAtCompile, std::remove_cvref_t<decltype(other)>::SizeAtCompile);
     }

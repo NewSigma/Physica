@@ -181,6 +181,7 @@ namespace Physica {
         [[nodiscard]] bool isFinite() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         [[nodiscard]] consteval static bool isStaticSymm() noexcept;
         [[nodiscard]] consteval static bool isStaticHermite() noexcept;
         [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixMajor::rowFromMajorMinor<Derived>(major, minor); }

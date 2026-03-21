@@ -29,15 +29,9 @@ namespace Physica {
         using NonZeroPair = std::pair<size_t, ScalarType>;
     public:
         /* Getters */
-        [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         [[nodiscard]] NonZeroPair calcNonZero(size_t index) const { return Base::getDerived().calcNonZero(index); }
         [[nodiscard]] size_t getNumNonZero() const noexcept { return Base::getDerived().getNumNonZero(); }
     };
-
-    template<class Derived>
-    __host__ __device__ consteval bool RSparseVector<Derived>::isSparse() noexcept {
-        return true;
-    }
 
     template<Vector V1, Vector V2>
     auto operator*(const RSparseVector<V1>& v1, const V2& v2) {

@@ -119,6 +119,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool isSquare() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept { return host_obj::isCompact(); }
+        [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept { return host_obj::isSparse(); }
         [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] __host__ __device__ static KernelConfig makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept;
