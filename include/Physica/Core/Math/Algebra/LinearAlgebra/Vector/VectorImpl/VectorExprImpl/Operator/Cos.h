@@ -49,7 +49,7 @@ namespace Physica {
     template<Vector V>
     template<Packet Pack>
     Pack VectorExpr<ExprID::Cos, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
-        return cos(input.template load<Pack>(count));
+        return cos(input.template load<Pack>(count)).cutoff(count);
     }
 
     template<Vector V>

@@ -67,9 +67,9 @@ namespace Physica {
     class UnitaryVectorExpr<ID, V>::View<Operand>::Iterator {
         using This = Iterator;
     public:
-        using iterator_concept = std::contiguous_iterator_tag;
+        using iterator_concept = std::random_access_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = std::remove_cvref_t<V>::ScalarType;
+        using value_type = VectorExpr<ID, V>::ScalarType;
         using reference = const value_type;
         using const_reference = const value_type;
     private:
@@ -152,13 +152,13 @@ namespace Physica {
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
     constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::operator*() const noexcept -> reference {
-        return *it;
+        return VectorExpr<ID, V>::operator()(it);
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
     constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::operator[](difference_type n) const noexcept -> reference {
-        return it[n];
+        return VectorExpr<ID, V>::operator()(it + n);
     }
 
     template<ExprID ID, Vector V>

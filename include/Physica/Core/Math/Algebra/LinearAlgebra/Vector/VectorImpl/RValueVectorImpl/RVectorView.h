@@ -78,7 +78,7 @@ namespace Physica {
     class RVectorView<V>::Iterator {
         using This = Iterator;
     public:
-        using iterator_concept = std::contiguous_iterator_tag;
+        using iterator_concept = std::random_access_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = V::ScalarType;
         using reference = const value_type;
