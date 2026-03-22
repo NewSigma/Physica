@@ -48,7 +48,7 @@ namespace Physica {
     private:
         Pack pack;
     public:
-        SIMD() = default;
+        constexpr SIMD() noexcept = default;
         explicit SIMD(double x) noexcept : pack(x) {}
         explicit SIMD(const Scalar auto& x) noexcept;
         SIMD(T x, int count) noexcept;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -171,33 +171,40 @@ int main(int argc, char** argv) {
     VectorND<T> volume_arr{};
     volume_arr.resize(length);
     {
-        const unsigned int threadCount = 5;
-        const unsigned int taskPerThread = length / threadCount;
-        const unsigned int halfTaskPerThread = taskPerThread / 2U;
-        assert(length % threadCount == 0);
-        assert(taskPerThread % 2 == 0);
-        ThreadPool::numThreadRequired = threadCount;
+        const unsigned int ThreadCount = 5;
+        const unsigned int TaskPerThread = length / ThreadCount;
+        const unsigned int HalfTaskPerThread = TaskPerThread / 2U;
+        assert(length % ThreadCount == 0);
+        assert(TaskPerThread % 2 == 0);
+        ThreadPool::numThreadRequired = ThreadCount;
         parallel_for<Thread>([&](size_t i) {
-            WaterDropArgs args{startRadius, sigma, rho, 1, g};
-            args.radius = startRadius + T(halfTaskPerThread * i * plotStepSize);
-            parallelSolve(args, { r_arr
-                                , lambda_arr
-                                , volume_arr
-                                , i * halfTaskPerThread
-                                , (i + 1) * halfTaskPerThread
-                                , rmin
-                                , solveStepSize
-                                , plotStepSize });
-            args.radius = startRadius + T((length - (i + 1) * halfTaskPerThread) * plotStepSize);
-            parallelSolve(args, { r_arr
-                                , lambda_arr
-                                , volume_arr
-                                , length - (i + 1) * halfTaskPerThread
-                                , length - i * halfTaskPerThread
-                                , rmin
-                                , solveStepSize
-                                , plotStepSize });
-        }, threadCount).wait();
+            WaterDropArgs args{
+                .radius = startRadius,
+                .sigma = sigma,
+                .rho = rho,
+                .tangent = 1,
+                .g = g};
+            args.radius = startRadius + T(HalfTaskPerThread * i * plotStepSize);
+            parallelSolve(args, {
+                .r_arr = r_arr,
+                .lambda_arr = lambda_arr,
+                .volume_arr = volume_arr,
+                .from = i * HalfTaskPerThread,
+                .to = (i + 1) * HalfTaskPerThread,
+                .rmin = rmin,
+                .solveStepSize = solveStepSize,
+                .plotStepSize = plotStepSize});
+            args.radius = startRadius + T((length - (i + 1) * HalfTaskPerThread) * plotStepSize);
+            parallelSolve(args, {
+                .r_arr = r_arr,
+                .lambda_arr = lambda_arr,
+                .volume_arr = volume_arr,
+                .from = length - (i + 1) * HalfTaskPerThread,
+                .to = length - i * HalfTaskPerThread,
+                .rmin = rmin,
+                .solveStepSize = solveStepSize,
+                .plotStepSize = plotStepSize});
+        }, ThreadCount).wait();
     }
 
     const VectorND<T> scaled_r = r_arr * T(1E3);
@@ -222,7 +229,12 @@ int main(int argc, char** argv) {
         r_volume->show();
     }
 
-    WaterDropSolver solver({startRadius, sigma, rho, 1, g}, rmin, solveStepSize);
+    WaterDropSolver solver({
+        .radius = startRadius,
+        .sigma = sigma,
+        .rho = rho,
+        .tangent = 1,
+        .g = g}, rmin, solveStepSize);
     const T lambda = solver.solve();
     std::cout << "Lambda is " << lambda << '\n';
     return solver.output();

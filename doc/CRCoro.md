@@ -1,5 +1,5 @@
 <!--
-Copyright 2025 Weibo He.
+Copyright 2025-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -11,7 +11,7 @@ with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 You should have received a copy of the GNU Free Documentation License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
-# 奇异递归协程
+# 奇异递归协程(Curiously Recurring Coroutine)
 
 ## Motivation
 
@@ -27,7 +27,7 @@ Result fn() {
 }
 ```
 
-遗憾的是，上述代码不能通过编译。因为C++标准规定`return`关键字不能和协程相关关键词`co_return`, `co_yield`, `co_await`出现在同一函数中。对于这种函数的迁移，我们只能采取妥协的办法，本文提出一种结合奇异递归模板模式和协程的非侵入的范式尝试解决该问题。
+遗憾的是，上述代码不能通过编译。因为C++标准禁止`return`关键字和协程关键词出现在同一函数中。对于这种函数的迁移，我们只能采取妥协的办法，本文提出一种结合奇异递归模板模式和协程的非侵入的范式尝试解决该问题。
 
 ## Implementation
 
@@ -39,40 +39,39 @@ Result fn() {
 
 template<class T>
 struct CRCoro { // Curiously Recurring Coroutine
-    struct RValueWrapper {
-        T* p;
-
-        operator T&&() const noexcept { return std::move(*p); }
-    };
-
     using promise_type = T;
 
     T& getDerived() noexcept { return *static_cast<T*>(this); }
 
-    auto get_return_object() noexcept { return RValueWrapper(&getDerived()); }
+    auto get_return_object() noexcept {
+        struct RValueWrapper {
+            This* p;
+
+            operator T&&() const noexcept { return std::move(p->getDerived()); }
+        };
+        return RValueWrapper(this);
+    }
     void await_transform(auto&&) noexcept = delete;
     std::suspend_never initial_suspend() noexcept { return {}; }
     std::suspend_never final_suspend() noexcept { return {}; }
-    void return_value(T&& x) noexcept {
-        getDerived() = std::move(x);
-    }
+    void return_value(T&& x) noexcept { getDerived() = std::move(x); }
     void unhandled_exception() {}
 };
 ```
 
 要设计一个协程，我们需要规定以下函数:
 
-`get_return_object`: 返回对象，必选
-`initial_suspend`: 初始暂停行为，必选
-`final_suspend`: 最终暂停行为，必选
-`return_value`/`return_void`: 返回值/返回空，任选其一
-`yield_value`: 产出值，可选
-`unhandled_exception`: 发生异常时的行为，必选
+`get_return_object`: 返回对象，必选  
+`initial_suspend`: 初始暂停行为，必选  
+`final_suspend`: 最终暂停行为，必选  
+`return_value`/`return_void`: 返回值/返回空，任选其一  
+`yield_value`: 产出值，可选  
+`unhandled_exception`: 未处理异常，必选  
 
-一个平庸的协程不应包含任何等待点, 因此我们要求`initial_suspend`和`final_suspend`返回`std::suspend_never`, 不实现`yield_value`。
-我们希望协程返回协程体产生的值, 因此在return的两个版本中选择`return_value`, 返回值必须保存在承诺对象中。
-在返回对象的实现中, 我们构造了右值包装对象`RValueWrapper`, 通过移动构造的方式将承诺对象返回给调用者。
-我们选择不处理异常, `unhandled_exception`为空
+一个平庸的协程不应包含任何等待点, 因此我们要求`initial_suspend`和`final_suspend`返回`std::suspend_never`, 不实现`yield_value`。  
+我们希望协程返回协程体产生的值, 因此在return的两个版本中选择`return_value`, 返回值必须保存在承诺对象中。  
+在返回对象的实现中, 我们构造了右值包装对象`RValueWrapper`, 通过移动构造的方式将承诺对象返回给调用者。  
+我们选择不处理异常, `unhandled_exception`为空  
 
 具体使用时，我们要求返回对象继承自`CRCoro`，正如我们习惯在奇异递归模板模式中做的事情:
 

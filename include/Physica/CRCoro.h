@@ -34,16 +34,17 @@ namespace Physica {
         static_assert(std::is_object<T>::value, "[Error]: Must save the return by value");
         using This = CRCoro<T>;
         using Base = CRTPBase<This>;
-
-        struct RValueWrapper {
-            T* p;
-
-            operator T&&() const noexcept { return std::move(*p); }
-        };
     public:
         using promise_type = T;
     public:
-        auto get_return_object() noexcept { return RValueWrapper(&Base::getDerived()); }
+        auto get_return_object() noexcept {
+            struct RValueWrapper {
+                This* p;
+
+                operator T&&() const noexcept { return std::move(p->getDerived()); }
+            };
+            return RValueWrapper(this);
+        }
         auto initial_suspend() noexcept { return suspend_never{}; }
         void await_transform(auto&&) noexcept = delete("[Error]: CRCoro never suspends");
         auto final_suspend() noexcept { return suspend_never{}; }
