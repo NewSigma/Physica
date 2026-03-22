@@ -76,9 +76,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Packet Pack>
-    __device__ Pack device_obj<CompactVector<Derived>>::packet(size_t index) const noexcept {
-        Pack packet{};
+    template<int Size>
+    __device__ auto device_obj<CompactVector<Derived>>::packet(size_t index) const noexcept {
+        SIMD<T, Size> packet{};
         if constexpr (isReverseDiff)
             packet.load(Base::data_ptr(index).value_ptr());
         else
@@ -87,11 +87,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Packet Pack>
-    __device__ Pack device_obj<CompactVector<Derived>>::packet(size_t index, size_t count) const noexcept {
-        assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
+    template<int Size>
+    __device__ auto device_obj<CompactVector<Derived>>::packet(size_t index, size_t count) const noexcept {
+        assert(0 < count && count < Size && "[Error]: Invalid size for partial operation");
         assert(index + count <= Base::getLength());
-        Pack packet{};
+        SIMD<T, Size> packet{};
         if constexpr (isReverseDiff)
             packet.load(Base::data_ptr(index).value_ptr(), count);
         else

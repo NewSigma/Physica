@@ -32,10 +32,10 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operators */
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return ln1p(Base::getExpr().calc(index)); }
         [[nodiscard]] Tv calc_value(size_t index) const { return ln1p(Base::getExpr().calc_value(index)); }
@@ -44,15 +44,15 @@ namespace Physica {
     };
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Ln1p, V>::operator()(std::random_access_iterator auto input) noexcept {
-        return ln1p(input.template load<Pack>());
+    template<int Size>
+    auto VectorExpr<ExprID::Ln1p, V>::operator()(std::random_access_iterator auto input) noexcept -> SIMD<T, Size> {
+        return ln1p(input.template load<Size>());
     }
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Ln1p, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
-        return ln1p(input.template load<Pack>(count));
+    template<int Size>
+    auto VectorExpr<ExprID::Ln1p, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept -> SIMD<T, Size> {
+        return ln1p(input.template load<Size>(count));
     }
 
     template<Vector V>

@@ -31,25 +31,25 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operators */
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] T calc(size_t i) const { return unit(Base::getExpr().calc(i)); }
         [[nodiscard]] Tv calc_value(size_t i) const { return unit(Base::getExpr().calc_value(i)); }
     };
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Unit, V>::operator()(std::random_access_iterator auto input) noexcept {
-        return unit(input.template load<Pack>());
+    template<int Size>
+    auto VectorExpr<ExprID::Unit, V>::operator()(std::random_access_iterator auto input) noexcept -> SIMD<T, Size> {
+        return unit(input.template load<Size>());
     }
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Unit, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
-        return unit(input.template load<Pack>(count)).cutoff(count);
+    template<int Size>
+    auto VectorExpr<ExprID::Unit, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept -> SIMD<T, Size> {
+        return unit(input.template load<Size>(count)).cutoff(count);
     }
 
     template<Vector V>

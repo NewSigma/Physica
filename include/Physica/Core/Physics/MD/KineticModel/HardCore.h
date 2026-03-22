@@ -216,7 +216,7 @@ namespace Physica {
     bool HardCore<T, IsFixedBoundary, NumReplica, Integrator, P>::checkCollision(
             [[maybe_unused]] size_t id_dof, const RingPolymerType& ringPolymer) const {
         using PacketType = BestPacket<T, Dynamic>::Type;
-        using BoolPacketType = Traits<PacketType>::BoolSIMDType;
+        constexpr int PacketSize = PacketType::size();
         const size_t numParticle = getNumParticle();
         if constexpr (NumReplica == 1) {
             auto phase = ringPolymer.asMatrix().col(0);
@@ -225,10 +225,10 @@ namespace Physica {
             {
                 auto head = pos.head(length);
                 auto tail = pos.tail(1);
-                const size_t to = length / PacketType::size() * PacketType::size();
+                const size_t to = length / PacketSize * PacketSize;
                 size_t i = 0;
-                for (; i < to; i += PacketType::size()) {
-                    const auto boolPacket = BoolPacketType(head.template packet<PacketType>(i) > tail.template packet<PacketType>(i));
+                for (; i < to; i += PacketSize) {
+                    const auto boolPacket = head.template packet<PacketSize>(i) > tail.template packet<PacketSize>(i);
                     if (boolPacket.horizontal_or()) [[unlikely]]
                         return true;
                 }
@@ -250,14 +250,13 @@ namespace Physica {
         }
         else {
             const size_t numReplica = getNumReplica();
-            const size_t to = numReplica / PacketType::size() * PacketType::size();
+            const size_t to = numReplica / PacketSize * PacketSize;
             auto pos = ringPolymer.asMatrix().row(numParticle + id_dof);
             if (id_dof == 0) [[unlikely]] {
                 if constexpr (IsFixedBoundary) {
-                    const PacketType zeros(0);
                     size_t i = 0;
-                    for (; i < to; i += PacketType::size()) {
-                        const auto boolPacket = BoolPacketType(pos.template packet<PacketType>(i) < zeros);
+                    for (; i < to; i += PacketSize) {
+                        const auto boolPacket = pos.template packet<PacketSize>(i).isNegative();
                         if (boolPacket.horizontal_or()) [[unlikely]]
                             return true;
                     }
@@ -272,9 +271,9 @@ namespace Physica {
                     auto pos_end = ringPolymer.asMatrix().row(numParticle * 2 - 1);
                     const PacketType latticeSizes(latticeSize.toMachine());
                     size_t i = 0;
-                    for (; i < to; i += PacketType::size()) {
-                        const PacketType pack1 = pos_end.template packet<PacketType>(i) - latticeSizes;
-                        const PacketType pack2 = pos.template packet<PacketType>(i);
+                    for (; i < to; i += PacketSize) {
+                        const auto pack1 = pos_end.template packet<PacketSize>(i) - latticeSizes;
+                        const auto pack2 = pos.template packet<PacketSize>(i);
                         const auto boolPacket = BoolPacketType(pack1 > pack2);
                         if (boolPacket.horizontal_or()) [[unlikely]]
                             return true;
@@ -291,8 +290,8 @@ namespace Physica {
                 /* Particles far from the wall */ {
                     auto pos0 = ringPolymer.asMatrix().row(numParticle + id_dof - 1);
                     size_t i = 0;
-                    for (; i < to; i += PacketType::size()) {
-                        const auto boolPacket = BoolPacketType(pos0.template packet<PacketType>(i) > pos.template packet<PacketType>(i));
+                    for (; i < to; i += PacketSize) {
+                        const auto boolPacket = pos0.template packet<PacketSize>(i) > pos.template packet<PacketSize>(i);
                         if (boolPacket.horizontal_or()) [[unlikely]]
                             return true;
                     }
@@ -307,8 +306,8 @@ namespace Physica {
                     if (id_dof == numParticle - 1) [[unlikely]] {
                         const PacketType latticeSizes(latticeSize.value().toMachine());
                         size_t i = 0;
-                        for (; i < to; i += PacketType::size()) {
-                            const auto boolPacket = BoolPacketType(pos.template packet<PacketType>(i) > latticeSizes);
+                        for (; i < to; i += PacketSize) {
+                            const auto boolPacket = pos.template packet<PacketSize>(i) > latticeSizes;
                             if (boolPacket.horizontal_or()) [[unlikely]]
                                 return true;
                         }

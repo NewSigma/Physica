@@ -25,25 +25,32 @@ namespace Physica {
     class device_obj<VectorExpr<ExprID::Reciprocal, V>>
             : public device_obj<UnitaryVectorExpr<ExprID::Reciprocal, V>> {
         using Base = device_obj<UnitaryVectorExpr<ExprID::Reciprocal, V>>;
-    public:
-        using typename Base::ScalarType;
+    protected:
+        using typename Base::T;
     public:
         using Base::Base;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const {
+        [[nodiscard]] __device__ T calc(size_t index) const {
             return reciprocal(Base::getExpr().calc(index));
         }
 
-        template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index) const noexcept {
-            return Pack(1) / Base::getExpr().template packet<Pack>(index);
-        }
-
-        template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index, size_t count) const noexcept {
-            return Pack(1) / Base::getExpr().template packet<Pack>(index, count);
-        }
+        template<int Size>
+        [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
+        template<int Size>
+        [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
     };
+
+    template<Vector V>
+    template<int Size>
+    __device__ auto device_obj<VectorExpr<ExprID::Reciprocal, V>>::packet(size_t index) const noexcept -> SIMD<T, Size> {
+        return reciprocal(Base::getExpr().template packet<Size>(index));
+    }
+
+    template<Vector V>
+    template<int Size>
+    __device__ auto device_obj<VectorExpr<ExprID::Reciprocal, V>>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
+        return reciprocal(Base::getExpr().template packet<Size>(index, count));
+    }
 
     template<Vector V>
     [[nodiscard]] __host__ __device__ auto reciprocal(V&& v) noexcept requires(DeviceObj<V>) {

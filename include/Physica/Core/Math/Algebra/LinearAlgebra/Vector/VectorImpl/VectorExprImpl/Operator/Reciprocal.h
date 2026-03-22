@@ -33,10 +33,10 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operators */
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
@@ -46,17 +46,17 @@ namespace Physica {
     };
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Reciprocal, V>::operator()(std::random_access_iterator auto input) noexcept {
-        auto x = input.template load<Pack>();
+    template<int Size>
+    auto VectorExpr<ExprID::Reciprocal, V>::operator()(std::random_access_iterator auto input) noexcept -> SIMD<T, Size> {
+        auto x = input.template load<Size>();
         assert(!x.isZero().horizontal_or() && "[Error]: Divide by zero");
         return reciprocal(x);
     }
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Reciprocal, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
-        auto x = reciprocal(input.template load<Pack>(count)).cutoff(count);
+    template<int Size>
+    auto VectorExpr<ExprID::Reciprocal, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept -> SIMD<T, Size> {
+        auto x = reciprocal(input.template load<Size>(count)).cutoff(count);
         assert(x.isFinite().horizontal_and() && "[Error]: Divide by zero");
         return x;
     }

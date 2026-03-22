@@ -31,25 +31,25 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operators */
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return cos(Base::getExpr().calc(index)); }
         [[nodiscard]] Tv calc_value(size_t index) const { return cos(Base::getExpr().calc_value(index)); }
     };
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Cos, V>::operator()(std::random_access_iterator auto input) noexcept {
-        return cos(input.template load<Pack>());
+    template<int Size>
+    auto VectorExpr<ExprID::Cos, V>::operator()(std::random_access_iterator auto input) noexcept -> SIMD<T, Size> {
+        return cos(input.template load<Size>());
     }
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Cos, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
-        return cos(input.template load<Pack>(count)).cutoff(count);
+    template<int Size>
+    auto VectorExpr<ExprID::Cos, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept -> SIMD<T, Size> {
+        return cos(input.template load<Size>(count)).cutoff(count);
     }
 
     template<Vector V>

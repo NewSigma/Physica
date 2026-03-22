@@ -38,6 +38,8 @@ namespace Physica {
         using Base = RValueVector<VectorExpr<ID, V>>;
 
         template<std::ranges::view Operand> class View;
+    protected:
+        using typename Base::T;
     private:
         LazyDestroy<V> expr;
     public:
@@ -51,10 +53,10 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] constexpr auto view() const noexcept;
 
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const noexcept;
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index) const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return getExpr().getLength(); }
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
@@ -68,15 +70,15 @@ namespace Physica {
     }
 
     template<ExprID ID, Vector V>
-    template<Packet Pack>
-    Pack UnitaryVectorExpr<ID, V>::packet(size_t index) const noexcept {
-        return (view().begin() + index).template load<Pack>();
+    template<int Size>
+    auto UnitaryVectorExpr<ID, V>::packet(size_t index) const noexcept -> SIMD<T, Size> {
+        return (view().begin() + index).template load<Size>();
     }
 
     template<ExprID ID, Vector V>
-    template<Packet Pack>
-    Pack UnitaryVectorExpr<ID, V>::packet(size_t index, size_t count) const noexcept {
-        return (view().begin() + index).template load<Pack>(count);
+    template<int Size>
+    auto UnitaryVectorExpr<ID, V>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
+        return (view().begin() + index).template load<Size>(count);
     }
 
     template<ExprID ID, Vector V>

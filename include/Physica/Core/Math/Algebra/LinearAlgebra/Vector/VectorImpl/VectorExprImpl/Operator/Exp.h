@@ -34,10 +34,10 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operators */
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const noexcept;
@@ -50,15 +50,15 @@ namespace Physica {
     };
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Exp, V>::operator()(std::random_access_iterator auto input) noexcept {
-        return exp(input.template load<Pack>());
+    template<int Size>
+    auto VectorExpr<ExprID::Exp, V>::operator()(std::random_access_iterator auto input) noexcept -> SIMD<T, Size> {
+        return exp(input.template load<Size>());
     }
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Exp, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
-        return exp(input.template load<Pack>(count)).cutoff(count);
+    template<int Size>
+    auto VectorExpr<ExprID::Exp, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept -> SIMD<T, Size> {
+        return exp(input.template load<Size>(count)).cutoff(count);
     }
 
     template<Vector V>

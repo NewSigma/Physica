@@ -56,8 +56,8 @@ namespace Physica {
         void assign(Vector auto&& v) const noexcept;
         void assign_mkl(Vector auto& v) const noexcept;
 
-        template<Packet Pack> [[nodiscard]] Pack packet(size_t index) const noexcept;
-        template<Packet Pack> [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
+        template<int Size> [[nodiscard]] SIMD<T, Size> packet(size_t index) const noexcept;
+        template<int Size> [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
         void writePacket(Packet auto packet, size_t index) noexcept;
         void writePacket(Packet auto packet, size_t index, size_t count) noexcept;
         [[nodiscard]] constexpr auto view(this auto&&) noexcept;

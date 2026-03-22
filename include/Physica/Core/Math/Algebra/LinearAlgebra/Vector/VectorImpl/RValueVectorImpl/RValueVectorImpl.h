@@ -101,68 +101,64 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Packet Pack>
-    Pack RValueVector<Derived>::packet(size_t index) const noexcept {
-        using U = Traits<Pack>::ScalarType;
-        assert(index + Pack::size() <= getLength() && "[Error]: Index out of range");
+    template<int Size>
+    auto RValueVector<Derived>::packet(size_t index) const noexcept -> SIMD<T, Size> {
+        using U = typename Derived::ScalarType;
+        assert(index + Size <= getLength() && "[Error]: Index out of range");
         if constexpr (Diffable<U>) {
-            using ValuePacket = Pack::ValueType;
             if constexpr (isForwardDiff) {
-                using GradPacket = Pack::GradType;
                 const auto& x = Base::getDerived();
-                auto values = x.values().template packet<ValuePacket>(index);
-                auto grads = x.grads().template packet<GradPacket>(index);
-                return Pack(std::move(values), std::move(grads));
+                auto values = x.values().template packet<Size>(index);
+                auto grads = x.grads().template packet<Size>(index);
+                return SIMD<T, Size>(std::move(values), std::move(grads));
             }
             else {
                 using Uv = U::ValueType;
-                Array<Uv, Pack::size()> values{};
-                for (size_t i = 0; i < Pack::size(); ++i, ++index)
+                Array<Uv, Size> values{};
+                for (size_t i = 0; i < Size; ++i, ++index)
                     values[i] = Uv(calc(index));
-                ValuePacket packet{};
+                SIMD<Uv, Size> packet{};
                 packet.load(values.data());
-                return Pack(std::move(packet));
+                return SIMD<T, Size>(std::move(packet));
             }
         }
         else {
-            Array<U, Pack::size()> buffer{};
-            for (size_t i = 0; i < Pack::size(); ++i, ++index)
+            Array<U, Size> buffer{};
+            for (size_t i = 0; i < Size; ++i, ++index)
                 buffer[i] = U(calc(index));
-            Pack packet{};
+            SIMD<T, Size> packet{};
             packet.load(buffer.data());
             return packet;
         }
     }
 
     template<class Derived>
-    template<Packet Pack>
-    Pack RValueVector<Derived>::packet(size_t index, size_t count) const noexcept {
-        using U = Traits<Pack>::ScalarType;
+    template<int Size>
+    auto RValueVector<Derived>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
+        using U = typename Derived::ScalarType;
         assert(index + count <= getLength() && "[Error]: Index out of range");
         if constexpr (Diffable<U>) {
-            using ValuePacket = Pack::ValueType;
             if constexpr (isForwardDiff) {
-                using GradPacket = Pack::GradType;
                 const auto& x = Base::getDerived();
-                auto values = x.values().template packet<ValuePacket>(index, count);
-                auto grads = x.grads().template packet<GradPacket>(index, count);
-                return Pack(std::move(values), std::move(grads));
+                auto values = x.values().template packet<Size>(index, count);
+                auto grads = x.grads().template packet<Size>(index, count);
+                return SIMD<T, Size>(std::move(values), std::move(grads));
             }
             else {
                 using Uv = U::ValueType;
-                Array<Uv, Pack::size()> values{};
-                for (size_t i = 0; i < Pack::size(); ++i, ++index)
+                Array<Uv, Size> values{};
+                for (size_t i = 0; i < Size; ++i, ++index)
                     values[i] = i < count ? Uv(calc(index)) : Uv(0);
-                ValuePacket packet{};
+                SIMD<Uv, Size> packet{};
                 packet.load(values.data());
-                return Pack(std::move(packet));
+                return SIMD<T, Size>(std::move(packet));
             }
         }
         else {
-            Array<U, Pack::size()> buffer{};
-            for (size_t i = 0; i < Pack::size(); ++i, ++index)
+            Array<U, Size> buffer{};
+            for (size_t i = 0; i < Size; ++i, ++index)
                 buffer[i] = i < count ? U(calc(index)) : U(0);
-            Pack packet{};
+            SIMD<T, Size> packet{};
             packet.load(buffer.data());
             return packet;
         }
@@ -320,16 +316,17 @@ namespace Physica {
             co_return std::move(result);
         }
         else {
+            constexpr int Size = PacketType::size();
             const auto& v = Base::getDerived();
             PacketType buffer(std::numeric_limits<T>::lowest());
             T result;
             if constexpr (SizeAtCompile != Dynamic) {
-                constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
-                for (size_t i = 0; i < to; i += PacketType::size())
-                    buffer = std::max(v.template packet<PacketType>(i), buffer);
+                constexpr size_t to = SizeAtCompile / Size * Size;
+                for (size_t i = 0; i < to; i += Size)
+                    buffer = std::max(v.template packet<Size>(i), buffer);
                 result = buffer.max();
 
-                constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
+                constexpr size_t i = SizeAtCompile - SizeAtCompile % Size;
                 if constexpr (i != SizeAtCompile) {
                     constexpr size_t count = SizeAtCompile - i;
                     for (size_t j = 0; j < count; ++j)
@@ -339,9 +336,9 @@ namespace Physica {
             else {
                 const size_t length = getLength();
                 size_t i = 0;
-                const size_t to = length / PacketType::size() * PacketType::size();
-                for (; i < to; i += PacketType::size())
-                    buffer = std::max(v.template packet<PacketType>(i), buffer);
+                const size_t to = length / Size * Size;
+                for (; i < to; i += Size)
+                    buffer = std::max(v.template packet<Size>(i), buffer);
                 result = buffer.max();
 
                 if (to != length) {
@@ -374,16 +371,17 @@ namespace Physica {
             calc(index).reverse(result.grad());
         }
         else if constexpr (EnableSIMD) {
+            constexpr int Size = PacketType::size();
             const auto& v = Base::getDerived();
             PacketType buffer(std::numeric_limits<T>::max());
             T result;
             if constexpr (SizeAtCompile != Dynamic) {
-                constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
-                for (size_t i = 0; i < to; i += PacketType::size())
-                    buffer = std::min(v.template packet<PacketType>(i), buffer);
+                constexpr size_t to = SizeAtCompile / Size * Size;
+                for (size_t i = 0; i < to; i += Size)
+                    buffer = std::min(v.template packet<Size>(i), buffer);
                 result = buffer.min();
 
-                constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
+                constexpr size_t i = SizeAtCompile - SizeAtCompile % Size;
                 if constexpr (i != SizeAtCompile) {
                     constexpr size_t count = SizeAtCompile - i;
                     for (size_t j = 0; j < count; ++j)
@@ -393,9 +391,9 @@ namespace Physica {
             else {
                 const size_t length = getLength();
                 size_t i = 0;
-                const size_t to = length / PacketType::size() * PacketType::size();
-                for (; i < to; i += PacketType::size())
-                    buffer = std::min(v.template packet<PacketType>(i), buffer);
+                const size_t to = length / Size * Size;
+                for (; i < to; i += Size)
+                    buffer = std::min(v.template packet<Size>(i), buffer);
                 result = buffer.min();
 
                 if (to != length) {
@@ -426,28 +424,29 @@ namespace Physica {
             v.reverse(result.grad());
         }
         else if constexpr (Internal::EnableSIMD<Derived>::value) {
+            constexpr int Size = PacketType::size();
             auto buffer = PacketType::zeros();
             if constexpr (SizeAtCompile != Dynamic) {
-                constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
-                for (size_t i = 0; i < to; i += PacketType::size())
-                    buffer += v.template packet<PacketType>(i);
+                constexpr size_t to = SizeAtCompile / Size * Size;
+                for (size_t i = 0; i < to; i += Size)
+                    buffer += v.template packet<Size>(i);
 
-                constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
+                constexpr size_t i = SizeAtCompile - SizeAtCompile % Size;
                 if constexpr (i != SizeAtCompile) {
                     constexpr size_t count = SizeAtCompile - i;
-                    buffer += v.template packet<PacketType>(i, count);
+                    buffer += v.template packet<Size>(i, count);
                 }
             }
             else {
                 const size_t length = getLength();
                 size_t i = 0;
-                const size_t to = length / PacketType::size() * PacketType::size();
-                for (; i < to; i += PacketType::size())
-                    buffer += v.template packet<PacketType>(i);
+                const size_t to = length / Size * Size;
+                for (; i < to; i += Size)
+                    buffer += v.template packet<Size>(i);
 
                 if (to != length) {
                     const size_t count = length - i;
-                    buffer += v.template packet<PacketType>(i, count);
+                    buffer += v.template packet<Size>(i, count);
                 }
             }
             co_return buffer.sum();
@@ -764,33 +763,32 @@ namespace Physica {
     template<class Derived>
     template<Vector V, ExecutePolicy P, size_t Length>
     void RValueVector<Derived>::assign_simd(V& __restrict v) const __restrict noexcept {
-        using Pack = BestPacket<typename V::ScalarType, Length>::Type;
-        constexpr static size_t PacketSize = Pack::size();
+        constexpr int Size = BestPacket<typename V::ScalarType, Length>::Size;
         const auto& v0 = Base::getDerived();
         if constexpr (Length != Dynamic) {
-            constexpr size_t to = Length / PacketSize * PacketSize;
-            for (size_t i = 0; i < to; i += PacketSize)
-                v.writePacket(v0.template packet<Pack>(i), i);
+            constexpr size_t to = Length / Size * Size;
+            for (size_t i = 0; i < to; i += Size)
+                v.writePacket(v0.template packet<Size>(i), i);
 
-            for (size_t i = Length - Length % PacketSize; i < Length; ++i)
+            for (size_t i = Length - Length % Size; i < Length; ++i)
                 v[i] = v0.calc(i);
         }
         else {
             const size_t length = getLength();
-            const size_t to = length / PacketSize * PacketSize;
+            const size_t to = length / Size * Size;
             if constexpr (P == Sequential) {
                 size_t i = 0;
-                for (; i < to; i += PacketSize)
-                    v.writePacket(v0.template packet<Pack>(i), i);
+                for (; i < to; i += Size)
+                    v.writePacket(v0.template packet<Size>(i), i);
 
                 for (; i < length; ++i)
                     v[i] = v0.calc(i);
             }
             else {
-                const size_t numLoop = to / PacketSize;
+                const size_t numLoop = to / Size;
                 auto future = parallel_for<P>([&, this](size_t i) {
-                    const size_t i1 = i * PacketSize;
-                    v.writePacket(v0.template packet<Pack>(i1), i1);
+                    const size_t i1 = i * Size;
+                    v.writePacket(v0.template packet<Size>(i1), i1);
                 }, numLoop, 0);
 
                 for (size_t i = to; i < length; ++i)
@@ -814,23 +812,22 @@ namespace Physica {
     template<class Derived>
     template<Vector V, size_t Length>
     void RValueVector<Derived>::assign_add_simd(V& __restrict v) const __restrict noexcept {
-        using Pack = BestPacket<typename V::ScalarType, Length>::Type;
-        constexpr size_t PacketSize = Pack::size();
+        constexpr int Size = BestPacket<typename V::ScalarType, Length>::Size;
         const auto& v0 = Base::getDerived();
         if constexpr (Length != Dynamic) {
-            constexpr size_t to = Length / PacketSize * PacketSize;
-            for (size_t i = 0; i < to; i += PacketSize)
-                v.writePacket(v.template packet<Pack>(i) + v0.template packet<Pack>(i), i);
+            constexpr size_t to = Length / Size * Size;
+            for (size_t i = 0; i < to; i += Size)
+                v.writePacket(v.template packet<Size>(i) + v0.template packet<Size>(i), i);
 
-            for (size_t i = Length - Length % PacketSize; i < Length; ++i)
+            for (size_t i = Length - Length % Size; i < Length; ++i)
                 v[i] += v0.calc(i);
         }
         else {
             const size_t length = v.getLength();
-            const size_t to = length / PacketSize * PacketSize;
+            const size_t to = length / Size * Size;
             size_t i = 0;
-            for (; i < to; i += PacketSize)
-                v.writePacket(v.template packet<Pack>(i) + v0.template packet<Pack>(i), i);
+            for (; i < to; i += Size)
+                v.writePacket(v.template packet<Size>(i) + v0.template packet<Size>(i), i);
 
             for (; i < length; ++i)
                 v[i] += v0.calc(i);

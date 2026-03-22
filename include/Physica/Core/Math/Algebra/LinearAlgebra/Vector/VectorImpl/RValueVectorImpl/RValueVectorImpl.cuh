@@ -91,24 +91,18 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Packet Pack>
-    __device__ Pack device_obj<RValueVector<Derived>>::packet(size_t index) const noexcept {
-        assert(index + Pack::size() <= getLength());
-        if constexpr (Scalar<Pack>)
-            return calc(index);
-        else
-            return Pack(calc(index).value(), calc(index + 1).value());
+    template<int Size>
+    __device__ auto device_obj<RValueVector<Derived>>::packet(size_t index) const noexcept -> SIMD<T, Size> {
+        assert(index + Size <= getLength());
+        return SIMD<T, Size>(calc(index).value(), calc(index + 1).value());
     }
 
     template<class Derived>
-    template<Packet Pack>
-    __device__ Pack device_obj<RValueVector<Derived>>::packet(size_t index, [[maybe_unused]] size_t count) const noexcept {
-        assert(index + Pack::size() <= getLength());
+    template<int Size>
+    __device__ auto device_obj<RValueVector<Derived>>::packet(size_t index, [[maybe_unused]] size_t count) const noexcept -> SIMD<T, Size> {
+        assert(index + Size <= getLength());
         assert(count == 1 && "[Error]: No need to call partial version");
-        if constexpr (Scalar<Pack>)
-            return calc(index);
-        else
-            return Pack(calc(index).value(), 0_HF);
+        return SIMD<T, Size>(calc(index).value(), 0_HF);
     }
 
     template<class Derived>
@@ -448,26 +442,22 @@ namespace Physica {
     __device__ void device_obj<RValueVector<Derived>>::assign_impl(V& target) const {
         const auto& v0 = Base::getDerived();
         if constexpr (Internal::EnableSIMD<device_obj<Derived>, V>::value) {
-            constexpr size_t Size1 = Derived::SizeAtCompile;
-            constexpr size_t Size2 = V::SizeAtCompile;
-            constexpr size_t Length = std::max(Size1, Size2);
-            using PacketType = device_obj<BestPacket<T, Length>>::Type;
-            constexpr size_t PacketSize = PacketType::size();
-
+            constexpr size_t Length = std::max(Derived::SizeAtCompile, V::SizeAtCompile);
+            constexpr int Size = device_obj<BestPacket<T, Length>>::Size;
             if constexpr (Length != Dynamic) {
-                constexpr size_t to = Length / PacketSize * PacketSize;
-                for (size_t i = 0; i < to; i += PacketSize)
-                    target.writePacket(v0.template packet<PacketType>(i), i);
+                constexpr size_t to = Length / Size * Size;
+                for (size_t i = 0; i < to; i += Size)
+                    target.writePacket(v0.template packet<Size>(i), i);
 
-                for (size_t i = Length - Length % PacketSize; i < Length; ++i)
+                for (size_t i = Length - Length % Size; i < Length; ++i)
                     target[i] = v0.calc(i);
             }
             else {
                 const size_t length = getLength();
-                const size_t to = length / PacketSize * PacketSize;
+                const size_t to = length / Size * Size;
                 size_t i = 0;
-                for (; i < to; i += PacketSize)
-                    target.writePacket(v0.template packet<PacketType>(i), i);
+                for (; i < to; i += Size)
+                    target.writePacket(v0.template packet<Size>(i), i);
 
                 for (; i < length; ++i)
                     target[i] = v0.calc(i);

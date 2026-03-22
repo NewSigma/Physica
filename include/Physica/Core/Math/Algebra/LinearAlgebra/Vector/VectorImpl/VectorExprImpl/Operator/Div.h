@@ -36,10 +36,10 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t s) const;
         [[nodiscard]] Tv calc_value(size_t s) const;
 
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const noexcept;
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index) const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
     };
 
     template<class U, class V>
@@ -65,27 +65,27 @@ namespace Physica {
     }
 
     template<class U, class V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Div, U, V>::packet(size_t index) const noexcept {
+    template<int Size>
+    auto VectorExpr<ExprID::Div, U, V>::packet(size_t index) const noexcept -> SIMD<T, Size> {
         if constexpr (Vector<U>)
-            return Base::getLHS().template packet<Pack>(index) * Pack(reciprocal(Base::getRHS()));
+            return Base::getLHS().template packet<Size>(index) * SIMD<T, Size>(reciprocal(Base::getRHS()));
         else {
-            auto div = Base::getRHS().template packet<Pack>(index);
+            auto div = Base::getRHS().template packet<Size>(index);
             assert(!div.isZero().horizontal_or() && "[Error]: Divide by zero");
-            return Pack(Base::getLHS()) / div;
+            return SIMD<T, Size>(Base::getLHS()) / div;
         }
     }
 
     template<class U, class V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Div, U, V>::packet(size_t index, size_t count) const noexcept {
+    template<int Size>
+    auto VectorExpr<ExprID::Div, U, V>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
         if constexpr (Vector<U>)
-            return Base::getLHS().template packet<Pack>(index, count) * Pack(reciprocal(Base::getRHS()));
+            return Base::getLHS().template packet<Size>(index, count) * SIMD<T, Size>(reciprocal(Base::getRHS()));
         else {
-            auto div = Base::getRHS().template packet<Pack>(index, count);
+            auto div = Base::getRHS().template packet<Size>(index, count);
             for (size_t i = 0; i < count; ++i)
                 assert(!div[i].isZero() && "[Error]: Divide by zero");
-            return (Pack(Base::getLHS()) / div).cutoff(count);
+            return (SIMD<T, Size>(Base::getLHS()) / div).cutoff(count);
         }
     }
 
@@ -102,10 +102,10 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t s) const;
         [[nodiscard]] Tv calc_value(size_t s) const;
 
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const noexcept;
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index) const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
     };
 
     template<Vector V1, Vector V2>
@@ -121,18 +121,18 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Div, V1, V2>::packet(size_t index) const noexcept {
-        auto div = Base::getRHS().template packet<Pack>(index);
+    template<int Size>
+    auto VectorExpr<ExprID::Div, V1, V2>::packet(size_t index) const noexcept -> SIMD<T, Size> {
+        auto div = Base::getRHS().template packet<Size>(index);
         assert(!div.isZero().horizontal_or() && "[Error]: Divide by zero");
-        return Base::getLHS().template packet<Pack>(index) / div;
+        return Base::getLHS().template packet<Size>(index) / div;
     }
 
     template<Vector V1, Vector V2>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Div, V1, V2>::packet(size_t index, size_t count) const noexcept {
-        const auto pack1 = Base::getLHS().template packet<Pack>(index, count);
-        const auto pack2 = Base::getRHS().template packet<Pack>(index, count);
+    template<int Size>
+    auto VectorExpr<ExprID::Div, V1, V2>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
+        const auto pack1 = Base::getLHS().template packet<Size>(index, count);
+        const auto pack2 = Base::getRHS().template packet<Size>(index, count);
         for (size_t i = 0; i < count; ++i)
             assert(!pack2[i].isZero() && "[Error]: Divide by zero");
         return (pack1 / pack2).cutoff(count);

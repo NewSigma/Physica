@@ -24,9 +24,7 @@ namespace Physica {
     template<Vector V1, Vector V2>
     auto sincos(const V1& x, V2& s, V2& c) {
         assert(x.getLength() == s.getLength() && x.getLength() == c.getLength());
-        constexpr size_t Size1 = V1::SizeAtCompile;
-        constexpr size_t Size2 = V2::SizeAtCompile;
-        constexpr size_t SizeAtCompile = std::max(Size1, Size2);
+        constexpr size_t SizeAtCompile = std::max(V1::SizeAtCompile, V2::SizeAtCompile);
         using ScalarType1 = V1::ScalarType;
         using ScalarType2 = V2::ScalarType;
         using ScalarType = Internal::BinaryScalarOpRtnTy<ScalarType1, ScalarType2>::Type;
@@ -43,12 +41,13 @@ namespace Physica {
                 sincos(x.calc(i), s[i], c[i]);
         }
         else {
+            constexpr int Size = PacketType::size();
             const size_t length = x.getLength();
             size_t i = 0;
-            const size_t to = length / PacketType::size() * PacketType::size();
+            const size_t to = length / Size * Size;
             PacketType s_buffer, c_buffer;
-            for (; i < to; i += PacketType::size()) {
-                sincos(x.template packet<PacketType>(i), s_buffer, c_buffer);
+            for (; i < to; i += Size) {
+                sincos(x.template packet<Size>(i), s_buffer, c_buffer);
                 s.writePacket(s_buffer, i);
                 c.writePacket(c_buffer, i);
             }

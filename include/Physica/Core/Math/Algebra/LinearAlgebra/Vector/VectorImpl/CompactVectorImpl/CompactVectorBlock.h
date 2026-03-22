@@ -42,8 +42,8 @@ namespace Physica {
         This& operator=(const This& v);
         This& operator=(This&& v) noexcept;
         /* Operations */
-        template<Packet Pack> [[nodiscard]] Pack packet(size_t index) const noexcept;
-        template<Packet Pack> [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
+        template<int Size> [[nodiscard]] auto packet(size_t index) const noexcept;
+        template<int Size> [[nodiscard]] auto packet(size_t index, size_t count) const noexcept;
         void writePacket(Packet auto packet, size_t index) noexcept;
         void writePacket(Packet auto packet, size_t index, size_t count) noexcept;
 
@@ -90,15 +90,15 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    template<Packet Pack>
-    Pack CompactVectorBlock<V, Length>::packet(size_t index) const noexcept {
-        return vec.template packet<Pack>(from + index);
+    template<int Size>
+    auto CompactVectorBlock<V, Length>::packet(size_t index) const noexcept {
+        return vec.template packet<Size>(from + index);
     }
 
     template<Vector V, size_t Length>
-    template<Packet Pack>
-    Pack CompactVectorBlock<V, Length>::packet(size_t index, size_t count) const noexcept {
-        return vec.template packet<Pack>(from + index, count);
+    template<int Size>
+    auto CompactVectorBlock<V, Length>::packet(size_t index, size_t count) const noexcept {
+        return vec.template packet<Size>(from + index, count);
     }
 
     template<Vector V, size_t Length>

@@ -45,10 +45,10 @@ namespace Physica {
 
         [[nodiscard]] T calc(size_t index) const { return vec.calc(index).conjugate(); }
         [[nodiscard]] Tv calc_value(size_t index) const { return vec.calc_value(index).conjugate(); }
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const noexcept;
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index) const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
 
         [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
         /* Getters */
@@ -62,15 +62,15 @@ namespace Physica {
     }
 
     template<Vector V>
-    template<Packet Pack>
-    Pack Conjugate<V>::packet(size_t index) const noexcept {
-        return vec.template packet<Pack>(index).conjugate();
+    template<int Size>
+    auto Conjugate<V>::packet(size_t index) const noexcept -> SIMD<T, Size> {
+        return vec.template packet<Size>(index).conjugate();
     }
 
     template<Vector V>
-    template<Packet Pack>
-    Pack Conjugate<V>::packet(size_t index, size_t count) const noexcept {
-        return vec.template packet<Pack>(index, count).conjugate();
+    template<int Size>
+    auto Conjugate<V>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
+        return vec.template packet<Size>(index, count).conjugate();
     }
 
     template<Vector V>

@@ -64,30 +64,22 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Packet Pack>
-    Pack CompactVector<Derived>::packet(size_t index) const noexcept {
-        assert(index + Pack::size() <= Base::getLength());
-        if constexpr (std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>) {
-            Pack packet{};
-            packet.load(Base::data_ptr(index));
-            return packet;
-        }
-        else
-            return Base::template packet<Pack>(index);
+    template<int Size>
+    auto CompactVector<Derived>::packet(size_t index) const noexcept -> SIMD<T, Size> {
+        assert(index + Size <= Base::getLength());
+        SIMD<T, Size> packet{};
+        packet.load(Base::data_ptr(index));
+        return packet;
     }
 
     template<class Derived>
-    template<Packet Pack>
-    Pack CompactVector<Derived>::packet(size_t index, size_t count) const noexcept {
+    template<int Size>
+    auto CompactVector<Derived>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
         assert(index + count <= Base::getLength());
-        assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
-        if constexpr (std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>) {
-            Pack packet{};
-            packet.load(Base::data_ptr(index), count);
-            return packet;
-        }
-        else
-            return Base::template packet<Pack>(index, count);
+        assert(0 < count && count < Size && "[Error]: Invalid size for partial operation");
+        SIMD<T, Size> packet{};
+        packet.load(Base::data_ptr(index), count);
+        return packet;
     }
 
     template<class Derived>

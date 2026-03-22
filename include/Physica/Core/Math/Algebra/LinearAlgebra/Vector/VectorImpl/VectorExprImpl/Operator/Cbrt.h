@@ -31,28 +31,28 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operators */
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t s) const { return cbrt(Base::getExpr().calc(s)); }
         [[nodiscard]] Tv calc_value(size_t index) const { return cbrt(Base::getExpr().calc_value(index)); }
     };
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Cbrt, V>::operator()(std::random_access_iterator auto input) noexcept {
-        Pack result = input.template load<Pack>();
-        for (int i = 0; i < Pack::size(); ++i)
+    template<int Size>
+    auto VectorExpr<ExprID::Cbrt, V>::operator()(std::random_access_iterator auto input) noexcept -> SIMD<T, Size> {
+        SIMD<T, Size> result = input.template load<Size>();
+        for (int i = 0; i < Size; ++i)
             result.insert(i, cbrt(result[i]));
         return result;
     }
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Cbrt, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
-        Pack result = input.template packet<Pack>(count);
+    template<int Size>
+    auto VectorExpr<ExprID::Cbrt, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept -> SIMD<T, Size> {
+        SIMD<T, Size> result = input.template packet<Size>(count);
         for (size_t i = 0; i < count; ++i)
             result.insert(i, cbrt(result[i]));
         return result;

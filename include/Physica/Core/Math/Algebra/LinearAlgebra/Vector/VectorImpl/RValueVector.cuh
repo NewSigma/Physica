@@ -61,10 +61,10 @@ namespace Physica {
 
         [[nodiscard]] __device__ T calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] __device__ Tv calc_value(size_t index) const { return Base::getDerived().calc_value(index); }
-        template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index) const noexcept;
-        template<Packet Pack>
-        [[nodiscard]] __device__ Pack packet(size_t index, size_t count) const noexcept;
+        template<int Size>
+        [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
+        template<int Size>
+        [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
 
         __host__ __device__ void resize(const Vector auto& x) { resize(x.getLength()); }

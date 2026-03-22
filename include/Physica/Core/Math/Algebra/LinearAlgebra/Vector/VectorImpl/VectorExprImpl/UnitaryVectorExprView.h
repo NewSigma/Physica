@@ -97,10 +97,10 @@ namespace Physica {
         [[nodiscard]] constexpr This operator-(difference_type n) const noexcept;
         [[nodiscard]] constexpr difference_type operator-(const This& other) const noexcept;
         /* Operations */
-        template<Packet Pack>
-        [[nodiscard]] Pack load() const noexcept;
-        template<Packet Pack>
-        [[nodiscard]] Pack load(size_t count) const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<value_type, Size> load() const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<value_type, Size> load(size_t count) const noexcept;
         /* Friends */
         friend constexpr This operator+(difference_type n, const This& ite) noexcept { return ite + n; }
     };
@@ -193,15 +193,15 @@ namespace Physica {
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    template<Packet Pack>
-    Pack UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::load() const noexcept {
-        return VectorExpr<ID, V>::template operator()<Pack>(it);
+    template<int Size>
+    auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::load() const noexcept -> SIMD<value_type, Size> {
+        return VectorExpr<ID, V>::template operator()<Size>(it);
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    template<Packet Pack>
-    Pack UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::load(size_t count) const noexcept {
-        return VectorExpr<ID, V>::template operator()<Pack>(it, count);
+    template<int Size>
+    auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::load(size_t count) const noexcept -> SIMD<value_type, Size> {
+        return VectorExpr<ID, V>::template operator()<Size>(it, count);
     }
 }

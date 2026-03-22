@@ -34,10 +34,10 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operators */
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const;
@@ -52,21 +52,21 @@ namespace Physica {
     };
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Abs, V>::operator()(std::random_access_iterator auto input) noexcept {
+    template<int Size>
+    auto VectorExpr<ExprID::Abs, V>::operator()(std::random_access_iterator auto input) noexcept -> SIMD<T, Size> {
         if constexpr (isComplexV)
-            return sqrt(SquaredNormVector<V>::template operator()<Pack>(input));
+            return sqrt(SquaredNormVector<V>::template operator()<Size>(input));
         else
-            return abs(input.template load<Pack>());
+            return abs(input.template load<Size>());
     }
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Abs, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
+    template<int Size>
+    auto VectorExpr<ExprID::Abs, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept -> SIMD<T, Size> {
         if constexpr (isComplexV)
-            return sqrt(SquaredNormVector<V>::template operator()<Pack>(input, count));
+            return sqrt(SquaredNormVector<V>::template operator()<Size>(input, count));
         else
-            return abs(input.template load<Pack>(count));
+            return abs(input.template load<Size>(count));
     }
 
     template<Vector V>

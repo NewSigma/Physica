@@ -31,6 +31,7 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
+        using typename Base::Tr;
     public:
         using Base::Base;
         /* Operators */
@@ -50,10 +51,10 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
 
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const noexcept;
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index, size_t count) const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index) const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
 
         [[nodiscard]] T sum() const { return getLHS().sum() * getRHS(); }
 
@@ -139,15 +140,41 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Mul, V, U>::packet(size_t index) const noexcept {
-        return getLHS().template packet<Pack>(index) * Pack(getRHS());
+    template<int Size>
+    auto VectorExpr<ExprID::Mul, V, U>::packet(size_t index) const noexcept -> SIMD<T, Size> {
+        using V1 = std::remove_cvref_t<V>;
+        using U1 = std::remove_cvref_t<U>;
+        if constexpr (!V1::isComplex && U1::isComplex) {
+            auto lhs = getLHS().template packet<Size>(index);
+            auto rhs = getRHS();
+            return SIMD<T, Size>::asComplex(SIMD<Tr, Size * 2>(lhs * rhs.real(), lhs * rhs.imag()).permRealImag());
+        }
+        else if constexpr (V1::isComplex && !U1::isComplex) {
+            auto lhs = getLHS().template packet<Size>(index);
+            auto rhs = getRHS();
+            return SIMD<T, Size>::asComplex(lhs.asReal() * SIMD<Tr, Size * 2>(rhs));
+        }
+        else
+            return getLHS().template packet<Size>(index) * SIMD<T, Size>(getRHS());
     }
 
     template<Vector V, Scalar U>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Mul, V, U>::packet(size_t index, size_t count) const noexcept {
-        return getLHS().template packet<Pack>(index, count) * Pack(getRHS());
+    template<int Size>
+    auto VectorExpr<ExprID::Mul, V, U>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
+        using V1 = std::remove_cvref_t<V>;
+        using U1 = std::remove_cvref_t<U>;
+        if constexpr (!V1::isComplex && U1::isComplex) {
+            auto lhs = getLHS().template packet<Size>(index, count);
+            auto rhs = getRHS();
+            return SIMD<T, Size>::asComplex(SIMD<Tr, Size * 2>(lhs * rhs.real(), lhs * rhs.imag()).permRealImag());
+        }
+        else if constexpr (V1::isComplex && !U1::isComplex) {
+            auto lhs = getLHS().template packet<Size>(index, count);
+            auto rhs = getRHS();
+            return SIMD<T, Size>::asComplex(lhs.asReal() * SIMD<Tr, Size * 2>(rhs));
+        }
+        else
+            return getLHS().template packet<Size>(index, count) * SIMD<T, Size>(getRHS());
     }
 
     template<Vector V, Scalar U>
@@ -177,23 +204,23 @@ namespace Physica {
     template<Vector Target, size_t Length>
     void VectorExpr<ExprID::Mul, V, U>::assign_fma_simd(Target&  __restrict v) const  __restrict noexcept {
         using Pack = BestPacket<typename Target::ScalarType, Length>::Type;
-        constexpr size_t PacketSize = Pack::size();
+        constexpr size_t Size = Pack::size();
         const auto& lhs = getLHS();
         const auto rhs = Pack(getRHS());
         if constexpr (Length != Dynamic) {
-            constexpr size_t to = Length / PacketSize * PacketSize;
-            for (size_t i = 0; i < to; i += PacketSize)
-                v.writePacket(fma(lhs.template packet<Pack>(i), rhs, v.template packet<Pack>(i)), i);
+            constexpr size_t to = Length / Size * Size;
+            for (size_t i = 0; i < to; i += Size)
+                v.writePacket(fma(lhs.template packet<Size>(i), rhs, v.template packet<Size>(i)), i);
 
-            for (size_t i = Length - Length % PacketSize; i < Length; ++i)
+            for (size_t i = Length - Length % Size; i < Length; ++i)
                 v[i] = fma(getLHS().calc(i), T(getRHS()), v[i]);
         }
         else {
             const size_t length = v.getLength();
-            const size_t to = length / PacketSize * PacketSize;
+            const size_t to = length / Size * Size;
             size_t i = 0;
-            for (; i < to; i += PacketSize)
-                v.writePacket(fma(lhs.template packet<Pack>(i), rhs, v.template packet<Pack>(i)), i);
+            for (; i < to; i += Size)
+                v.writePacket(fma(lhs.template packet<Size>(i), rhs, v.template packet<Size>(i)), i);
 
             for (; i < length; ++i)
                 v[i] = fma(getLHS().calc(i), T(getRHS()), v[i]);
@@ -211,6 +238,7 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
+        using typename Base::Tr;
     public:
         using Base::Base;
         /* Operations */
@@ -226,10 +254,10 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
 
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const;
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index, size_t count) const;
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index) const;
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const;
 
         using Base::reverse;
         void reverse(const auto& grad) const noexcept;
@@ -280,24 +308,38 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     auto VectorExpr<ExprID::Mul, V1, V2>::calc(size_t index) const -> CoDiff<T> {
-        return Base::getLHS().calc(index) * Base::getRHS().calc(index);
+        return getLHS().calc(index) * getRHS().calc(index);
     }
 
     template<Vector V1, Vector V2>
     auto VectorExpr<ExprID::Mul, V1, V2>::calc_value(size_t index) const -> Tv {
-        return Base::getLHS().calc_value(index) * Base::getRHS().calc_value(index);
+        return getLHS().calc_value(index) * getRHS().calc_value(index);
     }
 
     template<Vector V1, Vector V2>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Mul, V1, V2>::packet(size_t index) const {
-        return Base::getLHS().template packet<Pack>(index) * Base::getRHS().template packet<Pack>(index);
+    template<int Size>
+    auto VectorExpr<ExprID::Mul, V1, V2>::packet(size_t index) const -> SIMD<T, Size> {
+        using LHS = std::remove_cvref_t<V1>;
+        using RHS = std::remove_cvref_t<V2>;
+        auto lhs = getLHS().template packet<Size>(index);
+        auto rhs = getRHS().template packet<Size>(index);
+        if constexpr (LHS::isComplex && !RHS::isComplex)
+            return SIMD<T, Size>::asComplex(lhs.asReal() * SIMD<Tr, 2 * Size>(rhs, rhs).scatterRealImag());
+        else
+            return lhs * rhs;
     }
 
     template<Vector V1, Vector V2>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Mul, V1, V2>::packet(size_t index, size_t count) const {
-        return Base::getLHS().template packet<Pack>(index, count) * Base::getRHS().template packet<Pack>(index, count);
+    template<int Size>
+    auto VectorExpr<ExprID::Mul, V1, V2>::packet(size_t index, size_t count) const -> SIMD<T, Size> {
+        using LHS = std::remove_cvref_t<V1>;
+        using RHS = std::remove_cvref_t<V2>;
+        auto lhs = getLHS().template packet<Size>(index, count);
+        auto rhs = getRHS().template packet<Size>(index, count);
+        if constexpr (LHS::isComplex && !RHS::isComplex)
+            return SIMD<T, Size>::asComplex(lhs.asReal() * SIMD<Tr, 2 * Size>(rhs, rhs).scatterRealImag());
+        else
+            return lhs * rhs;
     }
 
     template<Vector V1, Vector V2>
@@ -305,17 +347,17 @@ namespace Physica {
         static_assert(isReverseDiff);
         if constexpr (Scalar<decltype(grad)>) {
             if constexpr (ReverseDiff<V1>)
-                Base::getLHS().reverse(Base::getRHS().values() * grad);
+                getLHS().reverse(getRHS().values() * grad);
             if constexpr (ReverseDiff<V2>)
-                Base::getRHS().reverse(Base::getLHS().values() * grad);
+                getRHS().reverse(getLHS().values() * grad);
         }
         else {
             static_assert(Vector<decltype(grad)>);
             const auto& g = grad.values();
             if constexpr (ReverseDiff<V1>)
-                Base::getLHS().reverse(hadamard(Base::getRHS().values(), g));
+                getLHS().reverse(hadamard(getRHS().values(), g));
             if constexpr (ReverseDiff<V2>)
-                Base::getRHS().reverse(hadamard(Base::getLHS().values(), g));
+                getRHS().reverse(hadamard(getLHS().values(), g));
         }
     }
 
@@ -334,23 +376,23 @@ namespace Physica {
     template<Vector Target, size_t Length>
     void VectorExpr<ExprID::Mul, V1, V2>::assign_fma_simd(Target&  __restrict v) const  __restrict noexcept {
         using Pack = BestPacket<typename Target::ScalarType, Length>::Type;
-        constexpr size_t PacketSize = Pack::size();
+        constexpr size_t Size = Pack::size();
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
         if constexpr (Length != Dynamic) {
-            constexpr size_t to = Length / PacketSize * PacketSize;
-            for (size_t i = 0; i < to; i += PacketSize)
-                v.writePacket(fma(lhs.template packet<Pack>(i), rhs.template packet<Pack>(i), v.template packet<Pack>(i)), i);
+            constexpr size_t to = Length / Size * Size;
+            for (size_t i = 0; i < to; i += Size)
+                v.writePacket(fma(lhs.template packet<Size>(i), rhs.template packet<Size>(i), v.template packet<Size>(i)), i);
 
-            for (size_t i = Length - Length % PacketSize; i < Length; ++i)
+            for (size_t i = Length - Length % Size; i < Length; ++i)
                 v[i] = fma(getLHS().calc(i), getRHS().calc(i), v[i]);
         }
         else {
             const size_t length = v.getLength();
-            const size_t to = length / PacketSize * PacketSize;
+            const size_t to = length / Size * Size;
             size_t i = 0;
-            for (; i < to; i += PacketSize)
-                v.writePacket(fma(lhs.template packet<Pack>(i), rhs.template packet<Pack>(i), v.template packet<Pack>(i)), i);
+            for (; i < to; i += Size)
+                v.writePacket(fma(lhs.template packet<Size>(i), rhs.template packet<Size>(i), v.template packet<Size>(i)), i);
 
             for (; i < length; ++i)
                 v[i] = fma(getLHS().calc(i), getRHS().calc(i), v[i]);

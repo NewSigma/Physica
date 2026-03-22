@@ -38,6 +38,15 @@ namespace {
         static_assert(std::ranges::view<R>);
     }
 
+    void sum() {
+        using T = float32;
+        const auto x = VectorND<T>::random_uniform<Random<>>(16);
+        expect(scalarNear(x.sum(), std::ranges::fold_left(x.view(), T(0), std::plus<>()), 3UL));
+
+        const auto y = VectorND<T>::random_uniform<Random<>>(17);
+        expect(scalarNear(y.sum(), std::ranges::fold_left(y.view(), T(0), std::plus<>()), 3UL));
+    }
+
     void argminTest() noexcept {
         const auto x = VectorND<float32>::random_uniform<Random<>>(16);
         expect(x.min() == x[x.argmin()]);
@@ -54,6 +63,7 @@ namespace {
 
 int main() {
     viewTest();
+    sum();
     argminTest();
     reshapeTest();
     return 0;

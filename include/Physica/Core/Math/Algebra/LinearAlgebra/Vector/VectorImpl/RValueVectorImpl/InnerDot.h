@@ -99,19 +99,20 @@ namespace Physica {
     template<Vector V1, Vector V2>
     auto InnerDot<V1, V2>::calc_base_simd() const noexcept -> T {
         using Pack = Internal::EnableSIMD<V1, V2>::PacketType;
+        constexpr int Size = Pack::size();
         const size_t length = v1.getLength();
+        const size_t to = length / Size * Size;
         size_t i = 0;
-        const size_t to = length / Pack::size() * Pack::size();
         auto buffer = Pack::zeros();
-        for (; i < to; i += Pack::size()) {
-            Pack p1 = v1.template packet<Pack>(i);
-            Pack p2 = v2.template packet<Pack>(i);
+        for (; i < to; i += Size) {
+            auto p1 = v1.template packet<Size>(i);
+            auto p2 = v2.template packet<Size>(i);
             buffer = fma(p1, p2, buffer);
         }
         if (to != length) {
             const size_t count = length - i;
-            Pack p1 = v1.template packet<Pack>(i, count);
-            Pack p2 = v2.template packet<Pack>(i, count);
+            auto p1 = v1.template packet<Size>(i, count);
+            auto p2 = v2.template packet<Size>(i, count);
             buffer = fma(p1, p2, buffer);
         }
         return buffer.sum();
@@ -121,14 +122,13 @@ namespace Physica {
     auto InnerDot<V1, V2>::calc_base_simd_complex_real() const noexcept -> T {
         using Pack = V1::PacketType;
         using FullRealPack = Pack::FullRealType;
-        using HalfRealPack = SIMD<Tr, FullRealPack::size() / 2>;
         const size_t length = v1.getLength();
         auto unroller = Unroller<Pack, HostDevAttr::NumUnrollDefault>();
         auto view1 = v1.view();
         auto view2 = v2.view();
         size_t i = unroller.loop_recursive([ite1 = view1.begin(), ite2 = view2.begin()](Pack buffer, size_t index) noexcept {
-            auto p1 = (ite1 + index).template load<Pack>().asReal();
-            auto half = (ite2 + index).template load<HalfRealPack>();
+            auto p1 = (ite1 + index).template load<Pack::size()>().asReal();
+            auto half = (ite2 + index).template load<FullRealPack::size() / 2>();
             auto p2 = FullRealPack(half, half).scatterRealImag();
             return Pack::asComplex(fma(p1, p2, buffer.asReal()));
         }, length);

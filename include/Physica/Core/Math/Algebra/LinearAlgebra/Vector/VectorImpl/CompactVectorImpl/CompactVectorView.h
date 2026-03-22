@@ -90,11 +90,10 @@ namespace Physica {
         [[nodiscard]] constexpr This operator-(difference_type n) const noexcept;
         [[nodiscard]] constexpr difference_type operator-(const This& other) const noexcept;
         /* Operations */
-        /* Operations */
-        template<Packet Pack>
-        [[nodiscard]] Pack load() const noexcept;
-        template<Packet Pack>
-        [[nodiscard]] Pack load(size_t count) const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<value_type, Size> load() const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<value_type, Size> load(size_t count) const noexcept;
         void store(Packet auto pack) noexcept;
         void store(Packet auto pack, size_t count) noexcept;
         /* Friends */
@@ -174,18 +173,18 @@ namespace Physica {
     }
 
     template<Vector V>
-    template<Packet Pack>
-    auto CompactVectorView<V>::Iterator::load() const noexcept -> Pack {
-        Pack pack{};
+    template<int Size>
+    auto CompactVectorView<V>::Iterator::load() const noexcept -> SIMD<value_type, Size> {
+        SIMD<value_type, Size> pack{};
         pack.load(data);
         return pack;
     }
 
     template<Vector V>
-    template<Packet Pack>
-    auto CompactVectorView<V>::Iterator::load(size_t count) const noexcept -> Pack {
-        assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
-        Pack pack{};
+    template<int Size>
+    auto CompactVectorView<V>::Iterator::load(size_t count) const noexcept -> SIMD<value_type, Size> {
+        assert(0 < count && count < Size && "[Error]: Invalid size for partial operation");
+        SIMD<value_type, Size> pack{};
         pack.load(data, count);
         return pack;
     }

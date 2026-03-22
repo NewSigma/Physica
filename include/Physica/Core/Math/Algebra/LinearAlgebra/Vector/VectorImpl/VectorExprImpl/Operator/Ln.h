@@ -33,10 +33,10 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operators */
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input) noexcept;
-        template<Packet Pack>
-        [[nodiscard]] static Pack operator()(std::random_access_iterator auto input, size_t count) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
@@ -45,17 +45,17 @@ namespace Physica {
     };
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Ln, V>::operator()(std::random_access_iterator auto input) noexcept {
-        auto x = input.template load<Pack>();
+    template<int Size>
+    auto VectorExpr<ExprID::Ln, V>::operator()(std::random_access_iterator auto input) noexcept -> SIMD<T, Size> {
+        auto x = input.template load<Size>();
         assert(x.isPositive().horizontal_and());
         return ln(x);
     }
 
     template<Vector V>
-    template<Packet Pack>
-    Pack VectorExpr<ExprID::Ln, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept {
-        return ln(input.template load<Pack>(count)).cutoff(count);
+    template<int Size>
+    auto VectorExpr<ExprID::Ln, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept -> SIMD<T, Size> {
+        return ln(input.template load<Size>(count)).cutoff(count);
     }
 
     template<Vector V>
