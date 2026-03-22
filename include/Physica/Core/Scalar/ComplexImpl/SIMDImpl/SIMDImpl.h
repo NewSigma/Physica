@@ -181,7 +181,7 @@ namespace Physica {
     template<Scalar T, int Size>
     auto SIMD<Complex<T>, Size>::real() const noexcept -> RealType {
         if constexpr (isSeparatable)
-            return permRealImag().getLow();
+            return gatherRealImag().getLow();
         else {
             const RealBase zero(0);
             if constexpr (T::Prec == Float32)
@@ -194,7 +194,7 @@ namespace Physica {
     template<Scalar T, int Size>
     auto SIMD<Complex<T>, Size>::imag() const noexcept -> RealType {
         if constexpr (isSeparatable)
-            return permRealImag().getHigh();
+            return gatherRealImag().getHigh();
         else {
             const RealBase zero(0);
             if constexpr (T::Prec == Float32)

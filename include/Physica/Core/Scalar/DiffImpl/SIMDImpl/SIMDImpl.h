@@ -144,8 +144,8 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, int Size>
-    auto SIMD<Diff<T, Mode, Order>, Size>::permRealImag() const noexcept -> FullRealType {
-        return FullRealType(values.permRealImag(), grads.permRealImag());
+    auto SIMD<Diff<T, Mode, Order>, Size>::gatherRealImag() const noexcept -> FullRealType {
+        return FullRealType(values.gatherRealImag(), grads.gatherRealImag());
     }
 
     template<Scalar T, DiffMode Mode, int Order, int Size>

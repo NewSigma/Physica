@@ -147,7 +147,7 @@ namespace Physica {
         if constexpr (!V1::isComplex && U1::isComplex) {
             auto lhs = getLHS().template packet<Size>(index);
             auto rhs = getRHS();
-            return SIMD<T, Size>::asComplex(SIMD<Tr, Size * 2>(lhs * rhs.real(), lhs * rhs.imag()).permRealImag());
+            return SIMD<T, Size>::asComplex(SIMD<Tr, Size * 2>(lhs * rhs.real(), lhs * rhs.imag()).gatherRealImag());
         }
         else if constexpr (V1::isComplex && !U1::isComplex) {
             auto lhs = getLHS().template packet<Size>(index);
@@ -166,7 +166,7 @@ namespace Physica {
         if constexpr (!V1::isComplex && U1::isComplex) {
             auto lhs = getLHS().template packet<Size>(index, count);
             auto rhs = getRHS();
-            return SIMD<T, Size>::asComplex(SIMD<Tr, Size * 2>(lhs * rhs.real(), lhs * rhs.imag()).permRealImag());
+            return SIMD<T, Size>::asComplex(SIMD<Tr, Size * 2>(lhs * rhs.real(), lhs * rhs.imag()).gatherRealImag());
         }
         else if constexpr (V1::isComplex && !U1::isComplex) {
             auto lhs = getLHS().template packet<Size>(index, count);

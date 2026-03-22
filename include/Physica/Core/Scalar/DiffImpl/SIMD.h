@@ -103,7 +103,7 @@ namespace Physica {
 
         This& cutoff(int count);
         [[nodiscard]] FullRealType swapRealImag() const noexcept;
-        [[nodiscard]] FullRealType permRealImag() const noexcept;
+        [[nodiscard]] FullRealType gatherRealImag() const noexcept;
 
         [[nodiscard]] auto sum() const;
         [[nodiscard]] auto max() const;

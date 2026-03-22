@@ -45,7 +45,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] FullRealType squaredNorm() const;
         [[nodiscard]] FullRealType swapRealImag() const;
-        [[nodiscard]] FullRealType permRealImag() const noexcept;
+        [[nodiscard]] FullRealType gatherRealImag() const noexcept;
         [[nodiscard]] FullRealType scatterRealImag() const noexcept;
         /* Getters */
         [[nodiscard]] constexpr static int size() noexcept { return TraitsType::Size; }
@@ -88,7 +88,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto SIMDBase<Derived>::permRealImag() const noexcept -> FullRealType {
+    auto SIMDBase<Derived>::gatherRealImag() const noexcept -> FullRealType {
         const auto x = asReal();
         constexpr int Size1 = isComplex ? size() * 2 : size();
         if constexpr (Size1 == 2)

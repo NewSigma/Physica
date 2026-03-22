@@ -88,7 +88,7 @@ namespace Physica {
         [[nodiscard]] This conjugate() const noexcept;
         [[nodiscard]] FullRealPair makeFullRealImag() const noexcept;
         using Base::swapRealImag;
-        using Base::permRealImag;
+        using Base::gatherRealImag;
         using Base::squaredNorm;
 
         //void insert(int index, const ScalarType& value);
