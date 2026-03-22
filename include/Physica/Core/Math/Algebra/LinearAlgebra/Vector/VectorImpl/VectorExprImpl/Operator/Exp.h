@@ -34,6 +34,7 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operators */
+        [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto input) noexcept;
         template<int Size>
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input) noexcept;
         template<int Size>
@@ -48,6 +49,11 @@ namespace Physica {
 
         void reverse(const auto& grad) const noexcept;
     };
+
+    template<Vector V>
+    auto VectorExpr<ExprID::Exp, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {
+        return exp(*input);
+    }
 
     template<Vector V>
     template<int Size>

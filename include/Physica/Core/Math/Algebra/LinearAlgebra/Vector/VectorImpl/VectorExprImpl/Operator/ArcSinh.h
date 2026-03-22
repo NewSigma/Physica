@@ -30,11 +30,18 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
+        /* Operators */
+        [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto input) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return arcsinh(Base::getExpr().calc(index)); }
 
         [[nodiscard]] Tv calc_value(size_t index) const { return arcsinh(Base::getExpr().calc_value(index)); }
     };
+
+    template<Vector V>
+    auto VectorExpr<ExprID::ArcSinh, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {
+        return arcsinh(*input);
+    }
 
     template<Vector V>
     [[nodiscard]] auto arcsinh(V&& v) noexcept requires(!DeviceObj<V>) {

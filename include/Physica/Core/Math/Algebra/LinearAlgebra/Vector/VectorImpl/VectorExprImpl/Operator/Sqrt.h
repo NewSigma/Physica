@@ -31,6 +31,7 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operators */
+        [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto input) noexcept;
         template<int Size>
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input) noexcept;
         template<int Size>
@@ -40,6 +41,11 @@ namespace Physica {
 
         [[nodiscard]] Tv calc_value(size_t index) const { return sqrt(Base::getExpr().calc_value(index)); }
     };
+
+    template<Vector V>
+    auto VectorExpr<ExprID::Sqrt, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {
+        return sqrt(*input);
+    }
 
     template<Vector V>
     template<int Size>

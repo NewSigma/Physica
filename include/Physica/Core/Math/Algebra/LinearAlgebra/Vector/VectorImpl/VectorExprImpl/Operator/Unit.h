@@ -31,6 +31,7 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operators */
+        [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto input) noexcept;
         template<int Size>
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input) noexcept;
         template<int Size>
@@ -39,6 +40,11 @@ namespace Physica {
         [[nodiscard]] T calc(size_t i) const { return unit(Base::getExpr().calc(i)); }
         [[nodiscard]] Tv calc_value(size_t i) const { return unit(Base::getExpr().calc_value(i)); }
     };
+
+    template<Vector V>
+    auto VectorExpr<ExprID::Unit, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {
+        return unit(*input);
+    }
 
     template<Vector V>
     template<int Size>

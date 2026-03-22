@@ -31,6 +31,7 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operators */
+        [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto input) noexcept;
         template<int Size>
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input) noexcept;
         template<int Size>
@@ -39,6 +40,11 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return sin(Base::getExpr().calc(index)); }
         [[nodiscard]] Tv calc_value(size_t index) const { return sin(Base::getExpr().calc_value(index)); }
     };
+
+    template<Vector V>
+    auto VectorExpr<ExprID::Sin, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {
+        return sin(*input);
+    }
 
     template<Vector V>
     template<int Size>
