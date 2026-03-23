@@ -34,6 +34,17 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
+        /* Operators */
+        [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept;
+        [[nodiscard]] static CoDiff<T> operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t s) const;
         [[nodiscard]] Tv calc_value(size_t s) const;
@@ -50,6 +61,40 @@ namespace Physica {
         using Base::getLHS;
         using Base::getRHS;
     };
+
+    template<class T1, class T2>
+    auto VectorExpr<ExprID::Sub, T1, T2>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> CoDiff<T> {
+        return *lhs - rhs;
+    }
+
+    template<class T1, class T2>
+    auto VectorExpr<ExprID::Sub, T1, T2>::operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept -> CoDiff<T> {
+        return lhs - *rhs;
+    }
+
+    template<class T1, class T2>
+    template<int Size>
+    auto VectorExpr<ExprID::Sub, T1, T2>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> SIMD<T, Size> {
+        return lhs.template load<Size>() - SIMD<T, Size>(rhs);
+    }
+
+    template<class T1, class T2>
+    template<int Size>
+    auto VectorExpr<ExprID::Sub, T1, T2>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept -> SIMD<T, Size> {
+        return lhs.template load<Size>(count) - SIMD<T, Size>(rhs, count);
+    }
+
+    template<class T1, class T2>
+    template<int Size>
+    auto VectorExpr<ExprID::Sub, T1, T2>::operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept -> SIMD<T, Size> {
+        return SIMD<T, Size>(lhs) - rhs.template load<Size>();
+    }
+
+    template<class T1, class T2>
+    template<int Size>
+    auto VectorExpr<ExprID::Sub, T1, T2>::operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs, size_t count) noexcept -> SIMD<T, Size> {
+        return SIMD<T, Size>(lhs, count) - rhs.template load<Size>(count);
+    }
 
     template<class T1, class T2>
     auto VectorExpr<ExprID::Sub, T1, T2>::calc(size_t s) const -> CoDiff<T> {
@@ -143,6 +188,12 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
+        /* Operators */
+        [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs, size_t count) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const;
@@ -163,6 +214,23 @@ namespace Physica {
         using Base::getLHS;
         using Base::getRHS;
     };
+
+    template<Vector V1, Vector V2>
+    auto VectorExpr<ExprID::Sub, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept -> CoDiff<T> {
+        return *lhs - *rhs;
+    }
+
+    template<Vector V1, Vector V2>
+    template<int Size>
+    auto VectorExpr<ExprID::Sub, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept -> SIMD<T, Size> {
+        return lhs.template load<Size>() - rhs.template load<Size>();
+    }
+
+    template<Vector V1, Vector V2>
+    template<int Size>
+    auto VectorExpr<ExprID::Sub, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs, size_t count) noexcept -> SIMD<T, Size> {
+        return lhs.template load<Size>(count) - rhs.template load<Size>(count);
+    }
 
     template<Vector V1, Vector V2>
     template<ExecutePolicy P>

@@ -32,6 +32,12 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
+        /* Operators */
+        [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
@@ -49,6 +55,56 @@ namespace Physica {
         using Base::getRHS;
         [[nodiscard]] __host__ __device__ consteval static bool lowerToFMA() noexcept;
     };
+
+    template<Vector V, Scalar U>
+    auto VectorExpr<ExprID::Add, V, U>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> CoDiff<T> {
+        if constexpr (lowerToFMA()) {
+            T a = *(lhs.getLHS());
+            T b;
+            if constexpr (Scalar<decltype(lhs.getRHS())>)
+                b = lhs.getRHS();
+            else
+                b = *(lhs.getRHS());
+            T c = rhs;
+            return fma(a, b, c);
+        }
+        else
+            return *lhs + rhs;
+    }
+
+    template<Vector V, Scalar U>
+    template<int Size>
+    auto VectorExpr<ExprID::Add, V, U>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> SIMD<T, Size> {
+        if constexpr (lowerToFMA()) {
+            SIMD<T, Size> a = lhs.getLHS().template load<Size>();
+            SIMD<T, Size> b;
+            if constexpr (Scalar<decltype(lhs.getRHS())>)
+                b = SIMD<T, Size>(lhs.getRHS());
+            else
+                b = lhs.getRHS().template load<Size>();
+            auto c = SIMD<T, Size>(rhs);
+            return fma(a, b, c);
+        }
+        else
+            return lhs.template load<Size>() + SIMD<T, Size>(rhs);
+    }
+
+    template<Vector V, Scalar U>
+    template<int Size>
+    auto VectorExpr<ExprID::Add, V, U>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept -> SIMD<T, Size> {
+        if constexpr (lowerToFMA()) {
+            SIMD<T, Size> a = lhs.getLHS().template load<Size>(count);
+            SIMD<T, Size> b;
+            if constexpr (Scalar<decltype(lhs.getRHS())>)
+                b = SIMD<T, Size>(lhs.getRHS());
+            else
+                b = lhs.getRHS().template load<Size>(count);
+            auto c = SIMD<T, Size>(rhs, count);
+            return fma(a, b, c);
+        }
+        else
+            return lhs.template load<Size>(count) + SIMD<T, Size>(rhs, count);
+    }
 
     template<Vector V, Scalar U>
     auto VectorExpr<ExprID::Add, V, U>::calc(size_t index) const -> CoDiff<T> {
@@ -155,6 +211,12 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
+        /* Operators */
+        [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs, size_t count) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const;
@@ -176,6 +238,56 @@ namespace Physica {
         using Base::getRHS;
         [[nodiscard]] __host__ __device__ consteval static bool lowerToFMA() noexcept;
     };
+
+    template<Vector V1, Vector V2>
+    auto VectorExpr<ExprID::Add, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept -> CoDiff<T> {
+        if constexpr (lowerToFMA()) {
+            T a = *(lhs.getLHS());
+            T b;
+            if constexpr (Scalar<decltype(lhs.getRHS())>)
+                b = lhs.getRHS();
+            else
+                b = *(lhs.getRHS());
+            T c = *rhs;
+            return fma(a, b, c);
+        }
+        else
+            return *lhs + *rhs;
+    }
+
+    template<Vector V1, Vector V2>
+    template<int Size>
+    auto VectorExpr<ExprID::Add, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept -> SIMD<T, Size> {
+        if constexpr (lowerToFMA()) {
+            SIMD<T, Size> a = lhs.getLHS().template load<Size>();
+            SIMD<T, Size> b;
+            if constexpr (Scalar<decltype(lhs.getRHS())>)
+                b = SIMD<T, Size>(lhs.getRHS());
+            else
+                b = lhs.getRHS().template load<Size>();
+            SIMD<T, Size> c = rhs.template load<Size>();
+            return fma(a, b, c);
+        }
+        else
+            return lhs.template load<Size>() + rhs.template load<Size>();
+    }
+
+    template<Vector V1, Vector V2>
+    template<int Size>
+    auto VectorExpr<ExprID::Add, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs, size_t count) noexcept -> SIMD<T, Size> {
+        if constexpr (lowerToFMA()) {
+            SIMD<T, Size> a = lhs.getLHS().template load<Size>(count);
+            SIMD<T, Size> b;
+            if constexpr (Scalar<decltype(lhs.getRHS())>)
+                b = SIMD<T, Size>(lhs.getRHS());
+            else
+                b = lhs.getRHS().template load<Size>(count);
+            SIMD<T, Size> c = rhs.template load<Size>(count);
+            return fma(a, b, c);
+        }
+        else
+            return lhs.template load<Size>(count) + rhs.template load<Size>(count);
+    }
 
     template<Vector V1, Vector V2>
     template<ExecutePolicy P>

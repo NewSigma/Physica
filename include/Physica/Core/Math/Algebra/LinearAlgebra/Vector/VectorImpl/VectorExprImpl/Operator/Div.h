@@ -32,6 +32,17 @@ namespace Physica {
         using typename Base::Tv;
     public:
         VectorExpr(U lhs, V rhs);
+        /* Operators */
+        [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept;
+        [[nodiscard]] static CoDiff<T> operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t s) const;
         [[nodiscard]] Tv calc_value(size_t s) const;
@@ -41,6 +52,46 @@ namespace Physica {
         template<int Size>
         [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
     };
+
+    template<class U, class V>
+    auto VectorExpr<ExprID::Div, U, V>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> CoDiff<T> {
+        return *lhs / rhs;
+    }
+
+    template<class U, class V>
+    auto VectorExpr<ExprID::Div, U, V>::operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept -> CoDiff<T> {
+        assert(!(*rhs).isSubNormal() && "[Error]: Division overflow");
+        return lhs / (*rhs);
+    }
+
+    template<class U, class V>
+    template<int Size>
+    auto VectorExpr<ExprID::Div, U, V>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> SIMD<T, Size> {
+        return lhs.template load<Size>() / SIMD<T, Size>(rhs);
+    }
+
+    template<class U, class V>
+    template<int Size>
+    auto VectorExpr<ExprID::Div, U, V>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept -> SIMD<T, Size> {
+        return lhs.template load<Size>(count) / SIMD<T, Size>(rhs);
+    }
+
+    template<class U, class V>
+    template<int Size>
+    auto VectorExpr<ExprID::Div, U, V>::operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept -> SIMD<T, Size> {
+        auto div = rhs.template load<Size>();
+        assert(!div.isZero().horizontal_or() && "[Error]: Divide by zero");
+        return SIMD<T, Size>(lhs) / div;
+    }
+
+    template<class U, class V>
+    template<int Size>
+    auto VectorExpr<ExprID::Div, U, V>::operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs, size_t count) noexcept -> SIMD<T, Size> {
+        auto div = rhs.template load<Size>(count);
+        for (size_t i = 0; i < count; ++i)
+            assert(!div[i].isZero() && "[Error]: Divide by zero");
+        return (SIMD<T, Size>(lhs) / div).cutoff(count);
+    }
 
     template<class U, class V>
     VectorExpr<ExprID::Div, U, V>::VectorExpr(U lhs, V rhs) : Base(std::forward<U>(lhs), std::forward<V>(rhs)) {
@@ -98,6 +149,12 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
+        /* Operators */
+        [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t s) const;
         [[nodiscard]] Tv calc_value(size_t s) const;
@@ -107,6 +164,30 @@ namespace Physica {
         template<int Size>
         [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
     };
+
+    template<Vector V1, Vector V2>
+    auto VectorExpr<ExprID::Div, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept -> CoDiff<T> {
+        assert(!(*rhs).isSubNormal() && "[Error]: Division overflow");
+        return *lhs / *rhs;
+    }
+
+    template<Vector V1, Vector V2>
+    template<int Size>
+    auto VectorExpr<ExprID::Div, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept -> SIMD<T, Size> {
+        auto div = rhs.template load<Size>();
+        assert(!div.isZero().horizontal_or() && "[Error]: Divide by zero");
+        return lhs.template load<Size>() / div;
+    }
+
+    template<Vector V1, Vector V2>
+    template<int Size>
+    auto VectorExpr<ExprID::Div, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs, size_t count) noexcept -> SIMD<T, Size> {
+        const auto pack1 = lhs.template load<Size>(count);
+        const auto pack2 = rhs.template load<Size>(count);
+        for (size_t i = 0; i < count; ++i)
+            assert(!pack2[i].isZero() && "[Error]: Divide by zero");
+        return (pack1 / pack2).cutoff(count);
+    }
 
     template<Vector V1, Vector V2>
     auto VectorExpr<ExprID::Div, V1, V2>::calc(size_t s) const -> CoDiff<T> {

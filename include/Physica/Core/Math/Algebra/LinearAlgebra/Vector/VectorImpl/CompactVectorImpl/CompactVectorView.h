@@ -64,7 +64,7 @@ namespace Physica {
         using value_type = V::ScalarType;
         using reference = value_type::RefTy;
         using const_reference = value_type::ConstRefTy;
-        using pointer = std::conditional<std::is_const_v<V>, typename value_type::ConstPtrTy, typename value_type::PtrTy>::type;
+        using pointer = decltype(std::declval<V>().data());
     private:
         pointer data;
     public:

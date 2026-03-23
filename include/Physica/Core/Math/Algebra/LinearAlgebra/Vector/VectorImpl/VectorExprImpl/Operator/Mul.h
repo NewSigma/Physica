@@ -35,6 +35,12 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operators */
+        [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept;
+        [[nodiscard]] static CoDiff<T> operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept;
         [[nodiscard]] auto operator-() const& noexcept;
         [[nodiscard]] auto operator-() && noexcept;
         /* Operations */
@@ -69,6 +75,50 @@ namespace Physica {
         template<Vector Target, size_t Length>
         void assign_fma_simd(Target&  __restrict v) const  __restrict noexcept;
     };
+
+    template<Vector V, Scalar U>
+    auto VectorExpr<ExprID::Mul, V, U>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> CoDiff<T> {
+        return (*lhs) * rhs;
+    }
+
+    template<Vector V, Scalar U>
+    auto VectorExpr<ExprID::Mul, V, U>::operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept -> CoDiff<T> {
+        return lhs * (*rhs);
+    }
+
+    template<Vector V, Scalar U>
+    template<int Size>
+    auto VectorExpr<ExprID::Mul, V, U>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> SIMD<T, Size> {
+        using V1 = std::remove_cvref_t<V>;
+        using U1 = std::remove_cvref_t<U>;
+        if constexpr (!V1::isComplex && U1::isComplex) {
+            auto pack = lhs.template load<Size>();
+            return SIMD<T, Size>::asComplex(SIMD<Tr, Size * 2>(pack * rhs.real(), pack * rhs.imag()).gatherRealImag());
+        }
+        else if constexpr (V1::isComplex && !U1::isComplex) {
+            auto pack = lhs.template load<Size>();
+            return SIMD<T, Size>::asComplex(pack.asReal() * SIMD<Tr, Size * 2>(rhs));
+        }
+        else
+            return lhs.template load<Size>() * SIMD<T, Size>(rhs);
+    }
+
+    template<Vector V, Scalar U>
+    template<int Size>
+    auto VectorExpr<ExprID::Mul, V, U>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept -> SIMD<T, Size> {
+        using V1 = std::remove_cvref_t<V>;
+        using U1 = std::remove_cvref_t<U>;
+        if constexpr (!V1::isComplex && U1::isComplex) {
+            auto pack = lhs.template load<Size>(count);
+            return SIMD<T, Size>::asComplex(SIMD<Tr, Size * 2>(pack * rhs.real(), pack * rhs.imag()).gatherRealImag());
+        }
+        else if constexpr (V1::isComplex && !U1::isComplex) {
+            auto pack = lhs.template load<Size>(count);
+            return SIMD<T, Size>::asComplex(pack.asReal() * SIMD<Tr, Size * 2>(rhs));
+        }
+        else
+            return lhs.template load<Size>(count) * SIMD<T, Size>(rhs);
+    }
 
     template<Vector V, Scalar U>
     auto VectorExpr<ExprID::Mul, V, U>::operator-() const& noexcept {
@@ -241,6 +291,12 @@ namespace Physica {
         using typename Base::Tr;
     public:
         using Base::Base;
+        /* Operators */
+        [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs, size_t count) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const;
@@ -270,6 +326,37 @@ namespace Physica {
         template<Vector Target, size_t Size>
         void assign_fma_simd(Target&  __restrict v) const  __restrict noexcept;
     };
+
+    template<Vector V1, Vector V2>
+    auto VectorExpr<ExprID::Mul, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept -> CoDiff<T> {
+        return (*lhs) * (*rhs);
+    }
+
+    template<Vector V1, Vector V2>
+    template<int Size>
+    auto VectorExpr<ExprID::Mul, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept -> SIMD<T, Size> {
+        using LHS = std::remove_cvref_t<V1>;
+        using RHS = std::remove_cvref_t<V2>;
+        auto pack1 = lhs.template load<Size>();
+        auto pack2 = rhs.template load<Size>();
+        if constexpr (LHS::isComplex && !RHS::isComplex)
+            return SIMD<T, Size>::asComplex(pack1.asReal() * SIMD<Tr, 2 * Size>(pack2, pack2).scatterRealImag());
+        else
+            return pack1 * pack2;
+    }
+
+    template<Vector V1, Vector V2>
+    template<int Size>
+    auto VectorExpr<ExprID::Mul, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs, size_t count) noexcept -> SIMD<T, Size> {
+        using LHS = std::remove_cvref_t<V1>;
+        using RHS = std::remove_cvref_t<V2>;
+        auto pack1 = lhs.template load<Size>(count);
+        auto pack2 = rhs.template load<Size>(count);
+        if constexpr (LHS::isComplex && !RHS::isComplex)
+            return SIMD<T, Size>::asComplex(pack1.asReal() * SIMD<Tr, 2 * Size>(pack2, pack2).scatterRealImag());
+        else
+            return pack1 * pack2;
+    }
 
     template<Vector V1, Vector V2>
     template<ExecutePolicy P>

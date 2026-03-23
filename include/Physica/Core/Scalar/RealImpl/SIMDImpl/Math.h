@@ -23,7 +23,7 @@
 
 namespace Physica {
     template<Scalar T, int Size>
-    __host__ __device__ auto unit(SIMD<T, Size> x) noexcept {
+    [[nodiscard]] __host__ __device__ auto unit(SIMD<T, Size> x) noexcept {
         return SIMD<T, Size>::select(x.isNegative(), SIMD<T, Size>(-1), SIMD<T, Size>(1));
     }
 
@@ -85,12 +85,17 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    auto sin(SIMD<T, Size> x) noexcept {
+    [[nodiscard]] auto pow(SIMD<T, Size> x, SIMD<T, Size> y) noexcept {
+        return SIMD<T, Size>(pow(x.toMachine(), y.toMachine()));
+    }
+
+    template<Scalar T, int Size>
+    [[nodiscard]] auto sin(SIMD<T, Size> x) noexcept {
         return SIMD<T, Size>(Physica::sin(x.toMachine()));
     }
 
     template<Scalar T, int Size>
-    auto cos(SIMD<T, Size> x) noexcept {
+    [[nodiscard]] auto cos(SIMD<T, Size> x) noexcept {
         return SIMD<T, Size>(Physica::cos(x.toMachine()));
     }
 
@@ -100,22 +105,22 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    auto tan(SIMD<T, Size> x) noexcept {
+    [[nodiscard]] auto tan(SIMD<T, Size> x) noexcept {
         return SIMD<T, Size>(Physica::tan(x.toMachine()));
     }
 
     template<Scalar T, int Size>
-    auto sec(SIMD<T, Size> x) noexcept {
+    [[nodiscard]] auto sec(SIMD<T, Size> x) noexcept {
         return reciprocal(cos(x));
     }
 
     template<Scalar T, int Size>
-    auto arctan2(SIMD<T, Size> y, SIMD<T, Size> x) noexcept {
+    [[nodiscard]] auto arctan2(SIMD<T, Size> y, SIMD<T, Size> x) noexcept {
         return Physica::atan2(y.toMachine(), x.toMachine());
     }
 
     template<Scalar T, int Size>
-    auto tanh(SIMD<T, Size> x) noexcept {
+    [[nodiscard]] auto tanh(SIMD<T, Size> x) noexcept {
         return SIMD<T, Size>(Physica::tanh(x.toMachine()));
     }
 
@@ -127,7 +132,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    auto round(SIMD<T, Size> x) noexcept -> SIMD<T, Size> {
+    [[nodiscard]] auto round(SIMD<T, Size> x) noexcept -> SIMD<T, Size> {
         return Physica::round(x.toMachine());
     }
 }

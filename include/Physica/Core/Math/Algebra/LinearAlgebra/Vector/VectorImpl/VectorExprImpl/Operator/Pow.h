@@ -30,12 +30,35 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
+        /* Operators */
+        [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t i) const;
         [[nodiscard]] Tv calc_value(size_t i) const;
 
         void reverse(const Vector auto& grad) const noexcept;
     };
+
+    template<Vector V, Scalar U>
+    auto VectorExpr<ExprID::Pow, V, U>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> CoDiff<T> {
+        return pow(*lhs, rhs);
+    }
+
+    template<Vector V, Scalar U>
+    template<int Size>
+    auto VectorExpr<ExprID::Pow, V, U>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> SIMD<T, Size> {
+        return pow(lhs.template load<Size>(), SIMD<T, Size>(rhs));
+    }
+
+    template<Vector V, Scalar U>
+    template<int Size>
+    auto VectorExpr<ExprID::Pow, V, U>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept -> SIMD<T, Size> {
+        return pow(lhs.template load<Size>(count), SIMD<T, Size>(rhs));
+    }
 
     template<Vector V, Scalar U>
     auto VectorExpr<ExprID::Pow, V, U>::calc(size_t i) const -> CoDiff<T> {

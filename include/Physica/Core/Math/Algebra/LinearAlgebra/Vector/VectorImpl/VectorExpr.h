@@ -91,6 +91,10 @@ namespace Physica {
         static_assert(Vector<LHS> || Vector<RHS>, "[Error]: Either type should be Vector");
         using This = BinaryVectorExpr<ID, LHS, RHS>;
         using Base = RValueVector<VectorExpr<ID, LHS, RHS>>;
+
+        template<class OpLHS, class OpRHS> class View;
+    protected:
+        using typename Base::T;
     private:
         LazyDestroy<LHS> lhs;
         LazyDestroy<RHS> rhs;
@@ -102,6 +106,13 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] constexpr auto view() const noexcept;
+
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index) const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept;
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
@@ -122,6 +133,28 @@ namespace Physica {
             return getLHS().getLength();
         else
             return getRHS().getLength();
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    constexpr auto BinaryVectorExpr<ID, LHS, RHS>::view() const noexcept {
+        if constexpr (Scalar<LHS>)
+            return View(getLHS(), getRHS().view());
+        else if constexpr (Scalar<RHS>)
+            return View(getLHS().view(), getRHS());
+        else
+            return View(getLHS().view(), getRHS().view());
+    }
+    // FIXME: Derived classes should use this instead their own
+    template<ExprID ID, class LHS, class RHS>
+    template<int Size>
+    auto BinaryVectorExpr<ID, LHS, RHS>::packet(size_t index) const noexcept -> SIMD<T, Size> {
+        return (view().begin() + index).template load<Size>();
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    template<int Size>
+    auto BinaryVectorExpr<ID, LHS, RHS>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
+        return (view().begin() + index).template load<Size>(count);
     }
 
     template<ExprID ID, class LHS, class RHS>
@@ -191,6 +224,7 @@ namespace Physica {
 }
 
 #include "VectorExprImpl/UnitaryVectorExprView.h"
+#include "VectorExprImpl/BinaryVectorExprView.h"
 #ifdef PHYSICA_MKL
     #include <mkl_vml.h>
 #endif
