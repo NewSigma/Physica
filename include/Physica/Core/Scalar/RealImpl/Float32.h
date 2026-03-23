@@ -92,7 +92,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr float toMKL() const noexcept { return toMachine(); }
         [[nodiscard]] __host__ __device__ constexpr float toCUDA() const noexcept { return toMachine(); }
         [[nodiscard]] __host__ __device__ constexpr bool isZero() const noexcept { return f == 0; }
-        [[nodiscard]] __host__ __device__ inline bool isSubNormal() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr bool isSubNormal() const noexcept;
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return f > 0; }
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return f < 0; }
         [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
@@ -141,7 +141,7 @@ namespace Physica {
     }
 
     __host__ __device__ constexpr auto Real<Float32>::operator/(const This& s) const noexcept -> Real {
-        assert(!s.isZero() && "[Error]: Divide by zero");
+        assert(!s.isSubNormal() && "[Error]: Division overflow");
         return Real(f / s.f);
     }
 
@@ -150,7 +150,7 @@ namespace Physica {
         return std::modf(toMachine(), &buffer);
     }
 
-    [[clang::no_sanitize("numerical")]] __host__ __device__ inline bool Real<Float32>::isSubNormal() const noexcept {
+    [[clang::no_sanitize("numerical")]] __host__ __device__ constexpr bool Real<Float32>::isSubNormal() const noexcept {
         return !__builtin_isnormal(f); // Use builtin to help no_sanitize
     }
 

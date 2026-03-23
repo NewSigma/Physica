@@ -32,7 +32,7 @@ namespace Physica {
     public:
         MatrixExpr(T lhs, U rhs) : Base(std::forward<T>(lhs), std::forward<U>(rhs)) {
             if constexpr (Matrix<T>)
-                assert(!Base::getRHS().isZero() && "[Error]: Divide by zero");
+                assert(!Base::getRHS().isSubNormal() && "[Error]: Division overflow");
         }
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
@@ -100,13 +100,13 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     auto MatrixExpr<ExprID::Div, M1, M2>::calc(size_t row, size_t col) const -> CoDiff<T> {
-        assert(!getRHS().calc(row, col).isZero() && "[Error]: Divide by zero");
+        assert(!getRHS().calc(row, col).isSubNormal() && "[Error]: Division overflow");
         return getLHS().calc(row, col) / getRHS().calc(row, col);
     }
 
     template<Matrix M1, Matrix M2>
     auto MatrixExpr<ExprID::Div, M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
-        assert(!getRHS().calc_value(row, col).isZero() && "[Error]: Divide by zero");
+        assert(!getRHS().calc_value(row, col).isSubNormal() && "[Error]: Division overflow");
         return getLHS().calc_value(row, col) / getRHS().calc_value(row, col);
     }
 

@@ -122,7 +122,7 @@ namespace Physica {
     template<Scalar T>
     template<Scalar U>
     __host__ __device__ auto Complex<T>::operator/(const U& x) const noexcept requires(!Diffable<U>) {
-        assert(!x.isZero() && "[Error]: Divide by zero");
+        assert(!x.isSubNormal() && "[Error]: Division overflow");
         using RtnType = Internal::BinaryScalarOpRtnTy<This, U>::Type;
         if constexpr (U::isComplex) {
             const auto& re_1 = real();

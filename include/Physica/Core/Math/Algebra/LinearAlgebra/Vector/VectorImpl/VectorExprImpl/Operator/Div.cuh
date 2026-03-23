@@ -30,7 +30,7 @@ namespace Physica {
     public:
         device_obj(V lhs, U rhs) : Base(std::forward<V>(lhs), std::forward<U>(rhs)) {
             if constexpr (Vector<V>)
-                assert(!Base::getRHS().isZero() && "[Error]: Divide by zero");
+                assert(!Base::getRHS().isSubNormal() && "[Error]: Division overflow");
         }
         /* Getters */
         [[nodiscard]] __device__ T calc(size_t index) const {
@@ -51,7 +51,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t index) const {
-            assert(!Base::getRHS().calc(index).isZero() && "[Error]: Divide by zero");
+            assert(!Base::getRHS().calc(index).isSubNormal() && "[Error]: Division overflow");
             return Base::getLHS().calc(index) / Base::getRHS().calc(index);
         }
     };

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,7 +25,10 @@
 
 namespace Physica {
     template<Scalar T, int Size>
-    SIMD<T, Size>::SIMD(const Scalar auto& x) noexcept : pack(x.value().toMachine()) {}
+    constexpr SIMD<T, Size>::SIMD(double x) noexcept : pack(x) {}
+
+    template<Scalar T, int Size>
+    constexpr SIMD<T, Size>::SIMD(T x) noexcept : pack(x.toMachine()) {}
 
     template<Scalar T, int Size>
     SIMD<T, Size>::SIMD(T x, int count) noexcept {
@@ -404,6 +407,11 @@ namespace Physica {
     template<Scalar T, int Size>
     auto SIMD<T, Size>::isZero() const noexcept -> BoolSIMDType {
         return operator==(This(0));
+    }
+
+    template<Scalar T, int Size>
+    auto SIMD<T, Size>::isSubNormal() const noexcept -> BoolSIMDType {
+        return BoolSIMDType(Physica::is_zero_or_subnormal(pack));
     }
 
     template<Scalar T, int Size>

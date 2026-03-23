@@ -32,7 +32,7 @@ namespace Physica {
     public:
         device_obj(T lhs, U rhs) : Base(std::forward<T>(lhs), std::forward<U>(rhs)) {
             if constexpr (Matrix<T>)
-                assert(!Base::getRHS().isZero() && "[Error]: Divide by zero");
+                assert(!Base::getRHS().isSubNormal() && "[Error]: Division overflow");
         }
         /* Operations */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
@@ -88,12 +88,12 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
-            assert(!Base::getRHS().calc(row, col).isZero() && "[Error]: Divide by zero");
+            assert(!Base::getRHS().calc(row, col).isSubNormal() && "[Error]: Division overflow");
             return Base::getLHS().calc(row, col) / Base::getRHS().calc(row, col);
         }
 
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
-            assert(!Base::getRHS().calc_value(row, col).isZero() && "[Error]: Divide by zero");
+            assert(!Base::getRHS().calc_value(row, col).isSubNormal() && "[Error]: Division overflow");
             return Base::getLHS().calc_value(row, col) / Base::getRHS().calc_value(row, col);
         }
     };

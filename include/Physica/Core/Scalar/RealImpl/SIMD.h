@@ -49,16 +49,16 @@ namespace Physica {
         Pack pack;
     public:
         constexpr SIMD() noexcept = default;
-        explicit SIMD(double x) noexcept : pack(x) {}
-        explicit SIMD(const Scalar auto& x) noexcept;
+        constexpr explicit SIMD(double x) noexcept;
+        constexpr explicit SIMD(T x) noexcept;
         SIMD(T x, int count) noexcept;
         SIMD(Scalar auto... args) noexcept;
         SIMD(MachineType x) noexcept : pack(x) {}
         SIMD(Pack value) noexcept : pack(value) {}
         SIMD(HalfType a, HalfType b) noexcept;
         explicit SIMD(BoolSIMDType x) noexcept;
-        SIMD(const SIMD&) = default;
-        SIMD(SIMD&&) noexcept = default;
+        constexpr SIMD(const SIMD&) = default;
+        constexpr SIMD(SIMD&&) noexcept = default;
         ~SIMD() = default;
         /* Operators */
         SIMD& operator=(const SIMD&) = default;
@@ -112,6 +112,7 @@ namespace Physica {
         [[nodiscard]] HalfType getHigh() const noexcept { return pack.get_high(); }
         [[nodiscard]] This value() const noexcept { return *this; }
         [[nodiscard]] BoolSIMDType isZero() const noexcept;
+        [[nodiscard]] BoolSIMDType isSubNormal() const noexcept;
         [[nodiscard]] BoolSIMDType isPositive() const noexcept;
         [[nodiscard]] BoolSIMDType isNegative() const noexcept;
         [[nodiscard]] BoolSIMDType isFinite() const noexcept;

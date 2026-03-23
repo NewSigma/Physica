@@ -114,7 +114,7 @@ namespace Physica {
     }
 
     __host__ __device__ inline Real<Float16> Real<Float16>::operator/(const This& s) const noexcept {
-        assert(!s.isZero() && "[Error]: Divide by zero");
+        assert(!s.isZero() && "[Error]: Division overflow"); // FIXME: Implement isSubNormal()
         return Real(h / s.h);
     }
 

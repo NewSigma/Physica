@@ -80,7 +80,7 @@ namespace Physica {
     template<int Size>
     auto VectorExpr<ExprID::Div, U, V>::operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept -> SIMD<T, Size> {
         auto div = rhs.template load<Size>();
-        assert(!div.isZero().horizontal_or() && "[Error]: Divide by zero");
+        assert(!div.isSubNormal().horizontal_or() && "[Error]: Division overflow");
         return SIMD<T, Size>(lhs) / div;
     }
 
@@ -89,14 +89,14 @@ namespace Physica {
     auto VectorExpr<ExprID::Div, U, V>::operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs, size_t count) noexcept -> SIMD<T, Size> {
         auto div = rhs.template load<Size>(count);
         for (size_t i = 0; i < count; ++i)
-            assert(!div[i].isZero() && "[Error]: Divide by zero");
+            assert(!div[i].isSubNormal() && "[Error]: Division overflow");
         return (SIMD<T, Size>(lhs) / div).cutoff(count);
     }
 
     template<class U, class V>
     VectorExpr<ExprID::Div, U, V>::VectorExpr(U lhs, V rhs) : Base(std::forward<U>(lhs), std::forward<V>(rhs)) {
         if constexpr (Vector<U>)
-            assert(!Base::getRHS().isZero() && "[Error]: Divide by zero");
+            assert(!Base::getRHS().isSubNormal() && "[Error]: Division overflow");
     }
 
     template<class U, class V>
@@ -175,7 +175,7 @@ namespace Physica {
     template<int Size>
     auto VectorExpr<ExprID::Div, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept -> SIMD<T, Size> {
         auto div = rhs.template load<Size>();
-        assert(!div.isZero().horizontal_or() && "[Error]: Divide by zero");
+        assert(!div.isSubNormal().horizontal_or() && "[Error]: Division overflow");
         return lhs.template load<Size>() / div;
     }
 
@@ -185,19 +185,19 @@ namespace Physica {
         const auto pack1 = lhs.template load<Size>(count);
         const auto pack2 = rhs.template load<Size>(count);
         for (size_t i = 0; i < count; ++i)
-            assert(!pack2[i].isZero() && "[Error]: Divide by zero");
+            assert(!pack2[i].isSubNormal() && "[Error]: Division overflow");
         return (pack1 / pack2).cutoff(count);
     }
 
     template<Vector V1, Vector V2>
     auto VectorExpr<ExprID::Div, V1, V2>::calc(size_t s) const -> CoDiff<T> {
-        assert(!Base::getRHS().calc(s).isZero() && "[Error]: Divide by zero");
+        assert(!Base::getRHS().calc(s).isSubNormal() && "[Error]: Division overflow");
         return Base::getLHS().calc(s) / Base::getRHS().calc(s);
     }
 
     template<Vector V1, Vector V2>
     auto VectorExpr<ExprID::Div, V1, V2>::calc_value(size_t s) const -> Tv {
-        assert(!Base::getRHS().calc_value(s).isZero() && "[Error]: Divide by zero");
+        assert(!Base::getRHS().calc_value(s).isSubNormal() && "[Error]: Division overflow");
         return Base::getLHS().calc_value(s) / Base::getRHS().calc_value(s);
     }
 

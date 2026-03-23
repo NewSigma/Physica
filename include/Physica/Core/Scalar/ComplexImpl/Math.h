@@ -50,7 +50,7 @@ namespace Physica {
 
     template<Scalar T>
     Complex<T> reciprocal(const Complex<T>& c) noexcept {
-        assert(!c.isZero() && "[Error]: Divide by zero");
+        assert(!c.isSubNormal() && "[Error]: Division overflow");
         const auto& real = c.real();
         const auto& imag = c.imag();
         const auto divisor = reciprocal(square(real) + square(imag));
