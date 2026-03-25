@@ -21,10 +21,10 @@
 #include "../CompactVector.h"
 
 namespace Physica {
+    template<class Derived>
     template<Vector V>
-    class CompactVectorView final : public std::ranges::view_base {
-        using This = CompactVectorView<V>;
-        using Base = LVectorView<V>;
+    class CompactVector<Derived>::View final : public std::ranges::view_base {
+        using This = View;
 
         using pointer = decltype(std::declval<V>().data());
 
@@ -33,10 +33,10 @@ namespace Physica {
         pointer data;
         size_t length;
     public:
-        [[gnu::always_inline]] constexpr CompactVectorView(V& vec) noexcept;
-        constexpr CompactVectorView(const This&) = default;
-        constexpr CompactVectorView(This&&) noexcept = default;
-        constexpr ~CompactVectorView() = default;
+        [[gnu::always_inline]] constexpr View(V& vec) noexcept;
+        constexpr View(const This&) = default;
+        constexpr View(This&&) noexcept = default;
+        constexpr ~View() = default;
         /* Operators */
         constexpr This& operator=(const This&) = default;
         constexpr This& operator=(This&&) noexcept = default;
@@ -46,28 +46,33 @@ namespace Physica {
         [[nodiscard, gnu::always_inline]] constexpr size_t size() const noexcept;
     };
 
+    template<class Derived>
     template<Vector V>
-    constexpr CompactVectorView<V>::CompactVectorView(V& vec) noexcept : data(vec.data()), length(vec.getLength()) {}
+    constexpr CompactVector<Derived>::View<V>::View(V& vec) noexcept : data(vec.data()), length(vec.getLength()) {}
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto CompactVectorView<V>::begin(this auto&& self) noexcept {
+    constexpr auto CompactVector<Derived>::View<V>::begin(this auto&& self) noexcept {
         return Iterator(self.data);
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto CompactVectorView<V>::end(this auto&& self) noexcept {
+    constexpr auto CompactVector<Derived>::View<V>::end(this auto&& self) noexcept {
         return Iterator(self.data + self.length);
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr size_t CompactVectorView<V>::size() const noexcept {
+    constexpr size_t CompactVector<Derived>::View<V>::size() const noexcept {
         return length;
     }
 }
 
 namespace Physica {
+    template<class Derived>
     template<Vector V>
-    class CompactVectorView<V>::Iterator {
+    class CompactVector<Derived>::View<V>::Iterator {
         using This = Iterator;
     public:
         using iterator_concept = std::contiguous_iterator_tag;
@@ -111,102 +116,120 @@ namespace Physica {
         [[gnu::always_inline]] friend constexpr This operator+(difference_type n, const This& ite) noexcept { return ite + n; }
     };
 
+    template<class Derived>
     template<Vector V>
-    constexpr CompactVectorView<V>::Iterator::Iterator(pointer data_) noexcept : data(data_) {}
+    constexpr CompactVector<Derived>::View<V>::Iterator::Iterator(pointer data_) noexcept : data(data_) {}
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto CompactVectorView<V>::Iterator::operator++() noexcept -> This& {
+    constexpr auto CompactVector<Derived>::View<V>::Iterator::operator++() noexcept -> This& {
         data += 1;
         return *this;
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto CompactVectorView<V>::Iterator::operator--() noexcept -> This& {
+    constexpr auto CompactVector<Derived>::View<V>::Iterator::operator--() noexcept -> This& {
         data -= 1;
         return *this;
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto CompactVectorView<V>::Iterator::operator+=(difference_type n) noexcept -> This& {
+    constexpr auto CompactVector<Derived>::View<V>::Iterator::operator+=(difference_type n) noexcept -> This& {
         data += n;
         return *this;
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto CompactVectorView<V>::Iterator::operator-=(difference_type n) noexcept -> This& {
+    constexpr auto CompactVector<Derived>::View<V>::Iterator::operator-=(difference_type n) noexcept -> This& {
         data -= n;
         return *this;
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto CompactVectorView<V>::Iterator::operator++(int) noexcept -> This {
+    constexpr auto CompactVector<Derived>::View<V>::Iterator::operator++(int) noexcept -> This {
         return std::exchange(*this, This(data + 1));
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto CompactVectorView<V>::Iterator::operator--(int) noexcept -> This {
+    constexpr auto CompactVector<Derived>::View<V>::Iterator::operator--(int) noexcept -> This {
         return std::exchange(*this, This(data - 1));
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr decltype(auto) CompactVectorView<V>::Iterator::operator*() const noexcept {
+    constexpr decltype(auto) CompactVector<Derived>::View<V>::Iterator::operator*() const noexcept {
         return *data;
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr decltype(auto) CompactVectorView<V>::Iterator::operator[](difference_type n) const noexcept {
+    constexpr decltype(auto) CompactVector<Derived>::View<V>::Iterator::operator[](difference_type n) const noexcept {
         return data[n];
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr bool CompactVectorView<V>::Iterator::operator==(const This& other) const noexcept {
+    constexpr bool CompactVector<Derived>::View<V>::Iterator::operator==(const This& other) const noexcept {
         return data == other.data;
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto CompactVectorView<V>::Iterator::operator<=>(const This& other) const noexcept {
+    constexpr auto CompactVector<Derived>::View<V>::Iterator::operator<=>(const This& other) const noexcept {
         return data <=> other.data;
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto CompactVectorView<V>::Iterator::operator+(difference_type n) const noexcept -> This {
+    constexpr auto CompactVector<Derived>::View<V>::Iterator::operator+(difference_type n) const noexcept -> This {
         return This(data + n);
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto CompactVectorView<V>::Iterator::operator-(difference_type n) const noexcept -> This {
+    constexpr auto CompactVector<Derived>::View<V>::Iterator::operator-(difference_type n) const noexcept -> This {
         return This(data - n);
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto CompactVectorView<V>::Iterator::operator-(const This& other) const noexcept -> difference_type {
+    constexpr auto CompactVector<Derived>::View<V>::Iterator::operator-(const This& other) const noexcept -> difference_type {
         return data - other.data;
     }
 
+    template<class Derived>
     template<Vector V>
     template<int Size>
-    auto CompactVectorView<V>::Iterator::load() const noexcept -> SIMD<value_type, Size> {
+    auto CompactVector<Derived>::View<V>::Iterator::load() const noexcept -> SIMD<value_type, Size> {
         SIMD<value_type, Size> pack{};
         pack.load(data);
         return pack;
     }
 
+    template<class Derived>
     template<Vector V>
     template<int Size>
-    auto CompactVectorView<V>::Iterator::load(size_t count) const noexcept -> SIMD<value_type, Size> {
+    auto CompactVector<Derived>::View<V>::Iterator::load(size_t count) const noexcept -> SIMD<value_type, Size> {
         assert(0 < count && count < Size && "[Error]: Invalid size for partial operation");
         SIMD<value_type, Size> pack{};
         pack.load(data, count);
         return pack;
     }
 
+    template<class Derived>
     template<Vector V>
-    void CompactVectorView<V>::Iterator::store(const Packet auto pack) noexcept {
+    void CompactVector<Derived>::View<V>::Iterator::store(const Packet auto pack) noexcept {
         pack.store(data);
     }
 
+    template<class Derived>
     template<Vector V>
-    void CompactVectorView<V>::Iterator::store(const Packet auto pack, size_t count) noexcept {
+    void CompactVector<Derived>::View<V>::Iterator::store(const Packet auto pack, size_t count) noexcept {
         assert(0 < count && count < pack.size() && "[Error]: Invalid size for partial operation");
         pack.store(data, count);
     }

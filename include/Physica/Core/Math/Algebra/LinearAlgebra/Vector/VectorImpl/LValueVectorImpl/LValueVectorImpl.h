@@ -128,7 +128,7 @@ namespace Physica {
 
     template<class Derived>
     constexpr auto LValueVector<Derived>::view(this auto&& self) noexcept {
-        return LVectorView<std::remove_reference_t<decltype(self)>>(self);
+        return View<std::remove_reference_t<decltype(self)>>(self);
     }
 
     template<class Derived>

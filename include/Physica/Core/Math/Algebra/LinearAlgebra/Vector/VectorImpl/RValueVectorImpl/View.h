@@ -24,19 +24,20 @@ namespace Physica {
     /**
      * Vector views are intended for loop-invariant code motion. We do this because compilers struggle to prove noalias and to align with the sprit of C++20 ranges.
      */
+    template<class Derived>
     template<Vector V>
-    class RVectorView : public std::ranges::view_base {
+    class RValueVector<Derived>::View : public std::ranges::view_base {
         static_assert(!std::is_reference_v<V>);
-        using This = RVectorView<V>;
+        using This = View;
 
         class Iterator;
 
         V* vec;
     public:
-        [[gnu::always_inline]] constexpr RVectorView(V& vec) noexcept : vec(&vec) {}
-        constexpr RVectorView(const This&) = default;
-        constexpr RVectorView(This&&) noexcept = default;
-        constexpr ~RVectorView() = default;
+        [[gnu::always_inline]] constexpr View(V& vec) noexcept : vec(&vec) {}
+        constexpr View(const This&) = default;
+        constexpr View(This&&) noexcept = default;
+        constexpr ~View() = default;
         /* Operators */
         constexpr This& operator=(const This&) = default;
         constexpr This& operator=(This&&) noexcept = default;
@@ -50,30 +51,35 @@ namespace Physica {
         [[nodiscard, gnu::always_inline]] constexpr size_t size() const noexcept;
     };
 
+    template<class Derived>
     template<Vector V>
-    decltype(auto) RVectorView<V>::calc(size_t index) const noexcept {
+    decltype(auto) RValueVector<Derived>::View<V>::calc(size_t index) const noexcept {
         return vec->calc(index);
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto RVectorView<V>::begin(this auto&& self) noexcept {
+    constexpr auto RValueVector<Derived>::View<V>::begin(this auto&& self) noexcept {
         return Iterator(&self, 0);
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto RVectorView<V>::end(this auto&& self) noexcept {
+    constexpr auto RValueVector<Derived>::View<V>::end(this auto&& self) noexcept {
         return Iterator(&self, self.size());
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr size_t RVectorView<V>::size() const noexcept {
+    constexpr size_t RValueVector<Derived>::View<V>::size() const noexcept {
         return vector().getLength();
     }
 }
 
 namespace Physica {
+    template<class Derived>
     template<Vector V>
-    class RVectorView<V>::Iterator {
+    class RValueVector<Derived>::View<V>::Iterator {
         using This = Iterator;
     public:
         using iterator_concept = std::random_access_iterator_tag;
@@ -82,11 +88,11 @@ namespace Physica {
         using reference = const value_type;
         using const_reference = const value_type;
     private:
-        const RVectorView<V>* view;
+        const RValueVector<Derived>::View<V>* view;
         difference_type index{};
     public:
         constexpr Iterator() = default;
-        [[gnu::always_inline]] constexpr Iterator(const RVectorView<V>* view, difference_type index) noexcept;
+        [[gnu::always_inline]] constexpr Iterator(const RValueVector<Derived>::View<V>* view, difference_type index) noexcept;
         constexpr Iterator(const This&) = default;
         constexpr Iterator(This&&) noexcept = default;
         constexpr ~Iterator() = default;
@@ -115,88 +121,104 @@ namespace Physica {
         [[gnu::always_inline]] friend constexpr This operator+(difference_type n, const This& ite) noexcept { return ite + n; }
     };
 
+    template<class Derived>
     template<Vector V>
-    constexpr RVectorView<V>::Iterator::Iterator(const RVectorView<V>* view, difference_type index) noexcept : view(view), index(index) {}
+    constexpr RValueVector<Derived>::View<V>::Iterator::Iterator(const RValueVector<Derived>::View<V>* view, difference_type index) noexcept : view(view), index(index) {}
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto RVectorView<V>::Iterator::operator++() noexcept -> This& {
+    constexpr auto RValueVector<Derived>::View<V>::Iterator::operator++() noexcept -> This& {
         index += 1;
         return *this;
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto RVectorView<V>::Iterator::operator--() noexcept -> This& {
+    constexpr auto RValueVector<Derived>::View<V>::Iterator::operator--() noexcept -> This& {
         index -= 1;
         return *this;
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto RVectorView<V>::Iterator::operator+=(difference_type n) noexcept -> This& {
+    constexpr auto RValueVector<Derived>::View<V>::Iterator::operator+=(difference_type n) noexcept -> This& {
         index += n;
         return *this;
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto RVectorView<V>::Iterator::operator-=(difference_type n) noexcept -> This& {
+    constexpr auto RValueVector<Derived>::View<V>::Iterator::operator-=(difference_type n) noexcept -> This& {
         index -= n;
         return *this;
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto RVectorView<V>::Iterator::operator++(int) noexcept -> This {
+    constexpr auto RValueVector<Derived>::View<V>::Iterator::operator++(int) noexcept -> This {
         return std::exchange(*this, This(view, index + 1));
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto RVectorView<V>::Iterator::operator--(int) noexcept -> This {
+    constexpr auto RValueVector<Derived>::View<V>::Iterator::operator--(int) noexcept -> This {
         return std::exchange(*this, This(view, index - 1));
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto RVectorView<V>::Iterator::operator*() const noexcept -> reference {
+    constexpr auto RValueVector<Derived>::View<V>::Iterator::operator*() const noexcept -> reference {
         return view->calc(index);
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto RVectorView<V>::Iterator::operator[](difference_type n) const noexcept -> reference {
+    constexpr auto RValueVector<Derived>::View<V>::Iterator::operator[](difference_type n) const noexcept -> reference {
         return view->calc(index + n);
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr bool RVectorView<V>::Iterator::operator==(const This& other) const noexcept {
+    constexpr bool RValueVector<Derived>::View<V>::Iterator::operator==(const This& other) const noexcept {
         return index == other.index;
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto RVectorView<V>::Iterator::operator<=>(const This& other) const noexcept {
+    constexpr auto RValueVector<Derived>::View<V>::Iterator::operator<=>(const This& other) const noexcept {
         return index <=> other.index;
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto RVectorView<V>::Iterator::operator+(difference_type n) const noexcept -> This {
+    constexpr auto RValueVector<Derived>::View<V>::Iterator::operator+(difference_type n) const noexcept -> This {
         return This(view, index + n);
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto RVectorView<V>::Iterator::operator-(difference_type n) const noexcept -> This {
+    constexpr auto RValueVector<Derived>::View<V>::Iterator::operator-(difference_type n) const noexcept -> This {
         return This(view, index - n);
     }
 
+    template<class Derived>
     template<Vector V>
-    constexpr auto RVectorView<V>::Iterator::operator-(const This& other) const noexcept -> difference_type {
+    constexpr auto RValueVector<Derived>::View<V>::Iterator::operator-(const This& other) const noexcept -> difference_type {
         return index - other.index;
     }
 
+    template<class Derived>
     template<Vector V>
     template<int Size>
-    auto RVectorView<V>::Iterator::load() const noexcept -> SIMD<value_type, Size> {
+    auto RValueVector<Derived>::View<V>::Iterator::load() const noexcept -> SIMD<value_type, Size> {
         assert(index + Size <= view->size());
         return view->vector().template packet<Size>(index);
     }
 
+    template<class Derived>
     template<Vector V>
     template<int Size>
-    auto RVectorView<V>::Iterator::load(size_t count) const noexcept -> SIMD<value_type, Size> {
+    auto RValueVector<Derived>::View<V>::Iterator::load(size_t count) const noexcept -> SIMD<value_type, Size> {
         assert(0 < count && count < Size && "[Error]: Invalid size for partial operation");
         return view->vector().template packet<Size>(index, count);
     }

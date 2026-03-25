@@ -20,7 +20,6 @@
 
 #include "RValueVector.h"
 #include "LValueVectorImpl/LVectorBlock.h"
-#include "LValueVectorImpl/LVectorView.h"
 
 namespace Physica {
     template<class V> class RealVectorL;
@@ -32,6 +31,8 @@ namespace Physica {
     class LValueVector : public RValueVector<Derived> {
         using Base = RValueVector<Derived>;
         using This = LValueVector<Derived>;
+
+        template<Vector> class View;
     public:
         using Base::isForwardDiff;
         using Base::isReverseDiff;
@@ -112,5 +113,6 @@ namespace Physica {
 }
 
 #include "LValueVectorImpl/LValueVectorImpl.h"
+#include "LValueVectorImpl/View.h"
 #include "LValueVectorImpl/VectorConvert/RealVector.h"
 #include "LValueVectorImpl/Sincos.h"

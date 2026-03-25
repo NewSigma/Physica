@@ -103,7 +103,7 @@ namespace Physica {
 
     template<class Derived>
     constexpr auto CompactVector<Derived>::view(this auto&& self) noexcept {
-        return CompactVectorView<std::remove_reference_t<decltype(self)>>(self);
+        return View<std::remove_reference_t<decltype(self)>>(self);
     }
 
     template<class Derived>

@@ -19,7 +19,6 @@
 #pragma once
 
 #include "CompactVectorImpl/CompactVectorBlock.h"
-#include "CompactVectorImpl/CompactVectorView.h"
 
 namespace Physica {
     template<class Derived>
@@ -27,6 +26,8 @@ namespace Physica {
         using Base = LValueVector<Derived>;
         using This = CompactVector<Derived>;
     public:
+        template<Vector> class View;
+
         using typename Base::ScalarType;
         using Base::SizeAtCompile;
         using Base::isForwardDiff;
@@ -103,6 +104,7 @@ namespace Physica {
 }
 
 #include "CompactVectorImpl/CompactVectorImpl.h"
+#include "CompactVectorImpl/View.h"
 #ifdef PHYSICA_MKL
     #include "CompactVectorImpl/CompactVector_MKL.h"
 #endif

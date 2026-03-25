@@ -23,7 +23,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Parallel/Parallel.h"
 #include "RValueVectorImpl/RVectorBlock.h"
-#include "RValueVectorImpl/RVectorView.h"
 
 namespace Physica {
     template<class Derived> class LValueVector;
@@ -93,6 +92,8 @@ namespace Physica {
         static_assert(!DeviceObj<Derived>, "[Error]: device_obj<> must be outside RValueVector<>");
         using This = RValueVector<Derived>;
         using Base = CRTPBase<This>;
+
+        template<Vector> class View;
     public:
         using ScalarType = Traits<Derived>::ScalarType;
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
@@ -267,6 +268,7 @@ namespace Physica {
 }
 
 #include "RValueVectorImpl/RValueVectorImpl.h"
+#include "RValueVectorImpl/View.h"
 #include "RValueVectorImpl/ReversalVector.h"
 #include "RValueVectorImpl/Conjugate.h"
 #include "RValueVectorImpl/CrossProduct.h"
