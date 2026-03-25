@@ -144,7 +144,7 @@ namespace Physica {
         else
             return View(getLHS().view(), getRHS().view());
     }
-    // FIXME: Derived classes should use this instead their own
+
     template<ExprID ID, class LHS, class RHS>
     template<int Size>
     auto BinaryVectorExpr<ID, LHS, RHS>::packet(size_t index) const noexcept -> SIMD<T, Size> {

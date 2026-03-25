@@ -57,11 +57,6 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
 
-        template<int Size>
-        [[nodiscard]] SIMD<T, Size> packet(size_t index) const noexcept;
-        template<int Size>
-        [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
-
         [[nodiscard]] T sum() const { return getLHS().sum() * getRHS(); }
 
         using Base::reverse;
@@ -190,44 +185,6 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    template<int Size>
-    auto VectorExpr<ExprID::Mul, V, U>::packet(size_t index) const noexcept -> SIMD<T, Size> {
-        using V1 = std::remove_cvref_t<V>;
-        using U1 = std::remove_cvref_t<U>;
-        if constexpr (!V1::isComplex && U1::isComplex) {
-            auto lhs = getLHS().template packet<Size>(index);
-            auto rhs = getRHS();
-            return SIMD<T, Size>::asComplex(SIMD<Tr, Size * 2>(lhs * rhs.real(), lhs * rhs.imag()).gatherRealImag());
-        }
-        else if constexpr (V1::isComplex && !U1::isComplex) {
-            auto lhs = getLHS().template packet<Size>(index);
-            auto rhs = getRHS();
-            return SIMD<T, Size>::asComplex(lhs.asReal() * SIMD<Tr, Size * 2>(rhs));
-        }
-        else
-            return getLHS().template packet<Size>(index) * SIMD<T, Size>(getRHS());
-    }
-
-    template<Vector V, Scalar U>
-    template<int Size>
-    auto VectorExpr<ExprID::Mul, V, U>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
-        using V1 = std::remove_cvref_t<V>;
-        using U1 = std::remove_cvref_t<U>;
-        if constexpr (!V1::isComplex && U1::isComplex) {
-            auto lhs = getLHS().template packet<Size>(index, count);
-            auto rhs = getRHS();
-            return SIMD<T, Size>::asComplex(SIMD<Tr, Size * 2>(lhs * rhs.real(), lhs * rhs.imag()).gatherRealImag());
-        }
-        else if constexpr (V1::isComplex && !U1::isComplex) {
-            auto lhs = getLHS().template packet<Size>(index, count);
-            auto rhs = getRHS();
-            return SIMD<T, Size>::asComplex(lhs.asReal() * SIMD<Tr, Size * 2>(rhs));
-        }
-        else
-            return getLHS().template packet<Size>(index, count) * SIMD<T, Size>(getRHS());
-    }
-
-    template<Vector V, Scalar U>
     void VectorExpr<ExprID::Mul, V, U>::reverse(const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& g = grad.values();
@@ -309,11 +266,6 @@ namespace Physica {
 
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
-
-        template<int Size>
-        [[nodiscard]] SIMD<T, Size> packet(size_t index) const;
-        template<int Size>
-        [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const;
 
         using Base::reverse;
         void reverse(const auto& grad) const noexcept;
@@ -401,32 +353,6 @@ namespace Physica {
     template<Vector V1, Vector V2>
     auto VectorExpr<ExprID::Mul, V1, V2>::calc_value(size_t index) const -> Tv {
         return getLHS().calc_value(index) * getRHS().calc_value(index);
-    }
-
-    template<Vector V1, Vector V2>
-    template<int Size>
-    auto VectorExpr<ExprID::Mul, V1, V2>::packet(size_t index) const -> SIMD<T, Size> {
-        using LHS = std::remove_cvref_t<V1>;
-        using RHS = std::remove_cvref_t<V2>;
-        auto lhs = getLHS().template packet<Size>(index);
-        auto rhs = getRHS().template packet<Size>(index);
-        if constexpr (LHS::isComplex && !RHS::isComplex)
-            return SIMD<T, Size>::asComplex(lhs.asReal() * SIMD<Tr, 2 * Size>(rhs, rhs).scatterRealImag());
-        else
-            return lhs * rhs;
-    }
-
-    template<Vector V1, Vector V2>
-    template<int Size>
-    auto VectorExpr<ExprID::Mul, V1, V2>::packet(size_t index, size_t count) const -> SIMD<T, Size> {
-        using LHS = std::remove_cvref_t<V1>;
-        using RHS = std::remove_cvref_t<V2>;
-        auto lhs = getLHS().template packet<Size>(index, count);
-        auto rhs = getRHS().template packet<Size>(index, count);
-        if constexpr (LHS::isComplex && !RHS::isComplex)
-            return SIMD<T, Size>::asComplex(lhs.asReal() * SIMD<Tr, 2 * Size>(rhs, rhs).scatterRealImag());
-        else
-            return lhs * rhs;
     }
 
     template<Vector V1, Vector V2>

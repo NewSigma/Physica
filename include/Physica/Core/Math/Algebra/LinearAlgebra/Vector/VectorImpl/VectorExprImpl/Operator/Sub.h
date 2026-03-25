@@ -49,11 +49,6 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t s) const;
         [[nodiscard]] Tv calc_value(size_t s) const;
 
-        template<int Size>
-        [[nodiscard]] SIMD<T, Size> packet(size_t index) const noexcept;
-        template<int Size>
-        [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
-
         void reverse(const auto& grad) const noexcept;
 
         [[nodiscard]] auto values() const noexcept;
@@ -110,24 +105,6 @@ namespace Physica {
             return getLHS().calc_value(s) - getRHS().value();
         else
             return getLHS().value() - getRHS().calc_value(s);
-    }
-
-    template<class T1, class T2>
-    template<int Size>
-    auto VectorExpr<ExprID::Sub, T1, T2>::packet(size_t index) const noexcept -> SIMD<T, Size> {
-        if constexpr (Vector<T1>)
-            return getLHS().template packet<Size>(index) - SIMD<T, Size>(getRHS());
-        else
-            return SIMD<T, Size>(getLHS()) - getRHS().template packet<Size>(index);
-    }
-
-    template<class T1, class T2>
-    template<int Size>
-    auto VectorExpr<ExprID::Sub, T1, T2>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
-        if constexpr (Vector<T1>)
-            return getLHS().template packet<Size>(index, count) - SIMD<T, Size>(getRHS(), count);
-        else
-            return SIMD<T, Size>(getLHS(), count) - getRHS().template packet<Size>(index, count);
     }
 
     template<class T1, class T2>
@@ -202,11 +179,6 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t s) const;
         [[nodiscard]] Tv calc_value(size_t s) const;
 
-        template<int Size>
-        [[nodiscard]] SIMD<T, Size> packet(size_t index) const;
-        template<int Size>
-        [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const;
-
         void reverse(const Vector auto& grad) const noexcept;
 
         [[nodiscard]] auto values() const noexcept;
@@ -273,18 +245,6 @@ namespace Physica {
     template<Vector V1, Vector V2>
     auto VectorExpr<ExprID::Sub, V1, V2>::calc_value(size_t s) const -> Tv {
         return getLHS().calc_value(s) - getRHS().calc_value(s);
-    }
-
-    template<Vector V1, Vector V2>
-    template<int Size>
-    auto VectorExpr<ExprID::Sub, V1, V2>::packet(size_t index) const -> SIMD<T, Size> {
-        return getLHS().template packet<Size>(index) - getRHS().template packet<Size>(index);
-    }
-
-    template<Vector V1, Vector V2>
-    template<int Size>
-    auto VectorExpr<ExprID::Sub, V1, V2>::packet(size_t index, size_t count) const -> SIMD<T, Size> {
-        return getLHS().template packet<Size>(index, count) - getRHS().template packet<Size>(index, count);
     }
 
     template<Vector V1, Vector V2>

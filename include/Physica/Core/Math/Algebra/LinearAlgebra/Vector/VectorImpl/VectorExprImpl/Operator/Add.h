@@ -42,11 +42,6 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
 
-        template<int Size>
-        [[nodiscard]] SIMD<T, Size> packet(size_t index) const noexcept;
-        template<int Size>
-        [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
-
         void reverse(const Vector auto& grad) const noexcept;
 
         [[nodiscard]] auto values() const noexcept;
@@ -139,40 +134,6 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    template<int Size>
-    auto VectorExpr<ExprID::Add, V, U>::packet(size_t index) const noexcept -> SIMD<T, Size> {
-        if constexpr (lowerToFMA()) {
-            SIMD<T, Size> a = getLHS().getLHS().template packet<Size>(index);
-            SIMD<T, Size> b;
-            if constexpr (Scalar<decltype(getLHS().getRHS())>)
-                b = SIMD<T, Size>(getLHS().getRHS());
-            else
-                b = getLHS().getRHS().template packet<Size>(index);
-            auto c = SIMD<T, Size>(getRHS());
-            return fma(a, b, c);
-        }
-        else
-            return getLHS().template packet<Size>(index) + SIMD<T, Size>(getRHS());
-    }
-
-    template<Vector V, Scalar U>
-    template<int Size>
-    auto VectorExpr<ExprID::Add, V, U>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
-        if constexpr (lowerToFMA()) {
-            SIMD<T, Size> a = getLHS().getLHS().template packet<Size>(index, count);
-            SIMD<T, Size> b;
-            if constexpr (Scalar<decltype(getLHS().getRHS())>)
-                b = SIMD<T, Size>(getLHS().getRHS());
-            else
-                b = getLHS().getRHS().template packet<Size>(index, count);
-            auto c = SIMD<T, Size>(getRHS(), count);
-            return fma(a, b, c);
-        }
-        else
-            return getLHS().template packet<Size>(index, count) + SIMD<T, Size>(getRHS(), count);
-    }
-
-    template<Vector V, Scalar U>
     void VectorExpr<ExprID::Add, V, U>::reverse(const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& g = grad.values();
@@ -224,11 +185,6 @@ namespace Physica {
 
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
-
-        template<int Size>
-        [[nodiscard]] SIMD<T, Size> packet(size_t index) const;
-        template<int Size>
-        [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const;
 
         void reverse(const auto& grad) const noexcept;
 
@@ -351,40 +307,6 @@ namespace Physica {
         }
         else
             return getLHS().calc_value(index) + getRHS().calc_value(index);
-    }
-
-    template<Vector V1, Vector V2>
-    template<int Size>
-    auto VectorExpr<ExprID::Add, V1, V2>::packet(size_t index) const -> SIMD<T, Size> {
-        if constexpr (lowerToFMA()) {
-            SIMD<T, Size> a = getLHS().getLHS().template packet<Size>(index);
-            SIMD<T, Size> b;
-            if constexpr (Scalar<decltype(getLHS().getRHS())>)
-                b = SIMD<T, Size>(getLHS().getRHS());
-            else
-                b = getLHS().getRHS().template packet<Size>(index);
-            SIMD<T, Size> c = getRHS().template packet<Size>(index);
-            return fma(a, b, c);
-        }
-        else
-            return getLHS().template packet<Size>(index) + getRHS().template packet<Size>(index);
-    }
-
-    template<Vector V1, Vector V2>
-    template<int Size>
-    auto VectorExpr<ExprID::Add, V1, V2>::packet(size_t index, size_t count) const -> SIMD<T, Size> {
-        if constexpr (lowerToFMA()) {
-            SIMD<T, Size> a = getLHS().getLHS().template packet<Size>(index, count);
-            SIMD<T, Size> b;
-            if constexpr (Scalar<decltype(getLHS().getRHS())>)
-                b = SIMD<T, Size>(getLHS().getRHS());
-            else
-                b = getLHS().getRHS().template packet<Size>(index, count);
-            SIMD<T, Size> c = getRHS().template packet<Size>(index);
-            return fma(a, b, c);
-        }
-        else
-            return getLHS().template packet<Size>(index, count) + getRHS().template packet<Size>(index, count);
     }
 
     template<Vector V1, Vector V2>
