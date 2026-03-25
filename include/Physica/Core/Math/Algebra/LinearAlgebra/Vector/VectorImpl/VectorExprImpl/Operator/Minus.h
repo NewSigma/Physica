@@ -107,7 +107,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] auto operator-(V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto operator-(V&& v) noexcept requires(!DeviceObj<V>) {
         if constexpr (instanceof<GEMV, V>)
             return v.getLHS() * (-v.getRHS());
         else

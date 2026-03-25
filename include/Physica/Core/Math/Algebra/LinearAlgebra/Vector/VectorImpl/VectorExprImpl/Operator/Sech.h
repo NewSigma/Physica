@@ -44,7 +44,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] auto sech(V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto sech(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Sech, V&&>(std::forward<V>(v));
     }
 }

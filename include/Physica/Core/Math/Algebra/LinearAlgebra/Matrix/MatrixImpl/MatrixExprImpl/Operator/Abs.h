@@ -41,7 +41,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    [[nodiscard]] auto abs_elem(M&& m) noexcept requires(!DeviceObj<M>) {
+    [[nodiscard, gnu::always_inline]] auto abs_elem(M&& m) noexcept requires(!DeviceObj<M>) {
         return MatrixExpr<ExprID::Abs, M&&>(std::forward<M>(m));
     }
 }

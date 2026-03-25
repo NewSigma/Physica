@@ -70,7 +70,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] auto softmax(V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto softmax(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Softmax, V&&>(std::forward<V>(v));
     }
 }

@@ -37,7 +37,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    [[nodiscard]] __host__ __device__ auto sin(V&& v) noexcept requires(DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] __host__ __device__ auto sin(V&& v) noexcept requires(DeviceObj<V>) {
         return device_obj<VectorExpr<ExprID::Sin, remove_device_obj_t<V&&>>>(std::forward<V>(v));
     }
 }

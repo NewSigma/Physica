@@ -103,7 +103,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] auto abs(V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto abs(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Abs, V&&>(std::forward<V>(v));
     }
 }

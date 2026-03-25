@@ -487,7 +487,7 @@ namespace Physica {
     }
     ////////////////////////////////////////////////////////////////////
     template<Vector V, Scalar U>
-    [[nodiscard]] auto operator*(V&& v, U&& x) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto operator*(V&& v, U&& x) noexcept requires(!DeviceObj<V>) {
         using RtnTy = VectorExpr<ExprID::Mul, V&&, U&&>;
         if constexpr (instanceof_xt<VectorExpr, V>) {
             using RHS = Traits<V>::RHS;
@@ -501,12 +501,12 @@ namespace Physica {
     }
 
     template<Scalar U, Vector V>
-    [[nodiscard]] auto operator*(U&& x, V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto operator*(U&& x, V&& v) noexcept requires(!DeviceObj<V>) {
         return std::forward<V>(v) * std::forward<U>(x);
     }
 
     template<Vector V1, Vector V2>
-    [[nodiscard]] auto hadamard(V1&& v1, V2&& v2) noexcept requires(!DeviceObj<V1> && !DeviceObj<V2>) {
+    [[nodiscard, gnu::always_inline]] auto hadamard(V1&& v1, V2&& v2) noexcept requires(!DeviceObj<V1> && !DeviceObj<V2>) {
         using RtnTy = VectorExpr<ExprID::Mul, V1&&, V2&&>;
         if constexpr (!canonicalized(v1, v2))
             return hadamard(std::forward<V2>(v2), std::forward<V1>(v1));

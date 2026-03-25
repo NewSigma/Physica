@@ -44,7 +44,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] auto arctanh(V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto arctanh(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::ArcTanh, V&&>(std::forward<V>(v));
     }
 }

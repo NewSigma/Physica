@@ -59,7 +59,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] auto cos(V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto cos(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Cos, V&&>(std::forward<V>(v));
     }
 }

@@ -39,7 +39,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    [[nodiscard]] __host__ __device__ auto sqrt_elem(M&& m) noexcept requires(DeviceObj<M>) {
+    [[nodiscard, gnu::always_inline]] __host__ __device__ auto sqrt_elem(M&& m) noexcept requires(DeviceObj<M>) {
         return device_obj<MatrixExpr<ExprID::Sqrt, remove_device_obj_t<M&&>>>(std::forward<M>(m));
     }
 }

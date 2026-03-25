@@ -70,7 +70,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] auto tanh(V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto tanh(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Tanh, V&&>(std::forward<V>(v));
     }
 }

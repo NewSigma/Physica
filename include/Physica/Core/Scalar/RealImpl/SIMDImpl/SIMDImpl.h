@@ -25,7 +25,7 @@
 
 namespace Physica {
     template<Scalar T, int Size>
-    constexpr SIMD<T, Size>::SIMD(double x) noexcept : pack(x) {}
+    constexpr SIMD<T, Size>::SIMD(T::MachineType x) noexcept : pack(x) {}
 
     template<Scalar T, int Size>
     constexpr SIMD<T, Size>::SIMD(T x) noexcept : pack(x.toMachine()) {}

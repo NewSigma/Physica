@@ -39,7 +39,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    [[nodiscard]] auto operator-(M&& m) noexcept requires(!DeviceObj<M>) {
+    [[nodiscard, gnu::always_inline]] auto operator-(M&& m) noexcept requires(!DeviceObj<M>) {
         return MatrixExpr<ExprID::Minus, M&&>(std::forward<M>(m));
     }
 }

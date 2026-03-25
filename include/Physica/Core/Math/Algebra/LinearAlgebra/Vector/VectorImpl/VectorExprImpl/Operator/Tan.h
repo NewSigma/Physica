@@ -59,7 +59,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] auto tan(V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto tan(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Tan, V&&>(std::forward<V>(v));
     }
 }

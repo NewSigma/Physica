@@ -65,7 +65,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] auto cbrt(V&& v) noexcept {
+    [[nodiscard, gnu::always_inline]] auto cbrt(V&& v) noexcept {
         return VectorExpr<ExprID::Cbrt, V&&>(std::forward<V>(v));
     }
 }

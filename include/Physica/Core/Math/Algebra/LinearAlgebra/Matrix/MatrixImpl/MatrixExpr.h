@@ -37,7 +37,7 @@ namespace Physica {
     private:
         LazyDestroy<M> expr;
     public:
-        UnitaryMatrixExpr(M expr_) : expr(std::forward<M>(expr_)) {}
+        UnitaryMatrixExpr(M expr_) noexcept : expr(std::forward<M>(expr_)) {}
         UnitaryMatrixExpr(const This&) = default;
         UnitaryMatrixExpr(This&&) noexcept requires(isReverseDiff) = default;
         ~UnitaryMatrixExpr() = default;
@@ -94,7 +94,7 @@ namespace Physica {
         LazyDestroy<LHS> lhs;
         LazyDestroy<RHS> rhs;
     public:
-        BinaryMatrixExpr(LHS lhs_, RHS rhs_);
+        BinaryMatrixExpr(LHS lhs_, RHS rhs_) noexcept;
         BinaryMatrixExpr(const This&) = default;
         BinaryMatrixExpr(This&&) noexcept requires(isReverseDiff) = default;
         ~BinaryMatrixExpr() = default;
@@ -119,7 +119,7 @@ namespace Physica {
     };
 
     template<ExprID ID, class LHS, class RHS>
-    BinaryMatrixExpr<ID, LHS, RHS>::BinaryMatrixExpr(LHS lhs_, RHS rhs_) : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
+    BinaryMatrixExpr<ID, LHS, RHS>::BinaryMatrixExpr(LHS lhs_, RHS rhs_) noexcept : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
         if constexpr (Matrix<LHS> && Matrix<RHS>) {
             assert(getLHS().getRow() == getRHS().getRow());
             assert(getLHS().getCol() == getRHS().getCol());

@@ -59,7 +59,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] auto unit(V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto unit(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Unit, V&&>(std::forward<V>(v));
     }
 }

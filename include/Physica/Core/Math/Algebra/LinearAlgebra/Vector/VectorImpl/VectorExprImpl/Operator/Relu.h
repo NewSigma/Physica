@@ -84,7 +84,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] auto relu(V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto relu(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Relu, V&&>(std::forward<V>(v));
     }
 }

@@ -303,17 +303,17 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    [[nodiscard]] auto operator-(V&& v, U&& x) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto operator-(V&& v, U&& x) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Sub, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
     }
 
     template<Scalar U, Vector V>
-    [[nodiscard]] auto operator-(U&& x, V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto operator-(U&& x, V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Sub, U&&, V&&>(std::forward<U>(x), std::forward<V>(v));
     }
 
     template<Vector V1, Vector V2>
-    [[nodiscard]] auto operator-(V1&& v1, V2&& v2) noexcept requires(!DeviceObj<V1> && !DeviceObj<V2>) {
+    [[nodiscard, gnu::always_inline]] auto operator-(V1&& v1, V2&& v2) noexcept requires(!DeviceObj<V1> && !DeviceObj<V2>) {
         return VectorExpr<ExprID::Sub, V1&&, V2&&>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }

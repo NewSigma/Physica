@@ -44,7 +44,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] auto arcsinh(V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto arcsinh(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::ArcSinh, V&&>(std::forward<V>(v));
     }
 }

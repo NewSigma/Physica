@@ -39,7 +39,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    [[nodiscard]] auto sech_elem(M&& m) noexcept requires(!DeviceObj<M>) {
+    [[nodiscard, gnu::always_inline]] auto sech_elem(M&& m) noexcept requires(!DeviceObj<M>) {
         return MatrixExpr<ExprID::Sech, M&&>(std::forward<M>(m));
     }
 }

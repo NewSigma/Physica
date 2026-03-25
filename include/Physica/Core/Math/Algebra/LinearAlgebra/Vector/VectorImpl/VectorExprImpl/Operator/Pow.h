@@ -71,7 +71,7 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    [[nodiscard]] auto pow(V&& v, U&& x) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto pow(V&& v, U&& x) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Pow, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
     }
 }

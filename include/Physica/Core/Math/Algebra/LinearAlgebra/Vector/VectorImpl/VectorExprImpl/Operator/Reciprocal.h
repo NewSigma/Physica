@@ -88,7 +88,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] auto reciprocal(V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto reciprocal(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Reciprocal, V&&>(std::forward<V>(v));
     }
 }

@@ -119,27 +119,27 @@ namespace Physica {
     }
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] auto divide_elem(M&& m, U&& x) noexcept requires(!DeviceObj<M>) {
+    [[nodiscard, gnu::always_inline]] auto divide_elem(M&& m, U&& x) noexcept requires(!DeviceObj<M>) {
         return MatrixExpr<ExprID::Div, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] auto divide_elem(U&& x, M&& m) noexcept requires(!DeviceObj<M>) {
+    [[nodiscard, gnu::always_inline]] auto divide_elem(U&& x, M&& m) noexcept requires(!DeviceObj<M>) {
         return MatrixExpr<ExprID::Div, U&&, M&&>(std::forward<U>(x), std::forward<M>(m));
     }
 
     template<Matrix M, Vector V>
-    [[nodiscard]] auto divide_elem(M&& m, V&& x) noexcept requires(!DeviceObj<M> && !DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto divide_elem(M&& m, V&& x) noexcept requires(!DeviceObj<M> && !DeviceObj<V>) {
         return MatrixExpr<ExprID::Div, M&&, V&&>(std::forward<M>(m), std::forward<V>(x));
     }
 
     template<Matrix M, Vector V>
-    [[nodiscard]] auto divide_elem(V&& x, M&& m) noexcept requires(!DeviceObj<M> && !DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto divide_elem(V&& x, M&& m) noexcept requires(!DeviceObj<M> && !DeviceObj<V>) {
         return MatrixExpr<ExprID::Div, V&&, M&&>(std::forward<V>(x), std::forward<M>(m));
     }
 
     template<Matrix M1, Matrix M2>
-    [[nodiscard]] auto divide_elem(M1&& m1, M2&& m2) noexcept requires(!DeviceObj<M1> && !DeviceObj<M2>) {
+    [[nodiscard, gnu::always_inline]] auto divide_elem(M1&& m1, M2&& m2) noexcept requires(!DeviceObj<M1> && !DeviceObj<M2>) {
         return MatrixExpr<ExprID::Div, M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

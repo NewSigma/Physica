@@ -37,7 +37,7 @@ namespace Physica {
         LazyDestroy<LHS> lhs;
         LazyDestroy<RHS> rhs;
     public:
-        BinaryTensorExpr(LHS&& lhs_, RHS&& rhs_);
+        BinaryTensorExpr(LHS&& lhs_, RHS&& rhs_) noexcept;
         BinaryTensorExpr(const This&) = delete;
         BinaryTensorExpr(This&&) noexcept requires(isReverseDiff) = default;
         ~BinaryTensorExpr() = default;
@@ -54,7 +54,7 @@ namespace Physica {
     };
 
     template<ExprID ID, class LHS, class RHS>
-    BinaryTensorExpr<ID, LHS, RHS>::BinaryTensorExpr(LHS&& lhs_, RHS&& rhs_) : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
+    BinaryTensorExpr<ID, LHS, RHS>::BinaryTensorExpr(LHS&& lhs_, RHS&& rhs_) noexcept : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
         if constexpr (Tensor<LHS> && Tensor<RHS>)
             assert(lhs->getShape() == rhs->getShape());
     }

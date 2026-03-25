@@ -43,7 +43,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] auto sigmoid(V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto sigmoid(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Sigmoid, V&&>(std::forward<V>(v));
     }
 }

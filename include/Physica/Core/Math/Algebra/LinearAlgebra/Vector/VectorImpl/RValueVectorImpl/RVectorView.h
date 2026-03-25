@@ -22,8 +22,6 @@
 
 namespace Physica {
     /**
-     * \class RVectorView is base class of all vector views.
-     *
      * Vector views are intended for loop-invariant code motion. We do this because compilers struggle to prove noalias and to align with the sprit of C++20 ranges.
      */
     template<Vector V>
@@ -35,7 +33,7 @@ namespace Physica {
 
         V* vec;
     public:
-        constexpr RVectorView(V& vec) noexcept : vec(&vec) {}
+        [[gnu::always_inline]] constexpr RVectorView(V& vec) noexcept : vec(&vec) {}
         constexpr RVectorView(const This&) = default;
         constexpr RVectorView(This&&) noexcept = default;
         constexpr ~RVectorView() = default;
@@ -43,13 +41,13 @@ namespace Physica {
         constexpr This& operator=(const This&) = default;
         constexpr This& operator=(This&&) noexcept = default;
         /* Operations */
-        [[nodiscard]] decltype(auto) calc(size_t index) const noexcept;
+        [[nodiscard, gnu::always_inline]] decltype(auto) calc(size_t index) const noexcept;
 
-        [[nodiscard]] constexpr auto begin(this auto&&) noexcept;
-        [[nodiscard]] constexpr auto end(this auto&&) noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr auto begin(this auto&&) noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr auto end(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] constexpr V& vector() const noexcept { return *vec; }
-        [[nodiscard]] constexpr size_t size() const noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr V& vector() const noexcept { return *vec; }
+        [[nodiscard, gnu::always_inline]] constexpr size_t size() const noexcept;
     };
 
     template<Vector V>
@@ -88,33 +86,33 @@ namespace Physica {
         difference_type index{};
     public:
         constexpr Iterator() = default;
-        constexpr Iterator(const RVectorView<V>* view, difference_type index) noexcept;
+        [[gnu::always_inline]] constexpr Iterator(const RVectorView<V>* view, difference_type index) noexcept;
         constexpr Iterator(const This&) = default;
         constexpr Iterator(This&&) noexcept = default;
         constexpr ~Iterator() = default;
         /* Operators */
         constexpr This& operator=(const This&) = default;
         constexpr This& operator=(This&&) noexcept = default;
-        constexpr This& operator++() noexcept;
-        constexpr This& operator--() noexcept;
-        constexpr This& operator+=(difference_type n) noexcept;
-        constexpr This& operator-=(difference_type n) noexcept;
-        [[nodiscard]] constexpr This operator++(int) noexcept;
-        [[nodiscard]] constexpr This operator--(int) noexcept;
-        [[nodiscard]] constexpr reference operator*() const noexcept;
-        [[nodiscard]] constexpr reference operator[](difference_type n) const noexcept;
-        [[nodiscard]] constexpr bool operator==(const This& other) const noexcept;
-        [[nodiscard]] constexpr auto operator<=>(const This& other) const noexcept;
-        [[nodiscard]] constexpr This operator+(difference_type n) const noexcept;
-        [[nodiscard]] constexpr This operator-(difference_type n) const noexcept;
-        [[nodiscard]] constexpr difference_type operator-(const This& other) const noexcept;
+        [[gnu::always_inline]] constexpr This& operator++() noexcept;
+        [[gnu::always_inline]] constexpr This& operator--() noexcept;
+        [[gnu::always_inline]] constexpr This& operator+=(difference_type n) noexcept;
+        [[gnu::always_inline]] constexpr This& operator-=(difference_type n) noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr This operator++(int) noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr This operator--(int) noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr reference operator*() const noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr reference operator[](difference_type n) const noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr bool operator==(const This& other) const noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr auto operator<=>(const This& other) const noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr This operator+(difference_type n) const noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr This operator-(difference_type n) const noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr difference_type operator-(const This& other) const noexcept;
         /* Operations */
         template<int Size>
-        [[nodiscard]] SIMD<value_type, Size> load() const noexcept;
+        [[nodiscard, gnu::always_inline]] SIMD<value_type, Size> load() const noexcept;
         template<int Size>
-        [[nodiscard]] SIMD<value_type, Size> load(size_t count) const noexcept;
+        [[nodiscard, gnu::always_inline]] SIMD<value_type, Size> load(size_t count) const noexcept;
         /* Friends */
-        friend constexpr This operator+(difference_type n, const This& ite) noexcept { return ite + n; }
+        [[gnu::always_inline]] friend constexpr This operator+(difference_type n, const This& ite) noexcept { return ite + n; }
     };
 
     template<Vector V>

@@ -49,8 +49,8 @@ namespace Physica {
         Pack pack;
     public:
         constexpr SIMD() noexcept = default;
-        constexpr explicit SIMD(double x) noexcept;
-        constexpr explicit SIMD(T x) noexcept;
+        [[gnu::always_inline, gnu::flatten]] constexpr explicit SIMD(T::MachineType x) noexcept;
+        [[gnu::always_inline, gnu::flatten]] constexpr explicit SIMD(T x) noexcept;
         SIMD(T x, int count) noexcept;
         SIMD(Scalar auto... args) noexcept;
         SIMD(MachineType x) noexcept : pack(x) {}

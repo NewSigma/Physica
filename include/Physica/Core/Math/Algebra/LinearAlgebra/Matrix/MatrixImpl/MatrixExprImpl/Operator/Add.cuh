@@ -109,27 +109,27 @@ namespace Physica {
     };
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator+(M&& m, U&& x) noexcept requires(DeviceObj<M>) {
+    [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator+(M&& m, U&& x) noexcept requires(DeviceObj<M>) {
         return device_obj<MatrixExpr<ExprID::Add, M&&, U&&>>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator+(U&& x, M&& m) noexcept requires(DeviceObj<M>) {
+    [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator+(U&& x, M&& m) noexcept requires(DeviceObj<M>) {
         return m + x;
     }
 
     template<Matrix M, Vector V>
-    [[nodiscard]] __host__ __device__ auto operator+(M&& m, V&& x) noexcept requires(DeviceObj<M> && DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator+(M&& m, V&& x) noexcept requires(DeviceObj<M> && DeviceObj<V>) {
         return device_obj<MatrixExpr<ExprID::Add, M&&, V&&>>(std::forward<M>(m), std::forward<V>(x));
     }
 
     template<Matrix M, Vector V>
-    [[nodiscard]] __host__ __device__ auto operator+(V&& x, M&& m) noexcept requires(DeviceObj<M> && DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator+(V&& x, M&& m) noexcept requires(DeviceObj<M> && DeviceObj<V>) {
         return m + x;
     }
 
     template<Matrix M1, Matrix M2>
-    [[nodiscard]] __host__ __device__ auto operator+(M1&& m1, M2&& m2) noexcept requires(DeviceObj<M1> && DeviceObj<M2>) {
+    [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator+(M1&& m1, M2&& m2) noexcept requires(DeviceObj<M1> && DeviceObj<M2>) {
         if constexpr (!canonicalized(m1, m2))
             return std::forward<M2>(m2) + std::forward<M1>(m1);
         else

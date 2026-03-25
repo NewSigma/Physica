@@ -58,7 +58,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    [[nodiscard]] auto square_elem(M&& m) noexcept requires(!DeviceObj<M>) {
+    [[nodiscard, gnu::always_inline]] auto square_elem(M&& m) noexcept requires(!DeviceObj<M>) {
         return MatrixExpr<ExprID::Square, M&&>(std::forward<M>(m));
     }
 }

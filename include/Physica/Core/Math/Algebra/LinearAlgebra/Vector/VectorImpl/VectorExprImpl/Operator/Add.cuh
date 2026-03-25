@@ -172,17 +172,17 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator+(V&& v, U&& x) noexcept requires(DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator+(V&& v, U&& x) noexcept requires(DeviceObj<V>) {
         return device_obj<VectorExpr<ExprID::Add, remove_device_obj_t<V&&>, U&&>>(std::forward<V>(v), std::forward<U>(x));
     }
 
     template<Scalar U, Vector V>
-    [[nodiscard]] __host__ __device__ auto operator+(U&& x, V&& v) noexcept requires(DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator+(U&& x, V&& v) noexcept requires(DeviceObj<V>) {
         return std::forward<V>(v) + std::forward<U>(x);
     }
 
     template<Vector V1, Vector V2>
-    [[nodiscard]] __host__ __device__ auto operator+(V1&& v1, V2&& v2) noexcept requires(DeviceObj<V1> && DeviceObj<V2>) {
+    [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator+(V1&& v1, V2&& v2) noexcept requires(DeviceObj<V1> && DeviceObj<V2>) {
         if constexpr (!canonicalized(v1, v2))
             return std::forward<V2>(v2) + std::forward<V1>(v1);
         else

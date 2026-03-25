@@ -31,7 +31,7 @@ namespace Physica {
     private:
         PlainStruct<add_device_obj_t<std::remove_reference_t<V>>> expr;
     public:
-        __host__ __device__ device_obj(Ref expr_);
+        __host__ __device__ device_obj(Ref expr_) noexcept;
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -46,7 +46,7 @@ namespace Physica {
     };
 
     template<ExprID ID, Vector V>
-    __host__ __device__ device_obj<UnitaryVectorExpr<ID, V>>::device_obj(Ref expr_) : expr(asStruct(expr_)) {}
+    __host__ __device__ device_obj<UnitaryVectorExpr<ID, V>>::device_obj(Ref expr_) noexcept : expr(asStruct(expr_)) {}
 
     template<ExprID ID, Vector V>
     __host__ __device__ auto&& device_obj<UnitaryVectorExpr<ID, V>>::getExpr(this auto&& self) noexcept {
@@ -71,7 +71,7 @@ namespace Physica {
         Physica::PlainStruct<LHS2> lhs;
         Physica::PlainStruct<RHS2> rhs;
     public:
-        __host__ __device__ device_obj(Ref1 lhs_, Ref2 rhs_);
+        __host__ __device__ device_obj(Ref1 lhs_, Ref2 rhs_) noexcept;
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -87,7 +87,7 @@ namespace Physica {
     };
 
     template<ExprID ID, class LHS, class RHS>
-    __host__ __device__ device_obj<BinaryVectorExpr<ID, LHS, RHS>>::device_obj(Ref1 lhs_, Ref2 rhs_) : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
+    __host__ __device__ device_obj<BinaryVectorExpr<ID, LHS, RHS>>::device_obj(Ref1 lhs_, Ref2 rhs_) noexcept : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
         if constexpr (Vector<RHS>)
             assert(getLHS().getLength() == getRHS().getLength());
     }

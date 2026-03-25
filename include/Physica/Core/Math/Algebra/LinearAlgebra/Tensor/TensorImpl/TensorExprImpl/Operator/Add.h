@@ -38,7 +38,7 @@ namespace Physica {
     };
 
     template<Tensor X, Tensor Y>
-    [[nodiscard]] auto operator+(X&& x, Y&& y) noexcept {
+    [[nodiscard, gnu::always_inline]] auto operator+(X&& x, Y&& y) noexcept {
         if constexpr (!canonicalized(x, y))
             return std::forward<Y>(y) + std::forward<X>(x);
         else

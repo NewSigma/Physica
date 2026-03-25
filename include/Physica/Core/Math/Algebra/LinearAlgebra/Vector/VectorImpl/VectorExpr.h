@@ -43,7 +43,7 @@ namespace Physica {
     private:
         LazyDestroy<V> expr;
     public:
-        UnitaryVectorExpr(V expr_) : expr(std::forward<V>(expr_)) {}
+        UnitaryVectorExpr(V expr_) noexcept : expr(std::forward<V>(expr_)) {}
         UnitaryVectorExpr(const This&) = default;
         UnitaryVectorExpr(This&&) noexcept = default;
         ~UnitaryVectorExpr() = default;
@@ -99,7 +99,7 @@ namespace Physica {
         LazyDestroy<LHS> lhs;
         LazyDestroy<RHS> rhs;
     public:
-        BinaryVectorExpr(LHS lhs_, RHS rhs_);
+        BinaryVectorExpr(LHS lhs_, RHS rhs_) noexcept;
         BinaryVectorExpr(const This&) = default;
         BinaryVectorExpr(This&&) noexcept = default;
         ~BinaryVectorExpr() = default;
@@ -122,7 +122,7 @@ namespace Physica {
     };
 
     template<ExprID ID, class LHS, class RHS>
-    BinaryVectorExpr<ID, LHS, RHS>::BinaryVectorExpr(LHS lhs_, RHS rhs_) : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
+    BinaryVectorExpr<ID, LHS, RHS>::BinaryVectorExpr(LHS lhs_, RHS rhs_) noexcept : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
         if constexpr (Vector<LHS> && Vector<RHS>)
             assert(lhs.getLength() == rhs.getLength());
     }

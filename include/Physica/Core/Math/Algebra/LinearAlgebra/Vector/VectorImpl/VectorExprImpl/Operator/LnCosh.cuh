@@ -46,7 +46,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    [[nodiscard]] __host__ __device__ auto lncosh(V&& v) noexcept requires(DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] __host__ __device__ auto lncosh(V&& v) noexcept requires(DeviceObj<V>) {
         return device_obj<VectorExpr<ExprID::LnCosh, remove_device_obj_t<V&&>>>(std::forward<V>(v));
     }
 }

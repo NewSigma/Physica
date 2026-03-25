@@ -138,17 +138,17 @@ namespace Physica {
     }
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] auto operator*(M&& m, U&& x) noexcept requires(!DeviceObj<M>) {
+    [[nodiscard, gnu::always_inline]] auto operator*(M&& m, U&& x) noexcept requires(!DeviceObj<M>) {
         return MatrixExpr<ExprID::Mul, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] auto operator*(U&& x, M&& m) noexcept requires(!DeviceObj<M>) {
+    [[nodiscard, gnu::always_inline]] auto operator*(U&& x, M&& m) noexcept requires(!DeviceObj<M>) {
         return std::forward<M>(m) * std::forward<U>(x);
     }
 
     template<Matrix M1, Matrix M2>
-    [[nodiscard]] auto hadamard(M1&& m1, M2&& m2) noexcept requires(!DeviceObj<M1> && !DeviceObj<M2>) {
+    [[nodiscard, gnu::always_inline]] auto hadamard(M1&& m1, M2&& m2) noexcept requires(!DeviceObj<M1> && !DeviceObj<M2>) {
         if constexpr (!canonicalized(m1, m2))
             return hadamard(std::forward<M2>(m2), std::forward<M1>(m1));
         else

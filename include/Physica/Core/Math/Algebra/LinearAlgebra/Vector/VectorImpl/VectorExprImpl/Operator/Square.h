@@ -105,7 +105,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] auto square(V&& v) noexcept requires(!DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] auto square(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Square, V&&>(std::forward<V>(v));
     }
 }

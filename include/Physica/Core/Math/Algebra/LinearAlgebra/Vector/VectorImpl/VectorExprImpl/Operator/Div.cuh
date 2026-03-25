@@ -57,17 +57,17 @@ namespace Physica {
     };
 
     template<Vector V, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator/(V&& v, U&& x) noexcept requires(DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator/(V&& v, U&& x) noexcept requires(DeviceObj<V>) {
         return device_obj<VectorExpr<ExprID::Div, remove_device_obj_t<V&&>, U&&>>(v, x);
     }
 
     template<Vector V, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator/(U&& x, V&& v) noexcept requires(DeviceObj<V>) {
+    [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator/(U&& x, V&& v) noexcept requires(DeviceObj<V>) {
         return device_obj<VectorExpr<ExprID::Div, U&&, remove_device_obj_t<V&&>>>(x, v);
     }
 
     template<Vector V1, Vector V2>
-    [[nodiscard]] auto divide(V1&& v1, V2&& v2) noexcept requires(DeviceObj<V1> && DeviceObj<V2>) {
+    [[nodiscard, gnu::always_inline]] auto divide(V1&& v1, V2&& v2) noexcept requires(DeviceObj<V1> && DeviceObj<V2>) {
         return device_obj<VectorExpr<ExprID::Div, remove_device_obj_t<V1&&>, remove_device_obj_t<V2&&>>>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }
