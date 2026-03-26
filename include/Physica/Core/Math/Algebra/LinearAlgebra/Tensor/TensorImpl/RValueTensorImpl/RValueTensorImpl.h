@@ -24,10 +24,16 @@
 namespace Physica {
     template<class Derived>
     void RValueTensor<Derived>::assign(Tensor auto& x) const {
-        const auto& derived = Base::getDerived();
-        for (size_t i = 0; i < derived.getSize(); ++i) {
-            const auto indices = toIndexND(i);
-            x[indices] = calc(indices);
+        if constexpr (!isDiffable() && x.isDiffable()) {
+            Base::getDerived().assign(x.values());
+            x.grads().zeros();
+        }
+        else {
+            size_t size = Base::getDerived().getSize();
+            for (size_t i = 0; i < size; ++i) {
+                const auto indices = toIndexND(i);
+                x[indices] = calc(indices);
+            }
         }
     }
 
@@ -108,6 +114,11 @@ namespace Physica {
         for (int i = 1; i < NDim; ++i)
             size *= dim(i);
         return size;
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueTensor<Derived>::isDiffable() noexcept {
+        return Diffable<T>;
     }
 
     template<class Derived>

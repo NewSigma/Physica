@@ -42,37 +42,22 @@ namespace Physica {
         constexpr This& operator=(const This&) = default;
         constexpr This& operator=(This&&) noexcept = default;
         /* Operations */
-        [[nodiscard, gnu::always_inline]] decltype(auto) calc(size_t index) const noexcept;
-
         [[nodiscard, gnu::always_inline]] constexpr auto begin(this auto&&) noexcept;
         [[nodiscard, gnu::always_inline]] constexpr auto end(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard, gnu::always_inline]] constexpr V& vector() const noexcept { return *vec; }
-        [[nodiscard, gnu::always_inline]] constexpr size_t size() const noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr size_t size() const noexcept { return vec->getLength(); }
     };
 
     template<class Derived>
     template<Vector V>
-    decltype(auto) RValueVector<Derived>::View<V>::calc(size_t index) const noexcept {
-        return vec->calc(index);
-    }
-
-    template<class Derived>
-    template<Vector V>
     constexpr auto RValueVector<Derived>::View<V>::begin(this auto&& self) noexcept {
-        return Iterator(&self, 0);
+        return Iterator(self.vec, 0);
     }
 
     template<class Derived>
     template<Vector V>
     constexpr auto RValueVector<Derived>::View<V>::end(this auto&& self) noexcept {
-        return Iterator(&self, self.size());
-    }
-
-    template<class Derived>
-    template<Vector V>
-    constexpr size_t RValueVector<Derived>::View<V>::size() const noexcept {
-        return vector().getLength();
+        return Iterator(self.vec, self.size());
     }
 }
 
@@ -88,11 +73,11 @@ namespace Physica {
         using reference = const value_type;
         using const_reference = const value_type;
     private:
-        const RValueVector<Derived>::View<V>* view;
+        V* vec;
         difference_type index{};
     public:
         constexpr Iterator() = default;
-        [[gnu::always_inline]] constexpr Iterator(const RValueVector<Derived>::View<V>* view, difference_type index) noexcept;
+        [[gnu::always_inline]] constexpr Iterator(V* vec, difference_type index) noexcept;
         constexpr Iterator(const This&) = default;
         constexpr Iterator(This&&) noexcept = default;
         constexpr ~Iterator() = default;
@@ -123,7 +108,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V>
-    constexpr RValueVector<Derived>::View<V>::Iterator::Iterator(const RValueVector<Derived>::View<V>* view, difference_type index) noexcept : view(view), index(index) {}
+    constexpr RValueVector<Derived>::View<V>::Iterator::Iterator(V* vec, difference_type index) noexcept : vec(vec), index(index) {}
 
     template<class Derived>
     template<Vector V>
@@ -156,25 +141,25 @@ namespace Physica {
     template<class Derived>
     template<Vector V>
     constexpr auto RValueVector<Derived>::View<V>::Iterator::operator++(int) noexcept -> This {
-        return std::exchange(*this, This(view, index + 1));
+        return std::exchange(*this, This(vec, index + 1));
     }
 
     template<class Derived>
     template<Vector V>
     constexpr auto RValueVector<Derived>::View<V>::Iterator::operator--(int) noexcept -> This {
-        return std::exchange(*this, This(view, index - 1));
+        return std::exchange(*this, This(vec, index - 1));
     }
 
     template<class Derived>
     template<Vector V>
     constexpr auto RValueVector<Derived>::View<V>::Iterator::operator*() const noexcept -> reference {
-        return view->calc(index);
+        return vec->calc(index);
     }
 
     template<class Derived>
     template<Vector V>
     constexpr auto RValueVector<Derived>::View<V>::Iterator::operator[](difference_type n) const noexcept -> reference {
-        return view->calc(index + n);
+        return vec->calc(index + n);
     }
 
     template<class Derived>
@@ -192,13 +177,13 @@ namespace Physica {
     template<class Derived>
     template<Vector V>
     constexpr auto RValueVector<Derived>::View<V>::Iterator::operator+(difference_type n) const noexcept -> This {
-        return This(view, index + n);
+        return This(vec, index + n);
     }
 
     template<class Derived>
     template<Vector V>
     constexpr auto RValueVector<Derived>::View<V>::Iterator::operator-(difference_type n) const noexcept -> This {
-        return This(view, index - n);
+        return This(vec, index - n);
     }
 
     template<class Derived>
@@ -211,15 +196,16 @@ namespace Physica {
     template<Vector V>
     template<int Size>
     auto RValueVector<Derived>::View<V>::Iterator::load() const noexcept -> SIMD<value_type, Size> {
-        assert(index + Size <= view->size());
-        return view->vector().template packet<Size>(index);
+        assert(index + Size <= vec->getLength());
+        return vec->template packet<Size>(index);
     }
 
     template<class Derived>
     template<Vector V>
     template<int Size>
     auto RValueVector<Derived>::View<V>::Iterator::load(size_t count) const noexcept -> SIMD<value_type, Size> {
+        assert(index + count <= vec->getLength());
         assert(0 < count && count < Size && "[Error]: Invalid size for partial operation");
-        return view->vector().template packet<Size>(index, count);
+        return vec->template packet<Size>(index, count);
     }
 }

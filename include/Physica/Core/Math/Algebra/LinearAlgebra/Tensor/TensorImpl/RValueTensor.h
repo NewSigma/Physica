@@ -78,6 +78,7 @@ namespace Physica {
         [[nodiscard]] IndexType getShape() const noexcept;
         [[nodiscard]] size_t getSize() const noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isDiffable() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         using TensorBase::forPointIndexInTensor;

@@ -39,15 +39,21 @@ namespace Physica {
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
-        v.assert_assign(Base::getDerived());
-        if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
-            constexpr static size_t Length1 = SizeAtCompile;
-            constexpr static size_t Length2 = V::SizeAtCompile;
-            constexpr static size_t Length = std::max(Length1, Length2);
-            assign_simd<V, P, Length>(v);
+        if constexpr (!isDiffable && Diffable<V>) {
+            Base::getDerived().assign(v.values());
+            v.grads().zeros();
         }
-        else
-            assign_for<P>(v);
+        else {
+            v.assert_assign(Base::getDerived());
+            if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
+                constexpr static size_t Length1 = SizeAtCompile;
+                constexpr static size_t Length2 = V::SizeAtCompile;
+                constexpr static size_t Length = std::max(Length1, Length2);
+                assign_simd<V, P, Length>(v);
+            }
+            else
+                assign_for<P>(v);
+        }
     }
 
     template<class Derived>
@@ -60,15 +66,19 @@ namespace Physica {
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign_add(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
-        v.assert_assign(Base::getDerived());
-        if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
-            constexpr static size_t Length1 = SizeAtCompile;
-            constexpr static size_t Length2 = V::SizeAtCompile;
-            constexpr static size_t Length = std::max(Length1, Length2);
-            assign_add_simd<V, Length>(v);
+        if constexpr (!isDiffable && Diffable<V>)
+            Base::getDerived().assign_add(v.values());
+        else {
+            v.assert_assign(Base::getDerived());
+            if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
+                constexpr static size_t Length1 = SizeAtCompile;
+                constexpr static size_t Length2 = V::SizeAtCompile;
+                constexpr static size_t Length = std::max(Length1, Length2);
+                assign_add_simd<V, Length>(v);
+            }
+            else
+                assign_add_for<P>(v);
         }
-        else
-            assign_add_for<P>(v);
     }
 
     template<class Derived>
@@ -753,10 +763,7 @@ namespace Physica {
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign_for(Vector auto& __restrict v) const __restrict noexcept {
         parallel_for<P>([&, this](size_t i) {
-            if constexpr (isReverseDiff)
-                v[i] = calc_value(i);
-            else
-                v[i] = calc(i);
+            v[i] = calc(i);
         }, getLength(), 0).wait();
     }
 
@@ -764,35 +771,44 @@ namespace Physica {
     template<Vector V, ExecutePolicy P, size_t Length>
     void RValueVector<Derived>::assign_simd(V& __restrict v) const __restrict noexcept {
         constexpr int Size = BestPacket<typename V::ScalarType, Length>::Size;
-        const auto& v0 = Base::getDerived();
+        auto it = zip(v.view(), Base::getDerived().view()).begin();
         if constexpr (Length != Dynamic) {
             constexpr size_t to = Length / Size * Size;
-            for (size_t i = 0; i < to; i += Size)
-                v.writePacket(v0.template packet<Size>(i), i);
+            for (size_t i = 0; i < to; i += Size) {
+                auto [lhs, rhs] = it + i;
+                lhs.store(rhs.template load<Size>());
+            }
 
-            for (size_t i = Length - Length % Size; i < Length; ++i)
-                v[i] = v0.calc(i);
+            for (size_t i = Length - Length % Size; i < Length; ++i) {
+                auto [lhs, rhs] = it + i;
+                *lhs = *rhs;
+            }
         }
         else {
             const size_t length = getLength();
             const size_t to = length / Size * Size;
             if constexpr (P == Sequential) {
                 size_t i = 0;
-                for (; i < to; i += Size)
-                    v.writePacket(v0.template packet<Size>(i), i);
+                for (; i < to; i += Size) {
+                    auto [lhs, rhs] = it + i;
+                    lhs.store(rhs.template load<Size>());
+                }
 
-                for (; i < length; ++i)
-                    v[i] = v0.calc(i);
+                for (; i < length; ++i) {
+                    auto [lhs, rhs] = it + i;
+                    *lhs = *rhs;
+                }
             }
             else {
-                const size_t numLoop = to / Size;
-                auto future = parallel_for<P>([&, this](size_t i) {
-                    const size_t i1 = i * Size;
-                    v.writePacket(v0.template packet<Size>(i1), i1);
-                }, numLoop, 0);
+                auto future = parallel_for<P>([it](size_t i) {
+                    auto [lhs, rhs] = it + i * Size;
+                    lhs.store(rhs.template load<Size>());
+                }, to / Size, 0);
 
-                for (size_t i = to; i < length; ++i)
-                    v[i] = v0.calc(i);
+                for (size_t i = to; i < length; ++i) {
+                    auto [lhs, rhs] = it + i;
+                    *lhs = *rhs;
+                }
                 future.wait();
             }
         }
@@ -802,10 +818,7 @@ namespace Physica {
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign_add_for(Vector auto& __restrict v) const __restrict noexcept {
         parallel_for<P>([&, this](size_t i) {
-            if constexpr (isReverseDiff)
-                v[i] += calc_value(i);
-            else
-                v[i] += calc(i);
+            v[i] += calc(i);
         }, getLength(), 0).wait();
     }
 
@@ -813,24 +826,32 @@ namespace Physica {
     template<Vector V, size_t Length>
     void RValueVector<Derived>::assign_add_simd(V& __restrict v) const __restrict noexcept {
         constexpr int Size = BestPacket<typename V::ScalarType, Length>::Size;
-        const auto& v0 = Base::getDerived();
+        auto it = zip(v.view(), Base::getDerived().view()).begin();
         if constexpr (Length != Dynamic) {
             constexpr size_t to = Length / Size * Size;
-            for (size_t i = 0; i < to; i += Size)
-                v.writePacket(v.template packet<Size>(i) + v0.template packet<Size>(i), i);
+            for (size_t i = 0; i < to; i += Size) {
+                auto [lhs, rhs] = it + i;
+                lhs.store(lhs.template load<Size>() + rhs.template load<Size>());
+            }
 
-            for (size_t i = Length - Length % Size; i < Length; ++i)
-                v[i] += v0.calc(i);
+            for (size_t i = Length - Length % Size; i < Length; ++i) {
+                auto [lhs, rhs] = it + i;
+                *lhs += *rhs;
+            }
         }
         else {
             const size_t length = v.getLength();
             const size_t to = length / Size * Size;
             size_t i = 0;
-            for (; i < to; i += Size)
-                v.writePacket(v.template packet<Size>(i) + v0.template packet<Size>(i), i);
+            for (; i < to; i += Size) {
+                auto [lhs, rhs] = it + i;
+                lhs.store(lhs.template load<Size>() + rhs.template load<Size>());
+            }
 
-            for (; i < length; ++i)
-                v[i] += v0.calc(i);
+            for (; i < length; ++i) {
+                auto [lhs, rhs] = it + i;
+                *lhs += *rhs;
+            }
         }
     }
 }

@@ -64,13 +64,19 @@ namespace Physica {
     template<class Derived>
     template<ExecutePolicy P>
     void RValueMatrix<Derived>::assign(Matrix auto&& target) const noexcept {
-        target.assert_assign(Base::getDerived());
+        if constexpr (!isDiffable && Diffable<decltype(target)>) {
+            Base::getDerived().assign(target.values());
+            target.grads().zeros();
+        }
+        else {
+            target.assert_assign(Base::getDerived());
 
-        const size_t maxMajor = target.getMaxMajor();
-        const size_t maxMinor = target.getMaxMinor();
-        for (size_t i = 0; i < maxMajor; ++i)
-            for (size_t j = 0; j < maxMinor; ++j)
-                target.refFromMajorMinor(i, j) = calc(target.rowFromMajorMinor(i, j), target.colFromMajorMinor(i, j));
+            const size_t maxMajor = target.getMaxMajor();
+            const size_t maxMinor = target.getMaxMinor();
+            for (size_t i = 0; i < maxMajor; ++i)
+                for (size_t j = 0; j < maxMinor; ++j)
+                    target.refFromMajorMinor(i, j) = calc(target.rowFromMajorMinor(i, j), target.colFromMajorMinor(i, j));
+        }
     }
 
     template<class Derived>
@@ -81,13 +87,17 @@ namespace Physica {
 
     template<class Derived>
     void RValueMatrix<Derived>::assign_add(Matrix auto&& target) const noexcept {
-        target.assert_assign(Base::getDerived());
+        if constexpr (!isDiffable && Diffable<decltype(target)>)
+            Base::getDerived().assign_add(target.values());
+        else {
+            target.assert_assign(Base::getDerived());
 
-        const size_t maxMajor = target.getMaxMajor();
-        const size_t maxMinor = target.getMaxMinor();
-        for (size_t i = 0; i < maxMajor; ++i)
-            for (size_t j = 0; j < maxMinor; ++j)
-                target.refFromMajorMinor(i, j) += calc(target.rowFromMajorMinor(i, j), target.colFromMajorMinor(i, j));
+            const size_t maxMajor = target.getMaxMajor();
+            const size_t maxMinor = target.getMaxMinor();
+            for (size_t i = 0; i < maxMajor; ++i)
+                for (size_t j = 0; j < maxMinor; ++j)
+                    target.refFromMajorMinor(i, j) += calc(target.rowFromMajorMinor(i, j), target.colFromMajorMinor(i, j));
+        }
     }
 
     template<class Derived>
