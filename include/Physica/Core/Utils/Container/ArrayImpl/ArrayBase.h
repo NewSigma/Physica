@@ -68,8 +68,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return Base::getDerived().getCapacity(); }
         [[nodiscard]] __host__ __device__ bool empty() const { return getLength() == 0; }
         [[nodiscard]] __host__ __device__ bool full() const noexcept { return getLength() == getCapacity(); }
-        [[nodiscard]] __host__ __device__ pointer data() noexcept { return Base::getDerived().data(); }
-        [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return Base::getDerived().data(); }
+        [[nodiscard]] __host__ __device__ auto* data(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto* data_ptr(this auto&&, size_t index) noexcept;
         [[nodiscard]] __host__ __device__ auto& front(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto& back(this auto&&) noexcept;
@@ -101,28 +100,29 @@ namespace Physica {
         pointer p;
     public:
         constexpr Iterator() = default;
-        __host__ __device__ constexpr explicit Iterator(pointer p) noexcept;
-        __host__ __device__ constexpr Iterator(const This& ite) noexcept;
+        [[gnu::always_inline]] __host__ __device__ constexpr explicit Iterator(pointer p) noexcept;
+        constexpr Iterator(const This&) noexcept = default;
+        constexpr Iterator(This&&) noexcept = default;
         constexpr ~Iterator() = default;
         /* Operators */
         constexpr This& operator=(const This&) = default;
         constexpr This& operator=(This&&) noexcept = default;
-        __host__ __device__ constexpr This& operator++() noexcept;
-        __host__ __device__ constexpr This& operator--() noexcept;
-        __host__ __device__ constexpr This& operator+=(difference_type n) noexcept;
-        __host__ __device__ constexpr This& operator-=(difference_type n) noexcept;
-        [[nodiscard]] __host__ __device__ constexpr This operator++(int) noexcept;
-        [[nodiscard]] __host__ __device__ constexpr This operator--(int) noexcept;
-        [[nodiscard]] __host__ __device__ constexpr reference operator*() const noexcept;
-        [[nodiscard]] __host__ __device__ constexpr pointer operator->() const noexcept;
-        [[nodiscard]] __host__ __device__ constexpr reference operator[](difference_type n) const noexcept;
-        [[nodiscard]] __host__ __device__ constexpr bool operator==(const This& other) const noexcept;
-        [[nodiscard]] __host__ __device__ constexpr auto operator<=>(const This& other) const noexcept;
-        [[nodiscard]] __host__ __device__ constexpr This operator+(difference_type n) const noexcept;
-        [[nodiscard]] __host__ __device__ constexpr This operator-(difference_type n) const noexcept;
-        [[nodiscard]] __host__ __device__ constexpr difference_type operator-(const This& other) const noexcept;
+        [[gnu::always_inline]] __host__ __device__ constexpr This& operator++() noexcept;
+        [[gnu::always_inline]] __host__ __device__ constexpr This& operator--() noexcept;
+        [[gnu::always_inline]] __host__ __device__ constexpr This& operator+=(difference_type n) noexcept;
+        [[gnu::always_inline]] __host__ __device__ constexpr This& operator-=(difference_type n) noexcept;
+        [[nodiscard, gnu::always_inline]] __host__ __device__ constexpr This operator++(int) noexcept;
+        [[nodiscard, gnu::always_inline]] __host__ __device__ constexpr This operator--(int) noexcept;
+        [[nodiscard, gnu::always_inline]] __host__ __device__ constexpr reference operator*() const noexcept;
+        [[nodiscard, gnu::always_inline]] __host__ __device__ constexpr pointer operator->() const noexcept;
+        [[nodiscard, gnu::always_inline]] __host__ __device__ constexpr reference operator[](difference_type n) const noexcept;
+        [[nodiscard, gnu::always_inline]] __host__ __device__ constexpr bool operator==(const This& other) const noexcept;
+        [[nodiscard, gnu::always_inline]] __host__ __device__ constexpr auto operator<=>(const This& other) const noexcept;
+        [[nodiscard, gnu::always_inline]] __host__ __device__ constexpr This operator+(difference_type n) const noexcept;
+        [[nodiscard, gnu::always_inline]] __host__ __device__ constexpr This operator-(difference_type n) const noexcept;
+        [[nodiscard, gnu::always_inline]] __host__ __device__ constexpr difference_type operator-(const This& other) const noexcept;
         /* Friends */
-        __host__ __device__ friend constexpr This operator+(difference_type n, const This& ite) noexcept { return ite + n; }
+        [[gnu::always_inline]] __host__ __device__ friend constexpr This operator+(difference_type n, const This& ite) noexcept { return ite + n; }
     };
 }
 

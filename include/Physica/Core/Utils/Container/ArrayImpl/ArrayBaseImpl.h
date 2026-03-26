@@ -37,7 +37,7 @@ namespace Physica {
         if (getCapacity() != array.getCapacity())
             return false;
         for (size_t i = 0; i < getLength(); ++i)
-            if (operator[](i) != array[i])
+            if (Base::getDerived()[i] != array.getDerived()[i])
                 return false;
         return true;
     }
@@ -77,6 +77,11 @@ namespace Physica {
     }
 
     template<class Derived, class Allocator>
+    __host__ __device__ auto* ArrayBase<Derived, Allocator>::data(this auto&& self) noexcept {
+        return self.data();
+    }
+
+    template<class Derived, class Allocator>
     __host__ __device__ auto* ArrayBase<Derived, Allocator>::data_ptr(this auto&& self, size_t index) noexcept {
         assert(index < self.getLength());
         return self.data() + index;
@@ -103,10 +108,6 @@ namespace Physica {
     template<class Derived, class Allocator>
     template<class Container>
     __host__ __device__ constexpr ArrayBase<Derived, Allocator>::Iterator<Container>::Iterator(pointer p) noexcept : p(p) {}
-
-    template<class Derived, class Allocator>
-    template<class Container>
-    __host__ __device__ constexpr ArrayBase<Derived, Allocator>::Iterator<Container>::Iterator(const This& ite) noexcept : p(ite.p) {}
 
     template<class Derived, class Allocator>
     template<class Container>
