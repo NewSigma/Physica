@@ -43,6 +43,7 @@ namespace Physica {
         DenseMatrix<Trv> pointGrid;
         Trv compressRate;
         Trv lr;
+        Trv momentum;
     protected:
         using Base::from;
         using Base::to;
@@ -50,7 +51,7 @@ namespace Physica {
         using Base::vars;
         using Base::loss;
 
-        DenseMatrix<Trv> lossMat;
+        DenseMatrix<Trv> losses;
         Array2D<int> counts;
     public:
         Vegas() = default;
@@ -60,7 +61,8 @@ namespace Physica {
               int numSample,
               int numPoint = 1000,
               Trv compressRate = 1.5,
-              Trv lr = 1);
+              Trv lr = 1,
+              Trv momentum = 0);
         Vegas(const This&) = default;
         Vegas(This&&) noexcept = default;
         ~Vegas() = default;

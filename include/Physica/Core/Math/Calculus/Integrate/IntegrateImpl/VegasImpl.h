@@ -22,17 +22,19 @@
 
 namespace Physica {
     template<Scalar T, bool TakeLn>
-    Vegas<T, TakeLn>::Vegas(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int numPoint, Trv compressRate, Trv lr)
+    Vegas<T, TakeLn>::Vegas(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int numPoint, Trv compressRate, Trv lr, Trv momentum)
             : Base(std::move(from), std::move(to), numRefine, numSample)
             , pointGrid(numPoint, getDim())
             , compressRate(compressRate)
             , lr(std::move(lr))
-            , lossMat(numPoint - 1, getDim())
+            , momentum(std::move(momentum))
+            , losses(numPoint - 1, getDim())
             , counts(numPoint - 1, getDim()) {
         assert(numPoint > 2 && "[Error]: Invalid point number");
         assert(compressRate.isPositive() && "[Error]: Rate = 0 implies no grid refinement");
         assert(compressRate < Trv(2) && "[Error]: Rate should be ~ 1");
-        assert(lr.isPositive() && (lr <= Trv(1)) && "[Error]: Invalid beta");
+        assert(lr.isPositive() && (lr <= Trv(1)) && "[Error]: Invalid param");
+        assert(!momentum.isNegative() && (momentum <= Trv(1)) && "[Error]: Invalid param");
         for (size_t i = 0; i < getDim(); ++i)
             mesh_uniform(i);
     }
@@ -62,13 +64,27 @@ namespace Physica {
         assert(numWarm >= 0 && "[Error]: Invalid param");
 
         T mean, var;
+        DenseMatrix<Trv> losses_old;
+        bool hasMomentum = momentum.isPositive();
+        if (hasMomentum) {
+            losses_old.resize(losses);
+            losses_old.zeros();
+        }
+
         for (int _ = 0; _ < numWarm; ++_) {
             pre_trial();
             if constexpr (TakeLn)
                 trial_ln<R, P>(fn, mean, var);
             else
                 trial_normal<R, P>(fn, mean, var);
-            refineGrid<P>();
+
+            if (hasMomentum) {
+                losses += losses_old * momentum;
+                refineGrid<P>();
+                losses_old = losses;
+            }
+            else
+                refineGrid<P>();
         }
         return calcGridLossImpl();
     }
@@ -81,6 +97,13 @@ namespace Physica {
 
         const int numRefine = Base::getNumRefine();
         T mean = 0, var = 0;
+        DenseMatrix<Trv> losses_old;
+        bool hasMomentum = momentum.isPositive();
+        if (hasMomentum) {
+            losses_old.resize(losses);
+            losses_old.zeros();
+        }
+
         for (int refine = 0; refine < numRefine; ++refine) {
             pre_trial();
             if constexpr (TakeLn)
@@ -90,7 +113,14 @@ namespace Physica {
             means[refine] = mean;
             vars[refine] = var;
             loss[refine] = calcGridLossImpl();
-            refineGrid<P>();
+
+            if (hasMomentum) {
+                losses += losses_old * momentum;
+                refineGrid<P>();
+                losses_old = losses;
+            }
+            else
+                refineGrid<P>();
         }
     }
 
@@ -114,7 +144,7 @@ namespace Physica {
         group.readAttr("lr", lr);
 
         pointGrid.read(group, "Grid");
-        lossMat.resize(getNumPoint() - 1, getDim());
+        losses.resize(getNumPoint() - 1, getDim());
         counts.resize(getNumPoint() - 1, getDim());
         return group;
     }
@@ -137,13 +167,15 @@ namespace Physica {
         pointGrid.swap(obj.pointGrid);
         compressRate.swap(obj.compressRate);
         lr.swap(obj.lr);
-        lossMat.swap(obj.lossMat);
+        momentum.swap(obj.momentum);
+        losses.swap(obj.losses);
         counts.swap(obj.counts);
     }
 
     template<Scalar T, bool TakeLn>
     void Vegas<T, TakeLn>::pre_trial() {
-        lossMat = Trv(std::numeric_limits<T>::min()); // Initial value avoids situation where number of samples is too small to sample effective data
+        // Initial value avoids situation where number of samples is too small to sample effective data
+        losses = Trv(std::numeric_limits<T>::min());
         counts.zeros();
     }
 
@@ -170,7 +202,7 @@ namespace Physica {
     template<ExecutePolicy P>
     void Vegas<T, TakeLn>::refineGrid() {
         parallel_for<P>([this](size_t dim) {
-            const auto meanL = compress(lossMat.col(dim));
+            const auto meanL = compress(losses.col(dim));
             const bool noData = meanL.isZero();
             if (noData) [[unlikely]] // No data in the dimension, typically we should have enough samples to avoid it
                 return;
@@ -182,12 +214,12 @@ namespace Physica {
             for (size_t i = 1, j = 0; i < newPoints.getLength() - 1; ++i) {
                 while (temp < meanL) {
                     assert(j < getNumPoint() && "[Error]: Unexpected not enough loss, this is likely a bug");
-                    temp += lossMat[j, dim];
+                    temp += losses[j, dim];
                     j += 1;
                 }
                 temp -= meanL;
                 Trv delta = oldPoints[j] - oldPoints[j - 1];
-                newPoints[i] = fma(temp / lossMat[j - 1, dim], -delta, oldPoints[j]);
+                newPoints[i] = fma(temp / losses[j - 1, dim], -delta, oldPoints[j]);
             }
             newPoints.back() = oldPoints.back();
             oldPoints = newPoints * lr + oldPoints * (Trv(1) - lr);
@@ -198,7 +230,7 @@ namespace Physica {
     auto Vegas<T, TakeLn>::calcGridLossImpl() const -> Trv {
         Trv sumvar = 0;
         for (size_t i = 0; i < getDim(); ++i) {
-            const auto col = lossMat.col(i);
+            const auto col = losses.col(i);
             const Trv prior = col.mean();
             sumvar += sqrt(col.variance(prior) / prior.squaredNorm() / Trv(getNumPoint()));
         }
@@ -244,12 +276,12 @@ namespace Physica {
             const auto l = xy.value().squaredNorm();
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indices[i, n];
-                lossMat[index, i].toNextMean(counts[index, i], l);
+                losses[index, i].toNextMean(counts[index, i], l);
                 counts[index, i] += 1;
             }
         }
         // Loss has minimal value to avoid the grid size reducing to 0
-        lossMat.clamp_min(std::numeric_limits<Trv>::min());
+        losses.clamp_min(std::numeric_limits<Trv>::min());
     }
 
     template<Scalar T, bool TakeLn>
@@ -283,11 +315,11 @@ namespace Physica {
             const auto l = xy.value().squaredNorm();
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indices[i, n];
-                lossMat[index, i].toNextMean(counts[index, i], l);
+                losses[index, i].toNextMean(counts[index, i], l);
                 counts[index, i] += 1;
             }
         }
-        lossMat.clamp_min(std::numeric_limits<Trv>::min());
+        losses.clamp_min(std::numeric_limits<Trv>::min());
 
         mean = ln(mean) + maxSample;
         var = ln(var + Trv(std::numeric_limits<T>::min()));
