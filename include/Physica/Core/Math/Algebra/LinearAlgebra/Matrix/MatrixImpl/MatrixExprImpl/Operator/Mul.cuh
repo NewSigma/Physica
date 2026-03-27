@@ -32,18 +32,41 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
+        /* Operators */
+        using Base::operator*;
+        [[nodiscard]] __host__ __device__ auto operator*(Scalar auto x) const noexcept;
+        [[nodiscard]] __host__ __device__ auto operator-(this auto&&) noexcept;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            if constexpr (isReverseDiff)
-                return calc_value(row, col);
-            else
-                return Base::getLHS().calc(row, col) * Base::getRHS();
-        }
-
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
-            return Base::getLHS().calc_value(row, col) * Base::getRHS().value();
-        }
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const;
+        /* Getters */
+        using Base::getLHS;
+        using Base::getRHS;
     };
+
+    template<Matrix M, Scalar U>
+    __host__ __device__ auto device_obj<MatrixExpr<ExprID::Mul, M, U>>::operator*(Scalar auto x) const noexcept {
+        return getLHS() * (getRHS() * x);
+    }
+
+    template<Matrix M, Scalar U>
+    __host__ __device__ auto device_obj<MatrixExpr<ExprID::Mul, M, U>>::operator-(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS() * (-std::forward<Self>(self).getRHS());
+    }
+
+    template<Matrix M, Scalar U>
+    __device__ auto device_obj<MatrixExpr<ExprID::Mul, M, U>>::calc(size_t row, size_t col) const -> T {
+        if constexpr (isReverseDiff)
+            return calc_value(row, col);
+        else
+            return getLHS().calc(row, col) * getRHS();
+    }
+
+    template<Matrix M, Scalar U>
+    __device__ auto device_obj<MatrixExpr<ExprID::Mul, M, U>>::calc_value(size_t row, size_t col) const -> Tv {
+        return getLHS().calc_value(row, col) * getRHS().value();
+    }
 
     template<Matrix M, Vector V>
     class device_obj<MatrixExpr<ExprID::Mul, M, V>>

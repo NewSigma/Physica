@@ -31,11 +31,31 @@ namespace Physica {
         using typename Base::T;
     public:
         using Base::Base;
+        /* Operators */
+        [[nodiscard]] auto operator*(Scalar auto x) const noexcept;
+        [[nodiscard]] auto operator-(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] T calc(const IndexType& indices) const {
-            return Base::getLHS().calc(indices) * Base::getRHS();
-        }
+        [[nodiscard]] T calc(const IndexType& indices) const;
+        /* Getters */
+        using Base::getLHS;
+        using Base::getRHS;
     };
+
+    template<Tensor X, Scalar U>
+    auto TensorExpr<ExprID::Mul, X, U>::operator*(Scalar auto x) const noexcept {
+        return getLHS() * (getRHS() * x);
+    }
+
+    template<Tensor X, Scalar U>
+    auto TensorExpr<ExprID::Mul, X, U>::operator-(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS() * (-std::forward<Self>(self).getRHS());
+    }
+
+    template<Tensor X, Scalar U>
+    auto TensorExpr<ExprID::Mul, X, U>::calc(const IndexType& indices) const -> T {
+        return getLHS().calc(indices) * getRHS();
+    }
 
     template<Tensor X1, Tensor X2>
     class TensorExpr<ExprID::Mul, X1, X2>

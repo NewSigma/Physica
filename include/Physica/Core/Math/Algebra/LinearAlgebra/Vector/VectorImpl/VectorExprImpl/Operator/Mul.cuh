@@ -32,6 +32,10 @@ namespace Physica {
         using Base::isReverseDiff;
     public:
         using Base::Base;
+        /* Operators */
+        using Base::operator*;
+        [[nodiscard]] __host__ __device__ auto operator*(Scalar auto x) const noexcept;
+        [[nodiscard]] __host__ __device__ auto operator-(this auto&&) noexcept;
         /* Operations */
         __host__ __device__ void assign_add(Vector auto&& v) const;
         __device__ void assign_add(Vector auto&& v, const ThreadBlock& block) const;
@@ -53,6 +57,17 @@ namespace Physica {
     private:
         __host__ __device__ void assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept;
     };
+
+    template<Vector V, Scalar U>
+    __host__ __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::operator*(Scalar auto x) const noexcept {
+        return getLHS() * (getRHS() * x);
+    }
+
+    template<Vector V, Scalar U>
+    __host__ __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::operator-(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS() * (-std::forward<Self>(self).getRHS());
+    }
 
     template<Vector V, Scalar U>
     __host__ __device__ void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_add(Vector auto&& v) const {

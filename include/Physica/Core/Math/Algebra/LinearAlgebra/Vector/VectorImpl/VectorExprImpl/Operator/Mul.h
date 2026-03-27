@@ -35,12 +35,14 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operators */
+        using Base::operator*;
         [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept;
         [[nodiscard]] static CoDiff<T> operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept;
         template<int Size>
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept;
         template<int Size>
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept;
+        [[nodiscard]] auto operator*(Scalar auto x) const noexcept;
         [[nodiscard]] auto operator-() const& noexcept;
         [[nodiscard]] auto operator-() && noexcept;
         /* Operations */
@@ -115,6 +117,13 @@ namespace Physica {
             return lhs.template load<Size>(count) * SIMD<T, Size>(rhs);
     }
 
+    // FIXME: we cannot use explicit object parameter, clang 22 rejects because ambiguous overloads
+    template<Vector V, Scalar U>
+    auto VectorExpr<ExprID::Mul, V, U>::operator*(Scalar auto x) const noexcept {
+        return getLHS() * (getRHS() * x);
+    }
+
+    // FIXME: we cannot use explicit object parameter because of regression; seems clang 22 has problem on overload?
     template<Vector V, Scalar U>
     auto VectorExpr<ExprID::Mul, V, U>::operator-() const& noexcept {
         return getLHS() * (-getRHS());

@@ -21,32 +21,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/MatrixExpr.cuh"
 
 namespace Physica {
-    template<class T1, class T2>
-    class device_obj<MatrixExpr<ExprID::Sub, T1, T2>> : public device_obj<BinaryMatrixExpr<ExprID::Sub, T1, T2>> {
-        static_assert(Scalar<T1> || Scalar<T2>, "[Error]: Either types should be Scalar");
-
-        using Base = device_obj<BinaryMatrixExpr<ExprID::Sub, T1, T2>>;
-    protected:
-        using typename Base::T;
-        using typename Base::Tv;
-    public:
-        using Base::Base;
-        /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            if constexpr (Matrix<T1>)
-                return Base::getLHS().calc(row, col) - Base::getRHS();
-            else
-                return Base::getLHS() - Base::getRHS().calc(row, col);
-        }
-
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
-            if constexpr (Matrix<T1>)
-                return Base::getLHS().calc_value(row, col) - Base::getRHS().value();
-            else
-                return Base::getLHS().value() - Base::getRHS().calc_value(row, col);
-        }
-    };
-
     template<Matrix M1, Matrix M2>
     class device_obj<MatrixExpr<ExprID::Sub, M1, M2>>
             : public device_obj<BinaryMatrixExpr<ExprID::Sub, M1, M2>> {
@@ -75,12 +49,12 @@ namespace Physica {
 
     template<Matrix M, Scalar U>
     [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator-(M&& m, U&& x) noexcept requires(DeviceObj<M>) {
-        return device_obj<MatrixExpr<ExprID::Sub, remove_device_obj_t<M&&>, U&&>>(std::forward<M>(m), std::forward<U>(x));
+        return std::forward<M>(m) + (-std::forward<U>(x));
     }
 
     template<Matrix M, Scalar U>
     [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator-(U&& x, M&& m) noexcept requires(DeviceObj<M>) {
-        return device_obj<MatrixExpr<ExprID::Sub, U&&, remove_device_obj_t<M&&>>>(std::forward<U>(x), std::forward<M>(m));
+        return std::forward<U>(x) + (-std::forward<M>(m));
     }
 
     template<Matrix M1, Matrix M2>

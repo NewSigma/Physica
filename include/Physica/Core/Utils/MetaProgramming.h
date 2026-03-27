@@ -85,7 +85,7 @@ namespace Physica {
      * [1] GH101614; https://bgithub.xyz/llvm/llvm-project/issues/101614
      */
     template<typename Tp, typename Up>
-    [[nodiscard]] constexpr decltype(auto) forward_like(Up&& x) noexcept {
+    [[nodiscard, gnu::nodebug]] constexpr decltype(auto) forward_like(Up&& x) noexcept {
         using namespace std;
         constexpr bool _as_rval = is_rvalue_reference_v<Tp&&>;
         if constexpr (is_const_v<remove_reference_t<Tp>>) {

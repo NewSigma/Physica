@@ -21,21 +21,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/VectorExpr.cuh"
 
 namespace Physica {
-    template<Vector V, Scalar U>
-    class device_obj<VectorExpr<ExprID::Sub, V, U>>
-            : public device_obj<BinaryVectorExpr<ExprID::Sub, V, U>> {
-        using Base = device_obj<BinaryVectorExpr<ExprID::Sub, V, U>>;
-    public:
-        using typename Base::ScalarType;
-    public:
-        using Base::Base;
-        /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const {
-            return Base::getLHS().calc(index) - Base::getRHS();
-        }
-
-    };
-
     template<Vector V1, Vector V2>
     class device_obj<VectorExpr<ExprID::Sub, V1, V2>>
             : public device_obj<BinaryVectorExpr<ExprID::Sub, V1, V2>> {
@@ -52,7 +37,12 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator-(V&& v, U&& x) noexcept requires(DeviceObj<V>) {
-        return device_obj<VectorExpr<ExprID::Sub, remove_device_obj_t<V&&>, U&&>>(std::forward<V>(v), std::forward<U>(x));
+        return std::forward<V>(v) + (-std::forward<U>(x));
+    }
+
+    template<Scalar U, Vector V>
+    [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator-(U&& x, V&& v) noexcept requires(DeviceObj<V>) {
+        return std::forward<U>(x) + (-std::forward<V>(v));
     }
 
     template<Vector V1, Vector V2>

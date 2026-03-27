@@ -21,59 +21,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/MatrixExpr.h"
 
 namespace Physica {
-    template<class U, class V>
-    class MatrixExpr<ExprID::Sub, U, V>
-            : public BinaryMatrixExpr<ExprID::Sub, U, V> {
-        static_assert(Scalar<U> || Scalar<V>, "[Error]: Either types should be Scalar");
-
-        using Base = BinaryMatrixExpr<ExprID::Sub, U, V>;
-    protected:
-        using typename Base::T;
-        using typename Base::Tv;
-    public:
-        using Base::Base;
-        /* Operations */
-        void assign(Matrix auto&& target) const;
-
-        [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
-        /* Getters */
-        using Base::getLHS;
-        using Base::getRHS;
-    };
-
-    template<class U, class V>
-    void MatrixExpr<ExprID::Sub, U, V>::assign(Matrix auto&& target) const {
-        if constexpr (Matrix<U>) {
-            if constexpr (MatrixMajor::isSameMajor<U, decltype(target)>())
-                (getLHS().flatten() - getRHS()).assign(target.flatten());
-            else
-                Base::assign(target);
-        }
-        else {
-            if constexpr (MatrixMajor::isSameMajor<V, decltype(target)>())
-                (getLHS() - getRHS().flatten()).assign(target.flatten());
-            else
-                Base::assign(target);
-        }
-    }
-
-    template<class U, class V>
-    auto MatrixExpr<ExprID::Sub, U, V>::calc(size_t row, size_t col) const -> T {
-        if constexpr (Matrix<U>)
-            return Base::getLHS().calc(row, col) - Base::getRHS();
-        else
-            return Base::getLHS() - Base::getRHS().calc(row, col);
-    }
-
-    template<class U, class V>
-    auto MatrixExpr<ExprID::Sub, U, V>::calc_value(size_t row, size_t col) const -> Tv {
-        if constexpr (Matrix<U>)
-            return Base::getLHS().calc_value(row, col) - Base::getRHS().value();
-        else
-            return Base::getLHS().value() - Base::getRHS().calc_value(row, col);
-    }
-
     template<Matrix M1, Matrix M2>
     class MatrixExpr<ExprID::Sub, M1, M2>
             : public BinaryMatrixExpr<ExprID::Sub, M1, M2> {
@@ -134,12 +81,12 @@ namespace Physica {
 
     template<Matrix M, Scalar U>
     [[nodiscard, gnu::always_inline]] auto operator-(M&& m, U&& x) noexcept requires(!DeviceObj<M>) {
-        return MatrixExpr<ExprID::Sub, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
+        return std::forward<M>(m) + (-std::forward<U>(x));
     }
 
     template<Matrix M, Scalar U>
     [[nodiscard, gnu::always_inline]] auto operator-(U&& x, M&& m) noexcept requires(!DeviceObj<M>) {
-        return MatrixExpr<ExprID::Sub, U&&, M&&>(std::forward<U>(x), std::forward<M>(m));
+        return std::forward<U>(x) + (-std::forward<M>(m));
     }
 
     template<Matrix M1, Matrix M2>

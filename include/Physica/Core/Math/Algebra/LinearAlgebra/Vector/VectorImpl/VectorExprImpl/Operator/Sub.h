@@ -21,138 +21,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/VectorExpr.h"
 
 namespace Physica {
-    template<class T1, class T2>
-    class VectorExpr<ExprID::Sub, T1, T2>
-            : public BinaryVectorExpr<ExprID::Sub, T1, T2> {
-        static_assert(Scalar<T1> || Scalar<T2>, "[Error]: Either type should be Scalar");
-
-        using Base = BinaryVectorExpr<ExprID::Sub, T1, T2>;
-    public:
-        using Base::isReverseDiff;
-    protected:
-        using typename Base::T;
-        using typename Base::Tv;
-    public:
-        using Base::Base;
-        /* Operators */
-        [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept;
-        [[nodiscard]] static CoDiff<T> operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept;
-        template<int Size>
-        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept;
-        template<int Size>
-        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept;
-        template<int Size>
-        [[nodiscard]] static SIMD<T, Size> operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept;
-        template<int Size>
-        [[nodiscard]] static SIMD<T, Size> operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs, size_t count) noexcept;
-        /* Operations */
-        [[nodiscard]] CoDiff<T> calc(size_t s) const;
-        [[nodiscard]] Tv calc_value(size_t s) const;
-
-        void reverse(const auto& grad) const noexcept;
-
-        [[nodiscard]] auto values() const noexcept;
-        /* Getters */
-        using Base::getLHS;
-        using Base::getRHS;
-    };
-
-    template<class T1, class T2>
-    auto VectorExpr<ExprID::Sub, T1, T2>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> CoDiff<T> {
-        return *lhs - rhs;
-    }
-
-    template<class T1, class T2>
-    auto VectorExpr<ExprID::Sub, T1, T2>::operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept -> CoDiff<T> {
-        return lhs - *rhs;
-    }
-
-    template<class T1, class T2>
-    template<int Size>
-    auto VectorExpr<ExprID::Sub, T1, T2>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> SIMD<T, Size> {
-        return lhs.template load<Size>() - SIMD<T, Size>(rhs);
-    }
-
-    template<class T1, class T2>
-    template<int Size>
-    auto VectorExpr<ExprID::Sub, T1, T2>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept -> SIMD<T, Size> {
-        return lhs.template load<Size>(count) - SIMD<T, Size>(rhs, count);
-    }
-
-    template<class T1, class T2>
-    template<int Size>
-    auto VectorExpr<ExprID::Sub, T1, T2>::operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs) noexcept -> SIMD<T, Size> {
-        return SIMD<T, Size>(lhs) - rhs.template load<Size>();
-    }
-
-    template<class T1, class T2>
-    template<int Size>
-    auto VectorExpr<ExprID::Sub, T1, T2>::operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs, size_t count) noexcept -> SIMD<T, Size> {
-        return SIMD<T, Size>(lhs, count) - rhs.template load<Size>(count);
-    }
-
-    template<class T1, class T2>
-    auto VectorExpr<ExprID::Sub, T1, T2>::calc(size_t s) const -> CoDiff<T> {
-        if constexpr (Vector<T1>)
-            return getLHS().calc(s) - getRHS();
-        else
-            return getLHS() - getRHS().calc(s);
-    }
-
-    template<class T1, class T2>
-    auto VectorExpr<ExprID::Sub, T1, T2>::calc_value(size_t s) const -> Tv {
-        if constexpr (Vector<T1>)
-            return getLHS().calc_value(s) - getRHS().value();
-        else
-            return getLHS().value() - getRHS().calc_value(s);
-    }
-
-    template<class T1, class T2>
-    void VectorExpr<ExprID::Sub, T1, T2>::reverse(const auto& grad) const noexcept {
-        static_assert(isReverseDiff);
-        const auto& lhs = getLHS();
-        const auto& rhs = getRHS();
-        if constexpr (Scalar<decltype(grad)>) {
-            const auto& g = grad.value();
-            if constexpr (Vector<T1>) {
-                if constexpr (ReverseDiff<T1>)
-                    lhs.reverse(g);
-                if constexpr (ReverseDiff<T2>)
-                    rhs.reverse(-g * Tv(Base::getLength()));
-            }
-            else {
-                if constexpr (ReverseDiff<T1>)
-                    lhs.reverse(g * Tv(Base::getLength()));
-                if constexpr (ReverseDiff<T2>)
-                    rhs.reverse(-g);
-            }
-        }
-        else {
-            static_assert(Vector<decltype(grad)>, "[Error]: Unexpected type");
-            const auto& g = grad.values();
-            if constexpr (Vector<T1>) {
-                if constexpr (ReverseDiff<T1>)
-                    lhs.reverse(g);
-                if constexpr (ReverseDiff<T2>)
-                    rhs.reverse(-g.sum());
-            }
-            else {
-                if constexpr (ReverseDiff<T1>)
-                    lhs.reverse(g.sum());
-                if constexpr (ReverseDiff<T2>)
-                    rhs.reverse(-g);
-            }
-        }
-    }
-
-    template<class T1, class T2>
-    auto VectorExpr<ExprID::Sub, T1, T2>::values() const noexcept {
-        if constexpr (Vector<T1>)
-            return getLHS().values() - getRHS().value();
-        else
-            return getLHS().value() - getRHS().values();
-    }
-
     template<Vector V1, Vector V2>
     class VectorExpr<ExprID::Sub, V1, V2>
             : public BinaryVectorExpr<ExprID::Sub, V1, V2> {
@@ -264,12 +132,12 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     [[nodiscard, gnu::always_inline]] auto operator-(V&& v, U&& x) noexcept requires(!DeviceObj<V>) {
-        return VectorExpr<ExprID::Sub, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
+        return std::forward<V>(v) + (-std::forward<U>(x));
     }
 
     template<Scalar U, Vector V>
     [[nodiscard, gnu::always_inline]] auto operator-(U&& x, V&& v) noexcept requires(!DeviceObj<V>) {
-        return VectorExpr<ExprID::Sub, U&&, V&&>(std::forward<U>(x), std::forward<V>(v));
+        return std::forward<U>(x) + (-std::forward<V>(v));
     }
 
     template<Vector V1, Vector V2>
