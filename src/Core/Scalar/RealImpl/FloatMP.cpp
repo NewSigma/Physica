@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 Weibo He.
+ * Copyright 2019-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <print>
 #include "Physica/Core/Scalar/Real.h"
 #include "Physica/Core/Scalar/RealImpl/FloatMPImpl/AddBasic.h"
 #include "Physica/Core/Scalar/RealImpl/FloatMPImpl/DivBasic.h"
@@ -341,8 +342,8 @@ void Real<FloatMP>::swap(This& __restrict s) noexcept {
 
 void Real<FloatMP>::dump() const noexcept {
     for (int i = 0; i < std::abs(length); ++i)
-        std::cout << byte[i] << ' ';
-    std::cout << std::format("\n{} {}\n", length, power);
+        std::print("{} ", byte[i]);
+    std::println("\n{} {}", length, power);
 }
 /**
  * Returns true if s1 and s2 has the same sign. Both s1 and s2 do not equal to zero.

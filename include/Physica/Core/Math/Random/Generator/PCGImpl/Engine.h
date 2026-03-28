@@ -40,7 +40,7 @@
 #pragma once
 
 #include <cstddef>
-#include <iostream>
+#include <iosfwd>
 #include <utility>
 #include "OutputFn.h"
 

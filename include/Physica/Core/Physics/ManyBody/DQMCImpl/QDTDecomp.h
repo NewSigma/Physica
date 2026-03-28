@@ -54,7 +54,6 @@ namespace Physica {
 
         void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
-        const This& dump() const;
         /* Getters */
         [[nodiscard]] const auto& getMatrixQ() const noexcept { return matrixQ; }
         [[nodiscard]] const auto& getMatrixD() const noexcept { return matrixD; }
@@ -143,13 +142,6 @@ namespace Physica {
         matrixD.swap(obj.matrixD);
         qr.swap(obj.qr);
         detQ.swap(obj.detQ);
-    }
-
-    template<Scalar T>
-    auto QDTDecomp<T>::dump() const -> const This& {
-        MatrixND<T> x = getMatrixQ() * getMatrixD() * getMatrixT();
-        std::cout << x;
-        return *this;
     }
 
     template<Scalar T>
