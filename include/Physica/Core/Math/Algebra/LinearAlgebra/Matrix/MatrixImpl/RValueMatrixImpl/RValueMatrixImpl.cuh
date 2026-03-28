@@ -119,8 +119,21 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ void device_obj<RValueMatrix<Derived>>::assert_assign(const Matrix auto& source) const noexcept {
         static_assert_assign(source);
-        assert(getRow() == source.getRow() && "[Error]: Dimensions do not match");
-        assert(getCol() == source.getCol() && "[Error]: Dimensions do not match");
+
+        constexpr size_t Row1 = RowAtCompile;
+        constexpr size_t Row2 = source.RowAtCompile;
+        if constexpr (Row1 == Dynamic || Row2 == Dynamic)
+            assert(getRow() == source.getRow() && "[Error]: Dimensions do not match");
+
+        constexpr size_t Col1 = RowAtCompile;
+        constexpr size_t Col2 = source.RowAtCompile;
+        if constexpr (Col1 == Dynamic || Col2 == Dynamic)
+            assert(getCol() == source.getCol() && "[Error]: Dimensions do not match");
+        
+        constexpr size_t Size1 = SizeAtCompile;
+        constexpr size_t Size2 = source.SizeAtCompile;
+        if constexpr (Size1 == Dynamic || Size2 == Dynamic)
+            assert(getSize() > 0);
     }
 
     template<class Derived>

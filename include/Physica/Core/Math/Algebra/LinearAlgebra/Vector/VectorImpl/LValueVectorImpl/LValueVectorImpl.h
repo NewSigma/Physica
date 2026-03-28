@@ -91,7 +91,7 @@ namespace Physica {
 
     template<class Derived>
     auto LValueVector<Derived>::calc_value(size_t index) const -> Tv {
-        return operator[](index).value();
+        return calc(index).value();
     }
 
     template<class Derived>
@@ -129,18 +129,6 @@ namespace Physica {
     template<class Derived>
     constexpr auto LValueVector<Derived>::view(this auto&& self) noexcept {
         return View<std::remove_reference_t<decltype(self)>>(self);
-    }
-
-    template<class Derived>
-    auto LValueVector<Derived>::sum() const -> CoDiff<T> {
-        if constexpr (isReverseDiff) {
-            auto& result = co_yield Base::getDerived().values().sum();
-            const auto& grad = result.grad();
-            for (size_t i = 0; i < Base::getLength(); ++i)
-                (*this)[i].reverse(grad);
-        }
-        else
-            co_return Base::sum();
     }
 
     template<class Derived>

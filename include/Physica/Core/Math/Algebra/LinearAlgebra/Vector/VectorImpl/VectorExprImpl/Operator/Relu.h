@@ -44,6 +44,10 @@ namespace Physica {
 
         using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
+        /* Getters */
+        using Base::getExpr;
     };
 
     template<Vector V>
@@ -65,12 +69,12 @@ namespace Physica {
 
     template<Vector V>
     auto VectorExpr<ExprID::Relu, V>::calc(size_t index) const -> CoDiff<T> {
-        return relu(Base::getExpr().calc(index));
+        return relu(getExpr().calc(index));
     }
 
     template<Vector V>
     auto VectorExpr<ExprID::Relu, V>::calc_value(size_t index) const -> Tv {
-        return relu(Base::getExpr().calc_value(index));
+        return relu(getExpr().calc_value(index));
     }
 
     template<Vector V>
@@ -78,9 +82,14 @@ namespace Physica {
         static_assert(isReverseDiff);
         const auto& g = grad.values();
         for (size_t i = 0; i < Base::getLength(); ++i) {
-            auto v = Base::getExpr().calc(i);
+            auto v = getExpr().calc(i);
             v.reverse(v.isPositive() ? g.calc(i) : Tv(0));
         }
+    }
+
+    template<Vector V>
+    auto VectorExpr<ExprID::Relu, V>::values(this auto&& self) noexcept {
+        return relu(std::forward<decltype(self)>(self).getExpr().values());
     }
 
     template<Vector V>

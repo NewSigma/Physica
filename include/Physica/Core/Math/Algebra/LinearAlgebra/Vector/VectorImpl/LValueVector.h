@@ -67,8 +67,6 @@ namespace Physica {
         void writePacket(Packet auto packet, size_t index, size_t count) noexcept;
         [[nodiscard]] constexpr auto view(this auto&&) noexcept;
 
-        [[nodiscard]] CoDiff<T> sum() const;
-
         void toNextMean(size_t lastNumSample, const Vector auto& sample) noexcept;
         void toNextVariance(Derived& mean, size_t lastNumSample, const Vector auto& sample) noexcept;
         void reverse(const auto& grad) const noexcept;
