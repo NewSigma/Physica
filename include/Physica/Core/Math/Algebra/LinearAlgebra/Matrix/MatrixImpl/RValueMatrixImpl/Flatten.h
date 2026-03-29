@@ -42,7 +42,7 @@ namespace Physica {
         [[nodiscard]] T calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
 
-        [[nodiscard]] auto values(this auto&& self) noexcept;
+        [[nodiscard]] auto values(this auto&&) noexcept;
         [[nodiscard]] auto grads(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }

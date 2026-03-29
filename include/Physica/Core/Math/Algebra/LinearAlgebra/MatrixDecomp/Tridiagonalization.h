@@ -94,7 +94,7 @@ namespace Physica {
             if (temp.calc(0).squaredNorm() <= RealType(std::numeric_limits<RealType>::min()))
                 factor = T(1);
             else
-                factor = unit(temp.values().calc(0));
+                factor = unit(temp.calc_value(0));
 
             auto p = buffer.head(order - i - 1);
             const RealType norm = temp.householder(p);

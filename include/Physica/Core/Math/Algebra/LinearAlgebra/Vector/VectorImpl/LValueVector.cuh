@@ -79,6 +79,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t index) noexcept;
         [[nodiscard]] __host__ __device__ auto& front(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto& back(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isLValueVector() noexcept { return true; }
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

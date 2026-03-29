@@ -39,7 +39,8 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t s) const { return cbrt(Base::getExpr().calc(s)); }
         [[nodiscard]] Tv calc_value(size_t index) const { return cbrt(Base::getExpr().calc_value(index)); }
-    };
+        [[nodiscard]] auto values(this auto&&) noexcept;
+};
 
     template<Vector V>
     auto VectorExpr<ExprID::Cbrt, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {
@@ -65,6 +66,12 @@ namespace Physica {
     }
 
     template<Vector V>
+    auto VectorExpr<ExprID::Cbrt, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return cbrt(std::forward<Self>(self).getExpr().values());
+    }
+
+template<Vector V>
     [[nodiscard, gnu::always_inline]] auto cbrt(V&& v) noexcept {
         return VectorExpr<ExprID::Cbrt, V&&>(std::forward<V>(v));
     }

@@ -36,7 +36,15 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
             return sech(Base::getExpr().calc_value(row, col));
         }
+        [[nodiscard]] auto values(this auto&&) noexcept;
     };
+
+    template<Matrix M>
+    auto MatrixExpr<ExprID::Sech, M>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return sech_elem(std::forward<Self>(self).getExpr().values());
+    }
+
 
     template<Matrix M>
     [[nodiscard, gnu::always_inline]] auto sech_elem(M&& m) noexcept requires(!DeviceObj<M>) {

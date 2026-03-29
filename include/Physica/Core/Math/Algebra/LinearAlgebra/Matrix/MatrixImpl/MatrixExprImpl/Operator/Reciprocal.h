@@ -36,7 +36,15 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
             return reciprocal(Base::getExpr().calc_value(row, col));
         }
+        [[nodiscard]] auto values(this auto&&) noexcept;
     };
+
+    template<Matrix M>
+    auto MatrixExpr<ExprID::Reciprocal, M>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return reciprocal_elem(std::forward<Self>(self).getExpr().values());
+    }
+
 
     template<Matrix M>
     [[nodiscard, gnu::always_inline]] auto reciprocal_elem(M&& m) noexcept requires(!DeviceObj<M>) {

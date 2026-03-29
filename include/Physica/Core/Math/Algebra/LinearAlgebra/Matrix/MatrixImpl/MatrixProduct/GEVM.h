@@ -56,7 +56,7 @@ namespace Physica {
         void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
 
-        [[nodiscard]] auto values() const noexcept;
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return vec.getLength(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
@@ -119,8 +119,9 @@ namespace Physica {
     }
 
     template<Vector V, Matrix M>
-    auto GEVM<V, M>::values() const noexcept {
-        return vec.values() * mat.values();
+    auto GEVM<V, M>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
     template<Vector V, Matrix M>

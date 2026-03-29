@@ -180,6 +180,7 @@ namespace Physica {
         [[nodiscard]] bool isHermite() const noexcept;
         [[nodiscard]] bool isFinite() const noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isLValueMatrix() noexcept { return false; }
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         [[nodiscard]] consteval static bool isStaticSymm() noexcept;

@@ -45,7 +45,7 @@ namespace Physica {
 
         [[nodiscard]] T calc(size_t) const { noImpl(__func__); }
 
-        [[nodiscard]] auto values() const noexcept { return m.values() * v.values(); }
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return m.getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
@@ -76,6 +76,12 @@ namespace Physica {
             VectorND<T> temp = lu.getMatrixL().inv() * v;
             (lu.getMatrixU().inv() * temp).assign(target);
         }
+    }
+
+    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
+    auto GEMV<M, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() + std::forward<Self>(self).getRHS().values();
     }
 
     template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)

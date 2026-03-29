@@ -79,10 +79,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept;
 
-        [[nodiscard]] __host__ __device__ const auto& values() const noexcept { return v; }
-        [[nodiscard]] __host__ __device__ auto& values() noexcept { return v; }
-        [[nodiscard]] __host__ __device__ const auto& grads() const noexcept { return g; }
-        [[nodiscard]] __host__ __device__ auto& grads() noexcept { return g; }
+        [[nodiscard]] __host__ __device__ auto&& values(this auto&&) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] __host__ __device__ auto&& grads(this auto&&) noexcept;
         /* Static members */
         template<RNG R>
         [[nodiscard]] static This random_uniform(size_t len);

@@ -113,12 +113,16 @@ namespace Physica {
 
     template<class T>
     class Traits<ValueTensor<T>> {
-        static_assert(T::ScalarType::isDiffable, "[Error]: Unnecessary toValueTensor() call or toGradTensor() call");
     public:
-        using ScalarType = T::PlainType;
+        using ScalarType = T::ScalarType::ValueType;
         constexpr static int Dim = T::Dim;
     };
 
     template<class T, int GradOrder>
-    class Traits<GradTensor<T, GradOrder>> : public Traits<ValueTensor<T>> {};
+    class Traits<GradTensor<T, GradOrder>> {
+        static_assert(T::ScalarType::isDiffable, "[Error]: Redundant GradTensor");
+    public:
+        using ScalarType = Internal::GradTypeHelper<typename T::ScalarType, GradOrder>::Type;
+        constexpr static int Dim = T::Dim;
+    };
 }

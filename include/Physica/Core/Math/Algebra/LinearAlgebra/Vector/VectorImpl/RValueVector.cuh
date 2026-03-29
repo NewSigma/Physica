@@ -108,6 +108,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isLValueVector() noexcept { return false; }
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept { return host_obj::isCompact(); }
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept { return host_obj::isSparse(); }
         [[nodiscard]] __host__ __device__ consteval static size_t maxSizeAtCompile(const Vector auto& other) noexcept;

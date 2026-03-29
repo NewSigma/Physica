@@ -127,6 +127,20 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ auto&& device_obj<DenseVector<Diff<T, Mode, Order>>>::values(this auto&& self) noexcept {
+        return forward_like<decltype(self)>(self.v);
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    template<int GradOrder>
+    __host__ __device__ auto&& device_obj<DenseVector<Diff<T, Mode, Order>>>::grads(this auto&& self) noexcept {
+        if constexpr (GradOrder == 1)
+            return forward_like<decltype(self)>(self.g);
+        else
+            return forward_like<decltype(self)>(self.g.template grads<GradOrder - 1>());
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
     template<RNG R>
     auto device_obj<DenseVector<Diff<T, Mode, Order>>>::random_uniform(size_t len) -> This {
         This result(len);

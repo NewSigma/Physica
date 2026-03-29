@@ -45,6 +45,8 @@ namespace Physica {
         LTensorBlock& operator=(LTensorBlock&& b) noexcept { Base::operator=(static_cast<const Base::Base&>(b)); return *this; }
         /* Operations */
         void resize([[maybe_unused]] Index3D size) { assert(size == count && "[Error]: Resize part of a grid is not allowed"); }
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getDimX() const noexcept { return count[0]; }
         [[nodiscard]] size_t getDimY() const noexcept { return count[1]; }
@@ -67,11 +69,19 @@ namespace Physica {
     auto LTensorBlock<X>::data_ptr(this auto&& self, Index3D index) noexcept {
         return self.grid.data_ptr({self.from[0] + index[0], self.from[1] + index[1], self.from[2] + index[2]});
     }
+
+    template<Tensor X>
+    auto LTensorBlock<X>::values(this auto&& self) noexcept {
+        auto&& v = propagate_rvalue_reference<decltype(self), X>(self.grid).values();
+        using X1 = decltype(v);
+        return LTensorBlock<X1>(std::forward<X1>(v), self.from, self.count);
+    }
 }
 
 namespace Physica {
     template<Tensor X>
     class Traits<LTensorBlock<X>> {
+        static_assert(std::remove_cvref_t<X>::isLValueTensor());
     public:
         using ScalarType = std::remove_cvref_t<X>::ScalarType;
     };

@@ -44,7 +44,8 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const {
             return lncosh(Base::getExpr().calc_value(index));
         }
-    };
+        [[nodiscard]] auto values(this auto&&) noexcept;
+};
 
     template<Vector V>
     auto VectorExpr<ExprID::LnCosh, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {
@@ -64,6 +65,12 @@ namespace Physica {
     }
 
     template<Vector V>
+    auto VectorExpr<ExprID::LnCosh, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return lncosh(std::forward<Self>(self).getExpr().values());
+    }
+
+template<Vector V>
     [[nodiscard, gnu::always_inline]] auto lncosh(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::LnCosh, V&&>(std::forward<V>(v));
     }

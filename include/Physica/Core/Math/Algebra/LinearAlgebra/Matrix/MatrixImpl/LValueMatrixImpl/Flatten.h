@@ -40,7 +40,7 @@ namespace Physica {
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
 
-        [[nodiscard]] auto values(this auto&& self) noexcept;
+        [[nodiscard]] auto values(this auto&&) noexcept;
         [[nodiscard]] auto grads(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }

@@ -38,6 +38,8 @@ namespace Physica {
 
         void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
+        
+        [[nodiscard]] auto values(this auto&&) noexcept;
     };
 
     template<Matrix M>
@@ -56,6 +58,13 @@ namespace Physica {
         const auto& expr = Base::getExpr();
         expr.reverse(Tv(2) * hadamard(expr.values(), grad));
     }
+
+    template<Matrix M>
+    auto MatrixExpr<ExprID::Square, M>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return square_elem(std::forward<Self>(self).getExpr().values());
+    }
+
 
     template<Matrix M>
     [[nodiscard, gnu::always_inline]] auto square_elem(M&& m) noexcept requires(!DeviceObj<M>) {

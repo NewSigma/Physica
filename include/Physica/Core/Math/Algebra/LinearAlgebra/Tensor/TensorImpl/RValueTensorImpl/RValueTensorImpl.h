@@ -85,8 +85,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueTensor<Derived>::values() const noexcept {
-        return ValueTensor<Derived>(Base::getDerived());
+    decltype(auto) RValueTensor<Derived>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (isDiffable())
+            return ValueVector<Self>(std::forward<Self>(self));
+        else
+            return std::forward<Self>(self);
     }
 
     template<class Derived>

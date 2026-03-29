@@ -37,6 +37,7 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
             return ln(Base::getExpr().calc_value(row, col));
         }
+        [[nodiscard]] auto values(this auto&&) noexcept;
 
         void reverse(const Vector auto& grad) const noexcept;
     };
@@ -47,6 +48,13 @@ namespace Physica {
         const auto& expr = Base::getExpr();
         expr.reverse(divide(grad, expr.values()));
     }
+
+    template<Matrix M>
+    auto MatrixExpr<ExprID::Ln, M>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return ln_elem(std::forward<Self>(self).getExpr().values());
+    }
+
 
     template<Matrix M>
     [[nodiscard, gnu::always_inline]] auto ln_elem(M&& m) noexcept requires(!DeviceObj<M>) {

@@ -34,8 +34,14 @@ namespace Physica {
             return Base::getLHS().calc(row, col) + Base::getRHS();
         }
 
-        __host__ __device__ auto values() const noexcept { return Base::getLHS().values() + Base::getRHS().values(); }
+        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
     };
+
+    template<Matrix M, Scalar U>
+    __host__ __device__ auto device_obj<MatrixExpr<ExprID::Add, M, U>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() + std::forward<Self>(self).getRHS().value();
+    }
 
     template<Matrix M, Vector U>
     class device_obj<MatrixExpr<ExprID::Add, M, U>>
@@ -79,8 +85,14 @@ namespace Physica {
                 Base::getRHS().reverse(grad.sum_cols());
         }
 
-        __host__ __device__ auto values() const noexcept { return Base::getLHS().values() + Base::getRHS().values(); }
+        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
     };
+
+    template<Matrix M, Vector U>
+    __host__ __device__ auto device_obj<MatrixExpr<ExprID::Add, M, U>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() + std::forward<Self>(self).getRHS().values();
+    }
 
     template<Matrix M1, Matrix M2>
     class device_obj<MatrixExpr<ExprID::Add, M1, M2>>
@@ -105,8 +117,14 @@ namespace Physica {
             return Base::getLHS().calc_value(row, col) + Base::getRHS().calc_value(row, col);
         }
 
-        __host__ __device__ auto values() const noexcept { return Base::getLHS().values() + Base::getRHS().values(); }
+        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
     };
+
+    template<Matrix M1, Matrix M2>
+    __host__ __device__ auto device_obj<MatrixExpr<ExprID::Add, M1, M2>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() + std::forward<Self>(self).getRHS().values();
+    }
 
     template<Matrix M, Scalar U>
     [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator+(M&& m, U&& x) noexcept requires(DeviceObj<M>) {

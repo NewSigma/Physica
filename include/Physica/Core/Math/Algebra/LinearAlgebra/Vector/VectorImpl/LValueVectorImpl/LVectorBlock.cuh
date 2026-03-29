@@ -114,5 +114,7 @@ namespace Physica {
 
 namespace Physica {
     template<Vector V, size_t Length>
-    class Traits<device_obj<LVectorBlock<V, Length>>> : public Traits<LVectorBlock<V, Length>> {};
+    class Traits<device_obj<LVectorBlock<V, Length>>> : public Traits<LVectorBlock<V, Length>> {
+        static_assert(!DeviceObj<V>);
+    };
 }

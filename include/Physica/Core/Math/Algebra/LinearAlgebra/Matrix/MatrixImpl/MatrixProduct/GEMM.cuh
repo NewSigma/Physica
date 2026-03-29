@@ -55,7 +55,7 @@ namespace Physica {
 
         void reverse(const Matrix auto& grad) const noexcept;
 
-        __host__ __device__ auto values() const noexcept { return getLHS().values() * getRHS().values(); }
+        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getLHS().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return getRHS().getCol(); }
@@ -100,6 +100,12 @@ namespace Physica {
             getLHS().reverse(grad * getRHS().values().transpose());
         if constexpr (ReverseDiff<M2>)
             getRHS().reverse(getLHS().values().transpose() * grad);
+    }
+
+    template<Matrix M1, Matrix M2>
+    __host__ __device__ auto device_obj<GEMM<M1, M2>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
     template<Matrix M1, Matrix M2>

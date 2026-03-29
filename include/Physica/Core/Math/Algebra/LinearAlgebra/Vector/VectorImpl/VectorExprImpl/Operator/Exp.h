@@ -48,6 +48,8 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const;
 
         void reverse(const auto& grad) const noexcept;
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
     };
 
     template<Vector V>
@@ -104,6 +106,12 @@ namespace Physica {
             static_assert(Vector<U>, "[Error]: Unexpected type");
             expr.reverse(hadamard(exp(expr.values()), grad.values()));
         }
+    }
+
+    template<Vector V>
+    auto VectorExpr<ExprID::Exp, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return exp(std::forward<Self>(self).getExpr().values());
     }
 
     template<Vector V>

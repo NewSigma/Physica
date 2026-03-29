@@ -42,7 +42,8 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const { return ln1p(Base::getExpr().calc_value(index)); }
 
         void reverse(const Scalar auto& grad) const noexcept;
-    };
+        [[nodiscard]] auto values(this auto&&) noexcept;
+};
 
     template<Vector V>
     auto VectorExpr<ExprID::Ln1p, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {
@@ -69,6 +70,12 @@ namespace Physica {
     }
 
     template<Vector V>
+    auto VectorExpr<ExprID::Ln1p, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return ln1p(std::forward<Self>(self).getExpr().values());
+    }
+
+template<Vector V>
     [[nodiscard, gnu::always_inline]] auto ln1p(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Ln1p, V&&>(std::forward<V>(v));
     }

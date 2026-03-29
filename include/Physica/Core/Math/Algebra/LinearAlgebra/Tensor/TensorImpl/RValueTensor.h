@@ -29,7 +29,7 @@ namespace Physica {
     template<class T> class ImagTensor;
     template<class T> class SquaredNormTensor;
     template<class T> class NormTensor;
-    template<class T> class ValueTensor;
+    template<class T> class ValueTensor;    
     template<class T, int GradOrder> class GradTensor;
 
     template<class Derived>
@@ -65,13 +65,13 @@ namespace Physica {
         decltype(auto) resize(std::integral auto... dims) { return Base::getDerived().resize(dims...); }
         decltype(auto) resize(IndexType shape) { return Base::getDerived().resize(shape); }
 
-        auto reals() const noexcept;
-        auto imags() const noexcept;
-        auto squaredNorms() const noexcept;
-        auto norms() const noexcept;
-        auto values() const noexcept;
+        [[nodiscard]] auto reals() const noexcept;
+        [[nodiscard]] auto imags() const noexcept;
+        [[nodiscard]] auto squaredNorms() const noexcept;
+        [[nodiscard]] auto norms() const noexcept;
+        [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         template<int GradOrder = 1>
-        auto grads() const noexcept;
+        [[nodiscard]] auto grads() const noexcept;
         /* Getters */
         [[nodiscard]] constexpr int ndim() const noexcept { return NDim; }
         [[nodiscard]] size_t dim(int index) const noexcept;
@@ -79,6 +79,7 @@ namespace Physica {
         [[nodiscard]] size_t getSize() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isDiffable() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isLValueTensor() noexcept { return false; }
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         using TensorBase::forPointIndexInTensor;

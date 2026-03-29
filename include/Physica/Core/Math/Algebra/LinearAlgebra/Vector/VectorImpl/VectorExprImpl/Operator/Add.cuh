@@ -117,7 +117,7 @@ namespace Physica {
 
         using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
-        auto values() const noexcept { return Base::getLHS().values() + Base::getRHS().values(); }
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -169,6 +169,12 @@ namespace Physica {
             Base::getLHS().reverse(g);
         if constexpr (ReverseDiff<V2>)
             Base::getRHS().reverse(g);
+    }
+
+    template<Vector V1, Vector V2>
+    auto device_obj<VectorExpr<ExprID::Add, V1, V2>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() + std::forward<Self>(self).getRHS().values();
     }
 
     template<Vector V, Scalar U>

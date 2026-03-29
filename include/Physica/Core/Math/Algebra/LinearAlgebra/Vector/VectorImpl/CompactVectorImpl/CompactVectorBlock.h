@@ -114,7 +114,7 @@ namespace Physica {
     template<Vector V, size_t Length>
     template<size_t Length_>
     auto CompactVectorBlock<V, Length>::head(this auto&& self, size_t to) noexcept {
-        decltype(auto) v = propagate_rvalue_reference<decltype(self), V>(self.vec);
+        auto&& v = propagate_rvalue_reference<decltype(self), V>(self.vec);
         using V1 = decltype(v);
         return CompactVectorBlock<V1, Length_>(std::forward<V1>(v), self.from, self.from + to);
     }
@@ -122,7 +122,7 @@ namespace Physica {
     template<Vector V, size_t Length>
     template<size_t Length_>
     auto CompactVectorBlock<V, Length>::tail(this auto&& self, size_t from) noexcept {
-        decltype(auto) v = propagate_rvalue_reference<decltype(self), V>(self.vec);
+        auto&& v = propagate_rvalue_reference<decltype(self), V>(self.vec);
         using V1 = decltype(v);
         return CompactVectorBlock<V1, Length_>(std::forward<V1>(v), self.from + from, self.to);
     }
@@ -130,14 +130,14 @@ namespace Physica {
     template<Vector V, size_t Length>
     template<size_t Length_>
     auto CompactVectorBlock<V, Length>::segment(this auto&& self, size_t from, size_t to) noexcept {
-        decltype(auto) v = propagate_rvalue_reference<decltype(self), V>(self.vec);
+        auto&& v = propagate_rvalue_reference<decltype(self), V>(self.vec);
         using V1 = decltype(v);
         return CompactVectorBlock<V1, Length_>(std::forward<V1>(v), self.from + from, self.from + to);
     }
 
     template<Vector V, size_t Length>
     auto CompactVectorBlock<V, Length>::values(this auto&& self) noexcept {
-        decltype(auto) v = propagate_rvalue_reference<decltype(self), V>(self.vec.values());
+        auto&& v = propagate_rvalue_reference<decltype(self), V>(self.vec).values();
         using V1 = decltype(v);
         return CompactVectorBlock<V1, Length>(std::forward<V1>(v), self.from, self.to);
     }
@@ -145,7 +145,7 @@ namespace Physica {
     template<Vector V, size_t Length>
     template<int GradOrder>
     auto CompactVectorBlock<V, Length>::grads(this auto&& self) noexcept {
-        decltype(auto) g = propagate_rvalue_reference<decltype(self), V>(self.vec.template grads<GradOrder>());
+        auto&& g = propagate_rvalue_reference<decltype(self), V>(self.vec).template grads<GradOrder>();
         using V1 = decltype(g);
         return CompactVectorBlock<V1, Length>(std::forward<V1>(g), self.from, self.to);
     }

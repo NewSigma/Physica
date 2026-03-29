@@ -48,7 +48,7 @@ namespace Physica {
         void reverse(const auto& grad) const noexcept;
         using Base::reverse;
 
-        [[nodiscard]] auto values() const noexcept;
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         using Base::getExpr;
     };
@@ -100,8 +100,9 @@ namespace Physica {
     }
 
     template<Vector V>
-    auto VectorExpr<ExprID::Square, V>::values() const noexcept {
-        return square(getExpr().values());
+    auto VectorExpr<ExprID::Square, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return square(std::forward<Self>(self).getExpr().values());
     }
 
     template<Vector V>

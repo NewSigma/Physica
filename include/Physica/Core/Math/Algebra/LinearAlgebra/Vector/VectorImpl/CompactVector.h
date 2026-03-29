@@ -42,8 +42,6 @@ namespace Physica {
         constexpr static int DataDim = 1 + (DiffOrder > 0);
         using DataSetType = H5DataSet<DataDim>;
         using DataSpaceType = H5DataSpace<DataDim>;
-
-        using ValuesRtnTy = std::conditional<Diffable<ScalarType>, ValueVector<This>, Derived&>::type;
     public:
         ~CompactVector() = default;
         /* Operators */

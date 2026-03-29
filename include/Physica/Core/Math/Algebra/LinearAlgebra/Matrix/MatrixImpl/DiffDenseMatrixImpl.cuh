@@ -135,6 +135,20 @@ namespace Physica {
     }
 
     template<tparams>
+    __host__ __device__ auto&& DiffDenseMatrix::values(this auto&& self) noexcept {
+        return forward_like<decltype(self)>(self.v);
+    }
+
+    template<tparams>
+    template<int GradOrder>
+    __host__ __device__ auto&& DiffDenseMatrix::grads(this auto&& self) noexcept {
+        if constexpr (GradOrder == 1)
+            return forward_like<decltype(self)>(self.g);
+        else
+            return forward_like<decltype(self)>(self.g.template grads<GradOrder - 1>());
+    }
+
+    template<tparams>
     template<RNG R>
     auto device_obj<DenseMatrix>::random_uniform(size_t row, size_t col) -> This {
         return This(ValueMatrix::template random_uniform<R>(row, col));

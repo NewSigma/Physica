@@ -123,6 +123,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
         [[nodiscard]] decltype(auto) refFromMajorMinor(this auto&&, size_t major, size_t minor) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isLValueMatrix() noexcept { return true; }
     protected:
         LValueMatrix() = default;
         LValueMatrix(const This&) = default;

@@ -46,6 +46,7 @@ namespace Physica {
         /* Operations */
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == colCount); }
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
@@ -62,6 +63,16 @@ namespace Physica {
     auto LMatrixBlock<M, 1, Col>::data_ptr(this auto&& self, size_t index) noexcept {
         assert(index < self.colCount);
         return self.mat.data_ptr(self.fromRow, self.fromCol + index);
+    }
+
+    template<Matrix M, size_t Col>
+    auto LMatrixBlock<M, 1, Col>::values(this auto&& self) noexcept {
+        auto&& v = propagate_rvalue_reference<decltype(self), M>(self.mat).values();
+        using M1 = decltype(v);
+        if constexpr (v.isLValueMatrix())
+            return LMatrixBlock<M1, 1, Col>(std::forward<M1>(v), self.fromRow, self.fromCol, self.getLength());
+        else
+            return RMatrixBlock<M1, 1, Dynamic>(std::forward<M1>(v), self.fromRow, self.fromCol, self.getLength());
     }
 
     template<Matrix M, size_t Row>
@@ -86,6 +97,7 @@ namespace Physica {
         /* Operations */
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
@@ -102,6 +114,16 @@ namespace Physica {
     auto LMatrixBlock<M, Row, 1>::data_ptr(this auto&& self, size_t index) noexcept {
         assert(index < self.rowCount);
         return self.mat.data_ptr(self.fromRow + index, self.fromCol);
+    }
+
+    template<Matrix M, size_t Row>
+    auto LMatrixBlock<M, Row, 1>::values(this auto&& self) noexcept {
+        auto&& v = propagate_rvalue_reference<decltype(self), M>(self.mat).values();
+        using M1 = decltype(v);
+        if constexpr (v.isLValueMatrix())
+            return LMatrixBlock<M1, Row, 1>(std::forward<M1>(v), self.fromRow, self.rowCount, self.fromCol);
+        else
+            return RMatrixBlock<M1, Dynamic, 1>(std::forward<M1>(v), self.fromRow, self.rowCount, self.fromCol);
     }
 
     template<Matrix M>
@@ -125,6 +147,7 @@ namespace Physica {
         /* Operations */
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == 1); }
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t getLength() noexcept { return 1; }
         [[nodiscard]] auto data_ptr(this auto&& self, [[maybe_unused]] size_t index) noexcept;
@@ -141,6 +164,16 @@ namespace Physica {
     auto LMatrixBlock<M, 1, 1>::data_ptr(this auto&& self, [[maybe_unused]] size_t index) noexcept {
         assert(index == 0 && "[Error]: Index overflow");
         return self.mat.data_ptr(self.fromRow, self.fromCol);
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, 1, 1>::values(this auto&& self) noexcept {
+        auto&& v = propagate_rvalue_reference<decltype(self), M>(self.mat).values();
+        using M1 = decltype(v);
+        if constexpr (v.isLValueMatrix())
+            return LMatrixBlock<M1, 1, 1>(std::forward<M1>(v), self.fromRow, self.fromCol);
+        else
+            return RMatrixBlock<M1, 1, Dynamic>(std::forward<M1>(v), self.fromRow, self.fromCol, 1);
     }
 
     template<Matrix M>
@@ -182,6 +215,7 @@ namespace Physica {
         [[nodiscard]] auto bottomRightCorner(this auto&&, size_t fromRow, size_t fromCol) noexcept;
         [[nodiscard]] auto bottomRightCorner(this auto&&, size_t from) noexcept;
         [[nodiscard]] auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return rowCount; }
         [[nodiscard]] size_t getCol() const noexcept { return colCount; }
@@ -201,7 +235,7 @@ namespace Physica {
     template<Matrix M>
     auto LMatrixBlock<M, Dynamic, Dynamic>::row(this auto&& self, size_t r) noexcept {
         assert(r < self.getRow());
-        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         return LMatrixBlock<M1, 1, Dynamic>(std::forward<M1>(m), self.fromRow + r, self.fromCol, self.getCol());
     }
@@ -209,7 +243,7 @@ namespace Physica {
     template<Matrix M>
     auto LMatrixBlock<M, Dynamic, Dynamic>::col(this auto&& self, size_t c) noexcept {
         assert(c < self.getCol());
-        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         return LMatrixBlock<M1, Dynamic, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c);
     }
@@ -217,7 +251,7 @@ namespace Physica {
     template<Matrix M>
     auto LMatrixBlock<M, Dynamic, Dynamic>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
         Base::checkBlock(self, fromRow, rowCount, 0, self.getCol());
-        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         return LMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow + fromRow, rowCount, self.fromCol, self.getCol());
     }
@@ -225,7 +259,7 @@ namespace Physica {
     template<Matrix M>
     auto LMatrixBlock<M, Dynamic, Dynamic>::topRows(this auto&& self, size_t to) noexcept {
         Base::checkBlock(self, 0, to, 0, self.getCol());
-        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         return LMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow, to, self.fromCol, self.getCol());
     }
@@ -233,7 +267,7 @@ namespace Physica {
     template<Matrix M>
     auto LMatrixBlock<M, Dynamic, Dynamic>::bottomRows(this auto&& self, size_t from) noexcept {
         Base::checkBlock(self, from, self.getRow() - from, 0, self.getCol());
-        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         return LMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow + from, self.getRow() - from, self.fromCol, self.getCol());
     }
@@ -241,7 +275,7 @@ namespace Physica {
     template<Matrix M>
     auto LMatrixBlock<M, Dynamic, Dynamic>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
         Base::checkBlock(self, 0, self.getRow(), fromCol, colCount);
-        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         return LMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + fromCol, colCount);
     }
@@ -249,7 +283,7 @@ namespace Physica {
     template<Matrix M>
     auto LMatrixBlock<M, Dynamic, Dynamic>::leftCols(this auto&& self, size_t to) noexcept {
         Base::checkBlock(self, 0, self.getRow(), 0, to);
-        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         return LMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol, to);
     }
@@ -257,7 +291,7 @@ namespace Physica {
     template<Matrix M>
     auto LMatrixBlock<M, Dynamic, Dynamic>::rightCols(this auto&& self, size_t from) noexcept {
         Base::checkBlock(self, 0, self.getRow(), from, self.getCol() - from);
-        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         return LMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + from, self.getCol() - from);
     }
@@ -265,7 +299,7 @@ namespace Physica {
     template<Matrix M>
     auto LMatrixBlock<M, Dynamic, Dynamic>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
         Base::checkBlock(self, 0, toRow, 0, toCol);
-        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         return LMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow, toRow, self.fromCol, toCol);
     }
@@ -273,7 +307,7 @@ namespace Physica {
     template<Matrix M>
     auto LMatrixBlock<M, Dynamic, Dynamic>::topLeftCorner(this auto&& self, size_t to) noexcept {
         Base::checkBlock(self, 0, to, 0, to);
-        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         return LMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow, to, self.fromCol, to);
     }
@@ -281,7 +315,7 @@ namespace Physica {
     template<Matrix M>
     auto LMatrixBlock<M, Dynamic, Dynamic>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
         Base::checkBlock(self, 0, toRow, fromCol, self.getCol() - fromCol);
-        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         return LMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow, toRow, self.fromCol + fromCol, self.getCol() - fromCol);
     }
@@ -289,7 +323,7 @@ namespace Physica {
     template<Matrix M>
     auto LMatrixBlock<M, Dynamic, Dynamic>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
         Base::checkBlock(self, fromRow, self.getRow() - fromRow, 0, toCol);
-        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         return LMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol, toCol);
     }
@@ -297,7 +331,7 @@ namespace Physica {
     template<Matrix M>
     auto LMatrixBlock<M, Dynamic, Dynamic>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
         Base::checkBlock(self, fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
-        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         return LMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol + fromCol, self.getCol() - fromCol);
     }
@@ -305,7 +339,7 @@ namespace Physica {
     template<Matrix M>
     auto LMatrixBlock<M, Dynamic, Dynamic>::bottomRightCorner(this auto&& self, size_t from) noexcept {
         Base::checkBlock(self, from, self.getRow() - from, from, self.getCol() - from);
-        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         return LMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow + from, self.getRow() - from, self.fromCol + from, self.getCol() - from);
     }
@@ -313,7 +347,7 @@ namespace Physica {
     template<Matrix M>
     auto LMatrixBlock<M, Dynamic, Dynamic>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
         Base::checkBlock(self, fromRow, rowCount, fromCol, colCount);
-        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         return LMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow + fromRow, rowCount, self.fromCol + fromCol, colCount);
     }
@@ -324,11 +358,22 @@ namespace Physica {
         assert(col < self.colCount);
         return self.mat.data_ptr(row + self.fromRow, col + self.fromCol);
     }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::values(this auto&& self) noexcept {
+        auto&& v = propagate_rvalue_reference<decltype(self), M>(self.mat).values();
+        using M1 = decltype(v);
+        if constexpr (v.isLValueMatrix())
+            return LMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(v), self.fromRow, self.rowCount, self.fromCol, self.colCount);
+        else
+            return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(v), self.fromRow, self.rowCount, self.fromCol, self.colCount);
+    }
 }
 
 namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
     class Traits<LMatrixBlock<M, Row, Col>> {
+        static_assert(std::remove_cvref_t<M>::isLValueMatrix());
         using M1 = std::remove_cvref<M>::type;
     public:
         using ScalarType = M1::ScalarType;

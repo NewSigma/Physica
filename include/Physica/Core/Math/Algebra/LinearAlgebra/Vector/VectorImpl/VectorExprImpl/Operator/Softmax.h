@@ -42,7 +42,8 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t i, Tv lnsumexp) const;
 
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
-    };
+        [[nodiscard]] auto values(this auto&&) noexcept;
+};
 
     template<Vector V>
     auto VectorExpr<ExprID::Softmax, V>::calc(size_t i, T lnsumexp) const -> T {
@@ -70,6 +71,12 @@ namespace Physica {
     }
 
     template<Vector V>
+    auto VectorExpr<ExprID::Softmax, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return softmax(std::forward<Self>(self).getExpr().values());
+    }
+
+template<Vector V>
     [[nodiscard, gnu::always_inline]] auto softmax(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Softmax, V&&>(std::forward<V>(v));
     }

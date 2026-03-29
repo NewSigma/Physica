@@ -39,12 +39,10 @@ namespace Physica {
         void reverse(const auto& grad) const noexcept;
         using Base::reverse;
 
-        [[nodiscard]] auto row(size_t r) noexcept;
-        [[nodiscard]] const auto row(size_t r) const noexcept;
-        [[nodiscard]] auto col(size_t c) noexcept;
-        [[nodiscard]] const auto col(size_t c) const noexcept;
+        [[nodiscard]] auto row(this auto&&, size_t r) noexcept;
+        [[nodiscard]] auto col(this auto&&, size_t c) noexcept;
 
-        [[nodiscard]] auto values() const noexcept;
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         using Base::getExpr;
     };
@@ -69,28 +67,21 @@ namespace Physica {
     }
 
     template<Matrix M>
-    auto MatrixExpr<ExprID::Ln1p, M>::row(size_t r) noexcept {
-        return ln1p(getExpr().row(r));
+    auto MatrixExpr<ExprID::Ln1p, M>::row(this auto&& self, size_t r) noexcept {
+        using Self = decltype(self);
+        return ln1p(std::forward<Self>(self).getExpr().row(r));
     }
 
     template<Matrix M>
-    const auto MatrixExpr<ExprID::Ln1p, M>::row(size_t r) const noexcept {
-        return const_cast<This&>(*this).row(r);
+    auto MatrixExpr<ExprID::Ln1p, M>::col(this auto&& self, size_t c) noexcept {
+        using Self = decltype(self);
+        return ln1p(std::forward<Self>(self).getExpr().col(c));
     }
 
     template<Matrix M>
-    auto MatrixExpr<ExprID::Ln1p, M>::col(size_t c) noexcept {
-        return ln1p(getExpr().col(c));
-    }
-
-    template<Matrix M>
-    const auto MatrixExpr<ExprID::Ln1p, M>::col(size_t c) const noexcept {
-        return const_cast<This&>(*this).col(c);
-    }
-
-    template<Matrix M>
-    auto MatrixExpr<ExprID::Ln1p, M>::values() const noexcept {
-        return ln1p_elem(getExpr().values());
+    auto MatrixExpr<ExprID::Ln1p, M>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return ln1p_elem(std::forward<Self>(self).getExpr().values());
     }
 
     template<Matrix M>

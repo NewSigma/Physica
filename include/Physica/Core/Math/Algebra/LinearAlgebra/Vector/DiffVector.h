@@ -72,7 +72,7 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] auto data(this auto&&) noexcept;
 
-        [[nodiscard]] auto&& values(this auto&& self) noexcept;
+        [[nodiscard]] auto&& values(this auto&&) noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] auto&& grads(this auto&&) noexcept;
         /* Static members */

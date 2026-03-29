@@ -45,11 +45,11 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void assign(Vector auto& target) const;
 
+        [[nodiscard]] __device__ T calc(size_t index) const;
         void reverse(const Vector auto& grad) const noexcept;
 
-        auto values() const noexcept { return mat.getDerived().values() * vec.getDerived().values(); }
+        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __device__ T calc(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getLHS().getRow(); }
         [[nodiscard]] __host__ __device__ auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto&& getRHS(this auto&&) noexcept;
@@ -58,11 +58,6 @@ namespace Physica {
     template<Matrix M, Vector V>
     __host__ __device__ device_obj<GEMV<M, V>>::device_obj(RefM mat_, RefV vec_) : mat(asStruct(mat_)), vec(asStruct(vec_)) {
         assert(getLHS().getCol() == getRHS().getLength());
-    }
-
-    template<Matrix M, Vector V>
-    __device__ auto device_obj<GEMV<M, V>>::calc(size_t index) const -> T {
-        return getLHS().row(index) * getRHS();
     }
 
     template<Matrix M, Vector V>
@@ -84,6 +79,11 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V>
+    __device__ auto device_obj<GEMV<M, V>>::calc(size_t index) const -> T {
+        return getLHS().row(index) * getRHS();
+    }
+
+    template<Matrix M, Vector V>
     void device_obj<GEMV<M, V>>::reverse(const Vector auto& grad) const noexcept {
         static_assert(Base::isReverseDiff);
         const auto& g = grad.values();
@@ -94,6 +94,12 @@ namespace Physica {
             m.reverse(g * v.values().transpose());
         if constexpr (ReverseDiff<V>)
             v.reverse(m.values().transpose() * g);
+    }
+
+    template<Matrix M, Vector V>
+    __host__ __device__ auto device_obj<GEMV<M, V>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
     template<Matrix M, Vector V>

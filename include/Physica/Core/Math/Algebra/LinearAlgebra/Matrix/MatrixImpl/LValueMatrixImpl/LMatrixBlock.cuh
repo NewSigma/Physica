@@ -289,6 +289,6 @@ namespace Physica {
 namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
     class Traits<device_obj<LMatrixBlock<M, Row, Col>>> : public Traits<LMatrixBlock<M, Row, Col>> {
-        static_assert(!is_device_obj<M>::value);
+        static_assert(!DeviceObj<M>);
     };
 }

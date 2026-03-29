@@ -103,6 +103,8 @@ namespace Physica {
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
         [[nodiscard]] auto& front(this auto&&) noexcept;
         [[nodiscard]] auto& back(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isLValueVector() noexcept { return true; }
     protected:
         LValueVector() = default;
         LValueVector(const This&) = default;

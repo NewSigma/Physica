@@ -46,10 +46,11 @@ namespace Physica {
 
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return abs(Base::getExpr().calc(index)); }
         [[nodiscard]] Tv calc_value(size_t index) const { return abs(Base::getExpr().calc_value(index)); }
-
         void reverse(const auto& grad) const noexcept;
 
         [[nodiscard]] T max() const;
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
     };
 
     template<Vector V>
@@ -100,6 +101,12 @@ namespace Physica {
             return sqrt(Base::getExpr().squaredNorms().max());
         else
             return Base::max();
+    }
+
+    template<Vector V>
+    auto VectorExpr<ExprID::Abs, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return abs(std::forward<Self>(self).getExpr().values());
     }
 
     template<Vector V>

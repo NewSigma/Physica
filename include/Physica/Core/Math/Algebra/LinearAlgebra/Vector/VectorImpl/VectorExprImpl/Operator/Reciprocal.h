@@ -44,7 +44,8 @@ namespace Physica {
 
         void reverse(const Vector auto& grad) const noexcept;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
-    };
+        [[nodiscard]] auto values(this auto&&) noexcept;
+};
 
     template<Vector V>
     auto VectorExpr<ExprID::Reciprocal, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {
@@ -88,6 +89,12 @@ namespace Physica {
     }
 
     template<Vector V>
+    auto VectorExpr<ExprID::Reciprocal, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return reciprocal(std::forward<Self>(self).getExpr().values());
+    }
+
+template<Vector V>
     [[nodiscard, gnu::always_inline]] auto reciprocal(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Reciprocal, V&&>(std::forward<V>(v));
     }

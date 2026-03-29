@@ -91,6 +91,8 @@ namespace Physica {
         using Base::getCol;
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
         [[nodiscard]] __device__ decltype(auto) refFromMajorMinor(this auto&&, size_t major, size_t minor) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isLValueMatrix() noexcept { return true; }
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

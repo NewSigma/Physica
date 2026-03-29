@@ -40,7 +40,7 @@ namespace Physica {
         using Base::reverse;
         void reverse(const auto& grad) const noexcept;
 
-        [[nodiscard]] auto values() const noexcept;
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -75,8 +75,9 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    [[nodiscard]] auto MatrixExpr<ExprID::Sub, M1, M2>::values() const noexcept {
-        return getLHS().values() - getRHS().values();
+    auto MatrixExpr<ExprID::Sub, M1, M2>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() - std::forward<Self>(self).getRHS().values();
     }
 
     template<Matrix M, Scalar U>

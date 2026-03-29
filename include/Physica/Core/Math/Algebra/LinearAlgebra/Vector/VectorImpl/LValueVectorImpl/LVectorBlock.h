@@ -55,6 +55,8 @@ namespace Physica {
 
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
@@ -86,7 +88,7 @@ namespace Physica {
     template<Vector V, size_t Length>
     template<size_t Length_>
     auto LVectorBlock<V, Length>::head(this auto&& self, size_t to) noexcept {
-        decltype(auto) v = propagate_rvalue_reference<decltype(self), V>(self.vec);
+        auto&& v = propagate_rvalue_reference<decltype(self), V>(self.vec);
         using V1 = decltype(v);
         return LVectorBlock<V1, Length_>(std::forward<V1>(v), self.from, self.from + to);
     }
@@ -94,7 +96,7 @@ namespace Physica {
     template<Vector V, size_t Length>
     template<size_t Length_>
     auto LVectorBlock<V, Length>::tail(this auto&& self, size_t from) noexcept {
-        decltype(auto) v = propagate_rvalue_reference<decltype(self), V>(self.vec);
+        auto&& v = propagate_rvalue_reference<decltype(self), V>(self.vec);
         using V1 = decltype(v);
         return LVectorBlock<V1, Length_>(std::forward<V1>(v), self.from + from, self.to);
     }
@@ -102,9 +104,19 @@ namespace Physica {
     template<Vector V, size_t Length>
     template<size_t Length_>
     auto LVectorBlock<V, Length>::segment(this auto&& self, size_t from, size_t to) noexcept {
-        decltype(auto) v = propagate_rvalue_reference<decltype(self), V>(self.vec);
+        auto&& v = propagate_rvalue_reference<decltype(self), V>(self.vec);
         using V1 = decltype(v);
         return LVectorBlock<V1, Length_>(std::forward<V1>(v), self.from + from, self.from + to);
+    }
+
+    template<Vector V, size_t Length>
+    auto LVectorBlock<V, Length>::values(this auto&& self) noexcept {
+        auto&& v = propagate_rvalue_reference<decltype(self), V>(self.vec).values();
+        using V1 = decltype(v);
+        if constexpr (v.isLValueVector())
+            return LVectorBlock<V1, Length>(std::forward<V1>(v), self.from, self.to);
+        else
+            return RVectorBlock<V1, Length>(std::forward<V1>(v), self.from, self.to);
     }
 
     template<Vector V, size_t Length>
@@ -125,6 +137,7 @@ namespace Physica {
 namespace Physica {
     template<Vector V, size_t Length>
     class Traits<LVectorBlock<V, Length>> {
+        static_assert(std::remove_cvref_t<V>::isLValueVector());
     public:
         using ScalarType = std::remove_cvref_t<V>::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
