@@ -158,7 +158,7 @@ namespace Physica {
      */
     template<Scalar T>
     T ElasticDQMC<T>::calcLocalCorrection(T beta, T repelU, T chemMu, int numFreq) noexcept {
-        T shift = chemMu - repelU - 0.5;
+        T shift = chemMu - repelU * 0.5;
         if (shift.isZero())
             return 0;
 
