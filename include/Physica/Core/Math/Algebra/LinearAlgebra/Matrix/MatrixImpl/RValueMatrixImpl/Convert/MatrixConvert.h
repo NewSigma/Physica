@@ -153,7 +153,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc_value(row, col); }
+        [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc(row, col).value(); }
         [[nodiscard]] T calc_value(size_t row, size_t col) const { return calc(row, col); }
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }

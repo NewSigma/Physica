@@ -84,7 +84,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] T calc(size_t s) const { return v.calc_value(s); }
+        [[nodiscard]] T calc(size_t s) const { return v.calc(s).value(); }
         [[nodiscard]] T calc_value(size_t s) const { return calc(s); }
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };

@@ -146,7 +146,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc_value(row, col); }
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).value(); }
         [[nodiscard]] __device__ T calc_value(size_t row, size_t col) const { return calc(row, col); }
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }

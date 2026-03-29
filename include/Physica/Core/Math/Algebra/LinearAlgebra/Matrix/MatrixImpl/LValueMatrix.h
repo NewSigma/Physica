@@ -66,7 +66,7 @@ namespace Physica {
         [[nodiscard]] decltype(auto) operator[](this auto&&, size_t row, size_t col);
         /* Operations */
         [[nodiscard]] decltype(auto) calc(size_t row, size_t col) const { return operator[](row, col); }
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return Base::getDerived().values().calc(row, col); }
 
         [[nodiscard]] size_t pivotPartial(size_t column) const noexcept;
         [[nodiscard]] size_t pivotComplete(size_t column) const noexcept;

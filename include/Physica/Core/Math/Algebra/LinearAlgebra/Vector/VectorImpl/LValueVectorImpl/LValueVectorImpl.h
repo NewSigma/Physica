@@ -91,7 +91,7 @@ namespace Physica {
 
     template<class Derived>
     auto LValueVector<Derived>::calc_value(size_t index) const -> Tv {
-        return calc(index).value();
+        return Base::getDerived().values().calc(index);
     }
 
     template<class Derived>
