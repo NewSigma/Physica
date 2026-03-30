@@ -197,6 +197,9 @@ namespace Physica {
     auto device_obj<FreqDQMC<T>>::potentialV(const Vector auto& pos) -> Trv {
         assert(pos.getLength() == getAuxField().getSize() * 2 && "[Error]: Real matrix contains 2x number of elements of complex matrix");
         check(cudaMemcpyAsync(getAuxField().data(), pos.data(), sizeof(Tr) * pos.getLength(), cudaMemcpyHostToDevice, CUDAContext::getInstance()));
+        bool noAuxField = getBetaU().isSubNormal();
+        if (noAuxField)
+            return -calcDet()[0];
 
         MatrixND<T> buffer;
         buffer.resize(getAuxField());
@@ -262,11 +265,15 @@ namespace Physica {
             action.flip();
         }
 
-        MatrixND<T> force;
-        force.resize(getAuxField());
-        force.read(pos);
-        force *= Trv(-2) / getBetaU();
-        force.row(0) *= Trv(0.5);
+        MatrixND<T> force(getAuxField().getRow(), getAuxField().getCol());
+        bool noAuxField = getBetaU().isSubNormal();
+        if (noAuxField)
+            force.zeros();
+        else {
+            force.read(pos);
+            force *= Trv(-2) / getBetaU();
+            force.row(0) *= Trv(0.5);
+        }
         force += forceBuffer.toHost();
         result.read(force);
     }

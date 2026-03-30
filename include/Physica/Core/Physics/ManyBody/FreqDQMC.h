@@ -184,6 +184,9 @@ namespace Physica {
     auto FreqDQMC<T>::potentialV(const Vector auto& pos) -> Trv {
         assert(pos.getLength() == getAuxField().getSize() * 2 && "[Error]: Real matrix contains 2x number of elements of complex matrix");
         getAuxField().read(pos);
+        bool noAuxField = getBetaU().isSubNormal();
+        if (noAuxField)
+            return -calcDet<P>()[0];
 
         MatrixND<Tr> buffer = getAuxField().squaredNorms();
         buffer *= reciprocal(getBetaU());
@@ -234,8 +237,14 @@ namespace Physica {
             }
         }, 2);
 
-        MatrixND<T> force = -getAuxField() * (Trv(2) / getBetaU());
-        force.row(0) *= Trv(0.5);
+        MatrixND<T> force(getAuxField().getRow(), getAuxField().getCol());
+        bool noAuxField = getBetaU().isSubNormal();
+        if (noAuxField)
+            force.zeros();
+        else {
+            force = -getAuxField() * (Trv(2) / getBetaU());
+            force.row(0) *= Trv(0.5);
+        }
         task.wait();
 
         for (auto& spinF : spinFs)
