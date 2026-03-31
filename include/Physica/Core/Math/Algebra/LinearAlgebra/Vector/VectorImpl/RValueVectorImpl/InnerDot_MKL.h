@@ -27,7 +27,7 @@ namespace Physica {
         using Tm = decltype(std::declval<T>().toMKL());
         const auto* p1 = reinterpret_cast<const Tm*>(v1.data());
         const auto* p2 = reinterpret_cast<const Tm*>(v2.data());
-        if constexpr (T::isComplex) {
+        if constexpr (T::isComplex()) {
             T result;
             if constexpr (T::Prec == Float32)
                 cblas_cdotu_sub_64(v1.getLength(), p1, 1, p2, 1, &result);

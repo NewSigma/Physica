@@ -34,8 +34,8 @@ namespace Physica {
             getLHS().assign(v);
 
         const size_t n = Base::getLength();
-        if constexpr (isComplex) {
-            if constexpr (U::isComplex) {
+        if constexpr (isComplex()) {
+            if constexpr (U::isComplex()) {
                 const auto a = T(Base::getRHS()).toMachine();
                 if constexpr (T::Prec == Float32)
                     cblas_cscal_64(n, &a, v.data(), 1);
@@ -66,7 +66,7 @@ namespace Physica {
         const size_t n = Base::getLength();
         const auto alpha = Base::getRHS().toMachine();
         const void* x = Base::getLHS().data();
-        if constexpr (isComplex) {
+        if constexpr (isComplex()) {
             if constexpr (T::Prec == Float32)
                 cblas_caxpy_64(n, &alpha, x, 1, v.data(), 1);
             else
@@ -90,7 +90,7 @@ namespace Physica {
         const auto* a = reinterpret_cast<const Tm*>(Base::getLHS().data());
         const auto* b = reinterpret_cast<const Tm*>(Base::getRHS().data());
         auto* r = reinterpret_cast<Tm*>(v.data());
-        if constexpr (isComplex) {
+        if constexpr (isComplex()) {
             if constexpr (T::Prec == Float32)
                 vcMul_64(n, a, b, r);
             else

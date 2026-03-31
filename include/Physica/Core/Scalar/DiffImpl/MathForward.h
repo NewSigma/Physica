@@ -23,7 +23,7 @@
 namespace Physica {
     template<Scalar T>
     __host__ __device__ auto unit(const T& x) noexcept requires(ForwardDiff<T>) {
-        static_assert(!T::isComplex, "[Error]: Not implemented");
+        static_assert(!T::isComplex(), "[Error]: Not implemented");
         using ResultType = T::ValueType;
         return ResultType(unit(x.value()));
     }
@@ -67,7 +67,7 @@ namespace Physica {
         using ResultType = T::ScalarType;
         using Tv = T::ValueType;
         constexpr int GradOrder = T::GradType::Order;
-        if constexpr (!T::isComplex)
+        if constexpr (!T::isComplex())
             assert(!x.isNegative());
         const auto v = sqrt(x.template grad_mask<GradOrder>());
         return ResultType(v.value(), Tv(0.5) * x.grad() / v);
@@ -86,7 +86,7 @@ namespace Physica {
     __host__ __device__ auto ln(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         constexpr int GradOrder = T::GradType::Order;
-        if constexpr (!T::isComplex)
+        if constexpr (!T::isComplex())
             assert(x.isPositive() && "[Error]: Invalid param");
         return ResultType(ln(x.value()), x.grad() / x.template grad_mask<GradOrder>());
     }

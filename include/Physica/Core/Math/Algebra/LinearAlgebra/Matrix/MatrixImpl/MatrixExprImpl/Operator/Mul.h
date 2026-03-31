@@ -123,7 +123,7 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     void MatrixExpr<ExprID::Mul, M1, M2>::reverse(const Matrix auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
         if constexpr (Diffable<M1>)

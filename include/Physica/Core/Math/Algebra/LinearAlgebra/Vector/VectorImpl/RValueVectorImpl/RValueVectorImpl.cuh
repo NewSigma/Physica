@@ -107,14 +107,14 @@ namespace Physica {
 
     template<class Derived>
     void device_obj<RValueVector<Derived>>::reverse(const Vector auto&, const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         Base::getDerived().reverse(grad);
     }
 
     template<class Derived>
     __host__ __device__ decltype(auto) device_obj<RValueVector<Derived>>::conjugate(this auto&& self) noexcept {
         using Self = decltype(self);
-        if constexpr (isComplex) {
+        if constexpr (isComplex()) {
             using V = remove_device_obj<Self>::type;
             return device_obj<Conjugate<V>>(std::forward<Self>(self));
         }
@@ -170,7 +170,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<RValueVector<Derived>>::sum() const -> T {
         assert(getLength() != 0);
         if (IsHost()) {
-            using U = std::conditional<isReverseDiff, Tv, T>::type;
+            using U = std::conditional<isReverseDiff(), Tv, T>::type;
             auto numThreads = std::min<size_t>(getLength(), CUDADevAttr::DefaultThreadsPerBlock);
             auto buffer = device_obj<VectorND<U>>(numThreads);
             auto func = [v_ = asStruct(Base::getDerived()), buffer_ = asStruct(buffer)] __device__() mutable {
@@ -178,7 +178,7 @@ namespace Physica {
                 auto& buffer = buffer_.getDerived();
                 U local = 0;
                 for (int i = (int)threadIdx.x; i < v.getLength(); i += (int)blockDim.x) {
-                    if constexpr (isReverseDiff)
+                    if constexpr (isReverseDiff())
                         local += v.calc_value(i);
                     else
                         local += v.calc(i);
@@ -197,7 +197,7 @@ namespace Physica {
         else if constexpr (IsDevice()) {
             auto result = T(0);
             for (size_t i = 0; i < getLength(); ++i) {
-                if constexpr (isReverseDiff)
+                if constexpr (isReverseDiff())
                     result += calc_value(i);
                 else
                     result += calc(i);
@@ -242,7 +242,7 @@ namespace Physica {
     __device__ auto device_obj<RValueVector<Derived>>::lnSumExp() const -> T {
         const auto& v = Base::getDerived();
         Tv m;
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             m = values().reals().max();
         else
             m = values().max();
@@ -272,7 +272,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<RValueVector<Derived>>::prod() const noexcept -> T {
         assert(getLength() != 0);
         if (IsHost()) {
-            using U = std::conditional<isReverseDiff, Tv, T>::type;
+            using U = std::conditional<isReverseDiff(), Tv, T>::type;
             auto numThreads = std::min<size_t>(getLength(), CUDADevAttr::DefaultThreadsPerBlock);
             auto buffer = device_obj<VectorND<U>>(numThreads);
             auto func = [v_ = asStruct(Base::getDerived()), buffer_ = asStruct(buffer)] __device__() mutable {
@@ -280,7 +280,7 @@ namespace Physica {
                 auto& buffer = buffer_.getDerived();
                 U local = 1;
                 for (int i = (int)threadIdx.x; i < v.getLength(); i += (int)blockDim.x) {
-                    if constexpr (isReverseDiff)
+                    if constexpr (isReverseDiff())
                         local *= v.calc_value(i);
                     else
                         local *= v.calc(i);
@@ -352,7 +352,7 @@ namespace Physica {
         assert(tid < numThread);
         const auto& v = Base::getDerived();
         Tv m;
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             m = values().reals().max(tid, numThread, shared);
         else
             m = values().max(tid, numThread, shared);
@@ -363,7 +363,7 @@ namespace Physica {
     __host__ __device__ decltype(auto) device_obj<RValueVector<Derived>>::reals(this auto&& self) noexcept {
         using Self = decltype(self);
         using V = remove_device_obj<Self>::type;
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             return device_obj<RealVectorR<V>>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);
@@ -394,7 +394,7 @@ namespace Physica {
     __host__ __device__ decltype(auto) device_obj<RValueVector<Derived>>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         using V = remove_device_obj<Self>::type;
-        if constexpr (isDiffable)
+        if constexpr (isDiffable())
             return device_obj<ValueVector<V>>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);
@@ -409,13 +409,48 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ KernelConfig device_obj<RValueVector<Derived>>::makeKernelConfig() const noexcept {
-        return makeKernelConfig(getLength());
+    __host__ __device__ consteval bool device_obj<RValueVector<Derived>>::isComplex() noexcept {
+        return ScalarType::isComplex();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueVector<Derived>>::isDiffable() noexcept {
+        return ScalarType::isDiffable();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueVector<Derived>>::isForwardDiff() noexcept {
+        return ScalarType::isForwardDiff();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueVector<Derived>>::isReverseDiff() noexcept {
+        return ScalarType::isReverseDiff();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueVector<Derived>>::isLValueVector() noexcept {
+        return false;
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueVector<Derived>>::isCompact() noexcept {
+        return host_obj::isCompact();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueVector<Derived>>::isSparse() noexcept {
+        return host_obj::isSparse();
     }
 
     template<class Derived>
     __host__ __device__ consteval size_t device_obj<RValueVector<Derived>>::maxSizeAtCompile(const Vector auto& other) noexcept {
         return host_obj::maxSizeAtCompile(other);
+    }
+
+    template<class Derived>
+    __host__ __device__ KernelConfig device_obj<RValueVector<Derived>>::makeKernelConfig() const noexcept {
+        return makeKernelConfig(getLength());
     }
 
     template<class Derived>

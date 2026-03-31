@@ -39,7 +39,7 @@ namespace Physica {
         const size_t lda = Side == CblasLeft ? m : n;
         auto* b = reinterpret_cast<Tm*>(target.data());
         const size_t ldb = Layout == CblasColMajor ? m : n;
-        if constexpr (Base::isComplex) {
+        if constexpr (Base::isComplex()) {
             const Tc alpha = 1;
             if constexpr (T::Prec == Float32)
                 cblas_ctrmm_64(Layout, Side, Uplo, TransA, Diag, m, n, (Tm*)&alpha, a, lda, b, ldb);

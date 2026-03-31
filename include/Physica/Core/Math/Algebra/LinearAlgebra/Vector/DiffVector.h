@@ -44,11 +44,11 @@ namespace Physica {
         DenseVector() = default;
         explicit DenseVector(size_t length);
         DenseVector(size_t length, T init);
-        DenseVector(size_t length, ScalarType init) requires(isForwardDiff);
+        DenseVector(size_t length, ScalarType init) requires(isForwardDiff());
         DenseVector(std::initializer_list<T> list);
-        DenseVector(std::initializer_list<ScalarType> list) requires(isForwardDiff);
+        DenseVector(std::initializer_list<ScalarType> list) requires(isForwardDiff());
         DenseVector(ValueVector v_, GradVector g_) noexcept;
-        explicit(isReverseDiff) DenseVector(const Vector auto& src); // Force explicit conversion to avoid misuse
+        explicit(isReverseDiff()) DenseVector(const Vector auto& src); // Force explicit conversion to avoid misuse
         DenseVector(const This&) = default;
         DenseVector(This&&) noexcept = default;
         ~DenseVector() = default;
@@ -91,7 +91,7 @@ namespace Physica {
 namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     class Traits<DenseVector<Diff<T, Mode, Order>, Length, Allocator>> : public Traits<VectorND<T>> {
-        static_assert(!T::isDiffable, "[Error]: Nested Diff<> is not allowed");
+        static_assert(!T::isDiffable(), "[Error]: Nested Diff<> is not allowed");
     public:
         using ScalarType = Diff<T, Mode, Order>;
         constexpr static size_t SizeAtCompile = Length;

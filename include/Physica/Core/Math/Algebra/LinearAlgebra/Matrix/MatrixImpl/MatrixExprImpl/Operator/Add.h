@@ -63,7 +63,7 @@ namespace Physica {
 
     template<Matrix M, Scalar U>
     void MatrixExpr<ExprID::Add, M, U>::reverse(const Matrix auto& grad) const noexcept {
-        static_assert(Base::isReverseDiff);
+        static_assert(Base::isReverseDiff());
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
         if constexpr (Diffable<M>)
@@ -136,7 +136,7 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     void MatrixExpr<ExprID::Add, M1, M2>::reverse(const Matrix auto& grad) const noexcept {
-        static_assert(Base::isReverseDiff);
+        static_assert(Base::isReverseDiff());
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
         if constexpr (Diffable<M1>)

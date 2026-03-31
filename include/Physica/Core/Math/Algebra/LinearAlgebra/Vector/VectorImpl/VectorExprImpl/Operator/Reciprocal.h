@@ -78,13 +78,13 @@ namespace Physica {
 
     template<Vector V>
     void VectorExpr<ExprID::Reciprocal, V>::reverse(const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         reverse(Base::getExpr().values(), grad);
     }
 
     template<Vector V>
     void VectorExpr<ExprID::Reciprocal, V>::reverse(const Vector auto& y, const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         Base::getExpr().reverse(hadamard(-square(y.values()), grad));
     }
 

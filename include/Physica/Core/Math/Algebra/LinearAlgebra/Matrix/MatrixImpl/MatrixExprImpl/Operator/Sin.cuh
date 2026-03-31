@@ -39,7 +39,7 @@ namespace Physica {
 
     template<Matrix M>
     __device__ auto device_obj<MatrixExpr<ExprID::Sin, M>>::calc(size_t row, size_t col) const -> T {
-        if constexpr (isReverseDiff)
+        if constexpr (isReverseDiff())
             return calc_value(row, col);
         else
             return sin(Base::getExpr().calc(row, col));

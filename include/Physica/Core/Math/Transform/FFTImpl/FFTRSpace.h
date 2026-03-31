@@ -71,7 +71,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ auto FFTRSpace<Derived, 1>::data(this auto&& self) noexcept {
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             return self.getDerived().asComplexBuffer();
         else
             return self.getDerived().asRealBuffer();
@@ -128,7 +128,7 @@ namespace Physica {
         assert(row < self.getRow());
         assert(col < self.getCol());
         const size_t numColumn = self.getCol();
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             return self.getDerived().asComplexBuffer() + row * numColumn + col;
         else {
             const size_t shift = (numColumn / 2 + 1) * 2;
@@ -197,7 +197,7 @@ namespace Physica {
         assert(index[0] < self.getDimX());
         assert(index[1] < self.getDimY());
         assert(index[2] < self.getDimZ());
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             return self.getDerived().asComplexBuffer() + (index[0] * self.getDimY() + index[1]) * self.getDimZ() + index[2];
         else {
             const size_t shift = (self.getDimZ() / 2 + 1) * 2;

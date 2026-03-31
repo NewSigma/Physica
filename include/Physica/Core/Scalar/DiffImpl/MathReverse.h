@@ -71,7 +71,7 @@ namespace Physica {
 
     template<Scalar T>
     CoDiff<T> ln(T&& x) noexcept requires(ReverseDiff<T>) {
-        if constexpr (!T::isComplex)
+        if constexpr (!T::isComplex())
             assert(x.isPositive() && "[Error]: Invalid param");
 
         LazyDestroy<T&&> x_ = std::forward<T>(x);

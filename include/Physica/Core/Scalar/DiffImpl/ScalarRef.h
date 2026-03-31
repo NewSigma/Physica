@@ -170,7 +170,7 @@ namespace Physica {
 
     template<Scalar T> requires(instanceof_tx<Diff, T>)
     __host__ __device__ auto ScalarRef<T>::real_ptr(this auto&& self) noexcept {
-        if constexpr (T::isComplex)
+        if constexpr (T::isComplex())
             return ScalarPtr<Tr>(self.value().real_ptr(), self.grad().real_ptr());
         else
             return &self;

@@ -39,7 +39,7 @@ namespace Physica {
     public:
         UnitaryMatrixExpr(M expr_) noexcept : expr(std::forward<M>(expr_)) {}
         UnitaryMatrixExpr(const This&) = default;
-        UnitaryMatrixExpr(This&&) noexcept requires(isReverseDiff) = default;
+        UnitaryMatrixExpr(This&&) noexcept requires(isReverseDiff()) = default;
         ~UnitaryMatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -96,7 +96,7 @@ namespace Physica {
     public:
         BinaryMatrixExpr(LHS lhs_, RHS rhs_) noexcept;
         BinaryMatrixExpr(const This&) = default;
-        BinaryMatrixExpr(This&&) noexcept requires(isReverseDiff) = default;
+        BinaryMatrixExpr(This&&) noexcept requires(isReverseDiff()) = default;
         ~BinaryMatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -210,10 +210,10 @@ namespace Physica {
         else if constexpr (Vector<LHS> || Vector<RHS>)
             return false;
         else if constexpr (Scalar<LHS>)
-            return RHS1::isStaticHermite() && !LHS1::isComplex;
+            return RHS1::isStaticHermite() && !LHS1::isComplex();
         else {
             static_assert(Scalar<RHS>, "[Error]: Unexpected type");
-            return LHS1::isStaticHermite() && !RHS1::isComplex;
+            return LHS1::isStaticHermite() && !RHS1::isComplex();
         }
     }
 }

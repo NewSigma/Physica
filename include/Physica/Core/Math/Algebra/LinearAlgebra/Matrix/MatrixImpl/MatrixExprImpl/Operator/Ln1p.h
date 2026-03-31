@@ -60,7 +60,7 @@ namespace Physica {
     template<Matrix M>
     void MatrixExpr<ExprID::Ln1p, M>::reverse(const auto& grad) const noexcept {
         using U = decltype(grad);
-        static_assert(Base::isReverseDiff);
+        static_assert(Base::isReverseDiff());
         static_assert(Scalar<U> || Matrix<U>, "[Error]: Unexpected type");
         auto& expr = Base::getExpr();
         expr.reverse(divide_elem(grad, (expr.values() + Trv(1))));

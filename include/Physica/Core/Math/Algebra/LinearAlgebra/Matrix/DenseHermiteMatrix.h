@@ -210,7 +210,7 @@ namespace Physica {
 namespace Physica {
     template<Scalar T, size_t Order>
     class Traits<DenseHermiteMatrix<T, Order>> {
-        static_assert(T::isComplex, "[Error]: Using a symmetric matrix is preferred for real numbers");
+        static_assert(T::isComplex(), "[Error]: Using a symmetric matrix is preferred for real numbers");
     public:
         using ScalarType = T;
         constexpr static int Major = MatrixMajor::BothMajor;

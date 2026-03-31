@@ -26,7 +26,7 @@ namespace Physica {
     class PermMatrix : public RValueMatrix<PermMatrix<T>> {
         using This = PermMatrix<T>;
         using Base = RValueMatrix<This>;
-        static_assert(!T::isComplex, "[Error]: Permutation matrix is real");
+        static_assert(!T::isComplex(), "[Error]: Permutation matrix is real");
 
         using typename Base::Trv;
     private:

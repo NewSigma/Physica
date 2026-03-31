@@ -30,7 +30,7 @@ namespace Physica {
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
-        static_assert(T::isComplex, "[Error]: Action is complex");
+        static_assert(T::isComplex(), "[Error]: Action is complex");
     private:
         DiagMatrix<Tr> matsubara;
         MatrixND<T> auxField;
@@ -191,7 +191,7 @@ namespace Physica {
 namespace Physica {
     template<Scalar T>
     class Traits<ActionMatrix<T>> {
-        static_assert(T::isComplex, "[Error]: Action is complex");
+        static_assert(T::isComplex(), "[Error]: Action is complex");
     public:
         using ScalarType = T;
         constexpr static int Major = MatrixMajor::BothMajor;

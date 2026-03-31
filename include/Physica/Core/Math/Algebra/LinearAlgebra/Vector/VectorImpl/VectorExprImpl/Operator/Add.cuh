@@ -61,7 +61,7 @@ namespace Physica {
             T c = getRHS();
             return fma(a, b, c);
         }
-        else if constexpr (isReverseDiff)
+        else if constexpr (isReverseDiff())
             return calc_value(index);
         else
             return Base::getLHS().calc(index) + Base::getRHS();
@@ -86,7 +86,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     void device_obj<VectorExpr<ExprID::Add, V, U>>::reverse(const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         const auto& g = grad.values();
         if constexpr (ReverseDiff<V>)
             Base::getLHS().reverse(g);
@@ -135,7 +135,7 @@ namespace Physica {
             T c = getRHS().calc(index);
             return fma(a, b, c);
         }
-        else if constexpr (isReverseDiff)
+        else if constexpr (isReverseDiff())
             return calc_value(index);
         else
             return Base::getLHS().calc(index) + Base::getRHS().calc(index);
@@ -162,7 +162,7 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     void device_obj<VectorExpr<ExprID::Add, V1, V2>>::reverse(const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         const auto& g = grad.values();
         assert(g.getLength() == Base::getLength());
         if constexpr (ReverseDiff<V1>)

@@ -37,7 +37,7 @@ namespace Physica {
         auto* B = reinterpret_cast<Tm*>(target.data());
         const size_t lda = Base::getMaxMinor();
         const size_t ldb = target.getMaxMinor();
-        if constexpr (T::isComplex) {
+        if constexpr (T::isComplex()) {
             const auto alpha = T(1).toMKL();
             if constexpr (T::Prec == Float32)
                 mkl_comatcopy(ordering, trans, rows, cols, alpha, A, lda, B, ldb);
@@ -66,7 +66,7 @@ namespace Physica {
         lapack_int ilo{}, ihi{};
         VectorND<T> result(n);
         auto* scale = reinterpret_cast<Tm*>(result.data());
-        if constexpr (isComplex) {
+        if constexpr (isComplex()) {
             if constexpr (T::Prec == Float32)
                 LAPACKE_cgebal(Layout, job, n, a, lda, &ilo, &ihi, scale);
             else

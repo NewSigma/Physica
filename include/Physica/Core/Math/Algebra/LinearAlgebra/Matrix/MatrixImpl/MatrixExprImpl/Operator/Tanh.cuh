@@ -33,7 +33,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            if constexpr (isReverseDiff)
+            if constexpr (isReverseDiff())
                 return calc_value(row, col);
             else
                 return tanh(Base::getExpr().calc(row, col));
@@ -48,7 +48,7 @@ namespace Physica {
 
     template<Matrix M>
     void device_obj<MatrixExpr<ExprID::Tanh, M>>::reverse(const Matrix auto& y, const Matrix auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         const auto& expr = Base::getExpr();
         expr.reverse(hadamard((Tv(1) - square_elem(y)), grad));
     }

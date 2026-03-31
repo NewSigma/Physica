@@ -65,7 +65,7 @@ namespace Physica {
 
     template<Matrix M>
     Hermite<M>::Hermite(const M& mat_) : mat(mat_) {
-        static_assert(M::isComplex, "[Error]: Do not call hermite on real matrix");
+        static_assert(M::isComplex(), "[Error]: Do not call hermite on real matrix");
     }
 
     template<Vector V>
@@ -97,7 +97,7 @@ namespace Physica {
 
     template<Vector V>
     Hermite<V>::Hermite(const V& vec_) : vec(vec_) {
-        static_assert(V::isComplex, "[Error]: Do not call hermite on real vector");
+        static_assert(V::isComplex(), "[Error]: Do not call hermite on real vector");
     }
 
     template<Vector V>

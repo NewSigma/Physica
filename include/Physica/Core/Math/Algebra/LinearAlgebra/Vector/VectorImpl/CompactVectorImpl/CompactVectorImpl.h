@@ -38,7 +38,7 @@ namespace Physica {
         constexpr bool SameScalar = std::same_as<T, typename V::ScalarType>;
         constexpr bool Copyable = std::is_trivially_copyable<T>::value;
         if constexpr (V::isCompact() && SameScalar && Copyable) {
-            if constexpr (isDiffable) {
+            if constexpr (isDiffable()) {
                 auto& x = Base::getDerived();
                 x.values().template assign<P>(v.values());
                 x.grads().template assign<P>(v.grads());
@@ -192,7 +192,7 @@ namespace Physica {
     void CompactVector<Derived>::random_uniform() {
         if constexpr (R::MKL_Ready) {
             [[maybe_unused]] auto& gen = R::getInstance();
-            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1) * (Base::isForwardDiff ? 2 : 1);
+            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex() ? 2 : 1) * (Base::isForwardDiff() ? 2 : 1);
             if constexpr (ScalarType::Prec == Float32)
                 check_vsl(vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD, gen, length, (float*)data(), 0, 1));
             else if constexpr (ScalarType::Prec == Float64)
@@ -207,9 +207,9 @@ namespace Physica {
     template<class Derived>
     template<RNG R>
     void CompactVector<Derived>::random_normal() {
-        if constexpr (R::MKL_Ready && !isForwardDiff) {
+        if constexpr (R::MKL_Ready && !isForwardDiff()) {
             [[maybe_unused]] auto& gen = R::getInstance();
-            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
+            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex() ? 2 : 1);
             if constexpr (ScalarType::Prec == Float32)
                 check_vsl(vsRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, gen, length, (float*)data(), 0, 1));
             else if constexpr (ScalarType::Prec == Float64)
@@ -229,7 +229,7 @@ namespace Physica {
         Base::resize(length);
 
         const auto memSpace = H5DataSpace<1>(length);
-        if constexpr (isDiffable) {
+        if constexpr (isDiffable()) {
             auto fileSpace = DataSpaceType({length, DiffOrder + 1});
             for (size_t i = 0; i <= DiffOrder; ++i) {
                 fileSpace.selectHyperslab(H5S_SELECT_SET, {length, 1}, {0, i});
@@ -246,7 +246,7 @@ namespace Physica {
         const size_t length = Base::getLength();
         const auto memSpace = H5DataSpace<1>(length);
         DataSpaceType fileSpace;
-        if constexpr (isDiffable)
+        if constexpr (isDiffable())
             fileSpace = DataSpaceType({length, DiffOrder + 1});
         else
             fileSpace = memSpace;
@@ -257,7 +257,7 @@ namespace Physica {
         else
             dataset = loc.createDataSet<DataDim>(name, Tv::dtype_hdf5(), fileSpace);
 
-        if constexpr (isDiffable) {
+        if constexpr (isDiffable()) {
             for (size_t i = 0; i <= DiffOrder; ++i) {
                 fileSpace.selectHyperslab(H5S_SELECT_SET, {length, 1}, {0, i});
                 dataset.write(data().get(i), Tv::dtype_hdf5(), memSpace, fileSpace);

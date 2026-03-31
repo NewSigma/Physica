@@ -103,7 +103,7 @@ namespace Physica {
 
     template<Vector V>
     void VectorExpr<ExprID::Minus, V>::reverse(const auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         Base::getExpr().reverse(-grad);
     }
 

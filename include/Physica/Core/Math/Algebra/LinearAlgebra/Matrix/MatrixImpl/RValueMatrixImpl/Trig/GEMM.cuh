@@ -75,7 +75,7 @@ namespace Physica {
 
         auto& ctx = CUDAContext::getInstance();
         ctx.setPointerMode(false);
-        if constexpr (Base::isComplex) {
+        if constexpr (Base::isComplex()) {
             if constexpr (T::Prec == Float32)
                 check(cublasCtrmm_64(ctx, Side, Uplo, TransA, Diag, m, n, &alpha, A, lda, B, ldb, B, ldb));
             else

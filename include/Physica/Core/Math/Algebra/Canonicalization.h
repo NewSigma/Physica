@@ -40,9 +40,9 @@ namespace Physica {
         using E2 = std::remove_cvref_t<T2>;
         if constexpr (E1::isSparse() && !E2::isSparse())
             return false;
-        if constexpr (!E1::isDiffable && E2::isDiffable)
+        if constexpr (!E1::isDiffable() && E2::isDiffable())
             return false;
-        if constexpr (!E1::isComplex && E2::isComplex)
+        if constexpr (!E1::isComplex() && E2::isComplex())
             return false;
         return true;
     }

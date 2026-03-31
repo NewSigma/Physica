@@ -31,7 +31,7 @@ namespace Physica {
         const auto* a = reinterpret_cast<const Tm*>(Base::getLHS().data());
         const auto* b = reinterpret_cast<const Tm*>(Base::getRHS().data());
         auto* r = reinterpret_cast<Tm*>(v.data());
-        if constexpr (isComplex) {
+        if constexpr (isComplex()) {
             if constexpr (T::Prec == Float32)
                 vcSub_64(n, a, b, r);
             else

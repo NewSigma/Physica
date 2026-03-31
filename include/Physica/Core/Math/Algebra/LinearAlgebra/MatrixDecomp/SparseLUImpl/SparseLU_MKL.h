@@ -122,6 +122,6 @@ namespace Physica {
 
     template<Scalar T>
     constexpr int SparseLU<T>::getMatrixType() noexcept {
-        return T::isComplex ? 13 : 11;
+        return T::isComplex() ? 13 : 11;
     }
 }

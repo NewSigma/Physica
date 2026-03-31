@@ -48,10 +48,10 @@ namespace Physica {
         __host__ __device__ Diff(MachineType x) : This(T(x)) {}
         __host__ __device__ Diff(T v_);
         __host__ __device__ Diff(T v_, GradType g_);
-        Diff(DiffCoro<This>) requires(isReverseDiff) = delete("[Error]: Copy a differential coroutine discards compute graph");
+        Diff(DiffCoro<This>) requires(isReverseDiff()) = delete("[Error]: Copy a differential coroutine discards compute graph");
         template<Scalar U>
         __host__ __device__ explicit(T::Prec < U::Prec) Diff(const U& x);
-        Diff(const This&) requires(isForwardDiff) = default;
+        Diff(const This&) requires(isForwardDiff()) = default;
         Diff(This&&) noexcept = default;
         ~Diff() = default;
         /* Operators */
@@ -82,7 +82,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto grad_mask() const noexcept;
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept;
         /* Static members */
-        [[nodiscard]] static This fromPhase(RealType phase) noexcept requires(isComplex);
+        [[nodiscard]] static This fromPhase(RealType phase) noexcept;
         template<RNG R>
         [[nodiscard]] static auto random_uniform();
         template<RNG R>
@@ -93,7 +93,7 @@ namespace Physica {
     };
 
     template<Scalar T>
-    std::ostream& operator<<(std::ostream& os, const T& obj) requires(T::isDiffable) {
+    std::ostream& operator<<(std::ostream& os, const T& obj) requires(T::isDiffable()) {
         return os << obj.value();
     }
 }
@@ -101,14 +101,14 @@ namespace Physica {
 namespace Physica {
     template<Scalar T, DiffMode Mode, int Order_>
     class Traits<Diff<T, Mode, Order_>> {
-        static_assert(!T::isDiffable, "[Error]: Nested Diff<> is not allowed");
+        static_assert(!T::isDiffable(), "[Error]: Nested Diff<> is not allowed");
         static_assert(Order_ > 0, "[Error]: Use plain type instead of 0 order differentiable");
         using RealT = T::RealType;
         using ComplexT = T::ComplexType;
     public:
         constexpr static FloatPrec Prec = T::Prec;
         constexpr static int Order = Order_;
-        constexpr static bool isComplex = T::isComplex;
+        constexpr static bool isComplex = T::isComplex();
         constexpr static bool isForwardDiff = Mode == DiffMode::Forward;
         constexpr static bool isReverseDiff = Mode == DiffMode::Reverse;
     private:

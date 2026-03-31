@@ -25,7 +25,6 @@ namespace Physica {
     template<Scalar T, bool Pivot>
     void DenseLU<T, Pivot>::compute_mkl() {
         using Tm = decltype(std::declval<T>().toMKL());
-        constexpr bool isComplex = T::isComplex;
         constexpr static int Layout = LAPACK_COL_MAJOR;
         const size_t m = getOrder();
         const size_t n = m;
@@ -34,7 +33,7 @@ namespace Physica {
         int err{};
         if constexpr (Pivot) {
             Array<MKL_INT64> ipiv(m);
-            if constexpr (isComplex) {
+            if constexpr (T::isComplex()) {
                 if constexpr (T::Prec == Float32)
                     err = LAPACKE_cgetrf_64(Layout, m, n, a, lda, ipiv.data());
                 else
@@ -49,7 +48,7 @@ namespace Physica {
             perm = PermType::fromMKL(std::move(ipiv));
         }
         else {
-            if constexpr (isComplex) {
+            if constexpr (T::isComplex()) {
                 if constexpr (T::Prec == Float32)
                     err = LAPACKE_mkl_cgetrfnp_64(Layout, m, n, a, lda);
                 else

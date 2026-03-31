@@ -381,7 +381,7 @@ namespace Physica {
 namespace Physica {
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, ExecutePolicy P>
     class Traits<HardCore<T, IsFixedBoundary, NumReplica, Integrator, P>> {
-        static_assert(!T::isComplex);
+        static_assert(!T::isComplex());
     public:
         constexpr static bool IsPeriodBoundary = !IsFixedBoundary;
     };

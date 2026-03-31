@@ -123,7 +123,7 @@ namespace Physica {
     template<int Dim, BoundaryCond BC>
     template<Scalar T>
     auto SquareLattice<Dim, BC>::calcPhase() const noexcept {
-        static_assert(!T::isComplex, "[Error]: Phase arg is real");
+        static_assert(!T::isComplex(), "[Error]: Phase arg is real");
         if constexpr (BC == BoundaryCond::TBC) {
             using Tc = T::ComplexType;
             DenseVector<Tc, Dim> result{};

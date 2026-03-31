@@ -35,10 +35,6 @@ namespace Physica {
         using ScalarType = TraitsType::ScalarType;
         constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;
         using PacketType = device_obj<BestPacket<ScalarType, SizeAtCompile>>::Type;
-        constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
-        constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
-        constexpr static bool isDiffable = ScalarType::isDiffable;
-        constexpr static bool isComplex = ScalarType::isComplex;
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
@@ -108,9 +104,13 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static bool isLValueVector() noexcept { return false; }
-        [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept { return host_obj::isCompact(); }
-        [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept { return host_obj::isSparse(); }
+        [[nodiscard]] __host__ __device__ consteval static bool isComplex() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isDiffable() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isForwardDiff() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isReverseDiff() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isLValueVector() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t maxSizeAtCompile(const Vector auto& other) noexcept;
         [[nodiscard]] __host__ __device__ static KernelConfig makeKernelConfig(size_t length) noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Scalar auto& source) noexcept;

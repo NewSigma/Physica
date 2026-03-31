@@ -36,7 +36,7 @@ namespace Physica {
     template<Scalar T, int Size>
     class SIMD : public SIMDBase<SIMD<T, Size>> {
         constexpr static bool isFloat32 = T::Prec == Float32;
-        constexpr static bool isForward = T::isForwardDiff;
+        constexpr static bool isForward = T::isForwardDiff();
         using This = SIMD<T, Size>;
         using Base = SIMDBase<This>;
         using Pack = Traits<This>::Pack;
@@ -145,8 +145,8 @@ namespace Physica {
     private:
         constexpr static bool isFloat32 = T::Prec == Float32;
         static_assert(isFloat32 || T::Prec == Float64, "[Error]: Unsupported float type");
-        static_assert(!T::isComplex, "[Error]: The main template targets on real scalar");
-        static_assert(!T::isDiffable, "[Error]: The main template targets on plain scalar");
+        static_assert(!T::isComplex(), "[Error]: The main template targets on real scalar");
+        static_assert(!T::isDiffable(), "[Error]: The main template targets on plain scalar");
         static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");
 
         using Size2Type = std::conditional<isFloat32, void, Vec2d>::type;
@@ -184,8 +184,8 @@ namespace std {
 
     template<Physica::Scalar T, int Size>
     PacketType max(PacketType a, PacketType b) {
-        static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
-        if constexpr (T::isForwardDiff) {
+        static_assert(!T::isComplex(), "[Error]: Compare between complex number is ill defined");
+        if constexpr (T::isForwardDiff()) {
             using GradPacket = PacketType::GradType;
             const auto values = max(a.value(), b.value());
             return PacketType(values, GradPacket::select(values == a.value(), a.grad(), b.grad()));
@@ -196,8 +196,8 @@ namespace std {
 
     template<Physica::Scalar T, int Size>
     PacketType min(PacketType a, PacketType b) {
-        static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
-        if constexpr (T::isForwardDiff) {
+        static_assert(!T::isComplex(), "[Error]: Compare between complex number is ill defined");
+        if constexpr (T::isForwardDiff()) {
             using GradPacket = PacketType::GradType;
             const auto values = min(a.value(), b.value());
             return PacketType(values, GradPacket::select(values == a.value(), a.grad(), b.grad()));

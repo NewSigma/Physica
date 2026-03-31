@@ -65,7 +65,7 @@ namespace Physica {
 
     template<Vector V>
     void VectorExpr<ExprID::Tanh, V>::reverse(const Vector auto& y, const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         const auto& expr = Base::getExpr();
         expr.reverse(hadamard((Tv(1) - square(y.values())), grad));
     }

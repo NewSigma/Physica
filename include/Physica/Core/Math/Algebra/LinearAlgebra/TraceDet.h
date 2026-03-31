@@ -25,7 +25,7 @@ namespace Physica {
      * \class TraceDet: Random trace estimation for determinants. Applies to positive definite matrix
      *
      * Reference:
-     * [1] J. Stat. Comput. 77(4), 329-348 (2007);  https://10.1080/10629360600569279
+     * [1] J. Stat. Comput. 77(4), 329-348 (2007);  https://doi.org/10.1080/10629360600569279
      */
     template<Scalar T>
     class TraceDet {

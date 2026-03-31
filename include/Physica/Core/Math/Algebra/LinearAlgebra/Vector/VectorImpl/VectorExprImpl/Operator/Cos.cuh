@@ -34,7 +34,7 @@ namespace Physica {
         using Base::Base;
         /* Getters */
         [[nodiscard]] __device__ T calc(size_t index) const {
-            if constexpr (isReverseDiff)
+            if constexpr (isReverseDiff())
                 return calc_value(index);
             else
                 return cos(Base::getExpr().calc(index));

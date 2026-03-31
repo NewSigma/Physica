@@ -33,7 +33,7 @@ namespace Physica {
      */
     template<Scalar T, size_t RowAtCompile = Dynamic, size_t ColAtCompile = Dynamic>
     class SVD : public Decouplable {
-        static_assert(!T::isComplex, "[Error]: SVD class do not support complex data");
+        static_assert(!T::isComplex(), "[Error]: SVD class do not support complex data");
         using Base = Decouplable;
         using RealType = T::RealType;
         constexpr static int Major = MatrixMajor::Col;

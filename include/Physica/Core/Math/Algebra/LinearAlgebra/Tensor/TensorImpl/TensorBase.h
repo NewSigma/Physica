@@ -32,7 +32,7 @@ namespace Physica {
     template<Scalar T, bool IsUnitLattice, class Functor>
     void TensorBase::forPointIndexInTensor(
             Index3D dim, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
-        static_assert(!T::isComplex, "[Error]: Position in 3D space can not be complex number");
+        static_assert(!T::isComplex(), "[Error]: Position in 3D space can not be complex number");
         using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
         using VectorType = Vector3D<T>;
 

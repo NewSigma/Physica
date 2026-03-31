@@ -23,7 +23,7 @@
 namespace Physica {
     template<Matrix M>
     class Conjugate<M> : public RValueMatrix<Conjugate<M>> {
-        static_assert(M::isComplex, "[Error]: Unnecessary conjugate call on real matrix");
+        static_assert(M::isComplex(), "[Error]: Unnecessary conjugate call on real matrix");
 
         using This = Conjugate<M>;
         using Base = RValueMatrix<This>;

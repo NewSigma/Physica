@@ -58,10 +58,10 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     auto InnerDot<V1, V2>::calc() const noexcept {
-        if constexpr (T::isForwardDiff) {
-            if constexpr (!V1::isForwardDiff)
+        if constexpr (T::isForwardDiff()) {
+            if constexpr (!V1::isForwardDiff())
                 return T(v2.values() * v1, v2.grads() * v1);
-            else if constexpr (!V2::isForwardDiff)
+            else if constexpr (!V2::isForwardDiff())
                 return T(v1.values() * v2, v1.grads() * v2);
             else {
                 constexpr static int Order = T::Order - 1;
@@ -77,7 +77,7 @@ namespace Physica {
     template<Vector V1, Vector V2>
     auto InnerDot<V1, V2>::calc_base() const noexcept -> CoDiff<T> {
         constexpr static bool isFastPacket = Traits<V1>::FastPacket && Traits<V2>::FastPacket;
-        if constexpr (T::isReverseDiff) {
+        if constexpr (T::isReverseDiff()) {
             auto& result = co_yield v1.values() * v2.values();
             if constexpr (ReverseDiff<V1>)
                 v1.reverse(v2.values() * result.grad());
@@ -87,7 +87,7 @@ namespace Physica {
         else if constexpr (isFastPacket) {
             if constexpr (Internal::EnableSIMD<V1, V2>::value)
                 co_return calc_base_simd();
-            else if constexpr (T1::isComplex && std::same_as<typename T1::RealType, T2>)
+            else if constexpr (T1::isComplex() && std::same_as<typename T1::RealType, T2>)
                 co_return calc_base_simd_complex_real();
             else
                 co_return calc_base_fallback();

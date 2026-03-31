@@ -29,8 +29,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        constexpr static bool isComplexV = std::remove_cvref_t<V>::isComplex;
-        constexpr static bool isReverseDiff = Base::isReverseDiff;
+        constexpr static bool isComplexV = std::remove_cvref_t<V>::isComplex();
     public:
         using Base::Base;
         /* Operators */
@@ -84,7 +83,7 @@ namespace Physica {
 
     template<Vector V>
     void VectorExpr<ExprID::Abs, V>::reverse(const auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(Base::isReverseDiff());
         using U = decltype(grad);
         const auto& expr = Base::getExpr();
         if constexpr (Scalar<U>)

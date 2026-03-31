@@ -57,7 +57,7 @@ namespace Physica {
 
     template<Matrix M, Scalar U>
     __device__ auto device_obj<MatrixExpr<ExprID::Mul, M, U>>::calc(size_t row, size_t col) const -> T {
-        if constexpr (isReverseDiff)
+        if constexpr (isReverseDiff())
             return calc_value(row, col);
         else
             return getLHS().calc(row, col) * getRHS();
@@ -81,7 +81,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            if constexpr (isReverseDiff)
+            if constexpr (isReverseDiff())
                 return calc_value(row, col);
             else
                 return Base::getLHS().calc(row, col) * Base::getRHS().calc(row);
@@ -105,7 +105,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            if constexpr (isReverseDiff)
+            if constexpr (isReverseDiff())
                 return calc_value(row, col);
             else
                 return getLHS().calc(row, col) * getRHS().calc(row, col);
@@ -124,7 +124,7 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     void device_obj<MatrixExpr<ExprID::Mul, M1, M2>>::reverse(const Matrix auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
         if constexpr (Diffable<M1>)

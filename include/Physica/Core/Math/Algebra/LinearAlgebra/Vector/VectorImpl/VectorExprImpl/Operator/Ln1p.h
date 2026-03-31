@@ -64,7 +64,7 @@ namespace Physica {
 
     template<Vector V>
     void VectorExpr<ExprID::Ln1p, V>::reverse(const Scalar auto& grad) const noexcept {
-        static_assert(Base::isReverseDiff);
+        static_assert(Base::isReverseDiff());
         const auto& expr = Base::getExpr();
         expr.reverse(divide(grad.value(), (Trv(1) + expr.values())));
     }

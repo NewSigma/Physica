@@ -72,10 +72,6 @@ namespace Physica {
         constexpr static size_t RowAtCompile = Traits<Derived>::RowAtCompile;
         constexpr static size_t ColAtCompile = Traits<Derived>::ColAtCompile;
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
-        constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
-        constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
-        constexpr static bool isDiffable = ScalarType::isDiffable;
-        constexpr static bool isComplex = ScalarType::isComplex;
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
@@ -180,11 +176,15 @@ namespace Physica {
         [[nodiscard]] bool isHermite() const noexcept;
         [[nodiscard]] bool isFinite() const noexcept;
         /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static bool isLValueMatrix() noexcept { return false; }
+        [[nodiscard]] __host__ __device__ consteval static bool isComplex() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isDiffable() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isForwardDiff() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isReverseDiff() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isLValueMatrix() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
-        [[nodiscard]] consteval static bool isStaticSymm() noexcept;
-        [[nodiscard]] consteval static bool isStaticHermite() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSymm() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticHermite() noexcept;
         [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixMajor::rowFromMajorMinor<Derived>(major, minor); }
         [[nodiscard]] static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixMajor::colFromMajorMinor<Derived>(major, minor); }
         __host__ __device__ consteval static void static_assert_assign(const Scalar auto& source) noexcept;

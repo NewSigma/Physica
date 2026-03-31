@@ -34,7 +34,7 @@ namespace Physica {
     template<Scalar T, size_t Order = Dynamic>
     class SymmEigenSolver : public Decouplable {
         using This = SymmEigenSolver<T, Order>;
-        constexpr static bool isComplex = T::isComplex;
+        constexpr static bool isComplex = T::isComplex();
         static_assert(!isComplex, "[Error]: Complex matrix is not supported");
 
         using Tr = T::RealType;

@@ -24,7 +24,7 @@
 
 namespace Physica {
     template<class Derived>
-    [[nodiscard]] auto RValueMatrix<Derived>::operator*(this auto&& self, Vector auto&& v) noexcept requires(RowAtCompile != 1) {
+    auto RValueMatrix<Derived>::operator*(this auto&& self, Vector auto&& v) noexcept requires(RowAtCompile != 1) {
         assert(self.getCol() == v.getLength());
         using Self = decltype(self);
         using V = decltype(v);
@@ -33,7 +33,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    [[nodiscard]] auto RValueMatrix<Derived>::operator*(const Vector auto& v) const noexcept requires(RowAtCompile == 1) {
+    auto RValueMatrix<Derived>::operator*(const Vector auto& v) const noexcept requires(RowAtCompile == 1) {
         assert(getCol() == v.getLength());
         using V = decltype(v);
         static_assert(!is_device_obj<V>::value, "[Error]: host-device mismatch");
@@ -41,7 +41,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    [[nodiscard]] auto RValueMatrix<Derived>::operator*(this auto&& self, Matrix auto&& m) noexcept {
+    auto RValueMatrix<Derived>::operator*(this auto&& self, Matrix auto&& m) noexcept {
         using Self = decltype(self);
         using M = decltype(m);
         static_assert(!is_device_obj<M>::value, "[Error]: host-device mismatch");
@@ -64,7 +64,7 @@ namespace Physica {
     template<class Derived>
     template<ExecutePolicy P>
     void RValueMatrix<Derived>::assign(Matrix auto&& target) const noexcept {
-        if constexpr (!isDiffable && Diffable<decltype(target)>) {
+        if constexpr (!isDiffable() && Diffable<decltype(target)>) {
             Base::getDerived().assign(target.values());
             target.grads().zeros();
         }
@@ -87,7 +87,7 @@ namespace Physica {
 
     template<class Derived>
     void RValueMatrix<Derived>::assign_add(Matrix auto&& target) const noexcept {
-        if constexpr (!isDiffable && Diffable<decltype(target)>)
+        if constexpr (!isDiffable() && Diffable<decltype(target)>)
             Base::getDerived().assign_add(target.values());
         else {
             target.assert_assign(Base::getDerived());
@@ -127,25 +127,13 @@ namespace Physica {
     }
 
     template<class Derived>
-    consteval bool RValueMatrix<Derived>::isStaticSymm() noexcept {
-        using TransposeTy = std::remove_cvref_t<decltype(std::declval<Derived>().transpose())>;
-        return std::same_as<TransposeTy, Derived>;
-    }
-
-    template<class Derived>
-    consteval bool RValueMatrix<Derived>::isStaticHermite() noexcept {
-        using HermiteTy = std::remove_cvref_t<decltype(std::declval<Derived>().hermite())>;
-        return std::same_as<HermiteTy, Derived>;
-    }
-
-    template<class Derived>
     decltype(auto) RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
         return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
     }
 
     template<class Derived>
     void RValueMatrix<Derived>::reverse(const Matrix auto&, const Matrix auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         Base::getDerived().reverse(grad);
     }
 
@@ -359,7 +347,7 @@ namespace Physica {
     template<class Derived>
     auto RValueMatrix<Derived>::sum() const -> CoDiff<T> {
         const auto& x = Base::getDerived();
-        if constexpr (isReverseDiff) {
+        if constexpr (isReverseDiff()) {
             auto& result = co_yield x.values().sum();
             x.reverse(result.grad());
         }
@@ -452,7 +440,7 @@ namespace Physica {
 
     template<class Derived>
     decltype(auto) RValueMatrix<Derived>::conjugate() const noexcept {
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             return Conjugate<Derived>(Base::getDerived());
         else
             return Base::getDerived();
@@ -460,7 +448,7 @@ namespace Physica {
 
     template<class Derived>
     auto RValueMatrix<Derived>::hermite() const noexcept {
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             return Hermite<Derived>(Base::getDerived());
         else
             return Base::getDerived().transpose();
@@ -475,7 +463,7 @@ namespace Physica {
     template<class Derived>
     decltype(auto) RValueMatrix<Derived>::reals(this auto&& self) noexcept {
         using Self = decltype(self);
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             return RealMatrix<Self>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);
@@ -502,7 +490,7 @@ namespace Physica {
     template<class Derived>
     decltype(auto) RValueMatrix<Derived>::values(this auto&& self) noexcept {
         using Self = decltype(self);
-        if constexpr (isDiffable)
+        if constexpr (isDiffable())
             return ValueMatrix<Self>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);
@@ -578,6 +566,31 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool RValueMatrix<Derived>::isComplex() noexcept {
+        return ScalarType::isComplex();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueMatrix<Derived>::isDiffable() noexcept {
+        return ScalarType::isDiffable();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueMatrix<Derived>::isForwardDiff() noexcept {
+        return ScalarType::isForwardDiff();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueMatrix<Derived>::isReverseDiff() noexcept {
+        return ScalarType::isReverseDiff();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueMatrix<Derived>::isLValueMatrix() noexcept {
+        return false;
+    }
+
+    template<class Derived>
     __host__ __device__ consteval bool RValueMatrix<Derived>::isCompact() noexcept {
         return requires{ std::declval<Derived>().data(); };
     }
@@ -585,6 +598,18 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ consteval bool RValueMatrix<Derived>::isSparse() noexcept {
         return requires{ std::declval<Derived>().getNumNonzero(); };
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueMatrix<Derived>::isStaticSymm() noexcept {
+        using TransposeTy = std::remove_cvref_t<decltype(std::declval<Derived>().transpose())>;
+        return std::same_as<TransposeTy, Derived>;
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueMatrix<Derived>::isStaticHermite() noexcept {
+        using HermiteTy = std::remove_cvref_t<decltype(std::declval<Derived>().hermite())>;
+        return std::same_as<HermiteTy, Derived>;
     }
 
     template<class Derived>

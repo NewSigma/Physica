@@ -74,7 +74,7 @@ namespace Physica {
             const bool isCycling = iteration > 0 && (lastIndex == index); // Avoid cycling because unit(0) is implemented as 1
             if (isConverged || isCycling) {
                 const Tr normY = y.norm1();
-                if constexpr (isComplex)
+                if constexpr (isComplex())
                     return normY;
                 else {
                     y.linspace(1, 2);
@@ -89,7 +89,7 @@ namespace Physica {
                 size_t result{};
                 Tr zmax = 0;
                 for (size_t i = 0; i < length; ++i) {
-                    const Tr temp = isComplex ? z[i].squaredNorm() : abs(z[i]);
+                    const Tr temp = isComplex() ? z[i].squaredNorm() : abs(z[i]);
                     if (temp > zmax) {
                         result = i;
                         zmax = temp;

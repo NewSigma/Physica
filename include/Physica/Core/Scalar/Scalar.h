@@ -97,13 +97,13 @@ namespace Physica {
     concept Packet = Scalar<T> || std::derived_from<std::remove_cvref_t<T>, SIMDBase<std::remove_cvref_t<T>>>;
 
     template<class T>
-    concept ForwardDiff = std::remove_cvref_t<T>::ScalarType::isForwardDiff;
+    concept ForwardDiff = std::remove_cvref_t<T>::ScalarType::isForwardDiff();
 
     template<class T>
-    concept ReverseDiff = std::remove_cvref_t<T>::ScalarType::isReverseDiff;
+    concept ReverseDiff = std::remove_cvref_t<T>::ScalarType::isReverseDiff();
 
     template<class T>
-    concept Diffable = std::remove_cvref_t<T>::ScalarType::isDiffable;
+    concept Diffable = std::remove_cvref_t<T>::ScalarType::isDiffable();
 
     template<class T>
     class DiffCoro;
@@ -144,13 +144,13 @@ namespace Physica {
             static_assert(std::is_class<T2>::value);
 
             constexpr static FloatPrec Prec = std::max(T1::Prec, T2::Prec);
-            constexpr static bool isComplex = T1::isComplex || T2::isComplex;
-            constexpr static bool isDiffable1 = T1::isDiffable;
-            constexpr static bool isDiffable2 = T2::isDiffable;
+            constexpr static bool isComplex = T1::isComplex() || T2::isComplex();
+            constexpr static bool isDiffable1 = T1::isDiffable();
+            constexpr static bool isDiffable2 = T2::isDiffable();
             constexpr static bool isDiffable = isDiffable1 || isDiffable2;
 
-            constexpr static DiffMode Mode = T1::isDiffable ? T1::Mode : T2::Mode;
-            constexpr static DiffMode Mode1 = T2::isDiffable ? T2::Mode : T1::Mode;
+            constexpr static DiffMode Mode = T1::isDiffable() ? T1::Mode : T2::Mode;
+            constexpr static DiffMode Mode1 = T2::isDiffable() ? T2::Mode : T1::Mode;
             static_assert(Mode == Mode1, "[Error]: Operation between differentiable scalars with different mode is not well defined");
 
             constexpr static int Order1 = T1::Order;

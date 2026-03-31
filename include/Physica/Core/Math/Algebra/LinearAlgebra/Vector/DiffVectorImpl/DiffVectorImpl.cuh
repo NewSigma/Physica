@@ -31,7 +31,7 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    device_obj<DenseVector<Diff<T, Mode, Order>>>::device_obj(size_t length, ScalarType init) requires(isForwardDiff)
+    device_obj<DenseVector<Diff<T, Mode, Order>>>::device_obj(size_t length, ScalarType init) requires(isForwardDiff())
             : v(length, init.value()), g(length, init.grad()) {}
 
     template<Scalar T, DiffMode Mode, int Order>

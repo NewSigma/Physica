@@ -85,7 +85,7 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     void device_obj<GEMV<M, V>>::reverse(const Vector auto& grad) const noexcept {
-        static_assert(Base::isReverseDiff);
+        static_assert(Base::isReverseDiff());
         const auto& g = grad.values();
         const auto& m = mat.getDerived();
         const auto& v = vec.getDerived();

@@ -302,7 +302,7 @@ namespace Physica {
         }, numSample, 0).wait();
 
         Trv maxSample;
-        if constexpr (T::isComplex)
+        if constexpr (T::isComplex())
             maxSample = samples.reals().max().value();
         else
             maxSample = samples.max().value(); // Assuming f(x) > 0, so ln(f(x)) is defined

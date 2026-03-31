@@ -42,15 +42,13 @@ namespace Physica {
     class FFT<T, 1>
             : public FFTRSpace<FFT<T, 1>, 1>
             , public FFTKSpace<FFT<T, 1>, 1> {
-        static_assert(!T::isDiffable, "[Error]: Header of differentiable fft should be included");
+        static_assert(!T::isDiffable(), "[Error]: Header of differentiable fft should be included");
         using This = FFT<T, 1>;
         using MachineType = Traits<This>::MachineType;
         using RealType = Traits<This>::RealType;
         using ComplexType = Traits<This>::ComplexType;
         using PlanType = Traits<This>::PlanType;
         using ComplexTypeFFTW = Traits<This>::ComplexTypeFFTW;
-        constexpr static bool isComplex = Traits<This>::isComplex;
-        constexpr static bool isSinglePrec = Traits<This>::isSinglePrec;
     public:
         using RSpaceType = FFTRSpace<This, 1>;
         using KSpaceType = FFTKSpace<This, 1>;
@@ -91,6 +89,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const RSpaceType& getRSpace() const { return *this; }
         [[nodiscard]] __host__ __device__ const KSpaceType& getKSpace() const { return *this; }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isComplex() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isSinglePrec() noexcept;
         [[nodiscard]] static FFT<T, 1> makeEmptyFFT(size_t rSpaceSize);
         template<std::integral IndexType>
         [[nodiscard]] __host__ __device__ constexpr static IndexType rSizeToKSize(IndexType rSize) noexcept;
@@ -114,7 +114,7 @@ namespace Physica {
     template<Scalar T, size_t Dim>
     class FFT : public FFTRSpace<FFT<T, Dim>, Dim>
               , public FFTKSpace<FFT<T, Dim>, Dim> {
-        static_assert(!T::isDiffable, "[Error]: Not implemented");
+        static_assert(!T::isDiffable(), "[Error]: Not implemented");
         using This = FFT<T, Dim>;
         using MachineType = Traits<This>::MachineType;
         using RealType = Traits<This>::RealType;
@@ -122,8 +122,6 @@ namespace Physica {
         using PlanType = Traits<This>::PlanType;
         using ComplexTypeFFTW = Traits<This>::ComplexTypeFFTW;
         using IndexArray = Array<size_t, Dim>;
-        constexpr static bool isComplex = Traits<This>::isComplex;
-        constexpr static bool isSinglePrec = Traits<This>::isSinglePrec;
     public:
         using RSpaceType = FFTRSpace<This, Dim>;
         using KSpaceType = FFTKSpace<This, Dim>;
@@ -164,6 +162,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const RSpaceType& getRSpace() const { return *this; }
         [[nodiscard]] __host__ __device__ const KSpaceType& getKSpace() const { return *this; }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isComplex() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isSinglePrec() noexcept;
         [[nodiscard]] static FFT<T, Dim> makeEmptyFFT(const Array<size_t, Dim>& rSpaceSize);
         template<std::integral IndexType>
         [[nodiscard]] static Array<IndexType, Dim> rSizeToKSize(const Array<IndexType, Dim>& rSize);
@@ -204,8 +204,8 @@ namespace Physica {
         using ComplexType = ScalarType::ComplexType;
         constexpr static size_t Dim = dim;
 
-        constexpr static bool isComplex = T::isComplex;
-        constexpr static bool isDiffable = T::isDiffable;
+        constexpr static bool isComplex = T::isComplex();
+        constexpr static bool isDiffable = T::isDiffable();
         constexpr static bool isSinglePrec = std::is_same<MachineType, float>::value;
         using PlanType = std::conditional<isSinglePrec, fftwf_plan, fftw_plan>::type;
         using ComplexTypeFFTW = std::conditional<isSinglePrec, fftwf_complex, fftw_complex>::type;

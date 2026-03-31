@@ -42,7 +42,7 @@ namespace Physica {
 
     template<Matrix M>
     __device__ auto device_obj<MatrixExpr<ExprID::Square, M>>::calc(size_t row, size_t col) const -> T {
-        if constexpr (isReverseDiff)
+        if constexpr (isReverseDiff())
             return calc_value(row, col);
         else
             return square(Base::getExpr().calc(row, col));
@@ -55,7 +55,7 @@ namespace Physica {
 
     template<Matrix M>
     void device_obj<MatrixExpr<ExprID::Square, M>>::reverse(const Matrix auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         const auto& expr = Base::getExpr();
         expr.reverse(Tv(2) * hadamard(expr.values(), grad));
     }

@@ -127,8 +127,8 @@ namespace Physica {
 namespace Physica {
     template<Scalar T>
     class Traits<Complex<T>> {
-        static_assert(!T::isComplex, "[Error]: Double complex mark is not allowed");
-        static_assert(!T::isDiffable, "[Error]: Diff mark should locate in outsite");
+        static_assert(!T::isComplex(), "[Error]: Double complex mark is not allowed");
+        static_assert(!T::isDiffable(), "[Error]: Diff mark should locate in outsite");
     public:
         constexpr static FloatPrec Prec = Traits<T>::Prec;
         constexpr static int Order = 0;

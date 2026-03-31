@@ -99,10 +99,6 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
 
         using PacketType = BestPacket<ScalarType, SizeAtCompile>::Type;
-        constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
-        constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
-        constexpr static bool isDiffable = ScalarType::isDiffable;
-        constexpr static bool isComplex = ScalarType::isComplex;
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
@@ -204,7 +200,11 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         [[nodiscard]] bool empty() const noexcept { return getLength() == 0; }
         /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static bool isLValueVector() noexcept { return false; }
+        [[nodiscard]] __host__ __device__ consteval static bool isComplex() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isDiffable() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isForwardDiff() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isReverseDiff() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isLValueVector() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t maxSizeAtCompile(const Vector auto& other) noexcept;

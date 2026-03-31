@@ -36,7 +36,7 @@ namespace Physica {
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
 
-        constexpr static bool isComplex = T::isComplex;
+        constexpr static bool isComplex = T::isComplex();
     private:
         const Params* params;
         VectorND<Trv> rSquareOmegas;

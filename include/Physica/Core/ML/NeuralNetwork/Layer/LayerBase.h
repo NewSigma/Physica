@@ -31,7 +31,7 @@ namespace Physica {
     public:
         template<Scalar U>
         using MatrixND = DenseMatrix<U, MatrixMajor::Col>;
-        constexpr static bool IsTrain = TraitsType::ScalarType::isDiffable;
+        constexpr static bool IsTrain = TraitsType::ScalarType::isDiffable();
         constexpr static bool IsInfer = !IsTrain;
     protected:
         using T = TraitsType::ScalarType;

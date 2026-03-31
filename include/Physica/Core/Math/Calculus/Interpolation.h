@@ -112,7 +112,7 @@ namespace Physica {
         using T = V::ScalarType;
         using RealType = T::RealType;
         using ComplexType = T::ComplexType;
-        constexpr bool isComplex = T::isComplex;
+        constexpr bool isComplex = T::isComplex();
 
         const size_t rSpaceSize = data.getLength();
         FFT<T, 1> fft(rSpaceSize, PlanFlag::Estimate);
@@ -151,7 +151,7 @@ namespace Physica {
         using T = V::ScalarType;
         using RealType = T::RealType;
         using ComplexType = T::ComplexType;
-        constexpr bool isComplex = T::isComplex;
+        constexpr bool isComplex = T::isComplex();
 
         const size_t rSpaceSize = data.getLength();
         FFT<T, 1> fft(rSpaceSize, PlanFlag::Estimate);
@@ -192,7 +192,7 @@ namespace Physica {
         using RealType = T::RealType;
         using ComplexType = T::ComplexType;
         constexpr size_t Dim = 3;
-        constexpr bool isComplex = T::isComplex;
+        constexpr bool isComplex = T::isComplex();
 
         auto fft = FFT<T, 3>(data.getShape(), PlanFlag::Estimate);
         fft.getRSpace() = data;
@@ -242,7 +242,7 @@ namespace Physica {
         using RealType = T::RealType;
         using ComplexType = T::ComplexType;
         constexpr size_t Dim = 3;
-        constexpr bool isComplex = T::isComplex;
+        constexpr bool isComplex = T::isComplex();
         
         auto fft = FFT<T, 3>(data.getShape(), PlanFlag::Estimate);
         fft.getRSpace() = data;

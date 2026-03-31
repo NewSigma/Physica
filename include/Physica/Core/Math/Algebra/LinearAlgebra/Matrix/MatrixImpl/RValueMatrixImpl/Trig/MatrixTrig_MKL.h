@@ -36,7 +36,7 @@ namespace Physica {
         const size_t lda = MatrixMajor::isRowMatrix<M>() ? n : m;
         auto* b = reinterpret_cast<Tm*>(target.data());
         const size_t ldb = lda;
-        if constexpr (Base::isComplex) {
+        if constexpr (Base::isComplex()) {
             if constexpr (T::Prec == Float32)
                 check_lapack(LAPACKE_clacpy_64(Layout, Uplo, m, n, a, lda, b, ldb));
             else

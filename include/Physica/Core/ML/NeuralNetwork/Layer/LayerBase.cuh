@@ -33,7 +33,7 @@ namespace Physica {
         template<Scalar U>
         using MatrixND = DenseMatrix<U, MatrixMajor::Col>;
         using ScalarType = Traits<device_obj<Derived>>::ScalarType;
-        constexpr static bool IsTrain = ScalarType::isDiffable;
+        constexpr static bool IsTrain = ScalarType::isDiffable();
         constexpr static bool IsInfer = !IsTrain;
     public:
         ~device_obj() = default;

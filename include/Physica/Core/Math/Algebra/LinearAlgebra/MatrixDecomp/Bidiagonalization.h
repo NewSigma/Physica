@@ -39,7 +39,7 @@ namespace Physica {
         using MainDiagVector = DenseVector<T, NumSingularValue>;
         using SubDiagVector = DenseVector<T, NumSingularValue == 0 ? Dynamic : NumSingularValue - 1>;
 
-        static_assert(!T::isComplex, "[Error]: Bidiagonalization do not support complex matrixes");
+        static_assert(!T::isComplex(), "[Error]: Bidiagonalization do not support complex matrixes");
     private:
         WorkingMatrix working;
         MainDiagVector mainDiag;

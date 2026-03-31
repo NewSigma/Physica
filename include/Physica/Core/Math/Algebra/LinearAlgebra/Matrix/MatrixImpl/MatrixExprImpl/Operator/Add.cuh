@@ -66,7 +66,7 @@ namespace Physica {
         }
 
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            if constexpr (isReverseDiff)
+            if constexpr (isReverseDiff())
                 return calc_value(row, col);
             else
                 return Base::getLHS().calc(row, col) + Base::getRHS().calc(row);
@@ -78,7 +78,7 @@ namespace Physica {
 
         using Base::reverse;
         void reverse(const Matrix auto& grad) const noexcept {
-            static_assert(isReverseDiff);
+            static_assert(isReverseDiff());
             if constexpr (ReverseDiff<M>)
                 Base::getLHS().reverse(grad);
             if constexpr (ReverseDiff<U>)
@@ -107,7 +107,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            if constexpr (isReverseDiff)
+            if constexpr (isReverseDiff())
                 return calc_value(row, col);
             else
                 return Base::getLHS().calc(row, col) + Base::getRHS().calc(row, col);

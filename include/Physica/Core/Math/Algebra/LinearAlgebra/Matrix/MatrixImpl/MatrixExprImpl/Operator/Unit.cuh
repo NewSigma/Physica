@@ -33,7 +33,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            if constexpr (isReverseDiff)
+            if constexpr (isReverseDiff())
                 return calc_value(row, col);
             else
                 return unit(Base::getExpr().calc(row, col));

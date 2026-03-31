@@ -37,7 +37,7 @@ namespace Physica {
         T x_i = vector.calc(i);
         T x_j = vector.calc(j);
         ResultType result;
-        if constexpr (T::isComplex) {
+        if constexpr (T::isComplex()) {
             const auto alpha = givens(Vector2Dr{x_i.real(), x_i.imag()}, 0, 1);
             const auto beta = givens(Vector2Dr{x_j.real(), x_j.imag()}, 0, 1);
             const auto theta = givens(Vector2Dr{x_i.norm(), x_j.norm()}, 0, 1);

@@ -34,7 +34,7 @@ namespace Physica {
     void device_obj<CompactVector<Derived>>::reverse(const auto& grad) const noexcept {
         using U = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename T::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         if constexpr (Scalar<U>)
             Base::getConstCastDerived().grads() += grad;
         else {
@@ -79,7 +79,7 @@ namespace Physica {
     template<int Size>
     __device__ auto device_obj<CompactVector<Derived>>::packet(size_t index) const noexcept {
         SIMD<T, Size> packet{};
-        if constexpr (isReverseDiff)
+        if constexpr (isReverseDiff())
             packet.load(Base::data_ptr(index).value_ptr());
         else
             packet.load(Base::data_ptr(index));
@@ -92,7 +92,7 @@ namespace Physica {
         assert(0 < count && count < Size && "[Error]: Invalid size for partial operation");
         assert(index + count <= Base::getLength());
         SIMD<T, Size> packet{};
-        if constexpr (isReverseDiff)
+        if constexpr (isReverseDiff())
             packet.load(Base::data_ptr(index).value_ptr(), count);
         else
             packet.load(Base::data_ptr(index), count);
@@ -101,9 +101,9 @@ namespace Physica {
 
     template<class Derived>
     __device__ void device_obj<CompactVector<Derived>>::writePacket(const Packet auto packet, size_t index) noexcept {
-        using T1 = std::conditional<isReverseDiff, Tv, T>::type;
+        using T1 = std::conditional<isReverseDiff(), Tv, T>::type;
         using LocalPacket = std::conditional<packet.size() == 1, T1, SIMD<T1, packet.size()>>::type;
-        if constexpr (isReverseDiff)
+        if constexpr (isReverseDiff())
             LocalPacket(packet).store(Base::data_ptr(index).value_ptr());
         else
             LocalPacket(packet).store(Base::data_ptr(index));
@@ -113,9 +113,9 @@ namespace Physica {
     __device__ void device_obj<CompactVector<Derived>>::writePacket(const Packet auto packet, size_t index, size_t count) noexcept {
         assert(0 < count && count < packet.size() && "[Error]: Invalid size for partial operation");
         assert(index + count <= Base::getLength());
-        using T1 = std::conditional<isReverseDiff, Tv, T>::type;
-        using LocalPacket = std::conditional<packet.size() == 1, T1, SIMD<T1, packet.ize()>>::type;
-        if constexpr (isReverseDiff)
+        using T1 = std::conditional<isReverseDiff(), Tv, T>::type;
+        using LocalPacket = std::conditional<packet.size() == 1, T1, SIMD<T1, packet.size()>>::type;
+        if constexpr (isReverseDiff())
             LocalPacket(packet).store(Base::data_ptr(index).value_ptr(), count);
         else
             LocalPacket(packet).store(Base::data_ptr(index), count);
@@ -161,7 +161,7 @@ namespace Physica {
         if constexpr (R::cuRAND_Ready) {
             auto& rng = R::getInstance();
             check(curandSetStream(rng, CUDAContext::getInstance()));
-            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
+            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex() ? 2 : 1);
             if constexpr (T::Prec == Float32)
                 check(curandGenerateUniform(rng, (float*)data(), length));
             else if constexpr (T::Prec == Float64)
@@ -179,7 +179,7 @@ namespace Physica {
         if constexpr (R::cuRAND_Ready) {
             auto& rng = R::getInstance();
             check(curandSetStream(rng, CUDAContext::getInstance()));
-            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
+            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex() ? 2 : 1);
             if constexpr (T::Prec == Float32)
                 check(curandGenerateNormal(rng, (float*)data(), length, 0, 1));
             else if constexpr (T::Prec == Float64)

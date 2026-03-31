@@ -30,7 +30,7 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length, ScalarType init) requires(isForwardDiff)
+    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length, ScalarType init) requires(isForwardDiff())
             : v(length, init.value()), g(length, init.grad()) {}
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
@@ -39,7 +39,7 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(std::initializer_list<ScalarType> list) requires(isForwardDiff) : DenseVector(list.size()) {
+    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(std::initializer_list<ScalarType> list) requires(isForwardDiff()) : DenseVector(list.size()) {
         size_t i = 0;
         for (auto& elem : list) {
             v[i] = elem.value();
@@ -55,7 +55,7 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(const Vector auto& src) : DenseVector(src.getLength()) {
         using V = decltype(src);
-        static_assert(!ReverseDiff<V>, "[Error]: Copying a reverse diff object corrupts the compute graph");
+        static_assert(!ReverseDiff<V>, "[Error]: Copying a reverse diff object breaks the compute graph");
         if constexpr (!Diffable<V>) {
             src.assign(v);
             g.zeros();

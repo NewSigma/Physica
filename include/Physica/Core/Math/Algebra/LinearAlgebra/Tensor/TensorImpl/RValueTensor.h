@@ -40,9 +40,6 @@ namespace Physica {
     public:
         using ScalarType = Traits<Derived>::ScalarType;
         constexpr static int NDim = Traits<Derived>::NDim;
-        constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
-        constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
-        constexpr static bool isComplex = ScalarType::isComplex;
 
         using IndexType = Array<size_t, NDim>;
     protected:
@@ -78,8 +75,11 @@ namespace Physica {
         [[nodiscard]] IndexType getShape() const noexcept;
         [[nodiscard]] size_t getSize() const noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isForwardDiff() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isReverseDiff() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isDiffable() noexcept;
-        [[nodiscard]] __host__ __device__ consteval static bool isLValueTensor() noexcept { return false; }
+        [[nodiscard]] __host__ __device__ consteval static bool isComplex() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isLValueTensor() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         using TensorBase::forPointIndexInTensor;

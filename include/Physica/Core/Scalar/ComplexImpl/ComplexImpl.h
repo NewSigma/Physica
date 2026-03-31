@@ -54,7 +54,7 @@ namespace Physica {
     __host__ __device__ Complex<T>::Complex(const U& x) {
         if constexpr (Diffable<U>)
             *this = x.value();
-        else if constexpr (U::isComplex)
+        else if constexpr (U::isComplex())
             *this = This(T(x.real()), T(x.imag()));
         else
             *this = This(T(x.real()));
@@ -79,7 +79,7 @@ namespace Physica {
     template<Scalar U>
     __host__ __device__ auto Complex<T>::operator+(const U& x) const noexcept requires(!Diffable<U>) {
         using RtnType = Internal::BinaryScalarOpRtnTy<This, U>::Type;
-        if constexpr (U::isComplex)
+        if constexpr (U::isComplex())
             return RtnType(real() + x.real(), imag() + x.imag());
         else
             return RtnType(real() + x.real(), imag());
@@ -89,7 +89,7 @@ namespace Physica {
     template<Scalar U>
     __host__ __device__ auto Complex<T>::operator-(const U& x) const noexcept requires(!Diffable<U>) {
         using RtnType = Internal::BinaryScalarOpRtnTy<This, U>::Type;
-        if constexpr (U::isComplex)
+        if constexpr (U::isComplex())
             return RtnType(real() - x.real(), imag() - x.imag());
         else
             return RtnType(real() - x.real(), imag());
@@ -99,7 +99,7 @@ namespace Physica {
     template<Scalar U>
     __host__ __device__ auto Complex<T>::operator*(const U& x) const noexcept requires(!Diffable<U>) {
         using RtnType = Internal::BinaryScalarOpRtnTy<This, U>::Type;
-        if constexpr (U::isComplex) {
+        if constexpr (U::isComplex()) {
             const auto& re_1 = real();
             const auto& im_1 = imag();
             const auto& re_2 = x.real();
@@ -124,7 +124,7 @@ namespace Physica {
     __host__ __device__ auto Complex<T>::operator/(const U& x) const noexcept requires(!Diffable<U>) {
         assert(!x.isSubNormal() && "[Error]: Division overflow");
         using RtnType = Internal::BinaryScalarOpRtnTy<This, U>::Type;
-        if constexpr (U::isComplex) {
+        if constexpr (U::isComplex()) {
             const auto& re_1 = real();
             const auto& im_1 = imag();
             const auto& re_2 = x.real();
@@ -251,23 +251,23 @@ namespace Physica {
 #endif
 
     template<Scalar T, Scalar U>
-    __host__ __device__ auto operator+(const T& x, const Complex<U>& y) requires(!T::isComplex && !Diffable<T>) {
+    __host__ __device__ auto operator+(const T& x, const Complex<U>& y) requires(!T::isComplex() && !Diffable<T>) {
         return y + x;
     }
 
     template<Scalar T, Scalar U>
-    __host__ __device__ auto operator-(const T& x, const Complex<U>& y) requires(!T::isComplex && !Diffable<T>) {
+    __host__ __device__ auto operator-(const T& x, const Complex<U>& y) requires(!T::isComplex() && !Diffable<T>) {
         using RtnType = Internal::BinaryScalarOpRtnTy<T, Complex<U>>::Type;
         return RtnType(x - y.real(), -y.imag());
     }
 
     template<Scalar T, Scalar U>
-    __host__ __device__ auto operator*(const T& x, const Complex<U>& y) requires(!T::isComplex && !Diffable<T>) {
+    __host__ __device__ auto operator*(const T& x, const Complex<U>& y) requires(!T::isComplex() && !Diffable<T>) {
         return y * x;
     }
 
     template<Scalar T, Scalar U>
-    __host__ __device__ auto operator/(const T& x, const Complex<U>& y) requires(!T::isComplex && !Diffable<T>) {
+    __host__ __device__ auto operator/(const T& x, const Complex<U>& y) requires(!T::isComplex() && !Diffable<T>) {
         using RtnType = Internal::BinaryScalarOpRtnTy<T, Complex<U>>::Type;
         const auto& re = y.real();
         const auto& im = y.imag();

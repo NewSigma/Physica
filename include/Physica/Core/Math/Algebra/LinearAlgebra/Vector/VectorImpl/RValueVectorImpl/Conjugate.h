@@ -82,7 +82,7 @@ namespace Physica {
 namespace Physica {
     template<Vector V>
     class Traits<Conjugate<V>> : public Traits<V> {
-        static_assert(std::remove_cvref_t<V>::isComplex, "[Error]: Unnecessary conjugate call on real vector");
+        static_assert(std::remove_cvref_t<V>::isComplex(), "[Error]: Unnecessary conjugate call on real vector");
     };
 }
 

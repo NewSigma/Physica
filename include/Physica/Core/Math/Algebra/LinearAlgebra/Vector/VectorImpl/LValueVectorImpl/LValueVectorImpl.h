@@ -98,7 +98,7 @@ namespace Physica {
     void LValueVector<Derived>::writePacket(const Packet auto packet, size_t index) noexcept {
         using Pack = std::remove_cvref_t<decltype(packet)>;
         using U = Traits<Pack>::ScalarType;
-        if constexpr (U::isForwardDiff) {
+        if constexpr (U::isForwardDiff()) {
             for (size_t i = 0; i < Pack::size(); ++i, ++index)
                 (*this)[index] = packet[i];
         }
@@ -114,7 +114,7 @@ namespace Physica {
     void LValueVector<Derived>::writePacket(const Packet auto packet, size_t index, size_t count) noexcept {
         using Pack = std::remove_cvref_t<decltype(packet)>;
         using U = Traits<Pack>::ScalarType;
-        if constexpr (U::isForwardDiff) {
+        if constexpr (U::isForwardDiff()) {
             for (size_t i = 0; i < count; ++i, ++index)
                 (*this)[index] = packet[i];
         }
@@ -165,7 +165,7 @@ namespace Physica {
     void LValueVector<Derived>::reverse(const auto& grad) const noexcept {
         using U = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename T::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         if constexpr (Scalar<U>)
             Base::getConstCastDerived().grads() += grad;
         else if constexpr (Vector<U>) {
@@ -262,7 +262,7 @@ namespace Physica {
     template<class Derived>
     decltype(auto) LValueVector<Derived>::reals(this auto&& self) noexcept {
         using Self = decltype(self);
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             return RealVectorL<Self>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);

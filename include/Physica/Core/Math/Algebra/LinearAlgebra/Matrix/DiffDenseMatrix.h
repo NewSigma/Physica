@@ -54,14 +54,14 @@ namespace Physica {
         explicit DenseMatrix(size_t order);
         DenseMatrix(size_t row, size_t col);
         DenseMatrix(size_t row, size_t col, T init);
-        DenseMatrix(size_t row, size_t col, ScalarType init) requires(isForwardDiff);
+        DenseMatrix(size_t row, size_t col, ScalarType init) requires(isForwardDiff());
         DenseMatrix(std::initializer_list<Tv> list);
         DenseMatrix(std::initializer_list<VectorIniter> list);
         DenseMatrix(ValueMatrix v_, GradMatrix g_);
         template<Vector V>
-        explicit(isReverseDiff) DenseMatrix(const V& vec) requires(!ReverseDiff<V>);
+        explicit(isReverseDiff()) DenseMatrix(const V& vec) requires(!ReverseDiff<V>);
         template<Matrix M>
-        explicit(isReverseDiff) DenseMatrix(const M& mat) requires(!ReverseDiff<M>);
+        explicit(isReverseDiff()) DenseMatrix(const M& mat) requires(!ReverseDiff<M>);
         DenseMatrix(const This&) = default;
         DenseMatrix(This&&) noexcept = default;
         ~DenseMatrix() = default;

@@ -140,7 +140,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     decltype(auto) DenseSymmMatrix<T, Order>::hermite() const noexcept {
-        if constexpr (T::isComplex)
+        if constexpr (T::isComplex())
             return Base::hermite();
         else
             return *this;

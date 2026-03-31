@@ -45,7 +45,7 @@ namespace Physica {
         using HouseholderNorm = DenseVector<T, NormVectorLength>;
         using BufferVector = DenseVector<T, BufferLength>;
     public:
-        using WorkingMatrix = std::conditional<T::isComplex, HermiteMatrix, SymmMatrix>::type;
+        using WorkingMatrix = std::conditional<T::isComplex(), HermiteMatrix, SymmMatrix>::type;
     private:
         WorkingMatrix working;
         HouseholderNorm normBuffer;

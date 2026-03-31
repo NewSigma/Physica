@@ -34,7 +34,7 @@ namespace Physica {
     template<Scalar T, size_t Order = Dynamic>
     class EigenSolver {
         using This = EigenSolver<T, Order>;
-        constexpr static bool isComplex = T::isComplex;
+        constexpr static bool isComplex = T::isComplex();
 
         using Tr = T::RealType;
         using Tc = Tr::ComplexType;

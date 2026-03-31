@@ -39,13 +39,13 @@ namespace Physica {
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
-        if constexpr (!isDiffable && Diffable<V>) {
+        if constexpr (!isDiffable() && Diffable<V>) {
             Base::getDerived().assign(v.values());
             v.grads().zeros();
         }
         else {
             v.assert_assign(Base::getDerived());
-            if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
+            if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff()) {
                 constexpr static size_t Length1 = SizeAtCompile;
                 constexpr static size_t Length2 = V::SizeAtCompile;
                 constexpr static size_t Length = std::max(Length1, Length2);
@@ -66,11 +66,11 @@ namespace Physica {
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign_add(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
-        if constexpr (!isDiffable && Diffable<V>)
+        if constexpr (!isDiffable() && Diffable<V>)
             Base::getDerived().assign_add(v.values());
         else {
             v.assert_assign(Base::getDerived());
-            if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
+            if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff()) {
                 constexpr static size_t Length1 = SizeAtCompile;
                 constexpr static size_t Length2 = V::SizeAtCompile;
                 constexpr static size_t Length = std::max(Length1, Length2);
@@ -116,7 +116,7 @@ namespace Physica {
         using U = typename Derived::ScalarType;
         assert(index + Size <= getLength() && "[Error]: Index out of range");
         if constexpr (Diffable<U>) {
-            if constexpr (isForwardDiff) {
+            if constexpr (isForwardDiff()) {
                 const auto& x = Base::getDerived();
                 auto values = x.values().template packet<Size>(index);
                 auto grads = x.grads().template packet<Size>(index);
@@ -148,7 +148,7 @@ namespace Physica {
         using U = typename Derived::ScalarType;
         assert(index + count <= getLength() && "[Error]: Index out of range");
         if constexpr (Diffable<U>) {
-            if constexpr (isForwardDiff) {
+            if constexpr (isForwardDiff()) {
                 const auto& x = Base::getDerived();
                 auto values = x.values().template packet<Size>(index, count);
                 auto grads = x.grads().template packet<Size>(index, count);
@@ -181,7 +181,7 @@ namespace Physica {
 
     template<class Derived>
     void RValueVector<Derived>::reverse(const Vector auto&, const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         Base::getDerived().reverse(grad);
     }
 
@@ -220,7 +220,7 @@ namespace Physica {
     template<class Derived>
     decltype(auto) RValueVector<Derived>::conjugate(this auto&& self) noexcept {
         using Self = decltype(self);
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             return Conjugate<Self>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);
@@ -228,7 +228,7 @@ namespace Physica {
 
     template<class Derived>
     auto RValueVector<Derived>::hermite() const noexcept {
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             return Hermite<Derived>(Base::getDerived());
         else
             return Base::getDerived().transpose();
@@ -299,11 +299,11 @@ namespace Physica {
 
     template<class Derived>
     auto RValueVector<Derived>::max() const noexcept -> CoDiff<T> {
-        static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
+        static_assert(!T::isComplex(), "[Error]: Compare between complex number is ill defined");
         assert(getLength() != 0);
 
         constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
-        if constexpr (isReverseDiff) {
+        if constexpr (isReverseDiff()) {
             size_t index = 0;
             Tv elem = calc_value(0);
             for (size_t i = 1; i < getLength(); ++i) {
@@ -363,11 +363,11 @@ namespace Physica {
 
     template<class Derived>
     auto RValueVector<Derived>::min() const noexcept -> CoDiff<T> {
-        static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
+        static_assert(!T::isComplex(), "[Error]: Compare between complex number is ill defined");
         assert(getLength() != 0);
 
         constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
-        if constexpr (isReverseDiff) {
+        if constexpr (isReverseDiff()) {
             size_t index = 0;
             Tv elem = calc_value(0);
             for (size_t i = 1; i < getLength(); ++i) {
@@ -429,7 +429,7 @@ namespace Physica {
     auto RValueVector<Derived>::sum() const noexcept -> CoDiff<T> {
         assert(getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
         const auto& v = Base::getDerived();
-        if constexpr (isReverseDiff) {
+        if constexpr (isReverseDiff()) {
             auto& result = co_yield v.values().sum();
             v.reverse(result.grad());
         }
@@ -481,7 +481,7 @@ namespace Physica {
         for (size_t i = 0; i < getLength(); ++i)
             result.toNextMean(i, v.calc(i));
 
-        if constexpr (isReverseDiff) {
+        if constexpr (isReverseDiff()) {
             auto& y = co_yield std::move(result);
             v.reverse(y.grad());
         }
@@ -497,7 +497,7 @@ namespace Physica {
         const auto expr = x - x_mean;
         const auto expr2 = square(expr);
         auto result = expr2.sum() / Trv(length);
-        if constexpr (isReverseDiff) {
+        if constexpr (isReverseDiff()) {
             auto& tmp = co_yield result.value();
             result.reverse(tmp.grad());
         }
@@ -543,7 +543,7 @@ namespace Physica {
     auto RValueVector<Derived>::lnSumExp() const noexcept -> CoDiff<T> {
         const Derived& v = Base::getDerived();
         Tv m;
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             m = v.values().reals().max();
         else
             m = v.values().max();
@@ -551,7 +551,7 @@ namespace Physica {
         auto expr1 = v - m;
         auto expr2 = exp(expr1);
         auto y = ln(expr2.sum() + Trv(std::numeric_limits<Trv>::min())) + m; // Add min() to avoid ln(0)
-        if constexpr (isReverseDiff) {
+        if constexpr (isReverseDiff()) {
             auto& tmp = co_yield y.value();
             y.reverse_final(tmp.grad());
         }
@@ -563,7 +563,7 @@ namespace Physica {
     auto RValueVector<Derived>::crossEntropy(size_t index) const noexcept -> CoDiff<T> {
         assert(index < getLength() && "[Error]: Index overflow");
         auto y = lnSumExp() - calc_value(index);
-        if constexpr (isReverseDiff) {
+        if constexpr (isReverseDiff()) {
             auto& tmp = co_yield y.value();
             auto g = tmp.grad();
             y.reverse(g);
@@ -577,7 +577,7 @@ namespace Physica {
     auto RValueVector<Derived>::lnSoftmax(size_t index) const noexcept -> CoDiff<T> {
         assert(index < getLength() && "[Error]: Index overflow");
         auto y = -crossEntropy(index);
-        if constexpr (isReverseDiff) {
+        if constexpr (isReverseDiff()) {
             auto& tmp = co_yield y.value();
             y.reverse(tmp.grad());
         }
@@ -589,7 +589,7 @@ namespace Physica {
     auto RValueVector<Derived>::softmax(size_t index) const noexcept -> CoDiff<T> {
         assert(index < getLength() && "[Error]: Index overflow");
         auto y = exp(lnSoftmax(index));
-        if constexpr (isReverseDiff) {
+        if constexpr (isReverseDiff()) {
             auto& tmp = co_yield y.value();
             y.reverse_final(tmp.grad());
         }
@@ -600,7 +600,7 @@ namespace Physica {
     template<class Derived>
     auto RValueVector<Derived>::prod() const noexcept -> CoDiff<T> {
         assert(getLength() != 0);
-        if constexpr (isReverseDiff) {
+        if constexpr (isReverseDiff()) {
             Tv result = calc_value(0);
             for (size_t i = 1; i < getLength(); ++i)
                 result *= calc_value(i);
@@ -679,7 +679,7 @@ namespace Physica {
     template<class Derived>
     decltype(auto) RValueVector<Derived>::reals(this auto&& self) noexcept {
         using Self = decltype(self);
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             return RealVectorR<Self>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);
@@ -706,7 +706,7 @@ namespace Physica {
     template<class Derived>
     decltype(auto) RValueVector<Derived>::values(this auto&& self) noexcept {
         using Self = decltype(self);
-        if constexpr (isDiffable)
+        if constexpr (isDiffable())
             return ValueVector<Self>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);
@@ -727,6 +727,31 @@ namespace Physica {
             return GradMaskVector<Self, MaskOrder>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueVector<Derived>::isComplex() noexcept {
+        return ScalarType::isComplex();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueVector<Derived>::isDiffable() noexcept {
+        return ScalarType::isDiffable();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueVector<Derived>::isForwardDiff() noexcept {
+        return ScalarType::isForwardDiff();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueVector<Derived>::isReverseDiff() noexcept {
+        return ScalarType::isReverseDiff();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueVector<Derived>::isLValueVector() noexcept {
+        return false;
     }
 
     template<class Derived>

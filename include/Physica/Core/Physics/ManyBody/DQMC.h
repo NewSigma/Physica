@@ -35,7 +35,7 @@ namespace Physica {
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
 
-        constexpr static bool isComplex = T::isComplex;
+        constexpr static bool isComplex = T::isComplex();
         static_assert(T::Prec == Float64, "[Warn]: It is highly recommended to use high-precision floats");
     private:
         const Params* params;

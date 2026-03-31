@@ -88,11 +88,11 @@ namespace Physica {
     auto VectorExpr<ExprID::Mul, V, U>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> SIMD<T, Size> {
         using V1 = std::remove_cvref_t<V>;
         using U1 = std::remove_cvref_t<U>;
-        if constexpr (!V1::isComplex && U1::isComplex) {
+        if constexpr (!V1::isComplex() && U1::isComplex()) {
             auto pack = lhs.template load<Size>();
             return SIMD<T, Size>::asComplex(SIMD<Tr, Size * 2>(pack * rhs.real(), pack * rhs.imag()).gatherRealImag());
         }
-        else if constexpr (V1::isComplex && !U1::isComplex) {
+        else if constexpr (V1::isComplex() && !U1::isComplex()) {
             auto pack = lhs.template load<Size>();
             return SIMD<T, Size>::asComplex(pack.asReal() * SIMD<Tr, Size * 2>(rhs));
         }
@@ -105,11 +105,11 @@ namespace Physica {
     auto VectorExpr<ExprID::Mul, V, U>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept -> SIMD<T, Size> {
         using V1 = std::remove_cvref_t<V>;
         using U1 = std::remove_cvref_t<U>;
-        if constexpr (!V1::isComplex && U1::isComplex) {
+        if constexpr (!V1::isComplex() && U1::isComplex()) {
             auto pack = lhs.template load<Size>(count);
             return SIMD<T, Size>::asComplex(SIMD<Tr, Size * 2>(pack * rhs.real(), pack * rhs.imag()).gatherRealImag());
         }
-        else if constexpr (V1::isComplex && !U1::isComplex) {
+        else if constexpr (V1::isComplex() && !U1::isComplex()) {
             auto pack = lhs.template load<Size>(count);
             return SIMD<T, Size>::asComplex(pack.asReal() * SIMD<Tr, Size * 2>(rhs));
         }
@@ -172,7 +172,7 @@ namespace Physica {
         constexpr bool LowerToFMA = std::same_as<T1, T2>;
         if constexpr (LowerToFMA) {
             v.assert_assign(Base::getDerived());
-            if constexpr (Internal::EnableSIMD<Source, Target>::value && !isReverseDiff) {
+            if constexpr (Internal::EnableSIMD<Source, Target>::value && !isReverseDiff()) {
                 constexpr size_t Length = Base::maxSizeAtCompile(v);
                 assign_fma_simd<Target, Length>(v);
             }
@@ -195,7 +195,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     void VectorExpr<ExprID::Mul, V, U>::reverse(const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         const auto& g = grad.values();
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
@@ -209,7 +209,7 @@ namespace Physica {
     template<ExecutePolicy P>
     void VectorExpr<ExprID::Mul, V, U>::assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept {
         parallel_for<P>([&, this](size_t i) {
-            if constexpr (isReverseDiff)
+            if constexpr (isReverseDiff())
                 v[i] = fma(getLHS().calc_value(i), Tv(getRHS().value()), v[i]);
             else
                 v[i] = fma(getLHS().calc(i), T(getRHS().value()), v[i]);
@@ -300,7 +300,7 @@ namespace Physica {
         using RHS = std::remove_cvref_t<V2>;
         auto pack1 = lhs.template load<Size>();
         auto pack2 = rhs.template load<Size>();
-        if constexpr (LHS::isComplex && !RHS::isComplex)
+        if constexpr (LHS::isComplex() && !RHS::isComplex())
             return SIMD<T, Size>::asComplex(pack1.asReal() * SIMD<Tr, 2 * Size>(pack2, pack2).scatterRealImag());
         else
             return pack1 * pack2;
@@ -313,7 +313,7 @@ namespace Physica {
         using RHS = std::remove_cvref_t<V2>;
         auto pack1 = lhs.template load<Size>(count);
         auto pack2 = rhs.template load<Size>(count);
-        if constexpr (LHS::isComplex && !RHS::isComplex)
+        if constexpr (LHS::isComplex() && !RHS::isComplex())
             return SIMD<T, Size>::asComplex(pack1.asReal() * SIMD<Tr, 2 * Size>(pack2, pack2).scatterRealImag());
         else
             return pack1 * pack2;
@@ -341,7 +341,7 @@ namespace Physica {
         constexpr bool LowerToFMA = std::same_as<T1, T2> && std::same_as<T, U>;
         if constexpr (LowerToFMA) {
             v.assert_assign(Base::getDerived());
-            if constexpr (Internal::EnableSIMD<This, Target>::value && !isReverseDiff) {
+            if constexpr (Internal::EnableSIMD<This, Target>::value && !isReverseDiff()) {
                 constexpr size_t Length1 = This::SizeAtCompile;
                 constexpr size_t Length2 = Target::SizeAtCompile;
                 constexpr size_t Length = std::max(Length1, Length2);
@@ -366,7 +366,7 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     void VectorExpr<ExprID::Mul, V1, V2>::reverse(const auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         if constexpr (Scalar<decltype(grad)>) {
             if constexpr (ReverseDiff<V1>)
                 getLHS().reverse(getRHS().values() * grad);
@@ -387,7 +387,7 @@ namespace Physica {
     template<ExecutePolicy P>
     void VectorExpr<ExprID::Mul, V1, V2>::assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept {
         parallel_for<P>([&, this](size_t i) {
-            if constexpr (isReverseDiff)
+            if constexpr (isReverseDiff())
                 v[i] = fma(getLHS().calc_value(i), Tv(getRHS().calc_value(i)), v[i]);
             else
                 v[i] = fma(getLHS().calc(i), T(getRHS().calc(i)), v[i]);

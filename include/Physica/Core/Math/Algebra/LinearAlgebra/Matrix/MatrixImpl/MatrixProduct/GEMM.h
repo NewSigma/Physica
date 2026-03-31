@@ -118,7 +118,7 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     void GEMM<M1, M2>::reverse(const Matrix auto& grad) const noexcept {
-        static_assert(Base::isReverseDiff);
+        static_assert(Base::isReverseDiff());
         if constexpr (ReverseDiff<M1>)
             mat1.reverse(grad * mat2.transpose());
         if constexpr (ReverseDiff<M2>)

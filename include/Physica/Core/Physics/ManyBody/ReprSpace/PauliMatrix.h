@@ -104,7 +104,7 @@ namespace Physica {
 namespace Physica {
     template<Scalar U, PauliIndex Idx>
     class Traits<PauliMatrix<U, Idx>> {
-        static_assert(!U::isComplex);
+        static_assert(!U::isComplex());
     public:
         using ScalarType = std::conditional<Idx == PauliIndex::Y, typename U::ComplexType, U>::type;
         constexpr static int Major = MatrixMajor::BothMajor;

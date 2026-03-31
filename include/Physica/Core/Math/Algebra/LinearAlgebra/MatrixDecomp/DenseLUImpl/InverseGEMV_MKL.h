@@ -35,7 +35,7 @@ namespace Physica {
         if constexpr (lu.isPivot()) {
             auto buffer = lu.getPerm().toMKL();
             const auto* ipiv = buffer.data();
-            if constexpr (Base::isComplex) {
+            if constexpr (Base::isComplex()) {
                 if constexpr (T::Prec == Float32)
                     check_lapack(LAPACKE_cgetrs_work_64(Layout, Trans, n, 1, a, n, ipiv, b, n));
                 else
@@ -53,7 +53,7 @@ namespace Physica {
             for (MKL_INT64 i = 0; i < n; ++i)
                 perm[i] = i + 1;
             auto* ipiv = perm.data();
-            if constexpr (Base::isComplex) {
+            if constexpr (Base::isComplex()) {
                 if constexpr (T::Prec == Float32)
                     check_lapack(LAPACKE_cgetrs_work_64(Layout, Trans, n, 1, a, n, ipiv, b, n));
                 else

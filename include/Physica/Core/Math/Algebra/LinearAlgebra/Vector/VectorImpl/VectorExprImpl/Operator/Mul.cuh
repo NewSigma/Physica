@@ -109,7 +109,7 @@ namespace Physica {
         const auto alpha = Base::getRHS().toMachine();
         const auto* x = reinterpret_cast<const Tm*>(Base::getLHS().data());
         auto* y = reinterpret_cast<Tm*>(v.data());
-        if constexpr (Base::isComplex) {
+        if constexpr (Base::isComplex()) {
             if constexpr (T::Prec == Float32)
                 check(cublasCaxpy_64(ctx, n, &alpha, x, 1, y, 1));
             else
@@ -125,7 +125,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::calc(size_t index) const -> T {
-        if constexpr (isReverseDiff)
+        if constexpr (isReverseDiff())
             return calc_value(index);
         else
             return Base::getLHS().calc(index) * Base::getRHS();
@@ -157,7 +157,7 @@ namespace Physica {
                 size_t length = source.getLength();
                 uint32_t i = blockIdx.x * blockDim.x + threadIdx.x;
                 if (i < length) {
-                    if constexpr (isReverseDiff)
+                    if constexpr (isReverseDiff())
                         target[i] = fma(source.getLHS().calc_value(i), Tv(source.getRHS().value()), target[i]);
                     else
                         target[i] = fma(source.getLHS().calc(i), T(source.getRHS().value()), target[i]);
@@ -168,7 +168,7 @@ namespace Physica {
 
         if constexpr (IsDevice()) {
             for (size_t i = 0; i < Base::getLength(); ++i) {
-                if constexpr (isReverseDiff)
+                if constexpr (isReverseDiff())
                     v[i] = fma(getLHS().calc_value(i), Tv(getRHS().value()), v[i]);
                 else
                     v[i] = fma(getLHS().calc(i), T(getRHS().value()), v[i]);
@@ -244,7 +244,7 @@ namespace Physica {
                 size_t length = source.getLength();
                 uint32_t i = blockIdx.x * blockDim.x + threadIdx.x;
                 if (i < length) {
-                    if constexpr (Base::isReverseDiff)
+                    if constexpr (Base::isReverseDiff())
                         target[i] = fma(source.getLHS().calc_value(i), Tv(source.getRHS().calc_value(i)), target[i]);
                     else
                         target[i] = fma(source.getLHS().calc(i), T(source.getRHS().calc(i)), target[i]);
@@ -255,7 +255,7 @@ namespace Physica {
 
         if constexpr (IsDevice()) {
             for (size_t i = 0; i < Base::getLength(); ++i) {
-                if constexpr (Base::isReverseDiff)
+                if constexpr (Base::isReverseDiff())
                     v[i] = fma(getLHS().calc_value(i), Tv(getRHS().calc_value(i)), v[i]);
                 else
                     v[i] = fma(getLHS().calc(i), T(getRHS().calc(i)), v[i]);

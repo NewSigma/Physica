@@ -31,7 +31,7 @@ namespace Physica {
     template<Scalar T>
     class BrillouInterpolate {
         constexpr static unsigned int Dim = 3;
-        constexpr static bool isComplex = T::isComplex;
+        constexpr static bool isComplex = T::isComplex();
         using This = BrillouInterpolate<T>;
         using Tr = T::RealType;
         using Tc = T::ComplexType;

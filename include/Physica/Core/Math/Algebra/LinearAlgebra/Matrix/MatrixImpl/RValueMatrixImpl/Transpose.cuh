@@ -59,7 +59,7 @@ namespace Physica {
 
     template<Matrix M>
     void device_obj<Transpose<M>>::reverse(const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         getExpr().reverse(grad.transpose());
     }
 
@@ -100,7 +100,7 @@ namespace Physica {
 
     template<Vector V>
     void device_obj<Transpose<V>>::reverse(const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         vec.getDerived().reverse(grad);
     }
 }

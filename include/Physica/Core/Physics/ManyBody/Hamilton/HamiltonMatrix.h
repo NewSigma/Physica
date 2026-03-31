@@ -38,11 +38,11 @@ namespace Physica {
         constexpr static unsigned int SiteDOF = StateType::SiteDOF;
         constexpr static bool IsTransInvariant = Traits<ReprType>::IsTransInvariant;
 
-        static_assert((IsTransInvariant && T::isComplex) || !IsTransInvariant, "[Error]: Use complex scalar if translational invariance is enabled");
+        static_assert((IsTransInvariant && T::isComplex()) || !IsTransInvariant, "[Error]: Use complex scalar if translational invariance is enabled");
         static_assert(!IsTransInvariant || (Dim == 1), "[Error]: Translational invariance is not implemented in high dimension");
         static_assert((Boundary == BoundaryCond::PBC) || !IsTransInvariant, "[Error]: Translational invariance is not implemented for other boundary conditions");
         static_assert((Boundary != BoundaryCond::OBC) || !IsTransInvariant, "[Error]: Translational invariance does not support OBC");
-        static_assert((Boundary != BoundaryCond::TBC) || T::isComplex, "[Error]: Twisted boundary condition gives complex hamilton");
+        static_assert((Boundary != BoundaryCond::TBC) || T::isComplex(), "[Error]: Twisted boundary condition gives complex hamilton");
     public:
         ~HamiltonMatrix() = default;
         /* Operations */
@@ -66,7 +66,7 @@ namespace Physica {
     template<class Derived>
     decltype(auto) HamiltonMatrix<Derived>::transpose(this auto&& self) noexcept {
         using Self = decltype(self);
-        if constexpr (T::isComplex) {
+        if constexpr (T::isComplex()) {
             using X = Base; // FIXME: clang 22 rejects valid
             [[maybe_unused]] auto x = sizeof(X);
             return std::forward<Self>(self).X::transpose();

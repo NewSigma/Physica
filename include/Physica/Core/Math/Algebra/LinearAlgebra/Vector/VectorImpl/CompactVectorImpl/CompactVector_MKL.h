@@ -27,7 +27,7 @@ namespace Physica {
         const size_t n = Base::getLength();
         const void* x = data();
         void* y = v.data();
-        if constexpr (T::isComplex) {
+        if constexpr (T::isComplex()) {
             if constexpr (T::Prec == Float32)
                 cblas_ccopy_64(n, x, 1, y, 1);
             else
@@ -45,7 +45,7 @@ namespace Physica {
     auto CompactVector<Derived>::norm1_mkl() const noexcept -> Tr {
         const size_t n = Base::getLength();
         const void* x = data();
-        if constexpr (T::isComplex) {
+        if constexpr (T::isComplex()) {
             if constexpr (T::Prec == Float32)
                 return cblas_scasum_64(n, x, 1);
             else {
@@ -67,7 +67,7 @@ namespace Physica {
     auto CompactVector<Derived>::norm2_mkl() const noexcept -> Tr {
         const size_t n = Base::getLength();
         const void* x = data();
-        if constexpr (T::isComplex) {
+        if constexpr (T::isComplex()) {
             if constexpr (T::Prec == Float32)
                 return cblas_scnrm2_64(n, x, 1);
             else {

@@ -24,7 +24,7 @@
 namespace Physica {
     template<Scalar Tv, size_t Order>
     class EigenSolver<Diff<Tv, DiffMode::Forward, 1>, Order> {
-        static_assert(!Tv::isDiffable, "[Error]: Invalid tparam");
+        static_assert(!Tv::isDiffable(), "[Error]: Invalid tparam");
         using T = Diff<Tv, DiffMode::Forward, 1>;
         using This = EigenSolver<T, Order>;
 
@@ -80,7 +80,7 @@ namespace Physica {
 
         GradMatrix transGrads;
         constexpr bool isHermite = source.isStaticHermite();
-        constexpr bool isRealSymm = !T::isComplex && source.isStaticSymm();
+        constexpr bool isRealSymm = !T::isComplex() && source.isStaticSymm();
         if constexpr (isHermite || isRealSymm)
             transGrads = basis.hermite() * GradMatrix(source.grads() * basis);
         else

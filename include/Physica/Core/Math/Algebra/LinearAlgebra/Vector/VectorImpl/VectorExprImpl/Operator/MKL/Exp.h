@@ -29,7 +29,7 @@ namespace Physica {
         size_t n = Base::getLength();
         const auto* a = reinterpret_cast<const Tm*>(Base::getExpr().data());
         auto* y = reinterpret_cast<Tm*>(v.data());
-        if constexpr (isComplex) {
+        if constexpr (isComplex()) {
             if constexpr (T::Prec == Float32)
                 vcExp_64(n, a, y);
             else

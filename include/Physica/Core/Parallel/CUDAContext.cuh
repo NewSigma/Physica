@@ -94,7 +94,7 @@ namespace Physica {
 
     template<Scalar T>
     constexpr cudaDataType CUDAContext::getDataType() noexcept {
-        if constexpr (T::isComplex) {
+        if constexpr (T::isComplex()) {
             if constexpr (T::Prec == Float32)
                 return cudaDataType::CUDA_C_32F;
             else

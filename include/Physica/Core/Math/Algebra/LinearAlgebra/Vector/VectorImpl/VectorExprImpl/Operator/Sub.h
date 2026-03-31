@@ -117,7 +117,7 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     void VectorExpr<ExprID::Sub, V1, V2>::reverse(const Vector auto& grad) const noexcept {
-        static_assert(Base::isReverseDiff);
+        static_assert(Base::isReverseDiff());
         const auto& g = grad.values();
         if constexpr (ReverseDiff<V1>)
             Base::getLHS().reverse(g);

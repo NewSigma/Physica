@@ -25,7 +25,7 @@ namespace Physica {
     class RealVectorR : public RValueVector<RealVectorR<V>> {
         using This = RealVectorR<V>;
         using Base = RValueVector<This>;
-        static_assert(std::remove_cvref_t<V>::isComplex, "[Error]: Unnecessary real() call on real vector");
+        static_assert(std::remove_cvref_t<V>::isComplex(), "[Error]: Unnecessary real() call on real vector");
     protected:
         using typename Base::T;
         using typename Base::Tv;

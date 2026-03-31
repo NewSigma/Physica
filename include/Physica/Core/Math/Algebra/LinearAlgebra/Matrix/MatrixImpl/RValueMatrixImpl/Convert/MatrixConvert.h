@@ -221,7 +221,7 @@ namespace Physica {
     template<class M, int GradOrder>
     class Traits<GradMatrix<M, GradOrder>> {
         using M1 = std::remove_cvref_t<M>;
-        static_assert(M1::ScalarType::isDiffable, "[Error]: Redundant GradMatrix");
+        static_assert(M1::ScalarType::isDiffable(), "[Error]: Redundant GradMatrix");
     public:
         using ScalarType = Internal::GradTypeHelper<typename M1::ScalarType, GradOrder>::Type;
         constexpr static int Major = M1::Major;

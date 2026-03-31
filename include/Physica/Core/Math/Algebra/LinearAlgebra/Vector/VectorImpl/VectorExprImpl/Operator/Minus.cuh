@@ -39,7 +39,7 @@ namespace Physica {
 
     template<Vector V>
     __device__ auto device_obj<VectorExpr<ExprID::Minus, V>>::calc(size_t index) const -> T {
-        if constexpr (isReverseDiff)
+        if constexpr (isReverseDiff())
             return calc_value(index);
         else
             return -Base::getExpr().calc(index);

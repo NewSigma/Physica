@@ -32,7 +32,7 @@ namespace Physica {
         constexpr char Diag = Traits<M>::Unit ? 'U' : 'N';
         size_t n = getRow();
         auto* a = reinterpret_cast<Tm*>(target.data());
-        if constexpr (Base::isComplex) {
+        if constexpr (Base::isComplex()) {
             if constexpr (T::Prec == Float32)
                 check_lapack(LAPACKE_ctrtri_64(Layout, Uplo, Diag, n, a, n));
             else

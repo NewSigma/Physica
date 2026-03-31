@@ -34,7 +34,7 @@ namespace Physica {
         using Base::Base;
         /* Getters */
         [[nodiscard]] __device__ T calc(size_t index) const {
-            if constexpr (isReverseDiff)
+            if constexpr (isReverseDiff())
                 return calc_value(index);
             else
                 return relu(Base::getExpr().calc(index));
@@ -50,7 +50,7 @@ namespace Physica {
 
     template<Vector V>
     void device_obj<VectorExpr<ExprID::Relu, V>>::reverse(const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         const auto& expr = Base::getExpr();
         expr.reverse(hadamard(relu(unit(expr.values())), grad.values()));
     }

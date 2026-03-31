@@ -45,9 +45,9 @@ namespace Physica {
         device_obj() = default;
         explicit device_obj(size_t length);
         device_obj(size_t length, T init);
-        device_obj(size_t length, ScalarType init) requires(isForwardDiff);
+        device_obj(size_t length, ScalarType init) requires(isForwardDiff());
         template<Vector V>
-        explicit(isReverseDiff) device_obj(const V& v_) requires(!ReverseDiff<V>);
+        explicit(isReverseDiff()) device_obj(const V& v_) requires(!ReverseDiff<V>);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;

@@ -35,7 +35,7 @@ namespace Physica {
         using typename Base::Tv;
         using typename Base::Tc;
     private:
-        constexpr static bool isComplexV = std::remove_cvref_t<V>::isComplex;
+        constexpr static bool isComplexV = std::remove_cvref_t<V>::isComplex();
 
         LazyDestroy<V> v;
     public:
@@ -71,7 +71,7 @@ namespace Physica {
     template<int Size>
     auto SquaredNormVector<V>::operator()(std::random_access_iterator auto it) noexcept -> SIMD<T, Size> {
         if constexpr (isComplexV) {
-            static_assert(!isReverseDiff, "[Error]: Not implemented");
+            static_assert(!isReverseDiff(), "[Error]: Not implemented");
             constexpr size_t MaxSize = BestPacket<Tc, Dynamic>::Size;
             if constexpr (Size <= MaxSize) {
                 const auto x2 = SIMD<Tc, Size>::asComplex(it.template load<Size>().squaredNorm());
@@ -96,7 +96,7 @@ namespace Physica {
     auto SquaredNormVector<V>::operator()(std::random_access_iterator auto it, size_t count) noexcept -> SIMD<T, Size> {
         assert(0 < count && count < Size && "[Error]: Invalid size for partial operation");
         if constexpr (isComplexV) {
-            static_assert(!isReverseDiff, "[Error]: Not implemented");
+            static_assert(!isReverseDiff(), "[Error]: Not implemented");
             constexpr size_t MaxSize = BestPacket<Tc, Dynamic>::Size;
             if constexpr (Size <= MaxSize) {
                 const auto x2 = SIMD<Tc, Size>::asComplex(it.template load<Size>(count).squaredNorm());
@@ -137,13 +137,13 @@ namespace Physica {
 
     template<class V>
     void SquaredNormVector<V>::reverse(const Scalar auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         v.reverse(Tv(2) * grad * v.values());
     }
 
     template<class V>
     auto SquaredNormVector<V>::sum() const noexcept -> CoDiff<T> {
-        if constexpr (!isReverseDiff && !isComplexV && Internal::EnableSIMD<V>::value) {
+        if constexpr (!isReverseDiff() && !isComplexV && Internal::EnableSIMD<V>::value) {
             assert(getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
             auto view = v.view();
             auto unroller = Unroller<PacketType, HostDevAttr::NumUnrollDefault>();

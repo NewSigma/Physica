@@ -26,8 +26,8 @@ namespace Physica {
      */
     template<Scalar T, size_t Length>
     class BestPacket {
-        static_assert(!T::isComplex, "[Error]: This specialization does not handle complex");
-        static_assert(!T::isForwardDiff, "[Error]: This specialization does not handle forward diff");
+        static_assert(!T::isComplex(), "[Error]: This specialization does not handle complex");
+        static_assert(!T::isForwardDiff(), "[Error]: This specialization does not handle forward diff");
         constexpr static bool isFloat32 = T::Prec == Float32;
         constexpr static bool isFloatMP = T::Prec == FloatMP;
         constexpr static bool isDynamic = Length == Dynamic;

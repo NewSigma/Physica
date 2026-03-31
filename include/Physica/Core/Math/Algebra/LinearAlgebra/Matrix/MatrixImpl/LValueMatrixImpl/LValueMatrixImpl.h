@@ -97,7 +97,7 @@ namespace Physica {
 
     template<class Derived>
     auto LValueMatrix<Derived>::sum() const -> CoDiff<ScalarType> {
-        if constexpr (isReverseDiff) {
+        if constexpr (isReverseDiff()) {
             const size_t maxMajor = Base::getMaxMajor();
             const size_t maxMinor = Base::getMaxMinor();
             Tr v = 0;
@@ -148,7 +148,7 @@ namespace Physica {
     void LValueMatrix<Derived>::reverse(const auto& grad) const noexcept {
         using U = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename ScalarType::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         if constexpr (Scalar<U>)
             Base::getConstCastDerived().grads() += grad;
         else {

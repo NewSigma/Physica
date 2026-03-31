@@ -39,7 +39,7 @@ namespace Physica {
     public:
         BinaryTensorExpr(LHS&& lhs_, RHS&& rhs_) noexcept;
         BinaryTensorExpr(const This&) = delete;
-        BinaryTensorExpr(This&&) noexcept requires(isReverseDiff) = default;
+        BinaryTensorExpr(This&&) noexcept requires(isReverseDiff()) = default;
         ~BinaryTensorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;

@@ -59,14 +59,11 @@ namespace Physica {
     public:
         constexpr static FloatPrec Prec = TraitsType::Prec;
         constexpr static int Order = TraitsType::Order;
-        constexpr static bool isComplex = TraitsType::isComplex;
-        constexpr static bool isForwardDiff = TraitsType::isForwardDiff;
-        constexpr static bool isReverseDiff = TraitsType::isReverseDiff;
-        constexpr static bool isDiffable = isForwardDiff || isReverseDiff;
-        constexpr static DiffMode Mode = isForwardDiff ? DiffMode::Forward : DiffMode::Reverse;
+        constexpr static DiffMode Mode = TraitsType::isForwardDiff ? DiffMode::Forward : DiffMode::Reverse;
 
-        using ValueType = TraitsType::ValueType;
         using ScalarType = TraitsType::ScalarType;
+        using ValueType = TraitsType::ValueType;
+        using GradType = Internal::GradTypeHelper<ScalarType, Order == 0 ? 0 : 1>::Type;
         using PtrTy = TraitsType::PtrTy;
         using ConstPtrTy = TraitsType::ConstPtrTy;
         using RefTy = TraitsType::RefTy;
@@ -75,29 +72,14 @@ namespace Physica {
         using ComplexType = TraitsType::ComplexType;
         using MachineType = TraitsType::MachineType;
         using device_obj_type = Derived;
-
-        using GradType = Internal::GradTypeHelper<ScalarType, isDiffable ? 1 : 0>::Type;
-
-    private:
-        constexpr static bool isScalarRef = instanceof<ScalarRef, Derived>;
-        static_assert(isDiffable == (Order > 0), "[Error]: DiffMode is not self consistent");
-        static_assert(std::is_same<Derived, ScalarType>::value || isScalarRef, "[Error]: Inconsistent type between traits and inherit class");
-
-        template<int GradOrder>
-        using GradRtnTy = std::conditional<!isDiffable || Order == GradOrder, ValueType, Diff<ValueType, Mode, Order - GradOrder>>::type;
     public:
         constexpr ~ScalarBase() = default;
         /* Operators */
-        template<Scalar U>
-        __host__ __device__ Derived& operator=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
-        template<Scalar U>
-        __host__ __device__ void operator+=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
-        template<Scalar U>
-        __host__ __device__ void operator-=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
-        template<Scalar U>
-        __host__ __device__ void operator*=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
-        template<Scalar U>
-        __host__ __device__ void operator/=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
+        __host__ __device__ Derived& operator=(const Scalar auto& x);
+        __host__ __device__ void operator+=(const Scalar auto& x);
+        __host__ __device__ void operator-=(const Scalar auto& x);
+        __host__ __device__ void operator*=(const Scalar auto& x);
+        __host__ __device__ void operator/=(const Scalar auto& x);
         [[nodiscard]] __host__ __device__ auto operator<=>(this const auto& x, float y) noexcept;
         [[nodiscard]] __host__ __device__ auto operator<=>(this const auto& x, double y) noexcept;
         [[nodiscard]] __host__ __device__ auto operator<=>(this const auto& x, const Scalar auto& y) noexcept;
@@ -136,6 +118,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto isNegative() const noexcept;
         [[nodiscard]] __host__ __device__ auto isFinite() const noexcept;
         /* Static Members */
+        [[nodiscard]] __host__ __device__ consteval static bool isComplex() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isDiffable() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isForwardDiff() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isReverseDiff() noexcept;
         static bool matchSign(const ScalarType& s1, const ScalarType& s2);
         template<Scalar Src>
         consteval static void static_assert_assign() noexcept;
@@ -147,62 +133,60 @@ namespace Physica {
         /* Operators */
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
+    private:
+        static_assert(isDiffable() == (Order > 0), "[Error]: DiffMode is not self consistent");
+        static_assert(std::is_same<Derived, ScalarType>::value || instanceof<ScalarRef, Derived>, "[Error]: Inconsistent type between traits and inherit class");
     };
 
     template<class Derived>
-    template<Scalar U>
-    __host__ __device__ Derived& ScalarBase<Derived>::operator=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        static_assert_assign<U>();
+    __host__ __device__ Derived& ScalarBase<Derived>::operator=(const Scalar auto& x) {
+        static_assert_assign<decltype(x)>();
         return Base::getDerived() = ScalarType(x);
     }
 
     template<class Derived>
-    template<Scalar U>
-    __host__ __device__ void ScalarBase<Derived>::operator+=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        static_assert_assign<U>();
+    __host__ __device__ void ScalarBase<Derived>::operator+=(const Scalar auto& x) {
+        static_assert_assign<decltype(x)>();
         auto& y = Base::getDerived();
-        if constexpr (ReverseDiff<U>)
+        if constexpr (x.isReverseDiff())
             y += x.value();
-        else if constexpr (isReverseDiff)
+        else if constexpr (isReverseDiff())
             y.value() += x;
         else
             y = y + x;
     }
 
     template<class Derived>
-    template<Scalar U>
-    __host__ __device__ void ScalarBase<Derived>::operator-=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        static_assert_assign<U>();
+    __host__ __device__ void ScalarBase<Derived>::operator-=(const Scalar auto& x) {
+        static_assert_assign<decltype(x)>();
         auto& y = Base::getDerived();
-        if constexpr (ReverseDiff<U>)
+        if constexpr (x.isReverseDiff())
             y -= x.value();
-        else if constexpr (isReverseDiff)
+        else if constexpr (isReverseDiff())
             y.value() -= x;
         else
             y = y - x;
     }
 
     template<class Derived>
-    template<Scalar U>
-    __host__ __device__ void ScalarBase<Derived>::operator*=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        static_assert_assign<U>();
+    __host__ __device__ void ScalarBase<Derived>::operator*=(const Scalar auto& x) {
+        static_assert_assign<decltype(x)>();
         auto& y = Base::getDerived();
-        if constexpr (ReverseDiff<U>)
+        if constexpr (x.isReverseDiff())
             y *= x.value();
-        else if constexpr (isReverseDiff)
+        else if constexpr (isReverseDiff())
             y.value() *= x;
         else
             y = y * x;
     }
 
     template<class Derived>
-    template<Scalar U>
-    __host__ __device__ void ScalarBase<Derived>::operator/=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        static_assert_assign<U>();
+    __host__ __device__ void ScalarBase<Derived>::operator/=(const Scalar auto& x) {
+        static_assert_assign<decltype(x)>();
         auto& y = Base::getDerived();
-        if constexpr (ReverseDiff<U>)
+        if constexpr (x.isReverseDiff())
             y /= x.value();
-        else if constexpr (isReverseDiff)
+        else if constexpr (isReverseDiff())
             y.value() /= x;
         else
             y = y / x;
@@ -224,7 +208,7 @@ namespace Physica {
     __host__ __device__ auto ScalarBase<Derived>::operator<=>(this const auto& x, const Scalar auto& y) noexcept {
         using X = std::remove_cvref<decltype(x)>::type;
         using Y = std::remove_cvref<decltype(y)>::type;
-        static_assert(X::isDiffable || Y::isDiffable || !std::same_as<X, Y>, "[Error]: This function handles type casts only");
+        static_assert(X::isDiffable() || Y::isDiffable() || !std::same_as<X, Y>, "[Error]: This function handles type casts only");
         using Z = Internal::BinaryScalarOpRtnTy<typename X::ValueType, typename Y::ValueType>::Type;
         return Z(x.value()) <=> Z(y.value());
     }
@@ -237,9 +221,9 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ auto ScalarBase<Derived>::real() const noexcept -> RealType {
         const auto& x = this->getDerived();
-        if constexpr (isDiffable)
+        if constexpr (isDiffable())
             return RealType(x.value().real(), x.grad().real());
-        else if constexpr (isComplex)
+        else if constexpr (isComplex())
             return x.real();
         else
             return x;
@@ -248,9 +232,9 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ auto ScalarBase<Derived>::imag() const noexcept -> RealType {
         const auto& x = this->getDerived();
-        if constexpr (isDiffable)
+        if constexpr (isDiffable())
             return RealType(x.value().imag(), x.grad().imag());
-        else if constexpr (isComplex)
+        else if constexpr (isComplex())
             return x.imag();
         else
             return RealType(0);
@@ -259,9 +243,9 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ auto ScalarBase<Derived>::conjugate() const noexcept -> ScalarType {
         const auto& x = this->getDerived();
-        if constexpr (isDiffable)
+        if constexpr (isDiffable())
             return ScalarType(x.value().conjugate(), x.grad().conjugate());
-        else if constexpr (isComplex)
+        else if constexpr (isComplex())
             return ScalarType(real(), -imag());
         else
             return real();
@@ -274,7 +258,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ auto ScalarBase<Derived>::squaredNorm() const noexcept {
-        if constexpr (isComplex || isReverseDiff)
+        if constexpr (isComplex() || isReverseDiff())
             return this->getDerived().squaredNorm();
         else
             return square(this->getDerived());
@@ -330,7 +314,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ auto* ScalarBase<Derived>::real_ptr(this auto&& self) noexcept {
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             return self.real_ptr();
         else
             return &self;
@@ -338,7 +322,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ auto* ScalarBase<Derived>::value_ptr(this auto&& self) noexcept {
-        if constexpr (isDiffable)
+        if constexpr (isDiffable())
             return self.value_ptr();
         else
             return &self;
@@ -347,7 +331,7 @@ namespace Physica {
     template<class Derived>
     template<int GradOrder>
     __host__ __device__ auto* ScalarBase<Derived>::grad_ptr(this auto&& self) noexcept {
-        static_assert(isDiffable, "[Error]: Cannot take grad ptr of a undiffable scalar");
+        static_assert(isDiffable(), "[Error]: Cannot take grad ptr of a undiffable scalar");
         return self.template grad_ptr<GradOrder>();
     }
 
@@ -365,7 +349,7 @@ namespace Physica {
     template<class Derived>
     template<int MaskOrder>
     __host__ __device__ auto ScalarBase<Derived>::grad_mask() const noexcept {
-        if constexpr (isDiffable)
+        if constexpr (isDiffable())
             return calc().template grad_mask<MaskOrder>();
         else
             return Base::getDerived();
@@ -373,7 +357,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ auto ScalarBase<Derived>::isZero() const noexcept {
-        if constexpr (isDiffable)
+        if constexpr (isDiffable())
             return Base::getDerived().value().isZero();
         else
             return Base::getDerived().isZero();
@@ -381,7 +365,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ auto ScalarBase<Derived>::isSubNormal() const noexcept {
-        if constexpr (isDiffable)
+        if constexpr (isDiffable())
             return Base::getDerived().value().isSubNormal();
         else
             return Base::getDerived().isSubNormal();
@@ -390,7 +374,7 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ auto ScalarBase<Derived>::isPositive() const noexcept {
         checkComplexCompare();
-        if constexpr (isDiffable)
+        if constexpr (isDiffable())
             return Base::getDerived().value().isPositive();
         else
             return Base::getDerived().isPositive();
@@ -399,7 +383,7 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ auto ScalarBase<Derived>::isNegative() const noexcept {
         checkComplexCompare();
-        if constexpr (isDiffable)
+        if constexpr (isDiffable())
             return Base::getDerived().value().isNegative();
         else
             return Base::getDerived().isNegative();
@@ -411,6 +395,26 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool ScalarBase<Derived>::isComplex() noexcept {
+        return TraitsType::isComplex;
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool ScalarBase<Derived>::isForwardDiff() noexcept {
+        return TraitsType::isForwardDiff;
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool ScalarBase<Derived>::isReverseDiff() noexcept {
+        return TraitsType::isReverseDiff;
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool ScalarBase<Derived>::isDiffable() noexcept {
+        return isForwardDiff() || isReverseDiff();
+    }
+
+    template<class Derived>
     bool ScalarBase<Derived>::matchSign(const ScalarType& s1, const ScalarType& s2) {
         return (s1.isPositive() && s2.isPositive()) || (s1.isNegative() && s2.isNegative());
     }
@@ -418,19 +422,20 @@ namespace Physica {
     template<class Derived>
     template<Scalar Src>
     consteval void ScalarBase<Derived>::static_assert_assign() noexcept {
-        static_assert(!ReverseDiff<Src>, "[Error]: Assign reverse diffable scalar to another scalar discards compute graph");
-        static_assert(isDiffable || !Src::isDiffable, "[Error]: Assign diffable scalar to normal scalar discards grad");
-        static_assert(isComplex || !Src::isComplex, "[Error]: Assign complex to real discards imag");
+        using U = std::remove_cvref_t<Src>;
+        static_assert(!ReverseDiff<Src>, "[Error]: Assign reverse diffable scalar to another scalar breaks compute graph");
+        static_assert(isDiffable() || !U::isDiffable(), "[Error]: Assign diffable scalar to normal scalar discards grad");
+        static_assert(isComplex() || !U::isComplex(), "[Error]: Assign complex to real discards imag");
     }
 
     template<class Derived>
     consteval void ScalarBase<Derived>::checkComplexCompare() noexcept {
-        static_assert(!isComplex, "[Error]: Comparison between complex scalars is invalid");
+        static_assert(!isComplex(), "[Error]: Comparison between complex scalars is invalid");
     }
 
     template<Scalar T>
     T relativeError(T x, T y) noexcept {
-        static_assert(!T::isComplex && !T::isDiffable, "[Error]: Invalid template param");
+        static_assert(!T::isComplex() && !T::isDiffable(), "[Error]: Invalid template param");
         T error = abs(x - y);
         if (x.isSubNormal() || y.isSubNormal())
             return error;
@@ -442,11 +447,11 @@ namespace Physica {
     template<Scalar T>
     [[clang::no_sanitize("numerical")]] bool scalarNear(const T& x, const T& y, double precision) noexcept {
         assert(precision > 0);
-        if constexpr (T::isDiffable)
+        if constexpr (T::isDiffable())
             return scalarNear(x.value(), y.value(), precision) && scalarNear(x.grad(), y.grad(), precision);
         else {
             using Tv = T::ValueType;
-            if constexpr (T::isComplex) {
+            if constexpr (T::isComplex()) {
                 using Trv = Tv::RealType;
                 Trv diff = std::hypot(x.value().real().toMachine() - y.value().real().toMachine(), x.value().imag().toMachine() - y.value().imag().toMachine());
                 return scalarNear(diff, Trv(0), precision);
@@ -458,10 +463,10 @@ namespace Physica {
 
     template<Scalar T>
     bool scalarNear(const T& x, const T& y, uint64_t ulp) noexcept {
-        if constexpr (T::isDiffable)
+        if constexpr (T::isDiffable())
             return scalarNear(x.value(), y.value(), ulp) && scalarNear(x.grad(), y.grad(), ulp);
         else {
-            if constexpr (T::isComplex)
+            if constexpr (T::isComplex())
                 return scalarNear(x.real(), y.real(), ulp)
                     && scalarNear(x.imag(), y.imag(), ulp);
             else
@@ -485,7 +490,7 @@ namespace Physica {
 
     template<Scalar T>
     [[nodiscard]] bool absCompare(const T& x, const T& y) {
-        if constexpr (T::isComplex)
+        if constexpr (T::isComplex())
             return x.squaredNorm() >= y.squaredNorm();
         else
             return abs(x) >= abs(y);

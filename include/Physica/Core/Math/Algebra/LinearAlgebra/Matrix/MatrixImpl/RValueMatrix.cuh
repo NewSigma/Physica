@@ -37,10 +37,6 @@ namespace Physica {
         constexpr static size_t RowAtCompile = TraitsType::RowAtCompile;
         constexpr static size_t ColAtCompile = TraitsType::ColAtCompile;
         constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;
-        constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
-        constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
-        constexpr static bool isDiffable = ScalarType::isDiffable;
-        constexpr static bool isComplex = ScalarType::isComplex;
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
@@ -118,9 +114,13 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ bool isSquare() const noexcept;
         /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static bool isLValueMatrix() noexcept { return false; }
-        [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept { return host_obj::isCompact(); }
-        [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept { return host_obj::isSparse(); }
+        [[nodiscard]] __host__ __device__ consteval static bool isComplex() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isDiffable() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isForwardDiff() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isReverseDiff() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isLValueMatrix() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] __host__ __device__ static KernelConfig makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept;

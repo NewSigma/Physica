@@ -66,7 +66,7 @@ namespace Physica {
 
     template<class M, bool ReduceCol>
     void MatrixSum<M, ReduceCol>::reverse(const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         if constexpr (ReduceCol)
             mat.reverse(grad);
         else

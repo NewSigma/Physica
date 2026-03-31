@@ -36,7 +36,7 @@ namespace Physica {
     }
 
     template<tparams>
-    DiffDenseMatrix::DenseMatrix(size_t row, size_t col, ScalarType init) requires(isForwardDiff)
+    DiffDenseMatrix::DenseMatrix(size_t row, size_t col, ScalarType init) requires(isForwardDiff())
             : v(row, col, init.value()), g(row, col, init.grad()) {}
 
     template<tparams>

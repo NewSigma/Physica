@@ -174,7 +174,7 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order, int Size>
     auto SIMD<Diff<T, Mode, Order>, Size>::asReal() const noexcept -> FullRealType {
-        if constexpr (T::isComplex)
+        if constexpr (T::isComplex())
             return FullRealType(values.asReal(), grads.asReal());
         else
             return *this;

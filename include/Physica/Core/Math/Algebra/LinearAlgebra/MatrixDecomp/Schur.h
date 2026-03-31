@@ -129,7 +129,7 @@ namespace Physica {
     template<Scalar T, size_t Order>
     void Schur<T, Order>::compute2D(const Matrix auto& normalized) {
         matrixT = normalized;
-        if constexpr (T::isComplex) {
+        if constexpr (T::isComplex()) {
             size_t iter = 0;
             while (activeWindowDownDiag(matrixT, 1) != 1) {
                 if (iter == Decouplable::maxItePerCol) [[unlikely]]
@@ -166,7 +166,7 @@ namespace Physica {
                 if (total_iter == max_iter) [[unlikely]]
                     throw BadConvergenceException(BadConvergenceMessage);
 
-                if constexpr (T::isComplex) {
+                if constexpr (T::isComplex()) {
                     const auto shift = complexShift(upper, iter);
                     complexQR(lower, upper, shift);
                     ++iter;

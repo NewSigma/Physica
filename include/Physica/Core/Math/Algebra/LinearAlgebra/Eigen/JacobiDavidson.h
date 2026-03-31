@@ -115,7 +115,7 @@ namespace Physica {
     template<Scalar T>
     void JacobiDavidson<T>::compute(const Matrix auto& source, const VectorND<T>& initial, T eigenGoal) {
         constexpr bool isHermite = source.isStaticHermite();
-        constexpr bool isRealSymm = !T::isComplex && source.isStaticSymm();
+        constexpr bool isRealSymm = !T::isComplex() && source.isStaticSymm();
         static_assert(isHermite || isRealSymm, "[Error]: Support for complex eigenvalues is not implemented");
         assert(source.getRow() == source.getCol() && "[Error]: Matrix should be square");
         assert(source.getRow() == initial.getLength() && "[Error]: Dimensions do not match");
@@ -356,7 +356,7 @@ namespace Physica {
         {
             const auto dots = dotSpaceProj.topLeftCorner(curSearchDim);
             const auto basis = searchSpaceProj.topLeftCorner(curSearchDim);
-            if constexpr (T::isComplex)
+            if constexpr (T::isComplex())
                 corner = dots - eigenGoal * basis - eigenGoal.conjugate() * basis.hermite();
             else
                 corner = dots - T(2) * eigenGoal * basis;

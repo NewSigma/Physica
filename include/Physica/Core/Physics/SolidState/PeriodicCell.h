@@ -44,7 +44,7 @@ namespace Physica {
         using This = PeriodicCell<T, Dim>;
         using Base = Internal::PeriodicCellImpl;
         using Tv = T::ValueType;
-        static_assert(!T::isComplex, "[Error]: Complex position is not allowed");
+        static_assert(!T::isComplex(), "[Error]: Complex position is not allowed");
     public:
         using LatticeMatrix = DenseMatrix<T, MatrixMajor::Row, Dim, Dim>;
         using InvLatticeMatrix = DenseMatrix<T, MatrixMajor::Col, Dim, Dim>;

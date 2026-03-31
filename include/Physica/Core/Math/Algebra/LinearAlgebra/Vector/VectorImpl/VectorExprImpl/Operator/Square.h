@@ -88,7 +88,7 @@ namespace Physica {
 
     template<Vector V>
     void VectorExpr<ExprID::Square, V>::reverse(const auto& grad) const noexcept {
-        static_assert(Base::isReverseDiff);
+        static_assert(Base::isReverseDiff());
         using G = decltype(grad);
         const auto& expr = getExpr();
         if constexpr (Scalar<G>)

@@ -143,7 +143,7 @@ namespace Physica {
 
     template<class Derived>
     void device_obj<RValueMatrix<Derived>>::reverse(const Matrix auto&, const Matrix auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         Base::getDerived().reverse(grad);
     }
 
@@ -324,7 +324,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ auto device_obj<RValueMatrix<Derived>>::hermite() const noexcept {
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             return device_obj<Hermite<Derived>>(Base::getDerived());
         else
             return transpose();
@@ -339,7 +339,7 @@ namespace Physica {
     __host__ __device__ decltype(auto) device_obj<RValueMatrix<Derived>>::reals(this auto&& self) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        if constexpr (isComplex)
+        if constexpr (isComplex())
             return device_obj<RealMatrix<M>>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);
@@ -370,7 +370,7 @@ namespace Physica {
     __host__ __device__ decltype(auto) device_obj<RValueMatrix<Derived>>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        if constexpr (isDiffable)
+        if constexpr (isDiffable())
             return device_obj<ValueMatrix<M>>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);
@@ -392,6 +392,41 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ bool device_obj<RValueMatrix<Derived>>::isSquare() const noexcept {
         return getRow() == getCol();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isComplex() noexcept {
+        return ScalarType::isComplex();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isDiffable() noexcept {
+        return ScalarType::isDiffable();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isForwardDiff() noexcept {
+        return ScalarType::isForwardDiff();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isReverseDiff() noexcept {
+        return ScalarType::isReverseDiff();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isLValueMatrix() noexcept {
+        return false;
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isCompact() noexcept {
+        return host_obj::isCompact();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isSparse() noexcept {
+        return host_obj::isSparse();
     }
 
     template<class Derived>

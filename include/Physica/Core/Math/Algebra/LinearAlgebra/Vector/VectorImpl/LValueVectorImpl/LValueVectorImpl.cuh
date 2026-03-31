@@ -110,7 +110,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ void device_obj<LValueVector<Derived>>::reverse(const auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         using U = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename T::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
         if constexpr (Scalar<U>) {
@@ -171,7 +171,7 @@ namespace Physica {
     __host__ __device__ decltype(auto) device_obj<LValueVector<Derived>>::reals(this auto&& self) noexcept {
         using Self = decltype(self);
         using V = remove_device_obj<Self>::type;
-        if constexpr (Base::isComplex)
+        if constexpr (Base::isComplex())
             return device_obj<RealVectorL<V>>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);

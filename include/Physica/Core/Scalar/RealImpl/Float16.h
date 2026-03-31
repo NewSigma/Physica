@@ -60,7 +60,7 @@ namespace Physica {
         [[gnu::always_inline, gnu::nodebug]] __host__ __device__ Real(std::floating_point auto f) : h(f) {}
         [[gnu::always_inline, gnu::nodebug]] __host__ __device__ Real(std::integral auto i) : h(i) {}
         template<Scalar T>
-        __host__ __device__ explicit(Float16 < T::Prec) Real(const T& x) requires(!T::isComplex && !Diffable<T>);
+        __host__ __device__ explicit(Float16 < T::Prec) Real(const T& x) requires(!T::isComplex() && !Diffable<T>);
         constexpr Real(const This&) = default;
         constexpr Real(This&&) noexcept = default;
         constexpr ~Real() = default;
@@ -101,7 +101,7 @@ namespace Physica {
     };
 
     template<Scalar T>
-    __host__ __device__ Real<Float16>::Real(const T& x) requires(!T::isComplex && !Diffable<T>) : h(x.toMachine()) {}
+    __host__ __device__ Real<Float16>::Real(const T& x) requires(!T::isComplex() && !Diffable<T>) : h(x.toMachine()) {}
 
     __host__ __device__ inline auto Real<Float16>::operator<=>(const Real& other) const noexcept {
         if (h == other.h)

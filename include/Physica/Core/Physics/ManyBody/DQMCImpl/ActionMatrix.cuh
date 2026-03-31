@@ -33,7 +33,7 @@ namespace Physica {
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
-        static_assert(T::isComplex, "[Error]: Action is complex");
+        static_assert(T::isComplex(), "[Error]: Action is complex");
     private:
         device_obj<DiagMatrix<Tr>> matsubara;
         device_obj<MatrixND<T>> auxField;

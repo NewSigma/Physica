@@ -60,7 +60,7 @@ namespace Physica {
         Real(const Integer& i) : Real(double(i)) {}
         Real(const Rational& r) : Real(double(r)) {}
         template<Scalar T>
-        __host__ __device__ explicit(Float64 < T::Prec) Real(const T& x) requires(!T::isComplex && !Diffable<T>);
+        __host__ __device__ explicit(Float64 < T::Prec) Real(const T& x) requires(!T::isComplex() && !Diffable<T>);
         constexpr Real(const Real&) = default;
         constexpr Real(Real&&) noexcept = default;
         constexpr ~Real() = default;
@@ -115,7 +115,7 @@ namespace Physica {
     };
 
     template<Scalar T>
-    __host__ __device__ Real<Float64>::Real(const T& x) requires(!T::isComplex && !Diffable<T>) : d(double(x)) {}
+    __host__ __device__ Real<Float64>::Real(const T& x) requires(!T::isComplex() && !Diffable<T>) : d(double(x)) {}
 
     __host__ __device__ constexpr auto Real<Float64>::operator<=>(const Real& other) const noexcept {
         auto order = d <=> other.d;

@@ -68,7 +68,7 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order>
     auto Diff<T, Mode, Order>::squaredNorm() const noexcept -> CoDiff<This> {
-        if constexpr (isReverseDiff) {
+        if constexpr (isReverseDiff()) {
             auto& y = co_yield value().squaredNorm();
             reverse(T(2) * v * y.grad());
         }
@@ -130,7 +130,8 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    auto Diff<T, Mode, Order>::fromPhase(RealType phase) noexcept -> This requires(isComplex) {
+    auto Diff<T, Mode, Order>::fromPhase(RealType phase) noexcept -> This {
+        static_assert(isComplex());
         static_assert(isForwardDiff && (Order == 1), "[Error]: Not implemented");
         T y = T::fromPhase(phase.value());
         return This(y, T(-y.imag(), y.real()) * phase.grad());

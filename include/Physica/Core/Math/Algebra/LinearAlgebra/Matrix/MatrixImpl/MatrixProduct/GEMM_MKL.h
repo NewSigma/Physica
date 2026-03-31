@@ -44,7 +44,7 @@ namespace Physica {
         const auto* a = reinterpret_cast<const Tm*>(getData(mat1));
         const auto* b = reinterpret_cast<const Tm*>(getData(mat2));
         auto* c = reinterpret_cast<Tm*>(target.data());
-        if constexpr (Base::isComplex) {
+        if constexpr (Base::isComplex()) {
             using Tc = T::ComplexType;
             const Tc alpha = 1;
             const Tc beta = 0;

@@ -79,7 +79,7 @@ namespace Physica {
 
     template<Vector V>
     void VectorExpr<ExprID::Relu, V>::reverse(const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         const auto& g = grad.values();
         for (size_t i = 0; i < Base::getLength(); ++i) {
             auto v = getExpr().calc(i);

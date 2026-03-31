@@ -96,7 +96,7 @@ namespace Physica {
     template<class Derived>
     template<int GradOrder>
     auto RValueTensor<Derived>::grads() const noexcept {
-        if constexpr (isReverseDiff)
+        if constexpr (isReverseDiff())
             return Base::getDerived().template grads<GradOrder>();
         else
             return grads_impl<GradOrder>();
@@ -121,8 +121,28 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool RValueTensor<Derived>::isForwardDiff() noexcept {
+        return ScalarType::isForwardDiff();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueTensor<Derived>::isReverseDiff() noexcept {
+        return ScalarType::isReverseDiff();
+    }
+
+    template<class Derived>
     __host__ __device__ consteval bool RValueTensor<Derived>::isDiffable() noexcept {
         return Diffable<T>;
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueTensor<Derived>::isComplex() noexcept {
+        return ScalarType::isComplex();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueTensor<Derived>::isLValueTensor() noexcept {
+        return false;
     }
 
     template<class Derived>

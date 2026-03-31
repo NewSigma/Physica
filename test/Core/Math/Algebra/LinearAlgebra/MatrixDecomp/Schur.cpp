@@ -65,7 +65,7 @@ namespace {
 
     template<Matrix M>
     void schurTest(const M& mat, double precision) {
-        static_assert(M::isComplex, "[Error]: Use realSchurTest is prefered");
+        static_assert(M::isComplex(), "[Error]: Use realSchurTest is prefered");
         Schur<typename M::ScalarType> schur(mat, true);
         expect(isUpperTriangle(schur.getMatrixT()));
 

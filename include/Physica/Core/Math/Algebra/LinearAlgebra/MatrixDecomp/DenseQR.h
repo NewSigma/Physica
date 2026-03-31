@@ -32,9 +32,8 @@ namespace Physica {
     template<Scalar T, bool Pivot = false>
     class DenseQR {
         using This = DenseQR<T, Pivot>;
-        constexpr static bool isComplex = T::isComplex;
+        constexpr static bool isComplex = T::isComplex();
         constexpr static size_t Threhold = 16;
-        
 
         using Tr = T::RealType;
         using Trv = Tr::ValueType;

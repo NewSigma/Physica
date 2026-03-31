@@ -153,7 +153,7 @@ namespace Physica {
 
         Tr lnAD = diagB.lnAbsDet() + qr.getMatrixR().lnAbsDet();
         Tv sgnD = qdt.calcDetQ() * qr.calcDetQ() * unit(qr.getMatrixR().diag().reals()).prod();
-        assert(T::isComplex || abs(sgnD) == Trv(1) && "[Error]: Bad sign");
+        assert(T::isComplex() || abs(sgnD) == Trv(1) && "[Error]: Bad sign");
         return {lnAD, sgnD};
     }
 }

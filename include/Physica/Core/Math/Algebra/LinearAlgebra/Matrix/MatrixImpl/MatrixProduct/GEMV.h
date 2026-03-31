@@ -143,7 +143,7 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     void GEMV<M, V>::reverse(const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         vec.assert_assign(grad);
         const auto& g = grad.values();
         if constexpr (ReverseDiff<M>) {
@@ -176,7 +176,7 @@ namespace Physica {
     template<Matrix M, Vector V>
     auto GEMV<M, V>::grads(this auto&& self) noexcept {
         using Self = decltype(self);
-        if constexpr (Base::isForwardDiff) {
+        if constexpr (Base::isForwardDiff()) {
             if constexpr (ForwardDiff<M> && ForwardDiff<V>)
                 return std::forward<Self>(self).getLHS().grads() * std::forward<Self>(self).getRHS().values()
                      + std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().grads();

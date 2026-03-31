@@ -30,7 +30,7 @@ namespace Physica {
         using This = device_obj<host_obj>;
         using DeviceVector = device_obj<VectorND<T>>;
         using Tc = T::ComplexType;
-        constexpr static bool isComplex = T::isComplex;
+        constexpr static bool isComplex = T::isComplex();
     private:
         device_obj<MatrixND<T>> working;
         DeviceVector taus;

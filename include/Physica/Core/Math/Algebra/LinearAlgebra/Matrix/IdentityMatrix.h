@@ -26,7 +26,7 @@ namespace Physica {
         using This = IdentityMatrix<T, Order>;
         using Base = RValueMatrix<This>;
         using IndexType = std::conditional<Order == Dynamic, size_t, PlainStruct<void>>::type;
-        static_assert(!T::isComplex && !T::isDiffable, "[Error]: Invalid scalar for unit matrix");
+        static_assert(!T::isComplex() && !T::isDiffable(), "[Error]: Invalid scalar for unit matrix");
     protected:
         using typename Base::Tv;
     private:

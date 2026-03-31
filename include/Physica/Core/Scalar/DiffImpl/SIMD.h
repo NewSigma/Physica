@@ -132,7 +132,7 @@ namespace Physica {
     public:
         using ScalarType = Diff<T, Mode, Order>;
         using GradType = SIMD<typename ScalarType::GradType, Size>;
-        using FullRealType = SIMD<Diff<typename T::RealType, Mode, Order>, Size * (T::isComplex ? 2 : 1)>;
+        using FullRealType = SIMD<Diff<typename T::RealType, Mode, Order>, Size * (T::isComplex() ? 2 : 1)>;
     };
 }
 

@@ -44,7 +44,7 @@ namespace Physica {
 
     template<Matrix M>
     void MatrixExpr<ExprID::Ln, M>::reverse(const Vector auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(isReverseDiff());
         const auto& expr = Base::getExpr();
         expr.reverse(divide(grad, expr.values()));
     }
