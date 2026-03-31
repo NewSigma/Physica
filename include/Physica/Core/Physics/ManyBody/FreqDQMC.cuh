@@ -323,15 +323,19 @@ namespace Physica {
     template<Scalar T>
     void device_obj<FreqDQMC<T>>::traceGreen(int spin) {
         auto kernel = [solBuffer_ = asStruct(solBuffer),
-                       green = asStruct(greensD[spin]),
+                       green_ = asStruct(greensD[spin]),
                        numSite = getNumSite(),
                        size = 2 * getNumFreq(),
                        correction = correction] __device__() mutable {
             const auto& solBuffer = solBuffer_.getDerived();
+            auto& green = green_.getDerived();
             unsigned int row = blockIdx.x * blockDim.x + threadIdx.x;
             unsigned int col = blockIdx.y;
+            if (row >= green.getRow())
+                return;
+
             Tr elem = 0;
-            for (int _ = 0, offset = 0; _ < size; ++_) {
+            for (int i = 0, offset = 0; i < size; ++i) {
                 elem += solBuffer[offset + row, offset + col].real();
                 offset += numSite;
             }
@@ -339,7 +343,7 @@ namespace Physica {
             if (row == col)
                 elem += Tr(0.5) + correction;
 
-            green.getDerived()[row, col] = elem;
+            green[row, col] = elem;
         };
 
         int numSite = getNumSite();

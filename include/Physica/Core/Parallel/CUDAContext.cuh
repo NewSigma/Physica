@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -72,7 +72,7 @@ namespace Physica {
         [[nodiscard]] PageGuard push() { return push(device()); }
         [[nodiscard]] PageGuard push(int device);
         [[nodiscard]] cudaError_t query() const noexcept { return getStream().query(); }
-        void wait() const { getStream().wait(); }
+        [[gnu::nodebug]] void wait() const { getStream().wait(); }
         /* Getters */
         [[nodiscard]] int device() const noexcept { return pages.top().device; }
         [[nodiscard]] const CUDAStream& getStream() const noexcept { return pages.top().stream; }

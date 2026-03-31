@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -49,7 +49,7 @@ namespace Physica {
     public:
         template<int MaxThreadsPerBlock = Dynamic, int MinBlocksPerMultiprocessor = Dynamic>
         __host__ __device__ static KernelFuture launch(auto&& fn, KernelConfig config, size_t sharedMem = 0);
-        static inline void wait();
+        [[gnu::nodebug]] static inline void wait();
     };
 
     template<int MaxThreadsPerBlock, int MinBlocksPerMultiprocessor>
