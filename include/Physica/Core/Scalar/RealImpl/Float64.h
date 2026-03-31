@@ -73,10 +73,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr auto operator<=>(const Real& other) const noexcept;
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(d); }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return d; }
-        [[nodiscard]] __host__ __device__ constexpr Real operator+(const Real& s) const noexcept;
-        [[nodiscard]] __host__ __device__ constexpr Real operator-(const Real& s) const noexcept;
-        [[nodiscard]] __host__ __device__ constexpr Real operator*(const Real& s) const noexcept;
-        [[nodiscard]] __host__ __device__ constexpr Real operator/(const Real& s) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr Real operator+(const Real& x) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr Real operator-(const Real& x) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr Real operator*(const Real& x) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr Real operator/(const Real& x) const noexcept;
         [[nodiscard]] __host__ __device__ Real operator<<(int i) const { return Real(std::ldexp(d, i)); }
         [[nodiscard]] __host__ __device__ Real operator>>(int i) const { return Real(std::ldexp(d, -i)); }
         [[nodiscard]] __host__ __device__ Real operator-() const noexcept { return Real(-d); }
@@ -86,7 +86,7 @@ namespace Physica {
 
         using Base::random_uniform;
         using Base::random_normal;
-        __host__ __device__ void swap(Real& __restrict s) noexcept { std::swap(d, s.d); }
+        __host__ __device__ void swap(Real& __restrict x) noexcept { std::swap(d, x.d); }
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr double toMachine() const noexcept { return d; }
         [[nodiscard]] __host__ __device__ constexpr double toMKL() const noexcept { return toMachine(); }
@@ -128,21 +128,21 @@ namespace Physica {
         unreachable("Encounter NAN");
     }
 
-    __host__ __device__ constexpr auto Real<Float64>::operator+(const Real& s) const noexcept -> Real {
-        return Real(d + s.d);
+    __host__ __device__ constexpr auto Real<Float64>::operator+(const Real& x) const noexcept -> Real {
+        return Real(d + x.d);
     }
 
-    __host__ __device__ constexpr auto Real<Float64>::operator-(const Real& s) const noexcept -> Real {
-        return Real(d - s.d);
+    __host__ __device__ constexpr auto Real<Float64>::operator-(const Real& x) const noexcept -> Real {
+        return Real(d - x.d);
     }
 
-    __host__ __device__ constexpr auto Real<Float64>::operator*(const Real& s) const noexcept -> Real {
-        return Real(d * s.d);
+    __host__ __device__ constexpr auto Real<Float64>::operator*(const Real& x) const noexcept -> Real {
+        return Real(d * x.d);
     }
 
-    __host__ __device__ constexpr auto Real<Float64>::operator/(const This& s) const noexcept -> Real {
-        assert(!s.isSubNormal() && "[Error]: Division overflow");
-        return Real(d / s.d);
+    __host__ __device__ constexpr auto Real<Float64>::operator/(const This& x) const noexcept -> Real {
+        assert(!x.isSubNormal() && "[Error]: Division overflow");
+        return Real(d / x.d);
     }
 
     __host__ __device__ inline Real<Float64> Real<Float64>::mod() const noexcept {

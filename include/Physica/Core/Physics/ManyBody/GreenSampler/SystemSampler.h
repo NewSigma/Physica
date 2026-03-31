@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,7 @@
 #pragma once
 
 #include "GreenSampler.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Physics/ManyBody/DQMCImpl/ImagKinetic.h"
 
@@ -45,7 +46,7 @@ namespace Physica {
         };
     private:
         LatticeModel<Dim> lattice;
-        Array<MatrixND<T>> observes;
+        DenseTensor<T, 3> observes;
         Observable type;
     public:
         SystemSampler(const HubbardParams<T>& params, const LatticeModel<Dim>& lattice, size_t numSample, Observable type);
@@ -67,8 +68,8 @@ namespace Physica {
         [[nodiscard]] int getNumSiteY() const noexcept { return lattice.getNumCellY(); }
         [[nodiscard]] int getNumSite() const noexcept { return getNumSiteX() * getNumSiteY(); }
     private:
-        [[nodiscard]] T calcCorr(const MatrixND<T>& greenU, int siteA, const MatrixND<T>& greenD, int siteB) const noexcept;
-        [[nodiscard]] MatrixND<T> calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD) noexcept;
+        [[nodiscard]] MatrixND<T> calcCorrelation(const MatrixND<T>& greenU, const MatrixND<T>& greenD) const noexcept;
+        [[nodiscard]] T calcCorrelation(const MatrixND<T>& greenU, int siteA, const MatrixND<T>& greenD, int siteB) const noexcept;
 
         using Base::calcDensityCorr;
     };
@@ -77,20 +78,20 @@ namespace Physica {
     SystemSampler<T>::SystemSampler(const HubbardParams<T>& params, const LatticeModel<Dim>& lattice, size_t numSample, Observable type)
             : Base(params, numSample)
             , lattice(lattice)
-            , observes(numSample)
+            , observes({numSample, getNumSiteX(), getNumSiteY()})
             , type(type) {}
 
     template<Scalar T>
     void SystemSampler<T>::sample(const GreenPair& greens, T rsign) {
-        observes[Base::getCursor()] = calcObservable(greens[0], greens[1]) * rsign;
+        observes.slice(1, 2, {Base::getCursor(), undef(), undef()}) = calcCorrelation(greens[0], greens[1]) * rsign;
         Base::sample(rsign);
     }
 
     template<Scalar T>
     auto SystemSampler<T>::calcMean() const -> MatrixND<T> {
         MatrixND<T> result(getNumSiteX(), getNumSiteY());
-        for (size_t i = 0; i < observes.getLength(); ++i)
-            result.toNextMean(i, observes[i]);
+        for (size_t i = 0; i < observes.dim(0); ++i)
+            result.toNextMean(i, observes.slice(1, 2, {Base::getCursor(), undef(), undef()}));
         result *= reciprocal(Base::calcSign());
         return result;
     }
@@ -119,25 +120,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T SystemSampler<T>::calcCorr(const MatrixND<T>& greenU, int siteA, const MatrixND<T>& greenD, int siteB) const noexcept {
-        switch (type) {
-        case Spin:
-            return calcDensityCorr(greenU, siteA, siteB) + calcDensityCorr(greenD, siteA, siteB)
-                 - calcDensityCorr(greenU, siteA, greenD, siteB) - calcDensityCorr(greenU, siteB, greenD, siteA);
-        case Charge:
-            return calcDensityCorr(greenU, siteA, siteB) + calcDensityCorr(greenD, siteA, siteB)
-                 + calcDensityCorr(greenU, siteA, greenD, siteB) + calcDensityCorr(greenU, siteB, greenD, siteA);
-            break;
-        case DoubleOccupy:
-            // TODO: Avoid mean field approximation
-            return calcDensityCorr(greenU, siteA, greenD, siteB) * calcDensityCorr(greenU, siteB, greenD, siteA);
-        default:
-            unreachable();
-        }
-    }
-
-    template<Scalar T>
-    auto SystemSampler<T>::calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD) noexcept -> MatrixND<T> {
+    auto SystemSampler<T>::calcCorrelation(const MatrixND<T>& greenU, const MatrixND<T>& greenD) const noexcept -> MatrixND<T> {
         MatrixND<T> result(getNumSiteX(), getNumSiteY());
         for (int siteA = 0; siteA < getNumSite(); ++siteA) {
             const auto indexA = lattice.toIndexND(siteA);
@@ -145,10 +128,27 @@ namespace Physica {
                 for (int y = 0; y < getNumSiteY(); ++y) {
                     const auto indexB = indexA.shift(0, x, getNumSiteX()).shift(1, y, getNumSiteY());
                     const size_t siteB = lattice.toIndex1D(indexB);
-                    result[x, y].toNextMean(siteA, calcCorr(greenU, siteA, greenD, siteB));
+                    result[x, y].toNextMean(siteA, calcCorrelation(greenU, siteA, greenD, siteB));
                 }
             }
         }
         return result;
+    }
+
+    template<Scalar T>
+    T SystemSampler<T>::calcCorrelation(const MatrixND<T>& greenU, int siteA, const MatrixND<T>& greenD, int siteB) const noexcept {
+        switch (type) {
+        case Spin:
+            return calcDensityCorr(greenU, siteA, siteB) + calcDensityCorr(greenD, siteA, siteB)
+                 - calcDensityCorr(greenU, siteA, greenD, siteB) - calcDensityCorr(greenU, siteB, greenD, siteA);
+        case Charge:
+            return calcDensityCorr(greenU, siteA, siteB) + calcDensityCorr(greenD, siteA, siteB)
+                 + calcDensityCorr(greenU, siteA, greenD, siteB) + calcDensityCorr(greenU, siteB, greenD, siteA);
+        case DoubleOccupy:
+            // TODO: Avoid mean field approximation
+            return calcDensityCorr(greenU, siteA, greenD, siteB) * calcDensityCorr(greenU, siteB, greenD, siteA);
+        default:
+            unreachable();
+        }
     }
 }

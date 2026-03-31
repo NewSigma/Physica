@@ -63,12 +63,6 @@ $$\theta_{k + 1} = \argmin_\lambda |\mathbf{r}_{k + 1}(\lambda)|$$
 
 物理上，我们通常感兴趣的是基态和最低的几个激发态，即厄米矩阵$\mathbf{A}$最小的若干本征值。Y. Notay针对这种情况提出了Jacobi-Davidson算法的一种变式，即使用共轭梯度算法(CG)求解Jacobi-Davidson修正方程。如果要求解的不是厄米矩阵或感兴趣的不是极端特征值，只需将线性求解器模块切换为MINRES、GMRES等更通用的线性求解器。这种模块的可替换性是Jacobi-Davidson算法的优点之一。
 
-## Example
-
-使用JDCG求解5000维厄米矩阵的前4个最小的本征值, 结果为
-
-(-1062.865585527699, -456.5290883347747, -291.9029897722832, -216.657138458762)
-
 ## Reference
 
 [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.284-285  

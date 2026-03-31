@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -32,23 +32,13 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
-    T& ArrayND<T, Dims...>::operator[](const IndexType& indices) {
-        return *data_ptr(indices);
+    auto& ArrayND<T, Dims...>::operator[](this auto&& self, const IndexType& indices) noexcept {
+        return *self.data_ptr(indices);
     }
 
     template<class T, int... Dims>
-    const T& ArrayND<T, Dims...>::operator[](const IndexType& indices) const {
-        return const_cast<This&>(*this)[indices];
-    }
-
-    template<class T, int... Dims>
-    T& ArrayND<T, Dims...>::operator[](std::integral auto... dims) {
-        return operator[](IndexType({static_cast<size_t>(dims)...}));
-    }
-
-    template<class T, int... Dims>
-    const T& ArrayND<T, Dims...>::operator[](std::integral auto... dims) const {
-        return const_cast<This&>(*this)[dims...];
+    auto& ArrayND<T, Dims...>::operator[](this auto&& self, std::integral auto... dims) noexcept {
+        return self[IndexType({static_cast<size_t>(dims)...})];
     }
 
     template<class T, int... Dims>

@@ -73,15 +73,15 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto operator<=>(const Real& other) const noexcept;
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return h; }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return h; }
-        [[nodiscard]] __host__ __device__ Real operator+(const Real& s) const noexcept { return Real(h + s.h); }
-        [[nodiscard]] __host__ __device__ Real operator-(const Real& s) const noexcept { return Real(h - s.h); }
-        [[nodiscard]] __host__ __device__ Real operator*(const Real& s) const noexcept { return Real(h * s.h); }
-        [[nodiscard]] __host__ __device__ Real operator/(const Real& s) const noexcept;
+        [[nodiscard]] __host__ __device__ Real operator+(const Real& x) const noexcept { return Real(h + x.h); }
+        [[nodiscard]] __host__ __device__ Real operator-(const Real& x) const noexcept { return Real(h - x.h); }
+        [[nodiscard]] __host__ __device__ Real operator*(const Real& x) const noexcept { return Real(h * x.h); }
+        [[nodiscard]] __host__ __device__ Real operator/(const Real& x) const noexcept;
         [[nodiscard]] __host__ __device__ Real operator-() const noexcept { return Real(-h); }
         /* Operations */
         using Base::random_uniform;
         using Base::random_normal;
-        __host__ __device__ void swap(Real& __restrict s) noexcept { std::swap(h, s.h); }
+        __host__ __device__ void swap(Real& __restrict x) noexcept { std::swap(h, x.h); }
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr half toMachine() const noexcept { return h; }
         [[nodiscard]] __host__ __device__ constexpr bool isZero() const noexcept { return h == half(0); }
@@ -113,9 +113,9 @@ namespace Physica {
         unreachable("Encounter NAN");
     }
 
-    __host__ __device__ inline Real<Float16> Real<Float16>::operator/(const This& s) const noexcept {
-        assert(!s.isZero() && "[Error]: Division overflow"); // FIXME: Implement isSubNormal()
-        return Real(h / s.h);
+    __host__ __device__ inline Real<Float16> Real<Float16>::operator/(const This& x) const noexcept {
+        assert(!x.isZero() && "[Error]: Division overflow"); // FIXME: Implement isSubNormal()
+        return Real(h / x.h);
     }
 
     template<RNG R>
