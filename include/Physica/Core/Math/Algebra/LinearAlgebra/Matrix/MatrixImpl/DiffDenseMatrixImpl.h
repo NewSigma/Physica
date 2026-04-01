@@ -95,7 +95,7 @@ namespace Physica {
     template<tparams>
     template<RNG R>
     void DiffDenseMatrix::random_normal() {
-        v.template random_uniform<R>();
+        v.template random_normal<R>();
         g.zeros();
     }
 

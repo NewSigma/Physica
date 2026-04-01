@@ -144,7 +144,7 @@ namespace Physica {
     template<Matrix M, Vector V>
     void GEMV<M, V>::reverse(const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff());
-        vec.assert_assign(grad);
+        Base::assert_assign(grad);
         const auto& g = grad.values();
         if constexpr (ReverseDiff<M>) {
             if constexpr (MatrixMajor::isRowMatrix<M>()) {

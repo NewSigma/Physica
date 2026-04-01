@@ -150,7 +150,7 @@ namespace Physica {
     void device_obj<BatchNorm1D<T>>::random_xavier_uniform(Tv gain) {
         const auto factor = gain * sqrt(Tv(3) / Tv(getLength()));
         auto& values = beta.values();
-        values.template random_uniform<R>();
+        beta.template random_uniform<R>();
         values = values * (factor * Tv(2)) - factor;
     }
 

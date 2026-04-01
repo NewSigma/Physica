@@ -187,12 +187,12 @@ namespace Physica {
         const auto factor = gain * sqrt(Tv(6) / Tv(getInputDim() + getOutputDim()));
         {
             auto& values = weights.values();
-            values.template random_uniform<R>();
+            weights.template random_uniform<R>();
             values = values * (factor * Tv(2)) - factor;
         }
         if constexpr (WithBias) {
             auto& values = bias.values();
-            values.template random_uniform<R>();
+            bias.template random_uniform<R>();
             values = values * (factor * Tv(2)) - factor;
         }
     }
@@ -213,12 +213,12 @@ namespace Physica {
         const auto bound = gain * sqrt(Tv(3) / Tv(getInputDim()));
         {
             auto& values = weights.values();
-            values.template random_uniform<R>();
+            weights.template random_uniform<R>();
             values = values * (bound * Tv(2)) - bound;
         }
         if constexpr (WithBias) {
             auto& values = bias.values();
-            values.template random_uniform<R>();
+            bias.template random_uniform<R>();
             values = values * (bound * Tv(2)) - bound;
         }
     }
