@@ -87,7 +87,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr bool isZero() const noexcept { return h == half(0); }
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return h > half(0); }
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return h < half(0); }
-        [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return __hisinf(h) == 0; }
+        [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return !__hisinf(h); }
+        [[nodiscard]] __host__ __device__ bool isInfinity() const noexcept { return __hisinf(h); }
         /* Static members */
         template<RNG R>
         [[nodiscard]] static Real random_uniform() noexcept;
@@ -114,7 +115,7 @@ namespace Physica {
     }
 
     __host__ __device__ inline Real<Float16> Real<Float16>::operator/(const This& x) const noexcept {
-        assert(!x.isZero() && "[Error]: Division overflow"); // FIXME: Implement isSubNormal()
+        assert((!x.isZero() || x.isInfinity()) && "[Error]: Division overflow"); // FIXME: Implement isSubNormal()
         return Real(h / x.h);
     }
 

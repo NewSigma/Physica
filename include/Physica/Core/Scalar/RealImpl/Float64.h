@@ -96,6 +96,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return d > 0; }
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return d < 0; }
         [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
+        [[nodiscard]] __host__ __device__ inline bool isInfinity() const noexcept;
         /* Static Members */
         [[nodiscard]] constexpr static Real nan() noexcept;
         template<RNG R>
@@ -141,7 +142,7 @@ namespace Physica {
     }
 
     __host__ __device__ constexpr auto Real<Float64>::operator/(const This& x) const noexcept -> Real {
-        assert(!x.isSubNormal() && "[Error]: Division overflow");
+        assert((!x.isSubNormal() || x.isInfinity()) && "[Error]: Division overflow");
         return Real(d / x.d);
     }
 
@@ -156,6 +157,10 @@ namespace Physica {
 
     __host__ __device__ inline bool Real<Float64>::isFinite() const noexcept {
         return std::isfinite(d);
+    }
+
+    __host__ __device__ inline bool Real<Float64>::isInfinity() const noexcept {
+        return std::isinf(d);
     }
 
     constexpr Real<Float64> Real<Float64>::nan() noexcept {
