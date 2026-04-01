@@ -36,7 +36,7 @@ namespace Physica {
     public:
         Point() = default;
         Point(const Vector auto& vec_) : vec(vec_) {}
-        Point(std::initializer_list<T> list) : vec(std::move(list)) {}
+        Point(std::initializer_list<T> list) : vec(list) {}
         Point(const Point& p) = default;
         Point(Point&& p) noexcept = default;
         ~Point() = default;

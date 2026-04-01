@@ -36,7 +36,7 @@ namespace Physica {
             : storage(row, col, std::move(value)) {}
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(std::initializer_list<T> list) : storage(std::move(list)) {}
+    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(std::initializer_list<T> list) : storage(list) {}
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(std::initializer_list<VectorIniter> list)

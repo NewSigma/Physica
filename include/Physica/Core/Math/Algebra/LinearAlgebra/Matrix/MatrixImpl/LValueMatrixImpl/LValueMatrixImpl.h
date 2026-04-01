@@ -96,25 +96,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::sum() const -> CoDiff<ScalarType> {
-        if constexpr (isReverseDiff()) {
-            const size_t maxMajor = Base::getMaxMajor();
-            const size_t maxMinor = Base::getMaxMinor();
-            Tr v = 0;
-            for (size_t major = 0; major < maxMajor; ++major)
-                for (size_t minor = 0; minor < maxMinor; ++minor)
-                    v += refFromMajorMinor(major, minor).value();
-
-            const auto& result = co_yield std::move(v);
-            for (size_t major = 0; major < maxMajor; ++major)
-                for (size_t minor = 0; minor < maxMinor; ++minor)
-                    refFromMajorMinor(major, minor).reverse(result.grad());
-        }
-        else
-            co_return Base::sum();
-    }
-
-    template<class Derived>
     void LValueMatrix<Derived>::toNextMean(size_t lastNumSample, const Matrix auto& sample) noexcept {
         Base::assert_assign(sample);
         auto& mean = Base::getDerived();

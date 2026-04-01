@@ -32,7 +32,7 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    Array2D<T, Major, Row, Col, Allocator>::Array2D(std::initializer_list<T> list) : arr(std::move(list)) {
+    Array2D<T, Major, Row, Col, Allocator>::Array2D(std::initializer_list<T> list) : arr(list) {
         static_assert(Row != Dynamic || Col != Dynamic, "[Error]: Either row or col must be given at compile");
     }
 
@@ -100,7 +100,6 @@ namespace Physica {
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
     void Array2D<T, Major, Row, Col, Allocator>::zeros() noexcept {
-        assert(!empty());
         asArray().zeros();
     }
 

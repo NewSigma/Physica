@@ -33,7 +33,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    DenseVector<T, Length, Allocator>::DenseVector(std::initializer_list<T> list) : storage(std::move(list)) {}
+    DenseVector<T, Length, Allocator>::DenseVector(std::initializer_list<T> list) : storage(list) {}
 
     template<Scalar T, size_t Length, class Allocator>
     DenseVector<T, Length, Allocator>::DenseVector(const Vector auto& v) : storage(v.getLength()) {
