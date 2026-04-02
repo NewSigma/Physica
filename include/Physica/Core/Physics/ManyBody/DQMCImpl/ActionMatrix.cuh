@@ -103,9 +103,8 @@ namespace Physica {
 
     template<Scalar T>
     void device_obj<ActionMatrix<T>>::assign_kinetic(Matrix auto&& target) const {
-        const int numSite = getNumSite();
-        kronecker(device_obj<IdentityMatrix<Trv>>(matsubara.getOrder()), hoppingT * beta).assign(target);
-        kronecker(matsubara, device_obj<IdentityMatrix<Trv>>(numSite) * T(0, 1)).assign_add(target);
+        kronecker(device_obj<IdentityMatrix<Trv>>(getNumSite()) * T(0, 1), matsubara).assign(target);
+        kronecker(hoppingT * beta, device_obj<IdentityMatrix<Trv>>(matsubara.getOrder())).assign_add(target);
     }
 
     template<Scalar T>
@@ -117,25 +116,25 @@ namespace Physica {
         CUDAExecutor::launch([auxField_ = asStruct(auxField),
                               target_ = asStruct(target),
                               maxBoson = getMaxBoson(),
-                              numSite = getNumSite(),
                               shift = beta * fma(repelU, Tr(-0.5), chemMu)] __device__() mutable {
-            int rowFreq = blockIdx.y;
-            int colFreq = blockIdx.z;
-            int delta = std::abs(rowFreq - colFreq);
+            int r = blockIdx.y;
+            int c = blockIdx.z;
+            int delta = std::abs(r - c);
             if (delta >= maxBoson)
                 return;
 
+            int site = threadIdx.x;
+            int numFreq2 = gridDim.y;
+            
+            int offset = site * numFreq2;
+            auto block = target_.getDerived().block(offset, numFreq2, offset, numFreq2);
             const auto& auxField = auxField_.getDerived();
-            auto& target = target_.getDerived();
-            int offsetR = rowFreq * numSite;
-            int offsetC = colFreq * numSite;
-            ThreadBlock block{};
-            if (rowFreq > colFreq)
-                auxField.row(delta).assign(target.block(offsetR, numSite, offsetC, numSite).diag(), block);
-            else if (rowFreq < colFreq)
-                auxField.row(delta).conjugate().assign(target.block(offsetR, numSite, offsetC, numSite).diag(), block);
+            if (r > c)
+                block[r, c] = auxField[delta, site];
+            else if (r < c)
+                block[r, c] = auxField[delta, site].conjugate();
             else
-                (auxField.row(0).reals() - shift).assign(target.block(offsetR, numSite, offsetR, numSite).diag().reals(), block);
+                block[r, r].real() = auxField[0, site].real() - shift;
         }, KernelConfig({numBlockX, numBlockY, numBlockZ}, numThread));
     }
 
@@ -144,10 +143,10 @@ namespace Physica {
         assert(row < getRow());
         assert(col < getCol());
         const int numSite = getNumSite();
-        const size_t rowFreq = row / numSite;
-        const size_t rowSite = row % numSite;
-        const size_t colFreq = col / numSite;
-        const size_t colSite = col % numSite;
+        const size_t rowSite = row / numSite;
+        const size_t rowFreq = row % numSite;
+        const size_t colSite = col / numSite;
+        const size_t colFreq = col % numSite;
         bool diagFreq = rowFreq == colFreq;
         bool diagSite = rowSite == colSite;
         if (diagFreq) {

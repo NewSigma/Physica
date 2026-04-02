@@ -97,26 +97,28 @@ namespace Physica {
 
     template<Scalar T>
     void ActionMatrix<T>::assign_kinetic(Matrix auto&& target) const {
-        const int numSite = getNumSite();
-        kronecker(IdentityMatrix<Trv>(matsubara.getOrder()), params.getHoppingMatrix() * params.getBeta()).assign(target);
-        kronecker(matsubara, IdentityMatrix<Trv>(numSite) * T(0, 1)).assign_add(target);
+        kronecker(IdentityMatrix<Trv>(getNumSite()) * T(0, 1), matsubara).assign(target);
+        kronecker(params.getHoppingMatrix() * params.getBeta(), IdentityMatrix<Trv>(matsubara.getOrder())).assign_add(target);
     }
 
     template<Scalar T>
     void ActionMatrix<T>::assign_potential(Matrix auto&& target) const {
-        const int numSite = getNumSite();
         const Tr shift = params.getBeta() * fma(params.getRepelU(), Tr(-0.5), params.getChemMu());
-        for (int rowFreq = 0; rowFreq < getNumFreq() * 2; ++rowFreq) {
-            int offsetR = rowFreq * numSite;
-            for (int colFreq = 0; colFreq < rowFreq; ++colFreq) {
-                int offsetC = colFreq * numSite;
-                int delta = rowFreq - colFreq;
-                if (delta < getMaxBoson()) {
-                    target.block(offsetR, numSite, offsetC, numSite).diag() = auxField.row(delta);
-                    target.block(offsetC, numSite, offsetR, numSite).diag() = auxField.row(delta).conjugate();
+        const int numFreq2 = getNumFreq() * 2;
+        const int numSite = getNumSite();
+        for (int site = 0; site < numSite; ++site) {
+            int offset = site * numFreq2;
+            auto block = target.block(offset, numFreq2, offset, numFreq2);
+            for (int r = 0; r < numFreq2; ++r) {
+                for (int c = 0; c < r; ++c) {
+                    int delta = r - c;
+                    if (delta < getMaxBoson()) {
+                        block[r, c] = auxField[delta, site];
+                        block[c, r] = auxField[delta, site].conjugate();
+                    }
                 }
+                block[r, r].real() = auxField[0, site].real() - shift;
             }
-            target.block(offsetR, numSite, offsetR, numSite).diag().reals() = auxField.row(0).reals() - shift;
         }
     }
 
@@ -125,10 +127,10 @@ namespace Physica {
         assert(row < getRow());
         assert(col < getCol());
         const int numSite = getNumSite();
-        const size_t rowFreq = row / numSite;
-        const size_t rowSite = row % numSite;
-        const size_t colFreq = col / numSite;
-        const size_t colSite = col % numSite;
+        const size_t rowSite = row / numSite;
+        const size_t rowFreq = row % numSite;
+        const size_t colSite = col / numSite;
+        const size_t colFreq = col % numSite;
         bool diagFreq = rowFreq == colFreq;
         bool diagSite = rowSite == colSite;
         if (diagFreq) {

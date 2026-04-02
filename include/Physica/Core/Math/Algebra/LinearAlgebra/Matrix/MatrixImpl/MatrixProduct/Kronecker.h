@@ -71,7 +71,7 @@ namespace Physica {
             size_t offsetR = r * rhsRow;
             if constexpr (instanceof_tx<IdentityMatrix, M1>)
                 rhs.assign(target.block(offsetR, rhsRow, offsetR, rhsCol));
-            else if constexpr (instanceof_tx<DiagMatrix, M2>)
+            else if constexpr (instanceof_tx<DiagMatrix, M1>)
                 (rhs * lhs.calc(r, r)).assign(target.block(offsetR, rhsRow, offsetR, rhsCol));
             else {
                 for (size_t c = 0; c < lhsCol; ++c) {
@@ -90,7 +90,7 @@ namespace Physica {
             size_t offsetR = r * rhs.getRow();
             if constexpr (instanceof_tx<IdentityMatrix, M1>)
                 rhs.assign_add(target.block(offsetR, rhs.getRow(), offsetR, rhs.getCol()));
-            else if constexpr (instanceof_tx<DiagMatrix, M2>)
+            else if constexpr (instanceof_tx<DiagMatrix, M1>)
                 (rhs * lhs.calc(r, r)).assign_add(target.block(offsetR, rhs.getRow(), offsetR, rhs.getCol()));
             else {
                 for (size_t c = 0; c < lhs.getCol(); ++c) {
