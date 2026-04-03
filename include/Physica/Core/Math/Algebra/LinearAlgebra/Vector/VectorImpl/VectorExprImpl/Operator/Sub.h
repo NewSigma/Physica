@@ -45,7 +45,6 @@ namespace Physica {
         void assign_mkl(Vector auto& v) const noexcept;
 
         [[nodiscard]] CoDiff<T> calc(size_t s) const;
-        [[nodiscard]] Tv calc_value(size_t s) const;
 
         void reverse(const Vector auto& grad) const noexcept;
 
@@ -108,11 +107,6 @@ namespace Physica {
     template<Vector V1, Vector V2>
     auto VectorExpr<ExprID::Sub, V1, V2>::calc(size_t s) const -> CoDiff<T> {
         return getLHS().calc(s) - getRHS().calc(s);
-    }
-
-    template<Vector V1, Vector V2>
-    auto VectorExpr<ExprID::Sub, V1, V2>::calc_value(size_t s) const -> Tv {
-        return getLHS().calc_value(s) - getRHS().calc_value(s);
     }
 
     template<Vector V1, Vector V2>

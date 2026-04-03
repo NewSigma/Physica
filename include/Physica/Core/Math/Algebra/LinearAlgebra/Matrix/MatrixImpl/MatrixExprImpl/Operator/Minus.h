@@ -33,9 +33,6 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const { return -Base::getExpr().calc(row, col); }
 
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
-            return -Base::getExpr().calc_value(row, col);
-        }
         [[nodiscard]] auto values(this auto&&) noexcept;
     };
 
@@ -44,7 +41,6 @@ namespace Physica {
         using Self = decltype(self);
         return -std::forward<Self>(self).getExpr().values();
     }
-
 
     template<Matrix M>
     [[nodiscard, gnu::always_inline]] auto operator-(M&& m) noexcept requires(!DeviceObj<M>) {

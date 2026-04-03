@@ -69,10 +69,11 @@ namespace Physica {
         auto assign(Vector auto& target, Tr traceMu, ParamPair params) const -> std::conditional<NoFactor, Tr, void>::type;
 
         [[nodiscard]] T calc(size_t) const { noImpl(__func__); }
-        [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
         [[nodiscard]] Tr calcTraceMu() const { return mexp.calcTraceMu(); }
         template<ExecutePolicy P>
         [[nodiscard]] ParamPair calcParam(Tr traceMu) const;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
@@ -191,6 +192,12 @@ namespace Physica {
             }
         }
         return std::make_pair(numMinCostTerm, std::max(cost / numMinCostTerm, 1));
+    }
+
+    template<Matrix M, Vector V>
+    auto MatExpVecProd<M, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
     template<Matrix M, Vector V>

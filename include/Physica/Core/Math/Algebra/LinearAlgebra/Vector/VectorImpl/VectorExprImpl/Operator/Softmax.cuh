@@ -37,20 +37,12 @@ namespace Physica {
         __host__ __device__ void assign(Vector auto&& v) const;
 
         [[nodiscard]] __device__ T calc(size_t i) const { return Base::getExpr().softmax(i); }
-        [[nodiscard]] __device__ Tv calc_value(size_t i) const { return Base::getExpr().values().softmax(i); }
+        [[nodiscard]] __device__ Tv calc_value(size_t i) const { return Base::calc_value(i); }
         [[nodiscard]] __device__ T calc(size_t i, T lnsumexp) const;
         [[nodiscard]] __device__ Tv calc_value(size_t i, Tv lnsumexp) const;
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
     };
-
-    template<Vector V>
-    __device__ auto device_obj<VectorExpr<ExprID::Softmax, V>>::calc(size_t i, T lnsumexp) const -> T {
-        return exp(Base::getExpr().calc(i) - lnsumexp);
-    }
-
-    template<Vector V>
-    __device__ auto device_obj<VectorExpr<ExprID::Softmax, V>>::calc_value(size_t i, Tv lnsumexp) const -> Tv {
-        return exp(Base::getExpr().calc_value(i) - lnsumexp);
-    }
 
     template<Vector V>
     template<ExecutePolicy P>
@@ -62,6 +54,22 @@ namespace Physica {
             const T factor = expr.lnSumExp();
             v = exp(expr - factor);
         }
+    }
+
+    template<Vector V>
+    __device__ auto device_obj<VectorExpr<ExprID::Softmax, V>>::calc(size_t i, T lnsumexp) const -> T {
+        return exp(Base::getExpr().calc(i) - lnsumexp);
+    }
+
+    template<Vector V>
+    __device__ auto device_obj<VectorExpr<ExprID::Softmax, V>>::calc_value(size_t i, Tv lnsumexp) const -> Tv {
+        return values().calc(i, lnsumexp);
+    }
+
+    template<Vector V>
+    auto device_obj<VectorExpr<ExprID::Softmax, V>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return softmax(std::forward<Self>(self).getExpr().values());
     }
 
     template<Vector V>

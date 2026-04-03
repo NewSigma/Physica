@@ -33,17 +33,24 @@ namespace Physica {
     public:
         using Base::Base;
         /* Getters */
-        [[nodiscard]] __device__ T calc(size_t index) const {
-            if constexpr (isReverseDiff())
-                return calc_value(index);
-            else
-                return tan(Base::getExpr().calc(index));
-        }
+        [[nodiscard]] __device__ T calc(size_t index) const;
 
-        [[nodiscard]] __device__ Tv calc_value(size_t index) const {
-            return tan(Base::getExpr().calc_value(index));
-        }
+        [[nodiscard]] auto values(this auto&& self) noexcept;
     };
+
+    template<Vector V>
+    __device__ auto device_obj<VectorExpr<ExprID::Tan, V>>::calc(size_t index) const -> T {
+        if constexpr (isReverseDiff())
+            return Base::calc_value(index);
+        else
+            return tan(Base::getExpr().calc(index));
+    }
+
+    template<Vector V>
+    auto device_obj<VectorExpr<ExprID::Tan, V>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return tan(std::forward<Self>(self).getExpr().values());
+    }
 
     template<Vector V>
     [[nodiscard, gnu::always_inline]] __host__ __device__ auto tan(V&& v) noexcept requires(DeviceObj<V>) {

@@ -45,7 +45,8 @@ namespace Physica {
         [[nodiscard]] static SIMD<T, Size> operator()(const Scalar auto& lhs, std::random_access_iterator auto rhs, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t s) const;
-        [[nodiscard]] Tv calc_value(size_t s) const;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
     };
 
     template<class U, class V>
@@ -103,11 +104,12 @@ namespace Physica {
     }
 
     template<class U, class V>
-    auto VectorExpr<ExprID::Div, U, V>::calc_value(size_t s) const -> Tv {
+    auto VectorExpr<ExprID::Div, U, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (Vector<U>)
-            return Base::getLHS().calc_value(s) / Base::getRHS().value();
+            return std::forward<Self>(self).getLHS().values() / std::forward<Self>(self).getRHS().value();
         else
-            return Base::getLHS().value() / Base::getRHS().calc_value(s);
+            return std::forward<Self>(self).getLHS().value() / std::forward<Self>(self).getRHS().values();
     }
 
     template<Vector V1, Vector V2>
@@ -127,7 +129,8 @@ namespace Physica {
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t s) const;
-        [[nodiscard]] Tv calc_value(size_t s) const;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
     };
 
     template<Vector V1, Vector V2>
@@ -161,9 +164,9 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    auto VectorExpr<ExprID::Div, V1, V2>::calc_value(size_t s) const -> Tv {
-        assert(!Base::getRHS().calc_value(s).isSubNormal() && "[Error]: Division overflow");
-        return Base::getLHS().calc_value(s) / Base::getRHS().calc_value(s);
+    auto VectorExpr<ExprID::Div, V1, V2>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return divide(std::forward<Self>(self).getLHS().values(), std::forward<Self>(self).getRHS().value());
     }
 
     template<Vector V, Scalar U>

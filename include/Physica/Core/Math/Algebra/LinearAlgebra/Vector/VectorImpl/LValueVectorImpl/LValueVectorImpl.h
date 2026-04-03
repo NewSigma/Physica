@@ -90,11 +90,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueVector<Derived>::calc_value(size_t index) const -> Tv {
-        return Base::getDerived().values().calc(index);
-    }
-
-    template<class Derived>
     void LValueVector<Derived>::writePacket(const Packet auto packet, size_t index) noexcept {
         using Pack = std::remove_cvref_t<decltype(packet)>;
         using U = Traits<Pack>::ScalarType;

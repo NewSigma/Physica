@@ -40,7 +40,6 @@ namespace Physica {
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
-        [[nodiscard]] Tv calc_value(size_t index) const;
 
         void reverse(const Vector auto& grad) const noexcept;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
@@ -72,9 +71,6 @@ namespace Physica {
     auto VectorExpr<ExprID::Reciprocal, V>::calc(size_t index) const -> CoDiff<T> {
         return reciprocal(Base::getExpr().calc(index));
     }
-
-    template<Vector V>
-    auto VectorExpr<ExprID::Reciprocal, V>::calc_value(size_t index) const -> Tv { return reciprocal(Base::getExpr().calc_value(index)); }
 
     template<Vector V>
     void VectorExpr<ExprID::Reciprocal, V>::reverse(const Vector auto& grad) const noexcept {

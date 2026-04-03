@@ -48,7 +48,6 @@ namespace Physica {
         [[nodiscard]] decltype(auto) operator[](size_t row, size_t col);
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] T calc_value(size_t row, size_t col) const;
 
         [[nodiscard]] const This& hermite() const noexcept { return *this; }
 
@@ -115,11 +114,6 @@ namespace Physica {
     T DenseHermiteMatrix<T, Order>::calc(size_t row, size_t col) const {
         T x = storage[row, col];
         return col >= row ? x : x.conjugate();
-    }
-
-    template<Scalar T, size_t Order>
-    T DenseHermiteMatrix<T, Order>::calc_value(size_t row, size_t col) const {
-        return calc(row, col).value();
     }
 
     template<Scalar T, size_t Order>

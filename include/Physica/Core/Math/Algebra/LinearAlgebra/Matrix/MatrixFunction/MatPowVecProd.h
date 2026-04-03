@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -46,7 +46,8 @@ namespace Physica {
         void assign(Vector auto& target) const __restrict;
 
         [[nodiscard]] T calc(size_t) const { noImpl(__func__); }
-        [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
@@ -74,6 +75,12 @@ namespace Physica {
             (mpow.getMatrix() * target).template assign<P>(buffer);
             buffer.swap(target);
         }
+    }
+
+    template<Matrix M, Vector V>
+    auto MatPowVecProd<M, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
     template<Matrix M, Vector V>

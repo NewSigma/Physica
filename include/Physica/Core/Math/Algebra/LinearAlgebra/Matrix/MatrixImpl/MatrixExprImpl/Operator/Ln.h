@@ -34,12 +34,9 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const { return ln(Base::getExpr().calc(row, col)); }
 
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
-            return ln(Base::getExpr().calc_value(row, col));
-        }
-        [[nodiscard]] auto values(this auto&&) noexcept;
-
         void reverse(const Vector auto& grad) const noexcept;
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
     };
 
     template<Matrix M>
@@ -54,7 +51,6 @@ namespace Physica {
         using Self = decltype(self);
         return ln_elem(std::forward<Self>(self).getExpr().values());
     }
-
 
     template<Matrix M>
     [[nodiscard, gnu::always_inline]] auto ln_elem(M&& m) noexcept requires(!DeviceObj<M>) {

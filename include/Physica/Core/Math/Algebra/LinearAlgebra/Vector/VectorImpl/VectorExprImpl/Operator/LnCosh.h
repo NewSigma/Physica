@@ -41,9 +41,6 @@ namespace Physica {
             return lncosh(Base::getExpr().calc(index));
         }
 
-        [[nodiscard]] Tv calc_value(size_t index) const {
-            return lncosh(Base::getExpr().calc_value(index));
-        }
         [[nodiscard]] auto values(this auto&&) noexcept;
 };
 

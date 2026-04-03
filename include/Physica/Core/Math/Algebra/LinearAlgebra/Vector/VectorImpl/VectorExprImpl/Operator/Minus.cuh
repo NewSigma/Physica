@@ -34,20 +34,21 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t index) const;
-        [[nodiscard]] __device__ Tv calc_value(size_t index) const;
+        [[nodiscard]] auto values(this auto&& self) noexcept;
     };
 
     template<Vector V>
     __device__ auto device_obj<VectorExpr<ExprID::Minus, V>>::calc(size_t index) const -> T {
         if constexpr (isReverseDiff())
-            return calc_value(index);
+            return Base::calc_value(index);
         else
             return -Base::getExpr().calc(index);
     }
 
     template<Vector V>
-    __device__ auto device_obj<VectorExpr<ExprID::Minus, V>>::calc_value(size_t index) const -> Tv {
-        return -Base::getExpr().calc_value(index);
+    auto device_obj<VectorExpr<ExprID::Minus, V>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return -std::forward<Self>(self).getExpr().values();
     }
 
     template<Vector V>

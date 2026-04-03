@@ -39,7 +39,6 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return sqrt(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] Tv calc_value(size_t index) const { return sqrt(Base::getExpr().calc_value(index)); }
         [[nodiscard]] auto values(this auto&&) noexcept;
 };
 

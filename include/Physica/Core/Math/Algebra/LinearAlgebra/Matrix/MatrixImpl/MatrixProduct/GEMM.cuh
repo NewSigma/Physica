@@ -51,7 +51,6 @@ namespace Physica {
 
         [[nodiscard]] auto compute() const;
         [[nodiscard]] __device__ T calc(size_t, size_t) const { noImpl("GEMM.calc() is low performance and should be avoided"); }
-        [[nodiscard]] __device__ Tv calc_value(size_t, size_t) const { noImpl("GEMM.calc_value() is low performance and should be avoided"); }
 
         void reverse(const Matrix auto& grad) const noexcept;
 

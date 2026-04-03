@@ -49,7 +49,6 @@ namespace Physica {
         void assign(M&& target) const;
 
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
-        [[nodiscard]] __device__ T calc_value(size_t row, size_t col) const;
 
         [[nodiscard]] __host__ __device__ const This& transpose() const noexcept { return *this; }
         [[nodiscard]] __host__ __device__ const This& conjugate() const noexcept { return *this; }
@@ -97,11 +96,6 @@ namespace Physica {
     template<Scalar T, size_t Order>
     __device__ T device_obj<IdentityMatrix<T, Order>>::calc(size_t row, size_t col) const {
         return T(row == col ? 1 : 0);
-    }
-
-    template<Scalar T, size_t Order>
-    __device__ T device_obj<IdentityMatrix<T, Order>>::calc_value(size_t row, size_t col) const {
-        return calc(row, col);
     }
 
     template<Scalar T, size_t Order>

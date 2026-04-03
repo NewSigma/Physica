@@ -39,7 +39,6 @@ namespace Physica {
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return ln1p(Base::getExpr().calc(index)); }
-        [[nodiscard]] Tv calc_value(size_t index) const { return ln1p(Base::getExpr().calc_value(index)); }
 
         void reverse(const Scalar auto& grad) const noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
@@ -75,7 +74,7 @@ namespace Physica {
         return ln1p(std::forward<Self>(self).getExpr().values());
     }
 
-template<Vector V>
+    template<Vector V>
     [[nodiscard, gnu::always_inline]] auto ln1p(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Ln1p, V&&>(std::forward<V>(v));
     }

@@ -107,7 +107,7 @@ namespace Physica {
 
     template<class Derived>
     decltype(auto) RValueVector<Derived>::calc_value(size_t index) const noexcept {
-        return Base::getDerived().calc_value(index);
+        return Base::getDerived().values().calc(index);
     }
 
     template<class Derived>

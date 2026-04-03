@@ -67,14 +67,11 @@ namespace Physica {
 
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
             if constexpr (isReverseDiff())
-                return calc_value(row, col);
+                return Base::calc_value(row, col);
             else
                 return Base::getLHS().calc(row, col) + Base::getRHS().calc(row);
         }
 
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
-            return Base::getLHS().calc_value(row, col) + Base::getRHS().calc_value(row);
-        }
 
         using Base::reverse;
         void reverse(const Matrix auto& grad) const noexcept {
@@ -106,19 +103,18 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            if constexpr (isReverseDiff())
-                return calc_value(row, col);
-            else
-                return Base::getLHS().calc(row, col) + Base::getRHS().calc(row, col);
-        }
-
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
-            return Base::getLHS().calc_value(row, col) + Base::getRHS().calc_value(row, col);
-        }
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
 
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
     };
+
+    template<Matrix M1, Matrix M2>
+    __device__ auto device_obj<MatrixExpr<ExprID::Add, M1, M2>>::calc(size_t row, size_t col) const -> T {
+        if constexpr (isReverseDiff())
+            return Base::calc_value(row, col);
+        else
+            return Base::getLHS().calc(row, col) + Base::getRHS().calc(row, col);
+    }
 
     template<Matrix M1, Matrix M2>
     __host__ __device__ auto device_obj<MatrixExpr<ExprID::Add, M1, M2>>::values(this auto&& self) noexcept {

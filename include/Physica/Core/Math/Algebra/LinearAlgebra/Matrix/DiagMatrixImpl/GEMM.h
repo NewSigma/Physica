@@ -42,7 +42,8 @@ namespace Physica {
         void assign(Matrix auto& target) const;
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] T calc_value(size_t row, size_t col) const;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return lhs.getRow(); }
         [[nodiscard]] size_t getCol() const { return rhs.getCol(); }
@@ -65,8 +66,9 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
-    auto GEMM<M1, M2>::calc_value(size_t row, size_t col) const -> T {
-        return lhs.calc_value(row, col) * rhs.diag()[col].value();
+    auto GEMM<M1, M2>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS() * std::forward<Self>(self).getRHS();
     }
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
@@ -100,7 +102,8 @@ namespace Physica {
         void assign(Matrix auto& target) const;
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] T calc_value(size_t row, size_t col) const;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return lhs.getRow(); }
         [[nodiscard]] size_t getCol() const { return rhs.getCol(); }
@@ -123,8 +126,9 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
-    auto GEMM<M1, M2>::calc_value(size_t row, size_t col) const -> T {
-        return lhs.diag()[row].value() * rhs.calc_value(row, col);
+    auto GEMM<M1, M2>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS() * std::forward<Self>(self).getRHS();
     }
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)

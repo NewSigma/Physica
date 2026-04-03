@@ -40,7 +40,6 @@ namespace Physica {
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
-        [[nodiscard]] Tv calc_value(size_t index) const;
 
         void reverse(const Vector auto& grad) const noexcept;
 
@@ -118,22 +117,6 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    auto VectorExpr<ExprID::Add, V, U>::calc_value(size_t index) const -> Tv {
-        if constexpr (lowerToFMA()) {
-            Tv a = getLHS().getLHS().calc_value(index);
-            Tv b;
-            if constexpr (Scalar<decltype(getLHS().getRHS())>)
-                b = getLHS().getRHS().value();
-            else
-                b = getLHS().getRHS().calc_value(index);
-            Tv c = getRHS().value();
-            return fma(a, b, c);
-        }
-        else
-            return getLHS().calc_value(index) + getRHS().value();
-    }
-
-    template<Vector V, Scalar U>
     void VectorExpr<ExprID::Add, V, U>::reverse(const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff());
         const auto& g = grad.values();
@@ -185,7 +168,6 @@ namespace Physica {
         void assign_mkl(Vector auto& v) const noexcept;
 
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
-        [[nodiscard]] Tv calc_value(size_t index) const;
 
         void reverse(const auto& grad) const noexcept;
 
@@ -292,22 +274,6 @@ namespace Physica {
         }
         else
             return getLHS().calc(index) + getRHS().calc(index);
-    }
-
-    template<Vector V1, Vector V2>
-    auto VectorExpr<ExprID::Add, V1, V2>::calc_value(size_t index) const -> Tv {
-        if constexpr (lowerToFMA()) {
-            Tv a = getLHS().getLHS().calc_value(index);
-            Tv b;
-            if constexpr (Scalar<decltype(getLHS().getRHS())>)
-                b = getLHS().getRHS().value();
-            else
-                b = getLHS().getRHS().calc_value(index);
-            Tv c = getRHS().calc_value(index);
-            return fma(a, b, c);
-        }
-        else
-            return getLHS().calc_value(index) + getRHS().calc_value(index);
     }
 
     template<Vector V1, Vector V2>

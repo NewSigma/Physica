@@ -35,7 +35,6 @@ namespace Physica {
         void assign(Matrix auto&& target) const;
 
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         using Base::reverse;
         void reverse(const auto& grad) const noexcept;
@@ -59,11 +58,6 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     auto MatrixExpr<ExprID::Sub, M1, M2>::calc(size_t row, size_t col) const -> CoDiff<T> {
         return getLHS().calc(row, col) - getRHS().calc(row, col);
-    }
-
-    template<Matrix M1, Matrix M2>
-    auto MatrixExpr<ExprID::Sub, M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
-        return getLHS().calc_value(row, col) - getRHS().calc_value(row, col);
     }
 
     template<Matrix M1, Matrix M2>

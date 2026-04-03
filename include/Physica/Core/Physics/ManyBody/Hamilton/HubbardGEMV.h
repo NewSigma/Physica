@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -122,11 +122,6 @@ namespace Physica {
         }
         result += vec.calc(index) * (mat.getRepelU() * Tr(numRepel));
         return result;
-    }
-
-    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
-    auto GEMV<M, V>::calc_value(size_t index) const -> Tv {
-        return calc(index).value();
     }
 
     template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)

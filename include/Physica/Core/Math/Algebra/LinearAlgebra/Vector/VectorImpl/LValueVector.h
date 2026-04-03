@@ -62,7 +62,6 @@ namespace Physica {
         [[nodiscard]] decltype(auto) operator[](this auto&&, size_t index);
         /* Operations */
         [[nodiscard]] decltype(auto) calc(size_t index) const;
-        [[nodiscard]] Tv calc_value(size_t index) const;
         void writePacket(Packet auto packet, size_t index) noexcept;
         void writePacket(Packet auto packet, size_t index, size_t count) noexcept;
         [[nodiscard]] constexpr auto view(this auto&&) noexcept;

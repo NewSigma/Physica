@@ -34,7 +34,6 @@ namespace Physica {
         [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto input) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return sigmoid(Base::getExpr().calc(index)); }
-        [[nodiscard]] Tv calc_value(size_t index) const { return sigmoid(Base::getExpr().calc_value(index)); }
         [[nodiscard]] auto values(this auto&&) noexcept;
 };
 

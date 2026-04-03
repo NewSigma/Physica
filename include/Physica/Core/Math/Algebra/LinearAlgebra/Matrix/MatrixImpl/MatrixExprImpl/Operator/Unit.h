@@ -35,10 +35,14 @@ namespace Physica {
             return unit(Base::getExpr().calc(row, col));
         }
 
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
-            return unit(Base::getExpr().calc_value(row, col));
-        }
+        [[nodiscard]] auto values(this auto&& self) noexcept;
     };
+
+    template<Matrix M>
+    auto MatrixExpr<ExprID::Unit, M>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return unit_elem(std::forward<Self>(self).getExpr().values());
+    }
 
     template<Matrix M>
     [[nodiscard, gnu::always_inline]] auto unit_elem(M&& m) noexcept requires(!DeviceObj<M>) {

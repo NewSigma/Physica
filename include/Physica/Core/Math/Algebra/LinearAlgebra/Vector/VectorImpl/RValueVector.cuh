@@ -55,8 +55,8 @@ namespace Physica {
         __host__ __device__ void assign_add_base(Vector auto& target) const;
         __host__ __device__ void assert_assign(const Vector auto& source) const noexcept;
 
-        [[nodiscard]] __device__ T calc(size_t index) const { return Base::getDerived().calc(index); }
-        [[nodiscard]] __device__ Tv calc_value(size_t index) const { return Base::getDerived().calc_value(index); }
+        [[nodiscard]] __device__ T calc(size_t index) const;
+        [[nodiscard]] __device__ Tv calc_value(size_t index) const;
         template<int Size>
         [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
         template<int Size>

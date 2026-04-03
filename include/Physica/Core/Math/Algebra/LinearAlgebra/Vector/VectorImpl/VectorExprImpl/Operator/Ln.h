@@ -40,7 +40,6 @@ namespace Physica {
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
-        [[nodiscard]] Tv calc_value(size_t index) const;
 
         void reverse(const auto& grad) const noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
@@ -71,11 +70,6 @@ namespace Physica {
     }
 
     template<Vector V>
-    auto VectorExpr<ExprID::Ln, V>::calc_value(size_t index) const -> Tv {
-        return ln(Base::getExpr().calc_value(index));
-    }
-
-    template<Vector V>
     void VectorExpr<ExprID::Ln, V>::reverse(const auto& grad) const noexcept {
         static_assert(isReverseDiff());
         const auto& expr = Base::getExpr();
@@ -93,7 +87,7 @@ namespace Physica {
         return ln(std::forward<Self>(self).getExpr().values());
     }
 
-template<Vector V>
+    template<Vector V>
     [[nodiscard, gnu::always_inline]] auto ln(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Ln, V&&>(std::forward<V>(v));
     }

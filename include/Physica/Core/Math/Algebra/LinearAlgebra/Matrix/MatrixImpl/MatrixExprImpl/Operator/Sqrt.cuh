@@ -31,12 +31,23 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return sqrt(Base::getExpr().calc(row, col)); }
-
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
-            return sqrt(Base::getExpr().calc_value(row, col));
-        }
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
+        [[nodiscard]] auto values(this auto&& self) noexcept;
     };
+
+    template<Matrix M>
+    __device__ auto device_obj<MatrixExpr<ExprID::Sqrt, M>>::calc(size_t row, size_t col) const -> T {
+        if constexpr (Base::isReverseDiff())
+            return Base::calc_value(row, col);
+        else
+            return sqrt(Base::getExpr().calc(row, col));
+    }
+
+    template<Matrix M>
+    auto device_obj<MatrixExpr<ExprID::Sqrt, M>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return sqrt_elem(std::forward<Self>(self).getExpr().values());
+    }
 
     template<Matrix M>
     [[nodiscard, gnu::always_inline]] __host__ __device__ auto sqrt_elem(M&& m) noexcept requires(DeviceObj<M>) {

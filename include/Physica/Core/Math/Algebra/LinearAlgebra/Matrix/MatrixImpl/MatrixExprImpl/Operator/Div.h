@@ -42,13 +42,17 @@ namespace Physica {
                 return Base::getLHS() / Base::getRHS().calc(row, col);
         }
 
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
-            if constexpr (Matrix<T>)
-                return Base::getLHS().calc_value(row, col) / Base::getRHS().value();
-            else
-                return Base::getLHS().value() / Base::getRHS().calc_value(row, col);
-        }
+        [[nodiscard]] auto values(this auto&& self) noexcept;
     };
+
+    template<class T, class U> requires(Scalar<T> || Scalar<U>)
+    auto MatrixExpr<ExprID::Div, T, U>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (Matrix<T>)
+            return divide_elem(std::forward<Self>(self).getLHS().values(), std::forward<Self>(self).getRHS().value());
+        else
+            return divide_elem(std::forward<Self>(self).getLHS().value(), std::forward<Self>(self).getRHS().values());
+    }
 
     template<class T, class U> requires(Vector<T> || Vector<U>)
     class MatrixExpr<ExprID::Div, T, U>
@@ -68,13 +72,14 @@ namespace Physica {
                 return Base::getLHS().calc(row) / Base::getRHS().calc(row, col);
         }
 
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
-            if constexpr (Matrix<T>)
-                return Base::getLHS().calc_value(row, col) / Base::getRHS().calc_value(row);
-            else
-                return Base::getLHS().calc_value(row) / Base::getRHS().calc_value(row, col);
-        }
+        [[nodiscard]] auto values(this auto&& self) noexcept;
     };
+
+    template<class T, class U> requires(Vector<T> || Vector<U>)
+    auto MatrixExpr<ExprID::Div, T, U>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return divide_elem(std::forward<Self>(self).getLHS().values(), std::forward<Self>(self).getRHS().values());
+    }
 
     template<Matrix M1, Matrix M2>
     class MatrixExpr<ExprID::Div, M1, M2>
@@ -89,10 +94,11 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -105,17 +111,17 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    auto MatrixExpr<ExprID::Div, M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
-        assert(!getRHS().calc_value(row, col).isSubNormal() && "[Error]: Division overflow");
-        return getLHS().calc_value(row, col) / getRHS().calc_value(row, col);
-    }
-
-    template<Matrix M1, Matrix M2>
     void MatrixExpr<ExprID::Div, M1, M2>::reverse(const Matrix auto& grad) const noexcept {
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
         static_assert(Diffable<M1> && !Diffable<M2>, "[Error]: Not implemented");
         lhs.reverse(divide_elem(grad, rhs));
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto MatrixExpr<ExprID::Div, M1, M2>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return divide_elem(std::forward<Self>(self).getLHS().values(), std::forward<Self>(self).getRHS().values());
     }
 
     template<Matrix M, Scalar U>

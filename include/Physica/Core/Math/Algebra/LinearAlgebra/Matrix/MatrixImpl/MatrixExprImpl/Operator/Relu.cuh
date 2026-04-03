@@ -32,26 +32,32 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            if constexpr (isReverseDiff())
-                return calc_value(row, col);
-            else
-                return relu(Base::getExpr().calc(row, col));
-        }
-
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
-            return relu(Base::getExpr().calc_value(row, col));
-        }
-
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
         using Base::reverse;
         void reverse(const Matrix auto& grad) const noexcept;
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
     };
+
+    template<Matrix M>
+    __device__ auto device_obj<MatrixExpr<ExprID::Relu, M>>::calc(size_t row, size_t col) const -> T {
+        if constexpr (isReverseDiff())
+            return Base::calc_value(row, col);
+        else
+            return relu(Base::getExpr().calc(row, col));
+    }
 
     template<Matrix M>
     void device_obj<MatrixExpr<ExprID::Relu, M>>::reverse(const Matrix auto& grad) const noexcept {
         static_assert(isReverseDiff());
         const auto& expr = Base::getExpr();
         expr.reverse(hadamard(relu_elem(unit_elem(expr.values())), grad.values()));
+    }
+
+    template<Matrix M>
+    auto device_obj<MatrixExpr<ExprID::Relu, M>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return relu_elem(std::forward<Self>(self).getExpr().values());
     }
 
     template<Matrix M>

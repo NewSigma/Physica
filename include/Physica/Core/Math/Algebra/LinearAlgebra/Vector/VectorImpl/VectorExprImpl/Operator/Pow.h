@@ -38,9 +38,10 @@ namespace Physica {
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t i) const;
-        [[nodiscard]] Tv calc_value(size_t i) const;
 
         void reverse(const Vector auto& grad) const noexcept;
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
     };
 
     template<Vector V, Scalar U>
@@ -66,8 +67,9 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    auto VectorExpr<ExprID::Pow, V, U>::calc_value(size_t i) const -> Tv {
-        return pow(Base::getLHS().calc_value(i), Base::getRHS().value());
+    auto VectorExpr<ExprID::Pow, V, U>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return pow(std::forward<Self>(self).getLHS().values(), std::forward<Self>(self).getRHS().values());
     }
 
     template<Vector V, Scalar U>

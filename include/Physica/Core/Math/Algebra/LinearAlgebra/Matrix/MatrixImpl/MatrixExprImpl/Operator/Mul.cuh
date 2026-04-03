@@ -38,7 +38,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto operator-(this auto&&) noexcept;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const;
+
+        [[nodiscard]] __host__ __device__ auto values(this auto&& self) noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -58,14 +59,15 @@ namespace Physica {
     template<Matrix M, Scalar U>
     __device__ auto device_obj<MatrixExpr<ExprID::Mul, M, U>>::calc(size_t row, size_t col) const -> T {
         if constexpr (isReverseDiff())
-            return calc_value(row, col);
+            return Base::calc_value(row, col);
         else
             return getLHS().calc(row, col) * getRHS();
     }
 
     template<Matrix M, Scalar U>
-    __device__ auto device_obj<MatrixExpr<ExprID::Mul, M, U>>::calc_value(size_t row, size_t col) const -> Tv {
-        return getLHS().calc_value(row, col) * getRHS().value();
+    __host__ __device__ auto device_obj<MatrixExpr<ExprID::Mul, M, U>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().value();
     }
 
     template<Matrix M, Vector V>
@@ -80,17 +82,24 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            if constexpr (isReverseDiff())
-                return calc_value(row, col);
-            else
-                return Base::getLHS().calc(row, col) * Base::getRHS().calc(row);
-        }
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
 
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
-            return Base::getLHS().calc_value(row, col) * Base::getRHS().calc_value(row);
-        }
+        [[nodiscard]] __host__ __device__ auto values(this auto&& self) noexcept;
     };
+
+    template<Matrix M, Vector V>
+    __device__ auto device_obj<MatrixExpr<ExprID::Mul, M, V>>::calc(size_t row, size_t col) const -> T {
+        if constexpr (isReverseDiff())
+            return Base::calc_value(row, col);
+        else
+            return Base::getLHS().calc(row, col) * Base::getRHS().calc(row);
+    }
+
+    template<Matrix M, Vector V>
+    __host__ __device__ auto device_obj<MatrixExpr<ExprID::Mul, M, V>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
+    }
 
     template<Matrix M1, Matrix M2>
     class device_obj<MatrixExpr<ExprID::Mul, M1, M2>>
@@ -104,23 +113,24 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            if constexpr (isReverseDiff())
-                return calc_value(row, col);
-            else
-                return getLHS().calc(row, col) * getRHS().calc(row, col);
-        }
-
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
-            return getLHS().calc_value(row, col) * getRHS().calc_value(row, col);
-        }
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
 
         void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
+
+        [[nodiscard]] __host__ __device__ auto values(this auto&& self) noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
     };
+
+    template<Matrix M1, Matrix M2>
+    __device__ auto device_obj<MatrixExpr<ExprID::Mul, M1, M2>>::calc(size_t row, size_t col) const -> T {
+        if constexpr (isReverseDiff())
+            return Base::calc_value(row, col);
+        else
+            return getLHS().calc(row, col) * getRHS().calc(row, col);
+    }
 
     template<Matrix M1, Matrix M2>
     void device_obj<MatrixExpr<ExprID::Mul, M1, M2>>::reverse(const Matrix auto& grad) const noexcept {
@@ -131,6 +141,12 @@ namespace Physica {
             lhs.reverse(hadamard(rhs.values(), grad));
         if constexpr (Diffable<M2>)
             rhs.reverse(hadamard(lhs.values(), grad));
+    }
+
+    template<Matrix M1, Matrix M2>
+    __host__ __device__ auto device_obj<MatrixExpr<ExprID::Mul, M1, M2>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
     template<Matrix M, Scalar U>

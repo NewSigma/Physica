@@ -33,9 +33,6 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const { return sin(Base::getExpr().calc(row, col)); }
 
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
-            return sin(Base::getExpr().calc_value(row, col));
-        }
         [[nodiscard]] auto values(this auto&&) noexcept;
     };
 
@@ -44,7 +41,6 @@ namespace Physica {
         using Self = decltype(self);
         return sin_elem(std::forward<Self>(self).getExpr().values());
     }
-
 
     template<Matrix M>
     [[nodiscard, gnu::always_inline]] auto sin_elem(M&& m) noexcept requires(!DeviceObj<M>) {

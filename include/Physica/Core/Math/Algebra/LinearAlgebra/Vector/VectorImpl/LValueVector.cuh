@@ -50,7 +50,6 @@ namespace Physica {
         [[nodiscard]] __device__ decltype(auto) operator[](this auto&&, size_t index);
         /* Operations */
         [[nodiscard]] __device__ decltype(auto) calc(size_t index) const { return operator[](index); }
-        [[nodiscard]] __device__ Tv calc_value(size_t index) const { return Base::getDerived().values().calc(index); }
 
         __host__ __device__ void reverse(const auto& grad) const noexcept;
 

@@ -37,7 +37,7 @@ namespace Physica {
         void assign(Vector auto&& v) const;
 
         [[nodiscard]] T calc(size_t i) const { return Base::getExpr().softmax(i); }
-        [[nodiscard]] Tv calc_value(size_t i) const { return Base::getExpr().values().softmax(i); }
+        [[nodiscard]] Tv calc_value(size_t i) const { return Base::calc_value(i); }
         [[nodiscard]] T calc(size_t i, T lnsumexp) const;
         [[nodiscard]] Tv calc_value(size_t i, Tv lnsumexp) const;
 
@@ -52,7 +52,7 @@ namespace Physica {
 
     template<Vector V>
     auto VectorExpr<ExprID::Softmax, V>::calc_value(size_t i, Tv lnsumexp) const -> Tv {
-        return exp(Base::getExpr().calc_value(i) - lnsumexp);
+        return values().calc(i, lnsumexp);
     }
 
     template<Vector V>
@@ -76,7 +76,7 @@ namespace Physica {
         return softmax(std::forward<Self>(self).getExpr().values());
     }
 
-template<Vector V>
+    template<Vector V>
     [[nodiscard, gnu::always_inline]] auto softmax(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Softmax, V&&>(std::forward<V>(v));
     }

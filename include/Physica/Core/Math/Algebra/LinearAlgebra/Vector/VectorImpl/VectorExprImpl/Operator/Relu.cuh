@@ -33,26 +33,32 @@ namespace Physica {
     public:
         using Base::Base;
         /* Getters */
-        [[nodiscard]] __device__ T calc(size_t index) const {
-            if constexpr (isReverseDiff())
-                return calc_value(index);
-            else
-                return relu(Base::getExpr().calc(index));
-        }
-
-        [[nodiscard]] __device__ Tv calc_value(size_t index) const {
-            return relu(Base::getExpr().calc_value(index));
-        }
+        [[nodiscard]] __device__ T calc(size_t index) const;
 
         using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
     };
+
+    template<Vector V>
+    __device__ auto device_obj<VectorExpr<ExprID::Relu, V>>::calc(size_t index) const -> T {
+        if constexpr (isReverseDiff())
+            return Base::calc_value(index);
+        else
+            return relu(Base::getExpr().calc(index));
+    }
 
     template<Vector V>
     void device_obj<VectorExpr<ExprID::Relu, V>>::reverse(const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff());
         const auto& expr = Base::getExpr();
         expr.reverse(hadamard(relu(unit(expr.values())), grad.values()));
+    }
+
+    template<Vector V>
+    auto device_obj<VectorExpr<ExprID::Relu, V>>::values(this auto&& self) noexcept {
+        return relu(std::forward<decltype(self)>(self).getExpr().values());
     }
 
     template<Vector V>

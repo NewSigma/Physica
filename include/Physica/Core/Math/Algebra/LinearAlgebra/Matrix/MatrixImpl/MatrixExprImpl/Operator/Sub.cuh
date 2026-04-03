@@ -34,7 +34,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const;
+        [[nodiscard]] auto values(this auto&& self) noexcept;
     };
 
     template<Matrix M1, Matrix M2>
@@ -43,8 +43,9 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    __device__ auto device_obj<MatrixExpr<ExprID::Sub, M1, M2>>::calc_value(size_t row, size_t col) const -> Tv {
-        return Base::getLHS().calc_value(row, col) - Base::getRHS().calc_value(row, col);
+    auto device_obj<MatrixExpr<ExprID::Sub, M1, M2>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() - std::forward<Self>(self).getRHS().values();
     }
 
     template<Matrix M, Scalar U>

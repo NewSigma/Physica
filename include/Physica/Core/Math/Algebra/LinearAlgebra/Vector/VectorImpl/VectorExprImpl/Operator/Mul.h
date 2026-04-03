@@ -57,12 +57,13 @@ namespace Physica {
         void assign_add_base(Vector auto&& v) const noexcept;
 
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
-        [[nodiscard]] Tv calc_value(size_t index) const;
 
         [[nodiscard]] T sum() const { return getLHS().sum() * getRHS(); }
 
         using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -189,11 +190,6 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    auto VectorExpr<ExprID::Mul, V, U>::calc_value(size_t index) const -> Tv {
-        return getLHS().calc_value(index) * getRHS().value();
-    }
-
-    template<Vector V, Scalar U>
     void VectorExpr<ExprID::Mul, V, U>::reverse(const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff());
         const auto& g = grad.values();
@@ -203,6 +199,12 @@ namespace Physica {
             lhs.reverse(rhs.value() * g);
         if constexpr (ReverseDiff<U>)
             rhs.reverse(lhs.values() * g);
+    }
+
+    template<Vector V, Scalar U>
+    auto VectorExpr<ExprID::Mul, V, U>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().value();
     }
 
     template<Vector V, Scalar U>
@@ -274,10 +276,11 @@ namespace Physica {
         void assign_add_base(Vector auto&& v) const noexcept;
 
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
-        [[nodiscard]] Tv calc_value(size_t index) const;
 
         using Base::reverse;
         void reverse(const auto& grad) const noexcept;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -360,11 +363,6 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    auto VectorExpr<ExprID::Mul, V1, V2>::calc_value(size_t index) const -> Tv {
-        return getLHS().calc_value(index) * getRHS().calc_value(index);
-    }
-
-    template<Vector V1, Vector V2>
     void VectorExpr<ExprID::Mul, V1, V2>::reverse(const auto& grad) const noexcept {
         static_assert(isReverseDiff());
         if constexpr (Scalar<decltype(grad)>) {
@@ -381,6 +379,12 @@ namespace Physica {
             if constexpr (ReverseDiff<V2>)
                 getRHS().reverse(hadamard(getLHS().values(), g));
         }
+    }
+
+    template<Vector V1, Vector V2>
+    auto VectorExpr<ExprID::Mul, V1, V2>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return hadamard(std::forward<Self>(self).getLHS().values(), std::forward<Self>(self).getRHS().values());
     }
 
     template<Vector V1, Vector V2>

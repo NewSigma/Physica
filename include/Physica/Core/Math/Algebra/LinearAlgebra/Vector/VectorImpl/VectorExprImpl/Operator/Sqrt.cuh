@@ -31,10 +31,23 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t index) const { return sqrt(Base::getExpr().calc(index)); }
-
-        [[nodiscard]] __device__ Tv calc_value(size_t index) const { return sqrt(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] __device__ T calc(size_t index) const;
+        [[nodiscard]] auto values(this auto&& self) noexcept;
     };
+
+    template<Vector V>
+    __device__ auto device_obj<VectorExpr<ExprID::Sqrt, V>>::calc(size_t index) const -> T {
+        if constexpr (Base::isReverseDiff())
+            return Base::calc_value(index);
+        else
+            return sqrt(Base::getExpr().calc(index));
+    }
+
+    template<Vector V>
+    auto device_obj<VectorExpr<ExprID::Sqrt, V>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return sqrt(std::forward<Self>(self).getExpr().values());
+    }
 
     template<Vector V>
     [[nodiscard, gnu::always_inline]] __host__ __device__ auto sqrt(V&& v) noexcept requires(DeviceObj<V>) {

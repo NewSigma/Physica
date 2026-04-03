@@ -127,6 +127,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    decltype(auto) RValueMatrix<Derived>::calc(size_t row, size_t col) const {
+        return Base::getDerived().calc(row, col);
+    }
+
+    template<class Derived>
+    decltype(auto) RValueMatrix<Derived>::calc_value(size_t row, size_t col) const {
+        return Base::getDerived().values().calc(row, col);
+    }
+
+    template<class Derived>
     decltype(auto) RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
         return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
     }

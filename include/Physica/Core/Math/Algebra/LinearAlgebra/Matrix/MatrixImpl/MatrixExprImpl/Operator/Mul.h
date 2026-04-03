@@ -39,10 +39,11 @@ namespace Physica {
         void assign(Matrix auto&& target) const;
 
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         [[nodiscard]] T trace() const { return getLHS().trace() * getRHS(); }
         [[nodiscard]] T sum() const { return getLHS().sum() * getRHS(); }
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -73,8 +74,9 @@ namespace Physica {
     }
 
     template<Matrix M, Scalar U>
-    auto MatrixExpr<ExprID::Mul, M, U>::calc_value(size_t row, size_t col) const -> Tv {
-        return getLHS().calc_value(row, col) * getRHS().value();
+    auto MatrixExpr<ExprID::Mul, M, U>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().value();
     }
 
     template<Matrix M1, Matrix M2>
@@ -92,10 +94,11 @@ namespace Physica {
         void assign(Matrix auto&& target) const;
 
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -117,11 +120,6 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    auto MatrixExpr<ExprID::Mul, M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
-        return getLHS().calc_value(row, col) * getRHS().calc_value(row, col);
-    }
-
-    template<Matrix M1, Matrix M2>
     void MatrixExpr<ExprID::Mul, M1, M2>::reverse(const Matrix auto& grad) const noexcept {
         static_assert(isReverseDiff());
         const auto& lhs = getLHS();
@@ -130,6 +128,12 @@ namespace Physica {
             lhs.reverse(hadamard(rhs.values(), grad));
         if constexpr (Diffable<M2>)
             rhs.reverse(hadamard(lhs.values(), grad));
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto MatrixExpr<ExprID::Mul, M1, M2>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
     template<Matrix M, Scalar U>

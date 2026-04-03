@@ -56,7 +56,6 @@ namespace Physica {
         [[nodiscard]] __device__ decltype(auto) operator[](this auto&& self, size_t row, size_t col);
         /* Operations */
         [[nodiscard]] __device__ decltype(auto) calc(size_t row, size_t col) const { return operator[](row, col); }
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return Base::getDerived().values().calc(row, col); }
 
         void reverse(const Matrix auto& grad) const noexcept;
 

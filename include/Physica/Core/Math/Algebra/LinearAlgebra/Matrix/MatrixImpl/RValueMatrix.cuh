@@ -58,8 +58,8 @@ namespace Physica {
         __device__ void assign_add(Matrix auto&& target, const ThreadBlock& block) const;
         __host__ __device__ void assert_assign(const Matrix auto& source) const noexcept;
 
-        [[nodiscard]] __device__ auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
-        [[nodiscard]] __device__ auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
+        [[nodiscard]] __device__ auto calc(size_t row, size_t col) const;
+        [[nodiscard]] __device__ auto calc_value(size_t row, size_t col) const;
         [[nodiscard]] __device__ T calcFromMajorMinor(size_t major, size_t minor) const;
         void reverse(const Matrix auto& y, const Matrix auto& grad) const noexcept;
 

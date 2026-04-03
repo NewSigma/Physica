@@ -38,7 +38,6 @@ namespace Physica {
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return tan(Base::getExpr().calc(index)); }
-        [[nodiscard]] Tv calc_value(size_t index) const { return tan(Base::getExpr().calc_value(index)); }
         [[nodiscard]] auto values(this auto&&) noexcept;
 };
 
@@ -65,7 +64,7 @@ namespace Physica {
         return tan(std::forward<Self>(self).getExpr().values());
     }
 
-template<Vector V>
+    template<Vector V>
     [[nodiscard, gnu::always_inline]] auto tan(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Tan, V&&>(std::forward<V>(v));
     }

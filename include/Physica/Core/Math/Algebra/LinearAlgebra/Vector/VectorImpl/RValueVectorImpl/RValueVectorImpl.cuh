@@ -91,6 +91,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::calc(size_t index) const -> T {
+        return Base::getDerived().calc(index);
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::calc_value(size_t index) const -> Tv {
+        return Base::getDerived().values().calc(index);
+    }
+
+    template<class Derived>
     template<int Size>
     __device__ auto device_obj<RValueVector<Derived>>::packet(size_t index) const noexcept -> SIMD<T, Size> {
         assert(index + Size <= getLength());

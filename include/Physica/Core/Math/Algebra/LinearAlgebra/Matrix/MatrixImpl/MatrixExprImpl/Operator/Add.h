@@ -34,10 +34,11 @@ namespace Physica {
         void assign(Matrix auto& target) const;
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -57,11 +58,6 @@ namespace Physica {
     }
 
     template<Matrix M, Scalar U>
-    auto MatrixExpr<ExprID::Add, M, U>::calc_value(size_t row, size_t col) const -> Tv {
-        return getLHS().calc_value(row, col) + getRHS().value();
-    }
-
-    template<Matrix M, Scalar U>
     void MatrixExpr<ExprID::Add, M, U>::reverse(const Matrix auto& grad) const noexcept {
         static_assert(Base::isReverseDiff());
         const auto& lhs = getLHS();
@@ -72,24 +68,37 @@ namespace Physica {
             rhs.reverse(grad.sum());
     }
 
-    template<Matrix M, Vector U>
-    class MatrixExpr<ExprID::Add, M, U>
-            : public BinaryMatrixExpr<ExprID::Add, M, U> {
-        using Base = BinaryMatrixExpr<ExprID::Add, M, U>;
+    template<Matrix M, Scalar U>
+    auto MatrixExpr<ExprID::Add, M, U>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() + std::forward<Self>(self).getRHS().values();
+    }
+
+    template<Matrix M, Vector V>
+    class MatrixExpr<ExprID::Add, M, V>
+            : public BinaryMatrixExpr<ExprID::Add, M, V> {
+        using Base = BinaryMatrixExpr<ExprID::Add, M, V>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] T calc(size_t row, size_t col) const {
-            return Base::getLHS().calc(row, col) + Base::getRHS().calc(row);
-        }
+        [[nodiscard]] T calc(size_t row, size_t col) const;
 
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
-            return Base::getLHS().calc_value(row, col) + Base::getRHS().calc_value(row);
-        }
+        [[nodiscard]] auto values(this auto&& self) noexcept;
     };
+
+    template<Matrix M, Vector V>
+    auto MatrixExpr<ExprID::Add, M, V>::calc(size_t row, size_t col) const -> T {
+        return Base::getLHS().calc(row, col) + Base::getRHS().calc(row);
+    }
+
+    template<Matrix M, Vector V>
+    auto MatrixExpr<ExprID::Add, M, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() + std::forward<Self>(self).getRHS().values();
+    }
 
     template<Matrix M1, Matrix M2>
     class MatrixExpr<ExprID::Add, M1, M2>
@@ -105,10 +114,11 @@ namespace Physica {
         void assign(Matrix auto& target) const;
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -130,11 +140,6 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    auto MatrixExpr<ExprID::Add, M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
-        return Base::getLHS().calc_value(row, col) + Base::getRHS().calc_value(row, col);
-    }
-
-    template<Matrix M1, Matrix M2>
     void MatrixExpr<ExprID::Add, M1, M2>::reverse(const Matrix auto& grad) const noexcept {
         static_assert(Base::isReverseDiff());
         const auto& lhs = getLHS();
@@ -143,6 +148,12 @@ namespace Physica {
             lhs.reverse(grad);
         if constexpr (Diffable<M2>)
             rhs.reverse(grad);
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto MatrixExpr<ExprID::Add, M1, M2>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() + std::forward<Self>(self).getRHS().values();
     }
 
     template<Matrix M, Scalar U>

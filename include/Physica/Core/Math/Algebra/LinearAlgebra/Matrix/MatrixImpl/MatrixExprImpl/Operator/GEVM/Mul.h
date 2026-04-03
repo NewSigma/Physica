@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -37,7 +37,8 @@ namespace Physica {
         void assign_add(Matrix auto& target) const;
 
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -68,7 +69,8 @@ namespace Physica {
     }
 
     template<Matrix M, Scalar U> requires(instanceof<GEVM, M>)
-    auto MatrixExpr<ExprID::Mul, M, U>::calc_value(size_t row, size_t col) const -> Tv {
-        return getLHS().value(row, col) * getRHS().value();
+    auto MatrixExpr<ExprID::Mul, M, U>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().value();
     }
 }

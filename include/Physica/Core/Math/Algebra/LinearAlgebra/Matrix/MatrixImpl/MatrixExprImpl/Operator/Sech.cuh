@@ -33,20 +33,21 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const;
+        [[nodiscard]] auto values(this auto&& self) noexcept;
     };
 
     template<Matrix M>
     __device__ auto device_obj<MatrixExpr<ExprID::Sech, M>>::calc(size_t row, size_t col) const -> T {
         if constexpr (isReverseDiff())
-            return calc_value(row, col);
+            return Base::calc_value(row, col);
         else
             return sech(Base::getExpr().calc(row, col));
     }
 
     template<Matrix M>
-    __device__ auto device_obj<MatrixExpr<ExprID::Sech, M>>::calc_value(size_t row, size_t col) const -> Tv {
-        return sech(Base::getExpr().calc_value(row, col));
+    auto device_obj<MatrixExpr<ExprID::Sech, M>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return sech_elem(std::forward<Self>(self).getExpr().values());
     }
 
     template<Matrix M>

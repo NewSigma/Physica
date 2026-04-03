@@ -48,7 +48,6 @@ namespace Physica {
         void assign_add(Vector auto& target) const noexcept;
 
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
-        [[nodiscard]] Tv calc_value(size_t index) const;
         template<int Size>
         [[nodiscard]] auto packet(size_t index) const noexcept;
         template<int Size>
@@ -102,11 +101,6 @@ namespace Physica {
     template<Matrix M, Vector V>
     auto GEMV<M, V>::calc(size_t index) const -> CoDiff<T> {
         return mat.row(index) * vec;
-    }
-
-    template<Matrix M, Vector V>
-    auto GEMV<M, V>::calc_value(size_t index) const -> Tv {
-        return mat.values().row(index) * vec.values();
     }
 
     template<Matrix M, Vector V>

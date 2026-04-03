@@ -43,7 +43,6 @@ namespace Physica {
         void assign_add_cublas(Vector auto&& v) const noexcept;
 
         [[nodiscard]] __device__ T calc(size_t index) const;
-        [[nodiscard]] __device__ Tv calc_value(size_t index) const;
 
         template<int Size>
         [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
@@ -51,6 +50,8 @@ namespace Physica {
         [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
 
         [[nodiscard]] __host__ __device__ T sum() const { return getLHS().sum() * getRHS(); }
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -126,26 +127,27 @@ namespace Physica {
     template<Vector V, Scalar U>
     __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::calc(size_t index) const -> T {
         if constexpr (isReverseDiff())
-            return calc_value(index);
+            return Base::calc_value(index);
         else
-            return Base::getLHS().calc(index) * Base::getRHS();
-    }
-
-    template<Vector V, Scalar U>
-    __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::calc_value(size_t index) const -> Tv {
-        return Base::getLHS().calc_value(index) * Base::getRHS().value();
+            return getLHS().calc(index) * getRHS();
     }
 
     template<Vector V, Scalar U>
     template<int Size>
     __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::packet(size_t index) const noexcept -> SIMD<T, Size> {
-        return Base::getLHS().template packet<Size>(index) * SIMD<T, Size>(Base::getRHS());
+        return getLHS().template packet<Size>(index) * SIMD<T, Size>(getRHS());
     }
 
     template<Vector V, Scalar U>
     template<int Size>
     __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
-           return Base::getLHS().template packet<Size>(index, count) * SIMD<T, Size>(Base::getRHS());
+           return getLHS().template packet<Size>(index, count) * SIMD<T, Size>(getRHS());
+    }
+
+    template<Vector V, Scalar U>
+    auto device_obj<VectorExpr<ExprID::Mul, V, U>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().value();
     }
 
     template<Vector V, Scalar U>

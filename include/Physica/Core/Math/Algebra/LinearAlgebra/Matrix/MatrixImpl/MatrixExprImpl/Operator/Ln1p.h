@@ -34,7 +34,6 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         void reverse(const auto& grad) const noexcept;
         using Base::reverse;
@@ -50,11 +49,6 @@ namespace Physica {
     template<Matrix M>
     auto MatrixExpr<ExprID::Ln1p, M>::calc(size_t row, size_t col) const -> T {
         return ln1p(getExpr().calc(row, col));
-    }
-
-    template<Matrix M>
-    auto MatrixExpr<ExprID::Ln1p, M>::calc_value(size_t row, size_t col) const -> Tv {
-        return ln1p(getExpr().calc_value(row, col));
     }
 
     template<Matrix M>

@@ -26,7 +26,6 @@ namespace Physica {
         using This = IdentityMatrix<T, Order>;
         using Base = RValueMatrix<This>;
         using IndexType = std::conditional<Order == Dynamic, size_t, PlainStruct<void>>::type;
-        static_assert(!T::isComplex() && !T::isDiffable(), "[Error]: Invalid scalar for unit matrix");
     protected:
         using typename Base::Tv;
     private:
@@ -46,7 +45,6 @@ namespace Physica {
         void assign(Matrix auto&& target) const;
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] T calc_value(size_t row, size_t col) const;
 
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
         [[nodiscard]] const This& conjugate() const noexcept { return *this; }
@@ -96,11 +94,6 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    T IdentityMatrix<T, Order>::calc_value(size_t row, size_t col) const {
-        return calc(row, col);
-    }
-
-    template<Scalar T, size_t Order>
     void IdentityMatrix<T, Order>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(order, obj.order);
@@ -122,6 +115,7 @@ namespace Physica {
 namespace Physica {
     template<Scalar T, size_t Order>
     class Traits<IdentityMatrix<T, Order>> {
+        static_assert(!T::isComplex() && !T::isDiffable(), "[Error]: Invalid scalar for identity matrix");
     public:
         using ScalarType = T;
         constexpr static int Major = MatrixMajor::BothMajor;

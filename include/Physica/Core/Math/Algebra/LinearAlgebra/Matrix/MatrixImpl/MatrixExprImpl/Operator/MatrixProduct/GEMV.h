@@ -48,7 +48,8 @@ namespace Physica {
         void assign_add(Vector auto& target) const;
 
         [[nodiscard]] T calc(size_t index) const;
-        [[nodiscard]] Tv calc_value(size_t index) const;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return expr.getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
@@ -134,8 +135,9 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
-    auto GEMV<M, V>::calc_value(size_t index) const -> Tv {
-        return expr.row(index).values() * vec.values();
+    auto GEMV<M, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
     template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)

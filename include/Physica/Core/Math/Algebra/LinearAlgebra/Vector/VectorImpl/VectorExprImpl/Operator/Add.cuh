@@ -35,7 +35,6 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t index) const;
-        [[nodiscard]] __device__ Tv calc_value(size_t index) const;
 
         template<int Size>
         [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
@@ -44,6 +43,8 @@ namespace Physica {
 
         using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -51,7 +52,9 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     [[nodiscard]] __device__ auto device_obj<VectorExpr<ExprID::Add, V, U>>::calc(size_t index) const -> T {
-        if constexpr (host_obj::lowerToFMA()) {
+        if constexpr (isReverseDiff())
+            return Base::getDerived().calc_value(index);
+        else if constexpr (host_obj::lowerToFMA()) {
             T a = getLHS().getLHS().calc(index);
             T b;
             if constexpr (Scalar<decltype(getLHS().getRHS())>)
@@ -61,15 +64,8 @@ namespace Physica {
             T c = getRHS();
             return fma(a, b, c);
         }
-        else if constexpr (isReverseDiff())
-            return calc_value(index);
         else
             return Base::getLHS().calc(index) + Base::getRHS();
-    }
-
-    template<Vector V, Scalar U>
-    [[nodiscard]] __device__ auto device_obj<VectorExpr<ExprID::Add, V, U>>::calc_value(size_t index) const -> Tv {
-        return Base::getLHS().calc_value(index) + Base::getRHS().value();
     }
 
     template<Vector V, Scalar U>
@@ -94,6 +90,12 @@ namespace Physica {
             Base::getRHS().reverse(g.sum());
     }
 
+    template<Vector V, Scalar U>
+    auto device_obj<VectorExpr<ExprID::Add, V, U>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() + std::forward<Self>(self).getRHS().value();
+    }
+
     template<Vector V1, Vector V2>
     class device_obj<VectorExpr<ExprID::Add, V1, V2>>
             : public device_obj<BinaryVectorExpr<ExprID::Add, V1, V2>> {
@@ -108,7 +110,6 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t index) const;
-        [[nodiscard]] __device__ Tv calc_value(size_t index) const;
 
         template<int Size>
         [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
@@ -125,7 +126,9 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     __device__ auto device_obj<VectorExpr<ExprID::Add, V1, V2>>::calc(size_t index) const -> T {
-        if constexpr (host_obj::lowerToFMA()) {
+        if constexpr (isReverseDiff())
+            return Base::calc_value(index);
+        else if constexpr (host_obj::lowerToFMA()) {
             T a = getLHS().getLHS().calc(index);
             T b;
             if constexpr (Scalar<decltype(getLHS().getRHS())>)
@@ -135,15 +138,8 @@ namespace Physica {
             T c = getRHS().calc(index);
             return fma(a, b, c);
         }
-        else if constexpr (isReverseDiff())
-            return calc_value(index);
         else
             return Base::getLHS().calc(index) + Base::getRHS().calc(index);
-    }
-
-    template<Vector V1, Vector V2>
-    __device__ auto device_obj<VectorExpr<ExprID::Add, V1, V2>>::calc_value(size_t index) const -> Tv {
-        return Base::getLHS().calc_value(index) + Base::getRHS().calc_value(index);
     }
 
     template<Vector V1, Vector V2>

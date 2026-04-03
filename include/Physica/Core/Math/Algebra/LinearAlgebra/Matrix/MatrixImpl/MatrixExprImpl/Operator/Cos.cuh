@@ -34,23 +34,19 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const;
 
         using Base::reverse;
         void reverse(const Matrix auto& grad) const noexcept;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
     };
 
     template<Matrix M>
     __device__ auto device_obj<MatrixExpr<ExprID::Cos, M>>::calc(size_t row, size_t col) const -> T {
         if constexpr (isReverseDiff())
-            return calc_value(row, col);
+            return Base::calc_value(row, col);
         else
             return cos(Base::getExpr().calc(row, col));
-    }
-
-    template<Matrix M>
-    __device__ auto device_obj<MatrixExpr<ExprID::Cos, M>>::calc_value(size_t row, size_t col) const -> Tv {
-        return cos(Base::getExpr().calc_value(row, col));
     }
 
     template<Matrix M>
@@ -58,6 +54,12 @@ namespace Physica {
         static_assert(isReverseDiff());
         const auto& expr = Base::getExpr();
         expr.reverse(-hadamard(grad, sin_elem(expr.values())));
+    }
+
+    template<Matrix M>
+    auto device_obj<MatrixExpr<ExprID::Cos, M>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return cos_elem(std::forward<Self>(self).getExpr().values());
     }
 
     template<Matrix M>

@@ -47,7 +47,8 @@ namespace Physica {
         void assign(Vector auto& target) const;
 
         [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const;
-        [[nodiscard]] Tv calc_value(size_t index) const;
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return m.getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
@@ -86,8 +87,9 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V> requires(instanceof_tx<DenseSymmMatrix, M>)
-    auto GEMV<M, V>::calc_value(size_t index) const -> Tv {
-        return m.values().row(index) * v.values();
+    auto GEMV<M, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
     template<Matrix M, Vector V> requires(instanceof_tx<DenseSymmMatrix, M>)

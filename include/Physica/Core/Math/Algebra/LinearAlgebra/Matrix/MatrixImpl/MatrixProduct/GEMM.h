@@ -50,7 +50,6 @@ namespace Physica {
         [[nodiscard]] auto compute() const;
 
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         void reverse(const Matrix auto& grad) const noexcept;
 
@@ -109,11 +108,6 @@ namespace Physica {
         }
         else // Intel LLVM does not optimize the following code well
             return mat1.row(row) * mat2.col(col);
-    }
-
-    template<Matrix M1, Matrix M2>
-    auto GEMM<M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
-        return (mat1.values() * mat2.values()).calc(row, col);
     }
 
     template<Matrix M1, Matrix M2>

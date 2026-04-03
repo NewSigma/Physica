@@ -45,7 +45,6 @@ namespace Physica {
         void assign(Vector auto&& v) const;
 
         [[nodiscard]] CoDiff<T> calc(size_t s) const;
-        [[nodiscard]] Tv calc_value(size_t index) const;
 
         void reverse(const auto& grad) const noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
@@ -94,11 +93,6 @@ namespace Physica {
     template<Vector V>
     auto VectorExpr<ExprID::Minus, V>::calc(size_t s) const -> CoDiff<T> {
         return -Base::getExpr().calc(s);
-    }
-
-    template<Vector V>
-    auto VectorExpr<ExprID::Minus, V>::calc_value(size_t index) const -> Tv {
-        return -Base::getExpr().calc_value(index);
     }
 
     template<Vector V>

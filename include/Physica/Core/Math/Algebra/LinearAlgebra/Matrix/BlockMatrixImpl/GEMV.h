@@ -45,7 +45,8 @@ namespace Physica {
         void assign(Vector auto& target_) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
-        [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
@@ -69,6 +70,12 @@ namespace Physica {
             target1 = m.getBlocks()[i] * v1;
             from = to;
         }
+    }
+
+    template<Matrix M, Vector V> requires(instanceof<BlockMatrix, M>)
+    auto GEMV<M, V>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
     template<Matrix M, Vector V> requires(instanceof<BlockMatrix, M>)

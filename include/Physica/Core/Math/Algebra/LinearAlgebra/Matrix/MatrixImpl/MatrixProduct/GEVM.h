@@ -51,7 +51,6 @@ namespace Physica {
         void assign_add(Matrix auto& target) const;
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
@@ -102,11 +101,6 @@ namespace Physica {
     template<Vector V, Matrix M>
     auto GEVM<V, M>::calc(size_t row, size_t col) const -> T {
         return vec.calc(row) * mat.calc(0, col);
-    }
-
-    template<Vector V, Matrix M>
-    auto GEVM<V, M>::calc_value(size_t row, size_t col) const -> Tv {
-        return vec.calc_value(row) * mat.calc_value(0, col);
     }
 
     template<Vector V, Matrix M>

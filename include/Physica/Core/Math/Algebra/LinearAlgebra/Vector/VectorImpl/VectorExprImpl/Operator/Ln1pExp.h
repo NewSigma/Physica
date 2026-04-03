@@ -38,7 +38,6 @@ namespace Physica {
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] T calc(size_t index) const { return ln1pexp(Base::getExpr().calc(index)); }
-        [[nodiscard]] Tv calc_value(size_t index) const { return ln1pexp(Base::getExpr().calc_value(index)); }
         [[nodiscard]] auto values(this auto&&) noexcept;
 };
 
