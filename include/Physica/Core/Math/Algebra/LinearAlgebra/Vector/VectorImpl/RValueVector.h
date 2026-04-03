@@ -56,7 +56,7 @@ namespace Physica {
             using ResultType = BinaryScalarOpRtnTy<T1, T2>::Type;
             using PacketType = BestPacket<ResultType, SizeAtCompile>::Type;
 
-            constexpr static bool value = []() consteval noexcept {
+            constexpr static bool value = []() consteval static noexcept {
                 constexpr bool isSameScalar = std::same_as<typename T1::ValueType, typename T2::ValueType>;
                 constexpr bool isScalar = PacketType::size() == 1;
                 constexpr bool isCUDA = DeviceObj<V1> || DeviceObj<V2>;

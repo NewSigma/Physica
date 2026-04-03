@@ -45,7 +45,7 @@ namespace Physica {
             constexpr float P5 = 1.0 / 5040;
             // The lower limit of x is slightly more restrictive than the upper limit.
             // We are specifying the lower limit, except for Base = 1 because it is only for positive x in hyperbolic functions
-            constexpr float32 max_x = []() consteval -> float32 {
+            constexpr float32 max_x = []() consteval static noexcept -> float32 {
                 switch (Base) {
                 case 0:
                     return 87.33655F;
@@ -114,7 +114,7 @@ namespace Physica {
             constexpr double P11 = 1.0 / 39916800;
             constexpr double P12 = 1.0 / 479001600;
             constexpr double P13 = 1.0 / 6227020800;
-            constexpr float64 max_x = []() consteval -> float64 {
+            constexpr float64 max_x = []() consteval static noexcept -> float64 {
                 switch (Base) {
                 case 0:
                     return 708.3964185322641;

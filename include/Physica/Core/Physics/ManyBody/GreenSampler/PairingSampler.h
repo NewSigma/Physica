@@ -136,7 +136,7 @@ namespace Physica {
 
     template<Scalar T>
     T PairingSampler<T>::calcPairingCorr(const GreenPair& greens, int siteM, int siteN, int siteI, int siteJ) {
-        auto calcHopping = [](const MatrixND<T>& green, int siteA, int siteB) noexcept {
+        auto calcHopping = [](const MatrixND<T>& green, int siteA, int siteB) static noexcept {
             return Trv(siteA == siteB) - green[siteB, siteA];
         };
 

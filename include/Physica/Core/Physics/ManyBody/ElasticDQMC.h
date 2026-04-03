@@ -162,11 +162,11 @@ namespace Physica {
         if (shift.isZero())
             return 0;
 
-        auto calcF = [=](T omega) {
+        auto calcF = [=](T omega) noexcept {
             return T(-2) / beta * (shift / (square(shift) + square(omega)));
         };
 
-        auto calcFreq = [](int m) {
+        auto calcFreq = [](int m) static noexcept {
             return T(2 * m + 1) * MathConst<T>::pi;
         };
         T omega1 = calcFreq(numFreq);

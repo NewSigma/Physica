@@ -107,7 +107,7 @@ namespace Physica {
         assert(num_loop > 0);
         Array<Task<Thread>> tasks(num_loop);
         for (size_t i = 0; i < num_loop; ++i) {
-            tasks[i] = [](auto fn, size_t i) noexcept -> Task<Thread> {
+            tasks[i] = [](auto fn, size_t i) static noexcept -> Task<Thread> {
                 fn(i);
                 co_return;
             }(fn, i);
@@ -134,7 +134,7 @@ namespace Physica {
         Array<Task<Thread>> tasks(part);
         for (int i = 0; i < part; ++i) {
             using Range = Task<Thread>::Range;
-            tasks[i] = [](auto fn, Range range) noexcept -> Task<Thread> {
+            tasks[i] = [](auto fn, Range range) static noexcept -> Task<Thread> {
                 for (size_t loop = range.first; loop < range.second; ++loop)
                     fn(loop);
                 co_return;

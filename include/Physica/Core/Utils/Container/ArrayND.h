@@ -27,7 +27,7 @@ namespace Physica {
         constexpr static bool StaticShape = sizeof...(Dims) != 1;
         static_assert(sizeof...(Dims) > 0, "[Error]: Dims is not specified");
     public:
-        constexpr static int NDim = [](int x, auto...) consteval -> int { return StaticShape ? sizeof...(Dims) : x; }(Dims...);
+        constexpr static int NDim = [](int x, auto...) consteval static noexcept -> int { return StaticShape ? sizeof...(Dims) : x; }(Dims...);
         constexpr static size_t SizeAtCompile = StaticShape ? (Dims * ...) : Dynamic;
         static_assert(NDim > 2, "[Error]: Invalid Dim");
     private:

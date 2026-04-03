@@ -158,8 +158,8 @@ namespace Physica {
      */
     template<Scalar T, bool isSpinPolarized>
     Vector3D<T> BandGrid<T, isSpinPolarized>::gradEnergy(size_t kPointId) const {
-        auto dimAdd = [](size_t dim, size_t dim_all) { return dim == dim_all - 1 ? 0 : dim + 1; };
-        auto dimSub = [](size_t dim, size_t dim_all) { return dim == 0 ? dim_all - 1 : dim - 1; };
+        auto dimAdd = [](size_t dim, size_t dim_all) static noexcept { return dim == dim_all - 1 ? 0 : dim + 1; };
+        auto dimSub = [](size_t dim, size_t dim_all) static noexcept { return dim == 0 ? dim_all - 1 : dim - 1; };
         const auto[x, y, z] = kPointGrid.indexToDim(kPointId);
         const size_t dimX = kPointGrid.getDimX();
         const size_t dimY = kPointGrid.getDimY();

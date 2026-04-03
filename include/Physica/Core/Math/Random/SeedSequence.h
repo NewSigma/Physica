@@ -196,7 +196,7 @@ namespace Physica {
             value ^= value >> XShift;
             return value;
         };
-        auto mix = [](I x, I y) noexcept {
+        auto mix = [](I x, I y) static noexcept {
             I result = MixMultL * x - MixMultR * y;
             result ^= result >> XShift;
             return result;
