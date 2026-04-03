@@ -168,3 +168,5 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }
+
+#include "KroneckerGEMV.h"

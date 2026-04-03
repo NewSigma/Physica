@@ -33,17 +33,40 @@ constexpr int NumSiteY = 2;
 constexpr int NumFreq = 2;
 constexpr int NumSplit = 1;
 
-int main() {
-    const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
-    const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, ChemMu, NumSplit);
-    int maxBoson = std::uniform_int_distribution<>(1, NumFreq)(RandomSource::getInstance());
-    ActionMatrix<Tc> action(params, NumFreq, maxBoson);
-    action.randAuxField<Random<>>();
+namespace {
+    void assign_calc_match() {
+        const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
+        const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, ChemMu, NumSplit);
+        int maxBoson = std::uniform_int_distribution<>(1, NumFreq)(RandomSource::getInstance());
+        ActionMatrix<Tc> action(params, NumFreq, maxBoson);
+        action.randAuxField<Random<>>();
 
-    const MatrixND<Tc> result = action;
-    size_t order = action.getOrder();
-    for (size_t r = 0; r < order; ++r)
-        for (size_t c = 0; c < order; ++c)
-            expect(action.calc(r, c) == result[r, c]);
+        const MatrixND<Tc> result = action;
+        size_t order = action.getOrder();
+        for (size_t r = 0; r < order; ++r)
+            for (size_t c = 0; c < order; ++c)
+                expect(action.calc(r, c) == result[r, c]);
+    }
+
+    void assign_gemv_match() {
+        const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
+        const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, ChemMu, NumSplit);
+        int maxBoson = std::uniform_int_distribution<>(1, NumFreq)(RandomSource::getInstance());
+        ActionMatrix<Tc> action(params, NumFreq, maxBoson);
+        action.randAuxField<Random<>>();
+
+        size_t order = action.getOrder();
+        const MatrixND<Tc> answer = action;
+        auto result = VectorND<Tc>(order);
+        for (size_t i = 0; i < order; ++i) {
+            result = action * UnitVector<T>(i, order);
+            expect(vectorNear(answer.col(i), result, 2UL));
+        }
+    }
+}
+
+int main() {
+    assign_calc_match();
+    assign_gemv_match();
     return 0;
 }

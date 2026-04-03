@@ -28,8 +28,8 @@ namespace Physica {
     class LValueReshapedVector : public LValueMatrix<LValueReshapedVector<V, MatrixMajor, Row, Col>> {
         using This = LValueReshapedVector<V, MatrixMajor, Row, Col>;
         using Base = LValueMatrix<This>;
-    public:
-        using typename Base::ScalarType;
+    protected:
+        using typename Base::T;
     private:
         LazyDestroy<V> v;
         size_t r;
@@ -45,11 +45,12 @@ namespace Physica {
         using Base::operator=;
         /* Operations */
         void resize(size_t row, size_t col);
+
+        [[nodiscard]] T sum() const { return v.sum(); }
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
-        [[nodiscard]] ScalarType sum() const { return v.sum(); }
     };
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>

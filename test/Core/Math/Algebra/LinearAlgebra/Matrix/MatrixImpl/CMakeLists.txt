@@ -1,4 +1,5 @@
 physica_add_test(GEMM MatrixProduct/GEMM.cpp)
+physica_add_test(Kronecker MatrixProduct/Kronecker.cpp)
 if(${PHYSICA_CUDA})
     physica_add_test(Kronecker_cuda MatrixProduct/Kronecker.cu)
 endif()

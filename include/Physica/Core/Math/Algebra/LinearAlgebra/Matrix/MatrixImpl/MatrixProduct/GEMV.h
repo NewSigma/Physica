@@ -43,9 +43,9 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        void assign(Vector auto& target) const noexcept;
+        void assign(Vector auto&& target) const noexcept;
         template<ExecutePolicy P = Sequential>
-        void assign_add(Vector auto& target) const noexcept;
+        void assign_add(Vector auto&& target) const noexcept;
 
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         template<int Size>
@@ -69,7 +69,7 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     template<ExecutePolicy P>
-    void GEMV<M, V>::assign(Vector auto& target) const noexcept {
+    void GEMV<M, V>::assign(Vector auto&& target) const noexcept {
         if constexpr (MatrixMajor::isColMatrix<M>()) {
             size_t length = vec.getLength();
             (mat.col(0) * vec.calc(0)).template assign<P>(target);
@@ -85,7 +85,7 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     template<ExecutePolicy P>
-    void GEMV<M, V>::assign_add(Vector auto& target) const noexcept {
+    void GEMV<M, V>::assign_add(Vector auto&& target) const noexcept {
         if constexpr (MatrixMajor::isColMatrix<M>()) {
             size_t length = vec.getLength();
             for (size_t i = 0; i < length; ++i)

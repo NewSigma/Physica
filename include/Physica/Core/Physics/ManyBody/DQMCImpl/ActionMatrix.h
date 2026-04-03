@@ -49,8 +49,11 @@ namespace Physica {
         void assign(Matrix auto&& target) const;
         void assign_kinetic(Matrix auto&& target) const;
         void assign_potential(Matrix auto&& target) const;
+        void assign_potential(Matrix auto&& target, int site) const;
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
+
+        [[nodiscard]] auto&& transpose(this auto&&) noexcept;
 
         void flip();
         template<RNG R>
@@ -68,6 +71,8 @@ namespace Physica {
         [[nodiscard]] Tr getRepelU() const noexcept { return params.getRepelU(); }
         [[nodiscard]] Tr getBeta() const noexcept { return params.getBeta(); }
         [[nodiscard]] const auto& getParams() const noexcept { return params; }
+        /* Friends */
+        template<Matrix, Vector> friend class GEMV;
     };
 
     template<Scalar T>
@@ -98,27 +103,33 @@ namespace Physica {
     template<Scalar T>
     void ActionMatrix<T>::assign_kinetic(Matrix auto&& target) const {
         kronecker(IdentityMatrix<Trv>(getNumSite()) * T(0, 1), matsubara).assign(target);
-        kronecker(params.getHoppingMatrix() * params.getBeta(), IdentityMatrix<Trv>(matsubara.getOrder())).assign_add(target);
+        kronecker(params.getHoppingMatrix() * getBeta(), IdentityMatrix<Trv>(matsubara.getOrder())).assign_add(target);
     }
 
     template<Scalar T>
     void ActionMatrix<T>::assign_potential(Matrix auto&& target) const {
-        const Tr shift = params.getBeta() * fma(params.getRepelU(), Tr(-0.5), params.getChemMu());
         const int numFreq2 = getNumFreq() * 2;
         const int numSite = getNumSite();
         for (int site = 0; site < numSite; ++site) {
             int offset = site * numFreq2;
-            auto block = target.block(offset, numFreq2, offset, numFreq2);
-            for (int r = 0; r < numFreq2; ++r) {
-                for (int c = 0; c < r; ++c) {
-                    int delta = r - c;
-                    if (delta < getMaxBoson()) {
-                        block[r, c] = auxField[delta, site];
-                        block[c, r] = auxField[delta, site].conjugate();
-                    }
+            assign_potential(target.block(offset, numFreq2, offset, numFreq2), site);
+        }
+    }
+
+    template<Scalar T>
+    void ActionMatrix<T>::assign_potential(Matrix auto&& target, int site) const {
+        const Tr shift = params.getBeta() * fma(params.getRepelU(), Tr(-0.5), params.getChemMu());
+        const int numFreq2 = getNumFreq() * 2;
+        assert(target.isSquare() && target.getRow() == numFreq2);
+        for (int r = 0; r < numFreq2; ++r) {
+            for (int c = 0; c < r; ++c) {
+                int delta = r - c;
+                if (delta < getMaxBoson()) {
+                    target[r, c] = auxField[delta, site];
+                    target[c, r] = auxField[delta, site].conjugate();
                 }
-                block[r, r].real() = auxField[0, site].real() - shift;
             }
+            target[r, r].real() = auxField[0, site].real() - shift;
         }
     }
 
@@ -153,6 +164,11 @@ namespace Physica {
             }
         }
         return 0;
+    }
+
+    template<Scalar T>
+    auto&& ActionMatrix<T>::transpose(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self);
     }
 
     template<Scalar T>
@@ -202,3 +218,5 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = Dynamic;
     };
 }
+
+#include "ActionMatrixGEMV.h"

@@ -57,6 +57,8 @@ namespace Physica {
 
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
 
+        [[nodiscard]] __host__ __device__ auto&& transpose(this auto&&) noexcept;
+
         void flip();
         template<RNG R>
         void randAuxField();
@@ -169,6 +171,11 @@ namespace Physica {
             }
         }
         return 0;
+    }
+
+    template<Scalar T>
+    __host__ __device__ auto&& device_obj<ActionMatrix<T>>::transpose(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self);
     }
 
     template<Scalar T>
