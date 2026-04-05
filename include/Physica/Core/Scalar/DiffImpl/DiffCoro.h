@@ -56,7 +56,7 @@ namespace Physica {
     };
 
     template<class T>
-    class DiffCoro<T>::Promise {
+    class DiffCoro<T>::Promise : public suspend_always {
         using This = Promise;
 
         T* pObj;
@@ -76,9 +76,11 @@ namespace Physica {
         auto initial_suspend() noexcept { return suspend_never{}; }
         void await_transform(auto&&) noexcept = delete("[Error]: Differential coroutine must suspend by yielding");
         auto final_suspend() noexcept { return suspend_never{}; }
-        auto yield_value(auto&& arg) noexcept;
+        auto& yield_value(auto&& arg) noexcept;
         void return_void() noexcept {}
         [[noreturn]] void unhandled_exception() { throw; }
+
+        [[nodiscard]] T& await_resume() const noexcept { return *pObj; }
     };
 
     template<class Predicate, class Operation, class Functor>

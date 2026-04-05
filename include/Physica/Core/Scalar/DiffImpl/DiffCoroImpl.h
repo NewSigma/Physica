@@ -106,19 +106,12 @@ namespace Physica {
     };
 
     template<class T>
-    auto DiffCoro<T>::Promise::yield_value(auto&& arg) noexcept {
+    auto& DiffCoro<T>::Promise::yield_value(auto&& arg) noexcept {
         if constexpr (Scalar<decltype(arg)>)
             *pObj = T(arg.value());
         else
             *pObj = T(std::forward<decltype(arg)>(arg).values());
-
-        struct awaiter : public suspend_always {
-            Promise& promise;
-
-            explicit awaiter(Promise& promise) : promise(promise) {}
-            [[nodiscard]] T& await_resume() const noexcept { return *(promise.pObj); }
-        };
-        return awaiter(*this);
+        return *this;
     }
 
     template<class Predicate, class Operation, class Functor>
