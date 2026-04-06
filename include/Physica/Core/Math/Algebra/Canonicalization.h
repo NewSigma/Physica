@@ -19,35 +19,64 @@
 #pragma once
 
 #include <type_traits>
+#include "Physica/Core/Scalar/ExprID.h"
 #include "Physica/Core/Scalar/Scalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
 
 namespace Physica {
-    template<class T>
-    consteval bool canonicalizable() noexcept {
-        return Scalar<T> || Vector<T> || Matrix<T> || Tensor<T>;
-    }
+    template<ExprID, class LHS, class RHS> class VectorExpr;
+    template<ExprID, class LHS, class RHS> class MatrixExpr;
+    template<ExprID, class LHS, class RHS> class TensorExpr;
 
-    consteval bool canonicalizable(const auto& expr) noexcept {
-        return canonicalizable<decltype(expr)>();
+    namespace Internal {
+        template<class T>
+        consteval int concept_score() noexcept {
+            // Increasing order; detailed number is not important
+            if (Scalar<T>)
+                return 1;
+            if (Vector<T>)
+                return 2;
+            if (Matrix<T>)
+                return 3;
+            if (Tensor<T>)
+                return 4;
+            return 0;
+        }
+
+        template<class T>
+        consteval int64_t canonical_score() noexcept {
+            int64_t result = 0;
+            result -= int64_t(T::isSparse());
+            result += int64_t(T::isComplex());
+            result += int64_t(T::isDiffable()) * 2;
+            result += int64_t(instanceof_xt<VectorExpr, T>) * 10;
+            result += int64_t(instanceof_xt<MatrixExpr, T>) * 10;
+            result += int64_t(instanceof_xt<TensorExpr, T>) * 10;
+            return result;
+        }
+
+        template<class T>
+        consteval bool canonicalizable() noexcept {
+            return concept_score<T>() > 0;
+        }
+
+        consteval bool canonicalizable(const auto& expr) noexcept {
+            return canonicalizable<decltype(expr)>();
+        }
     }
 
     template<class T1, class T2>
     consteval bool canonicalized() {
-        using E1 = std::remove_cvref_t<T1>;
-        using E2 = std::remove_cvref_t<T2>;
-        if constexpr (E1::isSparse() && !E2::isSparse())
-            return false;
-        if constexpr (!E1::isDiffable() && E2::isDiffable())
-            return false;
-        if constexpr (!E1::isComplex() && E2::isComplex())
-            return false;
-        return true;
+        using namespace Internal;
+        if (concept_score<T1>() == concept_score<T2>())
+            return canonical_score<std::remove_cvref_t<T1>>() >= canonical_score<std::remove_cvref_t<T2>>(); // TODO: Maybe give a warning if scores equal
+        return concept_score<T1>() > concept_score<T2>();
     }
 
     consteval bool canonicalized(const auto& expr1, const auto& expr2) noexcept {
+        using namespace Internal;
         static_assert(canonicalizable(expr1) && canonicalizable(expr2));
         return canonicalized<decltype(expr1), decltype(expr2)>();
     }

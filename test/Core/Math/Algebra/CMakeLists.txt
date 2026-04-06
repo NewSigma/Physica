@@ -1,3 +1,4 @@
 add_subdirectory(LinearAlgebra)
 physica_add_test(ElementaryEquation EquationSolver/ElementaryEquation.cpp)
+physica_add_test(Canonicalization Canonicalization.cpp)
 physica_add_test(Polynomial Polynomial.cpp)

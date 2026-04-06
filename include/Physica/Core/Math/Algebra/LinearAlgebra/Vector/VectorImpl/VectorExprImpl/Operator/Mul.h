@@ -463,10 +463,10 @@ namespace Physica {
             else // there is nothing we can do here
                 return RtnTy(std::forward<V1>(v1), std::forward<V2>(v2));
         }
-        else if constexpr (instanceof_xt<VectorExpr, V2>)
-            return hadamard(std::forward<V2>(v2), std::forward<V1>(v1));
-        else
+        else {
+            static_assert(!instanceof_xt<VectorExpr, V2>, "[Error]: Canonicalization failed");
             return RtnTy(std::forward<V1>(v1), std::forward<V2>(v2));
+        }
     }
 }
 
