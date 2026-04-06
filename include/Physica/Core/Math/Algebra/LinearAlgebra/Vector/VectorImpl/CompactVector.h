@@ -92,6 +92,8 @@ namespace Physica {
         [[nodiscard]] auto data() noexcept;
         [[nodiscard]] auto data() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isFastPacket() noexcept;
     protected:
         CompactVector() = default;
         CompactVector(const This&) = default;

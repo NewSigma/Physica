@@ -43,6 +43,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
+        [[nodiscard]] __host__ __device__ constexpr static bool isFastPacket() noexcept;
     };
 
     template<ExprID ID, Vector V>
@@ -51,6 +52,11 @@ namespace Physica {
     template<ExprID ID, Vector V>
     __host__ __device__ auto&& device_obj<UnitaryVectorExpr<ID, V>>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.expr.getDerived());
+    }
+
+    template<ExprID ID, Vector V>
+    __host__ __device__ constexpr bool device_obj<UnitaryVectorExpr<ID, V>>::isFastPacket() noexcept {
+        return host_obj::isFastPacket();
     }
 
     template<ExprID ID, class LHS, class RHS>
@@ -84,6 +90,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto&& getRHS(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
+        [[nodiscard]] __host__ __device__ constexpr static bool isFastPacket() noexcept;
     };
 
     template<ExprID ID, class LHS, class RHS>
@@ -100,6 +107,11 @@ namespace Physica {
     template<ExprID ID, class LHS, class RHS>
     __host__ __device__ auto&& device_obj<BinaryVectorExpr<ID, LHS, RHS>>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), RHS>(self.rhs.getDerived());
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    __host__ __device__ constexpr bool device_obj<BinaryVectorExpr<ID, LHS, RHS>>::isFastPacket() noexcept {
+        return host_obj::isFastPacket();
     }
 }
 

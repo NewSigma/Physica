@@ -283,4 +283,9 @@ namespace Physica {
     auto CompactVector<Derived>::data_ptr(this auto&& self, size_t index) noexcept {
         return self.data() + index;
     }
+
+    template<class Derived>
+    __host__ __device__ consteval bool CompactVector<Derived>::isFastPacket() noexcept {
+        return true;
+    }
 }

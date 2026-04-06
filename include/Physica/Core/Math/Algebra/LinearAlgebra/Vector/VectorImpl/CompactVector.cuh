@@ -75,6 +75,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto data() noexcept;
         [[nodiscard]] __host__ __device__ auto data() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t index) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isFastPacket() noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

@@ -129,7 +129,7 @@ concept Matrix = ...;
 
 我们提供四个逐级递进的concept: `Scalar`, `Vector`, `Matrix`, `Tensor`
 
-## 模板参数
+## Notes
 
 **FastAssign**:
 
@@ -149,18 +149,8 @@ assign具有整体性，因此FastAssign具有传播性。
 
 **FastPacket**:
 
-FastPacket = true表示可以快速构造SIMD对象. 对于右值表达式, 需要逐个计算元素并保存在栈上, 此时FastPacket = false
-
-## 转换函数
-
-一些常用的逐元素操作被实现为所谓的转换函数，它是返回一个右值对象的成员函数。其尺寸与原对象相同，但在每个元素上进行相同的操作，以右值向量为例:
-
-reals: 返回实部组成的向量  
-imags: 虚部  
-squaredNorms: 模方  
-norms: 模  
-values: 值  
-grads: 梯度, 对反向传播的纯右值对象调用grads()非法，因为此时计算图尚未生成。我们在编译期拒绝该用法  
+`false`: SIMD对象的构造需要在栈上创建临时数组
+`true`: 无额外开销
 
 ## Reference
 

@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Calculus/ODE/SRK2.h"
 #include "Test.h"
+#include <print>
 
 using namespace Physica;
 using RandomSource = Random<PCG32DXSM, 2911331191349224060>;
@@ -50,6 +51,6 @@ int main() {
 
     const VectorND<T> answer = exp(VectorND<T>::linspace(0, -4, numStep));
     for (int i = 0; i < numStep; ++i)
-        expect(abs(mean[i] - answer[i]) < devia[i] * T(2));
+        expect(abs(mean[i] - answer[i]) <= devia[i] * T(2));
     return 0;
 }

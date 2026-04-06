@@ -152,7 +152,6 @@ namespace Physica {
         using ScalarType = V1::ScalarType::ValueType;
         constexpr static size_t SizeAtCompile = V1::SizeAtCompile;
         constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = false;
     };
 
     template<class V, int GradOrder>
@@ -163,7 +162,6 @@ namespace Physica {
         using ScalarType = Internal::GradTypeHelper<typename V1::ScalarType, GradOrder>::Type;
         constexpr static size_t SizeAtCompile = V1::SizeAtCompile;
         constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = false;
     };
 
     template<class V, int MaskOrder>
@@ -176,6 +174,5 @@ namespace Physica {
         using ScalarType = std::conditional<MaskOrder == 0, ValueType, Diff<ValueType, U::Mode, MaskOrder>>::type;
         constexpr static size_t SizeAtCompile = V1::SizeAtCompile;
         constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = false;
     };
 }

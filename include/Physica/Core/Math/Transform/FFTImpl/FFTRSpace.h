@@ -215,7 +215,6 @@ namespace Physica {
         using ScalarType = Traits<T>::ScalarType;
         constexpr static size_t SizeAtCompile = Dynamic;
         constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = true;
     };
 
     template<class T>

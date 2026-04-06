@@ -62,6 +62,8 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ constexpr static bool isFastPacket() noexcept;
     };
 
     template<Matrix M, Vector V>
@@ -106,9 +108,7 @@ namespace Physica {
     template<Matrix M, Vector V>
     template<int Size>
     auto GEMV<M, V>::packet(size_t index) const noexcept {
-        if constexpr (Diffable<T>)
-            return Base::template packet<Size>(index);
-        else if constexpr (MatrixMajor::isColMatrix<M>()) {
+        if constexpr (isFastPacket() && !Base::isDiffable()) {
             size_t length = vec.getLength();
             auto result = SIMD<T, Size>::zeros();
             for (size_t i = 0; i < length; ++i)
@@ -122,9 +122,7 @@ namespace Physica {
     template<Matrix M, Vector V>
     template<int Size>
     auto GEMV<M, V>::packet(size_t index, size_t count) const noexcept {
-        if constexpr (Diffable<T>)
-            return Base::template packet<Size>(index, count);
-        if constexpr (MatrixMajor::isColMatrix<M>()) {
+        if constexpr (isFastPacket() && !Base::isDiffable()) {
             size_t length = vec.getLength();
             auto result = SIMD<T, Size>::zeros();
             for (size_t i = 0; i < length; ++i)
@@ -191,6 +189,11 @@ namespace Physica {
     template<Matrix M, Vector V>
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
+    }
+
+    template<Matrix M, Vector V>
+    __host__ __device__ constexpr bool GEMV<M, V>::isFastPacket() noexcept {
+        return MatrixMajor::isColMatrix<M>();
     }
 }
 

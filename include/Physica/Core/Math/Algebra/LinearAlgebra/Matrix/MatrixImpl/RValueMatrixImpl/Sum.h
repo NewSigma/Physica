@@ -90,6 +90,5 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = ReduceCol ? M::RowAtCompile : M::ColAtCompile;
 
         constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = false;
     };
 }

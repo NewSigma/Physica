@@ -76,7 +76,6 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     auto InnerDot<V1, V2>::calc_base() const noexcept -> CoDiff<T> {
-        constexpr static bool isFastPacket = Traits<V1>::FastPacket && Traits<V2>::FastPacket;
         if constexpr (T::isReverseDiff()) {
             auto& result = co_yield v1.values() * v2.values();
             if constexpr (ReverseDiff<V1>)
@@ -84,7 +83,7 @@ namespace Physica {
             if constexpr (ReverseDiff<V2>)
                 v2.reverse(v1.values() * result.grad());
         }
-        else if constexpr (isFastPacket) {
+        else if constexpr (V1::isFastPacket() && V2::isFastPacket()) {
             if constexpr (Internal::EnableSIMD<V1, V2>::value)
                 co_return calc_base_simd();
             else if constexpr (T1::isComplex() && std::same_as<typename T1::RealType, T2>)

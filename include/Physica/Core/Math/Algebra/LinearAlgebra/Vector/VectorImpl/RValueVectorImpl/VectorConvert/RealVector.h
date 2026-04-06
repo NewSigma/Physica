@@ -54,6 +54,5 @@ namespace Physica {
         using ScalarType = V1::ScalarType::RealType;
         constexpr static size_t SizeAtCompile = V1::SizeAtCompile;
         constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = Traits<V>::FastPacket;
     };
 }

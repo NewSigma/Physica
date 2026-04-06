@@ -217,6 +217,5 @@ namespace Physica {
         using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
         constexpr static size_t SizeAtCompile = M1::RowAtCompile;
         constexpr static bool FastAssign = true;
-        constexpr static bool FastPacket = false;
     };
 }

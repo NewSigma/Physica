@@ -112,6 +112,5 @@ namespace Physica {
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename V1::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = M1::RowAtCompile;
         constexpr static bool FastAssign = MatrixMajor::isColMatrix<M>();
-        constexpr static bool FastPacket = false;
     };
 }

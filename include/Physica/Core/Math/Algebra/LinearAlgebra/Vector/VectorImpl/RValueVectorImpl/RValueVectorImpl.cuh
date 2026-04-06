@@ -454,6 +454,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueVector<Derived>>::isFastPacket() noexcept {
+        return host_obj::isFastPacket();
+    }
+
+    template<class Derived>
     __host__ __device__ consteval size_t device_obj<RValueVector<Derived>>::maxSizeAtCompile(const Vector auto& other) noexcept {
         return host_obj::maxSizeAtCompile(other);
     }

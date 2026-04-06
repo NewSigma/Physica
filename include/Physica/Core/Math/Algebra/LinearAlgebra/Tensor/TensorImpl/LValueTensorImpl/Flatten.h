@@ -61,6 +61,5 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = Dynamic;
 
         constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = false;
     };
 }

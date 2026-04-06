@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -42,7 +42,7 @@ namespace Physica {
     };
 
     template<Scalar T, size_t Dim>
-    void SRK2<T, Dim>::solve(std::invocable<T, VectorType> auto fn, std::invocable<T, VectorType> auto  random) {
+    void SRK2<T, Dim>::solve(std::invocable<T, VectorType> auto fn, std::invocable<T, VectorType> auto random) {
         const size_t col_1 = Base::solution.getCol() - 1;
         for (size_t i = 0; i < col_1; ++i) {
             T temp = Base::x[i];

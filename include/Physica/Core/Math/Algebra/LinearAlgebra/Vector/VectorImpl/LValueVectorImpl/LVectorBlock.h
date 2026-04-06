@@ -142,6 +142,5 @@ namespace Physica {
         using ScalarType = std::remove_cvref_t<V>::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
         constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = false;
     };
 }

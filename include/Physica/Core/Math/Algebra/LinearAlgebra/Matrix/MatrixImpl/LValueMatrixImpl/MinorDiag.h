@@ -72,6 +72,5 @@ namespace Physica {
         using ScalarType = Expr::ScalarType;
         constexpr static size_t SizeAtCompile = std::max(Expr::RowAtCompile, Expr::ColAtCompile);
         constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = false;
     };
 }

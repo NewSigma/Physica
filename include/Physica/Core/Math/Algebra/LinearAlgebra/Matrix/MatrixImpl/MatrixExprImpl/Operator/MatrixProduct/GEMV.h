@@ -184,6 +184,5 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = M1::RowAtCompile;
 
         constexpr static bool FastAssign = calcFastAssign();
-        constexpr static bool FastPacket = false;
     };
 }

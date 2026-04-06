@@ -36,4 +36,4 @@ namespace {
     }
 }
 
-BENCHMARK(assign_mismatch_mkl)->Name("DenseMatrix mismatch mkl")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(assign_mismatch_mkl)->Name("Compact mismatch mkl")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);

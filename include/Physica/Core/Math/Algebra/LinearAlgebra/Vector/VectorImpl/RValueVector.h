@@ -65,7 +65,8 @@ namespace Physica {
                 // 1. Other packet types do not work for CUDA
                 // 2. Old processors do not have FP16 support
                 constexpr bool UsePacketFP16 = isFloat16 == isCUDA;
-                return isSameScalar && !isScalar && UsePacketFP16;
+                constexpr bool FastPacket = U1::isFastPacket() && U2::isFastPacket();
+                return isSameScalar && !isScalar && UsePacketFP16 && FastPacket;
             }();
         };
 
@@ -207,6 +208,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isLValueVector() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isFastPacket() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t maxSizeAtCompile(const Vector auto& other) noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Scalar auto& source) noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Vector auto& source) noexcept;

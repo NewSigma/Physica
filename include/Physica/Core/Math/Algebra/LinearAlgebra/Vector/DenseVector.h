@@ -134,7 +134,6 @@ namespace Physica {
         using ScalarType = T;
         constexpr static size_t SizeAtCompile = Length;
         constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = true;
 
         using ElemType = T;
     };

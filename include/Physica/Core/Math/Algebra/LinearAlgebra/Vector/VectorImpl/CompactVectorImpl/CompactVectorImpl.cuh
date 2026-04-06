@@ -224,6 +224,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool device_obj<CompactVector<Derived>>::isFastPacket() noexcept {
+        return true;
+    }
+
+    template<class Derived>
     template<Vector V>
     void CompactVector<Derived>::toDevice(device_obj<CompactVector<V>>& obj) const {
         toDeviceAsync(obj);
