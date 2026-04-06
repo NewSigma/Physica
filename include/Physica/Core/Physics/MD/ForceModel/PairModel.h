@@ -87,6 +87,8 @@ namespace Physica {
         [[nodiscard]] const Tv& getSquaredCutoff() const noexcept { return squared_cutoff; }
         /* Setters */
         void setCutoff(Tv cutoff_);
+        /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return true; }
     protected:
         PairModel() = default;
         PairModel(Tv cutoff_);
@@ -194,7 +196,7 @@ namespace Physica {
 
     template<class Derived>
     auto PairModel<Derived>::forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const -> CoDiff<T> {
-        static_assert(TraitsType::IsPeriodBoundary, "[Error]: Fixed boundary is not implemented");
+        static_assert(isPeriodBoundary(), "[Error]: Fixed boundary is not implemented");
         const size_t atom1 = dof1 / 3U;
         const size_t atom2 = dof2 / 3U;
         if (atom1 == atom2) [[unlikely]] {
@@ -420,7 +422,6 @@ namespace Physica {
     public:
         using Derived = T;
 
-        constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsContractable = false;
     };
 }

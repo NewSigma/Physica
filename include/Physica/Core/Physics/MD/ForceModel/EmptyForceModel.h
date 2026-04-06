@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -62,6 +62,8 @@ namespace Physica {
         [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType&) const { return LatticeMatrix(Dim, Dim, 0); }
+        /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return true; }
     };
 
     template<Scalar T, unsigned int Dim>
@@ -82,7 +84,6 @@ namespace Physica {
     template<Scalar T, unsigned int Dim>
     class Traits<EmptyForceModel<T, Dim>> {
     public:
-        constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsContractable = false;
     };
 }

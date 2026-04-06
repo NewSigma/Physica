@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,6 +29,8 @@ namespace Physica {
         using This = HardCore<T, IsFixedBoundary, NumReplica, Integrator, P>;
         using Base = FreeModel<T, 1, NumReplica, Integrator>;
         using Tv = T::ValueType;
+
+        static_assert(!T::isComplex());
     public:
         using RingPolymerType = RingPolymer<T, 1, NumReplica>;
         using PhaseMatrix = RingPolymerType::PhaseMatrix;
@@ -39,7 +41,7 @@ namespace Physica {
         VectorND<T> repMass;
         PhaseMatrix buffer;
         size_t maxHandleNum;
-        size_t handleNum;
+        size_t handleNum{};
     public:
         HardCore(T latticeSize_,
                  Tv collideFactor_,
@@ -62,12 +64,13 @@ namespace Physica {
         [[nodiscard]] const VectorND<T>& getRepMass() const noexcept { return repMass; }
         [[nodiscard]] size_t getHandleNum() { return handleNum; }
         /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return !IsFixedBoundary; }
         static void checkParam(Tv collideFactor, size_t numReplica);
         [[nodiscard]] __host__ __device__ static bool checkStepSize(T latticeSize, T temperatureT, T collideStep, T maxMass);
     private:
         bool checkCollision([[maybe_unused]] size_t id_dof, const RingPolymerType& ringPolymer) const;
         void handleCollision(const RingPolymerType& ringPolymer);
-        bool checkRepMass() const;
+        [[nodiscard]] bool checkRepMass() const;
     };
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, ExecutePolicy P>
@@ -376,13 +379,4 @@ namespace Physica {
             isGood &= elem.isPositive();
         return isGood;
     }
-}
-
-namespace Physica {
-    template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, ExecutePolicy P>
-    class Traits<HardCore<T, IsFixedBoundary, NumReplica, Integrator, P>> {
-        static_assert(!T::isComplex());
-    public:
-        constexpr static bool IsPeriodBoundary = !IsFixedBoundary;
-    };
 }

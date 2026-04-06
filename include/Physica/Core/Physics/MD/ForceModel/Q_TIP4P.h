@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -95,6 +95,7 @@ namespace Physica {
         /* Setters */
         void setLattice(LatticeMatrix lattice);
         /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return true; }
         [[nodiscard]] static PositionMatrix makePermanentDipole(const PeriodicCell<T, 3>& cell);
         static PermMatrix<T> sortPosition(MDCellType& cell);
     private:
@@ -617,7 +618,6 @@ namespace Physica {
     template<Scalar T, class EwaldType>
     class Traits<Q_TIP4P<T, EwaldType>> {
     public:
-        constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsLatticeDependent = true;
         constexpr static bool IsContractable = true;
     };

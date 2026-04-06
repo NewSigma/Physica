@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -63,6 +63,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] const WorkingDirType& getWorkingDir() const noexcept { return workingDir; }
         [[nodiscard]] size_t getNumParticle() const noexcept;
+        /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return true; }
     private:
         ProcessFuture run_vasp() const;
         friend class Test;
@@ -171,7 +173,6 @@ namespace Physica {
     template<Scalar T>
     class Traits<VASPModel<T>> {
     public:
-        constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsContractable = false;
     };
 }

@@ -88,6 +88,8 @@ namespace Physica {
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
         [[nodiscard]] Trv getRepelU() const noexcept { return action.getRepelU(); }
         [[nodiscard]] Trv getBeta() const noexcept { return action.getBeta(); }
+        /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return host_obj::isPeriodBoundary(); }
     private:
         [[nodiscard]] Vector2D<Trv> calcDet();
         [[nodiscard]] Vector2D<Trv> calcLnWeight();

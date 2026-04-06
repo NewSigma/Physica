@@ -57,7 +57,7 @@ namespace Physica {
     template<ExecutePolicy P>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::updateForce(auto& model) {
         using ForceModel = std::remove_cvref_t<decltype(model)>;
-        constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary = model.isPeriodBoundary();
         // TODO: Stateful ForceModel is not parallelizable. Add a trait to determine whether it is stateful.
         // Currently we assume GPU models are stateful
         // constexpr ExecutePolicy HostPolicy = Traits<ForceModel>::IsStateful ? Sequential : Thread;
@@ -144,11 +144,10 @@ namespace Physica {
     template<RNG R, ExecutePolicy P>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::nvt_step(const auto& thermostat, auto& kineticModel, auto& forceModel) {
         using Thermostat = std::remove_cvref_t<decltype(thermostat)>;
-        using KineticModel = std::remove_cvref_t<decltype(kineticModel)>;
         using ForceModel = std::remove_cvref_t<decltype(forceModel)>;
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
-        constexpr bool IsPeriodBoundary1 = Traits<KineticModel>::IsPeriodBoundary;
-        constexpr bool IsPeriodBoundary2 = Traits<ForceModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary1 = kineticModel.isPeriodBoundary();
+        constexpr bool IsPeriodBoundary2 = forceModel.isPeriodBoundary();
         static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
 
         constexpr bool isSeedFixed = Traits<R>::IsSeedFixed;
@@ -186,11 +185,10 @@ namespace Physica {
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::npt_step(const auto& thermostat, auto& barostat, auto& kineticModel, auto& forceModel) {
         using Thermostat = std::remove_cvref_t<decltype(thermostat)>;
         using Barostat = std::remove_cvref_t<decltype(barostat)>;
-        using KineticModel = std::remove_cvref_t<decltype(kineticModel)>;
         using ForceModel = std::remove_cvref_t<decltype(forceModel)>;
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
-        constexpr bool IsPeriodBoundary1 = Traits<KineticModel>::IsPeriodBoundary;
-        constexpr bool IsPeriodBoundary2 = Traits<ForceModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary1 = kineticModel.isPeriodBoundary();
+        constexpr bool IsPeriodBoundary2 = forceModel.isPeriodBoundary();
         static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
 
         constexpr unsigned int BarostatOrder = Traits<Barostat>::Order;
@@ -467,7 +465,7 @@ namespace Physica {
     T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcPressThermo(auto& forceModel) const {
         using ForceModel = std::remove_cvref_t<decltype(forceModel)>;
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
-        constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary = forceModel.isPeriodBoundary();
         T result = calcKinetic<KineticModel>() / (getVolume() * (Dim * 0.5));
         if constexpr (!isFreeModel) {
             const size_t numReplica = getNumReplica();
@@ -522,7 +520,7 @@ namespace Physica {
 
             std::ignore = forceModel; // Silent warnings
             if constexpr (!isFreeModel) {
-                constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
+                constexpr bool IsPeriodBoundary = forceModel.isPeriodBoundary();
                 MDCellType cell = phaseToCell(replica);
                 if constexpr (IsPeriodBoundary)
                     cell.normalize();
@@ -579,7 +577,7 @@ namespace Physica {
 
             std::ignore = forceModel; // Silent warnings
             if constexpr (!isFreeModel) {
-                constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
+                constexpr bool IsPeriodBoundary = forceModel.isPeriodBoundary();
                 auto cell = phaseToCell(replica);
                 if constexpr (IsPeriodBoundary)
                     cell.normalize();
@@ -598,7 +596,7 @@ namespace Physica {
     auto RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeStressClassical(auto& forceModel) const -> LatticeMatrix {
         using ForceModel = std::remove_cvref_t<decltype(forceModel)>;
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
-        constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary = forceModel.isPeriodBoundary();
         LatticeMatrix result(Dim, Dim, 0);
         if constexpr (NumReplica == 1) {
             const T repVolume = reciprocal(getVolume());
@@ -732,11 +730,10 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<ExecutePolicy P>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::nve_step_impl(auto& kineticModel, auto& forceModel, Tv deltaT) {
-        using KineticModel = std::remove_cvref_t<decltype(kineticModel)>;
         using ForceModel = std::remove_cvref_t<decltype(forceModel)>;
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
-        constexpr bool IsPeriodBoundary1 = Traits<KineticModel>::IsPeriodBoundary;
-        constexpr bool IsPeriodBoundary2 = Traits<ForceModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary1 = kineticModel.isPeriodBoundary();
+        constexpr bool IsPeriodBoundary2 = forceModel.isPeriodBoundary();
         static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
         if (isFreeModel)
             kineticModel.nve_step(ringPolymer, deltaT);
@@ -820,8 +817,8 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class KineticModel, class ForceModel>
     constexpr void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::checkRelaxParam() {
-        constexpr bool IsPeriodBoundary1 = Traits<KineticModel>::IsPeriodBoundary;
-        constexpr bool IsPeriodBoundary2 = Traits<ForceModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary1 = KineticModel::isPeriodBoundary();
+        constexpr bool IsPeriodBoundary2 = ForceModel::isPeriodBoundary();
         static_assert(IsPeriodBoundary1 == IsPeriodBoundary2, "[Error]: Inconsistent boundary condition");
         static_assert(NumReplica == 1, "[Error]: Relaxing using PIMD makes no sence, NumReplica = 1 shall be enough");
         static_assert(!Internal::is_empty_force_model<ForceModel>::value, "[Error]: Relax a empty model does nothing");

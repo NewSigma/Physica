@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -56,6 +56,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return elementTypes.getLength(); }
         [[nodiscard]] unsigned int getNumMPIProcess() const noexcept { return numMPIProcess; }
+        /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return true; }
     private:
         template<size_t N> ProcessFuture run_qe(TempFile<N>& __restrict input, TempFile<N>& __restrict output) const;
     };
@@ -180,7 +182,6 @@ namespace Physica {
     template<Scalar T>
     class Traits<QEModel<T>> {
     public:
-        constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsContractable = false;
     };
 }

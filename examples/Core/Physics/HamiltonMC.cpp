@@ -33,14 +33,8 @@ namespace {
             T y = pos[1, 0];
             result = Vector2D<T>{T(-2) * x - T(2) * y, T(-2) * x - T(4) * y};
         }
-    };
-}
-
-namespace Physica {
-    template<>
-    class Traits<ProbHamiltion> {
-    public:
-        constexpr static bool IsPeriodBoundary = false;
+        /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return false; }
     };
 }
 

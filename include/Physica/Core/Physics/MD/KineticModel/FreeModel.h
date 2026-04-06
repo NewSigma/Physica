@@ -66,6 +66,8 @@ namespace Physica {
         [[nodiscard]] size_t getNumReplica() const noexcept;
         /* Setters */
         void setTemperature(T temperatureT);
+        /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return true; }
     protected:
         void nve_step_impl(RingPolymerType& ringPolymer, const PhaseMatrix& input, PhaseMatrix& output, T deltaT);
         void pre_nve_step_impl([[maybe_unused]] RingPolymerType& ringPolymer, T deltaT);
@@ -221,6 +223,5 @@ namespace Physica {
         using ScalarType = T1;
         constexpr static unsigned int Dim = T2;
         constexpr static size_t NumReplica = T3;
-        constexpr static bool IsPeriodBoundary = true;
     };
 }

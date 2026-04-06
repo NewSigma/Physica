@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,11 +29,10 @@ namespace Physica {
         using Base = FreeModel<T, Dim, NumReplica, Integrator>;
     public:
         using Base::Base;
+        /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return false; }
     };
 
     template<Scalar T, unsigned int D, size_t N, RPMDIntegrator I>
-    class Traits<OpenModel<T, D, N, I>> : public Traits<FreeModel<T, D, N, I>> {
-    public:
-        constexpr static bool IsPeriodBoundary = false;
-    };
+    class Traits<OpenModel<T, D, N, I>> : public Traits<FreeModel<T, D, N, I>> {};
 }

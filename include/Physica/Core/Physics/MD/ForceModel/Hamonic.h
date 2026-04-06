@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -59,6 +59,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return sites.getRow(); }
         [[nodiscard]] const VectorND<T>& getSpringCoeffs() const noexcept { return springCoeffs; }
+        /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return true; }
     };
 
     template<Scalar T, unsigned int Dim>
@@ -142,7 +144,6 @@ namespace Physica {
     template<Scalar T, unsigned int Dim>
     class Traits<Hamonic<T, Dim>> {
     public:
-        constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsContractable = false;
     };
 }

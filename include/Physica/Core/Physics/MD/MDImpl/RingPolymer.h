@@ -125,9 +125,8 @@ namespace Physica {
         }
         momentum.template random_normal<R>();
 
-        constexpr bool IsPeriodBoundary = Traits<KineticModel>::IsPeriodBoundary;
         const T repBeta = calcRepBeta(temperatureT);
-        if constexpr (IsPeriodBoundary) {
+        if constexpr (KineticModel::isPeriodBoundary()) {
             DenseVector<T, Dim> driftMomentum(Dim, 0);
             for (size_t i = 0; i < getNumParticle(); ++i) {
                 phase.rows(i * Dim, Dim) *= sqrt(repBeta * massVec[i]);
@@ -304,8 +303,7 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica>
     template<class KineticModel>
     T RingPolymer<T, Dim, NumReplica>::calcTemperature() const {
-        constexpr bool IsPeriodBoundary = Traits<KineticModel>::IsPeriodBoundary;
-        constexpr size_t NumConstraint = IsPeriodBoundary ? 1 : 0;
+        constexpr size_t NumConstraint = KineticModel::isPeriodBoundary() ? 1 : 0;
         assert(getNumParticle() * getNumReplica() > NumConstraint && "[Error]: Temperature of a periodic boundary system with only one atom is not well defined");
         const auto factor1 = Tv(2 / (Dim * PhyConst<AU>::boltzmannK));
         const auto factor2 = factor1 / Tv((getNumParticle() * getNumReplica() - NumConstraint) * getNumReplica());

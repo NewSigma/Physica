@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -58,6 +58,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ T pot_functor(size_t i, size_t j, T r, T r2) const;
         [[nodiscard]] __host__ __device__ T force_functor(size_t i, size_t j, T r, T r2) const;
         void swap(This& __restrict obj) noexcept;
+        /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return IsPeriodBoundary; }
     };
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
@@ -126,7 +128,6 @@ namespace Physica {
     class Traits<device_obj<SilveraGoldman<T, B, IsSmallCell>>> {
     public:
         using ScalarType = T;
-        constexpr static bool IsPeriodBoundary = B;
         constexpr static bool IsPotDependOnAtomIndex = false;
         constexpr static bool IsContractable = false;
     };

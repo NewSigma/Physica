@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -91,6 +91,7 @@ namespace Physica {
         /* Setters */
         void setLattice(LatticeMatrix lattice);
         /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return true; }
         static PermMatrix<T> sortPosition(MDCellType& cell);
     private:
         [[nodiscard]] static T pot_functor_impl(T A, T b, T c, T r, T r2);
@@ -236,7 +237,6 @@ namespace Physica {
     class Traits<BKSModel<T, EwaldType, AvoidTooNear>> {
     public:
         using ScalarType = T;
-        constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsLatticeDependent = true;
         constexpr static bool IsPotDependOnAtomIndex = true;
         constexpr static bool IsSmallCell = Traits<EwaldType>::IsSmallCell;

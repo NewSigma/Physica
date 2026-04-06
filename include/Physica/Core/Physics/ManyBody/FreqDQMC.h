@@ -80,6 +80,8 @@ namespace Physica {
         [[nodiscard]] const auto& getGreens() noexcept { return greens; }
         [[nodiscard]] Trv getSign() const noexcept { return sign; }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
+        /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return false; }
     private:
         template<ExecutePolicy P>
         [[nodiscard]] Vector2D<Trv> calcDet();
@@ -313,12 +315,4 @@ namespace Physica {
     auto FreqDQMC<T>::getBetaU() const noexcept -> Trv {
         return getParams().getBeta() * getParams().getRepelU();
     }
-}
-
-namespace Physica {
-    template<Scalar T>
-    class Traits<FreqDQMC<T>> {
-    public:
-        constexpr static bool IsPeriodBoundary = false;
-    };
 }

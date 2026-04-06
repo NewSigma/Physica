@@ -69,6 +69,8 @@ namespace Physica {
         __device__ void stepKernelImpl(T deltaT, size_t numStep);
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getNumParticle() const noexcept { return repMass.getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isPeriodBoundary() noexcept { return !IsFixedBoundary; }
     private:
         __device__ void handleCollision(T* __restrict sharedBuffer);
     };

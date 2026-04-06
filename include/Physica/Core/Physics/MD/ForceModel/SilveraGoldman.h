@@ -55,6 +55,8 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> force_functor(size_t i, size_t j, const T& r, const T& r2) const;
         [[nodiscard]] CoDiff<T> forceConst_functor(const T& r, const T& r2) const;
         void swap(This& __restrict obj) noexcept;
+        /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return IsPeriodBoundary; }
     };
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
@@ -170,7 +172,6 @@ namespace Physica {
     class Traits<SilveraGoldman<T, B1, B2>> {
     public:
         using ScalarType = T;
-        constexpr static bool IsPeriodBoundary = B1;
         constexpr static bool IsSmallCell = B2;
         constexpr static bool IsPotDependOnAtomIndex = false;
         constexpr static bool IsContractable = false;

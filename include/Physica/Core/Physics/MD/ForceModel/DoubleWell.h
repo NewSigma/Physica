@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -60,6 +60,8 @@ namespace Physica {
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
         void swap(This& __restrict obj) noexcept;
+        /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return false; }
     };
 
     template<Scalar T>
@@ -116,7 +118,6 @@ namespace Physica {
     template<Scalar T>
     class Traits<DoubleWell<T>> {
     public:
-        constexpr static bool IsPeriodBoundary = false;
         constexpr static bool IsContractable = false;
     };
 }
