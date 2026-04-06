@@ -63,7 +63,6 @@ namespace Physica {
         /* Operators */
         SIMD& operator=(const SIMD&) = default;
         SIMD& operator=(SIMD&&) noexcept = default;
-        [[nodiscard]] operator MachineType() const noexcept { return toMachine(); }
         [[nodiscard]] T operator[](int index) const;
         [[nodiscard]] SIMD operator+(SIMD other) const;
         [[nodiscard]] SIMD operator-(SIMD other) const;
@@ -127,8 +126,17 @@ namespace Physica {
         [[nodiscard]] static SIMD zeros() noexcept;
         [[nodiscard]] static SIMD select(BoolSIMDType flags, SIMD x, SIMD y);
     private:
+        [[nodiscard]] operator MachineType() const noexcept { return toMachine(); }
+        /* Static members */
         template<int Order, int... Orders>
         [[nodiscard]] constexpr static unsigned int makeShuffleMask(int order);
+        /* Friends */
+        template<Scalar U, int Size1>
+        friend SIMD<U, Size> nmul_add(SIMD<U, Size> a, SIMD<U, Size> b, SIMD<U, Size> c) noexcept;
+        template<Scalar U, int Size1>
+        friend SIMD<U, Size> mul_sub(SIMD<U, Size> a, SIMD<U, Size> b, SIMD<U, Size> c) noexcept;
+        template<Scalar U, int Size1>
+        friend SIMD<U, Size1> mul_addsub(SIMD<U, Size1> a, SIMD<U, Size1> b, SIMD<U, Size1> c) noexcept;
     };
 
     template<Scalar T, int Size>
