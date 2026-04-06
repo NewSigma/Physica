@@ -64,9 +64,9 @@ namespace Physica {
     template<class Derived>
     template<ExecutePolicy P>
     void RValueMatrix<Derived>::assign(Matrix auto&& target) const noexcept {
-        if constexpr (!isDiffable() && Diffable<decltype(target)>) {
+        if constexpr (!isDiffable() && target.isDiffable()) {
             Base::getDerived().assign(target.values());
-            target.grads().zeros();
+            target.zero_grad();
         }
         else {
             target.assert_assign(Base::getDerived());
@@ -87,7 +87,7 @@ namespace Physica {
 
     template<class Derived>
     void RValueMatrix<Derived>::assign_add(Matrix auto&& target) const noexcept {
-        if constexpr (!isDiffable() && Diffable<decltype(target)>)
+        if constexpr (!isDiffable() && target.isDiffable())
             Base::getDerived().assign_add(target.values());
         else {
             target.assert_assign(Base::getDerived());

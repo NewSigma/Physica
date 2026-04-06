@@ -159,7 +159,7 @@ namespace Physica {
     void CompactVector<Derived>::zeros() {
         if constexpr (Diffable<T>) {
             Base::getDerived().values().zeros();
-            Base::getDerived().grads().zeros();
+            Base::getDerived().zero_grad();
         }
         else if constexpr (T::Prec != FloatMP)
             std::memset(data(), 0, Base::getLength() * sizeof(T));

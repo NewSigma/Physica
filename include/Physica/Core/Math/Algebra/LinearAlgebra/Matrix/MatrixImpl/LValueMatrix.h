@@ -104,6 +104,7 @@ namespace Physica {
         [[nodiscard]] auto flatten(this auto&&);
 
         void zeros() noexcept;
+        void zero_grad() noexcept;
         void clamp_min(Tv minimum);
         void clamp_max(Tv maximum);
         template<RNG R>

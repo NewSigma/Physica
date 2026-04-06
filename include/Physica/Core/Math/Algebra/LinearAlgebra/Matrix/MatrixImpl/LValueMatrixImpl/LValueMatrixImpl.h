@@ -343,6 +343,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    void LValueMatrix<Derived>::zero_grad() noexcept {
+        Base::getDerived().grads().zeros();
+    }
+
+    template<class Derived>
     void LValueMatrix<Derived>::clamp_min(Tv minimum) {
         Base::getDerived().flatten().clamp_min(minimum);
     }

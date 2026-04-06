@@ -79,6 +79,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto flatten();
         [[nodiscard]] __host__ __device__ const auto flatten() const;
 
+        void zero_grad() noexcept;
         template<RNG R>
         void random_uniform();
         template<RNG R>

@@ -223,6 +223,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    void device_obj<LValueMatrix<Derived>>::zero_grad() noexcept {
+        Base::getDerived().grads().zeros();
+    }
+
+    template<class Derived>
     template<RNG R>
     void device_obj<LValueMatrix<Derived>>::random_uniform() {
         Derived::template random_uniform<R>(Base::getRow(), Base::getCol()).toDeviceAsync(Base::getDerived());

@@ -84,6 +84,7 @@ namespace Physica {
         [[nodiscard]] auto reshape_row(this auto&& self, size_t row, size_t col) noexcept;
 
         void zeros() noexcept;
+        void zero_grad() noexcept;
         void clamp_min(Tv minimum);
         void clamp_max(Tv maximum);
         void toUnit();

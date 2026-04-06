@@ -178,9 +178,9 @@ namespace Physica {
     template<Scalar T, bool WithBias>
     void device_obj<LinearLayer<T, WithBias>>::zero_grad() {
         if constexpr (ReverseDiff<T>) {
-            weights.grads().zeros();
+            weights.zero_grad();
             if constexpr (WithBias)
-                bias.grads().zeros();
+                bias.zero_grad();
         }
     }
 

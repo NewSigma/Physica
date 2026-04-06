@@ -149,7 +149,7 @@ namespace Physica {
     void device_obj<CompactVector<Derived>>::zeros() {
         if constexpr (Diffable<T>) {
             Base::getDerived().values().zeros();
-            Base::getDerived().grads().zeros();
+            Base::getDerived().zero_grad();
         }
         else
             check(cudaMemsetAsync(data(), 0, Base::getLength() * sizeof(T)));

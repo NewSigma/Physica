@@ -202,6 +202,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    void LValueVector<Derived>::zero_grad() noexcept {
+        Base::getDerived().grads().zeros();
+    }
+
+    template<class Derived>
     void LValueVector<Derived>::clamp_min(Tv minimum) {
         for (size_t i = 0; i < Base::getLength(); ++i)
             (*this)[i] = std::max((*this)[i], minimum);

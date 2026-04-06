@@ -122,6 +122,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    void LValueTensor<Derived>::zero_grad() noexcept {
+        Base::getDerived().grads().zeros();
+    }
+
+    template<class Derived>
     template<RNG R>
     void LValueTensor<Derived>::random_uniform() {
         flatten().template random_uniform<R>();

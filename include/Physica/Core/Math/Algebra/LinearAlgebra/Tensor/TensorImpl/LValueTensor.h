@@ -61,6 +61,7 @@ namespace Physica {
 
         [[nodiscard]] auto flatten(this auto&&);
 
+        void zero_grad() noexcept;
         template<RNG R> void random_uniform();
         template<RNG R> void random_normal();
         /* Getters */

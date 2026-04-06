@@ -39,9 +39,9 @@ namespace Physica {
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
-        if constexpr (!isDiffable() && Diffable<V>) {
+        if constexpr (!isDiffable() && v.isDiffable()) {
             Base::getDerived().assign(v.values());
-            v.grads().zeros();
+            v.zero_grad();
         }
         else {
             v.assert_assign(Base::getDerived());
@@ -66,7 +66,7 @@ namespace Physica {
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign_add(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
-        if constexpr (!isDiffable() && Diffable<V>)
+        if constexpr (!isDiffable() && v.isDiffable())
             Base::getDerived().assign_add(v.values());
         else {
             v.assert_assign(Base::getDerived());

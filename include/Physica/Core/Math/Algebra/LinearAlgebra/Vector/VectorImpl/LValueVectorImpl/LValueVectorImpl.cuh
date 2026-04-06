@@ -150,6 +150,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    void device_obj<LValueVector<Derived>>::zero_grad() noexcept {
+        Base::getDerived().grads().zeros();
+    }
+
+    template<class Derived>
     template<RNG R>
     void device_obj<LValueVector<Derived>>::random_uniform() {
         Derived::template random_uniform<R>(Base::getLength()).toDeviceAsync(Base::getDerived());

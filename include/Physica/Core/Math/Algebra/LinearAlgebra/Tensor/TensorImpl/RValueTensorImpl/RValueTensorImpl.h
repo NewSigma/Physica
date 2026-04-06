@@ -26,7 +26,7 @@ namespace Physica {
     void RValueTensor<Derived>::assign(Tensor auto& x) const {
         if constexpr (!isDiffable() && x.isDiffable()) {
             Base::getDerived().assign(x.values());
-            x.grads().zeros();
+            x.zero_grad();
         }
         else {
             size_t size = Base::getDerived().getSize();

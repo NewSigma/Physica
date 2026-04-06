@@ -66,6 +66,7 @@ namespace Physica {
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] __host__ __device__ auto reshape_row(this auto&& self, size_t row, size_t col) noexcept;
 
+        void zero_grad() noexcept;
         template<RNG R>
         void random_uniform();
         template<RNG R>
