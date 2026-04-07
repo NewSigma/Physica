@@ -62,7 +62,7 @@ namespace Physica {
         std::array<char, 32> buffer{}; // 32 is enough for uint64_t
         for (size_t i = 0; i < getLength(); ++i) {
             std::sprintf(buffer.data(), "%zu", i);
-            (*this)[i].read(group, buffer.data());
+            Base::getDerived()[i].read(group, buffer.data());
         }
     }
 
@@ -72,7 +72,7 @@ namespace Physica {
         std::array<char, 32> buffer{}; // 32 is enough for uint64_t
         for (size_t i = 0; i < getLength(); ++i) {
             std::sprintf(buffer.data(), "%zu", i);
-            (*this)[i].write(group, buffer.data());
+            Base::getDerived()[i].write(group, buffer.data());
         }
     }
 

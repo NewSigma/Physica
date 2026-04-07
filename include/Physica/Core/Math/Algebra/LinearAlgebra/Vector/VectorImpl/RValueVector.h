@@ -131,9 +131,8 @@ namespace Physica {
         [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
         [[nodiscard]] constexpr auto view(this auto&&) noexcept;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
-
-        void resize(const Vector auto& x) { resize(x.getLength()); }
-        decltype(auto) resize(size_t length) { return Base::getDerived().resize(length); }
+        void resize(const Vector auto& x);
+        void resize(size_t length);
 
         template<size_t Length = Dynamic>
         [[nodiscard]] auto head(this auto&&, size_t to = Length) noexcept;
@@ -141,13 +140,18 @@ namespace Physica {
         [[nodiscard]] auto tail(this auto&&, size_t from) noexcept;
         template<size_t Length = Dynamic>
         [[nodiscard]] auto segment(this auto&&, size_t from, size_t to) noexcept;
+        template<Matrix M>
+        [[nodiscard]] auto reshape_like(const M& mat) const noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] auto reshape_col(size_t row, size_t col) const noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] auto reshape_row(size_t row, size_t col) const noexcept;
         [[nodiscard]] auto reversal() noexcept;
         [[nodiscard]] const auto reversal() const noexcept;
-
-        [[nodiscard]] auto format() const;
         [[nodiscard]] auto transpose(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
         [[nodiscard]] auto hermite() const noexcept;
+        [[nodiscard]] auto format() const;
 
         [[nodiscard]] CoDiff<Tr> norm1() const noexcept;
         [[nodiscard]] CoDiff<Tr> norm2() const noexcept;
@@ -155,7 +159,6 @@ namespace Physica {
         [[nodiscard]] CoDiff<Tr> squaredNorm() const noexcept;
         [[nodiscard]] Tr lnSquaredNorm() const;
         [[nodiscard]] Tr normInf() const;
-
         [[nodiscard]] size_t argmax() const noexcept;
         [[nodiscard]] size_t argmin() const noexcept;
         [[nodiscard]] CoDiff<T> max() const noexcept;
@@ -177,15 +180,7 @@ namespace Physica {
         [[nodiscard]] bool isZeros() const;
         [[nodiscard]] bool isFinite() const;
         [[nodiscard]] auto cross(const Vector auto& v) const noexcept;
-
         Tr householder(Vector auto& __restrict target) const __restrict;
-
-        template<Matrix M>
-        [[nodiscard]] auto reshape_like(const M& mat) const noexcept;
-        template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] auto reshape_col(size_t row, size_t col) const noexcept;
-        template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] auto reshape_row(size_t row, size_t col) const noexcept;
 
         [[nodiscard]] decltype(auto) reals(this auto&&) noexcept;
         [[nodiscard]] auto imags(this auto&&) noexcept;

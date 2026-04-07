@@ -186,6 +186,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    void RValueVector<Derived>::resize(const Vector auto& x) {
+        resize(x.getLength());
+    }
+
+    template<class Derived>
+    void RValueVector<Derived>::resize(size_t length) {
+        Base::getDerived().resize(length);
+    }
+
+    template<class Derived>
     template<size_t Length>
     auto RValueVector<Derived>::head(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
@@ -204,11 +214,6 @@ namespace Physica {
     auto RValueVector<Derived>::segment(this auto&& self, size_t from, size_t to) noexcept {
         using Self = decltype(self);
         return RVectorBlock<Self, Length>(std::forward<Self>(self), from, to);
-    }
-
-    template<class Derived>
-    auto RValueVector<Derived>::format() const {
-        return FormatedVector<Derived>(Base::getDerived());
     }
 
     template<class Derived>
@@ -232,6 +237,11 @@ namespace Physica {
             return Hermite<Derived>(Base::getDerived());
         else
             return Base::getDerived().transpose();
+    }
+
+    template<class Derived>
+    auto RValueVector<Derived>::format() const {
+        return FormatedVector<Derived>(Base::getDerived());
     }
 
     template<class Derived>

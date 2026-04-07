@@ -25,4 +25,6 @@ namespace Physica {
         if (!b) [[unlikely]]
             exit(EXIT_FAILURE);
     }
+
+    consteval void syntax_only([[maybe_unused]] auto expr) noexcept {}
 }

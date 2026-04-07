@@ -77,9 +77,10 @@ namespace {
     }
 
     void complexTest() {
-        auto vegas = Vegas<Tc, false>({0}, {1}, 50, 1000);
-        vegas.integral<RandomSource>([&](const VectorND<T>& x) { return Tc(x[0], -x[0]); });
-        // syntax only
+        syntax_only([]() {
+            auto vegas = Vegas<Tc, false>({0}, {1}, 50, 1000);
+            vegas.integral<RandomSource>([&](const VectorND<T>& x) { return Tc(x[0], -x[0]); });
+        });
     }
 }
 

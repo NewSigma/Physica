@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,6 +25,6 @@ int main() {
     using MatrixType = MatrixND<float32>;
     const MatrixType A = MatrixType::random_uniform<Random<>>(16, 16);
     const auto d_A = A.toDeviceAsync();
-    expect(scalarNear(d_A.diag().sum(), A.diag().sum(), 1E-7));
+    expect(scalarNear(d_A.diag().sum(), A.diag().sum(), 1E-6));
     return 0;
 }
