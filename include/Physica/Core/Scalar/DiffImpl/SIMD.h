@@ -81,18 +81,17 @@ namespace Physica {
         SIMD& operator=(const SIMD&) = default;
         SIMD& operator=(SIMD&&) noexcept = default;
         [[nodiscard]] explicit operator ValueType() const noexcept { return values; }
-        [[nodiscard]] ScalarType operator[](int index) const;
-        [[nodiscard]] SIMD operator+(const SIMD& other) const;
-        [[nodiscard]] SIMD operator-(const SIMD& other) const;
-        [[nodiscard]] SIMD operator*(const SIMD& x) const;
-        [[nodiscard]] SIMD operator*(const ScalarType& x) const;
-        [[nodiscard]] SIMD operator*(const Scalar auto& x) const;
-        [[nodiscard]] SIMD operator/(const SIMD& x) const;
-        [[nodiscard]] SIMD operator-() const;
-        void operator+=(const SIMD& x) { *this = *this + x; }
-        void operator-=(const SIMD& x) { *this = *this - x; }
-        void operator*=(const SIMD& x) { *this = *this * x; }
-        void operator/=(const SIMD& x) { *this = *this / x; }
+        [[nodiscard]] ScalarType operator[](int index) const noexcept;
+        [[nodiscard]] auto operator+(Packet auto x) const noexcept;
+        [[nodiscard]] auto operator-(Packet auto x) const noexcept;
+        [[nodiscard]] auto operator*(Packet auto x) const noexcept;
+        [[nodiscard]] auto operator*(const Scalar auto& x) const noexcept;
+        [[nodiscard]] auto operator/(Packet auto x) const noexcept;
+        [[nodiscard]] SIMD operator-() const noexcept;
+        void operator+=(const SIMD& x) noexcept { *this = *this + x; }
+        void operator-=(const SIMD& x) noexcept { *this = *this - x; }
+        void operator*=(const SIMD& x) noexcept { *this = *this * x; }
+        void operator/=(const SIMD& x) noexcept { *this = *this / x; }
         /* Operations */
         ValueType reverse(GradType grad = 1) const noexcept;
 
@@ -115,6 +114,8 @@ namespace Physica {
         [[nodiscard]] const ValueType& value() const noexcept { return values; }
         [[nodiscard]] GradType& grad() noexcept { return grads; }
         [[nodiscard]] const GradType& grad() const noexcept { return grads; }
+        template<int MaskOrder>
+        [[nodiscard]] auto grad_mask() const noexcept;
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType(values.getLow(), grads.getLow()); }
         [[nodiscard]] HalfType getHigh() const noexcept { return HalfType(values.getHigh(), grads.getHigh()); }
         [[nodiscard]] RealType real() const noexcept;

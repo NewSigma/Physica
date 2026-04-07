@@ -138,11 +138,6 @@ namespace Physica {
         template<Scalar U, int Size1>
         friend SIMD<U, Size1> mul_addsub(SIMD<U, Size1> a, SIMD<U, Size1> b, SIMD<U, Size1> c) noexcept;
     };
-
-    template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> operator*(const T& scalar, const SIMD<T, Size> packet) {
-        return packet * scalar;
-    }
 }
 
 namespace Physica {

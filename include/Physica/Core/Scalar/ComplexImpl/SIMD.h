@@ -38,21 +38,21 @@ namespace Physica {
     };
 
     template<Scalar T, int Size>
-    class SIMD<Complex<T>, Size> : public SIMDBase<SIMD<Complex<T>, Size>>, private SIMD<T, Size * 2> {
-        using ScalarType = Complex<T>;
-        using This = SIMD<ScalarType, Size>;
+    class SIMD<Complex<T>, Size> : public SIMDBase<SIMD<Complex<T>, Size>> {
+        using This = SIMD<Complex<T>, Size>;
         using Base = SIMDBase<This>;
-        using RealBase = SIMD<T, Size * 2>;
-        using MachineType = ScalarType::MachineType;
+        using MachineType = Complex<T>::MachineType;
     public:
+        using typename Base::ScalarType;
         using typename Base::RealType;
         using typename Base::FullRealType;
         using typename Base::BoolSIMDType;
         using Base::isSeparatable;
     private:
         using HalfType = std::conditional<sizeof(FullRealType) * CHAR_BIT != 128, SIMD<Complex<T>, Size / 2>, PlainStruct<void>>::type;
-
         using FullRealPair = std::pair<FullRealType, FullRealType>;
+
+        FullRealType storage;
     public:
         SIMD() = default;
         explicit SIMD(int x);
@@ -93,22 +93,22 @@ namespace Physica {
 
         //void insert(int index, const ScalarType& value);
         [[nodiscard]] ScalarType sum() const;
-        void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
+        void swap(SIMD& __restrict other) noexcept { storage.swap(other.storage); }
         /* Getters */
         using Base::size;
         using Base::value;
-        using RealBase::isZero;
-        using RealBase::isFinite;
-        [[nodiscard]] FullRealType asReal() const noexcept { return FullRealType::toMachine(); }
-        [[nodiscard]] HalfType getLow() const noexcept { return HalfType::asComplex(FullRealType::getLow()); }
-        [[nodiscard]] HalfType getHigh() const noexcept { return HalfType::asComplex(FullRealType::getHigh()); }
+        [[nodiscard]] auto isZero() const noexcept;
+        [[nodiscard]] auto isFinite() const noexcept;
+        [[nodiscard]] FullRealType asReal() const noexcept { return storage.toMachine(); }
+        [[nodiscard]] HalfType getLow() const noexcept { return HalfType::asComplex(storage.getLow()); }
+        [[nodiscard]] HalfType getHigh() const noexcept { return HalfType::asComplex(storage.getHigh()); }
         [[nodiscard]] RealType real() const noexcept;
         [[nodiscard]] RealType imag() const noexcept;
         /* Static members */
         [[nodiscard]] static SIMD zeros() noexcept;
         template<RNG R>
         [[nodiscard]] static SIMD random_uniform() { return asComplex(FullRealType::template random_uniform<R>()); }
-        [[nodiscard, gnu::always_inline]] static SIMD asComplex(FullRealType reals) noexcept;
+        [[nodiscard, gnu::always_inline]] static SIMD asComplex(FullRealType storage) noexcept;
     };
 }
 

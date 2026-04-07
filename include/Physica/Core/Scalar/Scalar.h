@@ -78,15 +78,6 @@ namespace Physica {
 
     template<class T>
     using remove_scalar_ref_t = remove_scalar_ref<T>::Type;
-    /**
-     * \class Real is a advanced float type that supports multiple precision
-     */
-    template<FloatPrec Prec = Float64>
-    class Real;
-    template<class T>
-    class Complex;
-    template<class ScalarType, DiffMode Mode, int Order = 1>
-    class Diff;
 
     template<class T>
     concept Scalar = std::derived_from<std::remove_cvref_t<T>, ScalarBase<std::remove_cvref_t<T>>>
@@ -105,6 +96,17 @@ namespace Physica {
     template<class T>
     concept Diffable = std::remove_cvref_t<T>::ScalarType::isDiffable();
 
+    /**
+     * \class Real is a advanced float type that supports multiple precision
+     */
+    template<FloatPrec Prec = Float64>
+    class Real;
+    template<class T>
+    class Complex;
+    template<class ScalarType, DiffMode Mode, int Order = 1>
+    class Diff;
+    template<Scalar, int Size>
+    class SIMD;
     template<class T>
     class DiffCoro;
 

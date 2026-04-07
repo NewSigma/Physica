@@ -36,19 +36,22 @@ namespace Physica {
             // Increasing order; detailed number is not important
             if (Scalar<T>)
                 return 1;
-            if (Vector<T>)
+            if (Packet<T>)
                 return 2;
-            if (Matrix<T>)
+            if (Vector<T>)
                 return 3;
-            if (Tensor<T>)
+            if (Matrix<T>)
                 return 4;
+            if (Tensor<T>)
+                return 5;
             return 0;
         }
 
         template<class T>
         consteval int64_t canonical_score() noexcept {
             int64_t result = 0;
-            result -= int64_t(T::isSparse());
+            if constexpr (!Scalar<T> && !Packet<T>)
+                result -= int64_t(T::isSparse());
             result += int64_t(T::isComplex());
             result += int64_t(T::isDiffable()) * 2;
             result += int64_t(instanceof_xt<VectorExpr, T>) * 10;
@@ -70,8 +73,12 @@ namespace Physica {
     template<class T1, class T2>
     consteval bool canonicalized() {
         using namespace Internal;
+        using U1 = std::remove_cvref_t<T1>;
+        using U2 = std::remove_cvref_t<T2>;
+        if (std::same_as<U1, U2>)
+            return true;
         if (concept_score<T1>() == concept_score<T2>())
-            return canonical_score<std::remove_cvref_t<T1>>() >= canonical_score<std::remove_cvref_t<T2>>(); // TODO: Maybe give a warning if scores equal
+            return canonical_score<U1>() >= canonical_score<std::remove_cvref_t<U2>>(); // TODO: Maybe give a warning if scores equal
         return concept_score<T1>() > concept_score<T2>();
     }
 

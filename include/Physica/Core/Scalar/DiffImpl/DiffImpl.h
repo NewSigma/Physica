@@ -119,9 +119,12 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     template<int MaskOrder>
     __host__ __device__ auto Diff<T, Mode, Order>::grad_mask() const noexcept {
-        using MaskedType = std::conditional<MaskOrder == 0, T, Diff<typename Base::ValueType, Mode, MaskOrder>>::type;
-        using ResultType = std::conditional<(MaskOrder < Order), MaskedType, This>::type;
-        return reinterpret_cast<const ResultType&>(*this);
+        if constexpr (MaskOrder == 0)
+            return v;
+        else if constexpr (MaskOrder >= Order)
+            return *this;
+        else
+            return Diff<T, Mode, MaskOrder>(v, g.template grad_mask<MaskOrder - 1>());
     }
 
     template<Scalar T, DiffMode Mode, int Order>

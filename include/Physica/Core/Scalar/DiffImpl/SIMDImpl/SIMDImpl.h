@@ -57,47 +57,70 @@ namespace Physica {
             : values(other.value()), grads(other.grad()) {}
 
     template<Scalar T, DiffMode Mode, int Order, int Size>
-    auto SIMD<Diff<T, Mode, Order>, Size>::operator[](int index) const -> ScalarType {
+    auto SIMD<Diff<T, Mode, Order>, Size>::operator[](int index) const noexcept -> ScalarType {
         return ScalarType(values[index], grads[index]);
     }
 
     template<Scalar T, DiffMode Mode, int Order, int Size>
-    auto SIMD<Diff<T, Mode, Order>, Size>::operator+(const SIMD& other) const -> This {
-        return This(values + other.values, grads + other.grads);
-    }
-
-    template<Scalar T, DiffMode Mode, int Order, int Size>
-    auto SIMD<Diff<T, Mode, Order>, Size>::operator-(const SIMD& other) const -> This {
-        return This(values - other.values, grads - other.grads);
-    }
-
-    template<Scalar T, DiffMode Mode, int Order, int Size>
-    auto SIMD<Diff<T, Mode, Order>, Size>::operator*(const SIMD& x) const -> This {
-        return This(values * x.value(), GradType(GradType(x) * grad() + GradType(*this) * x.grad()));
-    }
-
-    template<Scalar T, DiffMode Mode, int Order, int Size>
-    auto SIMD<Diff<T, Mode, Order>, Size>::operator*(const ScalarType& x) const -> This {
-        return This(values * x.value(), GradType(x.template grad_mask<Order - 1>() * grad() + GradType(*this) * x.grad()));
-    }
-
-    template<Scalar T, DiffMode Mode, int Order, int Size>
-    auto SIMD<Diff<T, Mode, Order>, Size>::operator*(const Scalar auto& x) const -> This {
-        if constexpr (Diffable<decltype(x)>)
-            return *this * ScalarType(x);
+    auto SIMD<Diff<T, Mode, Order>, Size>::operator+(const Packet auto x) const noexcept {
+        using RtnTy = SIMD<typename Internal::BinaryScalarOpRtnTy<ScalarType, typename decltype(x)::ScalarType>::Type, Size>;
+        if constexpr (x.isDiffable())
+            return RtnTy(values + x.values, grads + x.grads);
         else
-            return This(values * x, grads * x);
+            return RtnTy(values + x.values, grads);
     }
 
     template<Scalar T, DiffMode Mode, int Order, int Size>
-    auto SIMD<Diff<T, Mode, Order>, Size>::operator/(const SIMD& x) const -> This {
-        const auto x1 = GradType(x);
-        const auto v = reciprocal(x1);
-        return This(value() * v.value(), GradType((grad() * GradType(x1) - GradType(*this) * x.grad()) * square(v)));
+    auto SIMD<Diff<T, Mode, Order>, Size>::operator-(const Packet auto x) const noexcept {
+        using RtnTy = SIMD<typename Internal::BinaryScalarOpRtnTy<ScalarType, typename decltype(x)::ScalarType>::Type, Size>;
+        if constexpr (x.isDiffable())
+            return RtnTy(values - x.values, grads - x.grads);
+        else
+            return RtnTy(values - x.values, grads);
     }
 
     template<Scalar T, DiffMode Mode, int Order, int Size>
-    auto SIMD<Diff<T, Mode, Order>, Size>::operator-() const -> This {
+    auto SIMD<Diff<T, Mode, Order>, Size>::operator*(const Packet auto x) const noexcept {
+        using RtnTy = SIMD<typename Internal::BinaryScalarOpRtnTy<ScalarType, typename decltype(x)::ScalarType>::Type, Size>;
+        if constexpr (x.isDiffable()) {
+            using RtnGradTy = RtnTy::GradType;
+            constexpr int MaskOrder = RtnTy::ScalarType::Order;
+            return RtnTy(values * x.value(), RtnGradTy(x.template grad_mask<MaskOrder>() * grad() + grad_mask<MaskOrder>() * x.grad()));
+        }
+        else
+            return RtnTy(values * x, grads * x);
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, int Size>
+    auto SIMD<Diff<T, Mode, Order>, Size>::operator*(const Scalar auto& x) const noexcept {
+        using RtnTy = SIMD<typename Internal::BinaryScalarOpRtnTy<ScalarType, std::remove_cvref_t<decltype(x)>>::Type, Size>;
+        if constexpr (x.isDiffable()) {
+            using RtnGradTy = RtnTy::GradType;
+            constexpr int MaskOrder = RtnTy::ScalarType::Order;
+            return RtnTy(values * x.value(), RtnGradTy(x.template grad_mask<MaskOrder>() * grad() + grad_mask<MaskOrder>() * x.grad()));
+        }
+        else
+            return RtnTy(values * x, grads * x);
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, int Size>
+    auto SIMD<Diff<T, Mode, Order>, Size>::operator/(const Packet auto x) const noexcept {
+        using RtnTy = SIMD<typename Internal::BinaryScalarOpRtnTy<ScalarType, typename decltype(x)::ScalarType>::Type, Size>;
+        if constexpr (x.isDiffable()) {
+            using RtnGradTy = RtnTy::GradType;
+            constexpr int MaskOrder = RtnTy::ScalarType::Order;
+            const auto x1 = x.template grad_mask<MaskOrder>();
+            const auto v = reciprocal(x1);
+            return RtnTy(values * x.value(), RtnGradTy((x1 * grads - grad_mask<MaskOrder>() * x.grad()) * square(v)));
+        }
+        else {
+            const auto v = reciprocal(x);
+            return RtnTy(values * v, grads * v);
+        }
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, int Size>
+    auto SIMD<Diff<T, Mode, Order>, Size>::operator-() const noexcept -> This {
         return This(-values, -grads);
     }
 
@@ -178,6 +201,17 @@ namespace Physica {
             return FullRealType(values.asReal(), grads.asReal());
         else
             return *this;
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, int Size>
+    template<int MaskOrder>
+    auto SIMD<Diff<T, Mode, Order>, Size>::grad_mask() const noexcept {
+        if constexpr (MaskOrder == 0)
+            return values;
+        else if constexpr (MaskOrder >= Order)
+            return *this;
+        else
+            return SIMD<Diff<T, Mode, MaskOrder>, Size>(values, grads.template grad_mask<MaskOrder - 1>());
     }
 
     template<Scalar T, DiffMode Mode, int Order, int Size>

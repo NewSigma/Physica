@@ -134,6 +134,17 @@ namespace Physica {
         else
             return Base::getDerived_host();
     }
+
+    [[nodiscard]] auto operator*(const Scalar auto& x, const Packet auto p) noexcept {
+        return p * x;
+    }
+
+    [[nodiscard]] auto operator*(const Packet auto p1, const Packet auto p2) noexcept {
+        if constexpr (canonicalized(p1, p2))
+            return p1.operator*(p2);
+        else
+            return p2 * p1;
+    }
 }
 
 namespace Physica {

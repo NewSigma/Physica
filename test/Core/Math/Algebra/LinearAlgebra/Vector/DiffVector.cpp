@@ -25,7 +25,18 @@ using namespace Physica;
 using RandomSource = Random<>;
 
 namespace {
-    void test_rev() {
+    void forward() {
+        syntax_only([]() {
+            // Test mixed types for binary operation
+            using V0 = VectorND<float64>;
+            using V1 = VectorND<Diff<float64, DiffMode::Forward>>;
+            auto v0 = V0::random_uniform<RandomSource>(16);
+            auto v1 = V1::random_uniform<RandomSource>(16);
+            V1 xx = hadamard(v0, v1);
+        });
+    }
+
+    void reverse() {
         using VectorType = VectorND<Diff<float64, DiffMode::Reverse, 1>>;
         auto v = VectorType::random_uniform<RandomSource>(16);
         v.sum().reverse();
@@ -53,7 +64,8 @@ namespace {
 }
 
 int main() {
-    test_rev();
+    forward();
+    reverse();
     test_hdf5();
     return 0;
 }
