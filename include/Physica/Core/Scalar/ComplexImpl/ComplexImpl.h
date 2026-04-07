@@ -268,11 +268,7 @@ namespace Physica {
 
     template<Scalar T, Scalar U>
     __host__ __device__ auto operator/(const T& x, const Complex<U>& y) requires(!T::isComplex() && !Diffable<T>) {
-        using RtnType = Internal::BinaryScalarOpRtnTy<T, Complex<U>>::Type;
-        const auto& re = y.real();
-        const auto& im = y.imag();
-        const auto divisor = x * reciprocal(square(re) + square(im));
-        return RtnType(re * divisor, -im * divisor);
+        return y.conjugate() * x / y.squaredNorm();
     }
 }
 

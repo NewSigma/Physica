@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,9 +21,19 @@
 
 using namespace Physica;
 
+namespace {
+    void simd() {
+        auto x = SIMD<float64, 2>::random_uniform<Random<>>();
+        auto y = SIMD<cfloat64, 2>::random_uniform<Random<>>();
+        auto z = (x / y) * y;
+        for (int i = 0; i < x.size(); ++i)
+            expect(scalarNear(x[i], z[i].real(), 2UL));
+    }
+}
+
 int main() {
     static_assert(std::formattable<Complex<float64>, char>);
-
+    simd();
     expect(ln1pexp(cfloat64(-1000, 0)).isZero()); // Test underflow
     return 0;
 }

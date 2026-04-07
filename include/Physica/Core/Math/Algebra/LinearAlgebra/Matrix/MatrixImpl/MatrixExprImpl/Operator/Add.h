@@ -71,7 +71,7 @@ namespace Physica {
     template<Matrix M, Scalar U>
     auto MatrixExpr<ExprID::Add, M, U>::values(this auto&& self) noexcept {
         using Self = decltype(self);
-        return std::forward<Self>(self).getLHS().values() + std::forward<Self>(self).getRHS().values();
+        return std::forward<Self>(self).getLHS().values() + std::forward<Self>(self).getRHS().value();
     }
 
     template<Matrix M, Vector V>

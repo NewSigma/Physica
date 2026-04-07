@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,7 +22,18 @@
 
 namespace Physica {
     template<Scalar T, int Size>
-    SIMD<Complex<T>, Size> fma(const SIMD<Complex<T>, Size> a, const SIMD<Complex<T>, Size> b, const SIMD<Complex<T>, Size> c) noexcept {
+    [[nodiscard]] SIMD<Complex<T>, Size> unit(const SIMD<Complex<T>, Size> x) noexcept {
+        Array<Complex<T>, Size> buffer;
+        for (int i = 0; i < Size; ++i)
+            buffer[i] = unit(x[i]);
+
+        SIMD<Complex<T>, Size> result;
+        result.load(buffer.data());
+        return result;
+    }
+
+    template<Scalar T, int Size>
+    [[nodiscard]] SIMD<Complex<T>, Size> fma(const SIMD<Complex<T>, Size> a, const SIMD<Complex<T>, Size> b, const SIMD<Complex<T>, Size> c) noexcept {
         return a * b + c;
     }
 

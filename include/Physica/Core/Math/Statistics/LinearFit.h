@@ -71,7 +71,7 @@ namespace Physica {
         const T ssx = square(x - mean_x).sum();
         const T deviation_k = sqrt(mean_sse / ssx);
         const T deviation_b = sqrt(mean_sse);
-        return std::make_pair(deviation_k, deviation_b);
+        return {deviation_k, deviation_b};
     }
     /**
      * References:

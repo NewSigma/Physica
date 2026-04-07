@@ -53,43 +53,56 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator+(const SIMD other) const {
-        return asComplex(storage + other.storage);
+    auto SIMD<Complex<T>, Size>::operator+(const Packet auto x) const {
+        static_assert(x.size() == size(), "[Error]: Size mismatch");
+        static_assert(x.isComplex(), "[Error]: No impl");
+        return asComplex(asReal() + x.asReal());
     }
 
     template<Scalar T, int Size>
-    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator-(const SIMD other) const {
-        return asComplex(storage - other.storage);
+    auto SIMD<Complex<T>, Size>::operator-(const Packet auto x) const {
+        static_assert(x.size() == size(), "[Error]: Size mismatch");
+        static_assert(x.isComplex(), "[Error]: No impl");
+        return asComplex(asReal() - x.asReal());
+    }
+
+    template<Scalar T, int Size>
+    auto SIMD<Complex<T>, Size>::operator*(Packet auto x) const {
+        static_assert(x.size() == size(), "[Error]: Size mismatch");
+        if constexpr (x.isComplex()) {
+            /**
+             * Reference:
+             * [1] vectorclass add-on; https://github.com/vectorclass/add-on
+             */
+            const auto pair = makeFullRealImag();
+            return asComplex(mul_addsub(pair.first, x.asReal(), pair.second * x.swapRealImag()));
+        }
+        else
+            return asComplex(asReal() * FullRealType(x, x).gatherRealImag());
+    }
+
+    template<Scalar T, int Size>
+    auto SIMD<Complex<T>, Size>::operator*(const Scalar auto& x) const {
+        if constexpr (x.isComplex())
+            return operator*(SIMD(x));
+        else
+            return asComplex(storage * x);
     }
     /**
      * Reference:
      * [1] vectorclass add-on; https://github.com/vectorclass/add-on
      */
     template<Scalar T, int Size>
-    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator*(const SIMD other) const {
-        const auto pair = makeFullRealImag();
-        return asComplex(mul_addsub(pair.first, other.asReal(), pair.second * other.swapRealImag()));
-    }
-
-    template<Scalar T, int Size>
-    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator*(const ScalarType& x) const {
-        return operator*(SIMD(x));
-    }
-
-    template<Scalar T, int Size>
-    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator*(const T& x) const {
-        return asComplex(storage * x);
-    }
-    /**
-     * Reference:
-     * [1] vectorclass add-on; https://github.com/vectorclass/add-on
-     */
-    template<Scalar T, int Size>
-    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator/(const SIMD other) const {
-        const auto pair = makeFullRealImag();
-        const T factor = reciprocal(abs(other.asReal()).max()); // Avoid underflow
-        const auto normed = other * factor;
-        return asComplex(mul_addsub(pair.second, normed.swapRealImag(), -pair.first * normed.asReal()) / normed.squaredNorm() * factor);
+    auto SIMD<Complex<T>, Size>::operator/(const Packet auto x) const {
+        static_assert(x.size() == size(), "[Error]: Size mismatch");
+        if constexpr (x.isComplex()) {
+            const auto pair = makeFullRealImag();
+            const T factor = reciprocal(abs(x.asReal()).max()); // Avoid underflow
+            const auto normed = x * factor;
+            return asComplex(mul_addsub(pair.second, normed.swapRealImag(), -pair.first * normed.asReal()) / normed.squaredNorm() * factor);
+        }
+        else
+            return asComplex(asReal() / FullRealType(x, x).gatherRealImag());
     }
 
     template<Scalar T, int Size>
@@ -218,5 +231,10 @@ namespace Physica {
         SIMD result{};
         result.storage = storage;
         return result;
+    }
+
+    template<Scalar T, Scalar U, int Size>
+    __host__ __device__ auto operator/(const SIMD<T, Size> x, const SIMD<Complex<U>, Size> y) requires(!T::isComplex() && !T::isDiffable()) {
+        return y.conjugate() * x / SIMD<Complex<U>, Size>::asComplex(y.squaredNorm()).real();
     }
 }

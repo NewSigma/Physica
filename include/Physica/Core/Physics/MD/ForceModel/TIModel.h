@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -66,6 +66,7 @@ namespace Physica {
         /* Setters */
         void setLambda(ScalarType lambda_);
         /* Static members */
+        [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return ForceModel::isPeriodBoundary(); }
         [[nodiscard]] static VectorND<ScalarType> makeSpringCoeffs(const VectorND<ScalarType>& msd, ScalarType temperatureT);
     private:
         void updateRef();
@@ -77,9 +78,9 @@ namespace Physica {
             , hamonic(refCell.getPos(), std::move(springCoeffs))
             , mass(refCell.getMassVec())
             , temperatureT(temperatureT_)
+            , refPotentialV(original.potentialV(refCell))
             , lambda(0) {
         updateRef();
-        refPotentialV = original.potentialV(refCell);
     }
     
     template<class ForceModel>

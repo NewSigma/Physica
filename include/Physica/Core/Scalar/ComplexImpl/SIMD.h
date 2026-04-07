@@ -66,12 +66,11 @@ namespace Physica {
         SIMD& operator=(const SIMD&) = default;
         SIMD& operator=(SIMD&&) noexcept = default;
         [[nodiscard]] ScalarType operator[](int index) const;
-        [[nodiscard]] SIMD operator+(SIMD other) const;
-        [[nodiscard]] SIMD operator-(SIMD other) const;
-        [[nodiscard]] SIMD operator*(SIMD other) const;
-        [[nodiscard]] SIMD operator*(const ScalarType& x) const;
-        [[nodiscard]] SIMD operator*(const T& x) const;
-        [[nodiscard]] SIMD operator/(SIMD other) const;
+        [[nodiscard]] auto operator+(Packet auto x) const;
+        [[nodiscard]] auto operator-(Packet auto x) const;
+        [[nodiscard]] auto operator*(Packet auto x) const;
+        [[nodiscard]] auto operator*(const Scalar auto& x) const;
+        [[nodiscard]] auto operator/(Packet auto x) const;
         [[nodiscard]] SIMD operator-() const;
         void operator+=(SIMD other) { *this = *this + other; }
         void operator-=(SIMD other) { *this = *this - other; }
@@ -99,7 +98,7 @@ namespace Physica {
         using Base::value;
         [[nodiscard]] auto isZero() const noexcept;
         [[nodiscard]] auto isFinite() const noexcept;
-        [[nodiscard]] FullRealType asReal() const noexcept { return storage.toMachine(); }
+        [[nodiscard]] FullRealType asReal() const noexcept { return storage; }
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType::asComplex(storage.getLow()); }
         [[nodiscard]] HalfType getHigh() const noexcept { return HalfType::asComplex(storage.getHigh()); }
         [[nodiscard]] RealType real() const noexcept;

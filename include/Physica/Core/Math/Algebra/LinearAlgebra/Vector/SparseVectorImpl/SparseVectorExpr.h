@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,9 +28,10 @@ namespace Physica {
             : public RSparseVector<SparseVectorExpr<ExprID::Mul, V, U>> {
         using This = SparseVectorExpr<ExprID::Mul, V, U>;
         using Base = RSparseVector<This>;
+    public:
         using typename Base::ScalarType;
         using typename Base::NonZeroPair;
-
+    private:
         const V& v;
         const U& s;
     public:

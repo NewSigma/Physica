@@ -48,6 +48,8 @@ namespace Physica {
         [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getNumParticle() * 3, 0); }
         /* Getters */
         [[nodiscard]] size_t getNumCUDAThread() const noexcept { return deviceModels.getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isPeriodBoundary() noexcept;
     };
 
     template<class HostModel, class DeviceModel>
@@ -76,6 +78,13 @@ namespace Physica {
             result = hostModel.template force<Thread>(cell);
         else
             deviceModels[threadId].template forceAsync<GPU>(cell, result);
+    }
+
+    template<class HostModel, class DeviceModel>
+    __host__ __device__ consteval bool CPUGPUModel<HostModel, DeviceModel>::isPeriodBoundary() noexcept {
+        constexpr bool result = HostModel::isPeriodBoundary();
+        static_assert(result == DeviceModel::isPeriodBoundary(), "[Error]: Inconsistend boundary condition");
+        return result;
     }
 }
 

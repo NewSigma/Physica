@@ -277,7 +277,7 @@ namespace Physica {
                     for (; i < to; i += PacketSize) {
                         const auto pack1 = pos_end.template packet<PacketSize>(i) - latticeSizes;
                         const auto pack2 = pos.template packet<PacketSize>(i);
-                        const auto boolPacket = BoolPacketType(pack1 > pack2);
+                        const auto boolPacket = pack1 > pack2;
                         if (boolPacket.horizontal_or()) [[unlikely]]
                             return true;
                     }
