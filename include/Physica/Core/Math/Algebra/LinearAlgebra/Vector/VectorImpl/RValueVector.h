@@ -58,7 +58,6 @@ namespace Physica {
 
             constexpr static bool value = []() consteval static noexcept {
                 constexpr bool isSameScalar = std::same_as<typename T1::ValueType, typename T2::ValueType>;
-                constexpr bool isScalar = PacketType::size() == 1;
                 constexpr bool isCUDA = DeviceObj<V1> || DeviceObj<V2>;
                 constexpr bool isFloat16 = ResultType::Prec == Float16;
                 // Only use FP16 SIMD for device:
@@ -66,7 +65,7 @@ namespace Physica {
                 // 2. Old processors do not have FP16 support
                 constexpr bool UsePacketFP16 = isFloat16 == isCUDA;
                 constexpr bool FastPacket = U1::isFastPacket() && U2::isFastPacket();
-                return isSameScalar && !isScalar && UsePacketFP16 && FastPacket;
+                return isSameScalar && !Scalar<PacketType> && UsePacketFP16 && FastPacket;
             }();
         };
 

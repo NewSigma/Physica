@@ -100,7 +100,6 @@ namespace Physica {
         template<RNG R>
         void random_normal() noexcept;
         /* Getters */
-        __host__ __device__ constexpr static size_t size() { return 1; }
         [[nodiscard]] __host__ __device__ auto* real_ptr(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto* value_ptr(this auto&&) noexcept;
         template<int GradOrder>

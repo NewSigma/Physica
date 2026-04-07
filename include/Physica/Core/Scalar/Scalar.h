@@ -94,7 +94,7 @@ namespace Physica {
                   || instanceof<ScalarRef, T>;
 
     template<class T>
-    concept Packet = Scalar<T> || std::derived_from<std::remove_cvref_t<T>, SIMDBase<std::remove_cvref_t<T>>>;
+    concept Packet = std::derived_from<std::remove_cvref_t<T>, SIMDBase<std::remove_cvref_t<T>>>;
 
     template<class T>
     concept ForwardDiff = std::remove_cvref_t<T>::ScalarType::isForwardDiff();
