@@ -36,11 +36,12 @@ namespace Physica {
         dim3 threads;
 
         __host__ __device__ KernelConfig(dim3 blocks_, dim3 threads_) : blocks(blocks_), threads(threads_) {}
+        PHYSICA_API void dump();
     };
     /**
      * Single thread with cuda support
      */
-    class CUDAExecutor {
+    class CUDAExecutor final {
         struct KernelFuture {
             cudaStream_t stream;
 

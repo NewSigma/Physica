@@ -76,12 +76,15 @@ namespace Physica {
         [[nodiscard]] auto tail(this auto&&, size_t from) noexcept;
         template<size_t Length = Dynamic>
         [[nodiscard]] auto segment(this auto&&, size_t from, size_t to) noexcept;
+        template<int Major, size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] auto reshape(this auto&& self, size_t row, size_t col) noexcept;
 
-        [[nodiscard]] auto reshape_like(this auto&& self, const Matrix auto& mat) noexcept;
-        template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] auto reshape_col(this auto&& self, size_t row, size_t col) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] auto reshape_row(this auto&& self, size_t row, size_t col) noexcept;
+
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] auto reshape_col(this auto&& self, size_t row, size_t col) noexcept;
+        [[nodiscard]] auto reshape_like(this auto&& self, const Matrix auto& mat) noexcept;
 
         void zeros() noexcept;
         void zero_grad() noexcept;

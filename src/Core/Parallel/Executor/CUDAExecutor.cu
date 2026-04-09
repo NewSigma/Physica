@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,9 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <print>
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 
 using namespace Physica;
+
+void KernelConfig::dump() {
+    std::println("{}", *this);
+}
 
 namespace std {
     auto formatter<KernelConfig, char>::format(

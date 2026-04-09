@@ -92,27 +92,30 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueVector<Derived>::reshape_like(this auto&& self, const Matrix auto& mat) noexcept {
+    template<int Major, size_t Row, size_t Col>
+    auto LValueVector<Derived>::reshape(this auto&& self, size_t row, size_t col) noexcept {
         using Self = decltype(self);
-        using M = std::remove_cvref_t<decltype(mat)>;
-        constexpr auto Major = MatrixMajor::getMajor<M>();
-        static_assert(Major != MatrixMajor::BothMajor, "[Error]: Cannot infer major from this matrix");
-        using ResultType = LValueReshapedVector<Self, MatrixMajor::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>;
-        return ResultType(std::forward<Self>(self), mat.getRow(), mat.getCol());
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    auto LValueVector<Derived>::reshape_col(this auto&& self, size_t row, size_t col) noexcept {
-        using Self = decltype(self);
-        return LValueReshapedVector<Self, MatrixMajor::Col, Row, Col>(std::forward<Self>(self), row, col);
+        return LValueReshapedVector<Self, Major, Row, Col>(std::forward<Self>(self), row, col);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
     auto LValueVector<Derived>::reshape_row(this auto&& self, size_t row, size_t col) noexcept {
-        using Self = decltype(self);
-        return LValueReshapedVector<Self, MatrixMajor::Row, Row, Col>(std::forward<Self>(self), row, col);
+        return std::forward<decltype(self)>(self).template reshape<MatrixMajor::Row, Row, Col>(row, col);
+    }
+
+    template<class Derived>
+    template<size_t Row, size_t Col>
+    auto LValueVector<Derived>::reshape_col(this auto&& self, size_t row, size_t col) noexcept {
+        return std::forward<decltype(self)>(self).template reshape<MatrixMajor::Col, Row, Col>(row, col);
+    }
+
+    template<class Derived>
+    auto LValueVector<Derived>::reshape_like(this auto&& self, const Matrix auto& mat) noexcept {
+        using M = std::remove_cvref_t<decltype(mat)>;
+        constexpr auto Major = MatrixMajor::getMajor<M>();
+        static_assert(Major != MatrixMajor::BothMajor, "[Error]: Cannot infer major from this matrix");
+        return std::forward<decltype(self)>(self).template reshape<Major, M::RowAtCompile, M::ColAtCompile>(mat.getRow(), mat.getCol());
     }
 }
 
