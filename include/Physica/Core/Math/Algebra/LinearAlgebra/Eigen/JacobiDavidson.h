@@ -103,7 +103,7 @@ namespace Physica {
     JacobiDavidson<T>::JacobiDavidson() : curSearchDim() {
         linearSolver.mustConverge = false;
         linearSolver.setError(LinearSolverPrecision);
-        linearSolver.setMaxIteration(MaxLinearSolverIteration);
+        linearSolver.setIterationLimit(MaxLinearSolverIteration);
     }
 
     template<Scalar T>
@@ -373,7 +373,7 @@ namespace Physica {
         auto new_direction = searchSpace.col(curSearchDim);
         new_direction = residual;
         gram_schmidt(orthogonalSpace, new_direction);
-        linearSolver.cg_functor([this, index, eigenGoal, &buffer, &source](const VectorND<T>& v, VectorND<T>& dot) {
+        linearSolver.cg([this, index, eigenGoal, &buffer, &source](const VectorND<T>& v, VectorND<T>& dot) {
             const auto orthogonalSpace = eigenvectors.leftCols(index + 1);
             auto head1 = dot.head(index + 1);
             head1 = orthogonalSpace.hermite() * v;

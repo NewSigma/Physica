@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,6 +23,7 @@ namespace Physica {
     class BoolSIMD : private Traits<BoolSIMD<T, Size>>::Pack {
         using This = BoolSIMD<T, Size>;
         using Base = Traits<This>::Pack;
+        using HalfType = std::conditional<sizeof(Base) * CHAR_BIT != 128, BoolSIMD<T, Size / 2>, PlainStruct<void>>::type;
     public:
         BoolSIMD() = default;
         explicit BoolSIMD(Base value) : Base(value) {}
@@ -32,7 +33,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
+        [[nodiscard]] This operator&&(This other) const noexcept;
+        [[nodiscard]] This operator||(This other) const noexcept;
         [[nodiscard]] This operator^(This other) const noexcept;
+        [[nodiscard]] This operator!() const noexcept;
         /* Operations */
         [[nodiscard]] bool horizontal_and() const;
         [[nodiscard]] bool horizontal_or() const;
@@ -41,11 +45,28 @@ namespace Physica {
         [[nodiscard]] constexpr static size_t getSize() { return Size; }
         [[nodiscard]] Base& toMachine() noexcept { return *this; }
         [[nodiscard]] const Base& toMachine() const noexcept { return *this; }
+        [[nodiscard]] auto getLow() const noexcept { return HalfType(Base::get_low()); }
+        [[nodiscard]] auto getHigh() const noexcept { return HalfType(Base::get_high()); }
     };
+
+    template<Scalar T, int Size>
+    auto BoolSIMD<T, Size>::operator&&(This other) const noexcept -> This {
+        return This(toMachine() && other.toMachine());
+    }
+
+    template<Scalar T, int Size>
+    auto BoolSIMD<T, Size>::operator||(This other) const noexcept -> This {
+        return This(toMachine() && other.toMachine());
+    }
 
     template<Scalar T, int Size>
     auto BoolSIMD<T, Size>::operator^(This other) const noexcept -> This {
         return This(toMachine() ^ other.toMachine());
+    }
+
+    template<Scalar T, int Size>
+    auto BoolSIMD<T, Size>::operator!() const noexcept -> This {
+        return This(!toMachine());
     }
 
     template<Scalar T, int Size>

@@ -168,45 +168,6 @@ namespace Physica {
             using Type = Type2;
         };
     }
-
-    template<>
-    class DiffCoro<void> {
-        using This = DiffCoro<void>;
-        class Promise {
-        public:
-            auto get_return_object() noexcept { return std::coroutine_handle<Promise>::from_promise(*this); };
-            static std::nullptr_t get_return_object_on_allocation_failure() noexcept { unreachable("Expect coro frame is small"); }
-            static auto initial_suspend() noexcept { return suspend_never{}; }
-            static auto final_suspend() noexcept { return suspend_always{}; }
-            void return_void() noexcept {}
-            [[noreturn]] static void unhandled_exception() { throw; }
-        };
-    public:
-        using promise_type = Promise;
-    private:
-        std::coroutine_handle<Promise> handle = nullptr;
-    public:
-        DiffCoro() = default;
-        DiffCoro(std::nullptr_t) noexcept {}
-        DiffCoro(std::coroutine_handle<Promise> handle_) noexcept : handle(handle_) {}
-        DiffCoro(const This&) = delete;
-        DiffCoro(This&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
-        ~DiffCoro() {
-            if (!handle.done()) {
-                handle.resume();
-                assert(handle.done() && "[Error]: Invalid reverse diff");
-                handle.destroy();
-                handle = nullptr;
-            }
-        }
-        /* Operators */
-        This& operator=(This obj) noexcept { swap(obj); return *this; }
-        /* Operations */
-        void swap(This& __restrict obj) noexcept {
-            assert(this != &obj && "[Error]: Self swap is likely a bug");
-            std::swap(handle, obj.handle);
-        }
-    };
 }
 
 namespace Physica {

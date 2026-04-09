@@ -44,7 +44,7 @@ namespace Physica {
 
         using Base::operator*;
         void operator*=(const Scalar auto& x);
-        [[nodiscard]] auto operator*(Vector auto&& v) const noexcept;
+        [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
@@ -53,7 +53,8 @@ namespace Physica {
         [[nodiscard]] T sgndet() const;
 
         [[nodiscard]] This inv() const;
-        [[nodiscard]] const This& transpose() const noexcept { return *this; }
+        [[nodiscard]] auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) hermite(this auto&&) noexcept;
 
         void resize(size_t order);
         void swap(This& __restrict obj) noexcept;
@@ -78,9 +79,9 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    auto DiagMatrix<T, Order>::operator*(Vector auto&& v) const noexcept {
-        assert(getCol() == v.getLength());
-        return hadamard(diags, std::forward<decltype(v)>(v));
+    auto DiagMatrix<T, Order>::operator*(this auto&& self, Vector auto&& v) noexcept {
+        assert(self.getOrder() == v.getLength());
+        return hadamard(std::forward<decltype(self)>(self).diag(), std::forward<decltype(v)>(v));
     }
 
     template<Scalar T, size_t Order>
@@ -106,6 +107,16 @@ namespace Physica {
     template<Scalar T, size_t Order>
     auto DiagMatrix<T, Order>::inv() const -> This {
         return This(reciprocal(diags));
+    }
+
+    template<Scalar T, size_t Order>
+    auto&& DiagMatrix<T, Order>::transpose(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self);
+    }
+
+    template<Scalar T, size_t Order>
+    decltype(auto) DiagMatrix<T, Order>::hermite(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).conjugate();
     }
 
     template<Scalar T, size_t Order>

@@ -46,7 +46,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] decltype(auto) transpose(this auto&&) noexcept;
-        [[nodiscard]] decltype(auto) hermite() const noexcept;
+        [[nodiscard]] decltype(auto) hermite(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return getExpr().getRow(); }
         [[nodiscard]] size_t getCol() const { return getExpr().getCol(); }
@@ -68,11 +68,15 @@ namespace Physica {
     }
 
     template<ExprID ID, Matrix M>
-    decltype(auto) UnitaryMatrixExpr<ID, M>::hermite() const noexcept {
+    decltype(auto) UnitaryMatrixExpr<ID, M>::hermite(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (M::isStaticHermite())
-            return Base::getDerived();
-        else
-            return Base::hermite();
+            return std::forward<Self>(self);
+        else {
+            using X = Base; // FIXME: clang 22 rejects valid
+            [[maybe_unused]] auto x = sizeof(X);
+            return std::forward<Self>(self).X::hermite();
+        }
     }
 
     template<ExprID ID, Matrix M>
@@ -105,7 +109,7 @@ namespace Physica {
         [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept requires(RowAtCompile != 1);
         /* Operations */
         [[nodiscard]] decltype(auto) transpose(this auto&&) noexcept;
-        [[nodiscard]] decltype(auto) hermite() const noexcept;
+        [[nodiscard]] decltype(auto) hermite(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const;
         [[nodiscard]] size_t getCol() const;
@@ -152,11 +156,15 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    decltype(auto) BinaryMatrixExpr<ID, LHS, RHS>::hermite() const noexcept {
+    decltype(auto) BinaryMatrixExpr<ID, LHS, RHS>::hermite(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (isStaticHermite())
-            return Base::getDerived();
-        else
-            return Base::hermite();
+            return std::forward<Self>(self);
+        else {
+            using X = Base; // FIXME: clang 22 rejects valid
+            [[maybe_unused]] auto x = sizeof(X);
+            return std::forward<Self>(self).X::transpose();
+        }
     }
 
     template<ExprID ID, class LHS, class RHS>

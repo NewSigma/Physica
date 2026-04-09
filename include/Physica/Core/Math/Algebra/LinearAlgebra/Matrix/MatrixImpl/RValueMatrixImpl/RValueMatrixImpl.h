@@ -24,20 +24,15 @@
 
 namespace Physica {
     template<class Derived>
-    auto RValueMatrix<Derived>::operator*(this auto&& self, Vector auto&& v) noexcept requires(RowAtCompile != 1) {
+    auto RValueMatrix<Derived>::operator*(this auto&& self, Vector auto&& v) noexcept {
         assert(self.getCol() == v.getLength());
         using Self = decltype(self);
         using V = decltype(v);
         static_assert(!is_device_obj<V>::value, "[Error]: host-device mismatch");
-        return GEMV<Self, V&&>(std::forward<Self>(self), std::forward<V>(v));
-    }
-
-    template<class Derived>
-    auto RValueMatrix<Derived>::operator*(const Vector auto& v) const noexcept requires(RowAtCompile == 1) {
-        assert(getCol() == v.getLength());
-        using V = decltype(v);
-        static_assert(!is_device_obj<V>::value, "[Error]: host-device mismatch");
-        return Base::getDerived().row(0) * v;
+        if constexpr (RowAtCompile == 1)
+            return std::forward<Self>(self).row(0) * v;
+        else
+            return GEMV<Self, V&&>(std::forward<Self>(self), std::forward<V>(v));
     }
 
     template<class Derived>
@@ -449,19 +444,21 @@ namespace Physica {
     }
 
     template<class Derived>
-    decltype(auto) RValueMatrix<Derived>::conjugate() const noexcept {
+    decltype(auto) RValueMatrix<Derived>::conjugate(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (isComplex())
-            return Conjugate<Derived>(Base::getDerived());
+            return Conjugate<Self>(std::forward<Self>(self));
         else
-            return Base::getDerived();
+            return std::forward<Self>(self);
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::hermite() const noexcept {
+    auto RValueMatrix<Derived>::hermite(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (isComplex())
-            return Hermite<Derived>(Base::getDerived());
+            return Hermite<Self>(std::forward<Self>(self));
         else
-            return Base::getDerived().transpose();
+            return std::forward<Self>(self).transpose();
     }
 
     template<class Derived>

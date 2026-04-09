@@ -202,6 +202,12 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
+    auto SIMD<Complex<T>, Size>::isSubNormal() const noexcept {
+        auto bools = Base::scatterRealImag().isSubNormal();
+        return bools.getLow() && bools.getHigh();
+    }
+
+    template<Scalar T, int Size>
     auto SIMD<Complex<T>, Size>::real() const noexcept -> RealType {
         if constexpr (isSeparatable)
             return gatherRealImag().getLow();

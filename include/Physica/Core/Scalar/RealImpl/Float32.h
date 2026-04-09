@@ -83,6 +83,7 @@ namespace Physica {
         PHYSICA_API friend std::istream& operator>>(std::istream& is, Real& scalar);
         /* Operations */
         [[nodiscard]] __host__ __device__ inline Real mod() const noexcept;
+        PHYSICA_API void dump() const noexcept;
 
         using Base::random_uniform;
         using Base::random_normal;

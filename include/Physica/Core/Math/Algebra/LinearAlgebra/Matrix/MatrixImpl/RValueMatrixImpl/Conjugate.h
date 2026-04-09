@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,16 +23,14 @@
 namespace Physica {
     template<Matrix M>
     class Conjugate<M> : public RValueMatrix<Conjugate<M>> {
-        static_assert(M::isComplex(), "[Error]: Unnecessary conjugate call on real matrix");
-
         using This = Conjugate<M>;
         using Base = RValueMatrix<This>;
     protected:
         using typename Base::T;
     private:
-        const M& matrix;
+        LazyDestroy<M> m;
     public:
-        Conjugate(const M& matrix_) : matrix(matrix_) {}
+        Conjugate(M&& m);
         Conjugate(const This&) = default;
         Conjugate(This&&) = default;
         ~Conjugate() = default;
@@ -40,13 +38,23 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] T calc(size_t row, size_t col) const { return matrix.calc(row, col).conjugate(); }
+        [[nodiscard]] T calc(size_t row, size_t col) const { return m.calc(row, col).conjugate(); }
 
-        [[nodiscard]] const M& conjugate() const noexcept { return matrix; }
+        [[nodiscard]] auto&& conjugate(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return matrix.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return matrix.getCol(); }
+        [[nodiscard]] size_t getRow() const noexcept { return m.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return m.getCol(); }
     };
+
+    template<Matrix M>
+    Conjugate<M>::Conjugate(M&& m) : m(std::forward<M>(m)) {
+        static_assert(m.isComplex(), "[Error]: Unnecessary conjugate call on real matrix");
+    }
+
+    template<Matrix M>
+    auto&& Conjugate<M>::conjugate(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.m);
+    }
 }
 
 namespace Physica {

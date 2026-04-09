@@ -30,7 +30,7 @@ namespace Physica {
         constexpr auto TransB = MatrixMajor::isSameMajor<M, M2>() ? CblasNoTrans : CblasTrans;
         auto getData = [](const auto& mat) static {
             if constexpr (instanceof<Transpose, decltype(mat)>)
-                return mat.getExpr().data();
+                return mat.transpose().data();
             else
                 return mat.data();
         };

@@ -232,11 +232,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::hermite() const noexcept {
+    auto RValueVector<Derived>::hermite(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (isComplex())
-            return Hermite<Derived>(Base::getDerived());
+            return Hermite<Self>(std::forward<Self>(self));
         else
-            return Base::getDerived().transpose();
+            return std::forward<Self>(self).transpose();
     }
 
     template<class Derived>

@@ -105,7 +105,7 @@ namespace Physica {
 
     template<class T, size_t Length, class Allocator>
     auto Array<T, Length, Allocator>::toIndexND(const IndexType& shape, size_t index) noexcept -> IndexType {
-        const int dim = shape.getLength();
+        constexpr int dim = shape.getLength();
         IndexType indices(shape.size());
         size_t remaining = index;
         for (int i = 0; i < dim; ++i) {
@@ -169,7 +169,7 @@ namespace Physica {
 
     template<class T, class Allocator>
     Array<T, Dynamic, Allocator>::Array(This&& obj) noexcept
-            : arr(obj.arr), length(obj.length), capacity(obj.capacity), alloc() {
+            : arr(obj.arr), length(obj.length), capacity(obj.capacity), alloc(std::move(obj.alloc)) {
         obj.arr = nullptr;
         obj.length = 0;
         obj.capacity = 0;
@@ -181,7 +181,7 @@ namespace Physica {
             if (arr != nullptr)
                 for(size_t i = 0; i < length; ++i)
                     std::allocator_traits<Allocator>::destroy(alloc, arr + i);
-        alloc.deallocate(arr, length);
+        alloc.deallocate(arr, capacity);
     }
 
     template<class T, class Allocator>
@@ -293,9 +293,9 @@ namespace Physica {
     auto Array<T, Dynamic, Allocator>::generate(size_t length, std::invocable<size_t> auto fn) -> This {
         This result{};
         result.arr = result.get_allocator().allocate(length);
-        result.length = result.capacity = length;
-        for (size_t i = 0; i < length; ++i)
-            new (result.data_ptr(i)) T(std::move(fn(i)));
+        result.capacity = length;
+        for (auto& i = result.length; i < length; ++i)
+            new (result.arr + i) T(std::move(fn(i)));
         return result;
     }
 

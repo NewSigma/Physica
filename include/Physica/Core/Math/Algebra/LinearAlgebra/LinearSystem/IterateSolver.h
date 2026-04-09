@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,17 +25,16 @@ namespace Physica {
     template<Scalar T>
     class IterateSolver {
         using This = IterateSolver<T>;
-        using VectorType = VectorND<T>;
-        using RealType = T::RealType;
+        using Tr = T::RealType;
+        constexpr static size_t Unlimited = std::numeric_limits<size_t>::max();
     private:
-        VectorType residual;
-        VectorType searchP;
-        VectorType dot;
-        RealType squaredRes0;
-        RealType squaredRes;
-        RealType error = std::numeric_limits<T>::epsilon();
-        size_t maxIteration = 0;
-        size_t iteration;
+        VectorND<T> residual;
+        VectorND<T> searchP;
+        VectorND<T> dot;
+        Tr squaredRes0;
+        Tr squaredRes;
+        Tr error = std::numeric_limits<T>::epsilon();
+        size_t itelim = Unlimited;
     public:
         bool mustConverge = true;
     public:
@@ -47,20 +46,19 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void cg(const Matrix auto& A, VectorType& b);
-        void cgnr(const Matrix auto& A, VectorType& b);
-
-        void cg_functor(std::invocable<const VectorType&, VectorType&> auto dotFunc, Vector auto& b);
-        void cgnr_functor(std::invocable<const VectorType&, VectorType&> auto dotFunc, std::invocable<const VectorType&, VectorType&> auto dotTransFunc, Vector auto& b);
+        void cg(const Matrix auto& A, VectorND<T>& b);
+        void cg(std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc, Vector auto& b);
+        void cgnr(const Matrix auto& A, VectorND<T>& b);      
+        void cgnr(std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc, std::invocable<const VectorND<T>&, VectorND<T>&> auto dotTransFunc, Vector auto& b);
 
         void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
         /* Setters */
-        void setError(RealType error_) noexcept { error = std::move(error_); }
-        void setMaxIteration(size_t iteration) noexcept { maxIteration = iteration; }
+        void setError(Tr error_) noexcept { error = std::move(error_); }
+        void setIterationLimit(size_t limit) noexcept { itelim = limit; }
     private:
-        [[nodiscard]] bool isConverged() const { return squaredRes < squaredRes0 * error; }
-        [[nodiscard]] bool shouldStop() const { return (maxIteration != 0) && (iteration > maxIteration); }
+        [[nodiscard]] bool isConverged() const noexcept;
+        [[nodiscard]] size_t getMaxIterationCG() const noexcept;
     };
 
     template<Scalar T>
@@ -69,87 +67,94 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void IterateSolver<T>::cg(const Matrix auto& A, VectorType& b) {
-        assert(A.getRow() == A.getCol());
+    void IterateSolver<T>::cg(const Matrix auto& A, VectorND<T>& b) {
+        assert(A.isSquare());
         assert(A.getRow() == b.getLength());
-        cg_functor([&A](const VectorType& v, VectorType& dot) { dot = A * v; }, b);
-    }
-
-    template<Scalar T>
-    void IterateSolver<T>::cgnr(const Matrix auto& A, VectorType& b) {
-        assert(A.getRow() == A.getCol());
-        assert(A.getRow() == b.getLength());
-        auto dotFunc = [&A](const VectorType& v, VectorType& dot) { dot = A * v; };
-        auto dotTransFunc = [&A](const VectorType& v, VectorType& dot) { dot = A.transpose() * v; };
-        cgnr_functor(dotFunc, dotTransFunc, b);
+        cg([&A](const VectorND<T>& v, VectorND<T>& dot) { dot = A * v; }, b);
     }
     /**
-     * Conjagate gradient(CG)
+     * Conjugate gradient(CG)
      * Pertinent for large-scale problem, \param dotFunc must be symmetric and positive definite
      * 
      * Reference:
      * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006:112
      */
     template<Scalar T>
-    void IterateSolver<T>::cg_functor(std::invocable<const VectorType&, VectorType&> auto dotFunc, Vector auto& b) {
-        if (dot.getLength() != b.getLength())
-            resize(b.getLength());
+    void IterateSolver<T>::cg(std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc, Vector auto& b) {
+        size_t length = b.getLength();
+        if (dot.getLength() != length)
+            resize(length);
         residual = -b;
         searchP = b;
         auto& x = b;
         x.zeros();
 
         squaredRes0 = squaredRes = residual.squaredNorm();
-        iteration = 0;
-        while(!isConverged() && !shouldStop()) {
+        const size_t maxite = getMaxIterationCG();
+        size_t iteration = 0;
+        while(!isConverged()) {
             dotFunc(searchP, dot);
-            const RealType step = squaredRes / (searchP.conjugate() * dot).real();
+            const Tr resA = (searchP.conjugate() * dot).real();
+            const Tr step = squaredRes / resA;
             x += step * searchP;
             residual += step * dot;
 
-            const RealType next_squaredRes = residual.squaredNorm();
-            const RealType beta = next_squaredRes / squaredRes;
+            const Tr next_squaredRes = residual.squaredNorm();
+            const Tr beta = next_squaredRes / squaredRes;
             squaredRes = next_squaredRes;
             searchP = beta * searchP - residual;
-            ++iteration;
+            if (++iteration > maxite)
+                break;
         }
 
         if (mustConverge && !isConverged()) [[unlikely]]
             throw BadConvergenceException("[Error]: CG cannot converge in the given iterations");
     }
+
+    template<Scalar T>
+    void IterateSolver<T>::cgnr(const Matrix auto& A, VectorND<T>& b) {
+        assert(A.isSquare());
+        assert(A.getRow() == b.getLength());
+        auto dotFunc = [&A](const VectorND<T>& v, VectorND<T>& dot) { (A * v).assign(dot); };
+        auto dotTransFunc = [&A](const VectorND<T>& v, VectorND<T>& dot) { (A.hermite() * v).assign(dot); };
+        cgnr(dotFunc, dotTransFunc, b);
+    }
     /**
-     * Conjagate gradient normal equation residual(CGNR)
+     * Conjugate gradient normal equation residual(CGNR)
      * Applies to unsymmetric matrix, converges slow
      * 
      * References:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:636-637
      */
     template<Scalar T>
-    void IterateSolver<T>::cgnr_functor(
-            std::invocable<const VectorType&, VectorType&> auto dotFunc,
-            std::invocable<const VectorType&, VectorType&> auto dotTransFunc,
+    void IterateSolver<T>::cgnr(
+            std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc,
+            std::invocable<const VectorND<T>&, VectorND<T>&> auto dotTransFunc,
             Vector auto& b) {
-        if (dot.getLength() != b.getLength())
-            resize(b.getLength());
+        size_t length = b.getLength();
+        if (dot.getLength() != length)
+            resize(length);
         residual = -b;
         dotTransFunc(b, searchP);
         auto& x = b;
         x.zeros();
 
         squaredRes0 = squaredRes = searchP.squaredNorm();
-        iteration = 0;
-        while(!isConverged() && !shouldStop()) {
+        const size_t maxite = getMaxIterationCG();
+        size_t iteration = 0;
+        while(!isConverged()) {
             dotFunc(searchP, dot);
-            const RealType step = squaredRes / dot.squaredNorm();
+            const Tr step = squaredRes / dot.squaredNorm();
             x += step * searchP;
             residual += step * dot;
 
             dotTransFunc(residual, dot);
-            const RealType next_squaredRes = dot.squaredNorm();
-            const RealType beta = next_squaredRes / squaredRes;
+            const Tr next_squaredRes = dot.squaredNorm();
+            const Tr beta = next_squaredRes / squaredRes;
             squaredRes = next_squaredRes;
             searchP = beta * searchP - residual;
-            ++iteration;
+            if (++iteration > maxite)
+                break;
         }
 
         if (mustConverge && !isConverged()) [[unlikely]]
@@ -172,13 +177,18 @@ namespace Physica {
         squaredRes0.swap(obj.squaredRes0);
         squaredRes.swap(obj.squaredRes);
         error.swap(obj.error);
-        std::swap(maxIteration, obj.maxIteration);
-        std::swap(iteration, obj.iteration);
+        std::swap(itelim, obj.itelim);
         std::swap(mustConverge, obj.mustConverge);
     }
 
     template<Scalar T>
-    void swap(IterateSolver<T>& __restrict solver1, IterateSolver<T>& __restrict solver2) noexcept {
-        solver1.swap(solver2);
+    bool IterateSolver<T>::isConverged() const noexcept {
+        return squaredRes < squaredRes0 * error;
+    }
+
+    template<Scalar T>
+    size_t IterateSolver<T>::getMaxIterationCG() const noexcept {
+        constexpr static int MaxIterationFactor = 2;
+        return itelim == Unlimited ? (MaxIterationFactor * dot.getLength()) : itelim;
     }
 }

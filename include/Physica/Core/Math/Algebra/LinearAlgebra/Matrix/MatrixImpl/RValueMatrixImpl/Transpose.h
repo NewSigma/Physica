@@ -61,9 +61,8 @@ namespace Physica {
         [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc(col, row); }
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return mat.calc_value(col, row); }
 
-        [[nodiscard]] const M& transpose() const noexcept { return mat; }
+        [[nodiscard]] auto&& transpose(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] size_t getRow() const noexcept { return mat.getCol(); }
         [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
     };
@@ -83,7 +82,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    auto&& Transpose<M>::getExpr(this auto&& self) noexcept {
+    auto&& Transpose<M>::transpose(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 
@@ -110,7 +109,7 @@ namespace Physica {
         [[nodiscard]] T calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
         [[nodiscard]] Tv calc_value([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc_value(col); }
 
-        [[nodiscard]] const V& transpose() const noexcept { return vec; }
+        [[nodiscard]] auto&& transpose(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] size_t getCol() const noexcept { return vec.getLength(); }
@@ -120,6 +119,11 @@ namespace Physica {
     void Transpose<V>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < vec.getLength(); ++i)
             target.refFromMajorMinor(0, i) = calc(target.rowFromMajorMinor(0, i), target.colFromMajorMinor(0, i));
+    }
+
+    template<Vector V>
+    auto&& Transpose<V>::transpose(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
 }
 

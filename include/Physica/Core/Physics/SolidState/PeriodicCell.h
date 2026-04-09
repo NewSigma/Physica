@@ -126,8 +126,8 @@ namespace Physica {
         [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inv(); }
         void toDirect(const InvLatticeMatrix& invLattice);
         void normalize_direct();
-        CoDiff<void> scale_direct(const T& factor);
-        CoDiff<void> scale_cartesian(const T& factor);
+        void scale_direct(const T& factor);
+        void scale_cartesian(const T& factor);
         template<ExtendCellOption Option>
         void toSuperCellDirect(unsigned int x, unsigned int y, unsigned int z);
         void toUnitCellDirect(unsigned int x, unsigned int y, unsigned int z);
@@ -730,28 +730,18 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    CoDiff<void> PeriodicCell<T, Dim>::scale_direct(const T& factor) {
+    void PeriodicCell<T, Dim>::scale_direct(const T& factor) {
         assert(factor.isPositive());
         assert(type == Type::Direct);
         lattice *= factor;
-        if constexpr (ReverseDiff<T>) {
-            co_await suspend_always{};
-            factor.reverse(lattice.grads().sum());
-        }
-        co_return;
     }
 
     template<Scalar T, unsigned int Dim>
-    CoDiff<void> PeriodicCell<T, Dim>::scale_cartesian(const T& factor) {
+    void PeriodicCell<T, Dim>::scale_cartesian(const T& factor) {
         assert(factor.isPositive());
         assert(type == Type::Cartesian);
         lattice *= factor;
         pos *= factor;
-        if constexpr (ReverseDiff<T>) {
-            co_await suspend_always{};
-            factor.reverse(lattice.grads().sum() + pos.grads().sum());
-        }
-        co_return;
     }
 
     template<Scalar T, unsigned int Dim>

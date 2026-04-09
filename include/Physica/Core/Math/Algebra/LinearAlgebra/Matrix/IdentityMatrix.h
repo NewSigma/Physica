@@ -46,9 +46,10 @@ namespace Physica {
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
 
-        [[nodiscard]] const This& transpose() const noexcept { return *this; }
-        [[nodiscard]] const This& conjugate() const noexcept { return *this; }
-        [[nodiscard]] const This& hermite() const noexcept { return *this; }
+        [[nodiscard]] auto&& inv(this auto&&) noexcept;
+        [[nodiscard]] auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] auto&& conjugate(this auto&&) noexcept;
+        [[nodiscard]] auto&& hermite(this auto&&) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
@@ -91,6 +92,26 @@ namespace Physica {
     template<Scalar T, size_t Order>
     T IdentityMatrix<T, Order>::calc(size_t row, size_t col) const {
         return T(row == col ? 1 : 0);
+    }
+
+    template<Scalar T, size_t Order>
+    auto&& IdentityMatrix<T, Order>::inv(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self);
+    }
+
+    template<Scalar T, size_t Order>
+    auto&& IdentityMatrix<T, Order>::transpose(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self);
+    }
+
+    template<Scalar T, size_t Order>
+    auto&& IdentityMatrix<T, Order>::conjugate(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self);
+    }
+
+    template<Scalar T, size_t Order>
+    auto&& IdentityMatrix<T, Order>::hermite(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self);
     }
 
     template<Scalar T, size_t Order>

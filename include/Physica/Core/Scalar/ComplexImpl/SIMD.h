@@ -98,6 +98,7 @@ namespace Physica {
         using Base::value;
         [[nodiscard]] auto isZero() const noexcept;
         [[nodiscard]] auto isFinite() const noexcept;
+        [[nodiscard]] auto isSubNormal() const noexcept;
         [[nodiscard]] FullRealType asReal() const noexcept { return storage; }
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType::asComplex(storage.getLow()); }
         [[nodiscard]] HalfType getHigh() const noexcept { return HalfType::asComplex(storage.getHigh()); }

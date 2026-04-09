@@ -5,6 +5,7 @@ add_subdirectory(MatrixImpl)
 
 physica_add_test(DenseMatrix DenseMatrix.cpp)
 physica_add_test(DenseSymmMatrix DenseSymmMatrix.cpp)
+physica_add_test(DiagMatrix DiagMatrix.cpp)
 physica_add_test(DiffDenseMatrix DiffDenseMatrix.cpp)
 physica_add_test(MatrixChain MatrixChain.cpp)
 physica_add_test(PermMatrix PermMatrix.cpp)

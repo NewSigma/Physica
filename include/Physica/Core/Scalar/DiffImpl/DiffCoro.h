@@ -82,6 +82,46 @@ namespace Physica {
 
         [[nodiscard]] T& await_resume() const noexcept { return *pObj; }
     };
+    //////////////////////////////////////////////////////////////////////////////
+    template<>
+    class DiffCoro<void> {
+        using This = DiffCoro<void>;
+        class Promise;
+    public:
+        using promise_type = Promise;
+    private:
+        std::coroutine_handle<Promise> handle = nullptr;
+    public:
+        DiffCoro() = default;
+        DiffCoro(const This&) = delete;
+        DiffCoro(This&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
+        [[gnu::nodebug]] ~DiffCoro() {
+            if (handle) {
+                assert(!handle.done() && "[Error]: Unexpected resume, this is a bug");
+                handle.resume();
+                handle = nullptr;
+            }
+        }
+        /* Operators */
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        /* Operations */
+        void swap(This& __restrict obj) noexcept {
+            assert(this != &obj && "[Error]: Self swap is likely a bug");
+            std::swap(handle, obj.handle);
+        }
+    private:
+        DiffCoro(Promise& p) noexcept : handle(std::coroutine_handle<Promise>::from_promise(p)) {}
+    };
+
+    class DiffCoro<void>::Promise {
+    public:
+        auto get_return_object() noexcept { return DiffCoro<void>(*this); };
+        static DiffCoro<void> get_return_object_on_allocation_failure() noexcept { unreachable("Expect coro frame is small"); }
+        static auto initial_suspend() noexcept { return suspend_never{}; }
+        static auto final_suspend() noexcept { return suspend_never{}; }
+        void return_void() noexcept {}
+        [[noreturn]] static void unhandled_exception() { throw; }
+    };
 
     template<class Predicate, class Operation, class Functor>
     [[nodiscard("[Warn]: Discarding a coroutine")]] auto co_for(Predicate&& pred, Operation&& op, Functor&& func) noexcept(noexcept(func()));

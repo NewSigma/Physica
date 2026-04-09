@@ -45,9 +45,9 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        const M& mat;
+        LazyDestroy<M> m;
     public:
-        explicit Hermite(const M& mat_);
+        explicit Hermite(M&& m);
         Hermite(const This&) = default;
         Hermite(This&&) noexcept = default;
         ~Hermite() = default;
@@ -55,17 +55,22 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc(col, row).conjugate(); }
+        [[nodiscard]] T calc(size_t row, size_t col) const { return m.calc(col, row).conjugate(); }
 
-        [[nodiscard]] const M& hermite() const noexcept { return mat; }
+        [[nodiscard]] auto&& hermite(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return mat.getCol(); }
-        [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
+        [[nodiscard]] size_t getRow() const noexcept { return m.getCol(); }
+        [[nodiscard]] size_t getCol() const noexcept { return m.getRow(); }
     };
 
     template<Matrix M>
-    Hermite<M>::Hermite(const M& mat_) : mat(mat_) {
-        static_assert(M::isComplex(), "[Error]: Do not call hermite on real matrix");
+    Hermite<M>::Hermite(M&& m) : m(std::forward<M>(m)) {
+        static_assert(m.isComplex(), "[Error]: Do not call hermite on real matrix");
+    }
+
+    template<Matrix M>
+    auto&& Hermite<M>::hermite(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.m);
     }
 
     template<Vector V>
@@ -75,9 +80,9 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        const V& vec;
+        LazyDestroy<V> v;
     public:
-        explicit Hermite(const V& vec_);
+        explicit Hermite(V&& v);
         Hermite(const This&) = default;
         Hermite(This&&) noexcept = default;
         ~Hermite() = default;
@@ -87,45 +92,35 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
 
-        [[nodiscard]] T calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col).conjugate(); }
+        [[nodiscard]] T calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return v.calc(col).conjugate(); }
 
-        [[nodiscard]] const V& hermite() const noexcept { return vec; }
+        [[nodiscard]] auto&& hermite(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] size_t getCol() const noexcept { return vec.getLength(); }
+        [[nodiscard]] size_t getCol() const noexcept { return v.getLength(); }
     };
 
     template<Vector V>
-    Hermite<V>::Hermite(const V& vec_) : vec(vec_) {
-        static_assert(V::isComplex(), "[Error]: Do not call hermite on real vector");
+    Hermite<V>::Hermite(V&& v) : v(std::forward<V>(v)) {
+        static_assert(v.isComplex(), "[Error]: Do not call hermite on real vector");
     }
 
     template<Vector V>
     void Hermite<V>::assign(Matrix auto& target) const {
-        for (size_t i = 0; i < vec.getLength(); ++i)
+        for (size_t i = 0; i < v.getLength(); ++i)
             target.refFromMajorMinor(0, i) = calc(target.rowFromMajorMinor(0, i), target.colFromMajorMinor(0, i));
+    }
+
+    template<Vector V>
+    auto&& Hermite<V>::hermite(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.v);
     }
 }
 
 namespace Physica {
     template<Matrix M>
-    class Traits<Hermite<M>> {
-        constexpr static int OtherMajor = MatrixMajor::isColMatrix<M>() ? MatrixMajor::Row : MatrixMajor::Col;
-    public:
-        using ScalarType = M::ScalarType;
-        constexpr static int Major = MatrixMajor::isBothMajor<M>() ? MatrixMajor::BothMajor : OtherMajor;
-        constexpr static size_t RowAtCompile = M::ColAtCompile;
-        constexpr static size_t ColAtCompile = M::RowAtCompile;
-        constexpr static size_t SizeAtCompile = M::SizeAtCompile;
-    };
+    class Traits<Hermite<M>> : public Traits<Transpose<M>> {};
 
     template<Vector V>
-    class Traits<Hermite<V>> {
-    public:
-        using ScalarType = V::ScalarType;
-        constexpr static int Major = MatrixMajor::Row;
-        constexpr static size_t RowAtCompile = 1;
-        constexpr static size_t ColAtCompile = V::SizeAtCompile;
-        constexpr static size_t SizeAtCompile = V::SizeAtCompile;
-    };
+    class Traits<Hermite<V>> : public Traits<Transpose<V>> {};
 }

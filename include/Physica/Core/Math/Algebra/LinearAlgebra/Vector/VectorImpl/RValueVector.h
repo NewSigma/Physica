@@ -150,7 +150,7 @@ namespace Physica {
         [[nodiscard]] const auto reversal() const noexcept;
         [[nodiscard]] auto transpose(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
-        [[nodiscard]] auto hermite() const noexcept;
+        [[nodiscard]] auto hermite(this auto&&) noexcept;
         [[nodiscard]] auto format() const;
 
         [[nodiscard]] CoDiff<Tr> norm1() const noexcept;

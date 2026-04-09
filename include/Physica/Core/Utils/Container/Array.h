@@ -79,8 +79,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr static size_t size() noexcept { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() noexcept { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getCapacity() noexcept { return Length; }
-        [[nodiscard]] __host__ __device__ constexpr bool empty() const { return false; }
-        [[nodiscard]] __host__ __device__ constexpr bool full() const noexcept { return true; }
+        [[nodiscard]] __host__ __device__ constexpr static bool empty() noexcept { return false; }
+        [[nodiscard]] __host__ __device__ constexpr static bool full() noexcept { return true; }
         [[nodiscard]] __host__ __device__ auto* data(this auto&& self) noexcept { return self.arr.data(); }
         [[nodiscard]] auto get_allocator() const noexcept { return alloc; }
         /* Static members */

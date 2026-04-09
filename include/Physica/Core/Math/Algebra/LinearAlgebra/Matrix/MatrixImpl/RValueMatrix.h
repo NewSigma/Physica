@@ -84,8 +84,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept requires(RowAtCompile != 1);
-        [[nodiscard]] auto operator*(const Vector auto& v) const noexcept requires(RowAtCompile == 1);
+        [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept;
         [[nodiscard]] auto operator*(this auto&&, Matrix auto&& m) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
@@ -150,8 +149,8 @@ namespace Physica {
         [[nodiscard]] auto inv(this auto&&) noexcept;
         [[nodiscard]] auto pinv() const noexcept;
         [[nodiscard]] auto transpose(this auto&&) noexcept;
-        [[nodiscard]] decltype(auto) conjugate() const noexcept;
-        [[nodiscard]] auto hermite() const noexcept;
+        [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
+        [[nodiscard]] auto hermite(this auto&&) noexcept;
         [[nodiscard]] auto flatten(this auto&&) noexcept;
 
         [[nodiscard]] decltype(auto) reals(this auto&&) noexcept;
