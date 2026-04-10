@@ -62,9 +62,7 @@ namespace {
         const SquareLattice<Dim> lattice({NumSite}, 1);
         const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, 1);
         auto dqmc = device_obj<FreqDQMC<Tc>>(params, FreqDensity);
-
-        auto mass = VectorND<T>(dqmc.getAuxField().getSize() * 2, 1);
-        auto hmc = HamiltonMC<T>(std::move(mass));
+        auto hmc = HamiltonMC<T>(dqmc.makeDefaultMass());
         auto& engine = hmc.getRoot();
         engine.setTimeStep(StepSize);
 

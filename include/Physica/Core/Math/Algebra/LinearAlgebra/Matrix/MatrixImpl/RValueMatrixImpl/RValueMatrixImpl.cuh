@@ -440,6 +440,21 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isStaticSymm() noexcept {
+        return host_obj::isStaticSymm();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isStaticHermite() noexcept {
+        return host_obj::isStaticHermite();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval int device_obj<RValueMatrix<Derived>>::getMajor() noexcept {
+        return Traits<Derived>::Major;
+    }
+
+    template<class Derived>
     __host__ __device__ size_t device_obj<RValueMatrix<Derived>>::rowFromMajorMinor(size_t major, size_t minor) noexcept {
         return MatrixMajor::rowFromMajorMinor<device_obj<Derived>>(major, minor);
     }

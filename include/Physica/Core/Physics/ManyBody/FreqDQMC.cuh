@@ -189,8 +189,10 @@ namespace Physica {
 
     template<Scalar T>
     auto device_obj<FreqDQMC<T>>::makeDefaultMass() const -> VectorND<Trv> {
+        constexpr int Major = std::remove_cvref_t<decltype(getAuxField())>::getMajor();
         VectorND<Trv> result(getAuxField().getSize() * 2, 1);
-        result.tail(2) *= Trv(2);
+        auto mat = result.template reshape<Major>(getAuxField().getRow(), getAuxField().getCol() * 2);
+        mat.bottomRows(1) *= Trv(2);
         return result;
     }
 

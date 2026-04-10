@@ -620,6 +620,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval int RValueMatrix<Derived>::getMajor() noexcept {
+        return Traits<Derived>::Major;
+    }
+
+    template<class Derived>
     __host__ __device__ consteval void RValueMatrix<Derived>::static_assert_assign(const Scalar auto& source) noexcept {
         using U = std::remove_cvref<decltype(source)>::type;
         T::template static_assert_assign<U>();
