@@ -57,6 +57,13 @@ namespace Physica {
     }
 
     template<class Derived, class Allocator>
+    template<class R>
+    auto& ArrayBase<Derived, Allocator>::select(this auto&& self) noexcept {
+        assert(!self.empty() && "[Error]: Cannot select from empty array");
+        return self[R::select(self.getLength())];
+    }
+
+    template<class Derived, class Allocator>
     void ArrayBase<Derived, Allocator>::read(const auto& loc, const char* name) {
         const auto group = loc.openGroup(name);
         std::array<char, 32> buffer{}; // 32 is enough for uint64_t

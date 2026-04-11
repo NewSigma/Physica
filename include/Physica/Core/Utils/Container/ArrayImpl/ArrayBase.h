@@ -56,6 +56,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr auto begin(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ constexpr auto end(this auto&&) noexcept;
 
+        template<class R>
+        auto& select(this auto&&) noexcept;
+
         void send(int from, int to);
         void sendrecv(int send_to, int recv_from);
         void bcast(int root);

@@ -28,7 +28,7 @@
 namespace Physica {
     //////////////////////////////////////////Array<T, Length, Allocator>//////////////////////////////////////////
     template<class T, size_t Length, class Allocator>
-    __host__ __device__ Array<T, Length, Allocator>::Array([[maybe_unused]] size_t length, auto&&... args) {
+    __host__ __device__ constexpr Array<T, Length, Allocator>::Array([[maybe_unused]] size_t length, auto&&... args) {
         assert(length == Length);
         if constexpr (!Base::template isTrivialDefaultConstruct<decltype(args)...>()) {
             for (size_t i = 0; i < Length; ++i)
@@ -37,7 +37,7 @@ namespace Physica {
     }
 
     template<class T, size_t Length, class Allocator>
-    __host__ __device__ Array<T, Length, Allocator>::Array(std::initializer_list<T> list) {
+    __host__ __device__ constexpr Array<T, Length, Allocator>::Array(std::initializer_list<T> list) {
         assert(list.size() == Length);
         for (size_t i = 0; i < Length; ++i)
             arr[i] = std::data(list)[i];
@@ -45,7 +45,7 @@ namespace Physica {
 
     template<class T, size_t Length, class Allocator>
     template<size_t OtherLength, class OtherAlloc>
-    Array<T, Length, Allocator>::Array(const Array<T, OtherLength, OtherAlloc>& other) noexcept : Array(read(Length, other.data())) {
+    constexpr Array<T, Length, Allocator>::Array(const Array<T, OtherLength, OtherAlloc>& other) noexcept : Array(read(Length, other.data())) {
         static_assert(OtherLength == Length || OtherLength == Dynamic, "[Error]: Length do not match");
         assert(other.getLength() >= Length);
     }

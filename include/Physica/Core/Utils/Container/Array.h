@@ -47,17 +47,17 @@ namespace Physica {
         alignas(std::max(alignof(T), Align)) std::array<T, Length> arr;
         [[no_unique_address]] Allocator alloc;
     public:
-        Array() = default;
-        __host__ __device__ explicit Array(size_t length, auto&&... args);
-        __host__ __device__ Array(std::initializer_list<T> list);
+        constexpr Array() = default;
+        __host__ __device__ constexpr explicit Array(size_t length, auto&&... args);
+        __host__ __device__ constexpr Array(std::initializer_list<T> list);
         template<size_t OtherLength, class OtherAlloc>
-        Array(const Array<T, OtherLength, OtherAlloc>& other) noexcept;
-        Array(const This&) = default;
-        Array(This&&) noexcept = default;
+        constexpr Array(const Array<T, OtherLength, OtherAlloc>& other) noexcept;
+        constexpr Array(const This&) = default;
+        constexpr Array(This&&) noexcept = default;
         ~Array() = default;
         /* Operators */
-        This& operator=(const This&) = default;
-        This& operator=(This&&) noexcept = default;
+        constexpr This& operator=(const This&) = default;
+        constexpr This& operator=(This&&) noexcept = default;
         /* Operations */
         template<size_t I>
         [[nodiscard]] constexpr auto&& get(this auto&&) noexcept;

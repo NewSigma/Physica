@@ -146,6 +146,7 @@ namespace Physica {
 
         [[nodiscard]] static This& getInstance() noexcept;
         [[nodiscard]] static bool coin() noexcept;
+        [[nodiscard]] static int select(int size) noexcept;
         [[nodiscard]] static Array<int> random_int(size_t length, int from, int to);
         static void random_int(Array<int>& arr, int from, int to);
     private:
@@ -197,7 +198,13 @@ namespace Physica {
 
     template<RandomOption Option, uint64_t FixedSeed>
     bool Random<Option, FixedSeed>::coin() noexcept {
-        return std::uniform_int_distribution<>(0, 1)(getInstance());
+        return select(2);
+    }
+
+    template<RandomOption Option, uint64_t FixedSeed>
+    int Random<Option, FixedSeed>::select(int size) noexcept {
+        assert(size > 0 && "[Error]: select size must be positive");
+        return std::uniform_int_distribution<>(0, size - 1)(getInstance());
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
