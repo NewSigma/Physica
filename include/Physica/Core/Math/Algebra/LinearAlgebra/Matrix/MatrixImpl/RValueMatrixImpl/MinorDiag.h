@@ -35,9 +35,6 @@ namespace Physica {
         ~MinorDiagR() = default;
         /* Operations */
         [[nodiscard]] decltype(auto) calc(size_t index) const noexcept;
-
-        using Base::resize;
-        void resize([[maybe_unused]] size_t size) { assert(getLength() == size); }
         /* Getters */
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() - std::abs(shift); }

@@ -82,6 +82,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto bottomRightCorner(this auto&&, size_t from) noexcept;
         [[nodiscard]] __host__ __device__ auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         [[nodiscard]] __host__ __device__ auto diag(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto diag(this auto&&, ssize_t shift) noexcept;
         [[nodiscard]] __host__ __device__ auto triu(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto triu_unit(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto tril(this auto&&) noexcept;
@@ -147,6 +148,7 @@ namespace Physica {
 #include "RValueMatrixImpl/RValueMatrixImpl.cuh"
 #include "RValueMatrixImpl/Sum.cuh"
 #include "RValueMatrixImpl/DiagVector.cuh"
+#include "RValueMatrixImpl/MinorDiag.cuh"
 #include "RValueMatrixImpl/Transpose.cuh"
 #include "RValueMatrixImpl/Hermite.cuh"
 #include "RValueMatrixImpl/Convert/MatrixConvert.cuh"

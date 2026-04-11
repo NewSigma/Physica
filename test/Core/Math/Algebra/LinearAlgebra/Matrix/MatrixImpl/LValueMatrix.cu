@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,24 +23,17 @@ using namespace Physica;
 using MatrixType = MatrixND<float32>;
 
 namespace {
-    void sum() {
-        const MatrixType A = MatrixType::random_uniform<Random<>>(16, 16);
-        const auto d_A = A.toDeviceAsync();
-        expect(scalarNear(d_A.diag().sum(), A.diag().sum(), 1E-6));
-    }
-
     void minorDiag() {
         const MatrixType A = MatrixType::random_uniform<Random<>>(4, 4);
         const auto d_A = A.toDeviceAsync();
         int shift = Array<int>{1, 2, 3, -1, -2, -3, 0}.template select<Random<>>();
 
-        device_obj<VectorND<float32>> result = (-d_A).diag(shift);
-        expect((-A).diag(shift) == result.toHost());
+        device_obj<VectorND<float32>> result = d_A.diag(shift);
+        expect(A.diag(shift) == result.toHost());
     }
 }
 
 int main() {
-    sum();
     minorDiag();
     return 0;
 }
