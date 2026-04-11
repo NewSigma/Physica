@@ -21,9 +21,25 @@
 
 using namespace Physica;
 
+namespace {
+    void argmin() {
+        const auto x = MatrixND<float32>::random_uniform<Random<>>(4, 4);
+        auto index = x.argmin();
+        expect(x.min() == x[index[0], index[1]]);
+    }
+
+    void minorDiag() {
+        // Test that 0 sub-diagonal is diagonal
+        using T = float32;
+        using Matrix4D = DenseMatrix<T, MatrixMajor::Col, 4, 4>;
+        auto compact = Matrix4D::random_uniform<Random<>>(4, 4);
+        auto corner = compact.topLeftCorner(3);
+        for (int i = 0; i < 3; ++i)
+            expect(abs_elem(corner).diag(0).calc(i) == abs_elem(compact).diag().calc(i));
+    }
+}
+
 int main() {
-    const auto x = MatrixND<float32>::random_uniform<Random<>>(4, 4);
-    auto index = x.argmin();
-    expect(x.min() == x[index[0], index[1]]);
+    argmin();
     return 0;
 }

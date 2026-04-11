@@ -250,6 +250,12 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto RValueMatrix<Derived>::diag(this auto&& self, ssize_t shift) noexcept {
+        using Self = decltype(self);
+        return MinorDiagR<Self>(std::forward<Self>(self), shift);
+    }
+
+    template<class Derived>
     auto RValueMatrix<Derived>::triu(this auto&& self) noexcept {
         using Self = decltype(self);
         return MatrixTrig<Self, true, false>(std::forward<Self>(self));

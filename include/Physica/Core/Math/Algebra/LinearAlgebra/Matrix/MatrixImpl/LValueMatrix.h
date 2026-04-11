@@ -23,7 +23,7 @@
 
 namespace Physica {
     template<Matrix> class DiagVectorL;
-    template<Matrix M> class MinorDiagL;
+    template<Matrix> class MinorDiagL;
     template<class> class FlattenL;
     /**
      * \class LValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix

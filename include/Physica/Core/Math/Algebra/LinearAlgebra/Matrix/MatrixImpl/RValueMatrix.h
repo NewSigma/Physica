@@ -25,6 +25,7 @@ namespace Physica {
     template<class Derived> class CompactMatrix;
     template<class, bool ReduceCol> class MatrixSum;
     template<Matrix> class DiagVectorR;
+    template<Matrix> class MinorDiagR;
     template<class> class Inverse;
     template<Matrix> class PseudoInverse;
     template<class> class Transpose;
@@ -119,6 +120,7 @@ namespace Physica {
         [[nodiscard]] auto bottomRightCorner(this auto&&, size_t from) noexcept;
         [[nodiscard]] auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         [[nodiscard]] auto diag(this auto&&) noexcept;
+        [[nodiscard]] auto diag(this auto&&, ssize_t shift) noexcept;
         [[nodiscard]] auto triu(this auto&&) noexcept;
         [[nodiscard]] auto triu_unit(this auto&&) noexcept;
         [[nodiscard]] auto tril(this auto&&) noexcept;
@@ -255,6 +257,7 @@ namespace Physica {
 
 #include "RValueMatrixImpl/RValueMatrixImpl.h"
 #include "RValueMatrixImpl/DiagVector.h"
+#include "RValueMatrixImpl/MinorDiag.h"
 #include "MatrixProduct/GEMM.h"
 #include "MatrixProduct/GEMV.h"
 #include "MatrixProduct/GEVM.h"

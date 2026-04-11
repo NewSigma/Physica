@@ -21,12 +21,19 @@
 
 using namespace Physica;
 
+namespace {
+    void minorDiag() {
+        // Test that 0 sub-diagonal is diagonal
+        using T = float32;
+        using Matrix4D = DenseMatrix<T, MatrixMajor::Col, 4, 4>;
+        auto compact = Matrix4D::random_uniform<Random<>>(4, 4);
+        auto corner = compact.topLeftCorner(3);
+        for (int i = 0; i < 3; ++i)
+            expect(corner.diag(0)[i] == compact.diag()[i]);
+    }
+}
+
 int main() {
-    using T = float32;
-    using Matrix4D = DenseMatrix<T, MatrixMajor::Col, 4, 4>;
-    auto compact = Matrix4D::random_uniform<Random<>>(4, 4);
-    auto lMatrix = compact.topLeftCorner(3);
-    for (int i = 0; i < 3; ++i)
-        expect(lMatrix.diag(0)[i] == compact.diag()[i]); // 0 sub-diagonal is essentially diagonal
+    minorDiag();
     return 0;
 }
