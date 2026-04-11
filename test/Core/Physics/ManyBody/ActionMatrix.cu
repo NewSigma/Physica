@@ -28,23 +28,30 @@ constexpr T HoppingT = 1;
 constexpr T RepelU = 8;
 constexpr T Beta = 8;
 constexpr T ChemMu = -2;
-constexpr int NumSiteX = 2;
-constexpr int NumSiteY = 2;
-constexpr int NumFreq = 2;
 constexpr int NumSplit = 1;
 
+namespace {
+    void hostDeviceMatch() {
+        constexpr Array<int, 3> SmallInts{1, 2, 3};
+        const size_t numSite = SmallInts.template select<RandomSource>() + 1;
+        const int numFreq = SmallInts.template select<RandomSource>();
+
+        const SquareLattice<Dim> lattice({numSite, numSite}, 1);
+        const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, ChemMu, NumSplit);
+        int maxBoson = std::uniform_int_distribution<>(1, numFreq)(RandomSource::getInstance());
+        device_obj<ActionMatrix<Tc>> d_action(params, numFreq, maxBoson);
+        d_action.randAuxField<Random<>>();
+        device_obj<MatrixND<Tc>> result = d_action;
+
+        ActionMatrix<Tc> action(params, numFreq, maxBoson);
+        d_action.getAuxField().toHostAsync(action.getAuxField());
+        MatrixND<Tc> answer = action;
+
+        expect(matrixNear(answer, result.toHost(), 1E-6));
+    }
+}
+
 int main() {
-    const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
-    const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, ChemMu, NumSplit);
-    int maxBoson = std::uniform_int_distribution<>(1, NumFreq)(RandomSource::getInstance());
-    device_obj<ActionMatrix<Tc>> d_action(params, NumFreq, maxBoson);
-    d_action.randAuxField<Random<>>();
-    device_obj<MatrixND<Tc>> result = d_action;
-
-    ActionMatrix<Tc> action(params, NumFreq, maxBoson);
-    d_action.getAuxField().toHostAsync(action.getAuxField());
-    MatrixND<Tc> answer = action;
-
-    expect(matrixNear(answer, result.toHost(), 1E-6));
+    hostDeviceMatch();
     return 0;
 }

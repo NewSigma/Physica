@@ -23,20 +23,21 @@
 using namespace Physica;
 using T = float64;
 using Tc = cfloat64;
-using RandomSource = Random<PCG64DXSM>;
-constexpr T HoppingT = 0;
-constexpr T RepelU = 8;
-constexpr T Beta = 8;
+using RandomSource = Random<>;
+constexpr T HoppingT = 1;
+constexpr T RepelU = MathConst<T>::pi;
+constexpr T Beta = MathConst<T>::e;
 constexpr int Dim = 1;
-constexpr int NumSite = 1;
-constexpr int FreqDensity = 0;
 constexpr T StepSize = 1E-3;
 constexpr T Duration = 10;
 
 int main() {
-    const SquareLattice<Dim> lattice({NumSite}, 1);
+    const size_t numSite = Array<int, 2>{2, 3}.select<RandomSource>();
+    const int freqDensity = Array<int, 2>{0, 1}.select<RandomSource>();
+
+    const SquareLattice<Dim> lattice({numSite}, 1);
     const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, 1);
-    auto dqmc = FreqDQMC<Tc>(params, FreqDensity);
+    auto dqmc = FreqDQMC<Tc>(params, freqDensity);
     auto hmc = HamiltonMC<T>(dqmc.makeDefaultMass());
     auto& engine = hmc.getRoot();
     engine.setTimeStep(StepSize);
@@ -48,6 +49,7 @@ int main() {
     const T prevE = engine.calcClassicalInternalEnergy(dqmc);
     engine.nve_step_for(Duration, kinetic, dqmc);
     const T curE = engine.calcClassicalInternalEnergy(dqmc);
+
     expect(scalarNear(prevE, curE, 1E-4)); // Energe conserves
     return 0;
 }

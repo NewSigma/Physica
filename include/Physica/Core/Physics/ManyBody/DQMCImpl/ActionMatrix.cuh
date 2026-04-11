@@ -144,11 +144,11 @@ namespace Physica {
     __device__ T device_obj<ActionMatrix<T>>::calc(size_t row, size_t col) const {
         assert(row < getRow());
         assert(col < getCol());
-        const int numSite = getNumSite();
-        const size_t rowSite = row / numSite;
-        const size_t rowFreq = row % numSite;
-        const size_t colSite = col / numSite;
-        const size_t colFreq = col % numSite;
+        const int numFreq2 = getNumFreq() * 2;
+        const size_t rowSite = row / numFreq2;
+        const size_t rowFreq = row % numFreq2;
+        const size_t colSite = col / numFreq2;
+        const size_t colFreq = col % numFreq2;
         bool diagFreq = rowFreq == colFreq;
         bool diagSite = rowSite == colSite;
         if (diagFreq) {

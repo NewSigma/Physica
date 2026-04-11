@@ -225,18 +225,15 @@ namespace Physica {
             spinF.resize(getAuxField());
             spinF.zeros();
 
-            const Trv factor = spin == 0 ? 1.0 : -1.0;
-            const int size = getMaxBoson();
-            const int numSite = getNumSite();
-            for (int r = 0; r < size; ++r) {
-                for (int c = 0; c < size; ++c) {
-                    const auto diag = inv.transpose().block(r * numSite, numSite, c * numSite, numSite).diag();
-                    if (r == c)
-                        spinF.row(0) += diag.reals() * factor;
-                    else if (r < c)
-                        spinF.row(c - r) += diag * factor;
+            const Trv factor = spin == 0 ? 1 : -1;
+            const int numFreq2 = getNumFreq() * 2;
+            for (int site = 0; site < getNumSite(); ++site) {
+                const auto block = inv.transpose().block(site * numFreq2, numFreq2, site * numFreq2, numFreq2);
+                for (int freq = 0; freq < getMaxBoson(); ++freq) {
+                    if (freq == 0)
+                        spinF[0, site] = block.diag().sum().real() * factor;
                     else
-                        spinF.row(r - c) += diag.conjugate() * factor;
+                        spinF[freq, site] = (block.diag(freq).sum() + block.diag(-freq).conjugate().sum()) * factor;
                 }
             }
         }, 2);

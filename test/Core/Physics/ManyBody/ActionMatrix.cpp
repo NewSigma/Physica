@@ -20,7 +20,7 @@
 #include "Test.h"
 
 using namespace Physica;
-using RandomSource = Random<>;
+using RandomSource = Random<PCG64DXSM, 1000>;
 using T = float64;
 using Tc = cfloat64;
 constexpr int Dim = 2;
@@ -28,18 +28,18 @@ constexpr T HoppingT = 1;
 constexpr T RepelU = 8;
 constexpr T Beta = 8;
 constexpr T ChemMu = -2;
-constexpr int NumSiteX = 2;
-constexpr int NumSiteY = 2;
-constexpr int NumFreq = 2;
+constexpr Array<int, 3> SmallInts{1, 2, 3};
 constexpr int NumSplit = 1;
 
 namespace {
     void assign_calc_match() {
-        const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
+        const size_t numSite = SmallInts.template select<RandomSource>() + 1;
+        const int numFreq = SmallInts.template select<RandomSource>();
+        const SquareLattice<Dim> lattice({numSite, numSite}, 1);
         const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, ChemMu, NumSplit);
-        int maxBoson = std::uniform_int_distribution<>(1, NumFreq)(RandomSource::getInstance());
-        ActionMatrix<Tc> action(params, NumFreq, maxBoson);
-        action.randAuxField<Random<>>();
+        int maxBoson = std::uniform_int_distribution<>(1, numFreq)(RandomSource::getInstance());
+        ActionMatrix<Tc> action(params, numFreq, maxBoson);
+        action.randAuxField<RandomSource>();
 
         const MatrixND<Tc> result = action;
         size_t order = action.getOrder();
@@ -49,11 +49,13 @@ namespace {
     }
 
     void assign_gemv_match() {
-        const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
+        const size_t numSite = SmallInts.template select<RandomSource>() + 1;
+        const int numFreq = SmallInts.template select<RandomSource>();
+        const SquareLattice<Dim> lattice({numSite, numSite}, 1);
         const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, ChemMu, NumSplit);
-        int maxBoson = std::uniform_int_distribution<>(1, NumFreq)(RandomSource::getInstance());
-        ActionMatrix<Tc> action(params, NumFreq, maxBoson);
-        action.randAuxField<Random<>>();
+        int maxBoson = std::uniform_int_distribution<>(1, numFreq)(RandomSource::getInstance());
+        ActionMatrix<Tc> action(params, numFreq, maxBoson);
+        action.randAuxField<RandomSource>();
 
         size_t order = action.getOrder();
         const MatrixND<Tc> answer = action;

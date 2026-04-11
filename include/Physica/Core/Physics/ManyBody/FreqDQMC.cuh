@@ -227,45 +227,32 @@ namespace Physica {
         assert(result.getLength() == pos.getLength());
         assert(result.getLength() == getAuxField().getSize() * 2);
         check(cudaMemcpyAsync(getAuxField().data(), pos.data(), sizeof(Tr) * pos.getLength(), cudaMemcpyHostToDevice, CUDAContext::getInstance()));
-        forceBuffer.zeros();
 
+        forceBuffer.zeros();
         for (int spin : {0, 1}) {
             auto& spinLU = lu[spin];
             spinLU.compute(action);
             solBuffer = spinLU.inv();
 
-            Trv factor = spin == 0 ? 1.0 : -1.0;
             int numSite = getNumSite();
-            auto collectForce = [spinF_ = asStruct(forceBuffer), inv_ = asStruct(solBuffer), factor, numSite] __device__() mutable {
-                const auto& inv = inv_.getDerived();
-                auto& spinF = spinF_.getDerived();
-                unsigned int delta = blockIdx.x;
-                unsigned int size = gridDim.x;
-                ThreadBlock block{};
-
-                bool elastic = delta == 0;
-                if (elastic) {
-                    for (unsigned int i = 0; i < size; ++i) {
-                        const auto diag = inv.transpose().block(i * numSite, numSite, i * numSite, numSite).diag();
-                        (diag.reals() * factor).assign_add(spinF.row(0), block);
-                    }
-                }
-                else {
-                    unsigned int r = 0;
-                    unsigned int c = delta;
-                    auto row = spinF.row(delta);
-                    for (; c < size; ++r, ++c) {
-                        const auto upper = inv.transpose().block(r * numSite, numSite, c * numSite, numSite).diag();
-                        const auto lower = inv.transpose().block(c * numSite, numSite, r * numSite, numSite).diag();
-                        (upper * factor).assign_add(row, block);
-                        (lower.conjugate() * factor).assign_add(row, block);
-                    }
-                }
-            };
             int numThread = std::min<int>(numSite, CUDADevAttr::DefaultThreadsPerBlock);
             int numBlockX = getMaxBoson();
-            CUDAExecutor::launch(collectForce, KernelConfig(numBlockX, numThread));
-
+            CUDAExecutor::launch([spinF_ = asStruct(forceBuffer),
+                                 inv_ = asStruct(solBuffer),
+                                 factor = Trv(spin == 0 ? 1 : -1),
+                                 numSite,
+                                 numFreq2 = getNumFreq() * 2] __device__() mutable {
+                const auto invT = inv_.getDerived().transpose();
+                auto& spinF = spinF_.getDerived();
+                const int freq = int(blockIdx.x);
+                for (int site = int(threadIdx.x); site < numSite; site += int(blockDim.x)) {
+                    const auto block = invT.block(site * numFreq2, numFreq2, site * numFreq2, numFreq2);
+                    if (freq == 0)
+                        spinF[0, site] += block.diag().sum().real() * factor;
+                    else
+                        spinF[freq, site] += (block.diag(freq).sum() + block.diag(-freq).conjugate().sum()) * factor;
+                }
+            }, KernelConfig(numBlockX, numThread));
             action.flip();
         }
 
