@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,7 @@
 
 #include <cmath>
 #include <cassert>
-#include <utility>
+#include "Physica/Core/Utils/Allocator/HostAllocator.h"
 #include "Scalar.h"
 
 namespace Physica {
@@ -98,17 +98,41 @@ namespace Physica {
         /**
          * Degigned for performance,
          * this constructor should only be called operator+, -, *, / and etc.
-         *
-         * \param byte
-         * byte must be allocated by malloc()
          */
         Integer(MPUnit* byte_, int length_) : byte(byte_), length(length_) {}
         /* Operations */
         void cutZero();
         /* Static members */
-        static inline Integer integerAddImpl(const Integer& i1, const Integer& i2);
-        static inline Integer integerSubImpl(const Integer& i1, const Integer& i2);
+        static Integer integerAddImpl(const Integer& i1, const Integer& i2);
+        static Integer integerSubImpl(const Integer& i1, const Integer& i2);
     };
+
+    template<FloatPrec Prec>
+    Integer::Integer(const Real<Prec>& s) {
+        if constexpr (Prec == FloatMP) {
+            const auto power = s.getPower();
+            if (power < 0) {
+                byte = HostAllocator<MPUnit>{}.allocate(1);
+                byte[0] = 0;
+                length = 1;
+            }
+            length = power + 1;
+            byte = HostAllocator<MPUnit>{}.allocate(length);
+            memcpy(byte, s.byte, length * sizeof(MPUnit));
+        }
+        else
+            *this = Integer(static_cast<int>(s.toMachine()));
+    }
+    /**
+     * Returns true if i1 and i2 has the same sign. Both i1 and i2 do not equal to zero.
+     * This function provide a quick sign check compare to using isPositive() and isNegative().
+     */
+    inline bool Integer::matchSign(const Integer& i1, const Integer& i2) {
+        assert(!i1.isZero() && !i2.isZero());
+        return (i1.length ^ i2.length) >= 0;
+    }
+
+    Integer factorial(const Integer& i);
 
     inline void swap(Integer& __restrict i1, Integer& __restrict i2) noexcept {
         i1.swap(i2);
@@ -121,5 +145,3 @@ namespace std {
         constexpr static bool is_integer = true;
     };
 }
-
-#include "IntegerImpl/IntegerImpl.h"

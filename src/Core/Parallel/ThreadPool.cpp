@@ -161,10 +161,10 @@ void ThreadPool::shouldExit() noexcept {
 
 auto ThreadPool::getInstance() noexcept -> This& {
     static ThreadPool pool([]() {
-        int numProcesser = getNumProcessor();
+        int numProcessor = getNumProcessor();
         int num = ThreadPool::numThreadRequired;
-        if (num == 0 || num > numProcesser)
-            num = std::max(1, numProcesser * 3 / 4);
+        if (num == 0 || num > numProcessor)
+            num = std::max(1, numProcessor * 3 / 4);
         return num;
     }());
     return pool;

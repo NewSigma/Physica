@@ -45,11 +45,11 @@ namespace Physica {
         This& operator=(const This&) noexcept = default;
         This& operator=(This&&) noexcept = default;
         /* Operations */
-        [[nodiscard, gnu::returns_nonnull]] T* allocate(size_t n) noexcept;
-        void deallocate(T* p, size_t n) noexcept;
-        [[nodiscard, gnu::returns_nonnull]] T* reallocate(T* p, size_t new_size, size_t old_size) noexcept;
+        [[nodiscard, gnu::returns_nonnull]] static T* allocate(size_t n) noexcept;
+        static void deallocate(T* p, size_t n) noexcept;
+        [[nodiscard, gnu::returns_nonnull]] static T* reallocate(T* p, size_t new_size, size_t old_size) noexcept;
     private:
-        T* reallocate_mimalloc(T* p, size_t new_size, size_t old_size) noexcept;
+        static T* reallocate_mimalloc(T* p, size_t new_size, size_t old_size) noexcept;
     };
 
     template<class T, size_t Align>

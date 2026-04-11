@@ -62,10 +62,6 @@
     using ssize_t = SSIZE_T;
 #endif
 
-#ifdef PHYSICA_MIMALLOC
-    #include <mimalloc-override.h>
-#endif
-
 namespace Physica {
     template<class T>
     class Traits;

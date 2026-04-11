@@ -19,6 +19,7 @@
 #pragma once
 
 #include "HostAllocator.h"
+#include <mimalloc.h>
 
 namespace Physica {
     template<class T, size_t Align>
@@ -29,7 +30,7 @@ namespace Physica {
         if constexpr (OverAlign)
             new_p = mi_realloc_aligned(p, new_size * sizeof(T), Align);
         else
-            new_p = realloc(p, new_size * sizeof(T));
+            new_p = mi_realloc(p, new_size * sizeof(T));
         assert(new_p != nullptr);
         return reinterpret_cast<T*>(new_p);
     }

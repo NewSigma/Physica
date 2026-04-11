@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,12 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "Physica/Core/Scalar/Integer.h"
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
-#include "Physica/Core/Scalar/Integer.h"
 #include "Physica/Core/Scalar/Real.h"
 #include "Physica/Core/Scalar/RealImpl/FloatMPImpl/ArraySupport.h"
+#include "Physica/Core/Scalar/RealImpl/FloatMPImpl/AddBasic.h"
+#include "Physica/Core/Scalar/RealImpl/FloatMPImpl/SubBasic.h"
+#include "Physica/Core/Scalar/RealImpl/FloatMPImpl/MulBasic.h"
+#include "Physica/Core/Scalar/RealImpl/FloatMPImpl/DivBasic.h"
 
 using namespace Physica;
 
@@ -131,8 +135,8 @@ Integer Integer::operator*(const Integer& i) const {
     for (int j = 0; j < size1; ++j)
         resultByte[j + size2] = mulAddArrByWord(resultByte + j, i.byte, size2, byte[j]);
     if (resultByte[resultLength - 1] == 0) {
-        --resultLength;
-        resultByte = reinterpret_cast<MPUnit*>(realloc(resultByte, resultLength * sizeof(MPUnit)));
+        resultByte = HostAllocator<MPUnit>::reallocate(resultByte, resultLength - 1, resultLength);
+        resultLength--;
     }
     return Integer(resultByte, matchSign(*this, i) ? resultLength : -resultLength);
 }
@@ -338,11 +342,66 @@ bool Integer::absCompare(const Integer& i1, const Integer& i2) {
 
 void Integer::cutZero() {
     if (!isZero()) {
+        const int oldlen = length;
         for (int i = length - 1; i > 0; --i) {
             if (byte[i] != 0)
                 break;
             --length;
         }
-        byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
+        byte = HostAllocator<MPUnit>::reallocate(byte, length, oldlen);
     }
+}
+
+Integer Integer::integerAddImpl(const Integer& i1, const Integer& i2) {
+    assert(i1.isPositive() && i2.isPositive() && "[Error]: This function handles positive numbers only");
+    const Integer* __restrict largeInt = i1.length > i2.length ? &i1 : &i2;
+    const Integer* __restrict smallInt = i1.length > i2.length ? &i2 : &i1;
+    int length = largeInt->length;
+    auto* byte = HostAllocator<MPUnit>{}.allocate(length);
+    memcpy(byte, largeInt->byte, length * sizeof(MPUnit));
+
+    bool carry = addArrWithArrEq(smallInt->byte, byte, smallInt->length);
+    // usableSmall is the index that we will add carry to.
+    int carryToIndex = smallInt->length;
+    while (carry != 0 && carryToIndex < length) {
+        MPUnit temp = byte[carryToIndex] + 1;
+        byte[carryToIndex] = temp;
+        carry = temp < MPUnit(carry);
+        ++carryToIndex;
+    }
+    if (carry) {
+        byte = HostAllocator<MPUnit>::reallocate(byte, length + 1, length);
+        byte[length] = 1;
+        length++;
+    }
+    return Integer(byte, length);
+}
+
+Integer Integer::integerSubImpl(const Integer& i1, const Integer& i2) {
+    assert(i1.isPositive() && i2.isPositive() && "[Error]: This function handles positive numbers only");
+    bool changeSign = i1.length <= i2.length;
+    const bool i1_larger = !changeSign;
+    const Integer* __restrict largeInt = i1_larger ? &i1 : &i2;
+    const Integer* __restrict smallInt = i1_larger ? &i2 : &i1;
+    if (i1.length == i2.length && absCompare(i1, i2)) {
+        changeSign = false;
+        std::swap(largeInt, smallInt);
+    }
+    int length = largeInt->length;
+    auto* byte = HostAllocator<MPUnit>{}.allocate(length);
+    memcpy(byte, largeInt->byte, length * sizeof(MPUnit));
+
+    bool carry = subArrByArrEq(byte, smallInt->byte, smallInt->length);
+    int carryToIndex = smallInt->length;
+    while (carry != 0) {
+        assert(carryToIndex < length);
+        MPUnit temp1 = byte[carryToIndex];
+        MPUnit temp2 = temp1 - 1;
+        byte[carryToIndex] = temp2;
+        carry = temp1 < temp2;
+        ++carryToIndex;
+    }
+    Integer result(byte, changeSign ? -length : length);
+    result.cutZero();
+    return result;
 }

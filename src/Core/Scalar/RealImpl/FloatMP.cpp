@@ -422,10 +422,9 @@ void Real<FloatMP>::cutZero() {
 
     if (id != size) {
         int shorten = size - id;
-        byte = reinterpret_cast<MPUnit*>(realloc(byte, id * sizeof(MPUnit)));
+        byte = HostAllocator<MPUnit>::reallocate(byte, id, size);
         length = length > 0 ? id : -id;
-        auto temp = power;
-        power = byte[id - 1] != 0 ? (temp - shorten) : 0;
+        power = byte[id - 1] != 0 ? (power - shorten) : 0;
     }
 }
 
@@ -485,10 +484,10 @@ Real<FloatMP> Real<FloatMP>::add(const Real<FloatMP>& s1, const Real<FloatMP>& s
     ///////////////////////////////////////Get byte, length and power//////////////////////////
     int power = big.power;
     if (carry) {
-        ++length;
-        ++power;
-        byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
-        byte[length - 1] = 1;
+        byte = HostAllocator<MPUnit>::reallocate(byte, length + 1, length);
+        byte[length] = 1;
+        length++;
+        power++;
     }
     return Real<FloatMP>(byte, big.length < 0 ? -length : length, power);
 }
@@ -605,9 +604,9 @@ Real<FloatMP> Real<FloatMP>::mul(const Real<FloatMP>& s1, const Real<FloatMP>& s
     ///////////////////////////////////////Get byte, length and power//////////////////////////;
     int power = s1.power + s2.power + 1;
     if (byte[length - 1] == 0) {
-        --length;
-        --power;
-        byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
+        byte = HostAllocator<MPUnit>::reallocate(byte, length - 1, length);
+        length--;
+        power--;
     }
     ////////////////////////////////////Out put////////////////////////////////////////
     return Real<FloatMP>(byte, matchSign(s1, s2) ? length : -length, power);
