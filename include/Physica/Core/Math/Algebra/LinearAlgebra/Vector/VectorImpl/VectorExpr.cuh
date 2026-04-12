@@ -51,7 +51,7 @@ namespace Physica {
 
     template<ExprID ID, Vector V>
     __host__ __device__ auto&& device_obj<UnitaryVectorExpr<ID, V>>::getExpr(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), V>(self.expr.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref>(self.expr.getDerived());
     }
 
     template<ExprID ID, Vector V>
@@ -101,12 +101,12 @@ namespace Physica {
 
     template<ExprID ID, class LHS, class RHS>
     __host__ __device__ auto&& device_obj<BinaryVectorExpr<ID, LHS, RHS>>::getLHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), LHS>(self.lhs.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref1>(self.lhs.getDerived());
     }
 
     template<ExprID ID, class LHS, class RHS>
     __host__ __device__ auto&& device_obj<BinaryVectorExpr<ID, LHS, RHS>>::getRHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), RHS>(self.rhs.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref2>(self.rhs.getDerived());
     }
 
     template<ExprID ID, class LHS, class RHS>

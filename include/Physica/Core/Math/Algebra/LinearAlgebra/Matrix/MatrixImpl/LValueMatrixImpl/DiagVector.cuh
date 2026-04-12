@@ -47,7 +47,7 @@ namespace Physica {
 
     template<Matrix M>
     __host__ __device__ auto&& device_obj<DiagVectorL<M>>::getExpr(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), M>(self.mat.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived());
     }
 }
 

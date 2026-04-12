@@ -46,10 +46,10 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void cg(const Matrix auto& A, VectorND<T>& b);
-        void cg(std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc, Vector auto& b);
-        void cgnr(const Matrix auto& A, VectorND<T>& b);      
-        void cgnr(std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc, std::invocable<const VectorND<T>&, VectorND<T>&> auto dotTransFunc, Vector auto& b);
+        void cg(const Matrix auto& A, Vector auto&& b);
+        void cg(std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc, Vector auto&& b);
+        void cgnr(const Matrix auto& A, Vector auto&& b);      
+        void cgnr(std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc, std::invocable<const VectorND<T>&, VectorND<T>&> auto dotTransFunc, Vector auto&& b);
 
         void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
@@ -67,10 +67,10 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void IterateSolver<T>::cg(const Matrix auto& A, VectorND<T>& b) {
+    void IterateSolver<T>::cg(const Matrix auto& A, Vector auto&& b) {
         assert(A.isSquare());
         assert(A.getRow() == b.getLength());
-        cg([&A](const VectorND<T>& v, VectorND<T>& dot) { dot = A * v; }, b);
+        cg([&A](const VectorND<T>& v, VectorND<T>& dot) { dot = A * v; }, std::forward<decltype(b)>(b));
     }
     /**
      * Conjugate gradient(CG)
@@ -80,7 +80,7 @@ namespace Physica {
      * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006:112
      */
     template<Scalar T>
-    void IterateSolver<T>::cg(std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc, Vector auto& b) {
+    void IterateSolver<T>::cg(std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc, Vector auto&& b) {
         size_t length = b.getLength();
         if (dot.getLength() != length)
             resize(length);
@@ -95,6 +95,7 @@ namespace Physica {
         while(!isConverged()) {
             dotFunc(searchP, dot);
             const Tr resA = (searchP.conjugate() * dot).real();
+            assert(resA.isPositive() && "[Error]: The matrix is not positive definite");
             const Tr step = squaredRes / resA;
             x += step * searchP;
             residual += step * dot;
@@ -112,12 +113,12 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void IterateSolver<T>::cgnr(const Matrix auto& A, VectorND<T>& b) {
+    void IterateSolver<T>::cgnr(const Matrix auto& A, Vector auto&& b) {
         assert(A.isSquare());
         assert(A.getRow() == b.getLength());
         auto dotFunc = [&A](const VectorND<T>& v, VectorND<T>& dot) { (A * v).assign(dot); };
         auto dotTransFunc = [&A](const VectorND<T>& v, VectorND<T>& dot) { (A.hermite() * v).assign(dot); };
-        cgnr(dotFunc, dotTransFunc, b);
+        cgnr(dotFunc, dotTransFunc, std::forward<decltype(b)>);
     }
     /**
      * Conjugate gradient normal equation residual(CGNR)
@@ -130,7 +131,7 @@ namespace Physica {
     void IterateSolver<T>::cgnr(
             std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc,
             std::invocable<const VectorND<T>&, VectorND<T>&> auto dotTransFunc,
-            Vector auto& b) {
+            Vector auto&& b) {
         size_t length = b.getLength();
         if (dot.getLength() != length)
             resize(length);

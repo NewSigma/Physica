@@ -42,8 +42,10 @@ namespace Physica {
         GEMM(This&&) noexcept = default;
         ~GEMM() = default;
         /* Operators */
+        using Base::operator*;
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept;
         /* Operations */
         void assign(Matrix auto& target) const;
         void assign_mkl(Matrix auto& target) const noexcept;
@@ -74,6 +76,13 @@ namespace Physica {
         assert(mat1.getCol() > 0);
         assert(mat2.getCol() > 0);
         assert(mat1.getCol() == mat2.getRow());
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto GEMM<M1, M2>::operator*(this auto&& self, Vector auto&& v) noexcept {
+        using Self = decltype(self);
+        assert(self.getCol() == v.getLength());
+        return std::forward<Self>(self).getLHS() * (std::forward<Self>(self).getRHS() * std::forward<decltype(v)>(v));
     }
 
     template<Matrix M1, Matrix M2>
@@ -132,7 +141,7 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), M1>(self.mat2);
+        return propagate_rvalue_reference<decltype(self), M2>(self.mat2);
     }
 
     template<Matrix M1, Matrix M2>

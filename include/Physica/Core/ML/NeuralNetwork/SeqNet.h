@@ -25,8 +25,6 @@ namespace Physica {
     class SeqNet : public LayerBase<Derived> {
         using This = SeqNet<Derived>;
         using Base = LayerBase<Derived>;
-    public:
-        using Base::IsTrain;
     protected:
         using T = Base::T;
         using Tv = Base::Tv;
@@ -52,7 +50,7 @@ namespace Physica {
     template<class Derived>
     template<RNG R, ExecutePolicy P>
     void SeqNet<Derived>::train_step(int batchSize, const auto& dataset) {
-        static_assert(IsTrain, "[Error]: train_step must be called under training mode");
+        static_assert(Base::isTraining(), "[Error]: train_step must be called under training mode");
         const Tv mean_grad = reciprocal(Tv(batchSize));
         if constexpr (P == Sequential) {
             const auto indices = R::random_int(batchSize, 0, dataset.getSize() - 1);
@@ -86,7 +84,7 @@ namespace Physica {
 
     template<class Derived>
     auto SeqNet<Derived>::loss(const auto& dataset) const -> T {
-        static_assert(!IsTrain, "[Error]: It is suggested using eval mode to reduce memory use");
+        static_assert(Base::isInfering(), "[Error]: It is suggested using eval mode to reduce memory use");
         const size_t size = dataset.getSize();
         T result = 0;
         for (size_t i = 0; i < size; ++i)

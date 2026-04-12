@@ -104,12 +104,12 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     __host__ __device__ auto&& device_obj<GEMV<M, V>>::getLHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), M>(self.mat.getDerived());
+        return propagate_rvalue_reference<decltype(self), RefM>(self.mat.getDerived());
     }
 
     template<Matrix M, Vector V>
     __host__ __device__ auto&& device_obj<GEMV<M, V>>::getRHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), V>(self.vec.getDerived());
+        return propagate_rvalue_reference<decltype(self), RefV>(self.vec.getDerived());
     }
 }
 

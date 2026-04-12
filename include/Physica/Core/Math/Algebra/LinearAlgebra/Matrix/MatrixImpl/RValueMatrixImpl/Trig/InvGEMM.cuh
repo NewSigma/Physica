@@ -89,11 +89,11 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<MatrixTrig, typename Traits<M1>::ExprType>)
     auto&& device_obj<GEMM<M1, M2>>::getLHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), M1>(self.inv.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref1>(self.inv.getDerived());
     }
 
     template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<MatrixTrig, typename Traits<M1>::ExprType>)
     auto&& device_obj<GEMM<M1, M2>>::getRHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), M1>(self.rhs.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref2>(self.rhs.getDerived());
     }
 }

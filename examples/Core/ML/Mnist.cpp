@@ -65,7 +65,7 @@ namespace Physica {
             auto y1 = layer1.forward(x);
             CoDiff<VectorND<T>> y2 = relu(y1);
             auto y3 = layer2.forward(y2);
-            if constexpr (Base::IsTrain)
+            if constexpr (Base::isTraining())
                 y3 = co_yield std::move(y3);
             else
                 co_return std::move(y3);
@@ -101,7 +101,7 @@ namespace Physica {
         [[nodiscard]] T loss(const auto& dataset) const { return Base::loss(dataset); }
 
         [[nodiscard]] size_t classify(const VectorND<Tv>& input) const {
-            static_assert(!Base::IsTrain, "[Error]: It is suggested using eval mode to reduce memory use");
+            static_assert(Base::isInfering(), "[Error]: It is suggested using infer mode to reduce memory use");
             const auto output = forward(input);
             Tv max = output[0];
             size_t index = 0;

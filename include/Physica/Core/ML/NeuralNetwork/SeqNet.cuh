@@ -29,7 +29,6 @@ namespace Physica {
         using Base = device_obj<LayerBase<Derived>>;
     public:
         using typename Base::ScalarType;
-        using Base::IsTrain;
     protected:
         using Tv = ScalarType::ValueType;
     public:
@@ -54,7 +53,7 @@ namespace Physica {
     template<class Derived>
     template<RNG R, ExecutePolicy P>
     void device_obj<SeqNet<Derived>>::train_step(int batchSize, const auto& dataset) {
-        static_assert(IsTrain, "[Error]: train_step must be called under training mode");
+        static_assert(Base::isTraining(), "[Error]: train_step must be called under training mode");
         const auto indices = R::random_int(batchSize, 0, dataset.getSize() - 1);
         const Tv mean_grad = reciprocal(Tv(batchSize));
         for (auto index : indices)
@@ -72,7 +71,7 @@ namespace Physica {
 
     template<class Derived>
     auto device_obj<SeqNet<Derived>>::loss(const auto& dataset) const -> ScalarType {
-        static_assert(!IsTrain, "[Error]: It is suggested using eval mode to reduce memory use");
+        static_assert(Base::isInfering(), "[Error]: It is suggested using eval mode to reduce memory use");
         const size_t size = dataset.getSize();
         ScalarType result = 0;
         for (size_t i = 0; i < size; ++i)

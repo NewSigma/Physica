@@ -115,7 +115,7 @@ namespace Physica {
     auto RValueMatrix<Derived>::normInf() const -> Tr {
         Trv result = std::numeric_limits<T>::lowest();
         for (size_t i = 0; i < getRow(); ++i)
-            result = std::max(abs(row(i)).sum(), result);
+            result = std::max(abs(Base::getDerived().row(i)).sum(), result);
         return result;
     }
 

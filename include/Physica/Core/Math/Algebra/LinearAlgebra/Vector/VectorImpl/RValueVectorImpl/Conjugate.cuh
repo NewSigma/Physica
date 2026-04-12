@@ -57,7 +57,7 @@ namespace Physica {
 
     template<Vector V>
     __host__ __device__ auto&& device_obj<Conjugate<V>>::getExpr(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), V>(self.vec.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref>(self.vec.getDerived());
     }
 }
 

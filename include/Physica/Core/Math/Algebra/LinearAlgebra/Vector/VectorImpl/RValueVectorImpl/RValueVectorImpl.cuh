@@ -459,8 +459,13 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ consteval size_t device_obj<RValueVector<Derived>>::maxSizeAtCompile(const Vector auto& other) noexcept {
-        return host_obj::maxSizeAtCompile(other);
+    __host__ __device__ consteval size_t device_obj<RValueVector<Derived>>::getSizeAtCompile() noexcept {
+        return host_obj::getSizeAtCompile();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval size_t device_obj<RValueVector<Derived>>::getSizeAtCompile(const Vector auto& hint) noexcept {
+        return host_obj::getSizeAtCompile(hint);
     }
 
     template<class Derived>

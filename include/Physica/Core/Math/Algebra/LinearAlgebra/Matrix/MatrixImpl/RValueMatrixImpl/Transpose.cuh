@@ -71,7 +71,7 @@ namespace Physica {
 
     template<Matrix M>
     __host__ __device__ auto&& device_obj<Transpose<M>>::getExpr(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), M>(self.mat.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived());
     }
 
     template<Vector V>
@@ -119,7 +119,7 @@ namespace Physica {
 
     template<Vector V>
     __host__ __device__ auto&& device_obj<Transpose<V>>::getExpr(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), V>(self.vec.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref>(self.vec.getDerived());
     }
 }
 

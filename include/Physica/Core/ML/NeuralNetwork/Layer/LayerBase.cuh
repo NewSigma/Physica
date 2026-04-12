@@ -33,8 +33,9 @@ namespace Physica {
         template<Scalar U>
         using MatrixND = DenseMatrix<U, MatrixMajor::Col>;
         using ScalarType = Traits<device_obj<Derived>>::ScalarType;
-        constexpr static bool IsTrain = ScalarType::isDiffable();
-        constexpr static bool IsInfer = !IsTrain;
+    protected:
+        using T = ScalarType;
+        using Tv = T::ValueType;
     public:
         ~device_obj() = default;
         /* Operations */
@@ -44,6 +45,9 @@ namespace Physica {
         auto step(auto& optimizer) { return Base::getDerived().step(optimizer); }
         auto step() { return Base::getDerived().step(); }
         auto zero_grad() { return Base::getDerived().zero_grad(); }
+        /* Getters */
+        [[nodiscard]] __host__ __device__ consteval static bool isTraining() noexcept { return T::isDiffable(); }
+        [[nodiscard]] __host__ __device__ consteval static bool isInfering() noexcept { return !isTraining(); }
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

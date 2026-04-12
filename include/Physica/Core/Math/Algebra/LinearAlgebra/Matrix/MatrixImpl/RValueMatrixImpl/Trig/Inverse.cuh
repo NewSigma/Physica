@@ -91,7 +91,7 @@ namespace Physica {
 
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
     auto&& device_obj<Inverse<M>>::getExpr(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), M>(self.trig.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref>(self.trig.getDerived());
     }
 
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)

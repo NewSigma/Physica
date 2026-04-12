@@ -43,8 +43,10 @@ namespace Physica {
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
+        using Base::operator*;
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        [[nodiscard]] __host__ __device__ auto operator*(this auto&&, Vector auto&& v) noexcept;
         /* Operations */
         __host__ __device__ void assign(Matrix auto& target) const;
         __host__ __device__ void assign_add(Matrix auto& target) const;
@@ -68,6 +70,13 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     __host__ __device__ device_obj<GEMM<M1, M2>>::device_obj(Ref1 mat1_, Ref2 mat2_) : mat1(asStruct(mat1_)), mat2(asStruct(mat2_)) {
         assert(mat1_.getCol() == mat2_.getRow());
+    }
+
+    template<Matrix M1, Matrix M2>
+    __host__ __device__ auto device_obj<GEMM<M1, M2>>::operator*(this auto&& self, Vector auto&& v) noexcept {
+        using Self = decltype(self);
+        assert(self.getCol() == v.getLength());
+        return std::forward<Self>(self).getLHS() * (std::forward<Self>(self).getRHS() * std::forward<decltype(v)>(v));
     }
 
     template<Matrix M1, Matrix M2>
@@ -109,12 +118,12 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     __host__ __device__ auto&& device_obj<GEMM<M1, M2>>::getLHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), M1>(self.mat1.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref1>(self.mat1.getDerived());
     }
 
     template<Matrix M1, Matrix M2>
     __host__ __device__ auto&& device_obj<GEMM<M1, M2>>::getRHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), M1>(self.mat2.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref2>(self.mat2.getDerived());
     }
 
     template<Matrix M1, Matrix M2>

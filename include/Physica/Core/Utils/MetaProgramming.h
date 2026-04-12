@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <concepts>
 #include <type_traits>
 
 namespace Physica {
@@ -112,6 +113,7 @@ namespace Physica {
      */
     template<class T1, class T2>
     [[nodiscard, gnu::nodebug]] constexpr decltype(auto) propagate_rvalue_reference(auto&& x) noexcept {
+        static_assert(std::same_as<std::remove_cvref_t<T2>, std::remove_cvref_t<decltype(x)>>);
         static_assert(std::is_reference<T1>::value);
         static_assert(std::is_reference<T2>::value);
         if constexpr (std::is_rvalue_reference_v<T1> && std::is_rvalue_reference_v<T2>)

@@ -174,7 +174,7 @@ namespace Physica {
         if constexpr (LowerToFMA) {
             v.assert_assign(Base::getDerived());
             if constexpr (Internal::EnableSIMD<Source, Target>::value && !isReverseDiff()) {
-                constexpr size_t Length = Base::maxSizeAtCompile(v);
+                constexpr size_t Length = Base::getSizeAtCompile(v);
                 assign_fma_simd<Target, Length>(v);
             }
             else

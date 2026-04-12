@@ -179,16 +179,16 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     __host__ __device__ auto&& device_obj<Kronecker<M1, M2>>::getLHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), M1>(self.m1.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref1>(self.m1.getDerived());
     }
 
     template<Matrix M1, Matrix M2>
     __host__ __device__ auto&& device_obj<Kronecker<M1, M2>>::getRHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), M2>(self.m2.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref2>(self.m2.getDerived());
     }
 
     template<Matrix M1, Matrix M2>
-    [[nodiscard]] __host__ __device__ auto kronecker(M1&& m1, M2&& m2) noexcept requires(DeviceObj<M1> && DeviceObj<M2>) {
+    [[nodiscard, gnu::always_inline]] __host__ __device__ auto kronecker(M1&& m1, M2&& m2) noexcept requires(DeviceObj<M1> && DeviceObj<M2>) {
         using RetTy = device_obj<Kronecker<remove_device_obj_t<M1&&>, remove_device_obj_t<M2&&>>>;
         return RetTy(std::forward<M1>(m1), std::forward<M2>(m2));
     }

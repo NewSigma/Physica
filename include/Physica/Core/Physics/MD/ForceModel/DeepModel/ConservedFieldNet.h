@@ -33,7 +33,6 @@ namespace Physica {
         using device_obj_type = device_obj<LinearLayer<ScalarType, true>>;
         using DiffScalar1 = Diff<Tv, DiffMode::Reverse, 1>;
         using LossType = Loss<ScalarType>::LossType;
-        constexpr static bool IsTrain = ScalarType::Order == 2;
     public:
         ConservedFieldNet(const This&) = delete;
         ~ConservedFieldNet() = default;
@@ -43,6 +42,8 @@ namespace Physica {
 
         [[nodiscard]] ScalarType loss(const auto& dataset, size_t index) const { return Base::getDerived().loss(dataset, index); }
         [[nodiscard]] ScalarType loss(const auto& dataset) const;
+        /* Getters */
+        [[nodiscard]] __host__ __device__ consteval static bool isTraining() noexcept { return ScalarType::Order == 2; }
     protected:
         ConservedFieldNet() = default;
         ConservedFieldNet(This&&) noexcept = default;
@@ -55,7 +56,7 @@ namespace Physica {
     template<class Derived>
     void ConservedFieldNet<Derived>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        if constexpr (IsTrain)
+        if constexpr (isTraining())
             diffGuard.swap(obj.diffGuard);
     }
 }
