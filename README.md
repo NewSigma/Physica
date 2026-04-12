@@ -11,16 +11,11 @@ It is also an open source platform that maintains scientific code and related da
 
 ## Table of Contents
 
-- [Design philosophy](#philosophy)
 - [Features](#features)
 - [Usage](#usage)
 - [Maintainers](#maintainers)
 - [Contributing](#contributing)
 - [License](#license)
-
-## Design philosophy
-
-Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. *Physica* targets on performance and scalability, taking ease of use as a secondary concern if necessary.
 
 ## Features
 

@@ -19,7 +19,6 @@ LinearAlgebra
 
    EigenSolver
    HouseHolder
-   IterateSolver
    JacobiDavidson
    LinearAlgebra
    Schur
