@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <x86intrin.h>
 #include "Physica/Macro.h"
-#include "Physica/Core/Exception/NoImplException.h"
+#include "Physica/Core/Utils/NoImpl.h"
 
 namespace Physica {
     /**
@@ -71,7 +71,7 @@ namespace Physica {
                     :: "ebx", "ecx"
             );
         #else
-            noImpl(__func__);
+            noImpl();
         #endif
             return ((static_cast<uint64_t>(hi) << 32U) | lo);
         }
@@ -94,7 +94,7 @@ namespace Physica {
                     ::: "eax", "ebx", "ecx", "edx"
             );
         #else
-            noImpl(__func__);
+            noImpl();
         #endif
             return ((static_cast<uint64_t>(hi) << 32U) | lo);
         }

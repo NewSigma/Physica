@@ -44,7 +44,7 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto& target_) const;
 
-        [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
+        [[nodiscard]] ScalarType calc(size_t) const { noImpl(); }
 
         [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */

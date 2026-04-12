@@ -39,7 +39,7 @@ namespace Physica {
         ~ConservedFieldNet() = default;
         /* Operations */
         template<class RandomSource, ExecutePolicy P>
-        void train_step(const auto& dataset, auto& optimizer) { noImpl(__func__); }
+        void train_step(const auto& dataset, auto& optimizer) { noImpl(); }
 
         [[nodiscard]] ScalarType loss(const auto& dataset, size_t index) const { return Base::getDerived().loss(dataset, index); }
         [[nodiscard]] ScalarType loss(const auto& dataset) const;

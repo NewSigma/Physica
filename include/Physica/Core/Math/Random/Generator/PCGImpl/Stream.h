@@ -40,7 +40,7 @@
 #pragma once
 
 #include <cstddef>
-#include "Physica/Core/Exception/NoImplException.h"
+#include "Physica/Core/Utils/NoImpl.h"
 #include "OutputFn.h"
 
 namespace Physica::Internal {

@@ -19,7 +19,7 @@
 #pragma once
 
 #include <format>
-#include "Physica/Core/Exception/NoImplException.h"
+#include "Physica/Core/Utils/NoImpl.h"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "Physica/Core/Parallel/CUDAContext.cuh"
 

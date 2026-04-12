@@ -75,7 +75,7 @@ namespace Physica {
             }
         }
         else
-            noImpl(__func__);
+            noImpl();
     }
 
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)

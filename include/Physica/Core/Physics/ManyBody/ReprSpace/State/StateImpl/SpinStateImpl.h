@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Exception/NoImplException.h"
+#include "Physica/Core/Utils/NoImpl.h"
 #include "../SpinState.h"
 
 namespace Physica {
@@ -101,7 +101,7 @@ namespace Physica {
     template<int Dim, int NumSite>
     auto SpinState<Dim, NumSite>::transReduce(int period) const -> This {
         if constexpr (Dim != 1)
-            noImpl(__func__);
+            noImpl();
         assert(NumSite % period == 0 && "[Error]: Invalid period");
         assert(0 < period && period <= int(NumSite) && "[Error]: Invalid period");
         if (period == NumSite)
@@ -128,7 +128,7 @@ namespace Physica {
     template<int Dim, int NumSite>
     int SpinState<Dim, NumSite>::calcPeriod() const {
         if constexpr (Dim != 1)
-            noImpl(__func__);
+            noImpl();
         This copy = *this;
         int i = 1;
         for (; i <= NumSite; ++i) {

@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Utils/SSHWarpper.h"
 #include <utility>
-#include "Physica/Core/Exception/NoImplException.h"
+#include "Physica/Core/Utils/NoImpl.h"
 #include "Physica/Core/Exception/SystemException.h"
 
 using namespace Physica;
@@ -55,7 +55,7 @@ void SSHWarpper::execute() {
         throw SystemException();
     close(fd[1]);
 #else
-    noImpl(__func__);
+    noImpl();
 #endif
 }
 

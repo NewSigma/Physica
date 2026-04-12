@@ -118,7 +118,7 @@ namespace Physica {
         if constexpr (HasMKL())
             return solve_mkl(rhs);
         else
-            noImpl(__func__);
+            noImpl();
     }
 
     template<Scalar T>

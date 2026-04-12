@@ -43,7 +43,7 @@ namespace Physica {
         void assign_base(Vector auto& target) const;
         void assign_mkl(Vector auto& target) const;
 
-        [[nodiscard]] T calc(size_t) const { noImpl(__func__); }
+        [[nodiscard]] T calc(size_t) const { noImpl(); }
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */

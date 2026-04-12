@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Macro.h"
-#include "Physica/Core/Exception/NoImplException.h"
+#include "Physica/Core/Utils/NoImpl.h"
 
 namespace Physica {
     /*!
@@ -48,7 +48,7 @@ namespace Physica {
             }
             return result;
         #else
-            noImpl(__func__);
+            noImpl();
         #endif
         }
         else {
@@ -90,7 +90,7 @@ namespace Physica {
                 );
             }
         #else
-            noImpl(__func__);
+            noImpl();
         #endif
         }
         else {

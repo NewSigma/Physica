@@ -43,7 +43,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t, size_t) const { noImpl(__func__); }
+        [[nodiscard]] __device__ T calc(size_t, size_t) const { noImpl(); }
 
         using Base::resize;
         void resize(size_t row, size_t col);

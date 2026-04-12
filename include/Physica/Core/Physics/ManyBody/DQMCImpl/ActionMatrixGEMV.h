@@ -46,7 +46,7 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign_add(Vector auto& target) const noexcept;
 
-        [[nodiscard]] CoDiff<T> calc(size_t) const { noImpl(__func__); }
+        [[nodiscard]] CoDiff<T> calc(size_t) const { noImpl(); }
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */

@@ -265,7 +265,7 @@ namespace Physica {
 
         if constexpr (ReverseDiff<T>) {
             std::ignore = co_yield std::move(result);
-            noImpl(__func__);
+            noImpl();
         }
         else
             co_return std::move(result);
@@ -291,7 +291,7 @@ namespace Physica {
         result *= reciprocal(MDCellType::getVolume(lattice));
         if constexpr (ReverseDiff<T>) {
             std::ignore = co_yield std::move(result);
-            noImpl(__func__);
+            noImpl();
         }
         else
             co_return std::move(result);

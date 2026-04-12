@@ -40,7 +40,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] T calc(size_t, size_t) const { noImpl(__func__); }
+        [[nodiscard]] T calc(size_t, size_t) const { noImpl(); }
 
         void assign(Matrix auto& target) const;
         /* Getters */

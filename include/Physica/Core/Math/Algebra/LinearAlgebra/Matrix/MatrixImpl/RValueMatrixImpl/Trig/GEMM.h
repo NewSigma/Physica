@@ -57,7 +57,7 @@ namespace Physica {
         if constexpr (HasMKL())
             assign_mkl(target);
         else
-            noImpl(__func__);
+            noImpl();
     }
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)

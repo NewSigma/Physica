@@ -68,7 +68,7 @@ namespace Physica {
         if constexpr (Internal::EnableMKL<Expr, decltype(target)>::value) // FIXME: We should separate EnableMKL and EnableLAPACK
             assign_cusolver(target);
         else
-            noImpl(__func__);
+            noImpl();
     }
 
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)

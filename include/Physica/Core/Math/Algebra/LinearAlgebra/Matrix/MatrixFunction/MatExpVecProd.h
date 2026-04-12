@@ -68,7 +68,7 @@ namespace Physica {
         template<bool NoFactor = false, ExecutePolicy P = Sequential>
         auto assign(Vector auto& target, Tr traceMu, ParamPair params) const -> std::conditional<NoFactor, Tr, void>::type;
 
-        [[nodiscard]] T calc(size_t) const { noImpl(__func__); }
+        [[nodiscard]] T calc(size_t) const { noImpl(); }
         [[nodiscard]] Tr calcTraceMu() const { return mexp.calcTraceMu(); }
         template<ExecutePolicy P>
         [[nodiscard]] ParamPair calcParam(Tr traceMu) const;

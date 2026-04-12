@@ -70,7 +70,7 @@ namespace Physica {
     template<int Dim, int NumSite>
     auto FermiState<Dim, NumSite>::transReduce() const -> This {
         if constexpr (Dim != 1)
-            noImpl(__func__);
+            noImpl();
         This result = *this, temp = *this;
         for (int i = 0; i < NumSite; ++i) {
             temp <<= 1;
@@ -89,7 +89,7 @@ namespace Physica {
     template<int Dim, int NumSite>
     int FermiState<Dim, NumSite>::calcPeriod() const noexcept {
         if constexpr (Dim != 1)
-            noImpl(__func__);
+            noImpl();
         const int result = lcm<int, false>(spinUp.calcPeriod(), spinDown.calcPeriod());
         assert(0 < result && result <= NumSite && "[Error]: Unexpected period, this is a bug");
         return result;

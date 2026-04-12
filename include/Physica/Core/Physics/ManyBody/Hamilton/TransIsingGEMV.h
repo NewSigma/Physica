@@ -45,7 +45,7 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto& target) const;
 
-        [[nodiscard]] T calc(size_t) const { noImpl(__func__); }
+        [[nodiscard]] T calc(size_t) const { noImpl(); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;

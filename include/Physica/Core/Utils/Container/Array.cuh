@@ -20,7 +20,7 @@
 
 #include "Physica/PlainStruct.h"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
-#include "Physica/Core/Exception/NoImplException.h"
+#include "Physica/Core/Utils/NoImpl.h"
 #include "Physica/Core/Utils/Allocator/DeviceAllocator.cuh"
 #include "Array.h"
 
@@ -131,7 +131,7 @@ namespace Physica {
         if constexpr (IsHost())
             host_obj(length_, std::forward<decltype(args)>(args)...).toDevice(*this);
         else
-            noImpl(__func__);
+            noImpl();
     }
 
     template<class T, class Allocator>

@@ -175,6 +175,6 @@ double Cycler::makeCyclesPerSec() {
     }
     return result;
 #else
-    noImpl(__func__);
+    noImpl();
 #endif
 }

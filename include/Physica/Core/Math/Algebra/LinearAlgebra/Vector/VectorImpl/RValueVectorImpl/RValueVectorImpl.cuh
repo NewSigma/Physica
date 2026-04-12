@@ -71,7 +71,7 @@ namespace Physica {
             CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(func, makeKernelConfig());
         }
         else if constexpr (IsDevice())
-            noImpl(__func__);
+            noImpl();
     }
 
     template<class Derived>

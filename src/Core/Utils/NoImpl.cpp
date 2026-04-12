@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,23 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
-
-#include <stdexcept>
-#include "Physica/Macro.h"
+#include "Physica/Core/Utils/NoImpl.h"
+#include <cassert>
+#include <print>
 
 namespace Physica {
-    class PHYSICA_API NoImplException : public std::runtime_error {
-    public:
-        NoImplException(const char* msg) noexcept : std::runtime_error(msg) {}
-    };
-
-    [[noreturn, gnu::nodebug]] __host__ __device__ inline void noImpl(const char* msg) {
+    __host__ __device__ void noImpl(const char* msg) noexcept {
+        assert(msg != nullptr);
     #ifdef __CUDA_ARCH__
-        printf("%s\n", msg);
+        printf("[Error]: Not implemented\n%s\n", msg);
         __trap();
     #else
-        throw NoImplException(msg);
+        std::println("[Error]: Not implemented\n{}", msg);
+        std::abort();
     #endif
+    }
+
+    __host__ __device__ void noImpl(std::source_location loc) noexcept {
+        noImpl(std::format("File: {}:{}:{}\nFunc: {}", loc.file_name(), loc.line(), loc.column(), loc.function_name()).c_str());
     }
 }

@@ -25,7 +25,7 @@
  #endif
 #include "Physica/Core/Parallel/Future/ProcessFuture.h"
 #include "Physica/Core/Exception/SystemException.h"
-#include "Physica/Core/Exception/NoImplException.h"
+#include "Physica/Core/Utils/NoImpl.h"
 
 using namespace Physica;
 
@@ -53,7 +53,7 @@ int ProcessFuture::wait() {
     if (WIFEXITED(status))
         error = WEXITSTATUS(status);
 #else
-    noImpl(__func__);
+    noImpl();
 #endif
     return error;
 }

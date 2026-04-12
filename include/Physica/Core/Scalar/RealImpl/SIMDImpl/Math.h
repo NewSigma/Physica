@@ -39,7 +39,7 @@ namespace Physica {
         else if constexpr (IsHost())
             return SIMD<T, Size>(abs(x.toMachine()));
         else
-            noImpl(__func__);
+            noImpl();
     }
 
     template<Scalar T, int Size>
