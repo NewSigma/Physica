@@ -72,7 +72,12 @@ namespace Physica {
     template<Matrix M, Vector V>
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto&& target) const noexcept {
-        if constexpr (MatrixMajor::isColMatrix<M>()) {
+        target.assert_assign(*this);
+        if constexpr (instanceof<GEMV, V>) {
+            DenseVector<T, Base::getSizeAtCompile(target)> buffer = getRHS();
+            (getLHS() * std::move(buffer)).template assign<P>(target);
+        }
+        else if constexpr (MatrixMajor::isColMatrix<M>()) {
             size_t length = vec.getLength();
             (mat.col(0) * vec.calc(0)).template assign<P>(target);
             for (size_t i = 1; i < length; ++i)
