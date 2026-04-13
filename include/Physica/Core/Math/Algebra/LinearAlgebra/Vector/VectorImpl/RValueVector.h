@@ -29,6 +29,7 @@ namespace Physica {
     template<class Derived> class CompactVector;
     template<class Derived> class RValueMatrix;
     template<class Derived> class CompactMatrix;
+    template<Vector, int MatrixMajor, size_t Row, size_t Col> class RValueReshapedVector;
     template<class> class Transpose;
     template<class> class Conjugate;
     template<class> class Hermite;

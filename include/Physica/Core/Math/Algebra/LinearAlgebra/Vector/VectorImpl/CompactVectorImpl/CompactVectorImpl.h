@@ -128,6 +128,33 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<int Major, size_t Row, size_t Col>
+    auto CompactVector<Derived>::reshape(this auto&& self, size_t row, size_t col) noexcept {
+        using Self = decltype(self);
+        return CompactReshapedVector<Self, Major, Row, Col>(std::forward<Self>(self), row, col);
+    }
+
+    template<class Derived>
+    template<size_t Row, size_t Col>
+    auto CompactVector<Derived>::reshape_row(this auto&& self, size_t row, size_t col) noexcept {
+        return std::forward<decltype(self)>(self).template reshape<MatrixMajor::Row, Row, Col>(row, col);
+    }
+
+    template<class Derived>
+    template<size_t Row, size_t Col>
+    auto CompactVector<Derived>::reshape_col(this auto&& self, size_t row, size_t col) noexcept {
+        return std::forward<decltype(self)>(self).template reshape<MatrixMajor::Col, Row, Col>(row, col);
+    }
+
+    template<class Derived>
+    auto CompactVector<Derived>::reshape_like(this auto&& self, const Matrix auto& mat) noexcept {
+        using M = std::remove_cvref_t<decltype(mat)>;
+        constexpr auto Major = MatrixMajor::getMajor<M>();
+        static_assert(Major != MatrixMajor::BothMajor, "[Error]: Cannot infer major from this matrix");
+        return std::forward<decltype(self)>(self).template reshape<Major, M::RowAtCompile, M::ColAtCompile>(mat.getRow(), mat.getCol());
+    }
+
+    template<class Derived>
     auto CompactVector<Derived>::norm1() const noexcept -> CoDiff<Tr> {
         constexpr bool SmallVector = 0 < SizeAtCompile && SizeAtCompile <= 128;
         if constexpr (Internal::EnableMKL<Derived>::value && !SmallVector) {

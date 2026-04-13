@@ -47,7 +47,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept;
         /* Operations */
-        void assign(Matrix auto& target) const;
+        void assign(Matrix auto&& target) const;
         void assign_mkl(Matrix auto& target) const noexcept;
         [[nodiscard]] auto compute() const;
 
@@ -86,7 +86,7 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    void GEMM<M1, M2>::assign(Matrix auto& target) const {
+    void GEMM<M1, M2>::assign(Matrix auto&& target) const {
         target.assert_assign(*this);
         if constexpr (UseMKL(target)) {
             if (getLHS().getSize() > Critical && getRHS().getSize() > Critical)

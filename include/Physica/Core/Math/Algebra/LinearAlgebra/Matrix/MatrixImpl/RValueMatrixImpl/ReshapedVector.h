@@ -88,32 +88,6 @@ namespace Physica {
             return Col;
         return c;
     }
-
-    template<class Derived>
-    template<int Major, size_t Row, size_t Col>
-    auto RValueVector<Derived>::reshape(size_t row, size_t col) const noexcept {
-        return RValueReshapedVector<const Derived&, Major, Row, Col>(Base::getDerived(), row, col);
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    auto RValueVector<Derived>::reshape_row(size_t row, size_t col) const noexcept {
-        return reshape<MatrixMajor::Row, Row, Col>(row, col);
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    auto RValueVector<Derived>::reshape_col(size_t row, size_t col) const noexcept {
-        return reshape<MatrixMajor::Col, Row, Col>(row, col);
-    }
-
-    template<class Derived>
-    auto RValueVector<Derived>::reshape_like(const Matrix auto& mat) const noexcept {
-        using M = std::remove_cvref_t<decltype(mat)>;
-        constexpr auto Major = MatrixMajor::getMajor<M>();
-        static_assert(Major != MatrixMajor::BothMajor, "[Error]: Cannot infer major from this matrix");
-        return reshape<Major, M::RowAtCompile, M::ColAtCompile>(mat.getRow(), mat.getCol());
-    }
 }
 
 namespace Physica {

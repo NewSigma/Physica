@@ -458,6 +458,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isColMatrix() noexcept {
+        return host_obj::isColMatrix();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isRowMatrix() noexcept {
+        return host_obj::isRowMatrix();
+    }
+
+    template<class Derived>
     __host__ __device__ consteval int device_obj<RValueMatrix<Derived>>::getMajor() noexcept {
         return Traits<Derived>::Major;
     }

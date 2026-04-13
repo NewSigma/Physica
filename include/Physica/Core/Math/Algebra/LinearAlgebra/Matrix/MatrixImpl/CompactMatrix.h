@@ -116,3 +116,4 @@ namespace Physica {
 #ifdef PHYSICA_MKL
     #include "CompactMatrixImpl/CompactMatrix_MKL.h"
 #endif
+#include "CompactMatrixImpl/ReshapedVector.h"

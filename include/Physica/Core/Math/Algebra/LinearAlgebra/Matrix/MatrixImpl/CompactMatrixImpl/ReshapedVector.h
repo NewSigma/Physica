@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include "../LValueMatrix.h"
+#include "../CompactMatrix.h"
 
 namespace Physica {
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    class LValueReshapedVector : public LValueMatrix<LValueReshapedVector<V, MatrixMajor, Row, Col>> {
-        using This = LValueReshapedVector<V, MatrixMajor, Row, Col>;
+    class CompactReshapedVector : public CompactMatrix<CompactReshapedVector<V, MatrixMajor, Row, Col>> {
+        using This = CompactReshapedVector<V, MatrixMajor, Row, Col>;
         using Base = LValueMatrix<This>;
     protected:
         using typename Base::T;
@@ -32,10 +32,10 @@ namespace Physica {
         size_t r;
         size_t c;
     public:
-        LValueReshapedVector(V&& v_, size_t r_, size_t c_);
-        LValueReshapedVector(const This&) = default;
-        LValueReshapedVector(This&&) noexcept = default;
-        ~LValueReshapedVector() = default;
+        CompactReshapedVector(V&& v_, size_t r_, size_t c_);
+        CompactReshapedVector(const This&) = default;
+        CompactReshapedVector(This&&) noexcept = default;
+        ~CompactReshapedVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -47,11 +47,12 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
+        [[nodiscard]] auto data(this auto&&) noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
     };
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    LValueReshapedVector<V, MatrixMajor, Row, Col>::LValueReshapedVector(V&& v_, size_t r_, size_t c_)
+    CompactReshapedVector<V, MatrixMajor, Row, Col>::CompactReshapedVector(V&& v_, size_t r_, size_t c_)
             : v(std::forward<V>(v_)), r(r_), c(c_) {
         assert(r == Row || Row == Dynamic);
         assert(c == Col || Col == Dynamic);
@@ -59,38 +60,41 @@ namespace Physica {
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    void LValueReshapedVector<V, MatrixMajor, Row, Col>::resize(
+    void CompactReshapedVector<V, MatrixMajor, Row, Col>::resize(
             [[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
         assert(row == getRow());
         assert(col == getCol());
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    size_t LValueReshapedVector<V, MatrixMajor, Row, Col>::getRow() const noexcept {
+    size_t CompactReshapedVector<V, MatrixMajor, Row, Col>::getRow() const noexcept {
         if constexpr (Row != Dynamic)
             return Row;
         return r;
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    size_t LValueReshapedVector<V, MatrixMajor, Row, Col>::getCol() const noexcept {
+    size_t CompactReshapedVector<V, MatrixMajor, Row, Col>::getCol() const noexcept {
         if constexpr (Col != Dynamic)
             return Col;
         return c;
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    auto LValueReshapedVector<V, MatrixMajor, Row, Col>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
-        assert(row < self.getRow() && col < self.getCol());
-        if constexpr (MatrixMajor::isColMatrix<This>())
-            return self.v.data_ptr(col * self.getRow() + row);
+    auto CompactReshapedVector<V, MatrixMajor, Row, Col>::data(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).v.data();
+    }
+
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    auto CompactReshapedVector<V, MatrixMajor, Row, Col>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+        if constexpr (self.isColMatrix())
+            return self.data() + col * self.getRow() + row;
         else
-            return self.v.data_ptr(row * self.getCol() + col);
+            return self.data() + row * self.getCol() + col;
     }
 }
 
 namespace Physica {
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    class Traits<LValueReshapedVector<V, MatrixMajor, Row, Col>>
-            : public Traits<RValueReshapedVector<V, MatrixMajor, Row, Col>> {};
+    class Traits<CompactReshapedVector<V, MatrixMajor, Row, Col>> : public Traits<RValueReshapedVector<V, MatrixMajor, Row, Col>> {};
 }

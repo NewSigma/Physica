@@ -39,6 +39,11 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
+        template<ExecutePolicy P = Sequential>
+        void assign(Vector auto&& v) const noexcept;
+        template<ExecutePolicy P = Sequential>
+        void assign_add(Vector auto&& v) const noexcept;
+
         [[nodiscard]] T calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
 
@@ -47,6 +52,24 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
     };
+
+    template<Matrix M>
+    template<ExecutePolicy P>
+    void FlattenR<M>::assign(Vector auto&& v) const noexcept {
+        if constexpr (v.isCompact())
+            mat.template assign<P>(v.reshape_like(mat));
+        else
+            Base::template assign<P>(v);
+    }
+
+    template<Matrix M>
+    template<ExecutePolicy P>
+    void FlattenR<M>::assign_add(Vector auto&& v) const noexcept {
+        if constexpr (v.isCompact())
+            mat.template assign_add<P>(v.reshape_like(mat));
+        else
+            Base::template assign_add<P>(v);
+    }
 
     template<Matrix M>
     auto FlattenR<M>::values(this auto&& self) noexcept {
