@@ -81,9 +81,10 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<ExecutePolicy P>
     void RValueMatrix<Derived>::assign_add(Matrix auto&& target) const noexcept {
         if constexpr (!isDiffable() && target.isDiffable())
-            Base::getDerived().assign_add(target.values());
+            Base::getDerived().template assign_add<P>(target.values());
         else {
             target.assert_assign(Base::getDerived());
 
@@ -633,6 +634,11 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ consteval bool RValueMatrix<Derived>::isRowMatrix() noexcept {
         return (getMajor() & MatrixMajor::Row) != 0;
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval bool RValueMatrix<Derived>::isBothMajor() noexcept {
+        return getMajor() == MatrixMajor::BothMajor;
     }
 
     template<class Derived>

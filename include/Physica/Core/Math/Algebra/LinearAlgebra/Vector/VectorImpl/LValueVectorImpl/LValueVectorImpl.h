@@ -218,8 +218,10 @@ namespace Physica {
     auto LValueVector<Derived>::reshape_like(this auto&& self, const Matrix auto& mat) noexcept {
         using M = std::remove_cvref_t<decltype(mat)>;
         constexpr auto Major = MatrixMajor::getMajor<M>();
-        static_assert(Major != MatrixMajor::BothMajor, "[Error]: Cannot infer major from this matrix");
-        return std::forward<decltype(self)>(self).template reshape<Major, M::RowAtCompile, M::ColAtCompile>(mat.getRow(), mat.getCol());
+        if constexpr (Major == MatrixMajor::BothMajor)
+            return std::forward<decltype(self)>(self).template reshape<MatrixMajor::Col, M::RowAtCompile, M::ColAtCompile>(mat.getRow(), mat.getCol());
+        else
+            return std::forward<decltype(self)>(self).template reshape<Major, M::RowAtCompile, M::ColAtCompile>(mat.getRow(), mat.getCol());
     }
 
     template<class Derived>

@@ -92,6 +92,7 @@ namespace Physica {
         void assign(Matrix auto&& target) const noexcept;
         template<ExecutePolicy P = Sequential>
         void assign_base(Matrix auto&& target) const noexcept;
+        template<ExecutePolicy P = Sequential>
         void assign_add(Matrix auto&& target) const noexcept;
         void assert_assign(const Matrix auto& source) const noexcept;
         void assert_assign_mkl(const Matrix auto& source) const noexcept;
@@ -188,6 +189,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isStaticHermite() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isColMatrix() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isRowMatrix() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isBothMajor() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
         [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixMajor::rowFromMajorMinor<Derived>(major, minor); }
         [[nodiscard]] static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixMajor::colFromMajorMinor<Derived>(major, minor); }

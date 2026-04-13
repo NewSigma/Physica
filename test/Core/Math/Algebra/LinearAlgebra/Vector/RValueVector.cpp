@@ -58,6 +58,13 @@ namespace {
         auto x = VectorND<T>::random_uniform<RandomSource>(id.getSize());
         MatrixND<T> y = id * (x + x).reshape_col(3, 3);
         expect(vectorNear(y.flatten(), x * T(2), uint64_t(0)));
+
+        // Test that we fallback to Col major if cannot infer major from input matrix
+        syntax_only([]() {
+            auto mat = IdentityMatrix<T>{};
+            auto re = abs(VectorND<T>{}).reshape_like(mat);
+            static_assert(mat.isBothMajor() && re.isColMatrix());
+        });
     }
 }
 

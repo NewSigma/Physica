@@ -468,6 +468,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isBothMajor() noexcept {
+        return host_obj::isBothMajor();
+    }
+
+    template<class Derived>
     __host__ __device__ consteval int device_obj<RValueMatrix<Derived>>::getMajor() noexcept {
         return Traits<Derived>::Major;
     }
