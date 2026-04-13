@@ -374,15 +374,19 @@ namespace Physica {
         new_direction = residual;
         gram_schmidt(orthogonalSpace, new_direction);
         linearSolver.cg([this, index, eigenGoal, &buffer, &source](const VectorND<T>& v, VectorND<T>& dot) {
-            const auto orthogonalSpace = eigenvectors.leftCols(index + 1);
-            auto head1 = dot.head(index + 1);
-            head1 = orthogonalSpace.hermite() * v;
-            buffer = v - orthogonalSpace * head1;
-
+            const size_t dim = index + 1;
+            const auto orthogonalSpace = eigenvectors.leftCols(dim);
+            {
+                auto head = dot.head(dim);
+                head = orthogonalSpace.hermite() * v;
+                buffer = v - orthogonalSpace * head;
+            }
             dot = source * buffer - eigenGoal * buffer;
-            auto head2 = buffer.head(index + 1);
-            head2 = orthogonalSpace.hermite() * dot;
-            dot -= orthogonalSpace * head2;
+            {
+                auto head = buffer.head(dim);
+                head = orthogonalSpace.hermite() * dot;
+                dot -= orthogonalSpace * head;
+            }
         }, new_direction);
 
         new_direction.toUnit();

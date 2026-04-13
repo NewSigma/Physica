@@ -95,7 +95,7 @@ namespace Physica {
         while(!isConverged()) {
             dotFunc(searchP, dot);
             const Tr resA = (searchP.conjugate() * dot).real();
-            assert(resA.isPositive() && "[Error]: The matrix is not positive definite");
+            assert((resA.isPositive() || !mustConverge) && "[Error]: The matrix is not positive definite");
             const Tr step = squaredRes / resA;
             x += step * searchP;
             residual += step * dot;
