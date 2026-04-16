@@ -170,7 +170,9 @@ namespace Physica {
         const T abs_real = abs(c.real());
         const T norm1 = exp(T(-2) * abs_real);
         const T phase = c.real().isPositive() ? c.imag() : -c.imag();
-        const auto temp = Complex<T>((T(1) + norm1) * cos(phase), (T(1) - norm1) * sin(phase)) * T(0.5);
+        T cosine, sine;
+        sincos(phase, sine, cosine);
+        const auto temp = Complex<T>(fma(norm1, cosine, cosine), fma(-norm1, sine, sine)) * T(0.5);
         return abs_real + ln(temp);
     }
 }

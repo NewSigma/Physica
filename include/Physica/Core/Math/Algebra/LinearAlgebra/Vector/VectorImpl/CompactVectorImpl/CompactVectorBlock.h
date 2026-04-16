@@ -32,8 +32,8 @@ namespace Physica {
         size_t from;
         size_t to;
     public:
-        CompactVectorBlock(V&& vec, size_t from_, size_t to_);
-        CompactVectorBlock(V&& vec, size_t from_);
+        CompactVectorBlock(V&& vec_, size_t from_, size_t to_);
+        CompactVectorBlock(V&& vec_, size_t from_);
         CompactVectorBlock(const This& block) = default;
         CompactVectorBlock(This&&) noexcept = default;
         ~CompactVectorBlock() = default;
@@ -66,8 +66,8 @@ namespace Physica {
     };
 
     template<Vector V, size_t Length>
-    CompactVectorBlock<V, Length>::CompactVectorBlock(V&& vec, size_t from_, size_t to_)
-            : vec(std::forward<V>(vec)), from(from_), to(to_) {
+    CompactVectorBlock<V, Length>::CompactVectorBlock(V&& vec_, size_t from_, size_t to_)
+            : vec(std::forward<V>(vec_)), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());

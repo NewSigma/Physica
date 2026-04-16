@@ -324,5 +324,6 @@ namespace Physica {
         mean = ln(mean) + maxSample;
         var = ln(var + Trv(std::numeric_limits<T>::min()));
         var.value().real() = fma(Trv(2), maxSample, var.value().real());
+        assert(var.isFinite() && "[Error]: maxSample is too small?");
     }
 }

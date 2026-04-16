@@ -77,10 +77,15 @@ namespace {
     }
 
     void complexTest() {
-        syntax_only([]() {
-            auto vegas = Vegas<Tc, false>({0}, {1}, 50, 1000);
-            vegas.integral<RandomSource>([&](const VectorND<T>& x) { return Tc(x[0], -x[0]); });
-        });
+        // Test that real-complex results match
+        auto vegas1 = Vegas<T, true>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 10000);
+        vegas1.integral<RandomSource>([](const VectorND<T>&) static -> T { return -0.5; });
+        const T answer = vegas1.calcLnMean();
+
+        auto vegas2 = Vegas<Tc, true>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 10000);
+        vegas2.integral<RandomSource>([](const VectorND<T>&) static -> Tc { return -0.5; });
+        const T result = vegas2.calcLnMean().real();
+        expect(scalarNear(answer, result, 1E-13));
     }
 }
 

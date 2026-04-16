@@ -67,7 +67,7 @@ namespace Physica {
         return lncosh(std::forward<Self>(self).getExpr().values());
     }
 
-template<Vector V>
+    template<Vector V>
     [[nodiscard, gnu::always_inline]] auto lncosh(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::LnCosh, V&&>(std::forward<V>(v));
     }
