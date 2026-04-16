@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Scalar/Real.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -28,6 +29,14 @@ namespace {
         std::ignore = x <= y;
         std::ignore = x >= y;
     }
+
+    void real() {
+        // Test x.real() returns reference
+        using T = float64;
+        float64 x = 0;
+        x.real() += T(1);
+        expect(x == T(1));
+    }
 }
 
 int main() {
@@ -35,5 +44,6 @@ int main() {
     static_assert(std::formattable<float64, char>);
     static_assert(std::same_as<std::strong_ordering, decltype(float32() <=> float32())>);
     infiniteCompare(float32(0), float64(0)); // Always x = y = 0, we make it a function to silent useless comparison warning
+    real();
     return 0;
 }

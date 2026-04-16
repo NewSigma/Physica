@@ -76,18 +76,16 @@ namespace Physica {
         constexpr ~ScalarBase() = default;
         /* Operators */
         __host__ __device__ Derived& operator=(const Scalar auto& x);
-        __host__ __device__ void operator+=(const Scalar auto& x);
-        __host__ __device__ void operator-=(const Scalar auto& x);
-        __host__ __device__ void operator*=(const Scalar auto& x);
-        __host__ __device__ void operator/=(const Scalar auto& x);
+        __host__ __device__ void operator+=(this auto&, const Scalar auto& x) noexcept;
+        __host__ __device__ void operator-=(this auto&, const Scalar auto& x) noexcept;
+        __host__ __device__ void operator*=(this auto&, const Scalar auto& x) noexcept;
+        __host__ __device__ void operator/=(this auto&, const Scalar auto& x) noexcept;
         [[nodiscard]] __host__ __device__ auto operator<=>(this const auto& x, float y) noexcept;
         [[nodiscard]] __host__ __device__ auto operator<=>(this const auto& x, double y) noexcept;
         [[nodiscard]] __host__ __device__ auto operator<=>(this const auto& x, const Scalar auto& y) noexcept;
         /* Operations */
         [[nodiscard]] ScalarType calc() const;
 
-        [[nodiscard]] __host__ __device__ RealType real() const noexcept;
-        [[nodiscard]] __host__ __device__ RealType imag() const noexcept;
         [[nodiscard]] __host__ __device__ ScalarType conjugate() const noexcept;
         [[nodiscard]] __host__ __device__ RealType norm() const noexcept;
         [[nodiscard]] __host__ __device__ auto squaredNorm() const noexcept;
@@ -100,6 +98,9 @@ namespace Physica {
         template<RNG R>
         void random_normal() noexcept;
         /* Getters */
+        [[nodiscard]] __host__ __device__ decltype(auto) real(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) imag(this auto&&) noexcept;
+
         [[nodiscard]] __host__ __device__ auto* real_ptr(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto* value_ptr(this auto&&) noexcept;
         template<int GradOrder>
@@ -144,51 +145,27 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ void ScalarBase<Derived>::operator+=(const Scalar auto& x) {
+    __host__ __device__ void ScalarBase<Derived>::operator+=(this auto& self, const Scalar auto& x) noexcept {
         static_assert_assign<decltype(x)>();
-        auto& y = Base::getDerived();
-        if constexpr (x.isReverseDiff())
-            y += x.value();
-        else if constexpr (isReverseDiff())
-            y.value() += x;
-        else
-            y = y + x;
+        self = self + x;
     }
 
     template<class Derived>
-    __host__ __device__ void ScalarBase<Derived>::operator-=(const Scalar auto& x) {
+    __host__ __device__ void ScalarBase<Derived>::operator-=(this auto& self, const Scalar auto& x) noexcept {
         static_assert_assign<decltype(x)>();
-        auto& y = Base::getDerived();
-        if constexpr (x.isReverseDiff())
-            y -= x.value();
-        else if constexpr (isReverseDiff())
-            y.value() -= x;
-        else
-            y = y - x;
+        self = self - x;
     }
 
     template<class Derived>
-    __host__ __device__ void ScalarBase<Derived>::operator*=(const Scalar auto& x) {
+    __host__ __device__ void ScalarBase<Derived>::operator*=(this auto& self, const Scalar auto& x) noexcept {
         static_assert_assign<decltype(x)>();
-        auto& y = Base::getDerived();
-        if constexpr (x.isReverseDiff())
-            y *= x.value();
-        else if constexpr (isReverseDiff())
-            y.value() *= x;
-        else
-            y = y * x;
+        self = self * x;
     }
 
     template<class Derived>
-    __host__ __device__ void ScalarBase<Derived>::operator/=(const Scalar auto& x) {
+    __host__ __device__ void ScalarBase<Derived>::operator/=(this auto& self, const Scalar auto& x) noexcept {
         static_assert_assign<decltype(x)>();
-        auto& y = Base::getDerived();
-        if constexpr (x.isReverseDiff())
-            y /= x.value();
-        else if constexpr (isReverseDiff())
-            y.value() /= x;
-        else
-            y = y / x;
+        self = self / x;
     }
 
     template<class Derived>
@@ -218,23 +195,23 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::real() const noexcept -> RealType {
-        const auto& x = this->getDerived();
+    __host__ __device__ decltype(auto) ScalarBase<Derived>::real(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (isDiffable())
-            return RealType(x.value().real(), x.grad().real());
+            return RealType(self.value().real(), self.grad().real());
         else if constexpr (isComplex())
-            return x.real();
+            return std::forward<Self>(self).real();
         else
-            return x;
+            return std::forward<Self>(self);
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::imag() const noexcept -> RealType {
-        const auto& x = this->getDerived();
+    __host__ __device__ decltype(auto) ScalarBase<Derived>::imag(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (isDiffable())
-            return RealType(x.value().imag(), x.grad().imag());
+            return RealType(self.value().imag(), self.grad().imag());
         else if constexpr (isComplex())
-            return x.imag();
+            return std::forward<Self>(self).imag();
         else
             return RealType(0);
     }
@@ -245,9 +222,9 @@ namespace Physica {
         if constexpr (isDiffable())
             return ScalarType(x.value().conjugate(), x.grad().conjugate());
         else if constexpr (isComplex())
-            return ScalarType(real(), -imag());
+            return ScalarType(x.real(), -x.imag());
         else
-            return real();
+            return x.real();
     }
 
     template<class Derived>

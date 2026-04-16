@@ -49,6 +49,10 @@ namespace Physica {
         __host__ __device__ This& operator=(Scalar auto other) noexcept;
         __host__ __device__ This& operator=(int x);
         __host__ __device__ This& operator=(double x);
+        __host__ __device__ void operator+=(const Scalar auto& x) noexcept;
+        __host__ __device__ void operator-=(const Scalar auto& x) noexcept;
+        __host__ __device__ void operator*=(const Scalar auto& x) noexcept;
+        __host__ __device__ void operator/=(const Scalar auto& x) noexcept;
         [[nodiscard]] __host__ __device__ bool operator==(const This& other) const;
         using Base::operator<=>;
 
@@ -111,6 +115,30 @@ namespace Physica {
     __host__ __device__ auto ScalarRef<T>::operator=(double x) -> This& {
         operator=(T(x));
         return *this;
+    }
+
+    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    __host__ __device__ void ScalarRef<T>::operator+=(const Scalar auto& x) noexcept {
+        Base::template static_assert_assign<decltype(x)>();
+        *this = *this + x;
+    }
+
+    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    __host__ __device__ void ScalarRef<T>::operator-=(const Scalar auto& x) noexcept {
+        Base::template static_assert_assign<decltype(x)>();
+        *this = *this - x;
+    }
+
+    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    __host__ __device__ void ScalarRef<T>::operator*=(const Scalar auto& x) noexcept {
+        Base::template static_assert_assign<decltype(x)>();
+        *this = *this * x;
+    }
+
+    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    __host__ __device__ void ScalarRef<T>::operator/=(const Scalar auto& x) noexcept {
+        Base::template static_assert_assign<decltype(x)>();
+        *this = *this / x;
     }
 
     template<Scalar T> requires(instanceof_tx<Diff, T>)
