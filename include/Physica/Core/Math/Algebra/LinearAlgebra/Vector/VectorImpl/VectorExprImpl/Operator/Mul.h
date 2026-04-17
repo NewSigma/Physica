@@ -26,12 +26,12 @@ namespace Physica {
             : public BinaryVectorExpr<ExprID::Mul, V, U> {
         using Base = BinaryVectorExpr<ExprID::Mul, V, U>;
     public:
-        using Base::isReverseDiff;
         using Base::isComplex;
+        using Base::isReverseDiff;
     protected:
         using typename Base::T;
-        using typename Base::Tv;
         using typename Base::Tr;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operators */
@@ -68,9 +68,9 @@ namespace Physica {
         using Base::getRHS;
     private:
         template<ExecutePolicy P>
-        void assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept;
+        void assign_fma_for(Vector auto& __restrict v) const __restrict noexcept;
         template<Vector Target, size_t Length>
-        void assign_fma_simd(Target&  __restrict v) const  __restrict noexcept;
+        void assign_fma_simd(Target& v) const noexcept;
     };
 
     template<Vector V, Scalar U>
@@ -208,7 +208,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     template<ExecutePolicy P>
-    void VectorExpr<ExprID::Mul, V, U>::assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept {
+    void VectorExpr<ExprID::Mul, V, U>::assign_fma_for(Vector auto& __restrict v) const __restrict noexcept {
         parallel_for<P>([&, this](size_t i) {
             if constexpr (isReverseDiff())
                 v[i] = fma(getLHS().calc_value(i), Tv(getRHS().value()), v[i]);
@@ -219,28 +219,36 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     template<Vector Target, size_t Length>
-    void VectorExpr<ExprID::Mul, V, U>::assign_fma_simd(Target&  __restrict v) const  __restrict noexcept {
+    void VectorExpr<ExprID::Mul, V, U>::assign_fma_simd(Target& v) const noexcept {
         using Pack = BestPacket<typename Target::ScalarType, Length>::Type;
         constexpr size_t Size = Pack::size();
-        const auto& lhs = getLHS();
         const auto rhs = Pack(getRHS());
+        const T b = getRHS();
+        auto it = zip(v.view(), getLHS().view()).begin();
         if constexpr (Length != Dynamic) {
             constexpr size_t to = Length / Size * Size;
-            for (size_t i = 0; i < to; i += Size)
-                v.writePacket(fma(lhs.template packet<Size>(i), rhs, v.template packet<Size>(i)), i);
+            for (size_t i = 0; i < to; i += Size) {
+                auto [it_v, it_lhs] = it + i;
+                it_v.store(fma(it_lhs.template load<Size>(), rhs, it_v.template load<Size>()));
+            }
 
-            for (size_t i = Length - Length % Size; i < Length; ++i)
-                v[i] = fma(getLHS().calc(i), T(getRHS()), v[i]);
+            for (size_t i = Length - Length % Size; i < Length; ++i) {
+                auto [it_v, it_lhs] = it + i;
+                *it_v = fma(*it_lhs, b, *it_v);
+            }
         }
         else {
             const size_t length = v.getLength();
-            const size_t to = length / Size * Size;
             size_t i = 0;
-            for (; i < to; i += Size)
-                v.writePacket(fma(lhs.template packet<Size>(i), rhs, v.template packet<Size>(i)), i);
+            for (; i < length / Size * Size; i += Size) {
+                auto [it_v, it_lhs] = it + i;
+                it_v.store(fma(it_lhs.template load<Size>(), rhs, it_v.template load<Size>()));
+            }
 
-            for (; i < length; ++i)
-                v[i] = fma(getLHS().calc(i), T(getRHS()), v[i]);
+            for (; i < length; ++i) {
+                auto [it_v, it_lhs] = it + i;
+                *it_v = fma(*it_lhs, b, *it_v);
+            }
         }
     }
     ////////////////////////////////////////////////////////////////////
@@ -254,8 +262,8 @@ namespace Physica {
         using Base::isReverseDiff;
     protected:
         using typename Base::T;
-        using typename Base::Tv;
         using typename Base::Tr;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operators */
@@ -286,9 +294,9 @@ namespace Physica {
         using Base::getRHS;
     private:
         template<ExecutePolicy P>
-        void assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept;
+        void assign_fma_for(Vector auto& __restrict v) const __restrict noexcept;
         template<Vector Target, size_t Size>
-        void assign_fma_simd(Target&  __restrict v) const  __restrict noexcept;
+        void assign_fma_simd(Target& v) const noexcept;
     };
 
     template<Vector V1, Vector V2>
@@ -395,7 +403,7 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     template<ExecutePolicy P>
-    void VectorExpr<ExprID::Mul, V1, V2>::assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept {
+    void VectorExpr<ExprID::Mul, V1, V2>::assign_fma_for(Vector auto& __restrict v) const __restrict noexcept {
         parallel_for<P>([&, this](size_t i) {
             if constexpr (isReverseDiff())
                 v[i] = fma(getLHS().calc_value(i), Tv(getRHS().calc_value(i)), v[i]);
@@ -406,28 +414,34 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     template<Vector Target, size_t Length>
-    void VectorExpr<ExprID::Mul, V1, V2>::assign_fma_simd(Target&  __restrict v) const  __restrict noexcept {
+    void VectorExpr<ExprID::Mul, V1, V2>::assign_fma_simd(Target& v) const noexcept {
         using Pack = BestPacket<typename Target::ScalarType, Length>::Type;
         constexpr size_t Size = Pack::size();
-        const auto& lhs = getLHS();
-        const auto& rhs = getRHS();
+        auto it = zip(v.view(), getLHS().view(), getRHS().view()).begin();
         if constexpr (Length != Dynamic) {
             constexpr size_t to = Length / Size * Size;
-            for (size_t i = 0; i < to; i += Size)
-                v.writePacket(fma(lhs.template packet<Size>(i), rhs.template packet<Size>(i), v.template packet<Size>(i)), i);
+            for (size_t i = 0; i < to; i += Size) {
+                auto [it_v, it_lhs, it_rhs] = it + i;
+                it_v.store(fma(it_lhs.template load<Size>(), it_rhs.template load<Size>(), it_v.template load<Size>()));
+            }
 
-            for (size_t i = Length - Length % Size; i < Length; ++i)
-                v[i] = fma(getLHS().calc(i), getRHS().calc(i), v[i]);
+            for (size_t i = Length - Length % Size; i < Length; ++i) {
+                auto [it_v, it_lhs, it_rhs] = it + i;
+                *it_v = fma(*it_lhs, *it_rhs, *it_v);
+            }
         }
         else {
             const size_t length = v.getLength();
-            const size_t to = length / Size * Size;
             size_t i = 0;
-            for (; i < to; i += Size)
-                v.writePacket(fma(lhs.template packet<Size>(i), rhs.template packet<Size>(i), v.template packet<Size>(i)), i);
+            for (; i < length / Size * Size; i += Size) {
+                auto [it_v, it_lhs, it_rhs] = it + i;
+                it_v.store(fma(it_lhs.template load<Size>(), it_rhs.template load<Size>(), it_v.template load<Size>()));
+            }
 
-            for (; i < length; ++i)
-                v[i] = fma(getLHS().calc(i), getRHS().calc(i), v[i]);
+            for (; i < length; ++i) {
+                auto [it_v, it_lhs, it_rhs] = it + i;
+                *it_v = fma(*it_lhs, *it_rhs, *it_v);
+            }
         }
     }
     ////////////////////////////////////////////////////////////////////
