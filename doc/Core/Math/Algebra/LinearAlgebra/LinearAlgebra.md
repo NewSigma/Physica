@@ -77,31 +77,6 @@ Scalar* CompactVector::data() { ... }
 Scalar* CompactVector::data_ptr(size_t index) { return data() + index; }
 ```
 
-## 表达式模板
-
-一元操作可以显式约束:
-
-``` C++
-template<ExprID, Matrix M>
-class UnitaryMatrixExpr { ... };
-```
-
-考虑到可能的非Abel性, 二元操作需要更一般的声明:
-
-``` C++
-template<ExprID, class LHS, class RHS>
-class BinaryMatrixExpr { ... };
-```
-
-使用C++23显式对象参数技术构造返回对象, 避免一类表达式模板常见的生命周期问题:
-
-``` C++
-auto c = (MatrixND<T>::identity(3) + MatrixND<T>(3, 3, 5)).diag();
-// Before C++23: Bad: Heap-use-after-delete
-// After C++23: Good: Intermediate results are kept
-std::println("{}", c);
-```
-
 ## Concept
 
 以矩阵为例, 在C语言观点下, 矩阵是一个二维数组:
@@ -127,7 +102,32 @@ template<class T>
 concept Matrix = ...;
 ```
 
-我们提供四个逐级递进的concept: `Scalar`, `Vector`, `Matrix`, `Tensor`
+我们提供四个互斥的concept: `Scalar`, `Vector`, `Matrix`, `Tensor`; 例: 这个设计下, 只有一列的`Matrix`不是一个`Vector`。
+
+## 表达式模板
+
+一元操作可以显式约束:
+
+``` C++
+template<ExprID, Matrix M>
+class UnitaryMatrixExpr { ... };
+```
+
+考虑到可能的非Abel性, 二元操作需要更一般的声明:
+
+``` C++
+template<ExprID, class LHS, class RHS>
+class BinaryMatrixExpr { ... };
+```
+
+使用C++23显式对象参数技术构造返回对象, 避免一类表达式模板常见的生命周期问题:
+
+``` C++
+auto c = (MatrixND<T>::identity(3) + MatrixND<T>(3, 3, 5)).diag();
+// Before C++23: Bad: Heap-use-after-delete
+// After C++23: Good: Intermediate results are kept
+std::println("{}", c);
+```
 
 ## Notes
 
@@ -154,5 +154,5 @@ assign具有整体性，因此FastAssign具有传播性。
 
 ## Reference
 
-[1] Eigen; https://eigen.tuxfamily.org  
-[2] Armadillo; https://arma.sourceforge.net  
+[1] Eigen; <https://eigen.tuxfamily.org>  
+[2] Armadillo; <https://arma.sourceforge.net>  

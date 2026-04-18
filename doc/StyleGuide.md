@@ -11,35 +11,35 @@ with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 You should have received a copy of the GNU Free Documentation License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
-# Physica C++编程规范
+# Physica C++ Style Guide
 
-如本规范未明确指出，默认遵循Google C++编程规范$^{[1]}$。本规范与[1]均未指出的，应与已有的多数代码一致。
+If not explicitly specified in this document, the Google C++ Style Guide$^{[1]}$ shall be followed by default. For matters not addressed in either this document or [1], consistency with the existing majority of the code shall be maintained.
 
-## C++版本
+## C++ standard
 
-目前使用的C++版本应不低于C++23。
+No lower than C++23.
 
-## 头文件
+## Header file
 
-规定头文件拓展名为.h，源文件拓展名为.cpp
+It is specified that header files have the extension `.h` and source files have the extension `.cpp`.
 
-标准库、第三方库头文件使用<>, Physica头文件使用""
+`<>` are used for standard library and third-party library headers, while `""` are used for *Physica* headers.
 
 ### Header guard
 
-所有头文件应使用#pragma once以避免多重include，禁止使用#define
+All header files should use `#pragma once` to avoid multiple inclusions; the use of `#define` for this purpose is prohibited.
 
 ## Scoping
 
 ### namespace
 
-源文件中使用using namespace以避免缩进和避免潜在Bug$^{[2]}$
+In the source file, use `using namespace` to avoid indentation and potential bugs$^{[2]}$
 
 ## Class
 
-### swap函数原型
+### Function prototype of `swap`
 
-实践中发现自交换常导致Bug，参考[3]中的swap函数原型，进一步规定swap不可与自身发生交换，即任意对象T的swap函数的一般实现为
+In practice, it turns out self-swap often leads to bugs. Referring to the `swap` function prototype in [3], it is further specified that `swap` must not perform a self-swap. That is, the general implementation of the `swap` function for any object `T` is as follows:
 
 ``` C++
 void T::swap(T& obj) noexcept {  
@@ -48,19 +48,19 @@ void T::swap(T& obj) noexcept {
 }
 ```
 
-## 其他C++特性
+## Other C++ features
 
 ### RTTI
 
-不得使用
+Prohibited
 
-### auto
+### `auto`
 
-函数定义中, 多于4字符的返回类型应后置声明
+In function definitions, it is recommended to use trailing return type declarations for return types longer than 4 characters.
 
-## 命名
+## Naming
 
-模板参数: 鼓励使用缩写函数模板(Abbreviated Function Templates)消除占位符
+Template parameters: Encourage the use of abbreviated function templates to eliminate placeholders.
 
 ## Reference
 
