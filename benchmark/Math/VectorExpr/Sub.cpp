@@ -31,29 +31,11 @@ namespace {
         auto expr = a - b;
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            expr.assign(buffer);
-            benchmark::DoNotOptimize(buffer);
-            benchmark::ClobberMemory();
-        }
-    }
-
-    template<Scalar T>
-    void sub_base(benchmark::State& state) noexcept {
-        const auto size = makeVectorSize(state.range(0), sizeof(T));
-        const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
-        const VectorND<T> b = VectorND<T>::template random_uniform<RandomSource>(size);
-        auto expr = a - b;
-        VectorND<T> buffer(size);
-        for (auto _ : state) {
-            PHYSICA_BENCH(expr.assign_base(buffer));
+            PHYSICA_BENCH(expr.assign(buffer));
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
     }
 }
 
-BENCHMARK(sub<float32>)->Name("sub float32")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
 BENCHMARK(sub<float64>)->Name("sub float64")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-
-BENCHMARK(sub_base<float32>)->Name("sub float32 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(sub_base<float64>)->Name("sub float64 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);

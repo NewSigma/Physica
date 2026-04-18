@@ -43,8 +43,7 @@ namespace Physica {
         template<int Size>
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept;
         [[nodiscard]] auto operator*(Scalar auto x) const noexcept;
-        [[nodiscard]] auto operator-() const& noexcept;
-        [[nodiscard]] auto operator-() && noexcept;
+        [[nodiscard]] auto operator-(this auto&&) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const;
@@ -123,15 +122,10 @@ namespace Physica {
         return getLHS() * (getRHS() * x);
     }
 
-    // FIXME: we cannot use explicit object parameter because of regression; seems clang 22 has problem on overload?
     template<Vector V, Scalar U>
-    auto VectorExpr<ExprID::Mul, V, U>::operator-() const& noexcept {
-        return getLHS() * (-getRHS());
-    }
-
-    template<Vector V, Scalar U>
-    auto VectorExpr<ExprID::Mul, V, U>::operator-() && noexcept {
-        return std::move(getLHS()) * (-getRHS());
+    auto VectorExpr<ExprID::Mul, V, U>::operator-(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS() * (-std::forward<Self>(self).getRHS());
     }
 
     template<Vector V, Scalar U>

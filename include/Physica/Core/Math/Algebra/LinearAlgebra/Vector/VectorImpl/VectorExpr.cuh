@@ -121,7 +121,6 @@ namespace Physica {
 }
 
 #include "VectorExprImpl/Operator/Add.cuh"
-#include "VectorExprImpl/Operator/Sub.cuh"
 #include "VectorExprImpl/Operator/Mul.cuh"
 #include "VectorExprImpl/Operator/Div.cuh"
 #include "VectorExprImpl/Operator/Minus.cuh"
