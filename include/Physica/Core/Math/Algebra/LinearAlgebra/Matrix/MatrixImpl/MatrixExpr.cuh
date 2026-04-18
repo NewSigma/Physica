@@ -171,7 +171,6 @@ namespace Physica {
 
 #include "MatrixExprImpl/Operator/Minus.cuh"
 #include "MatrixExprImpl/Operator/Add.cuh"
-#include "MatrixExprImpl/Operator/Sub.cuh"
 #include "MatrixExprImpl/Operator/Mul.cuh"
 #include "MatrixExprImpl/Operator/Div.cuh"
 #include "MatrixExprImpl/Operator/Sqrt.cuh"
