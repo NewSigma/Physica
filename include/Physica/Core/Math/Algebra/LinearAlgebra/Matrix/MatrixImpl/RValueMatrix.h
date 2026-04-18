@@ -87,6 +87,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept;
         [[nodiscard]] auto operator*(this auto&&, Matrix auto&& m) noexcept;
+        [[nodiscard, gnu::always_inline]] auto operator-(this auto&&) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Matrix auto&& target) const noexcept;

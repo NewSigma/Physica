@@ -24,14 +24,6 @@
 #include "RValueVector.h"
 
 namespace Physica {
-    /**
-     * \class VectorExpr implements template expression for vectors, which will reduce temporary objects.
-     * 
-     * Operations defined as \tparam LHS \tparam ID \tparam RHS. e.g. vector + scalar, expression * expression
-     */
-    template<ExprID ID, class LHS, class RHS = LHS>
-    class VectorExpr;
-
     template<ExprID ID, Vector V>
     class UnitaryVectorExpr : public RValueVector<VectorExpr<ID, V>> {
         using This = UnitaryVectorExpr<ID, V>;

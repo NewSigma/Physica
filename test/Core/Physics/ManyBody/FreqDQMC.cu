@@ -23,7 +23,7 @@
 using namespace Physica;
 using T = float32;
 using Tc = cfloat32;
-using RandomSource = Random<>;
+using RandomSource = Random<PCG64DXSM, 1707742511338258283UL>;
 constexpr T HoppingT = 1;
 constexpr T RepelU = MathConst<T>::pi;
 constexpr T Beta = MathConst<T>::e;
@@ -82,6 +82,7 @@ namespace {
 }
 
 int main() {
+    printf("%zu\n", Random<>::getInstance().getSeed());
     hostDeviceCross();
     conserve();
     return 0;

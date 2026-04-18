@@ -22,9 +22,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
 
 namespace Physica {
-    template<ExprID ID, class LHS, class RHS = LHS>
-    class TensorExpr;
-
     template<ExprID ID, class LHS, class RHS>
     class BinaryTensorExpr : public RValueTensor<TensorExpr<ID, LHS, RHS>> {
         static_assert(Tensor<LHS> || Tensor<RHS>, "[Error]: Either type should be Tensor");

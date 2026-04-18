@@ -103,16 +103,16 @@ namespace Physica {
         const size_t to = length / Size * Size;
         size_t i = 0;
         auto buffer = Pack::zeros();
+        auto it = zip(v1.view(), v2.view()).begin();
         for (; i < to; i += Size) {
-            auto p1 = v1.template packet<Size>(i);
-            auto p2 = v2.template packet<Size>(i);
-            buffer = fma(p1, p2, buffer);
+            auto [lhs, rhs] = it + i;
+            buffer = fma(lhs.template load<Size>(), rhs.template load<Size>(), buffer);
         }
+
         if (to != length) {
+            auto [lhs, rhs] = it + i;
             const size_t count = length - i;
-            auto p1 = v1.template packet<Size>(i, count);
-            auto p2 = v2.template packet<Size>(i, count);
-            buffer = fma(p1, p2, buffer);
+            buffer = fma(lhs.template load<Size>(count), rhs.template load<Size>(count), buffer);
         }
         return buffer.sum();
     }

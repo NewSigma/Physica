@@ -22,11 +22,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 
 namespace Physica {
-    /**
-     * \class MatrixExpr represents \param T \param type \param U. e.g. matrix + scalar, expression * expression
-     */
-    template<ExprID ID, class T, class U = T> class MatrixExpr;
-
     template<ExprID ID, Matrix M>
     class UnitaryMatrixExpr : public RValueMatrix<MatrixExpr<ID, M>> {
         using Derived = MatrixExpr<ID, M>;
@@ -58,7 +53,7 @@ namespace Physica {
     template<ExprID ID, Matrix M>
     decltype(auto) UnitaryMatrixExpr<ID, M>::transpose(this auto&& self) noexcept {
         using Self = decltype(self);
-        if constexpr (M::isStaticSymm())
+        if constexpr (self.expr.isStaticSymm())
             return std::forward<Self>(self);
         else {
             using X = Base; // FIXME: clang 22 rejects valid
@@ -70,7 +65,7 @@ namespace Physica {
     template<ExprID ID, Matrix M>
     decltype(auto) UnitaryMatrixExpr<ID, M>::hermite(this auto&& self) noexcept {
         using Self = decltype(self);
-        if constexpr (M::isStaticHermite())
+        if constexpr (self.expr.isStaticHermite())
             return std::forward<Self>(self);
         else {
             using X = Base; // FIXME: clang 22 rejects valid

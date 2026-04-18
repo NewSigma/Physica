@@ -57,6 +57,12 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto RValueMatrix<Derived>::operator-(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return MatrixExpr<ExprID::Minus, Self>(std::forward<Self>(self));
+    }
+
+    template<class Derived>
     template<ExecutePolicy P>
     void RValueMatrix<Derived>::assign(Matrix auto&& target) const noexcept {
         if constexpr (!isDiffable() && target.isDiffable()) {

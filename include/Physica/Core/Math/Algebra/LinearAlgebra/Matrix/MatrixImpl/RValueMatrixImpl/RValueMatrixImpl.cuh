@@ -53,6 +53,12 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::operator-(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return device_obj<MatrixExpr<ExprID::Minus, remove_device_obj_t<Self>>>(std::forward<Self>(self));
+    }
+
+    template<class Derived>
     __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign(Matrix auto&& target) const {
         target.assert_assign(Base::getDerived());
         if (IsHost()) {

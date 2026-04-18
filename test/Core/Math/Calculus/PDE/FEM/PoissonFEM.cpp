@@ -61,9 +61,9 @@ int main() {
                                                           || scalarNear(p[0], T(width), 1E-5)
                                                           || scalarNear(p[1], T(0), 1E-5)
                                                           || scalarNear(p[1], T(height), 1E-5); },
-                                  []([[maybe_unused]] Vector2D<T> p) { return T(0); });
+                                  [](Vector2D<T>) { return T(0); });
 
-        auto func = []([[maybe_unused]] Vector2D<T> p) { return T(-2); };
+        auto func = [](Vector2D<T>) { return T(-2); };
         PoissonModel model(std::move(mesh), func);
         model.solve<ElementIntegratorPacker<ElementType>>();
 
@@ -84,9 +84,9 @@ int main() {
                                                           || scalarNear(p[0], T(width), 1E-5)
                                                           || scalarNear(p[1], T(0), 1E-5)
                                                           || scalarNear(p[1], T(height), 1E-5); },
-                                  []([[maybe_unused]] Vector2D<T> p) { return T(0); });
+                                  [](Vector2D<T>) { return T(0); });
 
-        auto func = []([[maybe_unused]] Vector2D<T> p) { return T(-2); };
+        auto func = [](Vector2D<T>) { return T(-2); };
         PoissonModel model(std::move(mesh), func);
         model.solve<ElementIntegratorPacker<ElementType>>();
 

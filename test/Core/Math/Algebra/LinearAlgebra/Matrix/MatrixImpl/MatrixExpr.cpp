@@ -46,14 +46,21 @@ namespace {
         mat[1, 0] = 2.0;
         expect(mat.row(1)[0] == ScalarType(2));
     }
-    /**
-     * Test that we are free of a set of lifetime problems under CXX23
-     */
+
     void lifetimeCXX23() {
+        // Test that we are free of a set of lifetime problems under CXX23
         using T = float32;
         auto diag = (MatrixND<T>::identity(3) + MatrixND<T>(3, 3, 5)).diag();
         for (int i = 0; i < 3; ++i)
             expect(diag.calc(i) == T(6));
+    }
+
+    void simplify() {
+        syntax_only([]() {
+            using T = float32;
+            auto x = -(MatrixND<T>() * T(2));
+            static_assert(x.getExprID() == ExprID::Mul);
+        });
     }
 }
 
@@ -61,5 +68,6 @@ int main() {
     general();
     block1x1();
     lifetimeCXX23();
+    simplify();
     return 0;
 }

@@ -26,9 +26,9 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
 
 namespace Physica {
-    template<ExprID, class LHS, class RHS> class VectorExpr;
-    template<ExprID, class LHS, class RHS> class MatrixExpr;
-    template<ExprID, class LHS, class RHS> class TensorExpr;
+    template<ExprID, class LHS, class RHS = LHS> class VectorExpr;
+    template<ExprID, class LHS, class RHS = LHS> class MatrixExpr;
+    template<ExprID, class LHS, class RHS = LHS> class TensorExpr;
 
     namespace Internal {
         template<class T>

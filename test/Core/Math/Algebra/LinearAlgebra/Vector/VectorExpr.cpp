@@ -20,13 +20,18 @@
 #include "Test.h"
 
 using namespace Physica;
-using T = float64;
-using Tc = cfloat64;
+
+namespace {
+    void simplify() {
+        syntax_only([]() {
+            using T = float32;
+            auto x = -(VectorND<T>() * T(2));
+            static_assert(x.getExprID() == ExprID::Mul);
+        });
+    }
+}
 
 int main() {
-    syntax_only([]() {
-        auto expr = VectorND<T>() * T(1);
-        auto complex_vec = VectorND<Tc>();
-        std::ignore = hadamard(expr, complex_vec);
-    });
+    simplify();
+    return 0;
 }

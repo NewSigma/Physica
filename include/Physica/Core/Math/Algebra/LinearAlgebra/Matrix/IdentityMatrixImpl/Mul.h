@@ -34,8 +34,7 @@ namespace Physica {
         /* Operators */
         using Base::operator*;
         [[nodiscard]] auto operator*(Scalar auto x) const noexcept;
-        [[nodiscard]] auto operator-() const& noexcept;
-        [[nodiscard]] auto operator-() && noexcept;
+        [[nodiscard]] auto operator-(this auto&&) noexcept;
         /* Operations */
         void assign(Matrix auto&& target) const;
         void assign_add(Matrix auto&& target) const;
@@ -54,13 +53,9 @@ namespace Physica {
     }
 
     template<Matrix M, Scalar U> requires(instanceof_tx<IdentityMatrix, M>)
-    auto MatrixExpr<ExprID::Mul, M, U>::operator-() const& noexcept {
-        return getLHS() * (-getRHS());
-    }
-
-    template<Matrix M, Scalar U> requires(instanceof_tx<IdentityMatrix, M>)
-    auto MatrixExpr<ExprID::Mul, M, U>::operator-() && noexcept {
-        return std::move(getLHS()) * (-getRHS());
+    auto MatrixExpr<ExprID::Mul, M, U>::operator-(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS() * (-std::forward<Self>(self).getRHS());
     }
 
     template<Matrix M, Scalar U> requires(instanceof_tx<IdentityMatrix, M>)
