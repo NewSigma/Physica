@@ -38,7 +38,7 @@ else()
             set(CMAKE_INSTALL_RPATH ${CMAKE_BUILD_RPATH} ${IntelSYCL_LIBRARY_PATH})
         endif()
 
-        if(${PHYSICA_LLVMIR})
+        if(${PHYSICA_EmitLLVM})
             if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Release")
                 message(FATAL_ERROR "Please enable Release mode for optimizations")
             endif()
@@ -47,11 +47,11 @@ else()
             add_link_options(--version)
             set(CMAKE_CUDA_SEPARABLE_COMPILATION ON) # Workaround to avoid linkage
 
-            add_custom_target(LLVMIR
-                              COMMAND python ${CMAKE_SOURCE_DIR}/cmake/GenIR.py ${CMAKE_CUDA_ARCHITECTURES}
+            add_custom_target(EmitLLVM
+                              COMMAND python ${CMAKE_SOURCE_DIR}/cmake/EmitLLVM.py ${CMAKE_CUDA_ARCHITECTURES}
                               WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                               USES_TERMINAL)
-            add_definitions(-DPHYSICA_LLVMIR)
+            add_definitions(-DPHYSICA_EmitLLVM)
         endif()
     else()
         message(FATAL_ERROR "Unknown compiler")
@@ -128,7 +128,7 @@ if(${PHYSICA_CUDA})
     set(CMAKE_INSTALL_RPATH ${CMAKE_BUILD_RPATH} ${CUDAToolkit_LIBRARY_DIR})
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Release AND NOT ${PHYSICA_LLVMIR})
+if(CMAKE_BUILD_TYPE MATCHES Release AND NOT ${PHYSICA_EmitLLVM})
     include(CheckIPOSupported)
     check_ipo_supported(RESULT Result OUTPUT Output LANGUAGES CXX)
     if(${Result})

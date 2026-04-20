@@ -28,7 +28,7 @@ namespace Physica {
 }
 
 // Prevent the callee of interest from being inlined, facilitating subsequent analysis at the LLVM IR level.
-#ifdef PHYSICA_LLVMIR
+#ifdef PHYSICA_EmitLLVM
     #define PHYSICA_BENCH(x) [[clang::noinline]] x
 #else
     #define PHYSICA_BENCH(x) x
