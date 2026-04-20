@@ -214,6 +214,7 @@ public:
     static constexpr int elementtype() {
         return 16;
     }
+    static Vec16f Zeros() noexcept { return Vec16f(_mm512_setzero_ps()); }
     typedef __m512 registertype;
 };
 
@@ -868,6 +869,7 @@ public:
     static constexpr int elementtype() {
         return 17;
     }
+    static Vec8d Zeros() noexcept { return Vec8d(_mm512_setzero_pd()); }
     typedef __m512d registertype;
 };
 
