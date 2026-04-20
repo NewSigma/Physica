@@ -25,7 +25,7 @@
 
 namespace Physica {
     template<class Derived, class Allocator>
-    __host__ __device__ auto& ArrayBase<Derived, Allocator>::operator[](this auto&& self, size_t index) noexcept {
+    __host__ __device__ constexpr auto& ArrayBase<Derived, Allocator>::operator[](this auto&& self, size_t index) noexcept {
         assert(index < self.getLength() && "[Error]: Index overflow");
         return self.data()[index];
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,13 +19,14 @@
 #pragma once
 
 #include <cstdarg>
-#include "Physica/Logger/LoggerRuntime.h"
+#include "Physica/Logger/LogBuffer.h"
+#include "Physica/Logger/LoggerType.h"
 
 namespace Physica {
     /*!
      * Abstract father class for all loggers.
      */
-    class AbstractLogger {
+    class PHYSICA_API AbstractLogger {
     public:
         LogLevel localLevel;
     public:
@@ -39,10 +40,6 @@ namespace Physica {
         /* Operations */
         virtual void log(LogBuffer& buffer) = 0;
         /* Getters */
-        [[nodiscard]] inline LogLevel getCurrentLevel() const noexcept;
+        [[nodiscard]] LogLevel getCurrentLevel() const noexcept;
     };
-
-    inline LogLevel AbstractLogger::getCurrentLevel() const noexcept {
-        return localLevel == LogLevel::Global ? LoggerRuntime::globalLevel : localLevel;
-    }
 }

@@ -49,7 +49,7 @@ namespace Physica {
     public:
         ~ArrayBase() = default;
         /* Operators */
-        [[nodiscard]] __host__ __device__ auto& operator[](this auto&&, size_t index) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr auto& operator[](this auto&&, size_t index) noexcept;
         [[nodiscard]] __host__ __device__ bool operator==(const ArrayBase& array) const;
         [[nodiscard]] __host__ __device__ bool operator!=(const ArrayBase& array) const { return !(*this == array); }
         /* Operations */
