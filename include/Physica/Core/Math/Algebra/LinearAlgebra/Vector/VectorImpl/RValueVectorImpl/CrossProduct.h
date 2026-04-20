@@ -40,10 +40,15 @@ namespace Physica {
         [[nodiscard]] T calc(size_t index) const;
         /* Getters */
         [[nodiscard]] constexpr size_t getLength() const noexcept { return 3; }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return 3; }
     };
 
     template<Vector V1, Vector V2>
     CrossProduct<V1, V2>::CrossProduct(const V1& v1_, const V2& v2_) : v1(v1_), v2(v2_) {
+        constexpr size_t Size1 = std::remove_cvref_t<V1>::getSizeAtCompile();
+        constexpr size_t Size2 = std::remove_cvref_t<V2>::getSizeAtCompile();
+        static_assert((Size1 == 3 || Size1 == Dynamic) && (Size2 == 3 || Size2 == Dynamic), "[Error]: CrossProduct can apply on 3-dim vectors only");
         assert(v1.getLength() == 3);
         assert(v2.getLength() == 3);
     }
@@ -75,11 +80,7 @@ namespace Physica {
 namespace Physica {
     template<Vector V1, Vector V2>
     class Traits<CrossProduct<V1, V2>> {
-        static_assert((Traits<V1>::SizeAtCompile == 3 || Traits<V1>::SizeAtCompile == Dynamic) &&
-                      (Traits<V2>::SizeAtCompile == 3 || Traits<V2>::SizeAtCompile == Dynamic),
-                      "CrossProduct can apply on 3-dim vectors only");
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename V1::ScalarType, typename V2::ScalarType>::Type;
-        constexpr static size_t SizeAtCompile = 3;
     };
 }

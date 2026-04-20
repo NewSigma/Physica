@@ -35,7 +35,6 @@ namespace Physica {
         using typename Base::ScalarType;
         using typename Coro::promise_type;
         using device_obj_type = device_obj<This>;
-        using Base::SizeAtCompile;
         using Base::isReverseDiff;
     protected:
         using typename Base::Trv;
@@ -96,6 +95,7 @@ namespace Physica {
         [[nodiscard]] size_t getCapacity() const noexcept { return storage.getCapacity(); }
         [[nodiscard]] auto* data(this auto&&) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         [[nodiscard]] static This zeros(size_t len);
         template<RNG R>
         [[nodiscard]] static This random_uniform(size_t len);
@@ -132,10 +132,9 @@ namespace Physica {
         static_assert(!Diffable<T>, "[Error]: Use diffable vector instead");
     public:
         using ScalarType = T;
-        constexpr static size_t SizeAtCompile = Length;
-        constexpr static bool FastAssign = false;
-
         using ElemType = T;
+
+        constexpr static bool FastAssign = false;
     };
 }
 

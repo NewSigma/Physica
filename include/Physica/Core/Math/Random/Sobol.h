@@ -58,7 +58,7 @@ namespace Physica {
 
     template<Vector V>
     void Sobol::fill(V& x) {
-        static_assert(V::SizeAtCompile <= MaxDim, "[Error]: Vector is too long");
+        static_assert(x.getSizeAtCompile() <= MaxDim, "[Error]: Vector is too long");
         constexpr static typename V::ScalarType factor = 1.0 / (1UL << MaxBit);
         assert(x.getLength() <= MaxDim && "[Error]: Vector is too long");
         const int m = pre_step();

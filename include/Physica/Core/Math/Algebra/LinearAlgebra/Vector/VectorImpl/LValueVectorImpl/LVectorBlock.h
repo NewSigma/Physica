@@ -60,6 +60,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
     template<Vector V, size_t Length>
@@ -132,6 +134,11 @@ namespace Physica {
         assert((self.from + index) < self.to);
         return self.vec.data_ptr(index + self.from);
     }
+
+    template<Vector V, size_t Length>
+    __host__ __device__ consteval size_t LVectorBlock<V, Length>::getSizeAtCompile() noexcept {
+        return Length;
+    }
 }
 
 namespace Physica {
@@ -140,7 +147,6 @@ namespace Physica {
         static_assert(std::remove_cvref_t<V>::isLValueVector());
     public:
         using ScalarType = std::remove_cvref_t<V>::ScalarType;
-        constexpr static size_t SizeAtCompile = Length;
         constexpr static bool FastAssign = false;
     };
 }

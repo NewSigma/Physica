@@ -45,6 +45,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return tensor.getSize(); }
         [[nodiscard]] auto data_ptr(this auto&& self, size_t index) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
     template<Tensor T>
@@ -58,8 +60,6 @@ namespace Physica {
     class Traits<FlattenL<T>> {
     public:
         using ScalarType = std::remove_cvref_t<T>::ScalarType;
-        constexpr static size_t SizeAtCompile = Dynamic;
-
         constexpr static bool FastAssign = false;
     };
 }

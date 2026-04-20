@@ -119,10 +119,11 @@ namespace Physica {
         [[nodiscard]] pointer release() noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard, gnu::return_nonnull]] __host__ __device__ auto* data(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return getLength(); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
+        [[nodiscard, gnu::return_nonnull]] __host__ __device__ auto* data(this auto&&) noexcept;
         using Base::empty;
     };
 
@@ -371,6 +372,5 @@ namespace Physica {
     public:
         using AllocatorType = DeviceAllocator<T>;
         using ElemType = AllocatorType::value_type;
-        constexpr static size_t SizeAtCompile = Length;
     };
 }

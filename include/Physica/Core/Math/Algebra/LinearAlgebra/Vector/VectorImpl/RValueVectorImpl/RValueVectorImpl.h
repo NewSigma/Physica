@@ -46,10 +46,8 @@ namespace Physica {
         else {
             v.assert_assign(Base::getDerived());
             if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff()) {
-                constexpr static size_t Length1 = SizeAtCompile;
-                constexpr static size_t Length2 = V::SizeAtCompile;
-                constexpr static size_t Length = std::max(Length1, Length2);
-                assign_simd<V, P, Length>(v);
+                constexpr static size_t Size = std::max(getSizeAtCompile(), v.getSizeAtCompile());
+                assign_simd<V, P, Size>(v);
             }
             else
                 assign_for<P>(v);
@@ -71,10 +69,8 @@ namespace Physica {
         else {
             v.assert_assign(Base::getDerived());
             if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff()) {
-                constexpr static size_t Length1 = SizeAtCompile;
-                constexpr static size_t Length2 = V::SizeAtCompile;
-                constexpr static size_t Length = std::max(Length1, Length2);
-                assign_add_simd<V, Length>(v);
+                constexpr static size_t Size = std::max(getSizeAtCompile(), v.getSizeAtCompile());
+                assign_add_simd<V, Size>(v);
             }
             else
                 assign_add_for<P>(v);
@@ -84,11 +80,7 @@ namespace Physica {
     template<class Derived>
     void RValueVector<Derived>::assert_assign(const Vector auto& source) const noexcept {
         static_assert_assign(source);
-
-        using V = std::remove_cvref<decltype(source)>::type;
-        constexpr size_t Size1 = SizeAtCompile;
-        constexpr size_t Size2 = V::SizeAtCompile;
-        if constexpr (Size1 == Dynamic && Size2 == Dynamic) {
+        if constexpr (getSizeAtCompile() == Dynamic && source.getSizeAtCompile() == Dynamic) {
             assert(getLength() == source.getLength() && "[Error]: Size mismatch between two vector");
             assert(getLength() > 0);
         }
@@ -365,19 +357,21 @@ namespace Physica {
             co_return std::move(result);
         }
         else {
-            constexpr int Size = PacketType::size();
+            using PacketType = BestPacket<ScalarType, getSizeAtCompile()>::Type;
+            constexpr size_t SizeV = getSizeAtCompile();
+            constexpr int SizeP = PacketType::size();
             const auto& v = Base::getDerived();
             PacketType buffer(std::numeric_limits<T>::lowest());
             T result;
-            if constexpr (SizeAtCompile != Dynamic) {
-                constexpr size_t to = SizeAtCompile / Size * Size;
-                for (size_t i = 0; i < to; i += Size)
-                    buffer = std::max(v.template packet<Size>(i), buffer);
+            if constexpr (SizeV != Dynamic) {
+                constexpr size_t to = SizeV / SizeP * SizeP;
+                for (size_t i = 0; i < to; i += SizeP)
+                    buffer = std::max(v.template packet<SizeP>(i), buffer);
                 result = buffer.max();
 
-                constexpr size_t i = SizeAtCompile - SizeAtCompile % Size;
-                if constexpr (i != SizeAtCompile) {
-                    constexpr size_t count = SizeAtCompile - i;
+                constexpr size_t i = SizeV - SizeV % SizeP;
+                if constexpr (i != SizeV) {
+                    constexpr size_t count = SizeV - i;
                     for (size_t j = 0; j < count; ++j)
                         result = std::max(result, v.calc(i + j));
                 }
@@ -385,9 +379,9 @@ namespace Physica {
             else {
                 const size_t length = getLength();
                 size_t i = 0;
-                const size_t to = length / Size * Size;
-                for (; i < to; i += Size)
-                    buffer = std::max(v.template packet<Size>(i), buffer);
+                const size_t to = length / SizeP * SizeP;
+                for (; i < to; i += SizeP)
+                    buffer = std::max(v.template packet<SizeP>(i), buffer);
                 result = buffer.max();
 
                 if (to != length) {
@@ -420,19 +414,21 @@ namespace Physica {
             calc(index).reverse(result.grad());
         }
         else if constexpr (EnableSIMD) {
-            constexpr int Size = PacketType::size();
+            using PacketType = BestPacket<ScalarType, getSizeAtCompile()>::Type;
+            constexpr size_t SizeV = getSizeAtCompile();
+            constexpr int SizeP = PacketType::size();
             const auto& v = Base::getDerived();
             PacketType buffer(std::numeric_limits<T>::max());
             T result;
-            if constexpr (SizeAtCompile != Dynamic) {
-                constexpr size_t to = SizeAtCompile / Size * Size;
-                for (size_t i = 0; i < to; i += Size)
-                    buffer = std::min(v.template packet<Size>(i), buffer);
+            if constexpr (SizeV != Dynamic) {
+                constexpr size_t to = SizeV / SizeP * SizeP;
+                for (size_t i = 0; i < to; i += SizeP)
+                    buffer = std::min(v.template packet<SizeP>(i), buffer);
                 result = buffer.min();
 
-                constexpr size_t i = SizeAtCompile - SizeAtCompile % Size;
-                if constexpr (i != SizeAtCompile) {
-                    constexpr size_t count = SizeAtCompile - i;
+                constexpr size_t i = SizeV - SizeV % SizeP;
+                if constexpr (i != SizeV) {
+                    constexpr size_t count = SizeV - i;
                     for (size_t j = 0; j < count; ++j)
                         result = std::min(result, v.calc(i + j));
                 }
@@ -440,9 +436,9 @@ namespace Physica {
             else {
                 const size_t length = getLength();
                 size_t i = 0;
-                const size_t to = length / Size * Size;
-                for (; i < to; i += Size)
-                    buffer = std::min(v.template packet<Size>(i), buffer);
+                const size_t to = length / SizeP * SizeP;
+                for (; i < to; i += SizeP)
+                    buffer = std::min(v.template packet<SizeP>(i), buffer);
                 result = buffer.min();
 
                 if (to != length) {
@@ -473,29 +469,31 @@ namespace Physica {
             v.reverse(result.grad());
         }
         else if constexpr (Internal::EnableSIMD<Derived>::value) {
-            constexpr int Size = PacketType::size();
+            using PacketType = BestPacket<ScalarType, getSizeAtCompile()>::Type;
+            constexpr size_t SizeV = getSizeAtCompile();
+            constexpr int SizeP = PacketType::size();
             auto buffer = PacketType::zeros();
-            if constexpr (SizeAtCompile != Dynamic) {
-                constexpr size_t to = SizeAtCompile / Size * Size;
-                for (size_t i = 0; i < to; i += Size)
-                    buffer += v.template packet<Size>(i);
+            if constexpr (SizeV != Dynamic) {
+                constexpr size_t to = SizeV / SizeP * SizeP;
+                for (size_t i = 0; i < to; i += SizeP)
+                    buffer += v.template packet<SizeP>(i);
 
-                constexpr size_t i = SizeAtCompile - SizeAtCompile % Size;
-                if constexpr (i != SizeAtCompile) {
-                    constexpr size_t count = SizeAtCompile - i;
-                    buffer += v.template packet<Size>(i, count);
+                constexpr size_t i = SizeV - SizeV % SizeP;
+                if constexpr (i != SizeV) {
+                    constexpr size_t count = SizeV - i;
+                    buffer += v.template packet<SizeP>(i, count);
                 }
             }
             else {
                 const size_t length = getLength();
                 size_t i = 0;
-                const size_t to = length / Size * Size;
-                for (; i < to; i += Size)
-                    buffer += v.template packet<Size>(i);
+                const size_t to = length / SizeP * SizeP;
+                for (; i < to; i += SizeP)
+                    buffer += v.template packet<SizeP>(i);
 
                 if (to != length) {
                     const size_t count = length - i;
-                    buffer += v.template packet<Size>(i, count);
+                    buffer += v.template packet<SizeP>(i, count);
                 }
             }
             co_return buffer.sum();
@@ -689,9 +687,8 @@ namespace Physica {
      */
     template<class Derived>
     auto RValueVector<Derived>::householder(Vector auto& __restrict target) const __restrict -> Tr {
-        using V = std::remove_cvref<decltype(target)>::type;
-        constexpr size_t Length = std::max(SizeAtCompile, V::SizeAtCompile);
-        constexpr size_t TailLength = Length > 0 ? (Length - 1) : Dynamic;
+        constexpr size_t Size = std::max(getSizeAtCompile(), target.getSizeAtCompile());
+        constexpr size_t TailLength = Size > 0 ? (Size - 1) : Dynamic;
         assert(getLength() == target.getLength());
         assert(getLength() > 1 && "[Error]: Unnecessary householder call");
 
@@ -809,13 +806,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ consteval size_t RValueVector<Derived>::getSizeAtCompile() noexcept {
-        return Traits<Derived>::SizeAtCompile;
-    }
-
-    template<class Derived>
-    __host__ __device__ consteval size_t RValueVector<Derived>::getSizeAtCompile(const Vector auto& hint) noexcept {
-        return std::max(SizeAtCompile, hint.getSizeAtCompile());
+    __host__ __device__ consteval auto RValueVector<Derived>::getSizeAtCompile() noexcept {
+        return Derived::getSizeAtCompile();
     }
 
     template<class Derived>
@@ -827,8 +819,8 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ consteval void RValueVector<Derived>::static_assert_assign(const Vector auto& source) noexcept {
         using Src = std::remove_cvref<decltype(source)>::type;
-        constexpr size_t Size1 = SizeAtCompile;
-        constexpr size_t Size2 = Src::SizeAtCompile;
+        constexpr size_t Size1 = getSizeAtCompile();
+        constexpr size_t Size2 = source.getSizeAtCompile();
         static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
 
         using U = Src::ScalarType;

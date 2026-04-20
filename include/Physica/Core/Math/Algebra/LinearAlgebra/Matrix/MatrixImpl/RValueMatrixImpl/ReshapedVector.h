@@ -99,6 +99,6 @@ namespace Physica {
         constexpr static int Major = MatrixMajor;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColAtCompile = Col;
-        constexpr static size_t SizeAtCompile = std::remove_cvref_t<V>::SizeAtCompile;
+        constexpr static size_t SizeAtCompile = std::remove_cvref_t<V>::getSizeAtCompile();
     };
 }

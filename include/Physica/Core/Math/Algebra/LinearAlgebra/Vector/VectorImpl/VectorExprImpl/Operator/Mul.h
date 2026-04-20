@@ -150,8 +150,8 @@ namespace Physica {
     template<ExecutePolicy P>
     void VectorExpr<ExprID::Mul, V, U>::assign_add(Vector auto&& v) const {
         using V1 = std::remove_cvref_t<decltype(v)>;
-        constexpr size_t Length = std::max(Base::SizeAtCompile, V1::SizeAtCompile);
-        constexpr bool SmallVector = 0 < Length && Length <= 128;
+        constexpr size_t Size = std::max(Base::getSizeAtCompile(), v.getSizeAtCompile());
+        constexpr bool SmallVector = 0 < Size && Size <= 128;
         if constexpr (Internal::EnableMKL<V, V1>::value && !SmallVector) {
             if (Base::getLength() <= 128)
                 assign_add_base(v);
@@ -173,7 +173,7 @@ namespace Physica {
         if constexpr (LowerToFMA) {
             v.assert_assign(Base::getDerived());
             if constexpr (Internal::EnableSIMD<Source, Target>::value && !isReverseDiff()) {
-                constexpr size_t Length = Base::getSizeAtCompile(v);
+                constexpr size_t Length = std::max(Base::getSizeAtCompile(), v.getSizeAtCompile());
                 assign_fma_simd<Target, Length>(v);
             }
             else
@@ -353,10 +353,8 @@ namespace Physica {
         if constexpr (LowerToFMA) {
             v.assert_assign(Base::getDerived());
             if constexpr (Internal::EnableSIMD<This, Target>::value && !isReverseDiff()) {
-                constexpr size_t Length1 = This::SizeAtCompile;
-                constexpr size_t Length2 = Target::SizeAtCompile;
-                constexpr size_t Length = std::max(Length1, Length2);
-                assign_fma_simd<Target, Length>(v);
+                constexpr size_t Size = std::max(Base::getSizeAtCompile(), v.getSizeAtCompile());
+                assign_fma_simd<Target, Size>(v);
             }
             else
                 assign_fma_for<P>(v);

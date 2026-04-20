@@ -81,7 +81,7 @@ namespace Physica {
     template<Scalar T>
     PhononDOS<T>::PhononDOS(MDCellType unitCell, Index3D superSize, Index3D gridDim)
             : solver(std::move(unitCell), superSize), eigenvalues(gridDim) {
-        for (unsigned i = 0; i < CoeffVector::SizeAtCompile; ++i) {
+        for (unsigned i = 0; i < CoeffVector::getSizeAtCompile(); ++i) {
             diffCoeffX[i] = ElementType::dBase_dr(i);
             diffCoeffY[i] = ElementType::dBase_ds(i);
             diffCoeffZ[i] = ElementType::dBase_dt(i);

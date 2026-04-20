@@ -53,6 +53,8 @@ namespace Physica {
         [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return vec.getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
     template<Vector V>
@@ -76,6 +78,11 @@ namespace Physica {
     template<Vector V>
     decltype(auto) Conjugate<V>::conjugate(this auto&& self) noexcept {
         return forward_like<decltype(self)>(self.vec);
+    }
+
+    template<Vector V>
+    __host__ __device__ consteval size_t Conjugate<V>::getSizeAtCompile() noexcept {
+        return std::remove_cvref_t<V>::getSizeAtCompile();
     }
 }
 

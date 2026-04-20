@@ -24,11 +24,11 @@ namespace Physica {
     template<Vector V1, Vector V2>
     auto sincos(const V1& x, V2& s, V2& c) {
         assert(x.getLength() == s.getLength() && x.getLength() == c.getLength());
-        constexpr size_t SizeAtCompile = std::max(V1::SizeAtCompile, V2::SizeAtCompile);
+        constexpr size_t Size = std::max(x.getSizeAtCompile(), s.getSizeAtCompile());
         using ScalarType1 = V1::ScalarType;
         using ScalarType2 = V2::ScalarType;
         using ScalarType = Internal::BinaryScalarOpRtnTy<ScalarType1, ScalarType2>::Type;
-        using PacketType = BestPacket<ScalarType, SizeAtCompile>::Type;
+        using PacketType = BestPacket<ScalarType, Size>::Type;
         if constexpr (ReverseDiff<ScalarType>) {
             size_t i = 0;
             auto result = co_for([&]{ return i < x.getLength(); }, [&]{ ++i; }, [&]{

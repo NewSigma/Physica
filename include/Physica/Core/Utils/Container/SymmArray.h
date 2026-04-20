@@ -143,10 +143,8 @@ namespace Physica {
         struct Helper<false, Length> {
             using Type = Array<T, Length>;
         };
-
-        constexpr static size_t SizeAtCompile = Order * (Order + 1) / 2;
     public:
         using ElemType = T;
-        using ArrayType = Helper<Scalar<T>, SizeAtCompile>::Type;
+        using ArrayType = Helper<Scalar<T>, Order * (Order + 1) / 2>::Type;
     };
 }

@@ -30,11 +30,8 @@ namespace Physica {
         using host_obj = RValueVector<Derived>;
         using This = device_obj<host_obj>;
         using Base = CRTPBase<This>;
-        using TraitsType = Traits<device_obj<Derived>>;
     public:
-        using ScalarType = TraitsType::ScalarType;
-        constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;
-        using PacketType = device_obj<BestPacket<ScalarType, SizeAtCompile>>::Type;
+        using ScalarType = Traits<device_obj<Derived>>::ScalarType;
     protected:
         using T = ScalarType;
         using Tr = T::RealType;

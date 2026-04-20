@@ -147,8 +147,8 @@ namespace Physica {
         using ScalarType = V1::ScalarType;
         constexpr static int Major = MatrixMajor::Row;
         constexpr static size_t RowAtCompile = 1;
-        constexpr static size_t ColAtCompile = V1::SizeAtCompile;
-        constexpr static size_t SizeAtCompile = V1::SizeAtCompile;
+        constexpr static size_t ColAtCompile = V1::getSizeAtCompile();
+        constexpr static size_t SizeAtCompile = V1::getSizeAtCompile();
     };
 }
 

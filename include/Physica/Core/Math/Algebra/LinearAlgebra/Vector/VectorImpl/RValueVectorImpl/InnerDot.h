@@ -45,6 +45,8 @@ namespace Physica {
         auto calc() const noexcept;
         T calc_mkl() const noexcept;
         CoDiff<T> calc_base() const noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     private:
         T calc_base_simd() const noexcept;
         T calc_base_simd_complex_real() const noexcept;
@@ -96,6 +98,11 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
+    __host__ __device__ consteval size_t InnerDot<V1, V2>::getSizeAtCompile() noexcept {
+        return std::max(std::remove_cvref_t<V1>::getSizeAtCompile(), std::remove_cvref_t<V2>::getSizeAtCompile());
+    }
+
+    template<Vector V1, Vector V2>
     auto InnerDot<V1, V2>::calc_base_simd() const noexcept -> T {
         using Pack = Internal::EnableSIMD<V1, V2>::PacketType;
         constexpr int Size = Pack::size();
@@ -119,7 +126,7 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     auto InnerDot<V1, V2>::calc_base_simd_complex_real() const noexcept -> T {
-        using Pack = V1::PacketType;
+        using Pack = BestPacket<T1, getSizeAtCompile()>::Type;
         using FullRealPack = Pack::FullRealType;
         const size_t length = v1.getLength();
         auto unroller = Unroller<Pack, HostDevAttr::NumUnrollDefault>();

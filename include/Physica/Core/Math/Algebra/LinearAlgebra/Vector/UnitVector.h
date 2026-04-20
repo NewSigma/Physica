@@ -43,6 +43,8 @@ namespace Physica {
         [[nodiscard]] T calc(size_t index) const noexcept;
         [[nodiscard]] size_t getNonZero() const noexcept { return nonzero; }
         [[nodiscard]] size_t getLength() const noexcept { return length; }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Length; }
     };
 
     template<Scalar T, size_t Length>
@@ -68,8 +70,6 @@ namespace Physica {
     class Traits<UnitVector<T, Length>> {
     public:
         using ScalarType = T;
-        constexpr static size_t SizeAtCompile = Length;
-
         constexpr static bool FastAssign = false;
     };
 }

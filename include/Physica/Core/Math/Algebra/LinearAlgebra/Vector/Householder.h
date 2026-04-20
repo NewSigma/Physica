@@ -27,7 +27,7 @@ namespace Physica {
      */
     template<Matrix M, Vector V>
     void applyHouseholder(const Scalar auto factor, const V& householder, M&& mat) {
-        constexpr size_t BufferSize = V::SizeAtCompile == Dynamic ? Dynamic : (V::SizeAtCompile + 1);
+        constexpr size_t BufferSize = householder.getSizeAtCompile() == Dynamic ? Dynamic : (householder.getSizeAtCompile() + 1);
         using T = V::ScalarType;
         using BufferType = DenseVector<T, BufferSize>;
         assert(householder.getLength() + 1 == mat.getRow());
@@ -36,13 +36,13 @@ namespace Physica {
         copy.tail(1) = householder;
 
         const BufferType temp1 = copy * factor;
-        using BufferType1 = DenseMatrix<T, MatrixMajor::Row, 1, decltype(mat * copy)::SizeAtCompile>;
+        using BufferType1 = DenseMatrix<T, MatrixMajor::Row, 1, decltype(mat * copy)::getSizeAtCompile()>;
         mat -= temp1 * BufferType1(copy.hermite() * mat);
     }
 
     template<Matrix M, Vector V>
     void applyHouseholder(M&& mat, const Scalar auto factor, const V& householder) {
-        constexpr size_t BufferSize = V::SizeAtCompile == Dynamic ? Dynamic : (V::SizeAtCompile + 1);
+        constexpr size_t BufferSize = householder.getSizeAtCompile() == Dynamic ? Dynamic : (householder.getSizeAtCompile() + 1);
         using T = V::ScalarType;
         using BufferType = DenseVector<T, BufferSize>;
         assert(householder.getLength() + 1 == mat.getCol());
@@ -50,7 +50,7 @@ namespace Physica {
         copy[0] = 1;
         copy.tail(1) = householder;
 
-        using BufferType1 = DenseVector<T, decltype(mat * copy)::SizeAtCompile>;
+        using BufferType1 = DenseVector<T, decltype(mat * copy)::getSizeAtCompile()>;
         mat -= BufferType1(mat * copy) * (copy.hermite() * factor);
     }
 

@@ -41,11 +41,19 @@ namespace Physica {
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] auto data_ptr(this auto&& self, size_t index) noexcept { return self.mat.data_ptr(index, index); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
     template<Matrix M>
     auto&& DiagVectorL<M>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
+    }
+
+    template<Matrix M>
+    __host__ __device__ consteval size_t DiagVectorL<M>::getSizeAtCompile() noexcept {
+        using Expr = std::remove_cvref<M>::type;
+        return std::max(Expr::RowAtCompile, Expr::ColAtCompile);
     }
 }
 

@@ -24,7 +24,7 @@
 namespace Physica {
     template<class Derived>
     auto CompactVector<Derived>::operator=(Scalar auto x) noexcept -> Derived& {
-        if constexpr (SizeAtCompile == Dynamic) {
+        if constexpr (Base::getSizeAtCompile() == Dynamic) {
             if (x.isZero())
                 zeros();
         }
@@ -45,12 +45,12 @@ namespace Physica {
                 return;
             }
             else {
-                constexpr size_t Length = std::max(SizeAtCompile, V::SizeAtCompile);
-                if constexpr (Length != Dynamic)
-                    memcpy(v.data(), data(), Length * sizeof(T)); // Static memcpy
+                constexpr size_t Size = std::max(Base::getSizeAtCompile(), v.getSizeAtCompile());
+                if constexpr (Size != Dynamic)
+                    memcpy(v.data(), data(), Size * sizeof(T)); // Static memcpy
                 else {
                     constexpr size_t Critical = 1024 * sizeof(float64); // Based on benchmark
-                    constexpr bool MaybeBenefit = Length == Dynamic || (Length * sizeof(T) > Critical);
+                    constexpr bool MaybeBenefit = Size == Dynamic || (Size * sizeof(T) > Critical);
                     size_t size = Base::getLength() * sizeof(T);
                     if (MaybeBenefit && (size > Critical))
                         memcpy(v.data(), data(), size); // Reuse size, because v.read(data()) shows IR regression
@@ -158,7 +158,8 @@ namespace Physica {
 
     template<class Derived>
     auto CompactVector<Derived>::norm1() const noexcept -> CoDiff<Tr> {
-        constexpr bool SmallVector = 0 < SizeAtCompile && SizeAtCompile <= 128;
+        constexpr size_t Size = Base::getSizeAtCompile();
+        constexpr bool SmallVector = 0 < Size && Size <= 128;
         if constexpr (Internal::EnableMKL<Derived>::value && !SmallVector) {
             bool isSmallVector = Base::getLength() <= 128;
             return isSmallVector ? norm1_base() : norm1_mkl();

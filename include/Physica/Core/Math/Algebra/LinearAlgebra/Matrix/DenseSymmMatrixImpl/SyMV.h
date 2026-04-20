@@ -53,6 +53,8 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return m.getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
     template<Matrix M, Vector V> requires(instanceof_tx<DenseSymmMatrix, M>)
@@ -94,11 +96,18 @@ namespace Physica {
 
     template<Matrix M, Vector V> requires(instanceof_tx<DenseSymmMatrix, M>)
     auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), M>(self.m1);
+        return propagate_rvalue_reference<decltype(self), M>(self.m);
     }
 
     template<Matrix M, Vector V> requires(instanceof_tx<DenseSymmMatrix, M>)
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), V>(self.m2);
+        return propagate_rvalue_reference<decltype(self), V>(self.v);
+    }
+
+    template<Matrix M, Vector V> requires(instanceof_tx<DenseSymmMatrix, M>)
+    __host__ __device__ consteval size_t GEMV<M, V>::getSizeAtCompile() noexcept {
+        using M1 = std::remove_cvref<M>::type;
+        using V1 = std::remove_cvref<V>::type;
+        return std::max(M1::RowAtCompile, V1::getSizeAtCompile());
     }
 }

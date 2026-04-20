@@ -42,6 +42,8 @@ namespace Physica {
         [[nodiscard]] auto data_ptr(this auto&& self, size_t index) noexcept;
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() - std::abs(shift); }
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
     template<Matrix M>
@@ -67,10 +69,8 @@ namespace Physica {
 namespace Physica {
     template<Matrix M>
     class Traits<MinorDiagL<M>> {
-        using Expr = std::remove_cvref<M>::type;
     public:
-        using ScalarType = Expr::ScalarType;
-        constexpr static size_t SizeAtCompile = std::max(Expr::RowAtCompile, Expr::ColAtCompile);
+        using ScalarType = std::remove_cvref<M>::type::ScalarType;
         constexpr static bool FastAssign = false;
     };
 }

@@ -51,6 +51,8 @@ namespace Physica {
         [[nodiscard]] auto grads(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
     template<Matrix M>
@@ -95,16 +97,19 @@ namespace Physica {
         return mat.calc_value(mat.rowFromMajorMinor(major, minor),
                               mat.colFromMajorMinor(major, minor));
     }
+
+    template<Matrix M>
+    __host__ __device__ consteval size_t FlattenR<M>::getSizeAtCompile() noexcept {
+        using M1 = std::remove_reference_t<M>;
+        return M1::RowAtCompile * M1::ColAtCompile;
+    }
 }
 
 namespace Physica {
     template<Matrix M>
     class Traits<FlattenR<M>> {
-        using M1 = std::remove_reference_t<M>;
     public:
-        using ScalarType = M1::ScalarType;
-        constexpr static size_t SizeAtCompile = M1::RowAtCompile * M1::ColAtCompile;
-
+        using ScalarType = std::remove_reference_t<M>::ScalarType;
         constexpr static bool FastAssign = false;
     };
 }

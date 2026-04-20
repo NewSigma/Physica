@@ -27,9 +27,7 @@ namespace Physica {
         using This = SquaredNormVector<V>;
         using Base = RValueVector<This>;
     public:
-        using Base::SizeAtCompile;
         using Base::isReverseDiff;
-        using typename Base::PacketType;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -65,6 +63,8 @@ namespace Physica {
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
     template<class V>
@@ -145,6 +145,7 @@ namespace Physica {
     auto SquaredNormVector<V>::sum() const noexcept -> CoDiff<T> {
         if constexpr (!isReverseDiff() && !isComplexV && Internal::EnableSIMD<V>::value) {
             assert(getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
+            using PacketType = BestPacket<T, getSizeAtCompile()>::Type;
             auto view = v.view();
             auto unroller = Unroller<PacketType, HostDevAttr::NumUnrollDefault>();
             size_t i = unroller.loop_recursive([ite = view.begin()](PacketType buffer, size_t index) noexcept {
@@ -166,6 +167,11 @@ namespace Physica {
     template<class V>
     auto SquaredNormVector<V>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v).values().squaredNorms();
+    }
+
+    template<class V>
+    __host__ __device__ consteval size_t SquaredNormVector<V>::getSizeAtCompile() noexcept {
+        return std::remove_cvref_t<V>::getSizeAtCompile();
     }
 }
 

@@ -23,7 +23,7 @@
 namespace Physica {
     template<class Derived>
     auto device_obj<CompactVector<Derived>>::operator=(Scalar auto x) -> device_obj<Derived>& {
-        if constexpr (Base::SizeAtCompile == Dynamic) {
+        if constexpr (Base::getSizeAtCompile() == Dynamic) {
             if (x.isZero())
                 zeros();
         }
@@ -65,7 +65,7 @@ namespace Physica {
         const size_t length = Base::getLength();
         const size_t size = length * sizeof(T);
         obj.resize(length);
-        if constexpr (V::SizeAtCompile != Dynamic)
+        if constexpr (obj.getSizeAtCompile() != Dynamic)
             memcpy(obj.data(), data(), size);
         else if constexpr (Diffable<T>) {
             Base::getDerived().values().toHostAsync(obj.getDerived().values());
@@ -244,7 +244,7 @@ namespace Physica {
         const size_t length = Base::getLength();
         const size_t size = length * sizeof(T);
         obj.resize(length);
-        if constexpr (V::SizeAtCompile != Dynamic)
+        if constexpr (obj.getSizeAtCompile() != Dynamic)
             memcpy(obj.data(), data(), size);
         else if constexpr (Diffable<V>) {
             Base::getDerived().values().toDeviceAsync(obj.getDerived().values());

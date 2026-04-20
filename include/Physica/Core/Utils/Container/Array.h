@@ -76,6 +76,7 @@ namespace Physica {
         using Base::write;
         __host__ __device__ void swap(This& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t size() noexcept { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() noexcept { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getCapacity() noexcept { return Length; }
@@ -132,10 +133,11 @@ namespace Physica {
         using Base::write;
         void swap(This& obj) noexcept;
         /* Getters */
-        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data(this auto&&) noexcept;
         [[nodiscard]] auto get_allocator() const noexcept { return alloc; }
         /* Static members */
         [[nodiscard]] static This read(size_t length, const T* __restrict p) noexcept;
@@ -163,7 +165,6 @@ namespace Physica {
     class Traits<Array<T, Length, Allocator>> {
     public:
         using ElemType = T;
-        constexpr static size_t SizeAtCompile = Length;
         using AllocatorType = Allocator;
     };
 }

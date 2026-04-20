@@ -44,6 +44,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto data_ptr(this auto&& self, size_t index) noexcept;
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
     template<class V>

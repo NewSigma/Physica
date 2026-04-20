@@ -72,8 +72,8 @@ namespace Physica {
     template<ExecutePolicy P>
     void VectorExpr<ExprID::Exp, V>::assign(Vector auto&& v) const noexcept {
         using V1 = std::remove_cvref_t<decltype(v)>;
-        constexpr size_t Length = std::max(Base::SizeAtCompile, V1::SizeAtCompile);
-        constexpr bool SmallVector = 0 < Length && Length <= 32;
+        constexpr size_t Size = std::max(Base::getSizeAtCompile(), v.getSizeAtCompile());
+        constexpr bool SmallVector = 0 < Size && Size <= 32;
         if constexpr (Internal::EnableMKL<V, V1>::value && !SmallVector && T::Prec == Float64) {
             if (Base::getLength() <= 32)
                 Base::template assign_base<P>(v);

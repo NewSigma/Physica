@@ -136,7 +136,6 @@ namespace Physica {
     class Traits<SparseVector<T>> {
     public:
         using ScalarType = T;
-        constexpr static size_t SizeAtCompile = Dynamic;
     };
 }
 

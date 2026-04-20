@@ -54,6 +54,7 @@ namespace Physica {
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ constexpr static bool isFastPacket() noexcept;
     };
 
@@ -77,6 +78,11 @@ namespace Physica {
     template<ExprID ID, Vector V>
     auto&& UnitaryVectorExpr<ID, V>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.expr);
+    }
+
+    template<ExprID ID, Vector V>
+    __host__ __device__ consteval size_t UnitaryVectorExpr<ID, V>::getSizeAtCompile() noexcept {
+        return std::remove_cvref_t<V>::getSizeAtCompile();
     }
 
     template<ExprID ID, Vector V>
@@ -117,13 +123,14 @@ namespace Physica {
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ constexpr static bool isFastPacket() noexcept;
     };
 
     template<ExprID ID, class LHS, class RHS>
     BinaryVectorExpr<ID, LHS, RHS>::BinaryVectorExpr(LHS lhs_, RHS rhs_) noexcept : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
         if constexpr (Vector<LHS> && Vector<RHS>)
-            assert(lhs.getLength() == rhs.getLength());
+            lhs.values().assert_assign(rhs.values());
     }
 
     template<ExprID ID, class LHS, class RHS>
@@ -167,6 +174,16 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
+    consteval size_t BinaryVectorExpr<ID, LHS, RHS>::getSizeAtCompile() noexcept {
+        if constexpr (Scalar<LHS>)
+            return std::remove_cvref_t<RHS>::getSizeAtCompile();
+        else if constexpr (Scalar<RHS>)
+            return std::remove_cvref_t<LHS>::getSizeAtCompile();
+        else
+            return std::max(std::remove_cvref_t<LHS>::getSizeAtCompile(), std::remove_cvref_t<RHS>::getSizeAtCompile());
+    }
+
+    template<ExprID ID, class LHS, class RHS>
     __host__ __device__ constexpr bool BinaryVectorExpr<ID, LHS, RHS>::isFastPacket() noexcept {
         if constexpr (Scalar<LHS>)
             return std::remove_cvref_t<RHS>::isFastPacket();
@@ -190,13 +207,9 @@ namespace Physica {
         using Tr = T::RealType;
         using T12 = Internal::BinaryScalarOpRtnTy<T, typename RHS1::ScalarType>::Type;
 
-        constexpr static size_t Size1 = Traits<LHS1>::SizeAtCompile;
-        constexpr static size_t Size2 = Traits<RHS1>::SizeAtCompile;
-        constexpr static bool FastAssign1 = Traits<LHS1>::FastAssign;
-        constexpr static bool FastAssign2 = Traits<RHS1>::FastAssign;
-        static_assert(Size1 == Dynamic || Size2 == Dynamic || (Size1 == Size2), "[Error]: Vector dimentions do not match");
-
         constexpr static bool calcFastAssign() {
+            constexpr bool FastAssign1 = Traits<LHS1>::FastAssign;
+            constexpr bool FastAssign2 = Traits<RHS1>::FastAssign;
             if constexpr (ID == ExprID::Minus)
                 return Traits<LHS1>::FastAssign;
             else if constexpr (ID == ExprID::Add || ID == ExprID::Sub)
@@ -206,7 +219,6 @@ namespace Physica {
         }
     public:
         using ScalarType = std::conditional<ID == ExprID::Abs, Tr, T12>::type;
-        constexpr static size_t SizeAtCompile = std::max(Size1, Size2);
         constexpr static bool FastAssign = calcFastAssign();
     };
 
@@ -220,7 +232,6 @@ namespace Physica {
         using RHS1 = std::remove_cvref_t<RHS>;
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, RHS1>::Type;
-        constexpr static size_t SizeAtCompile = Traits<LHS1>::SizeAtCompile;
         constexpr static bool FastAssign = Traits<LHS1>::FastAssign;
     };
 

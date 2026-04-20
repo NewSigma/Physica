@@ -50,6 +50,8 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return m.getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
     template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
@@ -92,6 +94,11 @@ namespace Physica {
     template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v);
+    }
+
+    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
+    __host__ __device__ consteval size_t GEMV<M, V>::getSizeAtCompile() noexcept {
+        return std::max(std::remove_cvref_t<M>::RowAtCompile, std::remove_cvref_t<V>::getSizeAtCompile());
     }
 }
 

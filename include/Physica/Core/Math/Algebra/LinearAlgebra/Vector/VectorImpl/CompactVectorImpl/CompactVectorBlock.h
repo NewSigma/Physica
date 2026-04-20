@@ -63,6 +63,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept;
         [[nodiscard]] auto data(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
     template<Vector V, size_t Length>
@@ -162,6 +164,11 @@ namespace Physica {
     auto CompactVectorBlock<V, Length>::data(this auto&& self) noexcept {
         return self.vec.data() + self.from;
     }
+
+    template<Vector V, size_t Length>
+    __host__ __device__ consteval size_t CompactVectorBlock<V, Length>::getSizeAtCompile() noexcept {
+        return Length;
+    }
 }
 
 namespace Physica {
@@ -169,7 +176,6 @@ namespace Physica {
     class Traits<CompactVectorBlock<V, Length>> {
     public:
         using ScalarType = std::remove_cvref_t<V>::ScalarType;
-        constexpr static size_t SizeAtCompile = Length;
         constexpr static bool FastAssign = false;
 
         using ElemType = ScalarType;

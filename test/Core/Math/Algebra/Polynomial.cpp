@@ -25,7 +25,7 @@ namespace {
     template<Vector V>
     void testPolyRoot(const V& coeffs, double precision) {
         using ScalarType = V::ScalarType;
-        const Polynomial<ScalarType, V::SizeAtCompile> poly(coeffs);
+        const Polynomial<ScalarType, coeffs.getSizeAtCompile()> poly(coeffs);
         auto roots = polyRoot(poly);
         for (const auto& root : roots) {
             auto result = poly(root);

@@ -28,9 +28,6 @@ namespace Physica {
     class LMatrixBlock<M, 1, Col> : public LValueVector<LMatrixBlock<M, 1, Col>> {
         using This = LMatrixBlock<M, 1, Col>;
         using Base = LValueVector<This>;
-    public:
-        using Base::isComplex;
-        using Base::SizeAtCompile;
     private:
         LazyDestroy<M> mat;
         size_t fromRow;
@@ -50,6 +47,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Col; }
     };
 
     template<Matrix M, size_t Col>
@@ -79,9 +78,6 @@ namespace Physica {
     class LMatrixBlock<M, Row, 1> : public LValueVector<LMatrixBlock<M, Row, 1>> {
         using This = LMatrixBlock<M, Row, 1>;
         using Base = LValueVector<This>;
-    public:
-        using Base::isComplex;
-        using Base::SizeAtCompile;
     private:
         LazyDestroy<M> mat;
         size_t fromRow;
@@ -101,6 +97,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Row; }
     };
 
     template<Matrix M, size_t Row>
@@ -130,9 +128,6 @@ namespace Physica {
     class LMatrixBlock<M, 1, 1> : public LValueVector<LMatrixBlock<M, 1, 1>> {
         using This = LMatrixBlock<M, 1, 1>;
         using Base = LValueVector<This>;
-    public:
-        using Base::isComplex;
-        using Base::SizeAtCompile;
     private:
         LazyDestroy<M> mat;
         size_t fromRow;
@@ -151,6 +146,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] constexpr static size_t getLength() noexcept { return 1; }
         [[nodiscard]] auto data_ptr(this auto&& self, [[maybe_unused]] size_t index) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return 1; }
     };
 
     template<Matrix M>
@@ -180,9 +177,6 @@ namespace Physica {
     class LMatrixBlock<M, Dynamic, Dynamic> : public LValueMatrix<LMatrixBlock<M, Dynamic, Dynamic>> {
         using This = LMatrixBlock<M, Dynamic, Dynamic>;
         using Base = LValueMatrix<This>;
-    public:
-        using Base::isComplex;
-        using Base::SizeAtCompile;
     private:
         LazyDestroy<M> mat;
         size_t fromRow;

@@ -52,6 +52,8 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
     template<Matrix M, Vector V>
@@ -69,7 +71,7 @@ namespace Physica {
             return;
         }
 
-        auto buffer = DenseVector<T, Base::SizeAtCompile>(getLength());
+        auto buffer = DenseVector<T, getSizeAtCompile()>(getLength());
         (mpow.getMatrix() * v).template assign<P>(target);
         for (int i = 1; i < power; ++i) {
             (mpow.getMatrix() * target).template assign<P>(buffer);
@@ -91,6 +93,11 @@ namespace Physica {
     template<Matrix M, Vector V>
     auto&& MatPowVecProd<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v);
+    }
+
+    template<Matrix M, Vector V>
+    __host__ __device__ consteval size_t MatPowVecProd<M, V>::getSizeAtCompile() noexcept {
+        return std::remove_cvref_t<M>::RowAtCompile;
     }
 }
 

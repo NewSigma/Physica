@@ -29,9 +29,6 @@ namespace Physica {
     class RMatrixBlock<M, 1, Dynamic> : public RValueVector<RMatrixBlock<M, 1, Dynamic>> {
         using This = RMatrixBlock<M, 1, Dynamic>;
         using Base = RValueVector<This>;
-    public:
-        using Base::isComplex;
-        using Base::SizeAtCompile;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -58,6 +55,8 @@ namespace Physica {
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return colCount; }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
     template<Matrix M>
@@ -78,9 +77,6 @@ namespace Physica {
     class RMatrixBlock<M, Dynamic, 1> : public RValueVector<RMatrixBlock<M, Dynamic, 1>> {
         using This = RMatrixBlock<M, Dynamic, 1>;
         using Base = RValueVector<This>;
-    public:
-        using Base::isComplex;
-        using Base::SizeAtCompile;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -107,6 +103,8 @@ namespace Physica {
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return rowCount; }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
     template<Matrix M>

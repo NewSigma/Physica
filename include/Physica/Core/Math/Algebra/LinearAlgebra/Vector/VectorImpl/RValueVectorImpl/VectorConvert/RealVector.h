@@ -43,7 +43,14 @@ namespace Physica {
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).real(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).real(); }
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
+
+    template<class V>
+    __host__ __device__ consteval size_t RealVectorR<V>::getSizeAtCompile() noexcept {
+        return std::remove_cvref_t<V>::getSizeAtCompile();
+    }
 }
 
 namespace Physica {
@@ -52,7 +59,6 @@ namespace Physica {
         using V1 = std::remove_cvref_t<V>;
     public:
         using ScalarType = V1::ScalarType::RealType;
-        constexpr static size_t SizeAtCompile = V1::SizeAtCompile;
         constexpr static bool FastAssign = false;
     };
 }

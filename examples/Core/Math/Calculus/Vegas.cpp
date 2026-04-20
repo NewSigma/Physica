@@ -44,7 +44,7 @@ namespace {
         plot->getAxisY()->setTitleText("ln(L)");
 
         Array<double, 3> rates{0.1, 0.2, 0.5};
-        const char* names[3]{"0.1", "0.2", "0.5"};
+        Array<const char*, 3> names{"0.1", "0.2", "0.5"};
         for (int i = 0; i < 3; ++i) {
             Vegas<T, false> vegas(from, to, 100, 100000, 10, rates[i]);
             vegas.integral<RandomSource, Thread>(func);
@@ -93,7 +93,7 @@ namespace {
         plot->getAxisY()->setTitleText("ln(L)");
 
         Array<int, 2> samples{10000, 100000};
-        const char* names[2]{"10<sup>4</sup>", "10<sup>5</sup>"};
+        Array<const char*, 2> names{"10<sup>4</sup>", "10<sup>5</sup>"};
         for (int i = 0; i < 2; ++i) {
             Vegas<T, false> vegas(from, to, 1000, samples[i], 1000, 0.1);
             vegas.integral<RandomSource, Thread>(func);

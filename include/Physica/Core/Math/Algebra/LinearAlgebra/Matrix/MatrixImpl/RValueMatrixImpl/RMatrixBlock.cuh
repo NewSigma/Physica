@@ -27,9 +27,6 @@ namespace Physica {
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
         using Ref = add_device_obj<M>::type;
-    public:
-        using Base::isComplex;
-        using Base::SizeAtCompile;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -68,9 +65,6 @@ namespace Physica {
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
         using Ref = add_device_obj<M>::type;
-    public:
-        using Base::isComplex;
-        using Base::SizeAtCompile;
     protected:
         using typename Base::T;
         using typename Base::Tv;

@@ -42,21 +42,27 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
     template<Matrix M>
     auto&& DiagVectorR<M>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
+
+    template<Matrix M>
+    __host__ __device__ consteval size_t DiagVectorR<M>::getSizeAtCompile() noexcept {
+        using Expr = std::remove_cvref<M>::type;
+        return std::max(Expr::RowAtCompile, Expr::ColAtCompile);
+    }
 }
 
 namespace Physica {
     template<Matrix M>
     class Traits<DiagVectorR<M>> {
-        using Expr = std::remove_cvref<M>::type;
     public:
-        using ScalarType = Expr::ScalarType;
-        constexpr static size_t SizeAtCompile = std::max(Expr::RowAtCompile, Expr::ColAtCompile);
+        using ScalarType = std::remove_cvref<M>::type::ScalarType;
         constexpr static bool FastAssign = false;
     };
 }

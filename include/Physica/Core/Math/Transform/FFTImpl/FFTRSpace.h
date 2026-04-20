@@ -49,6 +49,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getRSpaceSize(); }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getLength(); }
         [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     protected:
         FFTRSpace() = default;
         FFTRSpace(const FFTRSpace&) = default;
@@ -213,7 +215,6 @@ namespace Physica {
     public:
         using Derived = T;
         using ScalarType = Traits<T>::ScalarType;
-        constexpr static size_t SizeAtCompile = Dynamic;
         constexpr static bool FastAssign = false;
     };
 

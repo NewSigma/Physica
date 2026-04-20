@@ -53,7 +53,7 @@ namespace Physica {
             using T1 = typename U1::ScalarType;
             using T2 = typename U2::ScalarType;
         public:
-            constexpr static size_t SizeAtCompile = std::max(U1::SizeAtCompile, U2::SizeAtCompile);
+            constexpr static size_t SizeAtCompile = std::max(U1::getSizeAtCompile(), U2::getSizeAtCompile());
             using ResultType = BinaryScalarOpRtnTy<T1, T2>::Type;
             using PacketType = BestPacket<ResultType, SizeAtCompile>::Type;
 
@@ -97,9 +97,6 @@ namespace Physica {
         template<Vector> class View;
     public:
         using ScalarType = Traits<Derived>::ScalarType;
-        constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
-
-        using PacketType = BestPacket<ScalarType, SizeAtCompile>::Type;
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
@@ -205,8 +202,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isFastPacket() noexcept;
-        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
-        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile(const Vector auto& hint) noexcept;
+        [[nodiscard]] __host__ __device__ consteval static auto getSizeAtCompile() noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Scalar auto& source) noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Vector auto& source) noexcept;
     protected:

@@ -136,6 +136,11 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
+    __host__ __device__ consteval size_t DenseVector<T, Length, Allocator>::getSizeAtCompile() noexcept {
+        return Length;
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
     auto DenseVector<T, Length, Allocator>::zeros(size_t len) -> This {
         This result(len);
         result.zeros();

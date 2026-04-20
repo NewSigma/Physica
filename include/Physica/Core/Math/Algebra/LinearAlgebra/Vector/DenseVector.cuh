@@ -35,7 +35,6 @@ namespace Physica {
         using Storage = device_obj<Array<T, Length, Allocator>>;
     public:
         using typename Base::ScalarType;
-        using Base::SizeAtCompile;
     private:
         Storage storage;
     public:

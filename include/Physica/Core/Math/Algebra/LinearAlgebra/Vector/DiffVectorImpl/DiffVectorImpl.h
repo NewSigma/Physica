@@ -140,6 +140,11 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
+    __host__ __device__ consteval size_t DenseVector<Diff<T, Mode, Order>, Length, Allocator>::getSizeAtCompile() noexcept {
+        return Length;
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     template<RNG R>
     auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_uniform(size_t len) -> This {
         This result(len);

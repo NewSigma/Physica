@@ -78,6 +78,8 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     private:
         constexpr static Trv calcTheta(int numTaylorTerm);
     };
@@ -102,11 +104,8 @@ namespace Physica {
     template<Matrix M, Vector V>
     template<bool NoFactor, ExecutePolicy P>
     auto MatExpVecProd<M, V>::assign(Vector auto& target, Tr traceMu, ParamPair params) const -> std::conditional<NoFactor, Tr, void>::type {
-        constexpr size_t SizeAtCompile1 = std::remove_cvref_t<decltype(target)>::SizeAtCompile;
-        constexpr size_t SizeAtCompile2 = std::max(SizeAtCompile1, Base::SizeAtCompile);
-        using BufferType = DenseVector<T, SizeAtCompile2>;
-
         assert(getLength() == target.getLength());
+        using BufferType = DenseVector<T, getSizeAtCompile()>;
         const Tr epsilon = std::numeric_limits<Tr>::epsilon();
         const auto& mat = mexp.getMatrix();
         const int numTaylorTerm = params.first;
@@ -208,6 +207,11 @@ namespace Physica {
     template<Matrix M, Vector V>
     auto&& MatExpVecProd<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v);
+    }
+
+    template<Matrix M, Vector V>
+    __host__ __device__ consteval size_t MatExpVecProd<M, V>::getSizeAtCompile() noexcept {
+        return std::remove_cvref_t<M>::RowAtCompile;
     }
 
     template<Matrix M, Vector V>

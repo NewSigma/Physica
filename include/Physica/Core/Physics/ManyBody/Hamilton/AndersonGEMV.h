@@ -51,6 +51,8 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
     template<Matrix M, Vector V> requires(instanceof_tx<AndersonMatrix, M>)
@@ -99,4 +101,17 @@ namespace Physica {
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
+}
+
+namespace Physica {
+    template<Matrix M, Vector V> requires(instanceof_tx<AndersonMatrix, M>)
+    class Traits<GEMV<M, V>> {
+        using M1 = std::remove_cvref<M>::type;
+        using V1 = std::remove_cvref<V>::type;
+        using T1 = M1::ScalarType;
+        using T2 = V1::ScalarType;
+    public:
+        using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
+        constexpr static bool FastAssign = true;
+    };
 }

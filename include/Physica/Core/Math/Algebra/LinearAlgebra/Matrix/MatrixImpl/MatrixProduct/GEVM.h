@@ -142,7 +142,7 @@ namespace Physica {
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
         constexpr static int Major = MatrixMajor::BothMajor;
-        constexpr static size_t RowAtCompile = V1::SizeAtCompile;
+        constexpr static size_t RowAtCompile = V1::getSizeAtCompile();
         constexpr static size_t ColAtCompile = M1::ColAtCompile;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };

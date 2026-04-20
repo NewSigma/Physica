@@ -55,6 +55,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
         [[nodiscard]] auto data(this auto&& self) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Col; }
     };
 
     template<Matrix M, size_t Col>
@@ -131,6 +133,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] auto data(this auto&& self) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Row; }
     };
 
     template<Matrix M, size_t Row>
@@ -205,6 +209,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] constexpr static size_t getLength() noexcept { return 1; }
         [[nodiscard]] auto data(this auto&& self) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return 1; }
     };
 
     template<Matrix M>
@@ -232,7 +238,7 @@ namespace Physica {
     auto CompactMatrixBlock<M, 1, 1>::values(this auto&& self) noexcept {
         auto&& v = propagate_rvalue_reference<decltype(self), M>(self.mat).values();
         using M1 = decltype(v);
-        return CompactMatrixBlock<M1, 1, 1>(std::forward<M1>(v), self.fromRow, 1, self.fromCol);
+        return CompactMatrixBlock<M1, 1, 1>(std::forward<M1>(v), self.fromRow, self.fromCol);
     }
 
     template<Matrix M>
@@ -240,7 +246,7 @@ namespace Physica {
     auto CompactMatrixBlock<M, 1, 1>::grads(this auto&& self) noexcept {
         auto&& g = propagate_rvalue_reference<decltype(self), M>(self.mat).template grads<GradOrder>();
         using M1 = decltype(g);
-        return CompactMatrixBlock<M1, 1, 1>(std::forward<M1>(g), self.fromRow, 1, self.fromCol);
+        return CompactMatrixBlock<M1, 1, 1>(std::forward<M1>(g), self.fromRow, self.fromCol);
     }
 
     template<Matrix M>

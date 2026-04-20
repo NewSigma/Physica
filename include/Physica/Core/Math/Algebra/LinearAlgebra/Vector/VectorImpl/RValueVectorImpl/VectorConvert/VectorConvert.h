@@ -42,6 +42,8 @@ namespace Physica {
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).imag(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).imag(); }
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
     };
 
     template<class V>
@@ -65,6 +67,8 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t s) const { return v.calc(s).norm(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).norm(); }
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
     };
 
     template<class V>
@@ -87,6 +91,8 @@ namespace Physica {
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).value(); }
         [[nodiscard]] T calc_value(size_t s) const { return calc(s); }
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
     };
 
     template<class V, int GradOrder>
@@ -110,6 +116,8 @@ namespace Physica {
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).template grad<GradOrder>(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return calc(s).value(); }
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
     };
 
     template<class V, int MaskOrder>
@@ -135,6 +143,8 @@ namespace Physica {
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).template grad_mask<MaskOrder>(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s); }
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
     };
 }
 
@@ -150,7 +160,6 @@ namespace Physica {
         using V1 = std::remove_cvref_t<V>;
     public:
         using ScalarType = V1::ScalarType::ValueType;
-        constexpr static size_t SizeAtCompile = V1::SizeAtCompile;
         constexpr static bool FastAssign = false;
     };
 
@@ -160,7 +169,6 @@ namespace Physica {
         static_assert(V1::ScalarType::isDiffable(), "[Error]: Redundant GradVector");
     public:
         using ScalarType = Internal::GradTypeHelper<typename V1::ScalarType, GradOrder>::Type;
-        constexpr static size_t SizeAtCompile = V1::SizeAtCompile;
         constexpr static bool FastAssign = false;
     };
 
@@ -172,7 +180,6 @@ namespace Physica {
         static_assert(U::isDiffable(), "[Error]: Redundant GradMaskVector");
     public:
         using ScalarType = std::conditional<MaskOrder == 0, ValueType, Diff<ValueType, U::Mode, MaskOrder>>::type;
-        constexpr static size_t SizeAtCompile = V1::SizeAtCompile;
         constexpr static bool FastAssign = false;
     };
 }

@@ -38,6 +38,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() - std::abs(shift); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
     template<Matrix M>
@@ -65,7 +67,6 @@ namespace Physica {
         using Expr = std::remove_cvref<M>::type;
     public:
         using ScalarType = Expr::ScalarType;
-        constexpr static size_t SizeAtCompile = std::max(Expr::RowAtCompile, Expr::ColAtCompile);
         constexpr static bool FastAssign = false;
     };
 }

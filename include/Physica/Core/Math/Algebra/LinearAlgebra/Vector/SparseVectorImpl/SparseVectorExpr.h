@@ -50,7 +50,14 @@ namespace Physica {
         }
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] size_t getNumNonZero() const noexcept { return v.getNumNonZero(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
+
+    template<Vector V, Scalar U>
+    consteval size_t SparseVectorExpr<ExprID::Mul, V, U>::getSizeAtCompile() noexcept {
+        return std::remove_cvref_t<V>::getSizeAtCompile();
+    }
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Mul//////////////////////////////////////
     template<Vector V, Scalar U>
@@ -69,6 +76,5 @@ namespace Physica {
     class Traits<SparseVectorExpr<ID, V, U>> {
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename V::ScalarType, U>::Type;
-        constexpr static size_t SizeAtCompile = V::SizeAtCompile;
     };
 }

@@ -32,7 +32,6 @@ namespace Physica {
         template<Vector> class View;
 
         using typename Base::ScalarType;
-        using Base::SizeAtCompile;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
         using Base::isDiffable;

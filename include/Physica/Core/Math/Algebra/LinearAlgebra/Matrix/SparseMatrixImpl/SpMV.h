@@ -40,6 +40,8 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] const auto& getLHS() const noexcept { return mat; }
         [[nodiscard]] const auto& getRHS() const noexcept { return vec; }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
     template<Matrix M, Vector V> requires(instanceof_tx<SparseMatrix, M>)

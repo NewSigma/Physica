@@ -76,6 +76,7 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] auto&& grads(this auto&&) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         template<RNG R>
         [[nodiscard]] static This random_uniform(size_t len);
         template<RNG R>
@@ -94,7 +95,6 @@ namespace Physica {
         static_assert(!T::isDiffable(), "[Error]: Nested Diff<> is not allowed");
     public:
         using ScalarType = Diff<T, Mode, Order>;
-        constexpr static size_t SizeAtCompile = Length;
 
         constexpr static bool FastAssign = false;
     };

@@ -82,11 +82,7 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ void device_obj<RValueVector<Derived>>::assert_assign(const Vector auto& source) const noexcept {
         static_assert_assign(source);
-
-        using V = std::remove_cvref<decltype(source)>::type;
-        constexpr size_t Size1 = SizeAtCompile;
-        constexpr size_t Size2 = V::SizeAtCompile;
-        if constexpr (Size1 == Dynamic && Size2 == Dynamic)
+        if constexpr (getSizeAtCompile() == Dynamic && source.getSizeAtCompile() == Dynamic)
             assert(getLength() == source.getLength() && "[Error]: Size mismatch between two vector");
     }
 
@@ -488,7 +484,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ consteval void device_obj<RValueVector<Derived>>::static_assert_assign(const Vector auto& source) noexcept {
-        static_assert(SizeAtCompile != Dynamic || DeviceObj<decltype(source)>, "[Error]: Host object cannot be assigned to dynamic device object");
+        static_assert(getSizeAtCompile() != Dynamic || DeviceObj<decltype(source)>, "[Error]: Host object cannot be assigned to dynamic device object");
         host_obj::static_assert_assign(source);
     }
 
@@ -497,7 +493,7 @@ namespace Physica {
     __device__ void device_obj<RValueVector<Derived>>::assign_impl(V& target) const {
         const auto& v0 = Base::getDerived();
         if constexpr (Internal::EnableSIMD<device_obj<Derived>, V>::value) {
-            constexpr size_t Length = std::max(Derived::SizeAtCompile, V::SizeAtCompile);
+            constexpr size_t Length = getSizeAtCompile(target);
             constexpr int Size = device_obj<BestPacket<T, Length>>::Size;
             if constexpr (Length != Dynamic) {
                 constexpr size_t to = Length / Size * Size;

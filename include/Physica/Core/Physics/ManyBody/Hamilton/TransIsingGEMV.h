@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -50,6 +50,8 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     private:
         /* Getters */
         [[nodiscard]] const auto& getRepr() const noexcept { return mat.getRepr(); }
@@ -118,7 +120,6 @@ namespace Physica {
         using T2 = V1::ScalarType;
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
-        constexpr static size_t SizeAtCompile = M1::RowAtCompile;
         constexpr static bool FastAssign = true;
     };
 }

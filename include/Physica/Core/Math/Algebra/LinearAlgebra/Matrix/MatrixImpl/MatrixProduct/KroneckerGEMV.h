@@ -52,6 +52,8 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
     template<Matrix M, Vector V> requires(instanceof<Kronecker, M>)
@@ -99,6 +101,11 @@ namespace Physica {
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
+
+    template<Matrix M, Vector V> requires(instanceof<Kronecker, M>)
+    __host__ __device__ consteval size_t GEMV<M, V>::getSizeAtCompile() noexcept {
+        return std::max(std::remove_cvref_t<M>::RowAtCompile, std::remove_cvref_t<V>::getSizeAtCompile());
+    }
 }
 
 namespace Physica {
@@ -106,11 +113,10 @@ namespace Physica {
     class Traits<GEMV<M, V>> {
         using M1 = std::remove_cvref_t<M>;
         using V1 = std::remove_cvref_t<V>;
-        static_assert(M1::ColAtCompile == V1::SizeAtCompile || M1::ColAtCompile == Dynamic || V1::SizeAtCompile == Dynamic,
+        static_assert(M1::ColAtCompile == V1::getSizeAtCompile() || M1::ColAtCompile == Dynamic || V1::getSizeAtCompile() == Dynamic,
                 "Row and column do not match in matrix-vector product");
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename V1::ScalarType>::Type;
-        constexpr static size_t SizeAtCompile = M1::RowAtCompile;
         constexpr static bool FastAssign = MatrixMajor::isColMatrix<M>();
     };
 }

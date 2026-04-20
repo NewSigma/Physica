@@ -136,6 +136,5 @@ namespace Physica {
     class Traits<FCSwapVector<T>> {
     public:
         using ScalarType = T;
-        constexpr static size_t SizeAtCompile = Dynamic;
     };
 }
