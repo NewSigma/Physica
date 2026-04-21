@@ -36,6 +36,15 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto RValueVector<Derived>::operator-(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (instanceof<GEMV, Derived>)
+            return std::forward<Self>(self).getLHS() * (-std::forward<Self>(self).getRHS());
+        else
+            return VectorExpr<ExprID::Minus, Self>(std::forward<Self>(self));
+    }
+
+    template<class Derived>
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;

@@ -50,9 +50,4 @@ namespace Physica {
         using Self = decltype(self);
         return -std::forward<Self>(self).getExpr().values();
     }
-
-    template<Vector V>
-    [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator-(V&& v) noexcept requires(DeviceObj<V>) {
-        return device_obj<VectorExpr<ExprID::Minus, remove_device_obj_t<V&&>>>(std::forward<V>(v));
-    }
 }

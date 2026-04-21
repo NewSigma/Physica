@@ -42,6 +42,7 @@ namespace Physica {
     template<class T, int GradOrder> class GradVector;
     template<class T, int MaskOrder> class GradMaskVector;
     template<Vector, Matrix> class GEVM;
+    template<Matrix, Vector> class GEMV;
 
     namespace Internal {
         template<class T1, class T2 = T1> class EnableMKL;
@@ -111,6 +112,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         [[nodiscard]] bool operator!=(const Vector auto& other) const noexcept;
         [[nodiscard]] auto operator*(this auto&&, Matrix auto&& m) noexcept;
+        [[nodiscard, gnu::always_inline]] auto operator-(this auto&&) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const noexcept;
