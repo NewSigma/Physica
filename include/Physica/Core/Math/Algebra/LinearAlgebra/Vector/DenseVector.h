@@ -133,8 +133,6 @@ namespace Physica {
     public:
         using ScalarType = T;
         using ElemType = T;
-
-        constexpr static bool FastAssign = false;
     };
 }
 

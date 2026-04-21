@@ -54,6 +54,7 @@ namespace Physica {
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     private:
         void assign_add_potential(Vector auto& target) const noexcept;
@@ -103,6 +104,11 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V> requires(instanceof<ActionMatrix, M>)
+    __host__ __device__ consteval bool GEMV<M, V>::isFastAssign() noexcept {
+        return MatrixMajor::isColMatrix<M>();
+    }
+
+    template<Matrix M, Vector V> requires(instanceof<ActionMatrix, M>)
     void GEMV<M, V>::assign_add_potential(Vector auto& target) const noexcept {
         const int numSite = mat.getNumSite();
         const int numFreq2 = mat.getNumFreq() * 2;
@@ -126,6 +132,5 @@ namespace Physica {
                 "Row and column do not match in matrix-vector product");
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename V1::ScalarType>::Type;
-        constexpr static bool FastAssign = MatrixMajor::isColMatrix<M>();
     };
 }

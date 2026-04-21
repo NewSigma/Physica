@@ -40,7 +40,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getLength(); }
-        [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr auto&& getExpr(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
         [[nodiscard]] __host__ __device__ constexpr static bool isFastPacket() noexcept;
@@ -50,7 +50,7 @@ namespace Physica {
     __host__ __device__ device_obj<UnitaryVectorExpr<ID, V>>::device_obj(Ref expr_) noexcept : expr(asStruct(expr_)) {}
 
     template<ExprID ID, Vector V>
-    __host__ __device__ auto&& device_obj<UnitaryVectorExpr<ID, V>>::getExpr(this auto&& self) noexcept {
+    __host__ __device__ constexpr auto&& device_obj<UnitaryVectorExpr<ID, V>>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.expr.getDerived());
     }
 
@@ -86,8 +86,8 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getLHS().getLength(); }
-        [[nodiscard]] __host__ __device__ auto&& getLHS(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ auto&& getRHS(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr auto&& getRHS(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
         [[nodiscard]] __host__ __device__ constexpr static bool isFastPacket() noexcept;
@@ -100,12 +100,12 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    __host__ __device__ auto&& device_obj<BinaryVectorExpr<ID, LHS, RHS>>::getLHS(this auto&& self) noexcept {
+    __host__ __device__ constexpr auto&& device_obj<BinaryVectorExpr<ID, LHS, RHS>>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref1>(self.lhs.getDerived());
     }
 
     template<ExprID ID, class LHS, class RHS>
-    __host__ __device__ auto&& device_obj<BinaryVectorExpr<ID, LHS, RHS>>::getRHS(this auto&& self) noexcept {
+    __host__ __device__ constexpr auto&& device_obj<BinaryVectorExpr<ID, LHS, RHS>>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref2>(self.rhs.getDerived());
     }
 

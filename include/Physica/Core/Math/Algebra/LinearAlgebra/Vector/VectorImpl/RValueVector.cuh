@@ -108,6 +108,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isLValueVector() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isFastPacket() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile(const Vector auto& hint) noexcept;

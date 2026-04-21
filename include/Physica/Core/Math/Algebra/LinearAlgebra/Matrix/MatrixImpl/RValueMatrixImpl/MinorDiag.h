@@ -67,6 +67,5 @@ namespace Physica {
         using Expr = std::remove_cvref<M>::type;
     public:
         using ScalarType = Expr::ScalarType;
-        constexpr static bool FastAssign = false;
     };
 }

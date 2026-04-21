@@ -52,6 +52,7 @@ namespace Physica {
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     private:
         /* Getters */
@@ -130,6 +131,5 @@ namespace Physica {
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
         constexpr static size_t SizeAtCompile = M1::RowAtCompile;
-        constexpr static bool FastAssign = true;
     };
 }

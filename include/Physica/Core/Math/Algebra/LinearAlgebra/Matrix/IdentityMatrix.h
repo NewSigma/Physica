@@ -54,6 +54,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
+        /* Static members*/
+        [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
         /* Friends */
         friend class device_obj<This>;
     };
@@ -143,8 +145,6 @@ namespace Physica {
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
-
-        constexpr static bool FastAssign = true;
     };
 }
 

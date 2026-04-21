@@ -65,6 +65,7 @@ namespace Physica {
         [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
         /* Static members */
         [[nodiscard]] static This identity(size_t order);
+        [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
     };
 
     template<Scalar T, size_t Order>
@@ -157,8 +158,6 @@ namespace Physica {
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
-
-        constexpr static bool FastAssign = true;
     };
 }
 

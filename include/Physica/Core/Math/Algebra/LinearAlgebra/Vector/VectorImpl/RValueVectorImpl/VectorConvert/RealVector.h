@@ -59,6 +59,5 @@ namespace Physica {
         using V1 = std::remove_cvref_t<V>;
     public:
         using ScalarType = V1::ScalarType::RealType;
-        constexpr static bool FastAssign = false;
     };
 }

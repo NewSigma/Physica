@@ -450,6 +450,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueVector<Derived>>::isFastAssign() noexcept {
+        return host_obj::isFastAssign();
+    }
+
+    template<class Derived>
     __host__ __device__ consteval bool device_obj<RValueVector<Derived>>::isFastPacket() noexcept {
         return host_obj::isFastPacket();
     }

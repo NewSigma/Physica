@@ -55,6 +55,7 @@ namespace Physica {
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<M>::RowAtCompile; }
     };
 
@@ -65,7 +66,7 @@ namespace Physica {
 
     template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
     auto GEMV<M, V>::operator-() const noexcept {
-        if constexpr (Traits<M1>::FastAssign)
+        if constexpr (M1::isFastAssign())
             return (-getLHS()) * getRHS();
         else
             return getLHS() * (-getRHS());
@@ -74,13 +75,12 @@ namespace Physica {
     template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
-        constexpr bool FastAssign = Traits<This>::FastAssign;
-        if constexpr (FastAssign) {
+        if constexpr (isFastAssign()) {
             constexpr ExprID ID = std::remove_cvref_t<M>::getExprID();
             if constexpr (ID == ExprID::Minus) {
                 const auto& lhs = getLHS();
                 const auto& rhs = getRHS();
-                if constexpr (Traits<std::remove_cvref_t<M>>::FastAssign)
+                if constexpr (M1::isFastAssign())
                     ((-lhs) * rhs).template assign<P>(target);
                 else
                     (lhs * (-rhs)).template assign<P>(target);
@@ -92,7 +92,7 @@ namespace Physica {
             else if constexpr (ID == ExprID::Mul)
                 ((expr.getLHS() * vec) * expr.getRHS()).template assign<P>(target);
             else
-                static_assert(!FastAssign, "[Error]: assign is not implemented");
+                static_assert(ID == ExprID::Minus, "[Error]: assign is not implemented");
         }
         else
             Base::assign(target);
@@ -101,13 +101,12 @@ namespace Physica {
     template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign_add(Vector auto& target) const {
-        constexpr bool FastAssign = Traits<This>::FastAssign;
-        if constexpr (FastAssign) {
+        if constexpr (isFastAssign()) {
             constexpr ExprID ID = expr.getExprID();
             if constexpr (ID == ExprID::Minus) {
                 const auto& lhs = getLHS();
                 const auto& rhs = getRHS();
-                if constexpr (Traits<std::remove_cvref_t<M>>::FastAssign)
+                if constexpr (M1::isFastAssign())
                     ((-lhs) * rhs).template assign_add<P>(target);
                 else
                     (lhs * (-rhs)).template assign_add<P>(target);
@@ -125,7 +124,7 @@ namespace Physica {
                 expr1.template assign_add<P>(target);
             }
             else
-                static_assert(!FastAssign, "[Error]: assign is not implemented");
+                static_assert(ID == ExprID::Minus, "[Error]: assign is not implemented");
         }
         else
             Base::assign_add(target);
@@ -151,6 +150,28 @@ namespace Physica {
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
+
+    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
+    __host__ __device__ consteval bool GEMV<M, V>::isFastAssign() noexcept {
+        using U = Traits<M1>::RHS;
+        constexpr bool isScalarU = Scalar<U>;
+        constexpr ExprID ID = M1::getExprID();
+
+        if constexpr (ID == ExprID::Minus)
+            return M1::isFastAssign();
+        else if constexpr (ID == ExprID::Add || ID == ExprID::Sub) {
+            if constexpr (!isScalarU) {
+                using M2 = Traits<M1>::LHS;
+                using Add = decltype(std::declval<M2>() * std::declval<V>() + std::declval<U>() * std::declval<V>());
+                return Add::isFastAssign();
+            }
+            return false;
+        }
+        else if constexpr (ID == ExprID::Mul)
+            return isScalarU;
+        else
+            return false;
+    }
 }
 
 namespace Physica {
@@ -160,29 +181,7 @@ namespace Physica {
         using V1 = std::remove_cvref_t<V>;
         static_assert(M1::ColAtCompile == V1::getSizeAtCompile() || M1::ColAtCompile == Dynamic || V1::getSizeAtCompile() == Dynamic,
                       "Row and col do not match in matrix product");
-
-        constexpr static bool calcFastAssign() {
-            using U = Traits<M1>::RHS;
-            constexpr bool isScalarU = Scalar<U>;
-            constexpr ExprID ID = M1::getExprID();
-
-            if constexpr (ID == ExprID::Minus)
-                return Traits<M1>::FastAssign;
-            else if constexpr (ID == ExprID::Add || ID == ExprID::Sub) {
-                if constexpr (!isScalarU) {
-                    using M2 = Traits<M1>::LHS;
-                    using Add = decltype(std::declval<M2>() * std::declval<V>() + std::declval<U>() * std::declval<V>());
-                    return Traits<Add>::FastAssign;
-                }
-                return false;
-            }
-            else if constexpr (ID == ExprID::Mul)
-                return isScalarU;
-            else
-                return false;
-        }
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename V1::ScalarType>::Type;
-        constexpr static bool FastAssign = calcFastAssign();
     };
 }

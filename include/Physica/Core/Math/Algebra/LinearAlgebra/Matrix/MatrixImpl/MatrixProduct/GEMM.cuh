@@ -193,7 +193,5 @@ namespace Physica {
     class Traits<device_obj<GEMM<M1, M2>>> : public Traits<GEMM<M1, M2>> {
         static_assert(!is_device_obj<M1>::value);
         static_assert(!is_device_obj<M2>::value);
-    public:
-        constexpr static bool FastAssign = true;
     };
 }

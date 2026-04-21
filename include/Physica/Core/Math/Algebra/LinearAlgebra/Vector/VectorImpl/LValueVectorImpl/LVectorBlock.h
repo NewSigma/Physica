@@ -147,6 +147,5 @@ namespace Physica {
         static_assert(std::remove_cvref_t<V>::isLValueVector());
     public:
         using ScalarType = std::remove_cvref_t<V>::ScalarType;
-        constexpr static bool FastAssign = false;
     };
 }

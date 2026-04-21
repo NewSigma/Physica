@@ -95,8 +95,6 @@ namespace Physica {
         static_assert(!T::isDiffable(), "[Error]: Nested Diff<> is not allowed");
     public:
         using ScalarType = Diff<T, Mode, Order>;
-
-        constexpr static bool FastAssign = false;
     };
 }
 

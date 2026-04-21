@@ -115,9 +115,6 @@ namespace Physica {
         void random_any(auto& distribution);
         void toIdentity();
         [[nodiscard]] VectorND<T> balance();
-
-        template<int GradOrder = 1>
-        auto grads() const noexcept;
         /* Getters */
         [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
         [[nodiscard]] decltype(auto) refFromMajorMinor(this auto&&, size_t major, size_t minor) noexcept;

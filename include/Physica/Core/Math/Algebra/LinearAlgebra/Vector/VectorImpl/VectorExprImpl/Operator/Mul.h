@@ -137,8 +137,7 @@ namespace Physica {
     template<Vector V, Scalar U>
     template<ExecutePolicy P>
     void VectorExpr<ExprID::Mul, V, U>::assign(Vector auto&& v) const {
-        constexpr bool FastAssign = Traits<std::remove_cvref_t<V>>::FastAssign;
-        if constexpr (FastAssign) {
+        if constexpr (v.isFastAssign()) {
             getLHS().template assign<P>(v);
             v *= getRHS();
         }

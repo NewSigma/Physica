@@ -74,14 +74,12 @@ namespace Physica {
     template<Vector V1, Vector V2>
     template<ExecutePolicy P>
     void VectorExpr<ExprID::Sub, V1, V2>::assign(Vector auto&& v) const {
-        constexpr bool FastAssign1 = Traits<std::remove_cvref_t<V1>>::FastAssign;
-        constexpr bool FastAssign2 = Traits<std::remove_cvref_t<V2>>::FastAssign;
-        if constexpr (FastAssign1) {
+        if constexpr (std::remove_cvref_t<V1>::isFastAssign()) {
             getLHS().template assign<P>(v);
             v -= getRHS();
         }
-        else if constexpr (FastAssign2) {
-            static_assert(Traits<decltype(-getRHS())>::FastAssign, "[Debug]: Fast minus implementation is missing");
+        else if constexpr (std::remove_cvref_t<V2>::isFastAssign()) {
+            static_assert(decltype(-getRHS())::isFastAssign(), "[Debug]: Fast minus implementation is missing");
             (-getRHS()).template assign<P>(v);
             v += getLHS();
         }

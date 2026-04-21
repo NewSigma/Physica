@@ -64,6 +64,7 @@ namespace Physica {
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept;
         [[nodiscard]] __host__ __device__ constexpr static bool isFastPacket() noexcept;
     };
 
@@ -203,6 +204,11 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V>
+    __host__ __device__ consteval bool GEMV<M, V>::isFastAssign() noexcept {
+        return MatrixMajor::isColMatrix<M>();
+    }
+
+    template<Matrix M, Vector V>
     __host__ __device__ constexpr bool GEMV<M, V>::isFastPacket() noexcept {
         return MatrixMajor::isColMatrix<M>();
     }
@@ -217,6 +223,5 @@ namespace Physica {
                 "Row and column do not match in matrix-vector product");
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename V1::ScalarType>::Type;
-        constexpr static bool FastAssign = MatrixMajor::isColMatrix<M>();
     };
 }

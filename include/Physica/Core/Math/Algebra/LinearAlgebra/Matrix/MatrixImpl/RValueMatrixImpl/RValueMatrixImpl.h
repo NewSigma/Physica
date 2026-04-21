@@ -648,6 +648,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool RValueMatrix<Derived>::isFastAssign() noexcept {
+        return false;
+    }
+
+    template<class Derived>
     __host__ __device__ consteval int RValueMatrix<Derived>::getMajor() noexcept {
         return Traits<Derived>::Major;
     }

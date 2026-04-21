@@ -60,6 +60,5 @@ namespace Physica {
     class Traits<FlattenL<T>> {
     public:
         using ScalarType = std::remove_cvref_t<T>::ScalarType;
-        constexpr static bool FastAssign = false;
     };
 }

@@ -128,6 +128,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isColMatrix() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isRowMatrix() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isBothMajor() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
         [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept;

@@ -45,7 +45,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return getExpr().getRow(); }
         [[nodiscard]] size_t getCol() const { return getExpr().getCol(); }
-        [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto&& getExpr(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
     };
@@ -75,7 +75,7 @@ namespace Physica {
     }
 
     template<ExprID ID, Matrix M>
-    auto&& UnitaryMatrixExpr<ID, M>::getExpr(this auto&& self) noexcept {
+    constexpr auto&& UnitaryMatrixExpr<ID, M>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.expr);
     }
 
@@ -108,13 +108,13 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const;
         [[nodiscard]] size_t getCol() const;
-        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
-        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
-        /* Static members */
-        [[nodiscard]] consteval static bool isStaticSymm() noexcept;
-        [[nodiscard]] consteval static bool isStaticHermite() noexcept;
+        [[nodiscard]] constexpr auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto&& getRHS(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
+        [[nodiscard]] consteval static bool isStaticSymm() noexcept;
+        [[nodiscard]] consteval static bool isStaticHermite() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept;
     };
 
     template<ExprID ID, class LHS, class RHS>
@@ -179,12 +179,12 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    auto&& BinaryMatrixExpr<ID, LHS, RHS>::getLHS(this auto&& self) noexcept {
+    constexpr auto&& BinaryMatrixExpr<ID, LHS, RHS>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), LHS>(self.lhs);
     }
 
     template<ExprID ID, class LHS, class RHS>
-    auto&& BinaryMatrixExpr<ID, LHS, RHS>::getRHS(this auto&& self) noexcept {
+    constexpr auto&& BinaryMatrixExpr<ID, LHS, RHS>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), RHS>(self.rhs);
     }
 
@@ -219,6 +219,15 @@ namespace Physica {
             return LHS1::isStaticHermite() && !RHS1::isComplex();
         }
     }
+
+    template<ExprID ID, class LHS, class RHS>
+    __host__ __device__ consteval bool BinaryMatrixExpr<ID, LHS, RHS>::isFastAssign() noexcept {
+        if constexpr (Scalar<LHS>)
+            return std::remove_cvref_t<RHS>::isFastAssign();
+        if constexpr (Scalar<RHS>)
+            return std::remove_cvref_t<LHS>::isFastAssign();
+        return false;
+    }
 }
 
 namespace Physica {
@@ -241,8 +250,6 @@ namespace Physica {
         constexpr static size_t RowAtCompile = LHS1::RowAtCompile > RHS1::RowAtCompile ? LHS1::RowAtCompile : RHS1::RowAtCompile;
         constexpr static size_t ColAtCompile = LHS1::ColAtCompile > RHS1::ColAtCompile ? LHS1::ColAtCompile : RHS1::ColAtCompile;
         constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile > RHS1::SizeAtCompile ? LHS1::SizeAtCompile : RHS1::SizeAtCompile;
-
-        constexpr static bool FastAssign = false;
     };
 
     template<ExprID ID, Matrix LHS_, Vector RHS_>
@@ -259,10 +266,6 @@ namespace Physica {
         constexpr static size_t RowAtCompile = LHS1::RowAtCompile;
         constexpr static size_t ColAtCompile = LHS1::ColAtCompile;
         constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile;
-
-        constexpr static bool FastAssign = false;
-        constexpr static bool isSymm = false;
-        constexpr static bool isHermite = false;
     };
 
     template<ExprID ID, Vector LHS, Matrix RHS>
@@ -282,8 +285,6 @@ namespace Physica {
         constexpr static size_t RowAtCompile = LHS1::RowAtCompile;
         constexpr static size_t ColAtCompile = LHS1::ColAtCompile;
         constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile;
-
-        constexpr static bool FastAssign = Traits<LHS1>::FastAssign;
     };
 
     template<ExprID ID, Scalar LHS, Matrix RHS>

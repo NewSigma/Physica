@@ -70,6 +70,5 @@ namespace Physica {
     class Traits<UnitVector<T, Length>> {
     public:
         using ScalarType = T;
-        constexpr static bool FastAssign = false;
     };
 }

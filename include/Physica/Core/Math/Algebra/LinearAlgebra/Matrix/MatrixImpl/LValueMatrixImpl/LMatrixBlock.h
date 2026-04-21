@@ -375,7 +375,5 @@ namespace Physica {
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColAtCompile = Col;
         constexpr static size_t SizeAtCompile = Row * Col;
-
-        constexpr static bool FastAssign = false;
     };
 }

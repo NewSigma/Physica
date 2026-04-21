@@ -216,7 +216,6 @@ namespace Physica {
     public:
         using Derived = T;
         using ScalarType = Traits<T>::ScalarType::ComplexType;
-        constexpr static bool FastAssign = false;
     };
 
     template<class T>

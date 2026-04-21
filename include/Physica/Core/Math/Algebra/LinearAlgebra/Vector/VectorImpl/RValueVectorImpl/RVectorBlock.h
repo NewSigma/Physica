@@ -121,6 +121,5 @@ namespace Physica {
     class Traits<RVectorBlock<V, Length>> {
     public:
         using ScalarType = std::remove_cvref_t<V>::ScalarType;
-        constexpr static bool FastAssign = false;
     };
 }

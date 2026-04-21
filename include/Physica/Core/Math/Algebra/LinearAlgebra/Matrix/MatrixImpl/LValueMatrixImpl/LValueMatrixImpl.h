@@ -433,12 +433,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<int GradOrder>
-    auto LValueMatrix<Derived>::grads() const noexcept {
-        return Base::template grads_impl<GradOrder>();
-    }
-
-    template<class Derived>
     auto LValueMatrix<Derived>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
         assert(row < self.getRow() && col < self.getCol());
         return self.getDerived().data_ptr(row, col);

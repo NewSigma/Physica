@@ -71,6 +71,5 @@ namespace Physica {
     class Traits<MinorDiagL<M>> {
     public:
         using ScalarType = std::remove_cvref<M>::type::ScalarType;
-        constexpr static bool FastAssign = false;
     };
 }

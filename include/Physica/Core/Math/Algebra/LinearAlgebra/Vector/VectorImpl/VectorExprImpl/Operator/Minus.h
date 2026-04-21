@@ -78,7 +78,7 @@ namespace Physica {
             const auto& rhs = expr.getRHS();
             constexpr bool IsMatVecProd = Matrix<decltype(lhs)> && Vector<decltype(rhs)>;
             if constexpr (IsMatVecProd) {
-                if constexpr (Traits<std::remove_cvref_t<decltype(lhs)>>::FastAssign)
+                if constexpr (lhs.isFastAssign())
                     ((-lhs) * rhs).template assign<P>(v);
                 else
                     (lhs * (-rhs)).template assign<P>(v);

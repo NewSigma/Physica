@@ -56,8 +56,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         __host__ __device__ void assign(Matrix auto& target) const {
-            constexpr bool FastAssign = Traits<std::remove_cvref_t<M>>::FastAssign;
-            if constexpr (FastAssign) {
+            if constexpr (std::remove_cvref_t<M>::isFastAssign()) {
                 Base::getLHS().assign(target);
                 target += Base::getRHS();
             }

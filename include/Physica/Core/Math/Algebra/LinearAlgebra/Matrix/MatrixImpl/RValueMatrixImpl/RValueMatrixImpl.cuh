@@ -479,6 +479,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isFastAssign() noexcept {
+        return host_obj::isFastAssign();
+    }
+
+    template<class Derived>
     __host__ __device__ consteval int device_obj<RValueMatrix<Derived>>::getMajor() noexcept {
         return Traits<Derived>::Major;
     }

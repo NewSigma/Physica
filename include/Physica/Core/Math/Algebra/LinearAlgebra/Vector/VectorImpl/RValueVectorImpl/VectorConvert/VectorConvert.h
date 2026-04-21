@@ -160,7 +160,6 @@ namespace Physica {
         using V1 = std::remove_cvref_t<V>;
     public:
         using ScalarType = V1::ScalarType::ValueType;
-        constexpr static bool FastAssign = false;
     };
 
     template<class V, int GradOrder>
@@ -169,7 +168,6 @@ namespace Physica {
         static_assert(V1::ScalarType::isDiffable(), "[Error]: Redundant GradVector");
     public:
         using ScalarType = Internal::GradTypeHelper<typename V1::ScalarType, GradOrder>::Type;
-        constexpr static bool FastAssign = false;
     };
 
     template<class V, int MaskOrder>
@@ -180,6 +178,5 @@ namespace Physica {
         static_assert(U::isDiffable(), "[Error]: Redundant GradMaskVector");
     public:
         using ScalarType = std::conditional<MaskOrder == 0, ValueType, Diff<ValueType, U::Mode, MaskOrder>>::type;
-        constexpr static bool FastAssign = false;
     };
 }

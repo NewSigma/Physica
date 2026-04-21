@@ -75,6 +75,5 @@ namespace Physica {
     class Traits<FlattenC<M>> {
     public:
         using ScalarType = std::remove_reference_t<M>::ScalarType;
-        constexpr static bool FastAssign = false;
     };
 }

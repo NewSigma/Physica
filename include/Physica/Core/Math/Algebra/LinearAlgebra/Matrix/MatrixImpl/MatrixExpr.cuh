@@ -43,7 +43,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getExpr().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return getExpr().getCol(); }
-        [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr auto&& getExpr(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
     };
@@ -68,7 +68,7 @@ namespace Physica {
     }
 
     template<ExprID ID, Matrix M>
-    __host__ __device__ auto&& device_obj<UnitaryMatrixExpr<ID, M>>::getExpr(this auto&& self) noexcept {
+    __host__ __device__ constexpr auto&& device_obj<UnitaryMatrixExpr<ID, M>>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.expr.getDerived());
     }
 
@@ -103,8 +103,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const;
         [[nodiscard]] __host__ __device__ size_t getCol() const;
-        [[nodiscard]] __host__ __device__ auto&& getLHS(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ auto&& getRHS(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr auto&& getRHS(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
     };
@@ -154,12 +154,12 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    __host__ __device__ auto&& device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::getLHS(this auto&& self) noexcept {
+    __host__ __device__ constexpr auto&& device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref1>(self.lhs.getDerived());
     }
 
     template<ExprID ID, class LHS, class RHS>
-    __host__ __device__ auto&& device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::getRHS(this auto&& self) noexcept {
+    __host__ __device__ constexpr auto&& device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref2>(self.rhs.getDerived());
     }
 }

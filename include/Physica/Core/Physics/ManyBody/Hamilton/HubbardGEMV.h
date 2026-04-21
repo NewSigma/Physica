@@ -61,6 +61,7 @@ namespace Physica {
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     private:
         void sumHopping(Vector auto& target, FFT1D& fft, T factor, StateType psi) const;
@@ -217,6 +218,5 @@ namespace Physica {
         using T2 = V1::ScalarType;
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
-        constexpr static bool FastAssign = true;
     };
 }

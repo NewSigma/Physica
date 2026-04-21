@@ -88,7 +88,5 @@ namespace Physica {
     public:
         using ScalarType = M::ScalarType;
         constexpr static size_t SizeAtCompile = ReduceCol ? M::RowAtCompile : M::ColAtCompile;
-
-        constexpr static bool FastAssign = false;
     };
 }
