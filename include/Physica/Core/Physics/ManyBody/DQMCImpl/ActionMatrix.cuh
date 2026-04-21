@@ -57,7 +57,7 @@ namespace Physica {
 
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
 
-        [[nodiscard]] __host__ __device__ auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] This hermite(this auto&& self) noexcept;
 
         void flip();
         template<RNG R>
@@ -174,8 +174,10 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ auto&& device_obj<ActionMatrix<T>>::transpose(this auto&& self) noexcept {
-        return std::forward<decltype(self)>(self);
+    auto device_obj<ActionMatrix<T>>::hermite(this auto&& self) noexcept -> This {
+        This result = std::forward<decltype(self)>(self);
+        result.matsubara.diag() = -result.matsubara.diag();
+        return result;
     }
 
     template<Scalar T>

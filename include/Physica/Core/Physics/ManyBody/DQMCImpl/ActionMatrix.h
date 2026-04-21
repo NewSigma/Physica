@@ -53,7 +53,7 @@ namespace Physica {
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
 
-        [[nodiscard]] auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] This hermite(this auto&& self) noexcept;
 
         void flip();
         template<RNG R>
@@ -73,6 +73,8 @@ namespace Physica {
         [[nodiscard]] const auto& getParams() const noexcept { return params; }
         /* Friends */
         template<Matrix, Vector> friend class GEMV;
+    private:
+        ActionMatrix() = default;
     };
 
     template<Scalar T>
@@ -168,8 +170,10 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto&& ActionMatrix<T>::transpose(this auto&& self) noexcept {
-        return std::forward<decltype(self)>(self);
+    auto ActionMatrix<T>::hermite(this auto&& self) noexcept -> This {
+        This result = std::forward<decltype(self)>(self);
+        result.matsubara.diag() = -result.matsubara.diag();
+        return result;
     }
 
     template<Scalar T>

@@ -77,7 +77,7 @@ namespace Physica {
 
     template<Vector V>
     decltype(auto) Conjugate<V>::conjugate(this auto&& self) noexcept {
-        return forward_like<decltype(self)>(self.vec);
+        return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
 
     template<Vector V>

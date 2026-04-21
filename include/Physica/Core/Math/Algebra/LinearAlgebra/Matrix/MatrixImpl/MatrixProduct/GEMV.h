@@ -75,7 +75,7 @@ namespace Physica {
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto&& target) const noexcept {
         target.assert_assign(*this);
-        if constexpr (instanceof<GEMV, V>) {
+        if constexpr (std::remove_cvref_t<V>::isFastAssign()) {
             DenseVector<T, Base::getSizeAtCompile(target)> buffer = getRHS();
             (getLHS() * std::move(buffer)).template assign<P>(target);
         }

@@ -67,12 +67,17 @@ namespace Physica {
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const noexcept {
         target.assert_assign(*this);
-
-        const int numSite = mat.getNumSite();
-        const int numFreq2 = mat.getNumFreq() * 2;
-        (kronecker(IdentityMatrix<Trv>(numSite) * T(0, 1), mat.matsubara) * getRHS()).assign(target);
-        (kronecker(mat.params.getHoppingMatrix() * mat.getBeta(), IdentityMatrix<Trv>(numFreq2)) * getRHS()).assign_add(target);
-        assign_add_potential(target);
+        if constexpr (std::remove_cvref_t<V>::isFastAssign()) {
+            DenseVector<T, Base::getSizeAtCompile(target)> buffer = getRHS();
+            (getLHS() * std::move(buffer)).template assign<P>(target);
+        }
+        else {
+            const int numSite = mat.getNumSite();
+            const int numFreq2 = mat.getNumFreq() * 2;
+            (kronecker(IdentityMatrix<Trv>(numSite) * T(0, 1), mat.matsubara) * getRHS()).assign(target);
+            (kronecker(mat.params.getHoppingMatrix() * mat.getBeta(), IdentityMatrix<Trv>(numFreq2)) * getRHS()).assign_add(target);
+            assign_add_potential(target);
+        }
     }
 
     template<Matrix M, Vector V> requires(instanceof<ActionMatrix, M>)

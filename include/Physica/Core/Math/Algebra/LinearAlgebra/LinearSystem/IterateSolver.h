@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Exception/BadConvergenceException.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica {
     template<Scalar T>
@@ -48,11 +48,13 @@ namespace Physica {
         /* Operations */
         void cg(const Matrix auto& A, Vector auto&& b);
         void cg(std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc, Vector auto&& b);
-        void cgnr(const Matrix auto& A, Vector auto&& b);      
+        void cgnr(const Matrix auto& A, Vector auto&& b);
         void cgnr(std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc, std::invocable<const VectorND<T>&, VectorND<T>&> auto dotTransFunc, Vector auto&& b);
 
         void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
+        /* Getters */
+        [[nodiscard]] size_t getLength() const noexcept { return residual.getLength(); }
         /* Setters */
         void setError(Tr error_) noexcept { error = std::move(error_); }
         void setIterationLimit(size_t limit) noexcept { itelim = limit; }
@@ -62,48 +64,46 @@ namespace Physica {
     };
 
     template<Scalar T>
-    IterateSolver<T>::IterateSolver(size_t size) {
-        resize(size);
-    }
+    IterateSolver<T>::IterateSolver(size_t size) : residual(size), searchP(size), dot(size) {}
 
     template<Scalar T>
     void IterateSolver<T>::cg(const Matrix auto& A, Vector auto&& b) {
         assert(A.isSquare());
         assert(A.getRow() == b.getLength());
-        cg([&A](const VectorND<T>& v, VectorND<T>& dot) { dot = A * v; }, std::forward<decltype(b)>(b));
+        cg([&A](const VectorND<T>& v, VectorND<T>& dot) { (A * v).assign(dot); }, std::forward<decltype(b)>(b));
     }
     /**
      * Conjugate gradient(CG)
      * Pertinent for large-scale problem, \param dotFunc must be symmetric and positive definite
-     * 
+     *
      * Reference:
      * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006:112
      */
     template<Scalar T>
     void IterateSolver<T>::cg(std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc, Vector auto&& b) {
-        size_t length = b.getLength();
-        if (dot.getLength() != length)
-            resize(length);
+        assert(b.getLength() == getLength());
+        squaredRes0 = squaredRes = b.squaredNorm();
+        if (squaredRes.isZero()) [[unlikely]]
+            return;
+
         residual = -b;
         searchP = b;
         auto& x = b;
         x.zeros();
 
-        squaredRes0 = squaredRes = residual.squaredNorm();
         const size_t maxite = getMaxIterationCG();
         size_t iteration = 0;
-        while(!isConverged()) {
+        while (!isConverged()) {
             dotFunc(searchP, dot);
             const Tr resA = (searchP.conjugate() * dot).real();
             assert((resA.isPositive() || !mustConverge) && "[Error]: The matrix is not positive definite");
             const Tr step = squaredRes / resA;
-            x += step * searchP;
-            residual += step * dot;
+            (step * searchP).assign_add(x);
+            (step * dot).assign_add(residual);
 
-            const Tr next_squaredRes = residual.squaredNorm();
-            const Tr beta = next_squaredRes / squaredRes;
-            squaredRes = next_squaredRes;
-            searchP = beta * searchP - residual;
+            const Tr temp = residual.squaredNorm();
+            const Tr beta = temp / std::exchange(squaredRes, temp);
+            (beta * searchP - residual).assign(searchP);
             if (++iteration > maxite)
                 break;
         }
@@ -123,7 +123,7 @@ namespace Physica {
     /**
      * Conjugate gradient normal equation residual(CGNR)
      * Applies to unsymmetric matrix, converges slow
-     * 
+     *
      * References:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:636-637
      */
@@ -132,28 +132,28 @@ namespace Physica {
             std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc,
             std::invocable<const VectorND<T>&, VectorND<T>&> auto dotTransFunc,
             Vector auto&& b) {
-        size_t length = b.getLength();
-        if (dot.getLength() != length)
-            resize(length);
-        residual = -b;
+        assert(b.getLength() == getLength());
         dotTransFunc(b, searchP);
+        squaredRes0 = squaredRes = searchP.squaredNorm();
+        if (squaredRes.isZero()) [[unlikely]]
+            return;
+
+        residual = -b;
         auto& x = b;
         x.zeros();
 
-        squaredRes0 = squaredRes = searchP.squaredNorm();
         const size_t maxite = getMaxIterationCG();
         size_t iteration = 0;
-        while(!isConverged()) {
+        while (!isConverged()) {
             dotFunc(searchP, dot);
             const Tr step = squaredRes / dot.squaredNorm();
-            x += step * searchP;
-            residual += step * dot;
+            (step * searchP).assign_add(x);
+            (step * dot).assign_add(residual);
 
             dotTransFunc(residual, dot);
-            const Tr next_squaredRes = dot.squaredNorm();
-            const Tr beta = next_squaredRes / squaredRes;
-            squaredRes = next_squaredRes;
-            searchP = beta * searchP - residual;
+            const Tr temp = dot.squaredNorm();
+            const Tr beta = temp / std::exchange(squaredRes, temp);
+            (beta * searchP - residual).assign(searchP);
             if (++iteration > maxite)
                 break;
         }
