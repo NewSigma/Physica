@@ -22,12 +22,6 @@
 using namespace Physica;
 
 namespace {
-    void argmin() {
-        const auto x = MatrixND<float32>::random_uniform<Random<>>(4, 4);
-        auto index = x.argmin();
-        expect(x.min() == x[index[0], index[1]]);
-    }
-
     void minorDiag() {
         // Test that 0 sub-diagonal is diagonal
         using T = float32;
@@ -37,9 +31,28 @@ namespace {
         for (int i = 0; i < 3; ++i)
             expect(abs_elem(corner).diag(0).calc(i) == abs_elem(compact).diag().calc(i));
     }
+
+    void argmin() {
+        const auto x = MatrixND<float32>::random_uniform<Random<>>(4, 5);
+        auto index = x.argmin();
+        expect(x.min() == x[index[0], index[1]]);
+    }
+
+    void sumRowCol() {
+        const auto x = MatrixND<float32>::random_uniform<Random<>>(4, 5);
+        VectorND<float32> buffer = x.sum_cols();
+        for (size_t i = 0; i < x.getRow(); ++i)
+            expect(buffer[i] == x.row(i).sum());
+
+        buffer = x.sum_rows();
+        for (size_t i = 0; i < x.getCol(); ++i)
+            expect(buffer[i] == x.col(i).sum());
+    }
 }
 
 int main() {
     argmin();
+    minorDiag();
+    sumRowCol();
     return 0;
 }

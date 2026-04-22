@@ -653,6 +653,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval size_t RValueMatrix<Derived>::getRowAtCompile() noexcept {
+        return Traits<Derived>::RowAtCompile;
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval size_t RValueMatrix<Derived>::getColAtCompile() noexcept {
+        return Traits<Derived>::ColAtCompile;
+    }
+
+    template<class Derived>
     __host__ __device__ consteval int RValueMatrix<Derived>::getMajor() noexcept {
         return Traits<Derived>::Major;
     }

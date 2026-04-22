@@ -46,6 +46,8 @@ namespace Physica {
         void reverse(const Vector auto& grad) const noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
     template<class M, bool ReduceCol>
@@ -79,6 +81,11 @@ namespace Physica {
             return mat.getRow();
         else
             return mat.getCol();
+    }
+
+    template<class M, bool ReduceCol>
+    __host__ __device__ consteval size_t MatrixSum<M, ReduceCol>::getSizeAtCompile() noexcept {
+        return ReduceCol ? M::getRowAtCompile() : M::getColAtCompile();
     }
 }
 
