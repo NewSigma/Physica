@@ -23,7 +23,8 @@ else()
     if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
         add_compile_options(-Wextra)
     elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
-        add_compile_options(-fassume-sane-operator-new -fassume-nothrow-exception-dtor)
+        # Note: We must use "-Xclang=..." instead of "-Xclang ...", otherwise CMake will eliminate duplicate -Xclang
+        add_compile_options(-fassume-sane-operator-new -fassume-nothrow-exception-dtor -Xclang=-fexternc-nounwind)
         # Workaround for P2014R0
         #
         # Reference:
@@ -42,7 +43,7 @@ else()
             if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Release")
                 message(FATAL_ERROR "Please enable Release mode for optimizations")
             endif()
-            add_compile_options(-Xclang -disable-llvm-passes -S -emit-llvm)
+            add_compile_options(-Xclang=-disable-llvm-passes -S -emit-llvm)
             add_compile_options(-Wno-unused-command-line-argument) # Silent unused '-c'
             add_link_options(--version)
             set(CMAKE_CUDA_SEPARABLE_COMPILATION ON) # Workaround to avoid linkage
