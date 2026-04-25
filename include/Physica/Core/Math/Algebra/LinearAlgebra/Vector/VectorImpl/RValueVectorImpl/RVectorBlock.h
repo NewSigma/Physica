@@ -45,7 +45,6 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] T calc(size_t index) const { return vec.calc(index + from); }
-        [[nodiscard]] auto calc_value(size_t index) const { return vec.calc_value(index + from); }
 
         template<size_t Length_ = Dynamic>
         [[nodiscard]] auto head(this auto&&, size_t to = Length_) noexcept;

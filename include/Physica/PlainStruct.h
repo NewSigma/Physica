@@ -50,8 +50,8 @@ namespace Physica {
     private:
         std::array<std::byte, sizeof(T)> bytes;
     public:
-        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ const T& getDerived() const noexcept { return *reinterpret_cast<const T*>(this); }
-        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ T& getConstCastDerived() const noexcept { return *reinterpret_cast<T*>(const_cast<PlainStruct*>(this)); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ constexpr const T& getDerived() const noexcept { return *reinterpret_cast<const T*>(this); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ constexpr T& getConstCastDerived() const noexcept { return *reinterpret_cast<T*>(const_cast<PlainStruct*>(this)); }
     };
 
     template<class T>
@@ -59,7 +59,7 @@ namespace Physica {
         using Base = PlainStruct<const T>;
     public:
         using Base::getDerived;
-        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ T& getDerived() noexcept { return *reinterpret_cast<T*>(this); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ constexpr T& getDerived() noexcept { return *reinterpret_cast<T*>(this); }
     };
 
     template<class T>

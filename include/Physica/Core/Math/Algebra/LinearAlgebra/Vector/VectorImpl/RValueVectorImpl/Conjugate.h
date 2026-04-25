@@ -44,13 +44,14 @@ namespace Physica {
         void assign_mkl(Vector auto& v) const noexcept;
 
         [[nodiscard]] T calc(size_t index) const { return vec.calc(index).conjugate(); }
-        [[nodiscard]] Tv calc_value(size_t index) const { return vec.calc_value(index).conjugate(); }
+
         template<int Size>
         [[nodiscard]] SIMD<T, Size> packet(size_t index) const noexcept;
         template<int Size>
         [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
 
         [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return vec.getLength(); }
         /* Static members */
@@ -78,6 +79,11 @@ namespace Physica {
     template<Vector V>
     decltype(auto) Conjugate<V>::conjugate(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
+    }
+
+    template<Vector V>
+    auto Conjugate<V>::values(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).conjugate().values().conjugate();
     }
 
     template<Vector V>

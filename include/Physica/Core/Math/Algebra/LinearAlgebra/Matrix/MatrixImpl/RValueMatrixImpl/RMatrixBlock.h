@@ -43,14 +43,7 @@ namespace Physica {
         RMatrixBlock(This&&) noexcept = default;
         ~RMatrixBlock() = default;
         /* Operations */
-        [[nodiscard]] T calc(size_t index) const {
-            assert(index < colCount);
-            return mat.calc(fromRow, fromCol + index);
-        }
-        [[nodiscard]] Tv calc_value(size_t index) const {
-            assert(index < colCount);
-            return mat.calc_value(fromRow, fromCol + index);
-        }
+        [[nodiscard]] T calc(size_t index) const;
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
@@ -64,6 +57,12 @@ namespace Physica {
             : mat(std::forward<M>(mat_)), fromRow(fromRow), fromCol(fromCol), colCount(colCount) {
         assert(fromRow < mat.getRow());
         assert(fromCol + colCount <= mat.getCol());
+    }
+
+    template<Matrix M>
+    auto RMatrixBlock<M, 1, Dynamic>::calc(size_t index) const -> T {
+        assert(index < colCount);
+        return mat.calc(fromRow, fromCol + index);
     }
 
     template<Matrix M>
@@ -91,14 +90,7 @@ namespace Physica {
         RMatrixBlock(This&&) noexcept = default;
         ~RMatrixBlock() = default;
         /* Operations */
-        [[nodiscard]] T calc(size_t index) const {
-            assert(index < rowCount);
-            return mat.calc(fromRow + index, fromCol);
-        }
-        [[nodiscard]] Tv calc_value(size_t index) const {
-            assert(index < rowCount);
-            return mat.calc_value(fromRow + index, fromCol);
-        }
+        [[nodiscard]] T calc(size_t index) const;
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
@@ -112,6 +104,12 @@ namespace Physica {
             : mat(std::forward<M>(mat_)), fromRow(fromRow), fromCol(fromCol), rowCount(rowCount) {
         assert(fromRow + rowCount <= mat.getRow());
         assert(fromCol < mat.getCol());
+    }
+
+    template<Matrix M>
+    auto RMatrixBlock<M, Dynamic, 1>::calc(size_t index) const -> T {
+        assert(index < rowCount);
+        return mat.calc(fromRow + index, fromCol);
     }
 
     template<Matrix M>
@@ -141,7 +139,6 @@ namespace Physica {
         ~RMatrixBlock() = default;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         [[nodiscard]] auto row(this auto&&, size_t r) noexcept;
         [[nodiscard]] auto col(this auto&&, size_t c) noexcept;
@@ -180,13 +177,6 @@ namespace Physica {
         assert(row < rowCount);
         assert(col < colCount);
         return mat.calc(row + fromRow, col + fromCol);
-    }
-
-    template<Matrix M>
-    auto RMatrixBlock<M, Dynamic, Dynamic>::calc_value(size_t row, size_t col) const -> Tv {
-        assert(row < rowCount);
-        assert(col < colCount);
-        return mat.calc_value(row + fromRow, col + fromCol);
     }
 
     template<Matrix M>

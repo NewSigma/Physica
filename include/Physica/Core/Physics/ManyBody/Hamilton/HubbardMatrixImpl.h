@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -75,11 +75,6 @@ namespace Physica {
                 return repelElem(colState);
             return hoppingElem(repr[row], colState);
         }
-    }
-
-    template<Scalar T, Representation Repr, BoundaryCond BC>
-    auto HubbardMatrix<T, Repr, BC>::calc_value(size_t row, size_t col) const -> Tv {
-        return calc(row, col).value();
     }
 
     template<Scalar T, Representation Repr, BoundaryCond BC>

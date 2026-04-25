@@ -66,7 +66,6 @@ namespace Physica {
         [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
         [[nodiscard]] T trace() const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */

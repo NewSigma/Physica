@@ -40,11 +40,18 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] __device__ T calc(size_t s) const { return v.getDerived().calc(s).real(); }
-        [[nodiscard]] __device__ Tv calc_value(size_t s) const { return v.getDerived().calc_value(s).real(); }
+
+        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
+
+    template<class V>
+    __host__ __device__ auto device_obj<RealVectorR<V>>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), Ref>(self.v.getDerived()).values().reals();
+    }
 }
 
 namespace Physica {

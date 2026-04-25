@@ -40,11 +40,17 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const { return mat.calc(row, col).real(); }
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
+
+    template<class M>
+    auto RealMatrix<M>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat).values().reals();
+    }
 
     template<class M>
     class ImagMatrix : public RValueMatrix<ImagMatrix<M>> {
@@ -65,11 +71,17 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const { return mat.calc(row, col).imag(); }
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
+
+    template<class M>
+    auto ImagMatrix<M>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat).values().imags();
+    }
 
     template<class M>
     class SquaredNormMatrix : public RValueMatrix<SquaredNormMatrix<M>> {
@@ -91,10 +103,11 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const { return mat.calc(row, col).squaredNorm(); }
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return mat.calc(row, col).value().squaredNorm(); }
 
         void reverse(const auto& grad) const noexcept;
         using Base::reverse;
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
@@ -109,6 +122,11 @@ namespace Physica {
             static_assert(Matrix<U>);
             mat.reverse(hadamard(Trv(2) * mat.values(), grad));
         }
+    }
+
+    template<class M>
+    auto SquaredNormMatrix<M>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat).values().squaredNorms();
     }
 
     template<class M>
@@ -130,11 +148,17 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const { return mat.calc(row, col).norm(); }
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return mat.calc(row, col).value().norm(); }
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
+
+    template<class M>
+    auto NormMatrix<M>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat).values().norms();
+    }
 
     template<class M>
     class ValueMatrix : public RValueMatrix<ValueMatrix<M>> {

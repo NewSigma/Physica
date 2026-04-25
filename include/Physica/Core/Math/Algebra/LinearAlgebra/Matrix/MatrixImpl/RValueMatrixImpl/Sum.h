@@ -44,6 +44,8 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const;
 
         void reverse(const Vector auto& grad) const noexcept;
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept;
         /* Static members */
@@ -73,6 +75,11 @@ namespace Physica {
             mat.reverse(grad);
         else
             mat.transpose().reverse(grad);
+    }
+
+    template<class M, bool ReduceCol>
+    auto MatrixSum<M, ReduceCol>::values(this auto&& self) noexcept {
+        return MatrixSum<decltype(self.mat.values()), ReduceCol>(self.mat.values());
     }
 
     template<class M, bool ReduceCol>

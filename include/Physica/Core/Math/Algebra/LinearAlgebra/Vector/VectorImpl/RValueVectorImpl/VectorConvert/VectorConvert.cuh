@@ -40,11 +40,18 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] __device__ T calc(size_t s) const { return v.getDerived().calc(s).imag(); }
-        [[nodiscard]] __device__ Tv calc_value(size_t s) const { return v.getDerived().calc_value(s).imag(); }
+
+        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
+
+    template<class V>
+    __host__ __device__ auto device_obj<ImagVector<V>>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), Ref>(self.v.getDerived()).values().imags();
+    }
 
     template<class V>
     class device_obj<SquaredNormVector<V>> : public device_obj<RValueVector<SquaredNormVector<V>>> {
@@ -67,11 +74,18 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] __device__ T calc(size_t s) const { return v.getDerived().calc(s).squaredNorm(); }
-        [[nodiscard]] __device__ Tv calc_value(size_t s) const { return v.getDerived().calc_value(s).squaredNorm(); }
+
+        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
+
+    template<class V>
+    __host__ __device__ auto device_obj<SquaredNormVector<V>>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), Ref>(self.v.getDerived()).values().squaredNorms();
+    }
 
     template<class V>
     class device_obj<NormVector<V>> : public device_obj<RValueVector<NormVector<V>>> {
@@ -92,11 +106,18 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] __device__ T calc(size_t s) const { return v.getDerived().calc(s).norm(); }
-        [[nodiscard]] __device__ Tv calc_value(size_t s) const { return v.getDerived().calc_value(s).norm(); }
+
+        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
+
+    template<class V>
+    __host__ __device__ auto device_obj<NormVector<V>>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), Ref>(self.v.getDerived()).values().norms();
+    }
 
     template<class V>
     class device_obj<ValueVector<V>> : public device_obj<RValueVector<ValueVector<V>>> {
@@ -117,9 +138,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] __device__ T calc(size_t s) const { return v.getDerived().calc(s).value(); }
         [[nodiscard]] __device__ T calc_value(size_t s) const { return calc(s); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
@@ -142,9 +164,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] __device__ T calc(size_t s) const { return v.getDerived().calc(s).template grad<GradOrder>(); }
         [[nodiscard]] __device__ Tv calc_value(size_t s) const { return calc(s).value(); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 }

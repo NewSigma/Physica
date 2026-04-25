@@ -38,13 +38,20 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).imag(); }
-        [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).imag(); }
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
+        /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
     };
+
+    template<class V>
+    auto ImagVector<V>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.v).values().imags();
+    }
 
     template<class V>
     class NormVector : public RValueVector<NormVector<V>> {
@@ -63,13 +70,20 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t s) const { return v.calc(s).norm(); }
-        [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).norm(); }
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
+        /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
     };
+
+    template<class V>
+    auto NormVector<V>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.v).values().norms();
+    }
 
     template<class V>
     class ValueVector : public RValueVector<ValueVector<V>> {
@@ -87,9 +101,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).value(); }
         [[nodiscard]] T calc_value(size_t s) const { return calc(s); }
+        /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
@@ -112,9 +127,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).template grad<GradOrder>(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return calc(s).value(); }
+        /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
@@ -139,9 +155,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).template grad_mask<MaskOrder>(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s); }
+        /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }

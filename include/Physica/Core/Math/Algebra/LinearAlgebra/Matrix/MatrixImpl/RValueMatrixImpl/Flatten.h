@@ -45,7 +45,6 @@ namespace Physica {
         void assign_add(Vector auto&& v) const noexcept;
 
         [[nodiscard]] T calc(size_t index) const;
-        [[nodiscard]] Tv calc_value(size_t index) const;
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         [[nodiscard]] auto grads(this auto&& self) noexcept;
@@ -88,14 +87,6 @@ namespace Physica {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         return mat.calcFromMajorMinor(major, minor);
-    }
-
-    template<Matrix M>
-    auto FlattenR<M>::calc_value(size_t index) const -> Tv {
-        const size_t major = index / mat.getMaxMinor();
-        const size_t minor = index % mat.getMaxMinor();
-        return mat.calc_value(mat.rowFromMajorMinor(major, minor),
-                              mat.colFromMajorMinor(major, minor));
     }
 
     template<Matrix M>

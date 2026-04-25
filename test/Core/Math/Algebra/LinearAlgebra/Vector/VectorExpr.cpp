@@ -29,9 +29,16 @@ namespace {
             static_assert(x.getExprID() == ExprID::Mul);
         });
     }
+
+    void regression() {
+        syntax_only([]() {
+            std::ignore = VectorND<cfloat32>{} - VectorND<float32>(); // Test that we do not diagnostic this
+        });
+    }
 }
 
 int main() {
     simplify();
+    regression();
     return 0;
 }

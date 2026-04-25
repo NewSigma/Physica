@@ -41,10 +41,11 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t index) const;
-        [[nodiscard]] __device__ Tv calc_value(size_t index) const;
 
         using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
+
+        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
         [[nodiscard]] __host__ __device__ const device_obj<M>& getExpr() const noexcept { return mat.getDerived(); }
@@ -59,20 +60,18 @@ namespace Physica {
     }
 
     template<class M, bool ReduceCol>
-    __device__ auto device_obj<MatrixSum<M, ReduceCol>>::calc_value(size_t index) const -> Tv {
-        if constexpr (ReduceCol)
-            return mat.getDerived().values().row(index).sum();
-        else
-            return mat.getDerived().values().col(index).sum();
-    }
-
-    template<class M, bool ReduceCol>
     void device_obj<MatrixSum<M, ReduceCol>>::reverse(const Vector auto& grad) const noexcept {
         static_assert(Base::isReverseDiff());
         if constexpr (ReduceCol)
             mat.getDerived().reverse(grad);
         else
             mat.getDerived().transpose().reverse(grad);
+    }
+
+    template<class M, bool ReduceCol>
+    __host__ __device__ auto device_obj<MatrixSum<M, ReduceCol>>::values(this auto&& self) noexcept {
+        using Value = decltype(self.getExpr().values())::host_obj;
+        return device_obj<MatrixSum<Value, ReduceCol>>(self.getExpr().values());
     }
 
     template<class M, bool ReduceCol>

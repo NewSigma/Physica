@@ -40,12 +40,19 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).real(); }
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
+
+        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
     };
+
+    template<class M>
+    __host__ __device__ auto device_obj<RealMatrix<M>>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived()).values().reals();
+    }
 
     template<class M>
     class device_obj<ImagMatrix<M>> : public device_obj<RValueMatrix<ImagMatrix<M>>> {
@@ -66,12 +73,19 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).imag(); }
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
+
+        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
     };
+
+    template<class M>
+    __host__ __device__ auto device_obj<ImagMatrix<M>>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived()).values().imags();
+    }
 
     template<class M>
     class device_obj<SquaredNormMatrix<M>> : public device_obj<RValueMatrix<SquaredNormMatrix<M>>> {
@@ -94,12 +108,19 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).squaredNorm(); }
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return mat.getDerived().calc(row, col).value().squaredNorm(); }
+
+        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
     };
+
+    template<class M>
+    __host__ __device__ auto device_obj<SquaredNormMatrix<M>>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived()).values().squaredNorms();
+    }
 
     template<class M>
     class device_obj<NormMatrix<M>> : public device_obj<RValueMatrix<NormMatrix<M>>> {
@@ -120,12 +141,19 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).norm(); }
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return mat.getDerived().calc(row, col).value().norm(); }
+
+        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
     };
+
+    template<class M>
+    __host__ __device__ auto device_obj<NormMatrix<M>>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived()).values().squaredNorms();
+    }
 
     template<class M>
     class device_obj<ValueMatrix<M>> : public device_obj<RValueMatrix<ValueMatrix<M>>> {
@@ -145,9 +173,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).value(); }
         [[nodiscard]] __device__ T calc_value(size_t row, size_t col) const { return calc(row, col); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
     };
@@ -171,9 +200,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).template grad<GradOrder>(); }
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
     };

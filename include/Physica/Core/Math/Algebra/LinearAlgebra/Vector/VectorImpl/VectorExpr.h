@@ -138,8 +138,12 @@ namespace Physica {
 
     template<ExprID ID, class LHS, class RHS>
     BinaryVectorExpr<ID, LHS, RHS>::BinaryVectorExpr(LHS lhs_, RHS rhs_) noexcept : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
-        if constexpr (Vector<LHS> && Vector<RHS>)
-            lhs.values().assert_assign(rhs.values());
+        if constexpr (Vector<LHS> && Vector<RHS>) {
+            constexpr bool Size1 = std::remove_cvref_t<RHS>::getSizeAtCompile();
+            constexpr bool Size2 = std::remove_cvref_t<LHS>::getSizeAtCompile();
+            static_assert(Size1 == Size2 || Size1 == Dynamic || Size2 == Dynamic);
+            assert(lhs.getLength() == rhs.getLength());
+        }
     }
 
     template<ExprID ID, class LHS, class RHS>

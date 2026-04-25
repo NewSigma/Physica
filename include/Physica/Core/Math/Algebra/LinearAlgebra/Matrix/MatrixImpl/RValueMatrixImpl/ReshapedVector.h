@@ -42,7 +42,8 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] T calc(size_t r1, size_t c1) const;
-        [[nodiscard]] Tv calc_value(size_t r1, size_t c1) const;
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
@@ -67,12 +68,8 @@ namespace Physica {
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    auto RValueReshapedVector<V, MatrixMajor, Row, Col>::calc_value(size_t r1, size_t c1) const -> Tv {
-        assert(r1 < getRow() && c1 < getCol());
-        if constexpr (MatrixMajor::isColMatrix<This>())
-            return v.calc_value(c1 * getRow() + r1);
-        else
-            return v.calc_value(r1 * getCol() + c1);
+    auto RValueReshapedVector<V, MatrixMajor, Row, Col>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.v).values().template reshape<MatrixMajor, Row, Col>();
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>

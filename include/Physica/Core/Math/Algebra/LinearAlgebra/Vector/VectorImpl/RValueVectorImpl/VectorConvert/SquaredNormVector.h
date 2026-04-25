@@ -50,7 +50,6 @@ namespace Physica {
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto it, size_t count) noexcept;
         /* Getters */
         [[nodiscard]] CoDiff<T> calc(size_t s) const { return v.calc(s).squaredNorm(); }
-        [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).squaredNorm(); }
 
         template<int Size>
         [[nodiscard]] SIMD<T, Size> packet(size_t index) const noexcept;

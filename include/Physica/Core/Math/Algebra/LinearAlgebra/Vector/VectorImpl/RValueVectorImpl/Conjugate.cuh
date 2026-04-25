@@ -41,23 +41,22 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t index) const { return getExpr().calc(index).conjugate(); }
-        [[nodiscard]] __device__ Tv calc_value(size_t index) const { return getExpr().calc_value(index).conjugate(); }
+        [[nodiscard]] __device__ T calc(size_t index) const { return conjugate().calc(index).conjugate(); }
 
         [[nodiscard]] __host__ __device__ decltype(auto) conjugate(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return conjugate().getLength(); }
     };
 
     template<Vector V>
     __host__ __device__ decltype(auto) device_obj<Conjugate<V>>::conjugate(this auto&& self) noexcept {
-        return forward_like<decltype(self)>(self.vec);
+        return propagate_rvalue_reference<decltype(self), Ref>(self.vec.getDerived());
     }
 
     template<Vector V>
-    __host__ __device__ auto&& device_obj<Conjugate<V>>::getExpr(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), Ref>(self.vec.getDerived());
+    __host__ __device__ auto device_obj<Conjugate<V>>::values(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).conjugate().values().conjugate();
     }
 }
 

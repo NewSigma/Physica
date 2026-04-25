@@ -307,9 +307,9 @@ namespace Physica {
     Index3D CellList<T>::makeGridDim(const LatticeMatrix& lattice, T cutoff) {
         const auto repLatt = MDCellType::makeRepLattice(lattice);
         const T factor = reciprocal(cutoff) * T(2 * M_PI);
-        size_t dimX = static_cast<size_t>(double(factor * reciprocal(repLatt.row(0).norm())));
-        size_t dimY = static_cast<size_t>(double(factor * reciprocal(repLatt.row(1).norm())));
-        size_t dimZ = static_cast<size_t>(double(factor * reciprocal(repLatt.row(2).norm())));
+        auto dimX = static_cast<size_t>(double(factor * reciprocal(repLatt.row(0).norm())));
+        auto dimY = static_cast<size_t>(double(factor * reciprocal(repLatt.row(1).norm())));
+        auto dimZ = static_cast<size_t>(double(factor * reciprocal(repLatt.row(2).norm())));
         if (dimX == 0 || dimY == 0 || dimZ == 0)
             throw std::invalid_argument("[Error]: Cell is too small that self interaction is calculated");
         return {dimX, dimY, dimZ};

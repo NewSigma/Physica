@@ -40,11 +40,11 @@ namespace Physica {
     class Transpose<M> : public RValueMatrix<Transpose<M>> {
         using This = Transpose<M>;
         using Base = RValueMatrix<This>;
-
-        LazyDestroy<M> mat;
     public:        
         using typename Base::T;
         using typename Base::Tv;
+    private:
+        LazyDestroy<M> mat;
     public:
         Transpose(M&& mat_) : mat(std::forward<M>(mat_)) {}
         Transpose(const This&) = default;
@@ -59,9 +59,9 @@ namespace Physica {
         void assign_mkl(Matrix auto&& target) const;
 
         [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc(col, row); }
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return mat.calc_value(col, row); }
 
         [[nodiscard]] auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return mat.getCol(); }
         [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
@@ -86,6 +86,11 @@ namespace Physica {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 
+    template<Matrix M>
+    auto Transpose<M>::values(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).transpose().values().transpose();
+    }
+
     template<Vector V>
     class Transpose<V> : public RValueMatrix<Transpose<V>> {
         using This = Transpose<V>;
@@ -107,9 +112,9 @@ namespace Physica {
         void assign(Matrix auto& target) const;
 
         [[nodiscard]] T calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
-        [[nodiscard]] Tv calc_value([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc_value(col); }
 
         [[nodiscard]] auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] size_t getCol() const noexcept { return vec.getLength(); }
@@ -124,6 +129,11 @@ namespace Physica {
     template<Vector V>
     auto&& Transpose<V>::transpose(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
+    }
+
+    template<Vector V>
+    auto Transpose<V>::values(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).transpose().values().transpose();
     }
 }
 

@@ -45,9 +45,10 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const;
 
         [[nodiscard]] auto lnAbsDet() const;
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&& self) noexcept;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getExpr().getRow(); }
@@ -75,17 +76,6 @@ namespace Physica {
     }
 
     template<Matrix M, bool Upper, bool Unit>
-    __device__ auto device_obj<MatrixTrig<M, Upper, Unit>>::calc_value(size_t row, size_t col) const -> Tv {
-        if constexpr (Unit)
-            if (row == col)
-                return Trv(1);
-
-        if (row > col)
-            return Tv(0);
-        return getExpr().calc_value(row, col);
-    }
-
-    template<Matrix M, bool Upper, bool Unit>
     auto device_obj<MatrixTrig<M, Upper, Unit>>::lnAbsDet() const {
         if constexpr (Unit)
             return Trv(0);
@@ -93,6 +83,12 @@ namespace Physica {
             assert(!Base::diag().prod().isZero() && "[Error]: Singular matrix");
             return ln(abs(Base::diag())).sum();
         }
+    }
+
+    template<Matrix M, bool Upper, bool Unit>
+    auto device_obj<MatrixTrig<M, Upper, Unit>>::values(this auto&& self) noexcept {
+        using Value = decltype(std::forward<decltype(self)>(self).getExpr().values())::host_obj;
+        return device_obj<MatrixTrig<Value, Upper, Unit>>(std::forward<decltype(self)>(self).getExpr().values());
     }
 
     template<Matrix M, bool Upper, bool Unit>

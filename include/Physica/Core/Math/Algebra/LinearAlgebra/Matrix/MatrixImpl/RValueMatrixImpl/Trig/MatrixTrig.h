@@ -48,11 +48,12 @@ namespace Physica {
         // TODO: assign_base() lower it to memcpy
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         [[nodiscard]] auto det() const;
         [[nodiscard]] auto lnAbsDet() const;
         [[nodiscard]] auto sgndet() const;
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] size_t getRow() const noexcept { return mat.getRow(); }
@@ -86,23 +87,6 @@ namespace Physica {
     }
 
     template<Matrix M, bool Upper, bool Unit>
-    auto MatrixTrig<M, Upper, Unit>::calc_value(size_t row, size_t col) const -> Tv {
-        if constexpr (Unit)
-            if (row == col)
-                return Trv(1);
-
-        if constexpr (Upper) {
-            if (row > col)
-                return Trv(0);
-        }
-        else {
-            if (row < col)
-                return Trv(0);
-        }
-        return mat.calc_value(row, col);
-    }
-
-    template<Matrix M, bool Upper, bool Unit>
     auto MatrixTrig<M, Upper, Unit>::det() const {
         if constexpr (Unit)
             return Trv(1);
@@ -126,6 +110,12 @@ namespace Physica {
             return Trv(1);
         else
             return unit(mat.diag()).prod();
+    }
+
+    template<Matrix M, bool Upper, bool Unit>
+    auto MatrixTrig<M, Upper, Unit>::values(this auto&& self) noexcept {
+        using Value = decltype(std::forward<decltype(self)>(self).getExpr().values());
+        return MatrixTrig<Value, Upper, Unit>(std::forward<decltype(self)>(self).getExpr().values());
     }
 
     template<Matrix M, bool Upper, bool Unit>
