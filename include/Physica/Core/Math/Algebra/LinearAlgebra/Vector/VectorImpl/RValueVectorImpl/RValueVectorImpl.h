@@ -843,9 +843,11 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    void RValueVector<Derived>::assign_for(Vector auto& __restrict v) const __restrict noexcept {
-        parallel_for<P>([&, this](size_t i) {
-            v[i] = calc(i);
+    void RValueVector<Derived>::assign_for(Vector auto& v) const noexcept {
+        auto it = zip(v.view(), Base::getDerived().view()).begin();
+        parallel_for<P>([it](size_t i) noexcept {
+            auto [lhs, rhs] = it + i;
+            *lhs = *rhs;
         }, getLength(), 0).wait();
     }
 
@@ -898,9 +900,11 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    void RValueVector<Derived>::assign_add_for(Vector auto& __restrict v) const __restrict noexcept {
-        parallel_for<P>([&, this](size_t i) {
-            v[i] += calc(i);
+    void RValueVector<Derived>::assign_add_for(Vector auto& v) const noexcept {
+        auto it = zip(v.view(), Base::getDerived().view()).begin();
+        parallel_for<P>([it](size_t i) noexcept {
+            auto [lhs, rhs] = it + i;
+            *lhs += *rhs;
         }, getLength(), 0).wait();
     }
 

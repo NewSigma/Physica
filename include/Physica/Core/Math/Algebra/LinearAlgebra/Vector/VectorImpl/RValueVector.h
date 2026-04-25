@@ -214,12 +214,12 @@ namespace Physica {
         RValueVector(This&&) noexcept = default;
     private:
         template<ExecutePolicy P>
-        void assign_for(Vector auto& __restrict v) const __restrict noexcept;
+        void assign_for(Vector auto& v) const noexcept;
         template<Vector V, ExecutePolicy P, size_t Size>
         void assign_simd(V& __restrict v) const __restrict noexcept;
 
         template<ExecutePolicy P>
-        void assign_add_for(Vector auto& __restrict v) const __restrict noexcept;
+        void assign_add_for(Vector auto& v) const noexcept;
         template<Vector V, size_t Length>
         void assign_add_simd(V& __restrict v) const __restrict noexcept;
     };
