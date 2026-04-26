@@ -45,6 +45,9 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& target) const noexcept;
         template<ExecutePolicy P = Sequential>
+        void assign_base(Vector auto&& target) const noexcept;
+        void assign_mkl(Vector auto&& target) const noexcept;
+        template<ExecutePolicy P = Sequential>
         void assign_add(Vector auto&& target) const noexcept;
 
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
@@ -74,6 +77,31 @@ namespace Physica {
     template<Matrix M, Vector V>
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto&& target) const noexcept {
+        using M1 = std::remove_cvref_t<M>;
+        using V1 = std::remove_cvref_t<V>;
+        using T1 = M1::ScalarType;
+        using T2 = V1::ScalarType;
+        if constexpr (std::same_as<T1, T2> && M1::isCompact() && Internal::EnableMKL<V1, decltype(target)>::value) {
+            constexpr size_t Size = std::max(M1::getColAtCompile(), V1::getSizeAtCompile());
+            constexpr size_t Threhold = 16;
+            if constexpr (Size == Dynamic) {
+                if (vec.getLength() > Threhold)
+                    assign_mkl(target);
+                else
+                    assign_base<P>(target);
+            }
+            else if constexpr (Size > Threhold)
+                assign_mkl(target);
+            else
+                assign_base<P>(target);
+        }
+        else
+            assign_base<P>(target);
+    }
+
+    template<Matrix M, Vector V>
+    template<ExecutePolicy P>
+    void GEMV<M, V>::assign_base(Vector auto&& target) const noexcept {
         target.assert_assign(*this);
         if constexpr (std::remove_cvref_t<V>::isFastAssign()) {
             DenseVector<T, Base::getSizeAtCompile(target)> buffer = getRHS();
@@ -231,3 +259,7 @@ namespace Physica {
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename V1::ScalarType>::Type;
     };
 }
+
+#ifdef PHYSICA_MKL
+    #include "GEMV_MKL.h"
+#endif

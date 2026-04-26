@@ -1,4 +1,3 @@
-target_sources(Benchmark PRIVATE GEMM.cpp)
 target_sources(Benchmark PRIVATE IdentityMV.cpp)
 target_sources(Benchmark PRIVATE MatrixPow.cpp)
 target_sources(Benchmark PRIVATE MatrixTrig.cpp)
@@ -8,7 +7,6 @@ target_sources(Benchmark PRIVATE Transpose.cpp)
 
 if(${PHYSICA_MKL})
     target_sources(Benchmark PRIVATE CompactMatrix_MKL.cpp)
-    target_sources(Benchmark PRIVATE GEMM_MKL.cpp)
     target_sources(Benchmark PRIVATE MatrixTrig_MKL.cpp)
     target_sources(Benchmark PRIVATE Transpose_MKL.cpp)
 endif()
