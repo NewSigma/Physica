@@ -213,6 +213,12 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ auto device_obj<LValueVector<Derived>>::imags(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return device_obj<ImagVectorL<Self>>(std::forward<Self>(self));
+    }
+
+    template<class Derived>
     __host__ __device__ auto device_obj<LValueVector<Derived>>::data_ptr(this auto&& self, size_t index) noexcept {
         assert(index < self.getLength());
         return self.getDerived().data_ptr(index);

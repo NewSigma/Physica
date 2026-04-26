@@ -733,7 +733,7 @@ namespace Physica {
     template<class Derived>
     auto RValueVector<Derived>::imags(this auto&& self) noexcept {
         using Self = decltype(self);
-        return ImagVector<Self>(std::forward<Self>(self));
+        return ImagVectorR<Self>(std::forward<Self>(self));
     }
 
     template<class Derived>

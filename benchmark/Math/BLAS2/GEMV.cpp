@@ -51,6 +51,21 @@ namespace {
         }
     }
 
+    void complex_real(benchmark::State& state) {
+        using T = float64;
+        using Tc = cfloat64;
+        constexpr size_t size = 32;
+        const auto mat = MatrixND<cfloat64>::template random_uniform<RandomSource>(size, size);
+        const auto vec = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto expr = mat * vec;
+        VectorND<Tc> result(size);
+        for (auto _ : state) {
+            PHYSICA_BENCH(expr.assign_base(result));
+            benchmark::DoNotOptimize(result);
+            benchmark::ClobberMemory();
+        }
+    }
+
     // Benchmark we recursively lower GEMV::grad() without falling back to RValueVector::grad
     void forward2_grad(benchmark::State& state) {
         using T = float64;
@@ -75,4 +90,5 @@ namespace {
 
 BENCHMARK(gemv_default<float64, MatrixMajor::Col>)->Name("GEMV default")->Arg(16)->Arg(32)->Arg(512);
 BENCHMARK(gemv_base<float64, MatrixMajor::Col>)->Name("GEMV base")->Arg(16)->Arg(32)->Arg(512);
+BENCHMARK(complex_real)->Name("GEMV complex-real");
 BENCHMARK(forward2_grad)->Name("GEMV forward2");
