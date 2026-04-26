@@ -117,10 +117,13 @@ namespace Physica {
     auto GEMV<M, V>::packet(size_t index) const noexcept {
         if constexpr (isFastPacket() && !Base::isDiffable()) {
             size_t length = vec.getLength();
-            auto result = SIMD<T, Size>::zeros();
-            for (size_t i = 0; i < length; ++i)
-                result += mat.col(i).template packet<Size>(index) * SIMD<T, Size>(vec.calc(i));
-            return result;
+            auto unroller = Unroller<SIMD<T, Size>, HostDevAttr::NumUnrollGEMV>();
+            [[maybe_unused]] size_t i = unroller.loop_recursive([this, index](SIMD<T, Size> buffer, size_t iSize) noexcept {
+                size_t i = iSize / Size;
+                return fma(mat.col(i).template packet<Size>(index), SIMD<T, Size>(vec.calc(i)), buffer);
+            }, length * Size);
+            assert(i == length * Size && "[Error]: Unroller is buggy");
+            return unroller.sum();
         }
         else
             return Base::template packet<Size>(index);
@@ -131,10 +134,13 @@ namespace Physica {
     auto GEMV<M, V>::packet(size_t index, size_t count) const noexcept {
         if constexpr (isFastPacket() && !Base::isDiffable()) {
             size_t length = vec.getLength();
-            auto result = SIMD<T, Size>::zeros();
-            for (size_t i = 0; i < length; ++i)
-                result += mat.col(i).template packet<Size>(index, count) * SIMD<T, Size>(vec.calc(i));
-            return result;
+            auto unroller = Unroller<SIMD<T, Size>, HostDevAttr::NumUnrollGEMV>();
+            [[maybe_unused]] size_t i = unroller.loop_recursive([this, index, count](SIMD<T, Size> buffer, size_t iSize) noexcept {
+                size_t i = iSize / Size;
+                return fma(mat.col(i).template packet<Size>(index, count), SIMD<T, Size>(vec.calc(i)), buffer);
+            }, length * Size);
+            assert(i == length * Size && "[Error]: Unroller is buggy");
+            return unroller.sum();
         }
         else
             return Base::template packet<Size>(index, count);

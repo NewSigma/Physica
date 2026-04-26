@@ -37,6 +37,7 @@ namespace Physica {
         constexpr static bool HasRDRAND = @HasRDRAND@;
         /* Tunable */
         constexpr static int NumUnrollDefault = 8;
+        constexpr static int NumUnrollGEMV = 2;
     };
 
     class CUDADevAttr final {
