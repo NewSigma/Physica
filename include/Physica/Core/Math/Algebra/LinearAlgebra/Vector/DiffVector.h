@@ -42,7 +42,7 @@ namespace Physica {
         GradVector g;
     public:
         DenseVector() = default;
-        explicit DenseVector(size_t length);
+        explicit DenseVector(size_t length) noexcept;
         DenseVector(size_t length, T init);
         DenseVector(size_t length, ScalarType init) requires(isForwardDiff());
         DenseVector(std::initializer_list<T> list);

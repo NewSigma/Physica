@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length) : v(length), g(length) {}
+    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length) noexcept : v(length), g(length) {}
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length, T init) : v(length, init), g(length) {

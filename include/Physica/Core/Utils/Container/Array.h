@@ -19,10 +19,10 @@
 #pragma once
 
 #include <array>
+#include "ArrayImpl/ArrayBase.h"
 #include "Physica/CRCoro.h"
 #include "Physica/Core/Utils/Allocator/HostAllocator.h"
 #include "Physica/Core/Utils/CUDA/device_obj.h"
-#include "ArrayImpl/ArrayBase.h"
 
 namespace Physica {
     template<class T, size_t Length = Dynamic, class Allocator = HostAllocator<T>> class Array;
@@ -34,7 +34,7 @@ namespace Physica {
      */
     template<class T, size_t Length, class Allocator>
     class Array : public ArrayBase<Array<T, Length, Allocator>, Allocator>
-                , public CRCoro<Array<T, Length, Allocator>> {
+            , public CRCoro<Array<T, Length, Allocator>> {
         using This = Array<T, Length, Allocator>;
         using Base = ArrayBase<This, Allocator>;
         using IndexType = Array<size_t, Length>;
@@ -48,7 +48,7 @@ namespace Physica {
         [[no_unique_address]] Allocator alloc;
     public:
         constexpr Array() = default;
-        __host__ __device__ constexpr explicit Array(size_t length, auto&&... args);
+        __host__ __device__ constexpr explicit Array(size_t length, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value);
         __host__ __device__ constexpr Array(std::initializer_list<T> list);
         template<size_t OtherLength, class OtherAlloc>
         constexpr Array(const Array<T, OtherLength, OtherAlloc>& other) noexcept;
@@ -93,7 +93,7 @@ namespace Physica {
 
     template<class T, class Allocator>
     class Array<T, Dynamic, Allocator> : public ArrayBase<Array<T, Dynamic, Allocator>, Allocator>
-                                       , public CRCoro<Array<T, Dynamic, Allocator>> {
+            , public CRCoro<Array<T, Dynamic, Allocator>> {
         using This = Array<T, Dynamic, Allocator>;
         using Base = ArrayBase<This, Allocator>;
     private:

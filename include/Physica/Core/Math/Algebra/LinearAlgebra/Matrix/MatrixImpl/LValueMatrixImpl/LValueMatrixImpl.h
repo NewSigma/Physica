@@ -77,6 +77,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    void LValueMatrix<Derived>::operator*=(const Matrix auto& m) {
+        Base::getDerived() = Derived(Base::getDerived() * m);
+    }
+
+    template<class Derived>
     decltype(auto) LValueMatrix<Derived>::operator[](this auto&& self, size_t row, size_t col) {
         return *self.data_ptr(row, col);
     }

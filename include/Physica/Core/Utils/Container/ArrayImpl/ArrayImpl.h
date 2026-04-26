@@ -28,7 +28,7 @@
 namespace Physica {
     //////////////////////////////////////////Array<T, Length, Allocator>//////////////////////////////////////////
     template<class T, size_t Length, class Allocator>
-    __host__ __device__ constexpr Array<T, Length, Allocator>::Array([[maybe_unused]] size_t length, auto&&... args) {
+    __host__ __device__ constexpr Array<T, Length, Allocator>::Array([[maybe_unused]] size_t length, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value) {
         assert(length == Length);
         if constexpr (!Base::template isTrivialDefaultConstruct<decltype(args)...>()) {
             for (size_t i = 0; i < Length; ++i)
@@ -111,7 +111,7 @@ namespace Physica {
         for (int i = 0; i < dim; ++i) {
             size_t stride = 1;
             for (int j = i + 1; j < dim; ++j)
-                stride *= shape[j]; 
+                stride *= shape[j];
             indices[i] = remaining / stride;
             assert(indices[i] < shape[i] && "[Error]: Index out of range");
             remaining %= stride;
@@ -163,7 +163,7 @@ namespace Physica {
         if constexpr (std::is_trivially_copyable<T>::value)
             memcpy(arr, obj.arr, length * sizeof(T));
         else
-            for(size_t i = 0; i < length; ++i)
+            for (size_t i = 0; i < length; ++i)
                 std::allocator_traits<Allocator>::construct(alloc, arr + i, obj[i]);
     }
 
@@ -179,7 +179,7 @@ namespace Physica {
     Array<T, Dynamic, Allocator>::~Array() {
         if constexpr (!std::is_trivially_destructible<T>::value)
             if (arr != nullptr)
-                for(size_t i = 0; i < length; ++i)
+                for (size_t i = 0; i < length; ++i)
                     std::allocator_traits<Allocator>::destroy(alloc, arr + i);
         alloc.deallocate(arr, capacity);
     }

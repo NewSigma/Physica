@@ -178,7 +178,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    void CompactMatrix<Derived>::zeros() {
+    void CompactMatrix<Derived>::zeros() noexcept {
         Base::getDerived().flatten().zeros();
     }
 

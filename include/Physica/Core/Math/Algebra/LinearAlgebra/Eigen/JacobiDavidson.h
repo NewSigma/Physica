@@ -91,7 +91,8 @@ namespace Physica {
         void projSearchSpace(const Matrix auto& source, size_t index);
         void assembleProjects(const Matrix auto& source, size_t dim);
 
-        bool findEigenPair(const Matrix auto& source, size_t index, VectorND<T>& residual, VectorND<T>& buffer, T& eigenGoal);
+        [[nodiscard]] bool findEigenPair(const Matrix auto& source, size_t index, VectorND<T>& residual, VectorND<T>& buffer, T& eigenGoal);
+        [[nodiscard]] T updateGoal(const Matrix auto& source, VectorND<T>& buffer, T eigenvalue, Tr squaredRes, Tr& lastDeltaEigen, T eigenGoal);
         void extremeSearch();
         void refinedSearch(size_t index, T eigenGoal);
         void correction(size_t index, T eigenGoal, const Matrix auto& source, const VectorND<T>& residual, VectorND<T>& buffer);
@@ -318,24 +319,28 @@ namespace Physica {
                 if (converged || shouldRestart)
                     return converged;
 
-                if (!isFirstEigen) { // Update goal
-                    auto subSearchSpace = searchSpace.leftCols(curSearchDim);
-                    const VectorND<T> eigenvector2 = subSearchSpace * eigenSolver.getRawEigenvectors().col(1);
-                    buffer = source * eigenvector2;
-                    const T eigenvalue2 = eigenvector2.conjugate() * buffer;
-                    const Tr deltaEigen = abs(eigenvalue2.real() - eigenvalue.real());
-                    const bool nearConverge = squaredRes < square(deltaEigen);
-                    const bool deltaEigenStable = abs(deltaEigen - lastDeltaEigen) < stableThreshold * lastDeltaEigen;
-                    const bool goodDeltaEigen = lastDeltaEigen > std::numeric_limits<T>::epsilon();
-                    const bool increaseGoal = !goodDeltaEigen || (deltaEigenStable && nearConverge);
-                    const bool decreaseGoal = eigenvalue.real() < eigenGoal.real();
-                    if (increaseGoal || decreaseGoal)
-                        eigenGoal = eigenvalue;
-                    lastDeltaEigen = deltaEigen;
-                }
+                if (!isFirstEigen)
+                    eigenGoal = updateGoal(source, buffer, eigenvalue, squaredRes, lastDeltaEigen, eigenGoal);
             }
             correction(index, eigenGoal, source, residual, buffer);
         }
+    }
+
+    template<Scalar T>
+    T JacobiDavidson<T>::updateGoal(const Matrix auto& source, VectorND<T>& buffer, T eigenvalue, Tr squaredRes, Tr& lastDeltaEigen, const T eigenGoal) {
+        const VectorND<T> eigenvector2 = searchSpace.leftCols(curSearchDim) * eigenSolver.getRawEigenvectors().col(1);
+        buffer = source * eigenvector2;
+        const T eigenvalue2 = eigenvector2.hermite() * buffer;
+        const Tr deltaEigen = abs(eigenvalue2.real() - eigenvalue.real());
+        const bool nearConverge = squaredRes < square(deltaEigen);
+        const bool deltaEigenStable = abs(deltaEigen - lastDeltaEigen) < stableThreshold * lastDeltaEigen;
+        const bool goodDeltaEigen = lastDeltaEigen > std::numeric_limits<T>::epsilon();
+        const bool increaseGoal = !goodDeltaEigen || (deltaEigenStable && nearConverge);
+        const bool decreaseGoal = eigenvalue.real() < eigenGoal.real();
+        if (increaseGoal || decreaseGoal)
+            return eigenvalue;
+        lastDeltaEigen = deltaEigen;
+        return eigenGoal;
     }
 
     template<Scalar T>
@@ -344,8 +349,7 @@ namespace Physica {
         eigenSolver.resize(curSearchDim);
         eigenSolver.compute(searchSpaceProj.topLeftCorner(curSearchDim));
         eigenSolver.sort();
-        auto subSearchSpace = searchSpace.leftCols(curSearchDim);
-        eigenvectors.col(0) = subSearchSpace * eigenSolver.getRawEigenvectors().col(0);
+        eigenvectors.col(0) = searchSpace.leftCols(curSearchDim) * eigenSolver.getRawEigenvectors().col(0);
     }
 
     template<Scalar T>

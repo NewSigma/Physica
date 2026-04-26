@@ -88,7 +88,7 @@ namespace Physica {
         [[nodiscard]] CoDiff<Tr> norm2_base() const noexcept;
         [[nodiscard]] Tr norm2_mkl() const noexcept;
 
-        void zeros();
+        void zeros() noexcept;
         void read(const auto& obj) noexcept;
         template<RNG R>
         void random_uniform();

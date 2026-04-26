@@ -186,7 +186,7 @@ namespace Physica {
      * Prefer zeros() over simply assigning zeros for better performance.
      */
     template<class Derived>
-    void CompactVector<Derived>::zeros() {
+    void CompactVector<Derived>::zeros() noexcept {
         if constexpr (Diffable<T>) {
             Base::getDerived().values().zeros();
             Base::getDerived().zero_grad();

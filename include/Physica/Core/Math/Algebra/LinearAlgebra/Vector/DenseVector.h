@@ -43,7 +43,7 @@ namespace Physica {
     public:
         DenseVector() = default;
         explicit DenseVector(Storage storage) noexcept;
-        explicit DenseVector(size_t length);
+        explicit DenseVector(size_t length) noexcept;
         DenseVector(size_t length, const T& init);
         DenseVector(std::initializer_list<T> list);
         DenseVector(const Vector auto& v);

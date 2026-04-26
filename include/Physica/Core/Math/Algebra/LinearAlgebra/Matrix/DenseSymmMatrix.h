@@ -58,7 +58,7 @@ namespace Physica {
         [[nodiscard]] decltype(auto) hermite() const noexcept;
         void swap(This& __restrict m) noexcept;
 
-        void zeros() { storage.zeros(); }
+        void zeros() noexcept { storage.zeros(); }
         template<RNG R>
         void random_uniform() { asVector().template random_uniform<R>(); }
         template<RNG R>

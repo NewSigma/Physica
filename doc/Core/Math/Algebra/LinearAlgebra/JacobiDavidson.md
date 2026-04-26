@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -11,30 +11,31 @@ with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 You should have received a copy of the GNU Free Documentation License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
-# JacobiDavidson method
+# JacobiDavidson
 
-## 修正方程
+## Correction equation
 
-JacobiDavidson方法通过求解修正方程
+The Jacobi–Davidson method gradually improves the approximate eigenvector by solving the correction equation
 
-$$\mathbf{(I - UU^H)}(\mathbf A - \tilde \lambda \mathbf I) \mathbf{(I - UU^H)t = Bt = -r}$$
+$$(\mathbf{I - UU}^H)(\mathbf A - \tilde \lambda \mathbf I) (\mathbf{I - UU}^H) \mathbf t = \mathbf{Bt = -r}$$
 
-逐渐改善近似的特征向量。
+**Note**:
 
-**注意**:
+1. In practice, $\mathbf r \perp \mathbf U$ should be maintained; otherwise, the matrix $\mathbf B$ will be ill-conditioned and lead to numerical instability. That is, the modulus of the solution vector becomes too large, causing the orthogonalization to fail, which intuitively results in a pseudo-degeneracy phenomenon.
 
-1. 实现上应保持$\mathbf r \perp \mathbf U$，否则矩阵$\mathbf B$将是刚性的并导致数值不稳定。即解向量的模过大导致正交化失效，直观上将出现伪简并现象。
-2. 由于新的特征向量将在子空间$\{ \mathbf{U, t} \}$中搜索，上式中$\mathbf r$的符号不重要。
+2. Since the new eigenvector will be sought in the subspace $\{ \mathbf{U, t} \}$, the sign of $\mathbf r$ in the above expression is not important.
 
-## refinedSearch()的实现
+## Implementation of refinedSearch()
 
-改进的Ritz搜索$^{[1]}$(Refined Ritz extraction)要求在子空间$U$中找到线性组合$\mathbf c$使得
+The refined Ritz searching $^{[1]}$ requires finding $\mathbf x$ such that
 
-$$\hat{\mathbf c} = \argmin_{|\mathbf c| = 1} |(AU - \lambda U)\mathbf c|$$
+$$\hat{\mathbf x} = \argmin_{|\mathbf x| = 1} |(\mathbf{AU} - \lambda \mathbf U)\mathbf x|$$
 
-令$B = AU- \lambda U$, 则$$|(AU - \lambda U)\mathbf c| = \mathbf c^H B^H B \mathbf c$$
+Let $\mathbf{B = AU- \lambda U}$, accordingly
 
-注意到$B^H B$是正定的。上式最小值即$B^H B$的最小本征值，此时$\mathbf c$为最小本征值对应的特征向量。最小化问题转化为一个小矩阵的本征值问题。
+$$|(\mathbf{AU - \lambda U})\mathbf x| = \sqrt{\mathbf x^H \mathbf B^H \mathbf B \mathbf x}$$
+
+Note that $\mathbf B^H \mathbf B$ is positive definite. The minimum value of the above expression is exactly the minimum eigenvalue of $\mathbf B^H \mathbf B$, achieved when $\mathbf x$ is the eigenvector corresponding to that minimum eigenvalue. The optimization problem is thus reduced to an eigenvalue problem for a small matrix.
 
 ## Reference
 

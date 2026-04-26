@@ -61,7 +61,7 @@ namespace Physica {
         auto operator=(const Matrix auto& m) -> Derived&;
         void operator+=(const Matrix auto& m);
         void operator-=(const Matrix auto& m);
-        void operator*=(const Matrix auto& m) { Base::getDerived() = Derived(Base::getDerived() * m); }
+        void operator*=(const Matrix auto& m);
 
         [[nodiscard]] decltype(auto) operator[](this auto&&, size_t row, size_t col);
         /* Operations */
