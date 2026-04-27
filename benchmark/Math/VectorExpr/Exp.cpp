@@ -29,19 +29,6 @@ namespace {
         auto expr = exp(data);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            expr.assign(buffer);
-            benchmark::DoNotOptimize(buffer);
-            benchmark::ClobberMemory();
-        }
-    }
-
-    template<Scalar T>
-    void exp_base(benchmark::State& state) {
-        const int64_t size = state.range(0);
-        const VectorND<T> data = makeData<T>(size);
-        auto expr = exp(data);
-        VectorND<T> buffer(size);
-        for (auto _ : state) {
             PHYSICA_BENCH(expr.assign_base(buffer));
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
@@ -49,23 +36,12 @@ namespace {
     }
 }
 
-BENCHMARK(exp<float32>)->Name("exp float32")
+BENCHMARK(exp<float32>)->Name("exp float32 base")
     ->Arg(8)
     ->Arg(64)
     ->Arg(512)
     ->Arg(1024);
-BENCHMARK(exp<float64>)->Name("exp float64")
-    ->Arg(8)
-    ->Arg(16)
-    ->Arg(32)
-    ->Arg(64);
-
-BENCHMARK(exp_base<float32>)->Name("exp float32 base")
-    ->Arg(8)
-    ->Arg(64)
-    ->Arg(512)
-    ->Arg(1024);
-BENCHMARK(exp_base<float64>)->Name("exp float64 base")
+BENCHMARK(exp<float64>)->Name("exp float64 base")
     ->Arg(8)
     ->Arg(16)
     ->Arg(32)

@@ -39,6 +39,8 @@ def compile(device_only: bool):
 def collect(llvm_dir: Path, device_only: bool, arch: str):
     benchmark_dir = Path(".") / "benchmark"
     for file in benchmark_dir.rglob("*.o"):
+        if "Dispatch" in str(file):
+            continue
         if "MKL" in str(file):
             continue
 

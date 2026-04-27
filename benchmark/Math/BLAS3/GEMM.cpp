@@ -37,26 +37,6 @@ namespace {
         auto expr = m1 * m2;
         M0 result(m, n);
         for (auto _ : state) {
-            expr.assign(result);
-            benchmark::DoNotOptimize(result);
-            benchmark::ClobberMemory();
-        }
-    }
-
-    template<Scalar T, int Major0, int Major1, int Major2>
-    void gemm_base(benchmark::State& state) {
-        using M0 = DenseMatrix<T, Major0>;
-        using M1 = DenseMatrix<T, Major1>;
-        using M2 = DenseMatrix<T, Major2>;
-
-        const size_t m = state.range(0);
-        const size_t k = state.range(0);
-        const size_t n = state.range(0);
-        const auto m1 = M1::template random_uniform<RandomSource>(m, k);
-        const auto m2 = M2::template random_uniform<RandomSource>(k, n);
-        auto expr = m1 * m2;
-        M0 result(m, n);
-        for (auto _ : state) {
             PHYSICA_BENCH(expr.assign_base(result));
             benchmark::DoNotOptimize(result);
             benchmark::ClobberMemory();
@@ -78,57 +58,28 @@ namespace {
 }
 
 using enum MatrixMajor::Option;
-BENCHMARK(gemm<float64, Col, Col, Col>)->Name("GEMM CCC")
+BENCHMARK(gemm<float64, Col, Col, Col>)->Name("GEMM CCC base")
     ->Args({4, 4, 4})
     ->Args({8, 8, 8})
     ->Args({16, 16, 16})
     ->Args({64, 64, 64})
     ->Args({256, 256, 256})
     ->Args({1024, 1024, 1024});
-BENCHMARK(gemm<float64, Col, Row, Col>)->Name("GEMM CRC")
+BENCHMARK(gemm<float64, Col, Row, Col>)->Name("GEMM CRC base")
     ->Args({4, 4, 4})
     ->Args({8, 8, 8})
     ->Args({16, 16, 16})
     ->Args({64, 64, 64})
     ->Args({256, 256, 256})
     ->Args({1024, 1024, 1024});
-BENCHMARK(gemm<float64, Col, Col, Row>)->Name("GEMM CCR")
+BENCHMARK(gemm<float64, Col, Col, Row>)->Name("GEMM CCR base")
     ->Args({4, 4, 4})
     ->Args({8, 8, 8})
     ->Args({16, 16, 16})
     ->Args({64, 64, 64})
     ->Args({256, 256, 256})
     ->Args({1024, 1024, 1024});
-BENCHMARK(gemm<float64, Col, Row, Row>)->Name("GEMM CRR")
-    ->Args({4, 4, 4})
-    ->Args({8, 8, 8})
-    ->Args({16, 16, 16})
-    ->Args({64, 64, 64})
-    ->Args({256, 256, 256})
-    ->Args({1024, 1024, 1024});
-
-BENCHMARK(gemm_base<float64, Col, Col, Col>)->Name("GEMM CCC base")
-    ->Args({4, 4, 4})
-    ->Args({8, 8, 8})
-    ->Args({16, 16, 16})
-    ->Args({64, 64, 64})
-    ->Args({256, 256, 256})
-    ->Args({1024, 1024, 1024});
-BENCHMARK(gemm_base<float64, Col, Row, Col>)->Name("GEMM CRC base")
-    ->Args({4, 4, 4})
-    ->Args({8, 8, 8})
-    ->Args({16, 16, 16})
-    ->Args({64, 64, 64})
-    ->Args({256, 256, 256})
-    ->Args({1024, 1024, 1024});
-BENCHMARK(gemm_base<float64, Col, Col, Row>)->Name("GEMM CCR base")
-    ->Args({4, 4, 4})
-    ->Args({8, 8, 8})
-    ->Args({16, 16, 16})
-    ->Args({64, 64, 64})
-    ->Args({256, 256, 256})
-    ->Args({1024, 1024, 1024});
-BENCHMARK(gemm_base<float64, Col, Row, Row>)->Name("GEMM CRR base")
+BENCHMARK(gemm<float64, Col, Row, Row>)->Name("GEMM CRR base")
     ->Args({4, 4, 4})
     ->Args({8, 8, 8})
     ->Args({16, 16, 16})

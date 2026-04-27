@@ -29,18 +29,6 @@ namespace {
         const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
         MatrixND<T> buffer(order);
         for (auto _ : state) {
-            m.tril_unit().assign(buffer);
-            benchmark::DoNotOptimize(buffer);
-            benchmark::ClobberMemory();
-        }
-    }
-
-    void assign_base(benchmark::State& state) {
-        using T = float64;
-        const size_t order = state.range(0);
-        const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
-        MatrixND<T> buffer(order);
-        for (auto _ : state) {
             m.tril_unit().assign_base(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
@@ -48,12 +36,7 @@ namespace {
     }
 }
 
-BENCHMARK(assign)->Name("Trig assign")
-    ->Arg(256)
-    ->Arg(1024)
-    ->Arg(8192);
-
-BENCHMARK(assign_base)->Name("Trig assign base")
+BENCHMARK(assign)->Name("Trig assign base")
     ->Arg(256)
     ->Arg(1024)
     ->Arg(8192);

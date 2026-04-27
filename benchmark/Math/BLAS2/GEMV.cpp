@@ -24,21 +24,7 @@ using RandomSource = Random<MCG>;
 
 namespace {
     template<Scalar T, int Major>
-    void gemv_default(benchmark::State& state) {
-        const size_t size = state.range(0);
-        const auto mat = DenseMatrix<T, Major>::template random_uniform<RandomSource>(size, size);
-        const auto vec = VectorND<T>::template random_uniform<RandomSource>(size);
-        auto expr = mat * vec;
-        VectorND<T> result(size);
-        for (auto _ : state) {
-            expr.assign(result);
-            benchmark::DoNotOptimize(result);
-            benchmark::ClobberMemory();
-        }
-    }
-
-    template<Scalar T, int Major>
-    void gemv_base(benchmark::State& state) {
+    void gemv(benchmark::State& state) {
         const size_t size = state.range(0);
         const auto mat = DenseMatrix<T, Major>::template random_uniform<RandomSource>(size, size);
         const auto vec = VectorND<T>::template random_uniform<RandomSource>(size);
@@ -88,7 +74,6 @@ namespace {
     }
 }
 
-BENCHMARK(gemv_default<float64, MatrixMajor::Col>)->Name("GEMV default")->Arg(16)->Arg(32)->Arg(512);
-BENCHMARK(gemv_base<float64, MatrixMajor::Col>)->Name("GEMV base")->Arg(16)->Arg(32)->Arg(512);
+BENCHMARK(gemv<float64, MatrixMajor::Col>)->Name("GEMV base")->Arg(16)->Arg(32)->Arg(512);
 BENCHMARK(complex_real)->Name("GEMV complex-real");
 BENCHMARK(forward2_grad)->Name("GEMV forward2");

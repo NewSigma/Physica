@@ -36,52 +36,7 @@ namespace {
         auto toc = CUDAEvent();
         for (auto _ : state) {
             tic.record();
-            expr.assign_add(buffer);
-            toc.record();
-
-            toc.wait();
-            float elapsedTime{};
-            cudaEventElapsedTime(&elapsedTime, tic, toc);
-            state.SetIterationTime(elapsedTime / 1000);
-        }
-    }
-
-    void axpy_base(benchmark::State& state) {
-        using T = float32;
-        const int64_t size = state.range(0);
-        auto x = device_obj<VectorND<T>>::random_uniform<RandomSource>(size);
-        device_obj<VectorND<T>> buffer(size, 0);
-        auto expr = x * T(2);
-        CUDAExecutor::wait();
-
-        auto tic = CUDAEvent();
-        auto toc = CUDAEvent();
-        for (auto _ : state) {
-            tic.record();
             expr.assign_add_base(buffer);
-            toc.record();
-
-            toc.wait();
-            float elapsedTime{};
-            cudaEventElapsedTime(&elapsedTime, tic, toc);
-            state.SetIterationTime(elapsedTime / 1000);
-        }
-    }
-
-    void axpy_cublas(benchmark::State& state) {
-        using T = float32;
-        const int64_t size = state.range(0);
-        auto x = device_obj<VectorND<T>>::random_uniform<RandomSource>(size);
-        device_obj<VectorND<T>> buffer(size, 0);
-        auto expr = x * T(2);
-        expr.assign_add_cublas(buffer); // Warmup
-        CUDAExecutor::wait();
-
-        auto tic = CUDAEvent();
-        auto toc = CUDAEvent();
-        for (auto _ : state) {
-            tic.record();
-            expr.assign_add_cublas(buffer);
             toc.record();
 
             toc.wait();
@@ -93,6 +48,4 @@ namespace {
 }
 
 constexpr int N = 1 << 20;
-BENCHMARK(axpy)->Name("axpy cuda")->UseManualTime()->Arg(N);
-BENCHMARK(axpy_base)->Name("axpy cuda base")->UseManualTime()->Arg(N);
-BENCHMARK(axpy_cublas)->Name("axpy cuda cublas")->UseManualTime()->Arg(N);
+BENCHMARK(axpy)->Name("axpy cuda base")->UseManualTime()->Arg(N);

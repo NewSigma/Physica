@@ -31,19 +31,6 @@ namespace {
         const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(size);
         auto dot = InnerDot(v1, v2);
         for (auto _ : state) {
-            T y = dot.calc();
-            benchmark::DoNotOptimize(y);
-            benchmark::DoNotOptimize(dot);
-        }
-    }
-
-    template<Scalar T>
-    void innerDot_base(benchmark::State& state) {
-        const int64_t size = state.range(0);
-        const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(size);
-        const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(size);
-        auto dot = InnerDot(v1, v2);
-        for (auto _ : state) {
             T y{};
             PHYSICA_BENCH(y = dot.calc_base());
             benchmark::DoNotOptimize(y);
@@ -64,42 +51,22 @@ namespace {
     }
 }
 
-BENCHMARK(innerDot<float32>)->Name("innerDot float32")
+BENCHMARK(innerDot<float32>)->Name("innerDot base float32")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
 
-BENCHMARK(innerDot<float64>)->Name("innerDot float64")
+BENCHMARK(innerDot<float64>)->Name("innerDot base float64")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
 
-BENCHMARK(innerDot<cfloat32>)->Name("innerDot cfloat32")
+BENCHMARK(innerDot<cfloat32>)->Name("innerDot base cfloat32")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
 
-BENCHMARK(innerDot<cfloat64>)->Name("innerDot cfloat64")
-    ->Arg(16)
-    ->Arg(128)
-    ->Arg(1024);
-// Baseline
-BENCHMARK(innerDot_base<float32>)->Name("innerDot base float32")
-    ->Arg(16)
-    ->Arg(128)
-    ->Arg(1024);
-
-BENCHMARK(innerDot_base<float64>)->Name("innerDot base float64")
-    ->Arg(16)
-    ->Arg(128)
-    ->Arg(1024);
-
-BENCHMARK(innerDot_base<cfloat32>)->Name("innerDot base cfloat32")
-    ->Arg(16)
-    ->Arg(128)
-    ->Arg(1024);
-
-BENCHMARK(innerDot_base<cfloat64>)->Name("innerDot base cfloat64")
+BENCHMARK(innerDot<cfloat64>)->Name("innerDot base cfloat64")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);

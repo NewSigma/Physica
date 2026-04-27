@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,18 +29,6 @@ namespace {
         const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
         DenseQR<T> qr(order, order);
         for (auto _ : state) {
-            qr.compute(m);
-            benchmark::DoNotOptimize(qr);
-            benchmark::ClobberMemory();
-        }
-    }
-
-    void qr_base(benchmark::State& state) {
-        using T = float64;
-        const size_t order = state.range(0);
-        const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
-        DenseQR<T> qr(order, order);
-        for (auto _ : state) {
             PHYSICA_BENCH(qr.compute_base(m));
             benchmark::DoNotOptimize(qr);
             benchmark::ClobberMemory();
@@ -48,16 +36,7 @@ namespace {
     }
 }
 
-BENCHMARK(qr)->Name("DenseQR")
-    ->Arg(4)
-    ->Arg(8)
-    ->Arg(16)
-    ->Arg(32)
-    ->Arg(64)
-    ->Arg(256)
-    ->Arg(1024);
-
-BENCHMARK(qr_base)->Name("DenseQR base")
+BENCHMARK(qr)->Name("DenseQR base")
     ->Arg(4)
     ->Arg(8)
     ->Arg(16)

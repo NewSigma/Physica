@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,18 +26,6 @@ namespace {
     void copy(benchmark::State& state) {
         using T = float64;
         const int64_t size = state.range(0);
-        const auto x = VectorND<T>::random_uniform<RandomSource>(size);
-        VectorND<T> y(size);
-        for (auto _ : state) {
-            x.assign(y);
-            benchmark::DoNotOptimize(y);
-            benchmark::ClobberMemory();
-        }
-    }
-
-    void copy_base(benchmark::State& state) {
-        using T = float64;
-        const int64_t size = state.range(0);
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         VectorND<T> y(size);
         for (auto _ : state) {
@@ -48,15 +36,7 @@ namespace {
     }
 }
 
-BENCHMARK(copy)->Name("copy")
-    ->Arg(4)
-    ->Arg(8)
-    ->Arg(4UL * 1024UL / sizeof(float64))
-    ->Arg(64UL * 1024UL / sizeof(float64))
-    ->Arg(1024UL * 1024UL / sizeof(float64))
-    ->Arg(16UL * 1024UL * 1024UL / sizeof(float64));
-
-BENCHMARK(copy_base)->Name("copy base")
+BENCHMARK(copy)->Name("copy base")
     ->Arg(4)
     ->Arg(8)
     ->Arg(4UL * 1024UL / sizeof(float64))

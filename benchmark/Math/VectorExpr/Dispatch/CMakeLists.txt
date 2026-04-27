@@ -1,0 +1,5 @@
+target_sources(Benchmark PRIVATE Abs.cpp)
+target_sources(Benchmark PRIVATE Conj.cpp)
+target_sources(Benchmark PRIVATE Exp.cpp)
+target_sources(Benchmark PRIVATE Mul.cpp)
+target_sources(Benchmark PRIVATE Square.cpp)

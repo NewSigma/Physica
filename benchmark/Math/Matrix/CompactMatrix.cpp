@@ -41,17 +41,6 @@ namespace {
         const auto data = DenseMatrix<T, MatrixMajor::Col>::template random_uniform<RandomSource>(size);
         DenseMatrix<T, MatrixMajor::Row> buffer(size);
         for (auto _ : state) {
-            data.assign(buffer);
-            benchmark::DoNotOptimize(buffer);
-            benchmark::ClobberMemory();
-        }
-    }
-
-    void assign_mismatch_base(benchmark::State& state) {
-        const auto size = makeMatrixSize(state.range(0), sizeof(T));
-        const auto data = DenseMatrix<T, MatrixMajor::Col>::template random_uniform<RandomSource>(size);
-        DenseMatrix<T, MatrixMajor::Row> buffer(size);
-        for (auto _ : state) {
             PHYSICA_BENCH(data.assign_base(buffer));
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
@@ -60,5 +49,4 @@ namespace {
 }
 
 BENCHMARK(assign_match)->Name("Compact match")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(assign_mismatch)->Name("Compact mismatch")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(assign_mismatch_base)->Name("Compact mismatch base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(assign_mismatch)->Name("Compact mismatch base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);

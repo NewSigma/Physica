@@ -30,19 +30,6 @@ namespace {
         auto expr = abs(x);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            expr.assign(buffer);
-            benchmark::DoNotOptimize(buffer);
-            benchmark::ClobberMemory();
-        }
-    }
-
-    template<Scalar T>
-    void abs_base(benchmark::State& state) {
-        const auto size = makeVectorSize(state.range(0), sizeof(T));
-        const VectorND<T> x = VectorND<T>::template random_uniform<RandomSource>(size);
-        auto expr = abs(x);
-        VectorND<T> buffer(size);
-        for (auto _ : state) {
             PHYSICA_BENCH(expr.assign_base(buffer));
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
@@ -50,8 +37,5 @@ namespace {
     }
 }
 
-BENCHMARK(abs<float32>)->Name("abs float32")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(abs<float64>)->Name("abs float64")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-
-BENCHMARK(abs_base<float32>)->Name("abs float32 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(abs_base<float64>)->Name("abs float32 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(abs<float32>)->Name("abs float32 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(abs<float64>)->Name("abs float32 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);

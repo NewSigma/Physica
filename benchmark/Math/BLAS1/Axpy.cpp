@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -30,20 +30,6 @@ namespace {
         auto expr = x * T(2);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            expr.assign_add(buffer);
-            benchmark::DoNotOptimize(x);
-            benchmark::DoNotOptimize(buffer);
-            benchmark::ClobberMemory();
-        }
-    }
-
-    void axpy_base(benchmark::State& state) {
-        using T = float64;
-        const int64_t size = state.range(0);
-        auto x = VectorND<T>::random_uniform<RandomSource>(size);
-        auto expr = x * T(2);
-        VectorND<T> buffer(size);
-        for (auto _ : state) {
             PHYSICA_BENCH(expr.assign_add_base(buffer));
             benchmark::DoNotOptimize(x);
             benchmark::DoNotOptimize(buffer);
@@ -52,17 +38,7 @@ namespace {
     }
 }
 
-BENCHMARK(axpy)->Name("axpy")
-    ->Arg(2)
-    ->Arg(4)
-    ->Arg(8)
-    ->Arg(16)
-    ->Arg(64)
-    ->Arg(256)
-    ->Arg(1024)
-    ->Arg(16384);
-
-BENCHMARK(axpy_base)->Name("axpy base")
+BENCHMARK(axpy)->Name("axpy base")
     ->Arg(2)
     ->Arg(4)
     ->Arg(8)

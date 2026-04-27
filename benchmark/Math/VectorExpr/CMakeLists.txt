@@ -8,5 +8,6 @@ target_sources(Benchmark PRIVATE Square.cpp)
 target_sources(Benchmark PRIVATE Sub.cpp)
 
 if(${PHYSICA_MKL})
+    add_subdirectory(Dispatch)
     add_subdirectory(MKL)
 endif()

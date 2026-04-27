@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,20 +24,6 @@ using RandomSource = Random<MCG>;
 
 namespace {
     template<bool NeedEigenVec>
-    void direct(benchmark::State& state) {
-        using T = float64;
-        const auto size = state.range(0);
-        SymmEigenSolver<T> solver(size, NeedEigenVec);
-
-        auto m = MatrixND<T>::random_uniform<RandomSource>(size);
-        for (auto _ : state) {
-            solver.compute(m);
-            benchmark::DoNotOptimize(solver);
-            benchmark::ClobberMemory();
-        }
-    }
-
-    template<bool NeedEigenVec>
     void base(benchmark::State& state) {
         using T = float64;
         const auto size = state.range(0);
@@ -52,7 +38,5 @@ namespace {
     }
 }
 
-BENCHMARK(direct<false>)->Name("SymmEigenSolver s")->Arg(4)->Arg(64)->Arg(1024);
-BENCHMARK(direct<true>)->Name("SymmEigenSolver sv")->Arg(4)->Arg(64)->Arg(1024);
 BENCHMARK(base<false>)->Name("SymmEigenSolver s base")->Arg(4)->Arg(64)->Arg(1024);
 BENCHMARK(base<true>)->Name("SymmEigenSolver sv base")->Arg(4)->Arg(64)->Arg(1024);

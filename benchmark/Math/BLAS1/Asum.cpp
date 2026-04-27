@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,18 +28,6 @@ namespace {
         const int64_t size = state.range(0);
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
-            auto y = x.norm1();
-            benchmark::DoNotOptimize(x);
-            benchmark::DoNotOptimize(y);
-            benchmark::ClobberMemory();
-        }
-    }
-
-    void asum_base(benchmark::State& state) {
-        using T = float64;
-        const int64_t size = state.range(0);
-        auto x = VectorND<T>::random_uniform<RandomSource>(size);
-        for (auto _ : state) {
             PHYSICA_BENCH(auto y = x.norm1_base());
             benchmark::DoNotOptimize(x);
             benchmark::DoNotOptimize(y);
@@ -48,17 +36,7 @@ namespace {
     }
 }
 
-BENCHMARK(asum)->Name("asum")
-    ->Arg(2)
-    ->Arg(4)
-    ->Arg(8)
-    ->Arg(16)
-    ->Arg(64)
-    ->Arg(256)
-    ->Arg(1024)
-    ->Arg(16384);
-
-BENCHMARK(asum_base)->Name("asum base")
+BENCHMARK(asum)->Name("asum base")
     ->Arg(2)
     ->Arg(4)
     ->Arg(8)

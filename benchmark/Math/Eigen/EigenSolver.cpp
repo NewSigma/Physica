@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,19 +24,6 @@ using namespace Physica;
 
 namespace {
     template<bool NeedEigenVec>
-    void direct(benchmark::State& state) {
-        using T = float64;
-        const SquareLattice<1> lattice({10}, 1);
-        const DenseMatrix<T> data = TransIsingMatrix<T, 1, 10>(1, 0.01, lattice);
-        EigenSolver<T> solver(data.getRow(), NeedEigenVec);
-        for (auto _ : state) {
-            solver.compute(data);
-            benchmark::DoNotOptimize(solver);
-            benchmark::ClobberMemory();
-        }
-    }
-
-    template<bool NeedEigenVec>
     void base(benchmark::State& state) {
         using T = float64;
         const SquareLattice<1> lattice({10}, 1);
@@ -50,7 +37,5 @@ namespace {
     }
 }
 
-BENCHMARK(direct<false>)->Name("EigenSolver s");
-BENCHMARK(direct<true>)->Name("EigenSolver sv");
 BENCHMARK(base<false>)->Name("EigenSolver s base");
 BENCHMARK(base<true>)->Name("EigenSolver sv base");

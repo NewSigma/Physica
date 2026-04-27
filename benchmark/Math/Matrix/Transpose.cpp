@@ -31,20 +31,6 @@ namespace {
         auto trans = m.transpose();
         MatrixType buffer(order, order);
         for (auto _ : state) {
-            trans.assign(buffer);
-            benchmark::DoNotOptimize(buffer);
-            benchmark::ClobberMemory();
-        }
-    }
-
-    void trans_base(benchmark::State& state) {
-        using T = float64;
-        using MatrixType = DenseMatrix<T, MatrixMajor::Col>;
-        const size_t order = state.range(0);
-        const auto m = MatrixType::template random_uniform<RandomSource>(order, order);
-        auto trans = m.transpose();
-        MatrixType buffer(order, order);
-        for (auto _ : state) {
             PHYSICA_BENCH(trans.assign_base(buffer));
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
@@ -52,15 +38,7 @@ namespace {
     }
 }
 
-BENCHMARK(trans)->Name("trans")
-    ->Arg(2)
-    ->Arg(4)
-    ->Arg(8)
-    ->Arg(16)
-    ->Arg(32)
-    ->Arg(64);
-
-BENCHMARK(trans_base)->Name("trans base")
+BENCHMARK(trans)->Name("trans base")
     ->Arg(2)
     ->Arg(4)
     ->Arg(8)

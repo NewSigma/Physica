@@ -35,26 +35,9 @@ namespace {
             benchmark::ClobberMemory();
         }
     }
-
-    void lu_base(benchmark::State& state) {
-        using T = float64;
-        const size_t order = state.range(0);
-        auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
-        auto lu = DenseLU<T, false>(m);
-        auto inv = lu.inv();
-        for (auto _ : state) {
-            PHYSICA_BENCH(inv.assign_base(m));
-            benchmark::DoNotOptimize(m);
-            benchmark::ClobberMemory();
-        }
-    }
 }
 
-BENCHMARK(lu)->Name("DenseLU inv")
-    ->Arg(8)
-    ->Arg(64)
-    ->Arg(1024);
-BENCHMARK(lu_base)->Name("DenseLU inv base")
+BENCHMARK(lu)->Name("DenseLU inv default")
     ->Arg(8)
     ->Arg(64)
     ->Arg(1024);

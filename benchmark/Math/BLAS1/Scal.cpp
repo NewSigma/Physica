@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -30,20 +30,6 @@ namespace {
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
             auto expr = x * T(flag ? std::numbers::pi : (1.0 / std::numbers::pi));
-            expr.assign(x);
-            benchmark::DoNotOptimize(x);
-            benchmark::ClobberMemory();
-            flag = !flag;
-        }
-    }
-
-    void scal_base(benchmark::State& state) {
-        using T = float64;
-        const int64_t size = state.range(0);
-        bool flag = true;
-        auto x = VectorND<T>::random_uniform<RandomSource>(size);
-        for (auto _ : state) {
-            auto expr = x * T(flag ? std::numbers::pi : (1.0 / std::numbers::pi));
             PHYSICA_BENCH(expr.assign_base(x));
             benchmark::DoNotOptimize(x);
             benchmark::ClobberMemory();
@@ -52,17 +38,7 @@ namespace {
     }
 }
 
-BENCHMARK(scal)->Name("scal")
-    ->Arg(2)
-    ->Arg(4)
-    ->Arg(8)
-    ->Arg(16)
-    ->Arg(64)
-    ->Arg(256)
-    ->Arg(1024)
-    ->Arg(16384);
-
-BENCHMARK(scal_base)->Name("scal base")
+BENCHMARK(scal)->Name("scal base")
     ->Arg(2)
     ->Arg(4)
     ->Arg(8)
