@@ -21,6 +21,9 @@
 #include "../Scalar.h"
 
 namespace Physica {
+    /**
+     * \class ScalarRef helps implementing dereferencing semantic of ScalarPtr
+     */
     template<Scalar T> requires(instanceof_tx<Diff, T>)
     class ScalarRef<T> : public ScalarBase<ScalarRef<T>> {
         using This = ScalarRef<T>;
@@ -219,6 +222,11 @@ namespace Physica {
     std::ostream& operator<<(std::ostream& os, const ScalarRef<T>& obj) {
         return os << obj.value();
     }
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<ScalarRef<T>> : public Traits<T> {};
 }
 
 namespace std {

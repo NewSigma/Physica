@@ -57,13 +57,7 @@ namespace Physica {
     class ScalarBase;
     template<class Derived>
     class SIMDBase;
-    /**
-     * \class ScalarPtr is general n-dimension pointer that targets SOA(Structure of Arrays) storage
-     */
-    template<class ScalarType> class ScalarPtr;
-    /**
-     * \class ScalarRef helps implementing dereferencing semantic of ScalarPtr
-     */
+
     template<class ScalarType> class ScalarRef;
 
     template<class T>
@@ -81,8 +75,7 @@ namespace Physica {
 
     template<class T>
     concept Scalar = std::derived_from<std::remove_cvref_t<T>, ScalarBase<std::remove_cvref_t<T>>>
-                  || std::derived_from<std::remove_cvref_t<T>, typename std::remove_cvref_t<T>::ScalarType>
-                  || instanceof<ScalarRef, T>;
+                  || std::derived_from<std::remove_cvref_t<T>, typename std::remove_cvref_t<T>::ScalarType>;
 
     template<class T>
     concept Packet = std::derived_from<std::remove_cvref_t<T>, SIMDBase<std::remove_cvref_t<T>>>;
@@ -168,9 +161,4 @@ namespace Physica {
             using Type = Type2;
         };
     }
-}
-
-namespace Physica {
-    template<class T>
-    class Traits<ScalarRef<T>> : public Traits<T> {};
 }

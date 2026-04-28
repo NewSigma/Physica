@@ -20,10 +20,10 @@
 
 #include <iosfwd>
 #include "Physica/Core/Scalar/Real.h"  // IWYU pragma: export
-#include "Physica/Core/Scalar/ExprID.h"
 #include "DiffImpl/DiffCoro.h"
 
 namespace Physica {
+    template<class ScalarType> class ScalarPtr;
     /**
      * \class Diff provides auto differential support for scalars
      */

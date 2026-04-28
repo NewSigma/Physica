@@ -21,6 +21,9 @@
 #include "../Scalar.h"
 
 namespace Physica {
+    /**
+     * \class ScalarPtr is general n-dimension pointer that targets SOA(Structure of Arrays) storage
+     */
     template<Scalar T> requires(instanceof_tx<Diff, T>)
     class ScalarPtr<T> {
         using This = ScalarPtr<T>;
