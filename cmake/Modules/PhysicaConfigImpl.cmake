@@ -24,7 +24,7 @@ else()
         add_compile_options(-Wextra)
     elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
         # Note: We must use "-Xclang=..." instead of "-Xclang ...", otherwise CMake will eliminate duplicate -Xclang
-        add_compile_options(-fassume-sane-operator-new -fassume-nothrow-exception-dtor -Xclang=-fexternc-nounwind)
+        add_compile_options(-fassume-sane-operator-new -fassume-nothrow-exception-dtor -Xclang=-fexternc-nounwind -fexperimental-new-constant-interpreter)
         # Workaround for P2014R0
         #
         # Reference:
