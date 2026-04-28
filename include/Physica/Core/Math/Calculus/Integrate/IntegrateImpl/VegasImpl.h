@@ -78,6 +78,7 @@ namespace Physica {
             else
                 trial_normal<R, P>(fn, mean, var);
 
+            compress();
             if (hasMomentum) {
                 losses += losses_old * momentum;
                 refineGrid<P>();
@@ -114,6 +115,7 @@ namespace Physica {
             vars[refine] = var;
             loss[refine] = calcGridLossImpl();
 
+            compress();
             if (hasMomentum) {
                 losses += losses_old * momentum;
                 refineGrid<P>();
@@ -173,6 +175,27 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
+    void Vegas<T, TakeLn>::compress() {
+        for (size_t dim = 0; dim < getDim(); ++dim) {
+            auto loss = losses.col(dim);
+            const auto sum = loss.sum();
+            const bool noData = sum.isZero();
+            if (noData)
+                continue;
+
+            const VectorND<Trv> buffer = loss * reciprocal(sum); // Normalized values fall into a range that is feasible for compression function.
+            const Vector3D<Trv> kernel{1.0 / 8, 6.0 / 8, 1.0 / 8};
+            size_t i = 0;
+            loss[0] = fma(Trv(7.0 / 8), buffer[0], Trv(1.0 / 8) * buffer[1]);
+            for (; i < loss.getLength() - 2; ++i)
+                loss[i + 1] = buffer.template segment<3>(i, i + 3) * kernel;
+            loss[i + 1] = fma(Trv(7.0 / 8), buffer[i + 1], Trv(1.0 / 8) * buffer[i]);
+
+            loss = pow(divide(loss - Trv(1), ln(loss + Trv(std::numeric_limits<T>::min()))), compressRate);
+        }
+    }
+
+    template<Scalar T, bool TakeLn>
     void Vegas<T, TakeLn>::pre_trial() {
         // Initial value avoids situation where number of samples is too small to sample effective data
         losses = Trv(std::numeric_limits<T>::min());
@@ -180,30 +203,11 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    auto Vegas<T, TakeLn>::compress(Vector auto&& loss) -> Trv {
-        const auto sum = loss.sum();
-        const bool noData = sum.isZero();
-        if (noData)
-            return 0;
-
-        const VectorND<Trv> buffer = loss * reciprocal(sum); // Normalized values fall into a range that is feasible for compression function.
-        const Vector3D<Trv> kernel{1.0 / 8, 6.0 / 8, 1.0 / 8};
-        size_t i = 0;
-        loss[0] = fma(Trv(7.0 / 8), buffer[0], Trv(1.0 / 8) * buffer[1]);
-        for (; i < loss.getLength() - 2; ++i)
-            loss[i + 1] = buffer.template segment<3>(i, i + 3) * kernel;
-        loss[i + 1] = fma(Trv(7.0 / 8), buffer[i + 1], Trv(1.0 / 8) * buffer[i]);
-
-        loss = pow(divide(loss - Trv(1), ln(loss + Trv(std::numeric_limits<T>::min()))), compressRate);
-        return loss.mean();
-    }
-
-    template<Scalar T, bool TakeLn>
     template<ExecutePolicy P>
     void Vegas<T, TakeLn>::refineGrid() {
         parallel_for<P>([this](size_t dim) {
-            const auto meanL = compress(losses.col(dim));
-            const bool noData = meanL.isZero();
+            const auto mean = losses.col(dim).mean();
+            const bool noData = mean.isZero();
             if (noData) [[unlikely]] // No data in the dimension, typically we should have enough samples to avoid it
                 return;
 
@@ -212,12 +216,12 @@ namespace Physica {
             newPoints.front() = oldPoints.front();
             Trv temp = 0;
             for (size_t i = 1, j = 0; i < newPoints.getLength() - 1; ++i) {
-                while (temp < meanL) {
+                while (temp < mean) {
                     assert(j < getNumPoint() && "[Error]: Unexpected not enough loss, this is likely a bug");
                     temp += losses[j, dim];
                     j += 1;
                 }
-                temp -= meanL;
+                temp -= mean;
                 Trv delta = oldPoints[j] - oldPoints[j - 1];
                 newPoints[i] = fma(temp / losses[j - 1, dim], -delta, oldPoints[j]);
             }

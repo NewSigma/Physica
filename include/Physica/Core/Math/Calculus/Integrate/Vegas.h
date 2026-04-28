@@ -90,10 +90,10 @@ namespace Physica {
         void setLearnRate(Trv lr_) { lr = lr_; }
     private:
         void pre_trial();
+        void compress();
         template<ExecutePolicy P>
         void refineGrid();
         Trv calcGridLossImpl() const;
-        Trv compress(Vector auto&& loss);
 
         template<RNG R>
         [[nodiscard]] Array<VectorND<Trv>, 2> sample(std::span<int> indices) const;
