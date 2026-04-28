@@ -204,19 +204,19 @@ namespace Physica {
     void VectorExpr<ExprID::Mul, V, U>::assign_fma_for(Vector auto& __restrict v) const __restrict noexcept {
         parallel_for<P>([&, this](size_t i) {
             if constexpr (isReverseDiff())
-                v[i] = fma(getLHS().calc_value(i), Tv(getRHS().value()), v[i]);
+                v[i] = fma(getLHS().calc_value(i), getRHS().value(), v[i]);
             else
-                v[i] = fma(getLHS().calc(i), T(getRHS().value()), v[i]);
+                v[i] = fma(getLHS().calc(i), getRHS(), v[i]);
         }, Base::getLength(), 0).wait();
     }
 
     template<Vector V, Scalar U>
     template<Vector Target, size_t Length>
     void VectorExpr<ExprID::Mul, V, U>::assign_fma_simd(Target& v) const noexcept {
-        using Pack = BestPacket<typename Target::ScalarType, Length>::Type;
-        constexpr size_t Size = Pack::size();
-        const auto rhs = Pack(getRHS());
-        const T b = getRHS();
+        using U1 = std::remove_cvref_t<U>::ScalarType;
+        constexpr size_t Size = BestPacket<typename Target::ScalarType, Length>::Type::size();
+        const auto b = getRHS();
+        const auto rhs = SIMD<U1, Size>(b);
         auto it = zip(v.view(), getLHS().view()).begin();
         if constexpr (Length != Dynamic) {
             constexpr size_t to = Length / Size * Size;
@@ -397,9 +397,9 @@ namespace Physica {
     void VectorExpr<ExprID::Mul, V1, V2>::assign_fma_for(Vector auto& __restrict v) const __restrict noexcept {
         parallel_for<P>([&, this](size_t i) {
             if constexpr (isReverseDiff())
-                v[i] = fma(getLHS().calc_value(i), Tv(getRHS().calc_value(i)), v[i]);
+                v[i] = fma(getLHS().calc_value(i), getRHS().calc_value(i), v[i]);
             else
-                v[i] = fma(getLHS().calc(i), T(getRHS().calc(i)), v[i]);
+                v[i] = fma(getLHS().calc(i), getRHS().calc(i), v[i]);
         }, Base::getLength(), 0).wait();
     }
 

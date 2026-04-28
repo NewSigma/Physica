@@ -38,6 +38,12 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
+    [[nodiscard]] SIMD<Complex<T>, Size> fma(const SIMD<Complex<T>, Size> a, const SIMD<T, Size> b, const SIMD<Complex<T>, Size> c) noexcept {
+        using FullRealType = SIMD<Complex<T>, Size>::FullRealType;
+        return SIMD<Complex<T>, Size>::asComplex(fma(a.asReal(), FullRealType(b, b).gatherRealImag(), c.asReal()));
+    }
+
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<T, Size * 2> abs(const SIMD<Complex<T>, Size> x) noexcept {
         return sqrt(x.squaredNorm());
     }

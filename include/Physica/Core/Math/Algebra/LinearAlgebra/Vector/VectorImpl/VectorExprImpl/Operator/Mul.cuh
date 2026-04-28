@@ -160,9 +160,9 @@ namespace Physica {
                 uint32_t i = blockIdx.x * blockDim.x + threadIdx.x;
                 if (i < length) {
                     if constexpr (isReverseDiff())
-                        target[i] = fma(source.getLHS().calc_value(i), Tv(source.getRHS().value()), target[i]);
+                        target[i] = fma(source.getLHS().calc_value(i), source.getRHS().value(), target[i]);
                     else
-                        target[i] = fma(source.getLHS().calc(i), T(source.getRHS().value()), target[i]);
+                        target[i] = fma(source.getLHS().calc(i), source.getRHS().value(), target[i]);
                 }
             };
             CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(fn, Base::makeKernelConfig());
@@ -171,9 +171,9 @@ namespace Physica {
         if constexpr (IsDevice()) {
             for (size_t i = 0; i < Base::getLength(); ++i) {
                 if constexpr (isReverseDiff())
-                    v[i] = fma(getLHS().calc_value(i), Tv(getRHS().value()), v[i]);
+                    v[i] = fma(getLHS().calc_value(i), getRHS().value(), v[i]);
                 else
-                    v[i] = fma(getLHS().calc(i), T(getRHS().value()), v[i]);
+                    v[i] = fma(getLHS().calc(i), getRHS().value(), v[i]);
             }
         }
     }
@@ -247,9 +247,9 @@ namespace Physica {
                 uint32_t i = blockIdx.x * blockDim.x + threadIdx.x;
                 if (i < length) {
                     if constexpr (Base::isReverseDiff())
-                        target[i] = fma(source.getLHS().calc_value(i), Tv(source.getRHS().calc_value(i)), target[i]);
+                        target[i] = fma(source.getLHS().calc_value(i), source.getRHS().calc_value(i), target[i]);
                     else
-                        target[i] = fma(source.getLHS().calc(i), T(source.getRHS().calc(i)), target[i]);
+                        target[i] = fma(source.getLHS().calc(i), source.getRHS().calc(i), target[i]);
                 }
             };
             CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(fn, Base::makeKernelConfig());
@@ -258,9 +258,9 @@ namespace Physica {
         if constexpr (IsDevice()) {
             for (size_t i = 0; i < Base::getLength(); ++i) {
                 if constexpr (Base::isReverseDiff())
-                    v[i] = fma(getLHS().calc_value(i), Tv(getRHS().calc_value(i)), v[i]);
+                    v[i] = fma(getLHS().calc_value(i), getRHS().calc_value(i), v[i]);
                 else
-                    v[i] = fma(getLHS().calc(i), T(getRHS().calc(i)), v[i]);
+                    v[i] = fma(getLHS().calc(i), getRHS().calc(i), v[i]);
             }
         }
     }

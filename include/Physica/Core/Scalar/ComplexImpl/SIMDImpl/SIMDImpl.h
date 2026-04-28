@@ -55,15 +55,19 @@ namespace Physica {
     template<Scalar T, int Size>
     auto SIMD<Complex<T>, Size>::operator+(const Packet auto x) const {
         static_assert(x.size() == size(), "[Error]: Size mismatch");
-        static_assert(x.isComplex(), "[Error]: No impl");
-        return asComplex(asReal() + x.asReal());
+        if constexpr (x.isComplex())
+            return asComplex(asReal() + x.asReal());
+        else
+            return asComplex(asReal() + FullRealType(x, SIMD<T, Size>(0)).gatherRealImag());
     }
 
     template<Scalar T, int Size>
     auto SIMD<Complex<T>, Size>::operator-(const Packet auto x) const {
         static_assert(x.size() == size(), "[Error]: Size mismatch");
-        static_assert(x.isComplex(), "[Error]: No impl");
-        return asComplex(asReal() - x.asReal());
+        if constexpr (x.isComplex())
+            return asComplex(asReal() - x.asReal());
+        else
+            return asComplex(asReal() - FullRealType(x, SIMD<T, Size>(0)).gatherRealImag());
     }
 
     template<Scalar T, int Size>
