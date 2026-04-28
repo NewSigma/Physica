@@ -113,7 +113,7 @@ namespace Physica {
              */
             const auto ac = re_1 * re_2;
             const auto bd = im_1 * im_2;
-            return RtnType(ac - bd, (re_1 + im_1) * (re_2 + im_2) - ac - bd);
+            return RtnType(ac - bd, fma(re_1 + im_1, re_2 + im_2, -(ac + bd)));
         }
         else
             return RtnType(real() * x, imag() * x);
@@ -136,8 +136,8 @@ namespace Physica {
             const auto bd = im_1 * im_2;
             // May overflow
             // Algorithm 116; https://dl.acm.org/doi/pdf/10.1145/368637.368661
-            const auto divisor = square(re_2) + square(im_2);
-            return RtnType((ac + bd) / divisor, ((re_1 + im_1) * (re_2 - im_2) - ac + bd) / divisor);
+            const auto divisor = fma(re_2, re_2, square(im_2));
+            return RtnType((ac + bd) / divisor, fma(re_1 + im_1, re_2 - im_2, bd - ac) / divisor);
         }
         else {
             const auto rep = reciprocal(x);
@@ -152,7 +152,7 @@ namespace Physica {
 
     template<Scalar T>
     __host__ __device__ T Complex<T>::squaredNorm() const {
-        return square(re) + square(im);
+        return fma(re, re, square(im));
     }
 
     template<Scalar T>
@@ -163,18 +163,6 @@ namespace Physica {
     template<Scalar T>
     __host__ __device__ T Complex<T>::phase() const {
         return std::arg(toMachine());
-    }
-
-    template<Scalar T>
-    auto Complex<T>::packet() const -> PacketType {
-        PacketType packet{};
-        packet.load(&re);
-        return packet;
-    }
-
-    template<Scalar T>
-    void Complex<T>::writePacket(const PacketType packet) {
-        packet.store(&re);
     }
 
     template<Scalar T>

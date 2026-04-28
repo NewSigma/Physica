@@ -142,12 +142,10 @@ namespace Physica {
         T result1 = unroller.sum().sum();
         T result2 = 0;
         for (; i < length; ++i) {
-            if constexpr (T::enableSIMD)
-                result2.writePacket(fma(v1.calc(i).packet(), SIMD<Tr, 2>(v2.calc(i)), result2.packet().asReal()));
-            else {
-                result2.real() = fma(v1.calc(i).real(), v2.calc(i), result2.real());
-                result2.imag() = fma(v1.calc(i).imag(), v2.calc(i), result2.imag());
-            }
+            auto x = v1.calc(i);
+            auto y = v2.calc(i);
+            result2.real() = fma(x.real(), y, result2.real());
+            result2.imag() = fma(x.imag(), y, result2.imag());
         }
         return result1 + result2;
     }

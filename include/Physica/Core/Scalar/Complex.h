@@ -34,12 +34,9 @@ namespace Physica {
     class Complex<T> : public ScalarBase<Complex<T>>, public CRCoro<Complex<T>> {
         using This = Complex<T>;
         using Base = ScalarBase<This>;
-        using PacketType = BestPacket<T, 2>::Type;
     public:
         using typename Base::ScalarType;
         using typename Base::MachineType;
-
-        constexpr static bool enableSIMD = !std::is_same<T, PacketType>::value;
         using MKL_Complex = std::conditional<T::Prec == Float32, MKL_Complex8, typename std::conditional<T::Prec == Float64, MKL_Complex16, void>::type>::type;
         using cuBLAS_Complex = std::conditional<T::Prec == Float32, cuComplex, typename std::conditional<T::Prec == Float64, cuDoubleComplex, void>::type>::type;
     private:
@@ -84,9 +81,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ T squaredNorm() const;
         [[nodiscard]] __host__ __device__ T norm() const;
         [[nodiscard]] __host__ __device__ T phase() const;
-
-        [[nodiscard]] PacketType packet() const;
-        void writePacket(PacketType packet);
 
         using Base::random_uniform;
         using Base::random_normal;
