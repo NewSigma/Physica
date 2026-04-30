@@ -177,12 +177,8 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ void sincos(Real<Prec> x, Real<Prec>& __restrict sin_result, Real<Prec>& __restrict cos_result) noexcept {
-        assert(&sin_result != &cos_result);
-        if constexpr (Prec == Float32)
-            ::sincosf(x.toMachine(), (float*)&sin_result, (float*)&cos_result);
-        else
-            ::sincos(x.toMachine(), (double*)&sin_result, (double*)&cos_result);
+    [[nodiscard]] __host__ __device__ auto sincos(Real<Prec> x) noexcept {
+        return std::make_pair(sin(x), cos(x));
     }
 
     template<FloatPrec Prec>
@@ -194,7 +190,9 @@ namespace Physica {
         else
             ::sincospi(x.toMachine(), (double*)&sin_result, (double*)&cos_result);
     #else
-        return sincos(MathConst<Real<Prec>>::pi * x, sin_result, cos_result);
+        auto [s, c] = sincos(MathConst<Real<Prec>>::pi * x);
+        *sin_result = s;
+        *cos_result = c;
     #endif
     }
 

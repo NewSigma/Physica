@@ -203,9 +203,8 @@ namespace Physica {
 
     template<Scalar T>
     auto Complex<T>::fromPhase(T phase) noexcept -> Complex<T> {
-        This result{};
-        sincos(phase, result.im, result.re);
-        return result;
+        auto [s, c] = sincos(phase);
+        return {c, s};
     }
 
     template<Scalar T>

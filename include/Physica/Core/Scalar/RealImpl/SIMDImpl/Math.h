@@ -100,8 +100,10 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    void sincos(SIMD<T, Size> x, SIMD<T, Size>& s, SIMD<T, Size>& c) noexcept {
+    [[nodiscard]] auto sincos(SIMD<T, Size> x) noexcept {
+        SIMD<T, Size> s, c;
         Physica::sincos(x.toMachine(), s.toMachine(), c.toMachine());
+        return std::make_pair(s, c);
     }
 
     template<Scalar T, int Size>

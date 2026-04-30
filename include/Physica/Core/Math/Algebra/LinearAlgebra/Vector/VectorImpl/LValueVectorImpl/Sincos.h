@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Vector V1, Vector V2>
-    auto sincos(const V1& x, V2& s, V2& c) {
+    auto sincos(const V1& x, V2& s, V2& c) noexcept {
         assert(x.getLength() == s.getLength() && x.getLength() == c.getLength());
         constexpr size_t Size = std::max(x.getSizeAtCompile(), s.getSizeAtCompile());
         using ScalarType1 = V1::ScalarType;
@@ -37,23 +37,34 @@ namespace Physica {
             return result;
         }
         else if constexpr (PacketType::size() == 1) {
-            for (size_t i = 0; i < x.getLength(); ++i)
-                sincos(x.calc(i), s[i], c[i]);
+            const size_t length = x.getLength();
+            auto it = zip(x.view(), s.view(), c.view()).begin();
+            for (size_t i = 0; i < length; ++i) {
+                auto [it_x, it_s, it_c] = it + i;
+                auto [sine, cosine] = sincos(x.calc(i));
+                *it_s = sine;
+                *it_c = cosine;
+            }
         }
         else {
             constexpr int Size = PacketType::size();
             const size_t length = x.getLength();
-            size_t i = 0;
             const size_t to = length / Size * Size;
-            PacketType s_buffer, c_buffer;
+            auto it = zip(x.view(), s.view(), c.view()).begin();
+            size_t i = 0;
             for (; i < to; i += Size) {
-                sincos(x.template packet<Size>(i), s_buffer, c_buffer);
-                s.writePacket(s_buffer, i);
-                c.writePacket(c_buffer, i);
+                auto [it_x, it_s, it_c] = it + i;
+                auto [sine, cosine] = sincos(it_x.template load<Size>());
+                it_s.store(sine);
+                it_c.store(cosine);
             }
 
-            for (; i < length; ++i)
-                sincos(x.calc(i), s[i], c[i]);
+            for (; i < length; ++i) {
+                auto [it_x, it_s, it_c] = it + i;
+                auto [sine, cosine] = sincos(x.calc(i));
+                *it_s = sine;
+                *it_c = cosine;
+            }
         }
     }
 }

@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Scalar T>
-    CoDiff<T> abs(T&& x) noexcept requires(ReverseDiff<T>) {
+    [[nodiscard]] CoDiff<T> abs(T&& x) noexcept requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto& y = co_yield abs(x_.value());
         auto& g = y.grad();
@@ -30,7 +30,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    CoDiff<T> relu(T&& x) noexcept requires(ReverseDiff<T>) {
+    [[nodiscard]] CoDiff<T> relu(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto& y = co_yield relu(x_.value());
@@ -38,7 +38,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    CoDiff<T> square(T&& x) noexcept requires(ReverseDiff<T>) {
+    [[nodiscard]] CoDiff<T> square(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto& y = co_yield square(x_.value());
@@ -46,14 +46,14 @@ namespace Physica {
     }
 
     template<Scalar T>
-    CoDiff<T> reciprocal(T&& x) noexcept requires(ReverseDiff<T>) {
+    [[nodiscard]] CoDiff<T> reciprocal(T&& x) noexcept requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto& y = co_yield reciprocal(x_.value());
         x_.reverse(-square(y.value()) * y.grad());
     }
 
     template<Scalar T>
-    CoDiff<T> sqrt(T&& x) noexcept requires(ReverseDiff<T>) {
+    [[nodiscard]] CoDiff<T> sqrt(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto& y = co_yield sqrt(x_.value());
@@ -61,7 +61,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    CoDiff<T> cbrt(T&& x) noexcept requires(ReverseDiff<T>) {
+    [[nodiscard]] CoDiff<T> cbrt(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto& y = co_yield cbrt(x_.value());
@@ -70,7 +70,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    CoDiff<T> ln(T&& x) noexcept requires(ReverseDiff<T>) {
+    [[nodiscard]] CoDiff<T> ln(T&& x) noexcept requires(ReverseDiff<T>) {
         if constexpr (!T::isComplex())
             assert(x.isPositive() && "[Error]: Invalid param");
 
@@ -80,23 +80,23 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto ln1p(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto ln1p(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto ln1pexp(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto ln1pexp(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto log(const T& x, const T& a) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto log(const T& x, const T& a) noexcept requires(ReverseDiff<T>);
     
     template<Scalar T>
-    CoDiff<T> exp(T&& x) noexcept requires(ReverseDiff<T>) {
+    [[nodiscard]] CoDiff<T> exp(T&& x) noexcept requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto& y = co_yield exp(x_.value());
         x_.reverse(y.value() * y.grad());
     }
 
     template<Scalar T, Scalar U>
-    CoDiff<T> pow(T&& x, U&& a) noexcept requires(ReverseDiff<T> && !Diffable<U>) {
+    [[nodiscard]] CoDiff<T> pow(T&& x, U&& a) noexcept requires(ReverseDiff<T> && !Diffable<U>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         LazyDestroy<U&&> a_ = std::forward<U>(a);
         auto& y = co_yield pow(x_.value(), a_);
@@ -104,10 +104,10 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto pow(const T& x, const T& n) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto pow(const T& x, const T& n) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    CoDiff<T> cos(T&& x) noexcept requires(ReverseDiff<T>) {
+    [[nodiscard]] CoDiff<T> cos(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         Tv c, s;
@@ -117,17 +117,15 @@ namespace Physica {
     }
 
     template<Scalar T>
-    CoDiff<T> sin(T&& x) noexcept requires(ReverseDiff<T>) {
-        using Tv = std::remove_reference_t<T>::ValueType;
+    [[nodiscard]] CoDiff<T> sin(T&& x) noexcept requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
-        Tv c, s;
-        sincos(x_.value(), s, c);
+        auto [s, c] = sincos(x_.value());
         auto& y = co_yield s;
         x_.reverse(c * y.grad());
     }
 
     template<Scalar T, Scalar U>
-    CoDiff<void> sincos(const T& x, U&& sin_result, U&& cos_result) noexcept requires(ReverseDiff<T> && ReverseDiff<U>) {
+    [[nodiscard]] CoDiff<void> sincos(const T& x, U&& sin_result, U&& cos_result) noexcept requires(ReverseDiff<T> && ReverseDiff<U>) {
         using Tv = T::ValueType;
         Tv s, c;
         sincos(x.value(), s, c);
@@ -139,52 +137,52 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto tan(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto tan(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto sec(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto sec(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto csc(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto csc(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto cot(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto cot(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto arccos(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto arccos(const T& x) noexcept requires(ReverseDiff<T>);
 
     //!Domain of definition: [-Pi / 2, Pi / 2]
     template<Scalar T>
-    auto arcsin(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto arcsin(const T& x) noexcept requires(ReverseDiff<T>);
     //!Domain of definition: [-Pi / 2, Pi / 2]
     template<Scalar T>
-    auto arctan(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto arctan(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto arcsec(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto arcsec(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto arccsc(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto arccsc(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto arccot(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto arccot(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    CoDiff<T> cosh(T&& x) noexcept requires(ReverseDiff<T>) {
+    [[nodiscard]] CoDiff<T> cosh(T&& x) noexcept requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto& y = co_yield cosh(x_.value());
         x_.reverse(sinh(x_.value()) * y.grad());
     }
 
     template<Scalar T>
-    CoDiff<T> sinh(T&& x) noexcept requires(ReverseDiff<T>) {
+    [[nodiscard]] CoDiff<T> sinh(T&& x) noexcept requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto& y = co_yield sinh(x_.value());
         x_.reverse(cosh(x_.value()) * y.grad());
     }
 
     template<Scalar T>
-    CoDiff<T> tanh(T&& x) noexcept requires(ReverseDiff<T>) {
+    [[nodiscard]] CoDiff<T> tanh(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto& y = co_yield tanh(x_.value());
@@ -192,42 +190,42 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto sech(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto sech(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto csch(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto csch(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto coth(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto coth(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto arccosh(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto arccosh(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto arcsinh(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto arcsinh(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto arctanh(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto arctanh(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto arcsech(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto arcsech(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto arccsch(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto arccsch(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    auto arccoth(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto arccoth(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    CoDiff<T> lncosh(T&& x) noexcept requires(ReverseDiff<T>) {
+    [[nodiscard]] CoDiff<T> lncosh(T&& x) noexcept requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto& y = co_yield lncosh(x_.value());
         x_.reverse(tanh(x_.value()) * y.grad());
     }
 
     template<Scalar T>
-    T floor(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] T floor(const T& x) noexcept requires(ReverseDiff<T>);
     
     template<Scalar T>
-    T ceil(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] T ceil(const T& x) noexcept requires(ReverseDiff<T>);
 }

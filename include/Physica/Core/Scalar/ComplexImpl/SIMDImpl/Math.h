@@ -112,8 +112,7 @@ namespace Physica {
         if constexpr (ResultType::isSeparatable) {
             using FullRealType = ResultType::FullRealType;
             const RealType factor = exp(x.real());
-            RealType s, c;
-            sincos(x.imag(), s, c);
+            auto [s, c] = sincos(x.imag());
             s *= factor;
             c *= factor;
             return ResultType::asComplex(FullRealType(c, s).scatterRealImag());
@@ -121,8 +120,8 @@ namespace Physica {
         else {
             const auto [re, im] = x.makeFullRealImag();
             const RealType factor = exp(re);
-            RealType s, c, cs;
-            sincos(im, s, c);
+            const auto [s, c] = sincos(im);
+            RealType cs;
             if constexpr (T::Prec == Float32)
                 cs = RealType::template blend<0, 4, 3, 7>(c, s);
             else
@@ -195,9 +194,7 @@ namespace Physica {
             const RealType im = x.imag();
             const RealType abs_real = abs(x.real());
             const RealType norm1 = exp(T(-2) * abs_real);
-            const RealType phase = RealType::select(re.isPositive(), im, -im);
-            RealType s, c;
-            sincos(phase, s, c);
+            const auto [s, c] = sincos(RealType::select(re.isPositive(), im, -im));
             const auto temp = ResultType::asComplex(FullRealType(fma(norm1, c, c), nmul_add(norm1, s, s)).scatterRealImag() * T(0.5));
             return ResultType::asComplex(FullRealType(abs_real, RealType(0)).scatterRealImag()) + ln(temp);
         }
@@ -205,9 +202,8 @@ namespace Physica {
             const auto [re, im] = x.makeFullRealImag();
             const RealType abs_real = abs(re);
             const RealType norm1 = exp(T(-2) * abs_real);
-            const RealType phase = RealType::select(re.isPositive(), -im, im);
-            RealType s, c, cs;
-            sincos(phase, s, c);
+            const auto [s, c] = sincos(RealType::select(re.isPositive(), -im, im));
+            RealType cs;
             if constexpr (T::Prec == Float32)
                 cs = RealType::template blend<0, 4, 3, 7>(c, s);
             else
