@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -115,7 +115,6 @@ int main() {
     constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);
     ScalarType bond = 0;
 
-    ThreadPool::numThreadRequired = 4;
     {
         const ThermoType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
@@ -137,7 +136,6 @@ int main() {
             rpmd.nvt_step<RandomSource, Sequential>(thermo, kineticModel, forceModel);
         }
     }
-    ThreadPool::getInstance().shouldExit();
     expect(scalarNear(bond, ScalarType(answer), 2E-2));
     return 0;
 }

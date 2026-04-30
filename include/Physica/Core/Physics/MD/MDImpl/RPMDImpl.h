@@ -58,10 +58,8 @@ namespace Physica {
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::updateForce(auto& model) {
         using ForceModel = std::remove_cvref_t<decltype(model)>;
         constexpr bool IsPeriodBoundary = model.isPeriodBoundary();
-        // TODO: Stateful ForceModel is not parallelizable. Add a trait to determine whether it is stateful.
-        // Currently we assume GPU models are stateful
-        // constexpr ExecutePolicy HostPolicy = Traits<ForceModel>::IsStateful ? Sequential : Thread;
-        constexpr ExecutePolicy HostPolicy = P == GPU ? Sequential : Thread;
+        // TODO: Stateful ForceModel is not parallelizable. Add a trait to determine whether it is stateful. Currently we assume GPU models are stateful
+        constexpr ExecutePolicy HostPolicy = P == GPU ? Sequential : P;
         static_assert((P != GPU) || std::allocator_traits<ForceMatrixAllocator>::isPageLocked, "[Error]: Allocator is not page locked, performance will decrease");
         if (!isContractEnabled()) {
             auto kernel = [this, &model](unsigned int replica) {
