@@ -78,8 +78,8 @@ namespace Physica {
              * Reference:
              * [1] vectorclass add-on; https://github.com/vectorclass/add-on
              */
-            const auto pair = makeFullRealImag();
-            return asComplex(mul_addsub(pair.first, x.asReal(), pair.second * x.swapRealImag()));
+            const auto [re, im] = makeFullRealImag();
+            return asComplex(mul_addsub(re, x.asReal(), im * x.swapRealImag()));
         }
         else
             return asComplex(asReal() * FullRealType(x, x).gatherRealImag());
@@ -100,10 +100,10 @@ namespace Physica {
     auto SIMD<Complex<T>, Size>::operator/(const Packet auto x) const {
         static_assert(x.size() == size(), "[Error]: Size mismatch");
         if constexpr (x.isComplex()) {
-            const auto pair = makeFullRealImag();
+            const auto [re, im] = makeFullRealImag();
             const T factor = reciprocal(abs(x.asReal()).max()); // Avoid underflow
             const auto normed = x * factor;
-            return asComplex(mul_addsub(pair.second, normed.swapRealImag(), -pair.first * normed.asReal()) / normed.squaredNorm() * factor);
+            return asComplex(mul_addsub(im, normed.swapRealImag(), -re * normed.asReal()) / normed.squaredNorm() * factor);
         }
         else
             return asComplex(asReal() / FullRealType(x, x).gatherRealImag());

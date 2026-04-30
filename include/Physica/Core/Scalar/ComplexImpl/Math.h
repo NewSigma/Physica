@@ -48,9 +48,9 @@ namespace Physica {
 
     template<Scalar T>
     Complex<T> square(const Complex<T>& c) noexcept {
-        const auto& real = c.real();
-        const auto& imag = c.imag();
-        return Complex<T>(square(real) - square(imag), (real * imag) << 1);
+        const auto& re = c.real();
+        const auto& im = c.imag();
+        return Complex<T>(fma(re, re, -square(im)), (re * im) * T(2));
     }
 
     template<Scalar T>

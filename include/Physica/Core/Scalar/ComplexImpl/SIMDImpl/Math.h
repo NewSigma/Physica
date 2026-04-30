@@ -34,7 +34,8 @@ namespace Physica {
 
     template<Scalar T, int Size>
     [[nodiscard]] SIMD<Complex<T>, Size> fma(const SIMD<Complex<T>, Size> a, const SIMD<Complex<T>, Size> b, const SIMD<Complex<T>, Size> c) noexcept {
-        return a * b + c;
+        const auto [re, im] = a.makeFullRealImag();
+        return SIMD<Complex<T>, Size>::asComplex(mul_addsub(re, b.asReal(), mul_addsub(im, b.swapRealImag(), c.asReal())));
     }
 
     template<Scalar T, int Size>
@@ -118,10 +119,10 @@ namespace Physica {
             return ResultType::asComplex(FullRealType(c, s).scatterRealImag());
         }
         else {
-            const auto pair = x.makeFullRealImag();
-            const RealType factor = exp(pair.first);
+            const auto [re, im] = x.makeFullRealImag();
+            const RealType factor = exp(re);
             RealType s, c, cs;
-            sincos(pair.second, s, c);
+            sincos(im, s, c);
             if constexpr (T::Prec == Float32)
                 cs = RealType::template blend<0, 4, 3, 7>(c, s);
             else
@@ -145,7 +146,7 @@ namespace Physica {
             x_re *= factor;
             x_im *= factor;            
 
-            const auto re = ln(square(x_re) + square(x_im)) * T(0.5) - RealType(lnF);
+            const auto re = mul_sub(ln(fma(x_re, x_re, square(x_im))), RealType(0.5), RealType(lnF));
             const auto im = arctan2(x_im, x_re);
             return ResultType::asComplex(FullRealType(re, im).scatterRealImag());
         }
@@ -155,9 +156,9 @@ namespace Physica {
             const auto lnF = ln(factor);
 
             const auto x2 = ResultType::asComplex(x.asReal() * factor);
-            const auto re = ln(x2.squaredNorm()) * T(0.5) - RealType(lnF);
-            const auto pair = x2.makeFullRealImag();
-            const auto im = arctan2(pair.second, pair.first);
+            const auto re = mul_sub(ln(x2.squaredNorm()), RealType(0.5), RealType(lnF));
+            const auto [x2re, x2im] = x2.makeFullRealImag();
+            const auto im = arctan2(x2im, x2re);
 
             RealType result;
             if constexpr (T::Prec == Float32)
@@ -176,7 +177,7 @@ namespace Physica {
     template<Scalar T, int Size>
     [[nodiscard]] SIMD<Complex<T>, Size> tanh(const SIMD<Complex<T>, Size> x) noexcept {
         using ResultType = SIMD<Complex<T>, Size>;
-        Complex<T> arr[Size];
+        std::array<Complex<T>, Size> arr;
         for (int i = 0; i < Size; ++i)
             arr[i] = tanh(x[i]);
         ResultType result{};
@@ -197,13 +198,11 @@ namespace Physica {
             const RealType phase = RealType::select(re.isPositive(), im, -im);
             RealType s, c;
             sincos(phase, s, c);
-            const auto temp = ResultType::asComplex(FullRealType(c + c * norm1, s - s * norm1).scatterRealImag() * T(0.5));
+            const auto temp = ResultType::asComplex(FullRealType(fma(norm1, c, c), nmul_add(norm1, s, s)).scatterRealImag() * T(0.5));
             return ResultType::asComplex(FullRealType(abs_real, RealType(0)).scatterRealImag()) + ln(temp);
         }
         else {
-            const auto pair = x.makeFullRealImag();
-            const auto& re = pair.first;
-            const auto& im = pair.second;
+            const auto [re, im] = x.makeFullRealImag();
             const RealType abs_real = abs(re);
             const RealType norm1 = exp(T(-2) * abs_real);
             const RealType phase = RealType::select(re.isPositive(), -im, im);
