@@ -11,11 +11,12 @@ with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 You should have received a copy of the GNU Free Documentation License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
-# 奇异递归协程(Curiously Recurring Coroutine)
+# Curiously Recurring Coroutine
 
 ## Motivation
 
-C++20无栈协程目前已经相对成熟，但是要将旧代码库迁移到新的语言标准通常会遇到一些困难。具体到模板的迁移，我们可能尝试写出这样的代码
+
+C++20 stackless coroutines are currently relatively mature, but migrating legacy codebases to the new language standard often comes with some difficulties. Specifically regarding the migration of templates, we might try to write code like this:
 
 ```C++
 template<bool Coro>
@@ -27,11 +28,12 @@ Result fn() {
 }
 ```
 
-遗憾的是，上述代码不能通过编译。因为C++标准禁止`return`关键字和协程关键词出现在同一函数中。对于这种函数的迁移，我们只能采取妥协的办法，本文提出一种结合奇异递归模板模式和协程的非侵入的范式尝试解决该问题。
+Unfortunately, the above code cannot be compiled. This is because the C++ standard prohibits the `return` keyword and coroutine keywords from appearing in the same function. For migrating such functions, we have no choice but to adopt a compromise approach. This paper proposes a non-intrusive paradigm that combines the Curiously Recurring Template Pattern (CRTP) and coroutines in an attempt to solve this problem.
 
 ## Implementation
 
-奇异递归协程的核心设计思想是要求普通函数无开销或小开销地转化为一个平庸的协程(依赖于编译器的优化)，最小代码如下
+
+The core design philosophy of *curiously recurring coroutine* is to require ordinary functions to be transformed into a trivial coroutine with zero or low overhead (relying on compiler optimizations), with minimal code as follows:
 
 ```C++
 #include <utility>
@@ -59,23 +61,24 @@ struct CRCoro { // Curiously Recurring Coroutine
 };
 ```
 
-要设计一个协程，我们需要规定以下函数:
+To design a coroutine, we need to specify the following functions:
 
-`get_return_object`: 返回对象，必选  
-`initial_suspend`: 初始暂停行为，必选  
-`final_suspend`: 最终暂停行为，必选  
-`return_value`/`return_void`: 返回值/返回空，任选其一  
-`yield_value`: 产出值，可选  
-`unhandled_exception`: 未处理异常，必选  
+`get_return_object`: returns an object, required
+`initial_suspend`: initial suspension behavior, required
+`final_suspend`: final suspension behavior, required
+`return_value/return_void`: return value / return void, choose one
+`yield_value`: yield value, optional
+`unhandled_exception`: unhandled exception, required
 
-一个平庸的协程不应包含任何等待点, 因此我们要求`initial_suspend`和`final_suspend`返回`std::suspend_never`, 不实现`yield_value`。  
-我们希望协程返回协程体产生的值, 因此在return的两个版本中选择`return_value`, 返回值必须保存在承诺对象中。  
-在返回对象的实现中, 我们构造了右值包装对象`RValueWrapper`, 通过移动构造的方式将承诺对象返回给调用者。  
-我们选择不处理异常, `unhandled_exception`为空  
+A trivial coroutine should not contain any suspension points, so we require that `initial_suspend` and `final_suspend` return `std::suspend_never`, and that `yield_value` is not implemented.  
+We want the coroutine to return the value produced by the coroutine body, so we choose `return_value` from the two return versions, and the return value must be stored in the promise object.  
+In the implementation of the return object, we construct an rvalue wrapper object `RValueWrapper`, which returns the promise object to the caller via move construction.  
+We choose not to handle exceptions, so `unhandled_exception` is left empty.  
 
-具体使用时，我们要求返回对象继承自`CRCoro`，正如我们习惯在奇异递归模板模式中做的事情:
+In specific usage, we require the return object to inherit from `CRCoro`, just as we are accustomed to doing in CRTP:
 
 ```C++
+#include <cassert>
 #include <cstdio>
 
 struct A : public CRCoro<A> {
@@ -89,7 +92,7 @@ A fn() {
 }
 
 int main() {
-    printf("%d\n", fn().a); // Expect printing 5
+    assert(fn().a == 5);
     return 0;
 }
 ```
