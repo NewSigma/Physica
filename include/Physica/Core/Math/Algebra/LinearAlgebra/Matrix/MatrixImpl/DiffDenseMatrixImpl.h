@@ -28,52 +28,54 @@ namespace Physica {
     DiffDenseMatrix::DenseMatrix(size_t order) : DenseMatrix(order, order) {}
 
     template<tparams>
-    DiffDenseMatrix::DenseMatrix(size_t row, size_t col) : v(row, col), g(row, col) {}
+    DiffDenseMatrix::DenseMatrix(size_t row, size_t col) : v(row, col) {
+        if constexpr (isForwardDiff())
+            g.resize(row, col);
+    }
 
     template<tparams>
-    DiffDenseMatrix::DenseMatrix(size_t row, size_t col, T init) : v(row, col, init), g(row, col) {
-        g.zeros();
-    }
+    DiffDenseMatrix::DenseMatrix(size_t row, size_t col, T init) : v(row, col, init), g(GradMatrix::zeros(row, col)) {}
 
     template<tparams>
     DiffDenseMatrix::DenseMatrix(size_t row, size_t col, ScalarType init) requires(isForwardDiff())
             : v(row, col, init.value()), g(row, col, init.grad()) {}
 
     template<tparams>
-    DiffDenseMatrix::DenseMatrix(std::initializer_list<Tv> list) : v(std::move(list)) {
-        g = GradMatrix(v.getRow(), v.getCol());
-        g.zeros();
+    DiffDenseMatrix::DenseMatrix(std::initializer_list<Tv> list) : v(list) {
+        if constexpr (isForwardDiff())
+            g.resize(v.getRow(), v.getCol());
+        zero_grad();
     }
 
     template<tparams>
-    DiffDenseMatrix::DenseMatrix(std::initializer_list<VectorIniter> list) : v(std::move(list)) {
-        g = GradMatrix(v.getRow(), v.getCol());
-        g.zeros();
+    DiffDenseMatrix::DenseMatrix(std::initializer_list<VectorIniter> list) : v(list) {
+        if constexpr (isForwardDiff())
+            g.resize(v.getRow(), v.getCol());
+        zero_grad();
     }
 
     template<tparams>
     DiffDenseMatrix::DenseMatrix(ValueMatrix v_, GradMatrix g_) : v(std::move(v_)), g(std::move(g_)) {}
 
     template<tparams>
-    template<Vector V>
-    DiffDenseMatrix::DenseMatrix(const V& vec) requires(!ReverseDiff<V>) : DenseMatrix(vec.getLength(), 1) {
+    DiffDenseMatrix::DenseMatrix(const Vector auto& vec) : DenseMatrix(vec.getLength(), 1) {
+        using V = decltype(vec);
+        static_assert(!ReverseDiff<V>, "[Error]: Copying a reverse diff object breaks the compute graph");
         if constexpr (!Diffable<V>) {
-            auto col = v.col(0);
-            vec.assign(col);
-            g.zeros();
+            vec.assign(v.col(0));
+            zero_grad();
         }
-        else {
-            auto col = this->col(0);
-            vec.assign(col);
-        }
+        else
+            vec.assign(this->col(0));
     }
 
     template<tparams>
-    template<Matrix M>
-    DiffDenseMatrix::DenseMatrix(const M& mat) requires(!ReverseDiff<M>) : DenseMatrix(mat.getRow(), mat.getCol()) {
+    DiffDenseMatrix::DenseMatrix(const Matrix auto& mat) : DenseMatrix(mat.getRow(), mat.getCol()) {
+        using M = decltype(mat);
+        static_assert(!ReverseDiff<M>, "[Error]: Copying a reverse diff object breaks the compute graph");
         if constexpr (!Diffable<M>) {
             mat.assign(v);
-            g.zeros();
+            zero_grad();
         }
         else
             mat.assign(*this);
@@ -82,28 +84,31 @@ namespace Physica {
     template<tparams>
     void DiffDenseMatrix::resize(size_t row, size_t col) {
         v.resize(row, col);
-        g.resize(row, col);
+        if constexpr (isForwardDiff())
+            g.resize(row, col);
+        else
+            assert(g.empty() && "[Error]: Reject resize-after-reverse");
     }
 
     template<tparams>
     template<RNG R>
     void DiffDenseMatrix::random_uniform() {
         v.template random_uniform<R>();
-        g.zeros();
+        zero_grad();
     }
 
     template<tparams>
     template<RNG R>
     void DiffDenseMatrix::random_normal() {
         v.template random_normal<R>();
-        g.zeros();
+        zero_grad();
     }
 
     template<tparams>
     template<RNG R>
     void DiffDenseMatrix::random_any(auto& distribution) {
         v.template random_any<R>(distribution);
-        g.zeros();
+        zero_grad();
     }
 
     template<tparams>
@@ -126,11 +131,18 @@ namespace Physica {
     }
 
     template<tparams>
+    void DiffDenseMatrix::zero_grad() {
+        g.zeros();
+    }
+
+    template<tparams>
     auto DiffDenseMatrix::data(this auto&& self) noexcept {
         constexpr bool IsConst = std::is_const<std::remove_reference_t<decltype(self)>>::value;
         using U = Diff<T, Mode, Order>;
         using RetTy = std::conditional<IsConst, typename U::ConstPtrTy, typename U::PtrTy>::type;
-        return RetTy(self.v.data(), self.g.data());
+        if constexpr (isReverseDiff())
+            assert(!self.g.empty() && "[Error]: Grad is not ready");
+        return RetTy(self.values().data(), self.grads().data());
     }
 
     template<tparams>
@@ -141,6 +153,14 @@ namespace Physica {
     template<tparams>
     template<int GradOrder>
     auto&& DiffDenseMatrix::grads(this auto&& self) noexcept {
+        if constexpr (isReverseDiff()) {
+            if (self.g.empty()) {
+                auto& g1 = const_cast<GradMatrix&>(self.g);
+                g1.resize(self.v);
+                g1.zeros();
+            }
+        }
+
         if constexpr (GradOrder == 1)
             return forward_like<decltype(self)>(self.g);
         else

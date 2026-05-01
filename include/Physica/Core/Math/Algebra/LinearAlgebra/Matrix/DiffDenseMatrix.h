@@ -58,10 +58,8 @@ namespace Physica {
         DenseMatrix(std::initializer_list<Tv> list);
         DenseMatrix(std::initializer_list<VectorIniter> list);
         DenseMatrix(ValueMatrix v_, GradMatrix g_);
-        template<Vector V>
-        explicit(isReverseDiff()) DenseMatrix(const V& vec) requires(!ReverseDiff<V>);
-        template<Matrix M>
-        explicit(isReverseDiff()) DenseMatrix(const M& mat) requires(!ReverseDiff<M>);
+        explicit(isReverseDiff()) DenseMatrix(const Vector auto& vec);
+        explicit(isReverseDiff()) DenseMatrix(const Matrix auto& mat);
         DenseMatrix(const This&) = default;
         DenseMatrix(This&&) noexcept = default;
         ~DenseMatrix() = default;
@@ -70,6 +68,8 @@ namespace Physica {
         using Base::operator=;
         using Base::operator[];
         /* Operations */
+        void zero_grad();
+
         using Base::resize;
         void resize(size_t row, size_t col);
         [[nodiscard]] auto toDevice() const;

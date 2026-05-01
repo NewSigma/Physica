@@ -22,29 +22,31 @@
 
 namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length) noexcept : v(length), g(length) {}
-
-    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length, T init) : v(length, init), g(length) {
-        g.zeros();
+    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length) noexcept : v(length) {
+        if constexpr (isForwardDiff())
+            g.resize(length);
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length, ScalarType init) requires(isForwardDiff())
-            : v(length, init.value()), g(length, init.grad()) {}
+    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length, T init) : v(length, init), g(GradVector::zeros(length)) {}
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(std::initializer_list<T> list) : v(std::move(list)), g(v.getLength()) {
-        g.zeros();
+    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length, ScalarType init) requires(isForwardDiff()) : v(length, init.value()), g(length, init.grad()) {}
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
+    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(std::initializer_list<T> list) : v(list) {
+        if constexpr (isForwardDiff())
+            g.resize(v.getLength());
+        zero_grad();
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(std::initializer_list<ScalarType> list) requires(isForwardDiff()) : DenseVector(list.size()) {
-        size_t i = 0;
-        for (auto& elem : list) {
-            v[i] = elem.value();
-            g[i] = elem.grad();
-            i += 1;
+        auto view = zip(v.view(), g.view(), list);
+        for (auto it = view.begin(); it < view.end(); ++it) {
+            auto [it_v, it_g, it_l] = it;
+            *it_v = it_l->value();
+            *it_g = it_l->grad();
         }
     }
 
@@ -58,7 +60,7 @@ namespace Physica {
         static_assert(!ReverseDiff<V>, "[Error]: Copying a reverse diff object breaks the compute graph");
         if constexpr (!Diffable<V>) {
             src.assign(v);
-            g.zeros();
+            zero_grad();
         }
         else
             src.assign(*this);
@@ -66,14 +68,7 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     bool DenseVector<Diff<T, Mode, Order>, Length, Allocator>::operator==(const This& other) const {
-        const size_t length = getLength();
-        if (length != other.getLength())
-            return false;
-
-        for (size_t i = 0; i < length; ++i)
-            if (operator[](i) != other[i])
-                return false;
-        return true;
+        return v == other.v && g == other.g;
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
@@ -83,10 +78,11 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::resize(size_t size) {
-        if (size != getLength()) {
-            v.resize(size);
+        v.resize(size);
+        if constexpr (isForwardDiff())
             g.resize(size);
-        }
+        else
+            assert(g.empty() && "[Error]: Reject resize-after-reverse");
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
@@ -122,7 +118,7 @@ namespace Physica {
         constexpr bool IsConst = std::is_const<std::remove_reference_t<decltype(self)>>::value;
         using U = Diff<T, Mode, Order>;
         using RetTy = std::conditional<IsConst, typename U::ConstPtrTy, typename U::PtrTy>::type;
-        return RetTy(self.v.data(), self.g.data());
+        return RetTy(self.values().data(), self.grads().data());
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
@@ -133,6 +129,14 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     template<int GradOrder>
     auto&& DenseVector<Diff<T, Mode, Order>, Length, Allocator>::grads(this auto&& self) noexcept {
+        if constexpr (isReverseDiff()) {
+            if (self.g.empty()) {
+                auto& g1 = const_cast<GradVector&>(self.g);
+                g1.resize(self.v);
+                g1.zeros();
+            }
+        }
+
         if constexpr (GradOrder == 1)
             return forward_like<decltype(self)>(self.g);
         else

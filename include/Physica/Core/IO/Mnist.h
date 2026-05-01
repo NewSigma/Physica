@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -35,7 +35,7 @@ namespace Physica {
         constexpr static size_t NumPixelInImage = ImageSize * ImageSize;
         constexpr static size_t NumCategory = 10;
         struct ImageType {
-            unsigned char pixels[NumPixelInImage];
+            Array<unsigned char, NumPixelInImage> pixels;
             /* Operations */
             template<Vector V>
             [[nodiscard]] V asVector() const;
@@ -45,7 +45,7 @@ namespace Physica {
         using DatasetType = SimpleDataset<T, unsigned char>;
     private:
         union IntDecomp {
-            char c[4];
+            Array<char, 4> c;
             int32_t i;
         };
 
@@ -57,7 +57,7 @@ namespace Physica {
         LabelArray trainLabels;
         LabelArray testLabels;
     public:
-        Mnist(const char* folder);
+        Mnist(const char* folder = ".");
         Mnist(const Mnist&) = default;
         Mnist(Mnist&&) noexcept = default;
         ~Mnist() = default;
@@ -68,10 +68,10 @@ namespace Physica {
         template<Vector V> DatasetType<V> makeTestDataset() const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const DataArray& getTrainSamples() const noexcept { return trainSamples; }
-        [[nodiscard]] const DataArray& getTestSamples() const noexcept { return testSamples; }
-        [[nodiscard]] const LabelArray& getTrainLabels() const noexcept { return trainLabels; }
-        [[nodiscard]] const LabelArray& getTestLabels() const noexcept { return testLabels; }
+        [[nodiscard]] const auto& getTrainSamples() const noexcept { return trainSamples; }
+        [[nodiscard]] const auto& getTestSamples() const noexcept { return testSamples; }
+        [[nodiscard]] const auto& getTrainLabels() const noexcept { return trainLabels; }
+        [[nodiscard]] const auto& getTestLabels() const noexcept { return testLabels; }
         [[nodiscard]] size_t getNumTrainSample() const noexcept { return trainSamples.getLength(); }
         [[nodiscard]] size_t getNumTestSample() const noexcept { return testSamples.getLength(); }
     private:

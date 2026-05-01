@@ -138,7 +138,7 @@ using RandomSource = Random<MT19937>;
 
 namespace {
     std::pair<Dataset, Dataset> makeDataset() {
-        const Mnist mnist("./data");
+        const Mnist mnist{};
         auto dataset = mnist.makeTrainDataset<VectorND<T>>();
         for (size_t i = 0; i < dataset.getSize(); ++i) {
             auto& sample = dataset.getSamples()[i];
