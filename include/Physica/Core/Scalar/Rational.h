@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -61,7 +61,7 @@ namespace Physica {
         return Rational(-numerator, denominator);
     }
 
-    inline void swap(Rational& __restrict r1, Rational& __restrict r2) noexcept {
+    inline void swap(Rational& r1, Rational& r2) noexcept {
         r1.swap(r2);
     }
 }

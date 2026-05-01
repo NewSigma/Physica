@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -172,7 +172,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool isSpinPolarized>
-    void swap(BandGrid<T, isSpinPolarized>& __restrict band1, BandGrid<T, isSpinPolarized>& __restrict band2) noexcept {
+    void swap(BandGrid<T, isSpinPolarized>& band1, BandGrid<T, isSpinPolarized>& band2) noexcept {
         band1.swap(band2);
     }
 }

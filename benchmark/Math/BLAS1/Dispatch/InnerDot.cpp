@@ -38,22 +38,22 @@ namespace {
     }
 }
 
-BENCHMARK(innerDot<float32>)->Name("innerDot float32 default")
+BENCHMARK(innerDot<float32>)->Name("innerDot default float32")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
 
-BENCHMARK(innerDot<float64>)->Name("innerDot float64 default")
+BENCHMARK(innerDot<float64>)->Name("innerDot default float64")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
 
-BENCHMARK(innerDot<cfloat32>)->Name("innerDot cfloat32 default")
+BENCHMARK(innerDot<cfloat32>)->Name("innerDot default cfloat32")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
 
-BENCHMARK(innerDot<cfloat64>)->Name("innerDot cfloat64 default")
+BENCHMARK(innerDot<cfloat64>)->Name("innerDot default cfloat64")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);

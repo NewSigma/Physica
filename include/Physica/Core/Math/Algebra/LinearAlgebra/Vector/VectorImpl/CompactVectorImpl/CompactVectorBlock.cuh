@@ -32,8 +32,8 @@ namespace Physica {
         size_t from;
         size_t to;
     public:
-        __host__ __device__ device_obj(Ref vec, size_t from, size_t to);
-        __host__ __device__ device_obj(Ref vec, size_t from);
+        __host__ __device__ device_obj(Ref vec_, size_t from, size_t to);
+        __host__ __device__ device_obj(Ref vec_, size_t from);
         device_obj(const This& block) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -61,16 +61,16 @@ namespace Physica {
     };
 
     template<Vector V, size_t Length>
-    __host__ __device__ device_obj<CompactVectorBlock<V, Length>>::device_obj(Ref vec, size_t from, size_t to)
-            : vec(asStruct(vec)), from(from), to(to) {
+    __host__ __device__ device_obj<CompactVectorBlock<V, Length>>::device_obj(Ref vec_, size_t from, size_t to)
+            : vec(asStruct(vec_)), from(from), to(to) {
         assert(from < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
     template<Vector V, size_t Length>
-    __host__ __device__ device_obj<CompactVectorBlock<V, Length>>::device_obj(Ref vec, size_t from)
-            : device_obj(vec, from, vec.getLength()) {}
+    __host__ __device__ device_obj<CompactVectorBlock<V, Length>>::device_obj(Ref vec_, size_t from)
+            : device_obj(vec_, from, vec_.getLength()) {}
 
     template<Vector V, size_t Length>
     auto device_obj<CompactVectorBlock<V, Length>>::operator=(const This& obj) -> This& {

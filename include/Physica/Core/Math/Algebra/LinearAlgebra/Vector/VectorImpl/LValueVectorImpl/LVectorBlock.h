@@ -36,8 +36,8 @@ namespace Physica {
         size_t from;
         size_t to;
     public:
-        LVectorBlock(V&& vec, size_t from, size_t to);
-        LVectorBlock(V&& vec, size_t from);
+        LVectorBlock(V&& vec_, size_t from, size_t to);
+        LVectorBlock(V&& vec_, size_t from);
         LVectorBlock(const This& block) = default;
         LVectorBlock(This&&) noexcept = default;
         ~LVectorBlock() = default;
@@ -65,15 +65,15 @@ namespace Physica {
     };
 
     template<Vector V, size_t Length>
-    LVectorBlock<V, Length>::LVectorBlock(V&& vec, size_t from, size_t to)
-            : vec(std::forward<V>(vec)), from(from), to(to) {
+    LVectorBlock<V, Length>::LVectorBlock(V&& vec_, size_t from, size_t to)
+            : vec(std::forward<V>(vec_)), from(from), to(to) {
         assert(from < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
     template<Vector V, size_t Length>
-    LVectorBlock<V, Length>::LVectorBlock(V&& vec, size_t from_) : LVectorBlock(std::forward<V>(vec), from_, vec.getLength()) {}
+    LVectorBlock<V, Length>::LVectorBlock(V&& vec_, size_t from_) : LVectorBlock(std::forward<V>(vec_), from_, vec_.getLength()) {}
 
     template<Vector V, size_t Length>
     auto LVectorBlock<V, Length>::operator=(const This& v) -> This& {

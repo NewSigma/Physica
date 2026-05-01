@@ -178,7 +178,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    void swap(Bidiagonalization<M>& __restrict obj1, Bidiagonalization<M>& __restrict obj2) noexcept {
+    void swap(Bidiagonalization<M>& obj1, Bidiagonalization<M>& obj2) noexcept {
         obj1.swap(obj2);
     }
 }

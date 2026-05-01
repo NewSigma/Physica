@@ -34,8 +34,7 @@ namespace Physica {
 
     template<Scalar T, int Size>
     [[nodiscard]] SIMD<Complex<T>, Size> fma(const SIMD<Complex<T>, Size> a, const SIMD<Complex<T>, Size> b, const SIMD<Complex<T>, Size> c) noexcept {
-        const auto [re, im] = a.makeFullRealImag();
-        return SIMD<Complex<T>, Size>::asComplex(mul_addsub(re, b.asReal(), mul_addsub(im, b.swapRealImag(), c.asReal())));
+        return a * b + c;
     }
 
     template<Scalar T, int Size>

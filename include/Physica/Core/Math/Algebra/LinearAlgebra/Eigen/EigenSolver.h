@@ -461,7 +461,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    void swap(EigenSolver<T, Order>& __restrict solver1, EigenSolver<T, Order>& __restrict solver2) noexcept {
+    void swap(EigenSolver<T, Order>& solver1, EigenSolver<T, Order>& solver2) noexcept {
         solver1.swap(solver2);
     }
 }

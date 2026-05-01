@@ -196,7 +196,7 @@ namespace Physica {
 #endif
 
     template<Scalar T, size_t Order>
-    void swap(DenseHermiteMatrix<T, Order>& __restrict m1, DenseHermiteMatrix<T, Order>& __restrict m2) noexcept {
+    void swap(DenseHermiteMatrix<T, Order>& m1, DenseHermiteMatrix<T, Order>& m2) noexcept {
         m1.swap(m2);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -249,7 +249,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    void swap(SymmEigenSolver<T, Order>& __restrict solver1, SymmEigenSolver<T, Order>& __restrict solver2) noexcept {
+    void swap(SymmEigenSolver<T, Order>& solver1, SymmEigenSolver<T, Order>& solver2) noexcept {
         solver1.swap(solver2);
     }
 }

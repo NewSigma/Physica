@@ -59,7 +59,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return true; }
     private:
-        template<size_t N> ProcessFuture run_qe(TempFile<N>& __restrict input, TempFile<N>& __restrict output) const;
+        template<size_t N> ProcessFuture run_qe(TempFile<N>& input, TempFile<N>& output) const;
     };
 
     template<Scalar T>
@@ -133,8 +133,7 @@ namespace Physica {
 
     template<Scalar T>
     template<size_t N>
-    ProcessFuture QEModel<T>::run_qe(
-            TempFile<N>& __restrict input, TempFile<N>& __restrict output) const {
+    ProcessFuture QEModel<T>::run_qe(TempFile<N>& input, TempFile<N>& output) const {
         int fd[2];
         if (pipe(fd) == -1)
             throw SystemException();

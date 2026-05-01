@@ -76,8 +76,8 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    CompactVectorBlock<V, Length>::CompactVectorBlock(V&& vec, size_t from_)
-            : CompactVectorBlock(std::forward<V>(vec), from_, vec.getLength()) {}
+    CompactVectorBlock<V, Length>::CompactVectorBlock(V&& vec_, size_t from_)
+            : CompactVectorBlock(std::forward<V>(vec_), from_, vec_.getLength()) {}
 
     template<Vector V, size_t Length>
     auto CompactVectorBlock<V, Length>::operator=(const This& v) -> This& {

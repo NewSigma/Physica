@@ -15,63 +15,64 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ## Introduction
 
-LinearAlgebra模块提供有SIMD和GPU加速的可微线性代数功能。  
+The *LinearAlgebra* module provides differentiable linear algebra functionalities with SIMD and GPU acceleration.
 
-可微分科学计算: 将自动微分广泛而深入的结合现代科学计算, 降低自动微分技术使用成本, 与底层模块结合持续享受算法红利, 首先要有可微分线性代数库。  
+**Differentiable Scientific Computing**: By extensively and deeply integrating automatic differentiation with modern scientific computing, the goal is to lower the cost of using automatic differentiation techniques and enable continuous benefits from algorithmic advancements through integration with underlying modules. The first step is to have a differentiable linear algebra library.
 
-受Eigen、Armadillo等C++线性代数库的启发，LinearAlgebra广泛使用表达式模板技术以减少中间对象和进行编译期表达式变换。
+Inspired by C++ linear algebra libraries such as *Eigen*$^{[1]}$ and *Armadillo*$^{[2]}$, *LinearAlgebra* makes extensive use of expression template techniques to reduce intermediate objects and perform compile-time expression transformations.
 
-## 架构设计: 左值/右值线性空间
+## Architecture Design: LValue/RValue Linear Space
 
-历史上, C语言的左值和右值的定义非常简单：
+Historically, the definitions of lvalue and rvalue in the C language were very simple:
 
-    左值(lvalue)：可以出现在赋值语句左边的表达式。它代表一个有名字、有固定地址的内存位置。
-    右值(rvalue)：只能出现在赋值语句右边的表达式。它代表一个临时的、即将消亡的值。
+- LValue: An expression that can appear on the left side of an assignment statement. It represents a named memory location with a fixed address.
+- RValue: An expression that can only appear on the right side of an assignment statement. It represents a temporary, soon-to-be-destroyed value.
 
-数值计算的线性空间不是抽象的线性空间, 所有计算必须在一定的物理内存中进行。可将赋值运算引入线性空间, 构造广义线性空间。这种设计明确将表达式模板纳入LinearAlgebra的类型系统, 便于模式识别的编写。
+The linear space used for numerical computation is not an abstract linear space; all computations must take place within a specific physical memory. By introducing assignment operations into the linear space, a generalized linear space can be constructed. This design explicitly incorporates expression templates into the type system of *LinearAlgebra*, facilitating the writing of pattern recognition.
 
-线性代数对象的基类一般有三种:
+The base classes for linear algebra objects generally fall into three categories:
 
-- 右值对象(RValueVector, RValueMatrix, ...)
-- 左值对象(LValueVector, LValueMatrix, ...)
-- 紧凑对象(CompactVector, CompactMatrix, ...)
+- RValue objects (`RValueVector`, `RValueMatrix`, ...)
+- LValue objects (`LValueVector`, `LValueMatrix`, ...)
+- Compact objects (`CompactVector`, `CompactMatrix`, ...)
 
-以稠密向量为例, 继承关系为DenseVector -> CompactVector -> LValueVector -> RValueVector
+Taking a dense vector as an example, the inheritance hierarchy is: `DenseVector` → `CompactVector` → `LValueVector` → `RValueVector`.
 
-**右值对象**:
+**RValue object**:
 
-以右值向量为例, 唯二的核心操作:
+Taking an RValue vector as an example, there are only two core operations:
 
 ``` C++
 Scalar RValueVector::calc(size_t index) { ... }
 size_t RValueVector::getLength() { ... }
 ```
 
-原则上所有"数学"向量的操作均可以在核心操作的基础上实现。可以计算右值对象的元素但不能取其指针, 因此**任何**表达式模板都是一个右值对象。提供calc_value()返回元素的value, 用于反向传播中不需要梯度的情况。
+In principle, all "mathematical" vector operations can be implemented on the basis of these core operations. The elements of an rvalue object can be accessed, but their pointers cannot be taken. Therefore, **any** expression template is an rvalue object. The `calc_value()` function is provided to return the value of an element, which is used in cases where gradients are not needed during backpropagation.
 
-**左值对象**:
+**LValue object**:
 
-左值对象的唯一核心操作:
+The only core operation on LValue objects:
+
 
 ``` C++
 Scalar* LValueVector::data_ptr(size_t index) { ... }
 ```
 
-显然左值对象可计算, 计算的操作是解引用
+Obviously, LValue objects are computable, and the operation for computation is dereferencing.
 
 ``` C++
 Scalar LValueVector::calc(size_t index) { return *data_ptr(index); }
 ```
 
-**紧凑对象**:
+**Compact object**:
 
-紧凑对象的唯一核心操作:
+The only core operation on compact objects:
 
 ``` C++
 Scalar* CompactVector::data() { ... }
 ```
 
-紧凑对象是元素在内存上连续分布的
+A compact object is one whose elements are continuously distributed in memory.
 
 ``` C++
 Scalar* CompactVector::data_ptr(size_t index) { return data() + index; }
@@ -79,7 +80,7 @@ Scalar* CompactVector::data_ptr(size_t index) { return data() + index; }
 
 ## Concept
 
-以矩阵为例, 在C语言观点下, 矩阵是一个二维数组:
+Taking a matrix as an example, from the perspective of C language, a matrix is a two-dimensional array:
 
 ``` C
 void fn(double** matrix) {
@@ -87,7 +88,7 @@ void fn(double** matrix) {
 }
 ```
 
-C++20以前, 面向对象的观点:
+Before C++20, from an object-oriented perspective:
 
 ``` C++
 class Matrix {
@@ -95,32 +96,32 @@ class Matrix {
 };
 ```
 
-C++20及以后, 我们认为矩阵更适合作为抽象的concept(概念):
+From C++20 onward, we consider a matrix to be better suited as an abstract *concept*:
 
 ``` C++
 template<class T>
 concept Matrix = ...;
 ```
 
-我们提供四个互斥的concept: `Scalar`, `Vector`, `Matrix`, `Tensor`; 例: 这个设计下, 只有一列的`Matrix`不是一个`Vector`。
+We provide four mutually exclusive concepts: `Scalar`, `Vector`, `Matrix`, and `Tensor`. For example: under this design, a `Matrix` with only one column is not considered a `Vector`.
 
-## 表达式模板
+## Expression templates
 
-一元操作可以显式约束:
+Unary operations can have explicit constraints:
 
 ``` C++
 template<ExprID, Matrix M>
 class UnitaryMatrixExpr { ... };
 ```
 
-考虑到可能的非Abel性, 二元操作需要更一般的声明:
+Considering potential non-Abelian properties, binary operations require more general declarations:
 
 ``` C++
 template<ExprID, class LHS, class RHS>
 class BinaryMatrixExpr { ... };
 ```
 
-使用C++23显式对象参数技术构造返回对象, 避免一类表达式模板常见的生命周期问题:
+Using C++23 explicit object parameter techniques to construct return objects, avoiding a common category of expression template lifetime issues.
 
 ``` C++
 auto c = (MatrixND<T>::identity(3) + MatrixND<T>(3, 3, 5)).diag();
@@ -133,24 +134,20 @@ std::println("{}", c);
 
 **FastAssign**:
 
-考虑线性代数对象的赋值，如将向量$\mathbf x$赋给向量$\mathbf y$
+Consider the assignment of linear algebra objects, such as assigning vector:
 
 $$\mathbf{y = x}$$
 
-对于稠密向量，使用for逐元素赋值，或使用SIMD以Packet为最小单位以提高指令吞吐量。可以断言，对任意正确的实现，其开销不大于for循环或SIMD实现。
+For dense vectors, element-wise assignment can be done using a for loop, or SIMD can be used with packet as the smallest unit to improve instruction throughput. It can be asserted that for any correct implementation, its overhead is no greater than that of a for loop or a SIMD implementation.
 
-存在特殊情况，包括但不限于稀疏结构、对称性等，使得模板特化的性能高于for循环或SIMD。
+There are special cases, including but not limited to sparse structures, symmetry, etc., where template specializations can achieve higher performance than for loops or SIMD implementations. Template specializations are implemented using the `assign` function. `FastAssign = true` indicates that the assign implementation will outperform the for loop or SIMD implementation. `assign` is holistic, and therefore `FastAssign` is propagative.
 
-模板特化使用函数assign实现，FastAssign = true表示assign实现的性能将优于for或SIMD的实现。
-
-assign具有整体性，因此FastAssign具有传播性。
-
-该选项用于实现启发性表达式变换。
+This option is used to implement heuristic expression transformations.
 
 **FastPacket**:
 
-`false`: SIMD对象的构造需要在栈上创建临时数组
-`true`: 无额外开销
+`false`: Construction of SIMD objects requires creating a temporary array on the stack.
+`true`: No additional overhead
 
 ## Reference
 

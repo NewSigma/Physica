@@ -194,7 +194,7 @@ namespace Physica {
     }
 
     template<Physica::Scalar T, size_t Order>
-    void swap(DenseSymmMatrix<T, Order>& __restrict m1, DenseSymmMatrix<T, Order>& __restrict m2) noexcept {
+    void swap(DenseSymmMatrix<T, Order>& m1, DenseSymmMatrix<T, Order>& m2) noexcept {
         m1.swap(m2);
     }
 }

@@ -149,7 +149,7 @@ namespace Physica {
     };
 
     template<class T, size_t Length, class Allocator>
-    void swap(Array<T, Length, Allocator>& __restrict array1, Array<T, Length, Allocator>& __restrict array2) noexcept {
+    void swap(Array<T, Length, Allocator>& array1, Array<T, Length, Allocator>& array2) noexcept {
         array1.swap(array2);
     }
 

@@ -35,8 +35,8 @@ namespace Physica {
         size_t from;
         size_t to;
     public:
-        RVectorBlock(V&& vec, size_t from, size_t to);
-        RVectorBlock(V&& vec, size_t from);
+        RVectorBlock(V&& vec_, size_t from, size_t to);
+        RVectorBlock(V&& vec_, size_t from);
         RVectorBlock(const This& block) = default;
         RVectorBlock(This&&) noexcept = default;
         ~RVectorBlock() = default;
@@ -61,14 +61,14 @@ namespace Physica {
     };
 
     template<Vector V, size_t Length>
-    RVectorBlock<V, Length>::RVectorBlock(V&& vec, size_t from, size_t to) : vec(std::forward<V>(vec)), from(from), to(to) {
+    RVectorBlock<V, Length>::RVectorBlock(V&& vec_, size_t from, size_t to) : vec(std::forward<V>(vec_)), from(from), to(to) {
         assert(from < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
     template<Vector V, size_t Length>
-    RVectorBlock<V, Length>::RVectorBlock(V&& vec, size_t from) : RVectorBlock(std::forward<V>(vec), from, vec.getLength()) {}
+    RVectorBlock<V, Length>::RVectorBlock(V&& vec_, size_t from) : RVectorBlock(std::forward<V>(vec_), from, vec_.getLength()) {}
 
     template<Vector V, size_t Length>
     template<size_t Length_>

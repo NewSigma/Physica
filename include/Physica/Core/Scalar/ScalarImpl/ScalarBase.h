@@ -473,7 +473,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void swap(T& __restrict x, T& __restrict y) noexcept {
+    void swap(T& x, T& y) noexcept {
         x.swap(y);
     }
 }

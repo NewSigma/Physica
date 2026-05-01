@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -60,7 +60,7 @@ namespace Physica {
     };
 
     template<Scalar T, int... Dims>
-    void swap(DenseTensor<T, Dims...>& __restrict x, DenseTensor<T, Dims...>& __restrict y) noexcept {
+    void swap(DenseTensor<T, Dims...>& x, DenseTensor<T, Dims...>& y) noexcept {
         x.swap(y);
     }
 

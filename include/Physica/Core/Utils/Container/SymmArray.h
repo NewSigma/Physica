@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -126,7 +126,7 @@ namespace Physica {
     }
 
     template<class T, size_t Order>
-    void swap(SymmArray<T, Order>& __restrict mat1, SymmArray<T, Order>& __restrict mat2) noexcept {
+    void swap(SymmArray<T, Order>& mat1, SymmArray<T, Order>& mat2) noexcept {
         mat1.swap(mat2);
     }
 }

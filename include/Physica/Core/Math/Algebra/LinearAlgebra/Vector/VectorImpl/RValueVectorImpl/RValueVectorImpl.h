@@ -853,7 +853,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V, ExecutePolicy P, size_t Length>
-    void RValueVector<Derived>::assign_simd(V& __restrict v) const __restrict noexcept {
+    void RValueVector<Derived>::assign_simd(V& v) const noexcept {
         constexpr int Size = BestPacket<typename V::ScalarType, Length>::Size;
         auto it = zip(v.view(), Base::getDerived().view()).begin();
         if constexpr (Length != Dynamic) {
@@ -910,7 +910,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V, size_t Length>
-    void RValueVector<Derived>::assign_add_simd(V& __restrict v) const __restrict noexcept {
+    void RValueVector<Derived>::assign_add_simd(V& v) const noexcept {
         constexpr int Size = BestPacket<typename V::ScalarType, Length>::Size;
         auto it = zip(v.view(), Base::getDerived().view()).begin();
         if constexpr (Length != Dynamic) {

@@ -256,7 +256,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
-    void swap(SVD<T, RowAtCompile, ColAtCompile>& __restrict svd1, SVD<T, RowAtCompile, ColAtCompile>& __restrict svd2) noexcept {
+    void swap(SVD<T, RowAtCompile, ColAtCompile>& svd1, SVD<T, RowAtCompile, ColAtCompile>& svd2) noexcept {
         svd1.swap(svd2);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -61,7 +61,7 @@ namespace Physica {
     };
 
     template<class T>
-    void swap(Mesh<T>& __restrict mesh1, Mesh<T>& __restrict mesh2) noexcept {
+    void swap(Mesh<T>& mesh1, Mesh<T>& mesh2) noexcept {
         mesh1.swap(mesh2);
     }
 }

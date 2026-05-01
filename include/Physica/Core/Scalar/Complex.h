@@ -115,7 +115,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void swap(Complex<T>& __restrict c1, Complex<T>& __restrict c2) noexcept { c1.swap(c2); }
+    void swap(Complex<T>& c1, Complex<T>& c2) noexcept { c1.swap(c2); }
 }
 
 namespace Physica {

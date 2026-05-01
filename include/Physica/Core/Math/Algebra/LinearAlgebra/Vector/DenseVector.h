@@ -115,7 +115,7 @@ namespace Physica {
     };
 
     template<Scalar T, size_t Length>
-    void swap(DenseVector<T, Length>& __restrict v1, DenseVector<T, Length>& __restrict v2) noexcept {
+    void swap(DenseVector<T, Length>& v1, DenseVector<T, Length>& v2) noexcept {
         v1.swap(v2);
     }
 
