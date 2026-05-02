@@ -24,7 +24,7 @@ namespace Physica {
     template<Vector V>
     void Conjugate<V>::assign_mkl(Vector auto& v) const noexcept {
         using Tm = decltype(std::declval<T>().toMKL());
-        v.assert_assign_mkl(vec);
+        v.assert_assign_lapack(vec);
 
         size_t n = Base::getLength();
         const auto* a = reinterpret_cast<const Tm*>(vec.data());

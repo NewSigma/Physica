@@ -70,7 +70,7 @@ namespace Physica {
                 return T(v1.values() * v2.values(), v2.template grads_mask<Order>() * v1.grads() + v1.template grads_mask<Order>() * v2.grads());
             }
         }
-        else if constexpr (Internal::EnableMKL<V1, V2>::value)
+        else if constexpr (HasMKL() && Internal::EnableLAPACK<V1, V2>::value)
             return calc_mkl();
         else
             return calc_base();

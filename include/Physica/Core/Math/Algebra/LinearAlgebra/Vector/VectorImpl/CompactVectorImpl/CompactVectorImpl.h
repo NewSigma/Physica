@@ -160,7 +160,7 @@ namespace Physica {
     auto CompactVector<Derived>::norm1() const noexcept -> CoDiff<Tr> {
         constexpr size_t Size = Base::getSizeAtCompile();
         constexpr bool SmallVector = 0 < Size && Size <= 128;
-        if constexpr (Internal::EnableMKL<Derived>::value && !SmallVector) {
+        if constexpr (HasMKL() && Internal::EnableLAPACK<Derived>::value && !SmallVector) {
             bool isSmallVector = Base::getLength() <= 128;
             return isSmallVector ? norm1_base() : norm1_mkl();
         }

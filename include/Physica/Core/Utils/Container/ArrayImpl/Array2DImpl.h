@@ -157,9 +157,7 @@ namespace Physica {
     __host__ __device__ auto* Array2D<T, Major, Row, Col, Allocator>::data(this auto&& self) noexcept {
         return self.arr.data();
     }
-    /**
-     * FIXME: Seems llvm cannot infer nonnull for nonnull + GEP
-     */
+
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
     __host__ __device__ auto* Array2D<T, Major, Row, Col, Allocator>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
         return self.data() + self.toIndex1D(row, col);

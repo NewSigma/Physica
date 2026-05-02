@@ -22,7 +22,7 @@
 
 namespace Physica {
     /**
-     * \class ScalarPtr is general n-dimension pointer that targets SOA(Structure of Arrays) storage
+     * \class ScalarPtr is an iterator for traversing a differentiable vector
      */
     template<Scalar T> requires(instanceof_tx<Diff, T>)
     class ScalarPtr<T> {

@@ -65,7 +65,7 @@ namespace Physica {
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
     void device_obj<Inverse<M>>::assign(Matrix auto& target) const {
         using Expr = Traits<M>::ExprType;
-        if constexpr (Internal::EnableMKL<Expr, decltype(target)>::value) // FIXME: We should separate EnableMKL and EnableLAPACK
+        if constexpr (Internal::EnableLAPACK<Expr, decltype(target)>::value)
             assign_cusolver(target);
         else
             noImpl();

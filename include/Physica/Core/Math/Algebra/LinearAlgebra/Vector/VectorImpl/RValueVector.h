@@ -45,7 +45,10 @@ namespace Physica {
     template<Matrix, Vector> class GEMV;
 
     namespace Internal {
-        template<class T1, class T2 = T1> class EnableMKL;
+        /**
+         * LAPACK has requirements on its parameters; we can check them using \class EnableLAPACK
+         */
+        template<class T1, class T2 = T1> class EnableLAPACK;
 
         template<Vector V1, Vector V2 = V1>
         class EnableSIMD {
@@ -72,13 +75,12 @@ namespace Physica {
         };
 
         template<Vector V1, Vector V2>
-        class EnableMKL<V1, V2> {
+        class EnableLAPACK<V1, V2> {
             using U1 = std::remove_cvref<V1>::type;
             using U2 = std::remove_cvref<V2>::type;
             using T = U1::ScalarType;
         public:
-            constexpr static bool value = HasMKL()
-                                       && std::same_as<T, typename U2::ScalarType>
+            constexpr static bool value = std::same_as<T, typename U2::ScalarType>
                                        && (T::Prec == Float16 || T::Prec == Float32 || T::Prec == Float64)
                                        && U1::isCompact()
                                        && U2::isCompact()
@@ -121,7 +123,7 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign_add(Vector auto&& v) const noexcept;
         void assert_assign(const Vector auto& source) const noexcept;
-        void assert_assign_mkl(const Vector auto& source) const noexcept;
+        void assert_assign_lapack(const Vector auto& source) const noexcept;
 
         [[nodiscard]] decltype(auto) calc(size_t index) const noexcept;
         [[nodiscard]] decltype(auto) calc_value(size_t index) const noexcept;

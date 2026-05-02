@@ -45,14 +45,13 @@ namespace Physica {
 
     namespace Internal {
         template<Matrix M1, Matrix M2>
-        class EnableMKL<M1, M2> {
+        class EnableLAPACK<M1, M2> {
             using U1 = std::remove_cvref<M1>::type;
             using U2 = std::remove_cvref<M2>::type;
             using T1 = U1::ScalarType;
             using T2 = U2::ScalarType;
         public:
-            constexpr static bool value = HasMKL()
-                                       && std::same_as<T1, T2>
+            constexpr static bool value = std::same_as<T1, T2>
                                        && !Diffable<T1>
                                        && (T1::Prec == Float32 || T2::Prec == Float64)
                                        && U1::isCompact()
@@ -96,7 +95,7 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign_add(Matrix auto&& target) const noexcept;
         void assert_assign(const Matrix auto& source) const noexcept;
-        void assert_assign_mkl(const Matrix auto& source) const noexcept;
+        void assert_assign_lapack(const Matrix auto& source) const noexcept;
 
         [[nodiscard]] decltype(auto) calc(size_t row, size_t col) const;
         [[nodiscard]] decltype(auto) calc_value(size_t row, size_t col) const;

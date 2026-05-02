@@ -23,7 +23,7 @@
 namespace Physica {
     template<class Derived>
     void CompactVector<Derived>::assign_mkl(Vector auto& v) const noexcept {
-        v.assert_assign_mkl(Base::getDerived());
+        v.assert_assign_lapack(Base::getDerived());
         const size_t n = Base::getLength();
         const void* x = data();
         void* y = v.data();

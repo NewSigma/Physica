@@ -123,8 +123,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    void RValueMatrix<Derived>::assert_assign_mkl(const Matrix auto& source) const noexcept {
-        static_assert(Internal::EnableMKL<Derived, decltype(source)>::value, "[Error]: Cannot apply MKL to this expr");
+    void RValueMatrix<Derived>::assert_assign_lapack(const Matrix auto& source) const noexcept {
+        static_assert(Internal::EnableLAPACK<Derived, decltype(source)>::value, "[Error]: Invalid expr for LAPACK");
         assert_assign(source);
     }
 

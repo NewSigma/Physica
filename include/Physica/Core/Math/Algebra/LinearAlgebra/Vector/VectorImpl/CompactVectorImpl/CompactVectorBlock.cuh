@@ -64,7 +64,7 @@ namespace Physica {
     __host__ __device__ device_obj<CompactVectorBlock<V, Length>>::device_obj(Ref vec_, size_t from, size_t to)
             : vec(asStruct(vec_)), from(from), to(to) {
         assert(from < to);
-        assert(to <= vec.getLength());
+        assert(to <= vec.getDerived().getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 

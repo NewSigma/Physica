@@ -55,7 +55,7 @@ namespace Physica {
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
     void Inverse<M>::assign(Matrix auto& target) const {
         using Expr = Traits<M>::ExprType;
-        if constexpr (Internal::EnableMKL<Expr, decltype(target)>::value)
+        if constexpr (HasMKL() && Internal::EnableLAPACK<Expr, decltype(target)>::value)
             assign_mkl(target);
         else
             assign_base(target);

@@ -22,7 +22,7 @@
 
 namespace Physica {
     /**
-     * \class ScalarRef helps implementing dereferencing semantic of ScalarPtr
+     * \class ScalarRef is a proxy type returned when dereferencing \class ScalarPtr
      */
     template<Scalar T> requires(instanceof_tx<Diff, T>)
     class ScalarRef<T> : public ScalarBase<ScalarRef<T>> {

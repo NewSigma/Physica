@@ -60,7 +60,7 @@ namespace Physica {
     template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
-        if constexpr (Internal::EnableMKL<V, decltype(target)>::value)
+        if constexpr (HasMKL() && Internal::EnableLAPACK<V, decltype(target)>::value)
             assign_mkl(target);
         else
             assign_base(target);

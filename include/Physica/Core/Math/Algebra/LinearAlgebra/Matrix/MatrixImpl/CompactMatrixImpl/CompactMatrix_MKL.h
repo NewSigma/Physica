@@ -27,7 +27,7 @@ namespace Physica {
         static_assert(std::remove_cvref_t<decltype(target)>::isCompact(), "[Error]: MKL expects compact matrix");
         static_assert(!MatrixMajor::isSameMajor<This, decltype(target)>(), "[Error]: Do not need transpose, use assign_base() instead");
         using Tm = decltype(std::declval<T>().toMKL());
-        target.assert_assign_mkl(Base::getDerived());
+        target.assert_assign_lapack(Base::getDerived());
 
         constexpr char ordering = 'R'; // Ordering does not matter
         constexpr char trans = 'T';

@@ -243,10 +243,10 @@ namespace Physica {
             using V = std::remove_cvref<decltype(v)>::type;
             constexpr size_t Size = std::max(Base::getSizeAtCompile(), v.getSizeAtCompile());
             constexpr size_t Critical = 256;
-            constexpr bool UseMKL1 = Internal::EnableMKL<V1, V>::value;
-            constexpr bool UseMKL2 = Internal::EnableMKL<V2, V>::value;
+            constexpr bool UseMKL1 = Internal::EnableLAPACK<V1, V>::value;
+            constexpr bool UseMKL2 = Internal::EnableLAPACK<V2, V>::value;
             constexpr bool UseMKL3 = Size == Dynamic || Size > Critical;
-            constexpr bool UseMKL = UseMKL1 && UseMKL2 && UseMKL3 && (T::Prec != Float64);
+            constexpr bool UseMKL = HasMKL() && UseMKL1 && UseMKL2 && UseMKL3 && (T::Prec != Float64);
             if constexpr (UseMKL) {
                 if (Base::getLength() > Critical)
                     assign_mkl(v);

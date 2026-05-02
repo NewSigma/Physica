@@ -145,7 +145,7 @@ namespace Physica {
         using V1 = std::remove_cvref_t<decltype(v)>;
         constexpr size_t Size = std::max(Base::getSizeAtCompile(), v.getSizeAtCompile());
         constexpr bool SmallVector = 0 < Size && Size <= 128;
-        if constexpr (Internal::EnableMKL<V, V1>::value && !SmallVector) {
+        if constexpr (HasMKL() && Internal::EnableLAPACK<V, V1>::value && !SmallVector) {
             if (Base::getLength() <= 128)
                 assign_add_base(v);
             else

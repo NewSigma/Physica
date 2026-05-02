@@ -25,7 +25,7 @@ namespace Physica {
     template<Matrix M, bool Upper, bool Unit>
     void MatrixTrig<M, Upper, Unit>::assign_mkl(Matrix auto&& target) const {
         using Tm = decltype(std::declval<T>().toMKL());
-        target.assert_assign_mkl(mat);
+        target.assert_assign_lapack(mat);
         target.zeros();
 
         constexpr auto Layout = MatrixMajor::isRowMatrix<M>() ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR;
