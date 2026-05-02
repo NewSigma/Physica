@@ -15,7 +15,3 @@ endif()
 if (${PHYSICA_MPI})
     target_sources(PhysicaCore PRIVATE MPIException.cpp)
 endif()
-
-if (${PHYSICA_PYTHON})
-    target_sources(PhysicaCore PRIVATE FFIException.cpp)
-endif()

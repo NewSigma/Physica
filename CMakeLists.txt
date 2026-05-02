@@ -27,7 +27,6 @@ option(PHYSICA_MKL "Enable MKL support" OFF)
 option(PHYSICA_MPI "Enable MPI support" OFF)
 option(PHYSICA_HDF5 "HDF5 is the standard IO format in Physica" ON)
 option(PHYSICA_CUDA "Enables CUDA accleration" OFF)
-option(PHYSICA_PYTHON "Enable python suppert" OFF)
 option(PHYSICA_MIMALLOC "Use mimalloc" OFF)
 # Dev options
 option(PHYSICA_PROFILE "Build with profiling support" OFF)
