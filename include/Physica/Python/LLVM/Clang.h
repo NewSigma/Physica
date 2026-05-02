@@ -1,0 +1,77 @@
+/*
+ * Copyright 2024-2025 Weibo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include <forward_list>
+#include <filesystem>
+#include "llvm/IR/Module.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/CodeGen/ModuleBuilder.h"
+#include "clang/Parse/Parser.h"
+#include "ClangImpl/IncrementalAction.h"
+#include "LLVM.h"
+
+namespace Physica {
+    class HeaderManager;
+    /**
+     * Reference:
+     * [1] clang-repl; https://clang.llvm.org/docs/ClangRepl.html
+     */
+    class Clang : public clang::CompilerInstance {
+        using This = Clang;
+        using Base = CompilerInstance;
+        using CompilerInstance = clang::CompilerInstance;
+        using CodeGenerator = clang::CodeGenerator;
+        using Parser = clang::Parser;
+        using TranslationUnitDecl = clang::TranslationUnitDecl;
+        constexpr static const char* DummyFile = "Dummy";
+    public:
+        struct PartialTranslationUnit {
+            TranslationUnitDecl* unitDecl;
+            std::unique_ptr<llvm::Module> unitModule;
+        };
+    private:
+        std::filesystem::path root;
+        std::unique_ptr<IncrementalAction> action;
+        std::unique_ptr<Parser> parser;
+        std::forward_list<PartialTranslationUnit> partialUnitList;
+        HeaderManager* pHeaderManager;
+    public:
+        Clang(std::filesystem::path root_, LLVM& llvm);
+        Clang(const This&) = delete;
+        Clang(This&&) noexcept = delete;
+        ~Clang() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        const clang::NamedDecl* include(const char* includeName);
+        PartialTranslationUnit& compile(const char* moduleName);
+        /* Getters */
+        [[nodiscard]] CodeGenerator& getCodeGen() noexcept;
+        [[nodiscard]] Parser& getParser() noexcept { return *parser; }
+        [[nodiscard]] const HeaderManager& getHeaderManager() const noexcept { return *pHeaderManager; }
+    private:
+        /* Operations */
+        void makeInvocation();
+        void initOptions();
+        void parse();
+        void cleanLastUnit() noexcept;
+    };
+}

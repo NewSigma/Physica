@@ -19,7 +19,9 @@
 [cuDSS](https://developer.nvidia.com/cudss) >=0.7.1 (Required by CUDA)  
 [Qt](https://www.qt.io/)  6.5.3  (Optional, Plotting support)  
 [mimalloc](https://github.com/microsoft/mimalloc)  >=3.2.8  (Optional)  
-[LLVM](https://llvm.org/) The same version as clang (Optional)  
+[nanobind](https://github.com/wjakob/nanobind) >=2.5 (Optional, Python binding, Concept Validation)  
+[libffi](https://github.com/libffi/libffi/) >=3.4.6 (Optional, Python binding, Concept Validation)  
+[LLVM](https://llvm.org/) The same version as clang (Optional, Python binding, Concept Validation)  
 [vectorclass](https://github.com/vectorclass/version2) (Bundled)  
 
 We recommend incrementally installing them according to your specific requirements.
