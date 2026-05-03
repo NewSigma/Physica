@@ -36,15 +36,12 @@ if(${PHYSICA_CUDA})
     # WarpSize
     physica_try_run(WarpSize CUDADevAttr/WarpSize.cpp)
     set(WarpSize ${RUN_RESULT_VAR})
-    message(STATUS "Performing WarpSize --${RUN_RESULT_VAR}")
+    # FullUnifiedSupport
+    physica_try_run(FullUnifiedSupport CUDADevAttr/FullUnifiedSupport.cpp)
+    string(TOLOWER ${COMPILE_RESULT_VAR} FullUnifiedSupport)
     # MemoryPoolsSupported
     physica_try_run(MemoryPoolsSupported CUDADevAttr/MemoryPoolsSupported.cpp)
-    if(${RUN_RESULT_VAR} MATCHES 0)
-        set(MemoryPoolsSupported false)
-    else()
-        set(MemoryPoolsSupported true)
-    endif()
-    message(STATUS "Performing MemoryPoolsSupported --${MemoryPoolsSupported}")
+    string(TOLOWER ${COMPILE_RESULT_VAR} MemoryPoolsSupported)
 endif()
 
 message(STATUS)
