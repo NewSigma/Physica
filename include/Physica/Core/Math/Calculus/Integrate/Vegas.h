@@ -90,6 +90,7 @@ namespace Physica {
         void setLearnRate(Trv lr_) { lr = lr_; }
     private:
         void pre_trial();
+        template<ExecutePolicy P>
         void compress();
         template<ExecutePolicy P>
         void refineGrid();
