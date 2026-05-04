@@ -18,9 +18,7 @@
  */
 #include <print>
 #include "Physica/Core/Scalar/Real.h"
-#include "Physica/Core/Scalar/RealImpl/FloatMPImpl/AddBasic.h"
-#include "Physica/Core/Scalar/RealImpl/FloatMPImpl/DivBasic.h"
-#include "Physica/Core/Scalar/RealImpl/FloatMPImpl/ArraySupport.h"
+#include "Physica/Core/Scalar/ScalarImpl/ArrayArithmetic.h"
 
 using namespace Physica;
 

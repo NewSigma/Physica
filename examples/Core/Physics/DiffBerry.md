@@ -13,17 +13,17 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # DiffBerry - AutoDiff approach to Berry curvature
 
-本示例使用自动微分方法计算贝里曲率, 积分得到能带陈数。自动微分方法的优势在于只需要一个本征态, 为回避有限差分方法中相位不确定的问题提供新方法。
+This example uses automatic differentiation to compute the Berry curvature and the band Chern number. The advantage of automatic differentiation is that it requires only one eigenstate, providing a neat approach to circumvent the gauge ambiguity issue inherent in finite difference methods.
 
-考虑二维晶格上的两能带陈绝缘体$^{[1]}$:
+Consider a two-band Chern insulator on a two-dimensional lattice $^{[1]}$:
 
 $$H(\mathbf k) = \vec{d}(\mathbf{k}) \cdot \vec{\sigma}$$
 
-其中$\vec{d}(\mathbf{k}) = (\sin(k_x), 3\sin(k_y), 1 - \cos(k_x) - \cos(k_y))$, $\vec{\sigma} = (\sigma_x, \sigma_y, \sigma_z)$为泡利矩阵。贝里曲率
+where $\vec{d}(\mathbf{k}) = (\sin(k_x), 3\sin(k_y), 1 - \cos(k_x) - \cos(k_y))$, $\vec{\sigma} = (\sigma_x, \sigma_y, \sigma_z)$ is Pauli's matrix. The Berry curvature reads
 
 $$\Omega(\mathbf{k}) = -2\; \text{Im}[\braket{\frac{\partial \psi}{\partial k_x}|\frac{\partial \psi}{\partial k_y}}]$$
 
-其中$\ket{\psi}$为非简并本征态。基态和激发态的陈数分别为$-1$和$1$。
+Here $\ket{\psi}$ is a nondegenerate eigenstate. The Chern numbers of the ground state and the excited state are $-1$ and $1$, respectively.
 
 ## Reference
 

@@ -1,5 +1,7 @@
 ##############################################Libs################################################
-find_package(LLVM REQUIRED CONFIG)
+if(NOT ${PHYSICA_LLVM})
+    message(FATAL_ERROR "Transforms requires LLVM package")
+endif()
 
 include(AddLLVM)
 #############################################Project##############################################

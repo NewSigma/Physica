@@ -193,3 +193,7 @@ if(${PHYSICA_MIMALLOC})
     find_package(mimalloc REQUIRED)
     add_definitions(-DPHYSICA_MIMALLOC)
 endif()
+
+if(${PHYSICA_LLVM})
+    find_package(LLVM REQUIRED CONFIG)
+endif()
