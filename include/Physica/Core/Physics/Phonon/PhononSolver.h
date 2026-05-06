@@ -217,7 +217,7 @@ namespace Physica {
     template<Scalar T>
     auto PhononSolver<T>::toKSpace(const RSpaceFCGrid& rSpaceGrid) const -> KSpaceFCGrid {
         assert(superSize == rSpaceGrid.getShape() && "[Error]: Super sizes do not match");
-        assert(getUnitCellDOF() == rSpaceGrid(0, 0, 0).getRow() && "[Error]: DOF do not match");
+        assert((getUnitCellDOF() == rSpaceGrid[0, 0, 0].getRow()) && "[Error]: DOF do not match");
         const size_t unitCellDOF = getUnitCellDOF();
         KSpaceFCGrid kSpaceGrid(getForceConstantsGridSize(), unitCellDOF, unitCellDOF);
         FFT3D fft(superSize, PlanFlag::Estimate);

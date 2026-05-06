@@ -266,27 +266,18 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator+(U&& x, T&& y) noexcept requires(Diffable<T> && !Diffable<U>) {
-        if constexpr (IsHost() || ForwardDiff<T>)
-            return std::forward<T>(y) + std::forward<U>(x);
-        else
-            unreachable();
+    [[nodiscard]] auto operator+(U&& x, T&& y) noexcept requires(Diffable<T> && !Diffable<U>) {
+        return std::forward<T>(y) + std::forward<U>(x);
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator-(U&& x, T&& y) noexcept requires(Diffable<T> && !Diffable<U>) {
-        if constexpr (IsHost() || ForwardDiff<T>)
-            return -(std::forward<T>(y) - std::forward<U>(x));
-        else
-            unreachable();
+    [[nodiscard]] auto operator-(U&& x, T&& y) noexcept requires(Diffable<T> && !Diffable<U>) {
+        return -(std::forward<T>(y) - std::forward<U>(x));
     }
 
     template<Scalar T, Scalar U>
     [[nodiscard]] __host__ __device__ auto operator*(U&& x, T&& y) noexcept requires(Diffable<T> && !Diffable<U>) {
-        if constexpr (IsHost() || ForwardDiff<T>)
-            return std::forward<T>(y) * std::forward<U>(x);
-        else
-            unreachable();
+        return std::forward<T>(y) * std::forward<U>(x);
     }
 
     template<Scalar T, Scalar U>

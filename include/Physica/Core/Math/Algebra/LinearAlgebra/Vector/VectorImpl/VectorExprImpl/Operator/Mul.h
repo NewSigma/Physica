@@ -42,7 +42,7 @@ namespace Physica {
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept;
         template<int Size>
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept;
-        [[nodiscard]] auto operator*(Scalar auto x) const noexcept;
+        [[nodiscard]] auto operator*(this auto&&, Scalar auto&& x) noexcept;
         [[nodiscard]] auto operator-(this auto&&) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
@@ -116,10 +116,10 @@ namespace Physica {
             return lhs.template load<Size>(count) * SIMD<T, Size>(rhs);
     }
 
-    // FIXME: we cannot use explicit object parameter, clang 22 rejects because ambiguous overloads
     template<Vector V, Scalar U>
-    auto VectorExpr<ExprID::Mul, V, U>::operator*(Scalar auto x) const noexcept {
-        return getLHS() * (getRHS() * x);
+    auto VectorExpr<ExprID::Mul, V, U>::operator*(this auto&& self, Scalar auto&& x) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS() * (std::forward<Self>(self).getRHS() * x);
     }
 
     template<Vector V, Scalar U>
@@ -436,25 +436,6 @@ namespace Physica {
         }
     }
     ////////////////////////////////////////////////////////////////////
-    template<Vector V, Scalar U>
-    [[nodiscard, gnu::always_inline]] auto operator*(V&& v, U&& x) noexcept requires(!DeviceObj<V>) {
-        using RtnTy = VectorExpr<ExprID::Mul, V&&, U&&>;
-        if constexpr (instanceof_xt<VectorExpr, V>) {
-            using RHS = Traits<V>::RHS;
-            if constexpr (v.getExprID() == ExprID::Mul && Scalar<RHS>)
-                return v.getLHS() * (v.getRHS() * x);
-            else
-                return RtnTy(std::forward<V>(v), std::forward<U>(x));
-        }
-        else
-            return RtnTy(std::forward<V>(v), std::forward<U>(x));
-    }
-
-    template<Scalar U, Vector V>
-    [[nodiscard, gnu::always_inline]] auto operator*(U&& x, V&& v) noexcept requires(!DeviceObj<V>) {
-        return std::forward<V>(v) * std::forward<U>(x);
-    }
-
     template<Vector V1, Vector V2>
     [[nodiscard, gnu::always_inline]] auto hadamard(V1&& v1, V2&& v2) noexcept requires(!DeviceObj<V1> && !DeviceObj<V2>) {
         using RtnTy = VectorExpr<ExprID::Mul, V1&&, V2&&>;

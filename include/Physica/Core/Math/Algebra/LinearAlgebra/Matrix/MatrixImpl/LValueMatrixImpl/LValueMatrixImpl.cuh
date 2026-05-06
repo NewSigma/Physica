@@ -34,7 +34,8 @@ namespace Physica {
             };
             CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(func, Base::makeKernelConfig());
         }
-        else {
+
+        if constexpr (IsDevice()) {
             for (size_t i = 0; i < Base::getMaxMajor(); ++i)
                 for (size_t j = 0; j < Base::getMaxMinor(); ++j)
                     refFromMajorMinor(i, j) = x;

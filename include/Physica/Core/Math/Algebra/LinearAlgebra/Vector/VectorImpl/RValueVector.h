@@ -113,6 +113,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         [[nodiscard]] bool operator!=(const Vector auto& other) const noexcept;
+        [[nodiscard, gnu::always_inline]] auto operator*(this auto&&, Scalar auto&& x) noexcept;
         [[nodiscard]] auto operator*(this auto&&, Matrix auto&& m) noexcept;
         [[nodiscard, gnu::always_inline]] auto operator-(this auto&&) noexcept;
         /* Operations */
@@ -257,6 +258,10 @@ namespace Physica {
 
     std::ostream& operator<<(std::ostream& os, const Vector auto& v) {
         return os << std::format("{}", v.format());
+    }
+
+    [[nodiscard, gnu::always_inline]] auto operator*(Scalar auto&& x, Vector auto&& v) noexcept {
+        return std::forward<decltype(v)>(v) * std::forward<decltype(x)>(x);
     }
 }
 

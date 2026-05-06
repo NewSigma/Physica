@@ -58,6 +58,8 @@ namespace Physica {
         [[nodiscard]] NonZeroPair calcNonZero(size_t index) const { return std::make_pair(indexes[index], elems[index]); }
         [[nodiscard]] size_t getLength() const noexcept { return length; }
         [[nodiscard]] size_t getNumNonZero() const noexcept { return elems.getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
         /* Friends */
         friend class SparseReference<T>;
     };

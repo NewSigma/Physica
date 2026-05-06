@@ -208,7 +208,7 @@ namespace Physica {
     template<Scalar T>
     template<Matrix M>
     M BrillouInterpolate<T>::interpolateHermiteMatrix(Vec3D qPoint, const ArrayND<M, 3>& matrixGrid) {
-        const size_t order = matrixGrid(0, 0, 0).getRow();
+        const size_t order = matrixGrid[0, 0, 0].getRow();
         M result(order, order, T(0));
         DenseTensor<Tc, 3> buffer(matrixGrid.getShape());
         for (size_t c = 0; c < order; ++c) {

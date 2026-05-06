@@ -34,7 +34,7 @@ namespace Physica {
         using Base::Base;
         /* Operators */
         using Base::operator*;
-        [[nodiscard]] __host__ __device__ auto operator*(Scalar auto x) const noexcept;
+        [[nodiscard]] __host__ __device__ auto operator*(this auto&&, Scalar auto x) noexcept;
         [[nodiscard]] __host__ __device__ auto operator-(this auto&&) noexcept;
         /* Operations */
         __host__ __device__ void assign_add(Vector auto&& v) const;
@@ -60,8 +60,9 @@ namespace Physica {
     };
 
     template<Vector V, Scalar U>
-    __host__ __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::operator*(Scalar auto x) const noexcept {
-        return getLHS() * (getRHS() * x);
+    __host__ __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::operator*(this auto&& self, Scalar auto x) noexcept {
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS() * (std::forward<Self>(self).getRHS() * x);
     }
 
     template<Vector V, Scalar U>
@@ -265,16 +266,6 @@ namespace Physica {
         }
     }
     ////////////////////////////////////////////////////////////////////
-    template<Vector V, Scalar U>
-    [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator*(V&& v, U&& x) noexcept requires(DeviceObj<V>) {
-        return device_obj<VectorExpr<ExprID::Mul, remove_device_obj_t<V&&>, U&&>>(std::forward<V>(v), std::forward<U>(x));
-    }
-
-    template<Scalar U, Vector V>
-    [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator*(U&& x, V&& v) noexcept requires(DeviceObj<V>) {
-        return std::forward<V>(v) * std::forward<U>(x);
-    }
-
     template<Vector V1, Vector V2>
     [[nodiscard, gnu::always_inline]] __host__ __device__ auto hadamard(V1&& v1, V2&& v2) noexcept requires(DeviceObj<V1> && DeviceObj<V2>) {
         if constexpr (!canonicalized(v1, v2))

@@ -42,7 +42,8 @@ namespace Physica {
             CUDAExecutor::launch<WarpSize>(func, KernelConfig(numBlock, numThread));
             return Base::getDerived();
         }
-        else if constexpr (IsDevice()) {
+
+        if constexpr (IsDevice()) {
             if constexpr (!std::same_as<T, decltype(x)>)
                 return operator=(T(x));
             else {

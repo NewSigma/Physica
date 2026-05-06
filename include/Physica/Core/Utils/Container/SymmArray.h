@@ -55,7 +55,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return order; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getOrder(); }
-        [[nodiscard]] __host__ __device__ size_t size() const noexcept { return arr.size(); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return arr.getLength(); }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return arr.getCapacity(); }
         [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
@@ -96,7 +95,7 @@ namespace Physica {
     template<class T, size_t Order>
     const H5DataSet<1> SymmArray<T, Order>::read(const H5Loc& loc, const char* name) {
         auto group = arr.read(loc, name);
-        assert(order * (order + 1) / 2 == size() && "[Error]: Order is not well initialized");
+        assert(order * (order + 1) / 2 == getLength() && "[Error]: Order is not well initialized");
         return group;
     }
 

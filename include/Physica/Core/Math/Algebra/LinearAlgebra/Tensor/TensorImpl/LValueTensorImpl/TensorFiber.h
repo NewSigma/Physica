@@ -43,6 +43,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return tensor.dim(dim); }
         [[nodiscard]] auto data_ptr(this auto&& self, size_t i) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
     template<Tensor X>

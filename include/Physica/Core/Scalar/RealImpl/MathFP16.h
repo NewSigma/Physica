@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
 
@@ -22,39 +22,45 @@
 
 namespace Physica {
     template<>
-    __host__ __device__ inline Real<Float16> abs(const Real<Float16>& x) noexcept {
-        return Real<Float16>(::__habs(x.toMachine()));
+    __host__ __device__ inline float16 abs(const float16& x) noexcept {
+        return float16(::__habs(x.toMachine()));
     }
 
     template<>
-    __host__ __device__ inline Real<Float16> sqrt(const Real<Float16>& x) noexcept {
+    __host__ __device__ inline float16 sqrt(const float16& x) noexcept {
         if constexpr (IsHost())
             return float16(sqrt(float32(x)));
         else {
         #ifdef __CUDA_ARCH__
-            return Real<Float16>(::hsqrt(x.toMachine()));
+            return float16(::hsqrt(x.toMachine()));
+        #else
+            unreachable();
         #endif
         }
     }
 
     template<>
-    __host__ __device__ inline Real<Float16> ln(const Real<Float16>& x) noexcept {
+    __host__ __device__ inline float16 ln(const float16& x) noexcept {
         if constexpr (IsHost())
             return float16(ln(float32(x)));
         else {
         #ifdef __CUDA_ARCH__
-            return Real<Float16>(::hlog(x.toMachine()));
+            return float16(::hlog(x.toMachine()));
+        #else
+            unreachable();
         #endif
         }
     }
 
     template<>
-    __host__ __device__ inline Real<Float16> exp(const Real<Float16>& x) noexcept {
+    __host__ __device__ inline float16 exp(const float16& x) noexcept {
         if constexpr (IsHost())
             return float16(exp(float32(x)));
         else {
         #ifdef __CUDA_ARCH__
-            return Real<Float16>(::hexp(x.toMachine()));
+            return float16(::hexp(x.toMachine()));
+        #else
+            unreachable();
         #endif
         }
     }

@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -11,32 +11,33 @@ with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 You should have received a copy of the GNU Free Documentation License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
-# Vegas - 自适应蒙特卡洛积分
+# Vegas - Adaptive Monte Carlo Integration
 
-Vegas算法自适应地调整积分网格以降低采样误差, 考虑8维积分
+The Vegas algorithm$^{[1, 2]}$ adaptively adjusts the integration grid to reduce sampling error, considering an 8-dimensional integral.
 
 $$I = \int_{-a}^a \text{d}\mathbf{x} \exp(-\frac{1}{2} \mathbf{x}^T \mathbf{x})$$
 
-定义网格损失函数为所有维度损失标准差的平均值
+We define the grid loss function as the average of the *normalized* standard deviations of losses across all dimensions
 
 $$L = \frac{1}{N} \sum_i^N \; \sigma(d_i) = \frac{1}{N} \sum_i^N \sqrt{\frac{\braket{d_i^2} - \braket{d_i}^2}{N_P \braket{d_i}^2}}$$
 
-其中$N$为维度, $N_P$为每个维度的格点数, $d_i$由[1]中(17)式定义.
+where $N$ is the number of dimensions, $N_P$ is the number of grid points per dimension, and $d_i$ is defined by equation (17) in [2].
 
 ![](./Vegas1.png)
 
-**图1** 网格损失随迭代次数变化. compressRate控制网格调整的速度, 压缩率越大网格收敛越快, 过大的压缩率将导致不稳定$^{[1]}$
+**Fig. 1** The grid loss versus number of iterations. The compress rate controls the speed of grid adjustment; a larger compression rate leads to faster grid convergence, but an excessively large compression rate will cause instability.$^{[2]}$
 
 ![](./Vegas2.png)
 
-**图2** 更密的网格通常能够达到更好的网格损失
+**Fig. 2** A denser grid is generally able to achieve better grid loss.
 
 ![](./Vegas3.png)
 
-**图3** 样本数不足将导致网格改善过程中的不稳定
+**Fig. 3** Insufficient sample size will lead to instability during the grid improvement process.
 
-可以使用卡方统计评估网格改善的可靠性, $\chi^2$的理论值为$1$, 显著大于1可能意味着遗失了部分被积函数的细节.
+The chi-square statistic can be used to evaluate the reliability of grid improvements. The theoretical value of $\chi^2$ is $1$, and a value significantly greater than $1$ may indicate that some details of the integrand have been lost.
 
 ## Reference
 
-[1] J. Comput. Phys. 439, 110386 (2021); https://doi.org/10.1016/j.jcp.2021.110386
+[1] J. Comput. Phys. 27, 192 (1978); https://doi.org/10.1016/0021-9991(78)90004-9
+[2] J. Comput. Phys. 439, 110386 (2021); https://doi.org/10.1016/j.jcp.2021.110386

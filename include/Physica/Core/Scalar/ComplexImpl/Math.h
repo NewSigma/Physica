@@ -87,6 +87,8 @@ namespace Physica {
         else {
         #ifdef PHYSICA_CUDA
             return Complex<T>(thrust::log(c.toThrust()));
+        #else
+            unreachable();
         #endif
         }
     }

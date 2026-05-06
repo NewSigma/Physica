@@ -240,6 +240,6 @@ namespace Physica {
             });
             i += 1;
         }
-        kSpaceIonCoulomb(0, 0, 0) = T(0);
+        kSpaceIonCoulomb[0, 0, 0] = T(0);
     }
 }

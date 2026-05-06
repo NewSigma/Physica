@@ -76,7 +76,8 @@ namespace Physica {
             };
             CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(func, target.makeKernelConfig());
         }
-        else if constexpr (IsDevice()) {
+
+        if constexpr (IsDevice()) {
             const size_t maxMajor = target.getMaxMajor();
             const size_t maxMinor = target.getMaxMinor();
             for (size_t major = 0; major < maxMajor; ++major) {

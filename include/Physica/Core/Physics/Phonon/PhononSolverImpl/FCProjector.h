@@ -115,7 +115,7 @@ namespace Physica {
     template<Scalar T>
     FCProjector<T>::VectorType FCProjector<T>::toVector(const RSpaceFCGrid& fcGrid) const {
         assert(fcGrid.getShape() == superSize && "[Error]: Cell sizes do not match");
-        assert(fcGrid(0, 0, 0).getRow() == numDOF && "[Error]: DOFs do not match");
+        assert((fcGrid[0, 0, 0].getRow() == numDOF) && "[Error]: DOFs do not match");
         VectorType result(getNumForceConsts());
         for (size_t i = 0; i < result.getLength(); ++i) {
             const auto index5D = FCSwapVector<T>::index1DTo5D(numDOF, superSize, i);
@@ -129,7 +129,7 @@ namespace Physica {
     void FCProjector<T>::toGrid(const VectorType& fcVector, RSpaceFCGrid& fcGrid) const {
         assert(fcVector.getLength() == getNumForceConsts() && "[Error]: This is not a force constants vector");
         assert(fcGrid.getShape() == superSize && "[Error]: Cell sizes do not match");
-        assert(fcGrid(0, 0, 0).getRow() == numDOF && "[Error]: DOFs do not match");
+        assert((fcGrid[0, 0, 0].getRow() == numDOF) && "[Error]: DOFs do not match");
         for (size_t i = 0; i < fcVector.getLength(); ++i) {
             const auto index5D = FCSwapVector<T>::index1DTo5D(numDOF, superSize, i);
             const Index3D cellIndex{index5D[0], index5D[1], index5D[2]};

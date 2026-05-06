@@ -28,6 +28,13 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto RValueVector<Derived>::operator*(this auto&& self, Scalar auto&& x) noexcept {
+        using V = decltype(self);
+        using U = decltype(x);
+        return VectorExpr<ExprID::Mul, V, U>(std::forward<V>(self), std::forward<U>(x));
+    }
+
+    template<class Derived>
     auto RValueVector<Derived>::operator*(this auto&& self, Matrix auto&& m) noexcept {
         using Self = decltype(self);
         using M = decltype(m);

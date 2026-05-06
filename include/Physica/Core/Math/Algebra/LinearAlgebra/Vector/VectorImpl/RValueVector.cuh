@@ -44,6 +44,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator*(this auto&&, Scalar auto&& x) noexcept;
         [[nodiscard]] __host__ __device__ auto operator*(this auto&&, Matrix auto&& m) noexcept;
         [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator-(this auto&&) noexcept;
         /* Operations */

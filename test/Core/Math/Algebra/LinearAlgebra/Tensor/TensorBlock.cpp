@@ -21,15 +21,30 @@
 
 using namespace Physica;
 
+namespace {
+    void fiber(const DenseTensor<float64, 3>& x) {
+        auto fiber = x.fiber(1, {1, Dynamic, 2});
+        for (int i = 0; i < fiber.getLength(); ++i)
+            expect(x[1, i, 2] == fiber[i]);
+
+        VectorND<float64> v = fiber;
+        expect(v == fiber);
+    }
+
+    void slice(const DenseTensor<float64, 3>& x) {
+        auto slice = x.slice(1, 2, {1, Dynamic, Dynamic});
+        for (int r = 0; r < x.dim(1); ++r)
+            for (int c = 0; c < x.dim(2); ++c)
+            expect(x[1, r, c] == slice[r, c]);
+
+        MatrixND<float64> m = slice;
+        expect(m == slice);
+    }
+}
+
 int main() {
     auto x = DenseTensor<float64, 3>::random_uniform<Random<>>({4, 4, 4});
-    auto fiber = x.fiber(1, {1, Dynamic, 2});
-    for (int i = 0; i < fiber.getLength(); ++i)
-        expect(x[1, i, 2] == fiber[i]);
-
-    auto slice = x.slice(1, 2, {1, Dynamic, Dynamic});
-    for (int r = 0; r < fiber.getLength(); ++r)
-        for (int c = 0; c < fiber.getLength(); ++c)
-        expect(x[1, r, c] == slice[r, c]);
+    fiber(x);
+    slice(x);
     return 0;
 }

@@ -24,6 +24,13 @@
 
 namespace Physica {
     template<class Derived>
+    __host__ __device__ auto device_obj<RValueVector<Derived>>::operator*(this auto&& self, Scalar auto&& x) noexcept {
+        using V = decltype(self);
+        using U = decltype(x);
+        return device_obj<VectorExpr<ExprID::Mul, remove_device_obj_t<V>, U>>(std::forward<V>(self), std::forward<U>(x));
+    }
+
+    template<class Derived>
     __host__ __device__ auto device_obj<RValueVector<Derived>>::operator*(this auto&& self, Matrix auto&& m) noexcept {
         using Self = decltype(self);
         using M = decltype(m);
@@ -51,7 +58,8 @@ namespace Physica {
             };
             CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(func, makeKernelConfig());
         }
-        else if constexpr (IsDevice())
+
+        if constexpr (IsDevice())
             assign_impl(target);
     }
 
@@ -76,7 +84,8 @@ namespace Physica {
             };
             CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(func, makeKernelConfig());
         }
-        else if constexpr (IsDevice())
+
+        if constexpr (IsDevice())
             noImpl();
     }
 
@@ -206,7 +215,8 @@ namespace Physica {
             else
                 unreachable();
         }
-        else if constexpr (IsDevice()) {
+
+        if constexpr (IsDevice()) {
             auto result = T(0);
             for (size_t i = 0; i < getLength(); ++i) {
                 if constexpr (isReverseDiff())
@@ -308,7 +318,8 @@ namespace Physica {
             else
                 unreachable();
         }
-        else if constexpr (IsDevice()) {
+
+        if constexpr (IsDevice()) {
             T result = calc(0);
             for(size_t i = 1; i < getLength(); ++i)
                 result *= calc(i);
