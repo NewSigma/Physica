@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,17 +22,49 @@
 #include "Test.h"
 
 using namespace Physica;
-using RealType = float64;
-using ComplexType = Complex<RealType>;
+using RandomSource = Random<>;
+constexpr float64 Prec = 1E-15;
 
 namespace {
     template<Scalar T>
-    void test1() {
-        Vector2D<T> v{T(2), T(1)};
-        auto givens_vector = givens(v, 0, 1);
-        DenseMatrix<T> v_mat = v;
-        applyGivens(givens_vector, v_mat, 0, 1);
-        expect(abs(v_mat[1, 0].value()) < RealType(1E-15));
+    void eliminateReal() {
+        /* Single */ {
+            const auto v = Vector2D<T>::template random_normal<RandomSource>(2);
+            auto x = v;
+            auto rotator = givens(x, 0, 1);
+            applyGivensCol(rotator, x, 0, 1);
+            expect<RandomSource>(x[1].value() < Prec);
+
+            applyRowGivens(x, rotator, 0, 1);
+            expect<RandomSource>(vectorNear(x, v, 4UL));
+        }
+        /* Row major */ {
+            const auto m = DenseMatrix<T, MatrixMajor::Row>::template random_normal<RandomSource>(2, 16);
+            auto x = m;
+            auto rotator = givens(x.col(0), 0, 1);
+            applyGivens(rotator, x, 0, 1);
+            expect<RandomSource>(abs(x[1, 0].value()) < Prec);
+        }
+    }
+
+    void eliminateComplex() {
+        using Tc = cfloat64;
+        /* Single */ {
+            const auto v = Vector2D<Tc>::random_normal<RandomSource>(2);
+            auto x = v;
+            auto rotator = givens(x, 0, 1);
+            applyGivensCol(rotator, x, 0, 1);
+            expect<RandomSource>(x[1].norm() < Prec);
+
+            applyRowGivens(x, rotator.conjugate(), 0, 1);
+            expect<RandomSource>(vectorNear(x, v, 15UL));
+        }
+        /* Row major */ {
+            auto x = DenseMatrix<Tc, MatrixMajor::Row>::template random_normal<RandomSource>(2, 16);
+            auto rotator = givens(x.col(0), 0, 1);
+            applyGivens(rotator, x, 0, 1);
+            expect<RandomSource>(x[1, 0].norm() < Prec);
+        }
     }
 
     void emptyTest() {
@@ -44,22 +76,9 @@ namespace {
 }
 
 int main() {
-    test1<RealType>();
-    test1<Diff<RealType, DiffMode::Forward, 1>>();
+    eliminateReal<float64>();
+    eliminateReal<Diff<float64, DiffMode::Forward, 1>>();
+    eliminateComplex();
     emptyTest();
-    {
-        Vector2D<ComplexType> v{{2, 1}, {1, -3}};
-        auto givens_vector = givens(v, 0, 1);
-        DenseMatrix<ComplexType> v_mat = v;
-        applyGivens(givens_vector, v_mat, 0, 1);
-        expect(v_mat[1, 0].norm() < RealType(1E-15));
-    }
-    {
-        Vector2D<ComplexType> v{{0.8699464447, 0.1883214037}, {-0.520340944, 0.1297693695}};
-        auto givens_vector = givens(v, 0, 1);
-        DenseMatrix<ComplexType> v_mat = v;
-        applyGivens(givens_vector, v_mat, 0, 1);
-        expect(v_mat[1, 0].norm() < RealType(1E-15));
-    }
     return 0;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,11 +19,28 @@
 #pragma once
 
 #include <cstdlib>
+#include <print>
+#include <source_location>
+#include "Physica/Core/Math/Random/Random.h"
 
 namespace Physica {
-    inline void expect(bool b) noexcept {
-        if (!b) [[unlikely]]
-            exit(EXIT_FAILURE);
+    [[noreturn]] inline void expect_fail(std::source_location loc, uint64_t seed) noexcept {
+        std::println("Failed at file: {}:{}:{}", loc.file_name(), loc.line(), loc.column());
+        std::println("          func: {}", loc.function_name());
+        if (seed != 0)
+            std::println("          seed: {}", seed);
+        exit(EXIT_FAILURE);
+    }
+
+    inline void expect(bool pass, std::source_location loc = std::source_location::current()) noexcept {
+        if (!pass) [[unlikely]]
+            expect_fail(loc, 0);
+    }
+
+    template<RNG R>
+    void expect(bool pass, std::source_location loc = std::source_location::current()) noexcept {
+        if (!pass) [[unlikely]]
+            expect_fail(loc, R::getInstance().getSeed());
     }
 
     consteval void syntax_only([[maybe_unused]] auto expr) noexcept {}
