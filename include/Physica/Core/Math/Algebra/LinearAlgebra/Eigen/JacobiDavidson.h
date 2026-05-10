@@ -19,7 +19,7 @@
 #pragma once
 
 #include "EigenSolver.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/IterateSolver.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/LinearCG.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Orthogonalize.h"
 
@@ -50,18 +50,18 @@ namespace Physica {
     public:
         constexpr static Tr InvalidGoal = std::numeric_limits<Tr>::max();
     private:
-        IterateSolver<T> linearSolver;
+        LinearCG<T> linearSolver;
         EigenSolver<T> eigenSolver;
 
         size_t curSearchDim;
-        DenseMatrix<T> searchSpace;
-        DenseMatrix<T> dotSpace;
-        DenseMatrix<T> searchSpaceProj;
-        DenseMatrix<T> dotSpaceProj;
-        DenseMatrix<T> spaceProj;
+        MatrixND<T> searchSpace;
+        MatrixND<T> dotSpace;
+        MatrixND<T> searchSpaceProj;
+        MatrixND<T> dotSpaceProj;
+        MatrixND<T> spaceProj;
 
         VectorND<T> eigenvalues;
-        DenseMatrix<T> eigenvectors;
+        MatrixND<T> eigenvectors;
 
         Tr error = std::numeric_limits<Tr>::epsilon();
         Tr stableThreshold = DefaultStableThreshold;
@@ -263,26 +263,26 @@ namespace Physica {
     template<Scalar T>
     void JacobiDavidson<T>::assembleProjects(const Matrix auto& source, size_t dim) {
         const size_t i = dim;
-        const auto new_direction = searchSpace.col(i);
-        auto new_dot = dotSpace.col(i);
-        new_dot = source * new_direction;
+        const auto dir = searchSpace.col(i);
+        auto dot = dotSpace.col(i);
+        dot = source * dir;
         if (i != 0) {
             /* Fill searchSpaceProj */ {
                 auto col = searchSpaceProj.col(i).head(i);
-                col = dotSpace.leftCols(i).hermite() * new_direction;
+                col = dotSpace.leftCols(i).hermite() * dir;
                 searchSpaceProj.row(i).head(i) = col.conjugate();
-                searchSpaceProj[i, i] = new_dot.conjugate() * new_direction;
+                searchSpaceProj[i, i] = dot.conjugate() * dir;
             }
             /* Fill dotSpaceProj */ {
                 auto col = dotSpaceProj.col(i).head(i);
-                col = dotSpace.leftCols(i).hermite() * new_dot;
+                col = dotSpace.leftCols(i).hermite() * dot;
                 dotSpaceProj.row(i).head(i) = col.conjugate();
-                dotSpaceProj[i, i] = new_dot.squaredNorm();
+                dotSpaceProj[i, i] = dot.squaredNorm();
             }
         }
         else {
-            searchSpaceProj[0, 0] = new_dot.conjugate() * new_direction;
-            dotSpaceProj[0, 0] = new_dot.squaredNorm();
+            searchSpaceProj[0, 0] = dot.conjugate() * dir;
+            dotSpaceProj[0, 0] = dot.squaredNorm();
         }
     }
 

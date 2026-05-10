@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -36,15 +36,16 @@ namespace Physica {
         constexpr static const char* BadConvergenceMessage = "Exceed max iteration of Schur";
         using HessenburgType = Hessenburg<T, Order>;
         using This = Schur<T, Order>;
+        using Shift = std::conditional<T::isComplex(), PlainStruct<void>, T>::type;
     public:
-        using RealType = T::RealType;
-        using ComplexType = Complex<RealType>;
+        using Tr = T::RealType;
+        using Tc = Complex<Tr>;
         using WorkingMatrix = HessenburgType::WorkingMatrix;
     private:
         WorkingMatrix matrixT;
         WorkingMatrix matrixU;
         bool computeMatrixU = false;
-        T exshift;
+        [[no_unique_address]] Shift exshift;
     public:
         Schur() = default;
         Schur(const Matrix auto& source, bool computeMatrixU_ = false);
@@ -67,8 +68,8 @@ namespace Physica {
         void francisQR(size_t lower, size_t sub_order, Vector3D<T> shift);
         void specialHessenburg(size_t lower, size_t sub_order);
 
-        ComplexType complexShift(size_t upper, size_t iter);
-        void complexQR(size_t lower, size_t upper, ComplexType shift);
+        Tc complexShift(size_t upper, size_t iter);
+        void complexQR(size_t lower, size_t upper, Tc shift);
     };
 
     template<Scalar T, size_t Order>
@@ -86,13 +87,13 @@ namespace Physica {
         if (computeMatrixU)
             matrixU = WorkingMatrix::identity(source.getRow());
 
-        const RealType factor = abs_elem(source).max();
+        const Tr factor = abs_elem(source).max();
         if (factor.isSubNormal()) {
-            matrixT = RealType(0);
+            matrixT = Tr(0);
             return;
         }
 
-        const RealType inv_factor = reciprocal(factor);
+        const Tr inv_factor = reciprocal(factor);
         const auto normalized = source * inv_factor; // Referenced from eigen, to avoid under/overflow in householder, but will lost relative accuracy(from 10^-15 to 10^-14)
         exshift = 0;
         if constexpr (Order == 2)
@@ -158,7 +159,8 @@ namespace Physica {
         while (1 <= upper && upper < order) {
             const size_t lower = activeWindowDownDiag(matrixT, upper);
             if (lower == upper) {
-                matrixT[upper, upper] += exshift;
+                if constexpr (!T::isComplex())
+                    matrixT[upper, upper] += exshift;
                 upper -= 1;
                 iter = 0;
             }
@@ -188,7 +190,9 @@ namespace Physica {
                 }
             }
         }
-        matrixT[0, 0] += exshift;
+
+        if constexpr (!T::isComplex())
+            matrixT[0, 0] += exshift;
 
         if (computeMatrixU) {
             WorkingMatrix temp = WorkingMatrix(hess.getMatrixQ()) * matrixU;
@@ -367,7 +371,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    Schur<T, Order>::ComplexType Schur<T, Order>::complexShift(size_t upper, size_t iter) {
+    auto Schur<T, Order>::complexShift(size_t upper, size_t iter) -> Tc {
         using Matrix2D = DenseMatrix<T, MatrixMajor::Col, 2, 2>;
         if ((iter == 10 || iter == 20) && upper > 1) {
             // exceptional shift, taken from http://www.netlib.org/eispack/comqr.f
@@ -376,18 +380,18 @@ namespace Physica {
         // compute the shift as one of the eigenvalues of t, the 2x2
         // diagonal block on the bottom of the active submatrix
         const auto activeBlock = matrixT.block(upper - 1, 2, upper - 1, 2);
-        const RealType t_norm = abs(activeBlock[0, 0]) + abs(activeBlock[0, 1]) + abs(activeBlock[1, 0]) + abs(activeBlock[1, 1]);
+        const Tr t_norm = abs(activeBlock[0, 0]) + abs(activeBlock[0, 1]) + abs(activeBlock[1, 0]) + abs(activeBlock[1, 1]);
         const Matrix2D t = activeBlock * reciprocal(t_norm); // Normalization to avoid under/overflow
 
-        const ComplexType b = t[0, 1] * t[1, 0];
-        const ComplexType c = t[0, 0] - t[1, 1];
-        const ComplexType disc = sqrt(square(c) + RealType(4) * b);
-        const ComplexType det = t[0, 0] * t[1, 1] - b;
-        const ComplexType trace = t[0, 0] + t[1, 1];
-        ComplexType eival1 = (trace + disc) * RealType(0.5);
-        ComplexType eival2 = (trace - disc) * RealType(0.5);
-        const RealType eival1_norm = eival1.norm();
-        const RealType eival2_norm = eival2.norm();
+        const Tc b = t[0, 1] * t[1, 0];
+        const Tc c = t[0, 0] - t[1, 1];
+        const Tc disc = sqrt(square(c) + Tr(4) * b);
+        const Tc det = t[0, 0] * t[1, 1] - b;
+        const Tc trace = t[0, 0] + t[1, 1];
+        Tc eival1 = (trace + disc) * Tr(0.5);
+        Tc eival2 = (trace - disc) * Tr(0.5);
+        const Tr eival1_norm = eival1.norm();
+        const Tr eival2_norm = eival2.norm();
 
         if (eival1_norm > eival2_norm)
             eival2 = det / eival1;
@@ -399,7 +403,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    void Schur<T, Order>::complexQR(size_t lower, size_t upper, ComplexType shift) {
+    void Schur<T, Order>::complexQR(size_t lower, size_t upper, Tc shift) {
         {
             auto givensVec = givens(Vector2D<T>{matrixT[lower, lower] - shift, matrixT[lower + 1, lower]}, 0, 1);
             auto rightCols = matrixT.rightCols(lower);

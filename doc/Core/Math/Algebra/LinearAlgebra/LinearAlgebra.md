@@ -58,7 +58,7 @@ The only core operation on LValue objects:
 Scalar* LValueVector::data_ptr(size_t index) { ... }
 ```
 
-Obviously, LValue objects are computable, and the operation for computation is dereferencing.
+Obviously, LValue objects are calculable, and the operation for calculation is dereferencing:
 
 ``` C++
 Scalar LValueVector::calc(size_t index) { return *data_ptr(index); }
@@ -72,7 +72,7 @@ The only core operation on compact objects:
 Scalar* CompactVector::data() { ... }
 ```
 
-A compact object is one whose elements are continuously distributed in memory.
+A compact object is one whose elements are continuously distributed in memory:
 
 ``` C++
 Scalar* CompactVector::data_ptr(size_t index) { return data() + index; }

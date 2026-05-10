@@ -11,70 +11,70 @@ with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 You should have received a copy of the GNU Free Documentation License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
-# Diff - 自动微分支持
+# Diff - Automatic differentiation support
 
 ## Forward
 
-使用常规的对偶数方法实现
+Implemented using the well-known dual number approach.
 
-## Reverse - 协程反向传播
+## Reverse - Coroutine-based backpropagation
 
-协程反向传播定义为使用协程管理计算图生命周期的反向传播实现。我们将前向传播和反向传播视为一个完整的过程, 跨越函数调用边界, 为编译器暴露更多优化机会。
+Coroutine-based backpropagation is defined as a backpropagation implementation that uses coroutines to manage the lifetime of the computation graph. We treat forward propagation and backpropagation as a unified process that crosses function call boundaries, exposing more optimization opportunities to the compiler.
 
-Physica在前向传播完成时暂停协程以等待未来梯度, 使用RAII在析构时恢复协程执行, 当协程恢复执行时进行梯度累积。
+Physica suspends the coroutine upon completing the forward pass to wait for future gradients, uses RAII to resume coroutine execution upon destruction, and performs gradient accumulation when the coroutine resumes execution.
 
-由[1]:
+By [1]:
 
     Rule  2: What’s good for function values is good for their derivatives.
 
-规定若前向传播不抛出异常, 则要求反向传播亦不得抛出异常, 否则程序非良构。
+The rule stipulates that if forward propagation does not throw an exception, then backpropagation must also not throw an exception; otherwise, the program is ill-formed.
 
-对满足ReferseDiff概念的类型, 提供以下函数
+For types that satisfy concept `ReverseDiff`, the following functions are provided.
 
-    ``` C++
-    // 累积梯度但不进行传播
-    void reverse(GradType grad = 1) const noexcept { ... }
-    ```
+``` C++
+// Accumulate gradients but don't propagate
+void reverse(GradType grad = 1) const noexcept { ... }
+```
 
-考虑
+Consider
 
-    ``` C++
-    VectorND<dfloat> x = ...;
-    use(x.sum());
-    ```
+``` C++
+VectorND<dfloat> x = ...;
+use(x.sum());
+```
 
-我们希望将`sum()`声明为`const`, `reverse`的声明应当保持一致:
+We want to declare `sum()` as `const`, and the declaration of `reverse` should be consistent:
 
-    ``` C++
-    // const reverse: working
-    // non-const reverse: does not compile
-    x.sum().reverse();
-    ```
+``` C++
+// const reverse: working
+// non-const reverse: does not compile
+x.sum().reverse();
+```
 
-最底层的`reverse`实现需要使用`const_cast`.
+The lowest-level `reverse` implementation requires the use of `const_cast`.
 
 ### CoDiff
 
-    ``` C++
-    tempalate<class T>
-    using CoDiff = ...
-    ```
+``` C++
+tempalate<class T>
+using CoDiff = ...
+```
 
-将类型 T 映射为其满足 ReverseDiff 约束的对应类型。协程只能在主机端(host)创建，因此下列组合属于非法情况：
+maps type `T` to its corresponding type that satisfies the `ReverseDiff` constraint. Coroutines can only be created on the host side, so the following combinations are illegal:
 
-    ``` C++
-    device_obj<CoDiff<...>>
-    ```
+``` C++
+device_obj<CoDiff<...>>
+```
 
-### 反向传播 + 表达式模板
+### Backpropagation + Expression Templates
 
-对于表达式模板的情况, 传递前向传播的值可以避免重复计算的开销
+In the case of expression templates, passing forward propagation values can avoid the overhead of redundant computations:
 
-    ``` C++
-    void reverse(ValueType value, GradType grad = 1) const noexcept { ... }
-    ```
+``` C++
+void reverse(ValueType value, GradType grad = 1) const noexcept { ... }
+```
 
-注意到，表达式模板本身并不执行实际计算, 亦不储存计算结果。因此，表达式模板反向传播过程中若需使用表达式的结果，会触发必要的前向传播以获取该值，该机制等同于Checkpoint技术。
+Note that the expression template itself does not perform actual computation nor store the computation results. Therefore, if the result of an expression is needed during the backpropagation process of the expression template, it triggers the necessary forward propagation to obtain that value. This mechanism is equivalent to checkpointing techniques.
 
 ## Reference
 

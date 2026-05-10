@@ -177,7 +177,7 @@ namespace Physica {
     template<Scalar T> requires(instanceof_tx<Diff, T>)
     __host__ __device__ void ScalarRef<T>::swap(This&& obj) noexcept {
         static_assert(!IsConst, "[Error]: Cannot modify const reference");
-        (void)std::move(obj); // Silent clang-tidy warning
+        std::ignore = std::move(obj); // Silent clang-tidy warning
         value().swap(obj.value());
         grad().swap(obj.grad());
     }
@@ -201,10 +201,12 @@ namespace Physica {
 
     template<Scalar T> requires(instanceof_tx<Diff, T>)
     __host__ __device__ auto ScalarRef<T>::real_ptr(this auto&& self) noexcept {
+        constexpr bool ConstPtr = std::is_const_v<std::remove_reference_t<decltype(self)>>;
+        using RetTy = std::conditional<ConstPtr, ScalarPtr<const Tr>, ScalarPtr<Tr>>::type;
         if constexpr (T::isComplex())
-            return ScalarPtr<Tr>(self.value().real_ptr(), self.grad().real_ptr());
+            return RetTy(self.value().real_ptr(), self.grad().real_ptr());
         else
-            return &self;
+            return RetTy(self.ptr);
     }
 
     template<Scalar T> requires(instanceof_tx<Diff, T>)

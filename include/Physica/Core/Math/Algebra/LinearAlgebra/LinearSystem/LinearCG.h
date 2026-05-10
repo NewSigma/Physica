@@ -23,8 +23,8 @@
 
 namespace Physica {
     template<Scalar T>
-    class IterateSolver {
-        using This = IterateSolver<T>;
+    class LinearCG {
+        using This = LinearCG<T>;
         using Tr = T::RealType;
         constexpr static size_t Unlimited = std::numeric_limits<size_t>::max();
     private:
@@ -38,11 +38,11 @@ namespace Physica {
     public:
         bool mustConverge = true;
     public:
-        IterateSolver() = default;
-        IterateSolver(size_t size);
-        IterateSolver(const This&) = default;
-        IterateSolver(This&&) noexcept = default;
-        ~IterateSolver() = default;
+        LinearCG() = default;
+        LinearCG(size_t size);
+        LinearCG(const This&) = default;
+        LinearCG(This&&) noexcept = default;
+        ~LinearCG() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
@@ -64,10 +64,10 @@ namespace Physica {
     };
 
     template<Scalar T>
-    IterateSolver<T>::IterateSolver(size_t size) : residual(size), searchP(size), dot(size) {}
+    LinearCG<T>::LinearCG(size_t size) : residual(size), searchP(size), dot(size) {}
 
     template<Scalar T>
-    void IterateSolver<T>::cg(const Matrix auto& A, Vector auto&& b) {
+    void LinearCG<T>::cg(const Matrix auto& A, Vector auto&& b) {
         assert(A.isSquare());
         assert(A.getRow() == b.getLength());
         cg([&A](const VectorND<T>& v, VectorND<T>& dot) { (A * v).assign(dot); }, std::forward<decltype(b)>(b));
@@ -80,7 +80,7 @@ namespace Physica {
      * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006:112
      */
     template<Scalar T>
-    void IterateSolver<T>::cg(std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc, Vector auto&& b) {
+    void LinearCG<T>::cg(std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc, Vector auto&& b) {
         assert(b.getLength() == getLength());
         squaredRes0 = squaredRes = b.squaredNorm();
         if (squaredRes.isZero()) [[unlikely]]
@@ -113,12 +113,12 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void IterateSolver<T>::cgnr(const Matrix auto& A, Vector auto&& b) {
+    void LinearCG<T>::cgnr(const Matrix auto& A, Vector auto&& b) {
         assert(A.isSquare());
         assert(A.getRow() == b.getLength());
         auto dotFunc = [&A](const VectorND<T>& v, VectorND<T>& dot) { (A * v).assign(dot); };
         auto dotTransFunc = [&A](const VectorND<T>& v, VectorND<T>& dot) { (A.hermite() * v).assign(dot); };
-        cgnr(dotFunc, dotTransFunc, std::forward<decltype(b)>);
+        cgnr(dotFunc, dotTransFunc, std::forward<decltype(b)>(b));
     }
     /**
      * Conjugate gradient normal equation residual(CGNR)
@@ -128,7 +128,7 @@ namespace Physica {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:636-637
      */
     template<Scalar T>
-    void IterateSolver<T>::cgnr(
+    void LinearCG<T>::cgnr(
             std::invocable<const VectorND<T>&, VectorND<T>&> auto dotFunc,
             std::invocable<const VectorND<T>&, VectorND<T>&> auto dotTransFunc,
             Vector auto&& b) {
@@ -163,14 +163,14 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void IterateSolver<T>::resize(size_t size) {
+    void LinearCG<T>::resize(size_t size) {
         residual.resize(size);
         searchP.resize(size);
         dot.resize(size);
     }
 
     template<Scalar T>
-    void IterateSolver<T>::swap(This& __restrict obj) noexcept {
+    void LinearCG<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         residual.swap(obj.residual);
         searchP.swap(obj.searchP);
@@ -183,12 +183,12 @@ namespace Physica {
     }
 
     template<Scalar T>
-    bool IterateSolver<T>::isConverged() const noexcept {
+    bool LinearCG<T>::isConverged() const noexcept {
         return squaredRes < squaredRes0 * error;
     }
 
     template<Scalar T>
-    size_t IterateSolver<T>::getMaxIterationCG() const noexcept {
+    size_t LinearCG<T>::getMaxIterationCG() const noexcept {
         constexpr static int MaxIterationFactor = 2;
         return itelim == Unlimited ? (MaxIterationFactor * dot.getLength()) : itelim;
     }

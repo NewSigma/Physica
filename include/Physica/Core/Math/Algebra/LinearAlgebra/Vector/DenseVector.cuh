@@ -50,7 +50,6 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
-        using Base::operator[];
         /* Operations */
         __host__ __device__ void resize(const Vector auto& x);
         __host__ __device__ void resize(size_t size, auto&&... args) noexcept;

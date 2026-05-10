@@ -20,7 +20,7 @@
 
 #include "Mesh.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/SparseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/IterateSolver.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/LinearCG.h"
 
 namespace Physica {
     template<class MeshType>
@@ -30,7 +30,7 @@ namespace Physica {
     protected:
         using ElementType = MeshType::ElementType;
         using VectorType = ElementType::VectorType;
-        using SolverType = IterateSolver<ScalarType>;
+        using SolverType = LinearCG<ScalarType>;
 
         MeshType mesh;
         SparseMatrix<ScalarType> A;

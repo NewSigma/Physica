@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "HouseholderSequence.h"
 
 namespace Physica {
     template<Scalar T, size_t Order> class HessenburgMatrixH;

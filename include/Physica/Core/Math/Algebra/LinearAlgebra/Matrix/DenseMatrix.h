@@ -68,7 +68,6 @@ namespace Physica {
         using Base::toDevice;
         using Base::toDeviceAsync;
 
-        using Base::transpose;
         [[nodiscard]] auto&& flatten(this auto&&) noexcept;
 
         using Base::random_any;

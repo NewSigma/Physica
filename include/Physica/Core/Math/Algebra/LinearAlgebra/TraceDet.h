@@ -94,7 +94,7 @@ namespace Physica {
         rand.swap(obj.rand);
         normInf.swap(obj.normInf);
 
-        std::swap(numSample, obj,numSample);
+        std::swap(numSample, obj.numSample);
         std::swap(numExpand, obj.numExpand);
     }
 

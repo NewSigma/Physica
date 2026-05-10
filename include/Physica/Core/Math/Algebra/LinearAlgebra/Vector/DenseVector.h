@@ -29,11 +29,9 @@ namespace Physica {
         static_assert(std::allocator_traits<Allocator>::Align % DefaultAlign == 0, "[Error]: Bad alignment for SIMD");
         using This = DenseVector<T, Length, Allocator>;
         using Base = CompactVector<This>;
-        using Coro = CRCoro<This>;
         using Storage = Array<T, Length, Allocator>;
     public:
         using typename Base::ScalarType;
-        using typename Coro::promise_type;
         using device_obj_type = device_obj<This>;
         using Base::isReverseDiff;
     protected:
@@ -54,7 +52,6 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] bool operator==(const This& other) const noexcept;
         using Base::operator=;
-        using Base::operator[];
         /* Operations */
         template<size_t I>
         [[nodiscard]] constexpr auto&& get(this auto&&) noexcept;
@@ -84,12 +81,6 @@ namespace Physica {
         void linspace(T from, T to);
         void zeros() noexcept;
         void swap(This& __restrict obj) noexcept;
-
-        using Coro::get_return_object;
-        using Coro::initial_suspend;
-        using Coro::final_suspend;
-        using Coro::return_value;
-        using Coro::unhandled_exception;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return storage.getLength(); }
         [[nodiscard]] size_t getCapacity() const noexcept { return storage.getCapacity(); }

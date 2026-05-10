@@ -38,7 +38,7 @@ namespace Physica {
         using Tr = T::RealType;
         using Trv = Tr::ValueType;
         // The lowest minus float number, keeping enough digits for later algebra
-        constexpr static Tr Smallest = -std::numeric_limits<T>::max() * std::numeric_limits<Tr>::epsilon();
+        constexpr static Trv Smallest = -std::numeric_limits<Trv>::max() * std::numeric_limits<Trv>::epsilon();
 
         Tr beta = 0;
         Tr lnZ0 = 0; // Collect constant contribution, improve numerical stability
@@ -67,6 +67,8 @@ namespace Physica {
 
         template<RNG R>
         void random_normal();
+        template<RNG R>
+        void random_rademacher();
         /* Getters */
         [[nodiscard]] Tr getBeta() const noexcept { return beta; }
         [[nodiscard]] Tr getTraceMu() const noexcept;
@@ -77,10 +79,10 @@ namespace Physica {
         /* Static members */
         template<RNG R>
         [[nodiscard]] static TPQ random_normal(size_t len);
+        template<RNG R>
+        [[nodiscard]] static TPQ random_rademacher(size_t len);
         [[nodiscard]] static Tr calcObserveUVT(Tr beta, Tr mu, const MatrixND<T>& lnPartitionNVT, const MatrixND<T>& observeNVT);
     private:
-        using Base::random_uniform;
-        using Base::random_any;
         [[nodiscard]] bool isPrepared() const noexcept;
         /* Static members */
         constexpr static void checkH(const Matrix auto& hamiltonH) noexcept;
@@ -175,10 +177,12 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    TPQ<T> TPQ<T>::random_normal(size_t len) {
-        TPQ result(len);
-        result.random_normal<R>();
-        return result;
+    void TPQ<T>::random_rademacher() {
+        Base::template random_uniform<R>();
+        for (auto& elem : asVector())
+            elem = (elem > T(0.5)) ? T(1) : T(-1);
+        beta = 0;
+        lnZ0 = 0;
     }
 
     template<Scalar T>
@@ -197,6 +201,22 @@ namespace Physica {
     int TPQ<T>::getNumSplit() const noexcept {
         assert(isPrepared());
         return numSplit;
+    }
+
+    template<Scalar T>
+    template<RNG R>
+    TPQ<T> TPQ<T>::random_normal(size_t len) {
+        TPQ result(len);
+        result.random_normal<R>();
+        return result;
+    }
+
+    template<Scalar T>
+    template<RNG R>
+    TPQ<T> TPQ<T>::random_rademacher(size_t len) {
+        TPQ result(len);
+        result.random_rademacher<R>();
+        return result;
     }
 
     template<Scalar T>

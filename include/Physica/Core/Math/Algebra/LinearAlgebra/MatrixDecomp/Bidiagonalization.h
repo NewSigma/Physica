@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h"
+#include "HouseholderSequence.h"
 
 namespace Physica {
     template<Matrix M> class BiDiagMatrixB;
