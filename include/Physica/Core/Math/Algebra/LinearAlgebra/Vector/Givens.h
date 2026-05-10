@@ -28,7 +28,7 @@ namespace Physica {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:240-244
      */
     template<Vector V>
-    Vector2D<typename V::ScalarType> givens(const V& vector, size_t i, size_t j) noexcept {
+    auto givens(const V& vector, size_t i, size_t j) noexcept {
         static_assert(!ReverseDiff<V>, "[Error]: Not implemented, wait for P2014Rx");
         using T = V::ScalarType;
         using Tr = T::RealType;
@@ -36,15 +36,13 @@ namespace Physica {
         using Vector2Dr = Vector2D<Tr>;
         T x_i = vector.calc(i);
         T x_j = vector.calc(j);
-        ResultType result;
         if constexpr (T::isComplex()) {
             const auto alpha = givens(Vector2Dr{x_i.real(), x_i.imag()}, 0, 1);
             const auto beta = givens(Vector2Dr{x_j.real(), x_j.imag()}, 0, 1);
             const auto theta = givens(Vector2Dr{x_i.norm(), x_j.norm()}, 0, 1);
             const auto factor = T(fma(alpha[0], beta[0], alpha[1] * beta[1]), fma(alpha[1], beta[0], -alpha[0] * beta[1]));
             const auto theta1 = theta[1] * factor;
-            result = ResultType{theta[0], theta1};
-            assert(result[0].imag().isZero() && "[Error]: Cosine term is real by definition, this is a bug");
+            return ResultType{theta[0], theta1};
         }
         else {
             if (x_j.isZero())
@@ -53,9 +51,8 @@ namespace Physica {
             T rep_norm = reciprocal(sqrt(fma(x_i, x_i, square(x_j))));
             T cos = x_i * rep_norm;
             T sin = x_j * rep_norm;
-            result = ResultType{cos, sin};
+            return ResultType{cos, sin};
         }
-        return result;
     }
     /**
      * Givens * Matrix
@@ -68,12 +65,26 @@ namespace Physica {
         auto row_j = mat.row(j);
 
         const size_t length = row_i.getLength();
-        for (size_t k = 0; k < length; ++k) {
+        size_t k = 0;
+        if constexpr (row_i.isCompact()) {
+            using Pack = BestPacket<typename M::ScalarType, mat.getColAtCompile()>::Type;
+            constexpr int Size = Pack::size();
+            auto it = zip(row_i.view(), row_j.view()).begin();
+            for (; k < length / Size * Size; k += Size) {
+                auto [it_i, it_j] = it + k;
+                auto pack1 = it_i.template load<Size>();
+                auto pack2 = it_j.template load<Size>();
+                it_i.store(fma(pack1, Pack(cosine), pack2 * Pack(sine)));
+                it_j.store(fma(pack2, Pack(cosine), pack1 * Pack(-sine.conjugate())));
+            }
+        }
+
+        for (; k < length; ++k) {
             using T = M::ScalarType;
             const T temp1 = row_i[k];
             const T temp2 = row_j[k];
             row_i[k] = fma(temp1, cosine, temp2 * sine);
-            row_j[k] = fma(temp2, cosine, -temp1 * sine.conjugate());
+            row_j[k] = fma(temp2, cosine, temp1 * (-sine.conjugate()));
         }
     }
     /**
@@ -87,11 +98,25 @@ namespace Physica {
         auto col_j = mat.col(j);
 
         const size_t length = col_i.getLength();
-        for (size_t k = 0; k < length; ++k) {
+        size_t k = 0;
+        if constexpr (col_i.isCompact()) {
+            using Pack = BestPacket<typename M::ScalarType, mat.getColAtCompile()>::Type;
+            constexpr int Size = Pack::size();
+            auto it = zip(col_i.view(), col_j.view()).begin();
+            for (; k < length / Size * Size; k += Size) {
+                auto [it_i, it_j] = it + k;
+                auto pack1 = it_i.template load<Size>();
+                auto pack2 = it_j.template load<Size>();
+                it_i.store(fma(pack1, Pack(cosine), pack2 * Pack(-sine.conjugate())));
+                it_j.store(fma(pack1, Pack(sine), pack2 * Pack(cosine)));
+            }
+        }
+
+        for (; k < length; ++k) {
             using T = M::ScalarType;
             const T temp1 = col_i[k];
             const T temp2 = col_j[k];
-            col_i[k] = fma(temp1, cosine, -temp2 * sine.conjugate());
+            col_i[k] = fma(temp1, cosine, temp2 * (-sine.conjugate()));
             col_j[k] = fma(temp1, sine, temp2 * cosine);
         }
     }
@@ -106,7 +131,7 @@ namespace Physica {
         const T temp1 = vec[i];
         const T temp2 = vec[j];
         vec[i] = fma(temp1, cosine, temp2 * sine);
-        vec[j] = fma(temp2, cosine, -temp1 * sine.conjugate());
+        vec[j] = fma(temp2, cosine, temp1 * (-sine.conjugate()));
     }
     /**
      * Vector * Givens
@@ -118,7 +143,7 @@ namespace Physica {
         using T = V::ScalarType;
         const T temp1 = vec[i];
         const T temp2 = vec[j];
-        vec[i] = fma(temp1, cosine, -temp2 * sine.conjugate());
+        vec[i] = fma(temp1, cosine, temp2 * (-sine.conjugate()));
         vec[j] = fma(temp1, sine, temp2 * cosine);
     }
 }
