@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,14 +17,14 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Hessenburg.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Hessenberg.h"
 #include "Physica/Core/Scalar/Complex.h"
 #include "Test.h"
 
 using namespace Physica;
 
 namespace {
-    bool isHessenburgMatrix(const Matrix auto& m) {
+    bool isHessenbergMatrix(const Matrix auto& m) {
         const size_t order = m.getRow();
         if (m.getRow() != m.getCol())
             return false;
@@ -40,9 +40,9 @@ namespace {
 
     template<Matrix M>
     void hessTest(const M& source, double tolerance) {
-        Hessenburg<typename M::ScalarType> hess(source);
+        Hessenberg<typename M::ScalarType> hess(source);
         M H = hess.getMatrixH();
-        expect(isHessenburgMatrix(H));
+        expect(isHessenbergMatrix(H));
 
         M Q = hess.getMatrixQ();
         M A = (Q * H).compute() * Q.hermite();

@@ -33,7 +33,7 @@ namespace Physica {
     template<Scalar T, size_t Order = Dynamic>
     class Tridiagonalization {
         static_assert(Order > 2 || Order == Dynamic,
-                      "Unnecessary hessenburg operation on matrixes whose rank is 1 or 2");
+                      "Unnecessary hessenberg operation on matrixes whose rank is 1 or 2");
         using This = Tridiagonalization<T, Order>;
         using RealType = T::RealType;
         using MatrixT = TridiagonalMatrixT<T, Order>;

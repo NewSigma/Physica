@@ -58,7 +58,7 @@ namespace Physica {
      * Givens * Matrix
      */
     template<Matrix M>
-    void applyGivens(const Vector2D<typename M::ScalarType>& givens, M& mat, size_t i, size_t j) noexcept {
+    void applyGivens(const Vector2D<typename M::ScalarType>& givens, M&& mat, size_t i, size_t j) noexcept {
         const auto cosine = givens[0].real();
         const auto sine = givens[1];
         auto row_i = mat.row(i);
@@ -91,7 +91,7 @@ namespace Physica {
      * Matrix * Givens
      */
     template<Matrix M>
-    void applyGivens(M& mat, const Vector2D<typename M::ScalarType>& givens, size_t i, size_t j) noexcept {
+    void applyGivens(M&& mat, const Vector2D<typename M::ScalarType>& givens, size_t i, size_t j) noexcept {
         const auto cosine = givens[0].real();
         const auto sine = givens[1];
         auto col_i = mat.col(i);

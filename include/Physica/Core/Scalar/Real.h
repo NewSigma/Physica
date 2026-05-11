@@ -93,9 +93,8 @@ namespace Physica {
         static_assert(sizeof(Int) == sizeof(Real<Prec>));
 
         assert(x1.isFinite() && x2.isFinite());
-        Int i1, i2;
-        memcpy(&i1, &x1, sizeof(Int));
-        memcpy(&i2, &x2, sizeof(Int));
+        Int i1 = std::bit_cast<Int>(x1);
+        Int i2 = std::bit_cast<Int>(x2);
         bool signdiff = (i1 ^ i2) & SignMask;
         if (signdiff)
             return (i1 & AntiSignMask) + (i2 & AntiSignMask);

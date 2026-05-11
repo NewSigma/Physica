@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Decouplable.h"
-#include "Hessenburg.h"
+#include "Hessenberg.h"
 #include "Physica/Core/Exception/BadConvergenceException.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
 
@@ -34,13 +34,13 @@ namespace Physica {
     template<Scalar T, size_t Order = Dynamic>
     class Schur : public Decouplable {
         constexpr static const char* BadConvergenceMessage = "Exceed max iteration of Schur";
-        using HessenburgType = Hessenburg<T, Order>;
+        using HessenbergType = Hessenberg<T, Order>;
         using This = Schur<T, Order>;
         using Shift = std::conditional<T::isComplex(), PlainStruct<void>, T>::type;
     public:
         using Tr = T::RealType;
         using Tc = Complex<Tr>;
-        using WorkingMatrix = HessenburgType::WorkingMatrix;
+        using WorkingMatrix = HessenbergType::WorkingMatrix;
     private:
         WorkingMatrix matrixT;
         WorkingMatrix matrixU;
@@ -66,7 +66,7 @@ namespace Physica {
         void splitOffTwoRows(size_t index) noexcept;
         Vector3D<T> realShift(size_t upper, size_t iter);
         void francisQR(size_t lower, size_t sub_order, Vector3D<T> shift);
-        void specialHessenburg(size_t lower, size_t sub_order);
+        void specialHessenberg(size_t lower, size_t sub_order);
 
         Tc complexShift(size_t upper, size_t iter);
         void complexQR(size_t lower, size_t upper, Tc shift);
@@ -148,7 +148,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     void Schur<T, Order>::computeND(const Matrix auto& normalized) {
-        const Hessenburg<T, Order> hess(normalized);
+        const Hessenberg<T, Order> hess(normalized);
         matrixT = hess.getMatrixH();
 
         size_t iter = 0;
@@ -299,7 +299,7 @@ namespace Physica {
                 auto cols = matrixU.cols(lower, 3);
                 applyHouseholder(cols, householderVector);
             }
-            specialHessenburg(lower, sub_order);
+            specialHessenberg(lower, sub_order);
         }
         else {
             Vector2D<T> householderVector{};
@@ -321,10 +321,10 @@ namespace Physica {
         }
     }
     /**
-     * A special designed Hessenburg decomposition for francis QR algorithm
+     * A special designed Hessenberg decomposition for francis QR algorithm
      */
     template<Scalar T, size_t Order>
-    void Schur<T, Order>::specialHessenburg(size_t lower, size_t sub_order) {
+    void Schur<T, Order>::specialHessenberg(size_t lower, size_t sub_order) {
         assert(sub_order > 2);
         Vector3D<T> householderVector3D{};
         for (size_t i = 0; i < sub_order - 3; ++i) {

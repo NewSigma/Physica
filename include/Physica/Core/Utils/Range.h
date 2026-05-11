@@ -206,6 +206,15 @@ namespace Physica {
         };
 
         template<std::ranges::view... Vs>
+        constexpr common_zip<Vs...>::common_zip(Vs... views_) noexcept : views(std::move(views_)...) {
+            std::apply([](const auto& view0, const auto&... rest) {
+                auto size = std::ranges::size(view0);
+                assert(((std::ranges::size(rest) == size) && ...) && "[Error]: Sizes mismatch");
+                static_assert(((std::same_as<decltype(size), decltype(std::ranges::size(rest))>) && ...), "[Error]: Size type mismatch");
+            }, views);
+        }
+
+        template<std::ranges::view... Vs>
         constexpr auto common_zip<Vs...>::begin(this auto&& self) noexcept {
             auto current = std::apply([](auto&... views) {
                 return std::make_tuple(std::ranges::begin(std::forward<decltype(views)>(views))...);
@@ -226,15 +235,6 @@ namespace Physica {
         }
 
         template<std::ranges::view... Vs>
-        constexpr common_zip<Vs...>::common_zip(Vs... views_) noexcept : views(std::move(views_)...) {
-            std::apply([](const auto& view0, const auto&... rest) {
-                auto size = std::ranges::size(view0);
-                assert(((std::ranges::size(rest) == size) && ...) && "[Error]: Sizes mismatch");
-                static_assert(((std::same_as<decltype(size), decltype(std::ranges::size(rest))>) && ...), "[Error]: Size type mismatch");
-            }, views);
-        }
-
-        template<std::ranges::view... Vs>
         constexpr auto common_zip<Vs...>::size() const noexcept {
             static_assert((std::ranges::sized_range<Vs> && ...), "[Error]: Unavailable");
             return std::get<0>(views).size();
@@ -247,8 +247,9 @@ namespace Physica {
         }
     }
     /**
-     * 1. Assume the views have identical size here and avoid the std::min call in std::ranges::views::zip_view.
-     * 2. Allow unzip into indivisual views/iterators
+     * Motivation:
+     * 1. Assume all zipped views have identical size, avoiding the need for std::min in std::ranges::views::zip_view.
+     * 2. Support unzipping into individual views/iterators, which std::ranges::views::zip_view does not provide.
      */
     [[nodiscard]] constexpr auto zip(std::ranges::viewable_range auto&&... ranges) noexcept {
         return Internal::common_zip<std::ranges::views::all_t<decltype(ranges)>...>(std::forward<decltype(ranges)>(ranges)...);
