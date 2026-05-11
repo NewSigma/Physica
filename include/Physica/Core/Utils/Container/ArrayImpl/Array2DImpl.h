@@ -26,8 +26,9 @@ namespace Physica {
             : Array2D(order, order) {}
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    Array2D<T, Major, Row, Col, Allocator>::Array2D(size_t row, size_t col, auto&&... args)
-            : r(row) {
+    Array2D<T, Major, Row, Col, Allocator>::Array2D(size_t row, size_t col, auto&&... args) : r(row) {
+        if constexpr (Row != Dynamic)
+            assert(Row == row);
         new (&arr) ArrayType(row * col, std::forward<decltype(args)>(args)...);
     }
 

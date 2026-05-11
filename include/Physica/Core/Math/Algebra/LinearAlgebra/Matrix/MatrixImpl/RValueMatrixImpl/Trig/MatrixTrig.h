@@ -56,8 +56,11 @@ namespace Physica {
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
-        [[nodiscard]] size_t getRow() const noexcept { return mat.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return mat.getCol(); }
+        [[nodiscard]] size_t getRow() const noexcept;
+        [[nodiscard]] size_t getCol() const noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
     };
 
     template<Matrix M, bool Upper, bool Unit>
@@ -121,6 +124,40 @@ namespace Physica {
     template<Matrix M, bool Upper, bool Unit>
     auto&& MatrixTrig<M, Upper, Unit>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
+    }
+
+    template<Matrix M, bool Upper, bool Unit>
+    size_t MatrixTrig<M, Upper, Unit>::getRow() const noexcept {
+        if constexpr (Upper)
+            return std::min(mat.getRow(), mat.getCol());
+        else
+            return mat.getRow();
+    }
+
+    template<Matrix M, bool Upper, bool Unit>
+    size_t MatrixTrig<M, Upper, Unit>::getCol() const noexcept {
+        if constexpr (Upper)
+            return mat.getCol();
+        else
+            return std::min(mat.getRow(), mat.getCol());
+    }
+
+    template<Matrix M, bool Upper, bool Unit>
+    __host__ __device__ consteval size_t MatrixTrig<M, Upper, Unit>::getRowAtCompile() noexcept {
+        using M1 = std::remove_cvref_t<M>;
+        if constexpr (Upper)
+            return std::min(M1::getRowAtCompile(), M1::getColAtCompile());
+        else
+            return M1::getRowAtCompile();
+    }
+
+    template<Matrix M, bool Upper, bool Unit>
+    __host__ __device__ consteval size_t MatrixTrig<M, Upper, Unit>::getColAtCompile() noexcept {
+        using M1 = std::remove_cvref_t<M>;
+        if constexpr (Upper)
+            return M1::getColAtCompile();
+        else
+            return std::min(M1::getRowAtCompile(), M1::getColAtCompile());
     }
 }
 

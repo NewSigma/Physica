@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,23 +18,22 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseQR.h"
+#include "Test.h"
 
 using namespace Physica;
 
 namespace {
     template<Scalar T, Matrix M, bool Pivot>
     void testQR(const DenseQR<T, Pivot>& qr, const M& m, double decompPrec, double detPrec) noexcept {
-        DenseMatrix<T> matrixQ = qr.getMatrixQ();
-        M matrixR = qr.getMatrixR();
-        M result = matrixQ * matrixR;
+        MatrixND<T> matrixQ = qr.getMatrixQ();
+        MatrixND<T> matrixR = qr.getMatrixR();
+        M result = matrixQ.leftCols(matrixR.getRow()) * matrixR;
         if constexpr (Pivot)
             result = M(result * qr.getMatrixP());
 
-        if (!matrixNear(result, m, decompPrec))
-            exit(1);
-
-        if (m.isSquare() && !scalarNear(m.det(), qr.det(), detPrec))
-            exit(1);
+        expect(matrixNear(result, m, decompPrec));
+        if (m.isSquare())
+            expect(scalarNear(m.det(), qr.det(), detPrec));
     }
 
     void testDecomp(const Matrix auto& m, double decompPrec, double detPrec) noexcept {
