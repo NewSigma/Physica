@@ -38,6 +38,18 @@ namespace Physica {
         v.toUnit();
     }
 
+    void gram_schmidt(const Matrix auto& base, Vector auto& v, Vector auto&& dots) {
+        assert(base.getRow() > base.getCol() && "[Error]: base is over complete");
+        assert(dots.getLength() == base.getCol());
+        for (size_t i = 0; i < base.getCol(); ++i) {
+            const auto col = base.col(i);
+            const auto dot = col.conjugate() * v;
+            v -= dot * col;
+            dots[i] = dot;
+        }
+        v.toUnit();
+    }
+
     void gram_schmidt(Matrix auto& m) {
         assert(m.getRow() >= m.getCol() && "[Error]: base is over complete");
         for (size_t i = 0; i < m.getCol(); ++i) {
