@@ -25,51 +25,6 @@
 using namespace Physica;
 using dfloat = Diff<float64, DiffMode::Reverse, 1>;
 
-// FIXME: Re-enable this test
-constexpr bool Disable = sizeof(int) == 0;
-/**
- * Params referenced from [1]
- * 
- * Reference:
- * [1] J. Chem. Phys. 122, 184503 (2005); https://doi.org/10.1063/1.1893956
- */
-class ForceConstTest {
-    using MDCellType = MDCell<dfloat>;
-    using RandomSource = Random<MT19937, 12345>;
-    constexpr static unsigned int numMolecular = 32;
-    constexpr static double pair_cutoff = 15;
-    constexpr static double molarVolume = 31.7;
-    constexpr static double mass = PhyConst<AU>::atomMass(1) * 2;
-public:
-    static void run() {
-        if constexpr (Disable) {
-            SilveraGoldman<dfloat, true> sg(pair_cutoff);
-            const auto cell = makeSystem();
-            const auto fc = sg.forceConst(cell);
-            for (size_t i = 0; i < cell.getDOF(); ++i) {
-                for (size_t j = 0; j < cell.getDOF(); ++j) {
-                    const auto fc1 = sg.forceConst(cell, i, j);
-                    expect(scalarNear<dfloat>(fc[i, j], fc1, 1E-15));
-                }
-            }
-        }
-    }
-private:
-    static MDCellType makeSystem() {
-        if constexpr (Disable) {
-            auto lattice = MDCellType::LatticeMatrix::identity(3);
-            auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
-            MDCellType::MassVector massVec(numMolecular, mass);
-            MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
-
-            const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
-            cell.scale(factor);
-            return cell;
-        }
-        return {};
-    }
-};
-
 int main() {
     {
         LJModel<dfloat> lj(1.0, 1.0);
@@ -79,6 +34,5 @@ int main() {
         const auto f1 = lj.force_functor(0, 0, r, square(r));
         expect(scalarNear(f.value(), f1.value(), 1E-15));
     }
-    ForceConstTest::run();
     return 0;
 }

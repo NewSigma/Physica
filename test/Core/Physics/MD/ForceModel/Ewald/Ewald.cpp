@@ -21,7 +21,6 @@
 #include "Test.h"
 
 using namespace Physica;
-constexpr bool Disable = sizeof(int) == 0; // FIXME: Re-enable this test
 
 namespace {
     template<Scalar T>
@@ -90,127 +89,10 @@ namespace {
     }
 }
 
-namespace Physica {
-    class Test {
-        using T = Diff<float64, DiffMode::Reverse, 1>;
-        using Tv = T::ValueType;
-
-        using CrystalCellType = CrystalCell<T>;
-        using LatticeMatrix = CrystalCellType::LatticeMatrix;
-        using PositionMatrix = CrystalCellType::PositionMatrix;
-    
-        LatticeMatrix lattice;
-        PositionMatrix pos;
-        Ewald<T> ewald;
-    public:
-        Test() {
-            lattice = LatticeMatrix{
-                4.6635062604325164,   0.2499522611778955,    0.0000000000000000,
-                2.1629745970109657,   4.1943944839773311,    0.0000000000000000,
-                0.2750800827878018,   0.4169789280520980,   18.0000000000000000
-            };
-            pos = PositionMatrix{
-                3.018608093,  1.835086465,  2.232546806, 
-                3.435233593,  2.209633827,  17.07962227, 
-                4.486242294,  3.763740540,  2.207314014,
-                3.108575344,  2.784703970,  0.294100195,
-                4.877948284,  4.089979172,  17.05440140,
-                2.148158073,  3.204983473,  2.224137545, 
-                5.324354172,  4.297039032,  0.992797017,
-                6.498651505,  4.175083160,  17.06279564,
-                5.301470280,  4.300325871,  1.994232059,
-                3.399604082,  3.184972763,  17.29266357,
-                5.658125877,  4.686541080,  17.23267174,
-                3.052176714,  2.816649675,  2.054240227
-            };
-            lattice.values() *= reciprocal(Tv(PhyConst<SI>::bohrRadius * 1E10));
-            pos.values() *= reciprocal(Tv(PhyConst<SI>::bohrRadius * 1E10));
-            ewald = Ewald<T>(lattice, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
-        };
-        /* Operations */
-        void functorTest() {
-            if constexpr (Disable) {
-                const T r = 2;
-                const auto r2 = square(r);
-                ewald.pot_functor(0, 1, r, r2.value()).reverse();
-                const Tv f = ewald.force_functor(0, 1, r, r2.value()).value();
-                expect(scalarNear(-r.grad(), f, 1E-10));
-            }
-        }
-
-        void forceTest() {
-            if constexpr (Disable) {
-                ewald.potentialV(pos).reverse();
-
-                const VectorND<T> force = ewald.force<Sequential>(pos);
-                PositionMatrix force_diff(pos.getRow(), pos.getCol());
-                for (size_t i = 0; i < pos.getRow(); ++i)
-                    for (size_t j = 0; j < pos.getCol(); ++j)
-                        force_diff[i, j] = -pos[i, j].grad();
-                expect(vectorNear(force, force_diff.flatten(), 1E-11));
-            }
-        }
-    };
-
-    class PressTest {
-        using T = Diff<float64, DiffMode::Reverse, 1>;
-        using Tv = T::ValueType;
-
-        using MDCellType = MDCell<T>;
-        using LatticeMatrix = MDCellType::LatticeMatrix;
-        using PositionMatrix = MDCellType::PositionMatrix;
-        using MassVector = MDCellType::MassVector;
-        using EwaldType = Ewald<T>;
-    public:
-        static void run() {
-            if constexpr (Disable) {
-                const T volume = 125;
-                const size_t cellSize = 3;
-                const auto cell = makeSystem(volume, cellSize);
-                VectorND<Tv> charges(cell.getNumParticle(), 1.0);
-                auto tail = charges.tail(cell.getNumParticle() / 2);
-                tail = Tv(-1);
-                EwaldType ewald(cell.getLattice(), VectorND<T>(std::move(charges)));
-                ewald.potentialV(cell.getPos()).reverse();
-
-                const Tv press_diff = -volume.grad() / Tv(cellSize * cellSize * cellSize);
-                const Tv press = (ewald.virial(cell.getPos()).trace() / Tv(3)).value();
-                expect(scalarNear(press_diff, press, 1E-13));
-            }
-        }
-    private:
-        static MDCellType makeSystem(const T& volume, size_t cellSize) {
-            if constexpr (Disable) {
-                constexpr size_t numMolecularUnitCell = 2;
-                LatticeMatrix lattice = MDCellType::LatticeMatrix::identity(3);
-                const auto latticeConst = cbrt(volume);
-                lattice *= latticeConst.value();
-
-                PositionMatrix pos(numMolecularUnitCell, 3, Tv(0));
-                auto row = pos.row(1);
-                row = Tv(0.5);
-                pos *= latticeConst.value();
-
-                MassVector massVec(numMolecularUnitCell, 1);
-                MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
-                cell.toSuperCell<ExtendCellOption::AtomMajor>({cellSize, cellSize, cellSize});
-                return cell;
-            }
-            return {};
-        }
-    };
-}
-
 int main() {
     VASPTest<float64>();
     VASPTest<float32>();
     madelungTest<float64>();
     madelungTest<float32>();
-    if constexpr (Disable) {
-        Physica::Test test{};
-        test.functorTest();
-        test.forceTest();
-        Physica::PressTest::run();
-    }
     return 0;
 }
