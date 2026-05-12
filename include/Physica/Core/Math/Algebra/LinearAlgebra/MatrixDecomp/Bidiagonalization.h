@@ -33,9 +33,7 @@ namespace Physica {
         using This = Bidiagonalization<M>;
         using T = M::ScalarType;
         using WorkingMatrix = M::ColMatrix;
-        constexpr static size_t NumSingularValue = M::RowAtCompile > M::ColAtCompile
-                                                                            ? M::ColAtCompile
-                                                                            : M::RowAtCompile;
+        constexpr static size_t NumSingularValue = std::min(M::getRowAtCompile(), M::getColAtCompile());
         using MainDiagVector = DenseVector<T, NumSingularValue>;
         using SubDiagVector = DenseVector<T, NumSingularValue == 0 ? Dynamic : NumSingularValue - 1>;
 

@@ -97,7 +97,7 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     __host__ __device__ consteval size_t MatPowVecProd<M, V>::getSizeAtCompile() noexcept {
-        return std::remove_cvref_t<M>::RowAtCompile;
+        return std::max(std::remove_cvref_t<M>::getRowAtCompile(), std::remove_cvref_t<V>::getSizeAtCompile());
     }
 }
 

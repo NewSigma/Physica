@@ -36,8 +36,6 @@ namespace Physica {
         using This = LValueMatrix<Derived>;
     public:
         using typename Base::ScalarType;
-        using Base::RowAtCompile;
-        using Base::ColAtCompile;
         using Base::isComplex;
         using Base::isForwardDiff;
         using Base::isReverseDiff;

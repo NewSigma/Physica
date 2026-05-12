@@ -65,8 +65,7 @@ namespace Physica {
 
     template<Matrix M>
     __host__ __device__ consteval size_t FlattenC<M>::getSizeAtCompile() noexcept {
-        using M1 = std::remove_reference_t<M>;
-        return M1::RowAtCompile * M1::ColAtCompile;
+        return std::remove_reference_t<M>::getSizeAtCompile();
     }
 }
 

@@ -30,8 +30,6 @@ namespace Physica {
         using Base = device_obj<LValueMatrix<Derived>>;
     public:
         using typename Base::ScalarType;
-        using Base::RowAtCompile;
-        using Base::ColAtCompile;
     protected:
         using typename Base::T;
     private:

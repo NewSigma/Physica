@@ -24,7 +24,7 @@
 
 namespace Physica {
     template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::operator*(this auto&& self, Vector auto&& v) noexcept requires(RowAtCompile != 1) {
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::operator*(this auto&& self, Vector auto&& v) noexcept {
         using Self = decltype(self);
         using V = decltype(v);
         static_assert(is_device_obj<V>::value, "[Error]: host-device mismatch");
@@ -36,10 +36,10 @@ namespace Physica {
         using Self = decltype(self);
         using M = decltype(m);
         static_assert(is_device_obj<M>::value, "[Error]: host-device mismatch");
-        constexpr bool ColVectorLHS = ColAtCompile == 1;
-        constexpr bool RowVectorLHS = RowAtCompile == 1;
-        constexpr bool ColVectorRHS = Traits<M>::ColAtCompile == 1;
-        constexpr bool RowVectorRHS = Traits<M>::RowAtCompile == 1;
+        constexpr bool ColVectorLHS = self.getColAtCompile() == 1;
+        constexpr bool RowVectorLHS = self.getRowAtCompile() == 1;
+        constexpr bool ColVectorRHS = m.getColAtCompile() == 1;
+        constexpr bool RowVectorRHS = m.getRowAtCompile() == 1;
         if constexpr (RowVectorLHS)
             return (std::forward<M>(m).transpose() * std::forward<Self>(self).row(0)).transpose();
         else if constexpr (ColVectorRHS)
@@ -127,18 +127,18 @@ namespace Physica {
     __host__ __device__ void device_obj<RValueMatrix<Derived>>::assert_assign(const Matrix auto& source) const noexcept {
         static_assert_assign(source);
 
-        constexpr size_t Row1 = RowAtCompile;
-        constexpr size_t Row2 = source.RowAtCompile;
+        constexpr size_t Row1 = Derived::getRowAtCompile();
+        constexpr size_t Row2 = source.getRowAtCompile();
         if constexpr (Row1 == Dynamic || Row2 == Dynamic)
             assert(getRow() == source.getRow() && "[Error]: Dimensions do not match");
 
-        constexpr size_t Col1 = RowAtCompile;
-        constexpr size_t Col2 = source.RowAtCompile;
+        constexpr size_t Col1 = Derived::getColAtCompile();
+        constexpr size_t Col2 = source.getColAtCompile();
         if constexpr (Col1 == Dynamic || Col2 == Dynamic)
             assert(getCol() == source.getCol() && "[Error]: Dimensions do not match");
         
-        constexpr size_t Size1 = SizeAtCompile;
-        constexpr size_t Size2 = source.SizeAtCompile;
+        constexpr size_t Size1 = Derived::getSizeAtCompile();
+        constexpr size_t Size2 = source.getSizeAtCompile();
         if constexpr (Size1 == Dynamic || Size2 == Dynamic)
             assert(getSize() > 0);
     }
@@ -481,17 +481,22 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isFastAssign() noexcept {
-        return host_obj::isFastAssign();
+        return Derived::isFastAssign();
     }
 
     template<class Derived>
     __host__ __device__ consteval size_t device_obj<RValueMatrix<Derived>>::getRowAtCompile() noexcept {
-        return host_obj::getRowAtCompile();
+        return Derived::getRowAtCompile();
     }
 
     template<class Derived>
     __host__ __device__ consteval size_t device_obj<RValueMatrix<Derived>>::getColAtCompile() noexcept {
-        return host_obj::getColAtCompile();
+        return Derived::getColAtCompile();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval size_t device_obj<RValueMatrix<Derived>>::getSizeAtCompile() noexcept {
+        return Derived::getSizeAtCompile();
     }
 
     template<class Derived>
@@ -526,7 +531,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ consteval void device_obj<RValueMatrix<Derived>>::static_assert_assign(const Matrix auto& source) noexcept {
-        static_assert(SizeAtCompile != Dynamic || DeviceObj<decltype(source)>, "[Error]: Host object cannot be assigned to dynamic device object");
+        static_assert(getSizeAtCompile() != Dynamic || DeviceObj<decltype(source)>, "[Error]: Host object cannot be assigned to dynamic device object");
         host_obj::static_assert_assign(source);
     }
 }

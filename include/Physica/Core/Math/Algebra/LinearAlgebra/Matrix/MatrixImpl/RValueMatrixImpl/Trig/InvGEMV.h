@@ -107,6 +107,6 @@ namespace Physica {
 
     template<Matrix M, Vector V> requires(instanceof<Inverse, M> && instanceof_tx<MatrixTrig, typename Traits<M>::ExprType>)
     __host__ __device__ consteval size_t GEMV<M, V>::getSizeAtCompile() noexcept {
-        return std::max(std::remove_cvref_t<M>::RowAtCompile, std::remove_cvref_t<V>::getSizeAtCompile());
+        return std::max(std::remove_cvref_t<M>::getRowAtCompile(), std::remove_cvref_t<V>::getSizeAtCompile());
     }
 }

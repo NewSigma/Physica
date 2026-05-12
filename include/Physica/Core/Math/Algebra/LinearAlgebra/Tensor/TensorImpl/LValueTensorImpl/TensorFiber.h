@@ -78,8 +78,5 @@ namespace Physica {
     public:
         using ScalarType = std::remove_cvref_t<X>::ScalarType;
         constexpr static int Major = MatrixMajor::BothMajor;
-        constexpr static size_t RowAtCompile = Dynamic;
-        constexpr static size_t ColAtCompile = Dynamic;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }

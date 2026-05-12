@@ -34,9 +34,6 @@ namespace Physica {
     public:
         using ScalarType = TraitsType::ScalarType;
         constexpr static int Major = TraitsType::Major;
-        constexpr static size_t RowAtCompile = TraitsType::RowAtCompile;
-        constexpr static size_t ColAtCompile = TraitsType::ColAtCompile;
-        constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
@@ -49,7 +46,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        [[nodiscard]] __host__ __device__ auto operator*(this auto&&, Vector auto&& v) noexcept requires(RowAtCompile != 1);
+        [[nodiscard]] __host__ __device__ auto operator*(this auto&&, Vector auto&& v) noexcept;
         [[nodiscard]] __host__ __device__ auto operator*(this auto&&, Matrix auto&& m) noexcept;
         [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator-(this auto&&) noexcept;
         /* Operations */
@@ -131,6 +128,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
         [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept;

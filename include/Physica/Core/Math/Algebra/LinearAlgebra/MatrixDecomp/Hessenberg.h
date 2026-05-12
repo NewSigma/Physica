@@ -139,6 +139,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return hess.getOrder(); }
         [[nodiscard]] size_t getCol() const noexcept { return hess.getOrder(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return Order; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return Order; }
     };
 
     template<Scalar T, size_t Order>
@@ -166,8 +169,5 @@ namespace Physica {
     public:
         using ScalarType = T;
         constexpr static int Major = MatrixMajor::Col;
-        constexpr static size_t RowAtCompile = Order;
-        constexpr static size_t ColAtCompile = Order;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }

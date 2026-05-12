@@ -58,7 +58,8 @@ namespace Physica {
      * Givens * Matrix
      */
     template<Matrix M>
-    void applyGivens(const Vector2D<typename M::ScalarType>& givens, M&& mat, size_t i, size_t j) noexcept {
+    void applyGivens(const Vector2D<typename std::remove_cvref_t<M>::ScalarType>& givens, M&& mat, size_t i, size_t j) noexcept {
+        using T = std::remove_cvref_t<M>::ScalarType;
         const auto cosine = givens[0].real();
         const auto sine = givens[1];
         auto row_i = mat.row(i);
@@ -67,7 +68,7 @@ namespace Physica {
         const size_t length = row_i.getLength();
         size_t k = 0;
         if constexpr (row_i.isCompact()) {
-            using Pack = BestPacket<typename M::ScalarType, mat.getColAtCompile()>::Type;
+            using Pack = BestPacket<T, mat.getColAtCompile()>::Type;
             constexpr int Size = Pack::size();
             auto it = zip(row_i.view(), row_j.view()).begin();
             for (; k < length / Size * Size; k += Size) {
@@ -80,7 +81,6 @@ namespace Physica {
         }
 
         for (; k < length; ++k) {
-            using T = M::ScalarType;
             const T temp1 = row_i[k];
             const T temp2 = row_j[k];
             row_i[k] = fma(temp1, cosine, temp2 * sine);
@@ -91,7 +91,8 @@ namespace Physica {
      * Matrix * Givens
      */
     template<Matrix M>
-    void applyGivens(M&& mat, const Vector2D<typename M::ScalarType>& givens, size_t i, size_t j) noexcept {
+    void applyGivens(M&& mat, const Vector2D<typename std::remove_cvref_t<M>::ScalarType>& givens, size_t i, size_t j) noexcept {
+        using T = std::remove_cvref_t<M>::ScalarType;
         const auto cosine = givens[0].real();
         const auto sine = givens[1];
         auto col_i = mat.col(i);
@@ -100,7 +101,7 @@ namespace Physica {
         const size_t length = col_i.getLength();
         size_t k = 0;
         if constexpr (col_i.isCompact()) {
-            using Pack = BestPacket<typename M::ScalarType, mat.getColAtCompile()>::Type;
+            using Pack = BestPacket<T, mat.getColAtCompile()>::Type;
             constexpr int Size = Pack::size();
             auto it = zip(col_i.view(), col_j.view()).begin();
             for (; k < length / Size * Size; k += Size) {
@@ -113,7 +114,6 @@ namespace Physica {
         }
 
         for (; k < length; ++k) {
-            using T = M::ScalarType;
             const T temp1 = col_i[k];
             const T temp2 = col_j[k];
             col_i[k] = fma(temp1, cosine, temp2 * (-sine.conjugate()));
@@ -124,10 +124,10 @@ namespace Physica {
      * Givens * Vector
      */
     template<Vector V>
-    void applyGivensCol(const Vector2D<typename V::ScalarType>& givens, V& vec, size_t i, size_t j) noexcept {
+    void applyGivensCol(const Vector2D<typename std::remove_cvref_t<V>::ScalarType>& givens, V&& vec, size_t i, size_t j) noexcept {
+        using T = std::remove_cvref_t<V>::ScalarType;
         const auto cosine = givens[0].real();
         const auto sine = givens[1];
-        using T = V::ScalarType;
         const T temp1 = vec[i];
         const T temp2 = vec[j];
         vec[i] = fma(temp1, cosine, temp2 * sine);
@@ -137,10 +137,10 @@ namespace Physica {
      * Vector * Givens
      */
     template<Vector V>
-    void applyRowGivens(V& vec, const Vector2D<typename V::ScalarType>& givens, size_t i, size_t j) noexcept {
+    void applyRowGivens(V&& vec, const Vector2D<typename std::remove_cvref_t<V>::ScalarType>& givens, size_t i, size_t j) noexcept {
+        using T = std::remove_cvref_t<V>::ScalarType;
         const auto cosine = givens[0].real();
         const auto sine = givens[1];
-        using T = V::ScalarType;
         const T temp1 = vec[i];
         const T temp2 = vec[j];
         vec[i] = fma(temp1, cosine, temp2 * (-sine.conjugate()));

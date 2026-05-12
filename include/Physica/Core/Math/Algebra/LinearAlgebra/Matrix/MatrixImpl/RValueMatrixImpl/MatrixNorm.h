@@ -53,7 +53,7 @@ namespace Physica {
         if (length == 1) [[unlikely]]
             return abs(calc(0, 0));
 
-        using Buffer = DenseVector<T, RowAtCompile>;
+        using Buffer = DenseVector<T, Derived::getRowAtCompile()>;
         const Trv factor = reciprocal(Trv(length));
         Buffer y(length);
         Buffer z(length);
@@ -121,7 +121,7 @@ namespace Physica {
 
     template<class Derived>
     auto RValueMatrix<Derived>::cond2() const -> T {
-        SVD<T, RowAtCompile, ColAtCompile> svd(getRow(), getCol());
+        SVD<T, Derived::getRowAtCompile(), Derived::getColAtCompile()> svd(getRow(), getCol());
         svd.compute(Base::getDerived());
         const auto& s = svd.getSingulars();
         return s.max() / s.min();

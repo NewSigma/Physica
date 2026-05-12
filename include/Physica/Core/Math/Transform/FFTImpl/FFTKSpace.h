@@ -225,9 +225,6 @@ namespace Physica {
         using Derived = T;
         using ScalarType = Traits<T>::ScalarType::ComplexType;
         constexpr static int Major = MatrixMajor::Row;
-        constexpr static size_t RowAtCompile = Dynamic;
-        constexpr static size_t ColAtCompile = Dynamic;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 
     template<class T>

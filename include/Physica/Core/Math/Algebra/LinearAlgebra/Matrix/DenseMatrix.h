@@ -86,6 +86,8 @@ namespace Physica {
         [[nodiscard]] size_t getSize() const noexcept { return storage.getSize(); }
         [[nodiscard]] auto&& asArray(this auto&&) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] static This zeros(size_t order) { return zeros(order, order); }
         [[nodiscard]] static This zeros(size_t row, size_t col);
         [[nodiscard]] static This identity(size_t order);
@@ -120,9 +122,6 @@ namespace Physica {
     public:
         using ScalarType = T;
         constexpr static int Major = Major_;
-        constexpr static size_t RowAtCompile = Row;
-        constexpr static size_t ColAtCompile = Col;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
         using AllocatorType = Allocator;
     };
 }

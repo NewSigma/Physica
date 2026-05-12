@@ -130,7 +130,7 @@ namespace Physica {
     template<bool AssignAdd>
     void device_obj<GEMM<M1, M2>>::assign_impl_cublas(Matrix auto& target) const {
         using Tm = decltype(std::declval<T>().toCUDA());
-        constexpr bool IsDeviceMatrix = Traits<M1>::SizeAtCompile == Dynamic && Traits<M2>::SizeAtCompile == Dynamic;
+        constexpr bool IsDeviceMatrix = getLHS().getSizeAtCompile() == Dynamic && getRHS().getSizeAtCompile() == Dynamic;
         constexpr bool isTranspose1 = is_transpose<M1>::value;
         constexpr bool isTranspose2 = is_transpose<M2>::value;
         static_assert(IsDeviceMatrix, "[Error]: Fixed matrix is on host, pass it to device before calling cuBLAS");

@@ -81,8 +81,5 @@ namespace Physica {
     class Traits<HamiltonMatrix<Derived>> {
     public:
         constexpr static int Major = MatrixMajor::BothMajor;
-        constexpr static size_t RowAtCompile = Dynamic;
-        constexpr static size_t ColAtCompile = Dynamic;
-        constexpr static size_t SizeAtCompile = Dynamic;
     };
 }

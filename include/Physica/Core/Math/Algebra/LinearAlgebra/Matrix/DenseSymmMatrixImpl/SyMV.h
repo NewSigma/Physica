@@ -108,6 +108,6 @@ namespace Physica {
     __host__ __device__ consteval size_t GEMV<M, V>::getSizeAtCompile() noexcept {
         using M1 = std::remove_cvref<M>::type;
         using V1 = std::remove_cvref<V>::type;
-        return std::max(M1::RowAtCompile, V1::getSizeAtCompile());
+        return std::max(M1::getRowAtCompile(), V1::getSizeAtCompile());
     }
 }

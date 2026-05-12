@@ -65,12 +65,15 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return mat.getCol(); }
         [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
     };
 
     template<Matrix M>
     template<ExecutePolicy P>
     void Transpose<M>::assign(Matrix auto&& target) const {
-        constexpr bool LargeMatrix = Traits<This>::SizeAtCompile == Dynamic;
+        constexpr bool LargeMatrix = Base::getSizeAtCompile() == Dynamic;
         constexpr bool UseMKL = HasMKL() && Internal::EnableLAPACK<M, decltype(target)>::value && MatrixMajor::isSameMajor<M, decltype(target)>();
         if constexpr (LargeMatrix && UseMKL) {
             if (Base::getSize() <= 16)
@@ -90,6 +93,16 @@ namespace Physica {
     template<Matrix M>
     auto Transpose<M>::values(this auto&& self) noexcept {
         return std::forward<decltype(self)>(self).transpose().values().transpose();
+    }
+
+    template<Matrix M>
+    __host__ __device__ consteval size_t Transpose<M>::getRowAtCompile() noexcept {
+        return std::remove_cvref_t<M>::getColAtCompile();
+    }
+
+    template<Matrix M>
+    __host__ __device__ consteval size_t Transpose<M>::getColAtCompile() noexcept {
+        return std::remove_cvref_t<M>::getRowAtCompile();
     }
 
     template<Vector V>
@@ -119,6 +132,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] size_t getCol() const noexcept { return vec.getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
     };
 
     template<Vector V>
@@ -136,6 +152,16 @@ namespace Physica {
     auto Transpose<V>::values(this auto&& self) noexcept {
         return std::forward<decltype(self)>(self).transpose().values().transpose();
     }
+
+    template<Vector V>
+    __host__ __device__ consteval size_t Transpose<V>::getRowAtCompile() noexcept {
+        return 1;
+    }
+
+    template<Vector V>
+    __host__ __device__ consteval size_t Transpose<V>::getColAtCompile() noexcept {
+        return std::remove_cvref_t<V>::getSizeAtCompile();
+    }
 }
 
 namespace Physica {
@@ -146,9 +172,6 @@ namespace Physica {
     public:
         using ScalarType = M1::ScalarType;
         constexpr static int Major = MatrixMajor::isBothMajor<M>() ? MatrixMajor::BothMajor : OtherMajor;
-        constexpr static size_t RowAtCompile = M1::ColAtCompile;
-        constexpr static size_t ColAtCompile = M1::RowAtCompile;
-        constexpr static size_t SizeAtCompile = M1::SizeAtCompile;
     };
 
     template<Vector V>
@@ -157,9 +180,6 @@ namespace Physica {
     public:
         using ScalarType = V1::ScalarType;
         constexpr static int Major = MatrixMajor::Row;
-        constexpr static size_t RowAtCompile = 1;
-        constexpr static size_t ColAtCompile = V1::getSizeAtCompile();
-        constexpr static size_t SizeAtCompile = V1::getSizeAtCompile();
     };
 }
 

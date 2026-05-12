@@ -48,6 +48,9 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
         [[nodiscard]] T sum() const { return v.sum(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return Row; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return Col; }
     };
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
@@ -94,8 +97,5 @@ namespace Physica {
     public:
         using ScalarType = std::remove_cvref_t<V>::ScalarType;
         constexpr static int Major = MatrixMajor;
-        constexpr static size_t RowAtCompile = Row;
-        constexpr static size_t ColAtCompile = Col;
-        constexpr static size_t SizeAtCompile = std::remove_cvref_t<V>::getSizeAtCompile();
     };
 }

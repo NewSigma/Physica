@@ -247,9 +247,9 @@ namespace Physica {
         using M = std::remove_cvref_t<decltype(mat)>;
         constexpr auto Major = MatrixMajor::getMajor<M>();
         if constexpr (Major == MatrixMajor::BothMajor)
-            return reshape<MatrixMajor::Col, M::RowAtCompile, M::ColAtCompile>(mat.getRow(), mat.getCol());
+            return reshape<MatrixMajor::Col, M::getRowAtCompile(), M::getColAtCompile()>(mat.getRow(), mat.getCol());
         else
-            return reshape<Major, M::RowAtCompile, M::ColAtCompile>(mat.getRow(), mat.getCol());
+            return reshape<Major, M::getRowAtCompile(), M::getColAtCompile()>(mat.getRow(), mat.getCol());
     }
 
     template<class Derived>

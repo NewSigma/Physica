@@ -56,6 +56,8 @@ namespace Physica {
         [[nodiscard]] size_t getCol() const noexcept;
         /* Static members*/
         [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         /* Friends */
         friend class device_obj<This>;
     };
@@ -133,6 +135,16 @@ namespace Physica {
     size_t IdentityMatrix<T, Order>::getCol() const noexcept {
         return getRow();
     }
+
+    template<Scalar T, size_t Order>
+    __host__ __device__ consteval size_t IdentityMatrix<T, Order>::getRowAtCompile() noexcept {
+        return Order;
+    }
+
+    template<Scalar T, size_t Order>
+    __host__ __device__ consteval size_t IdentityMatrix<T, Order>::getColAtCompile() noexcept {
+        return Order;
+    }
 }
 
 namespace Physica {
@@ -142,9 +154,6 @@ namespace Physica {
     public:
         using ScalarType = T;
         constexpr static int Major = MatrixMajor::BothMajor;
-        constexpr static size_t RowAtCompile = Order;
-        constexpr static size_t ColAtCompile = Order;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }
 

@@ -152,6 +152,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return tri.working.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return tri.working.getCol(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
     };
 
     template<Scalar T, size_t Order>
@@ -176,6 +179,16 @@ namespace Physica {
         target[i - 1, i] = target[i, i - 1].conjugate();
         target[i, i] = tri.working.calc(i, i);
     }
+
+    template<Scalar T, size_t Order>
+    __host__ __device__ consteval size_t TridiagonalMatrixT<T, Order>::getRowAtCompile() noexcept {
+        return Order;
+    }
+
+    template<Scalar T, size_t Order>
+    __host__ __device__ consteval size_t TridiagonalMatrixT<T, Order>::getColAtCompile() noexcept {
+        return Order;
+    }
 }
 
 namespace Physica {
@@ -184,8 +197,5 @@ namespace Physica {
     public:
         using ScalarType = T;
         constexpr static int Major = MatrixMajor::BothMajor;
-        constexpr static size_t RowAtCompile = Order;
-        constexpr static size_t ColAtCompile = Order;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }

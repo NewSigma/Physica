@@ -105,9 +105,6 @@ namespace Physica {
     public:
         using ScalarType = M::ScalarType;
         constexpr static int Prec = M::Prec;
-        constexpr static size_t RowAtCompile = Dynamic;
-        constexpr static size_t ColAtCompile = Dynamic;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }
 

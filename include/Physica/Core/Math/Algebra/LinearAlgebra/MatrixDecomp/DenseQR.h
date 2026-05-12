@@ -98,9 +98,9 @@ namespace Physica {
     void DenseQR<T, Pivot>::compute(const M& source) {
         assert(getRow() == source.getRow());
         assert(getCol() == source.getCol());
-        constexpr bool SmallMatrix = M::SizeAtCompile <= Threhold && M::SizeAtCompile != Dynamic;
+        constexpr bool SmallMatrix = M::getSizeAtCompile() <= Threhold && M::getSizeAtCompile() != Dynamic;
         if constexpr (HasMKL() && !SmallMatrix) {
-            if constexpr (M::SizeAtCompile > Threhold) {
+            if constexpr (M::getSizeAtCompile() > Threhold) {
                 compute_mkl<M>(source);
                 return;
             }

@@ -52,6 +52,9 @@ namespace Physica {
         [[nodiscard]] size_t getCol() const noexcept;
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
     };
 
     template<Matrix M1, Matrix M2>
@@ -150,6 +153,16 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
+    __host__ __device__ consteval size_t Kronecker<M1, M2>::getRowAtCompile() noexcept {
+        return std::remove_cvref_t<M1>::getRowAtCompile() * std::remove_cvref_t<M2>::getRowAtCompile();
+    }
+
+    template<Matrix M1, Matrix M2>
+    __host__ __device__ consteval size_t Kronecker<M1, M2>::getColAtCompile() noexcept {
+        return std::remove_cvref_t<M1>::getColAtCompile() * std::remove_cvref_t<M2>::getColAtCompile();
+    }
+
+    template<Matrix M1, Matrix M2>
     [[nodiscard, gnu::always_inline]] auto kronecker(M1&& m1, M2&& m2) noexcept requires(!DeviceObj<M1> && !DeviceObj<M2>) {
         return Kronecker<M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
@@ -163,9 +176,6 @@ namespace Physica {
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename M2::ScalarType>::Type;
         constexpr static int Major = MatrixMajor::BothMajor;
-        constexpr static size_t RowAtCompile = M1::RowAtCompile * M2::RowAtCompile;
-        constexpr static size_t ColAtCompile = M1::ColAtCompile * M2::ColAtCompile;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }
 

@@ -32,8 +32,6 @@ namespace Physica {
         using This = CompactMatrix<Derived>;
     public:
         using typename Base::ScalarType;
-        using Base::RowAtCompile;
-        using Base::ColAtCompile;
         using Base::isComplex;
         using Base::isReverseDiff;
     protected:

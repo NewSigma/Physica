@@ -29,7 +29,7 @@ namespace {
     template<Matrix M, Backend B>
     void eigenTestImpl(const M& mat, double precision) {
         using ScalarType = M::ScalarType;
-        using VectorType = DenseVector<ScalarType, M::RowAtCompile>;
+        using VectorType = DenseVector<ScalarType, M::getRowAtCompile()>;
         using EigenvectorMatrix = SymmEigenSolver<ScalarType>::EigenvectorMatrix;
 
         auto solver = SymmEigenSolver<ScalarType>(mat.getRow(), true);

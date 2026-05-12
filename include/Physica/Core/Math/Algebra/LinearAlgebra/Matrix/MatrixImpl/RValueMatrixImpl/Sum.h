@@ -101,6 +101,5 @@ namespace Physica {
     class Traits<MatrixSum<M, ReduceCol>> {
     public:
         using ScalarType = M::ScalarType;
-        constexpr static size_t SizeAtCompile = ReduceCol ? M::RowAtCompile : M::ColAtCompile;
     };
 }

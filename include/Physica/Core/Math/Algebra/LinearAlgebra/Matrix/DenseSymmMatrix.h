@@ -76,6 +76,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
         [[nodiscard]] auto&& asVector(this auto&&) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] static DenseSymmMatrix identity(size_t order);
         template<RNG R>
         [[nodiscard]] static This random_uniform(size_t order);
@@ -163,6 +165,16 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
+    __host__ __device__ consteval size_t DenseSymmMatrix<T, Order>::getRowAtCompile() noexcept {
+        return Order;
+    }
+
+    template<Scalar T, size_t Order>
+    __host__ __device__ consteval size_t DenseSymmMatrix<T, Order>::getColAtCompile() noexcept {
+        return Order;
+    }
+
+    template<Scalar T, size_t Order>
     auto DenseSymmMatrix<T, Order>::identity(size_t order) -> This {
         DenseSymmMatrix<T, Order> result(order);
         result.toIdentity();
@@ -205,9 +217,6 @@ namespace Physica {
     public:
         using ScalarType = T;
         constexpr static int Major = MatrixMajor::BothMajor;
-        constexpr static size_t RowAtCompile = Order;
-        constexpr static size_t ColAtCompile = Order;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }
 

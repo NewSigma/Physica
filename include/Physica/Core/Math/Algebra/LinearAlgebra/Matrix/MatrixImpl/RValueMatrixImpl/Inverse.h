@@ -57,7 +57,7 @@ namespace Physica {
     template<Matrix M>
     void Inverse<M>::assign(Matrix auto& target) const {
         using M2 = std::remove_cvref_t<decltype(target)>;
-        constexpr size_t Order = std::max(Base::RowAtCompile, M2::RowAtCompile);
+        constexpr size_t Order = std::max(Base::getRowAtCompile(), M2::getRowAtCompile());
         if constexpr (Order == 1)
             target = reciprocal(mat[0, 0]);
         else if constexpr (Order == 2)

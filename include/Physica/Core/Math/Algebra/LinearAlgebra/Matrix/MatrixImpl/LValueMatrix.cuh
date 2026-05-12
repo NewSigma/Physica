@@ -28,8 +28,6 @@ namespace Physica {
         using Base = device_obj<RValueMatrix<Derived>>;
     public:
         using typename Base::ScalarType;
-        using Base::RowAtCompile;
-        using Base::ColAtCompile;
         using Base::isReverseDiff;
     protected:
         using typename Base::T;

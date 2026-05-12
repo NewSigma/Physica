@@ -45,6 +45,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
     };
 
     template<class M>
@@ -76,6 +79,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
     };
 
     template<class M>
@@ -111,6 +117,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
     };
 
     template<class M>
@@ -153,6 +162,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
     };
 
     template<class M>
@@ -182,6 +194,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
     };
 
     template<class M, int GradOrder>
@@ -207,6 +222,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
     };
 }
 
@@ -217,9 +235,6 @@ namespace Physica {
     public:
         using ScalarType = typename M1::ScalarType::RealType;
         constexpr static int Major = M1::Major;
-        constexpr static size_t RowAtCompile = M1::RowAtCompile;
-        constexpr static size_t ColAtCompile = M1::ColAtCompile;
-        constexpr static size_t SizeAtCompile = M1::SizeAtCompile;
     };
 
     template<class M>
@@ -237,9 +252,6 @@ namespace Physica {
     public:
         using ScalarType = typename M1::ScalarType::ValueType;
         constexpr static int Major = M1::Major;
-        constexpr static size_t RowAtCompile = M1::RowAtCompile;
-        constexpr static size_t ColAtCompile = M1::ColAtCompile;
-        constexpr static size_t SizeAtCompile = M1::SizeAtCompile;
     };
 
     template<class M, int GradOrder>
@@ -249,8 +261,5 @@ namespace Physica {
     public:
         using ScalarType = Internal::GradTypeHelper<typename M1::ScalarType, GradOrder>::Type;
         constexpr static int Major = M1::Major;
-        constexpr static size_t RowAtCompile = M1::RowAtCompile;
-        constexpr static size_t ColAtCompile = M1::ColAtCompile;
-        constexpr static size_t SizeAtCompile = M1::SizeAtCompile;
     };
 }

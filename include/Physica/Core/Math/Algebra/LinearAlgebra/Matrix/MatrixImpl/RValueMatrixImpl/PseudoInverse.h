@@ -32,8 +32,6 @@ namespace Physica {
         using This = PseudoInverse<M>;
         using Base = RValueMatrix<This>;
 
-        using Base::RowAtCompile;
-        using Base::ColAtCompile;
         using typename Base::T;
 
         const M& mat;
@@ -58,7 +56,7 @@ namespace Physica {
 
     template<Matrix M>
     void PseudoInverse<M>::assign(Matrix auto& target) const {
-        SVD<T, RowAtCompile, ColAtCompile> svd(mat);
+        SVD<T, mat.getRowAtCompile(), mat.getColAtCompile()> svd(mat);
         auto diagD = DiagMatrix<T, decltype(svd)::NumSingularValue>(svd.getNumSingular());
         const auto& singular = svd.getSingulars();
         const T tol = singular.max() * std::numeric_limits<T>::epsilon();

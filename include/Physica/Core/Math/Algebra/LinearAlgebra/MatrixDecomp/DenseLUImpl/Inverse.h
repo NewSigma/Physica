@@ -77,9 +77,6 @@ namespace Physica {
     public:
         using ScalarType = T;
         constexpr static int Major = MatrixMajor::Col;
-        constexpr static size_t RowAtCompile = Dynamic;
-        constexpr static size_t ColAtCompile = Dynamic;
-        constexpr static size_t SizeAtCompile = Dynamic;
 
         using ExprType = DenseLU<T, P>;
     };

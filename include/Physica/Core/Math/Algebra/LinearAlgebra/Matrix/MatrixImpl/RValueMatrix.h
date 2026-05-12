@@ -69,9 +69,6 @@ namespace Physica {
     public:
         using ScalarType = Traits<Derived>::ScalarType;
         constexpr static int Major = Traits<Derived>::Major;
-        constexpr static size_t RowAtCompile = Traits<Derived>::RowAtCompile;
-        constexpr static size_t ColAtCompile = Traits<Derived>::ColAtCompile;
-        constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
@@ -193,6 +190,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
         [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixMajor::rowFromMajorMinor<Derived>(major, minor); }
         [[nodiscard]] static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixMajor::colFromMajorMinor<Derived>(major, minor); }

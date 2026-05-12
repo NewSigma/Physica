@@ -61,6 +61,9 @@ namespace Physica {
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
     };
 
     template<Vector V, Matrix M>
@@ -127,6 +130,16 @@ namespace Physica {
     auto&& GEVM<V, M>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
+
+    template<Vector V, Matrix M>
+    __host__ __device__ consteval size_t GEVM<V, M>::getRowAtCompile() noexcept {
+        return std::remove_cvref_t<V>::getSizeAtCompile();
+    }
+
+    template<Vector V, Matrix M>
+    __host__ __device__ consteval size_t GEVM<V, M>::getColAtCompile() noexcept {
+        return std::remove_cvref_t<M>::getColAtCompile();
+    }
 }
 
 namespace Physica {
@@ -137,13 +150,10 @@ namespace Physica {
         using T1 = V1::ScalarType;
         using T2 = M1::ScalarType;
 
-        static_assert(M1::RowAtCompile == 1 || M1::RowAtCompile == Dynamic, "[Error]: Outer product requires that the rows of M be 1");
+        static_assert(M1::getRowAtCompile() == 1 || M1::getRowAtCompile() == Dynamic, "[Error]: Outer product requires that the rows of M be 1");
         static_assert(!instanceof_tx<IdentityMatrix, M>, "[Error]: This pattern is unusual and is likely a bug. Consider rewriting if this is a false-positive");
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
         constexpr static int Major = MatrixMajor::BothMajor;
-        constexpr static size_t RowAtCompile = V1::getSizeAtCompile();
-        constexpr static size_t ColAtCompile = M1::ColAtCompile;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }

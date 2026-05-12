@@ -73,5 +73,9 @@ int main() {
     sum();
     argminTest();
     reshapeTest();
+    syntax_only([]() {
+        static_assert(DenseVector<float64>{}.transpose().getRowAtCompile() == 1);
+        static_assert(DenseVector<cfloat64>{}.hermite().getRowAtCompile() == 1);
+    });
     return 0;
 }

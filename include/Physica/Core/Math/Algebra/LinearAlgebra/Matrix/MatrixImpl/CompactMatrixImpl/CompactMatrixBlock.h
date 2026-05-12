@@ -300,6 +300,9 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] size_t getCol() const noexcept { return Col == Dynamic ? colCount : Col; }
         [[nodiscard]] auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
     };
 
     template<Matrix M, size_t Row, size_t Col>
@@ -461,6 +464,16 @@ namespace Physica {
         assert(col < self.getCol());
         return self.mat.data_ptr(row + self.fromRow, col + self.fromCol);
     }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ consteval size_t CompactMatrixBlock<M, Row, Col>::getRowAtCompile() noexcept {
+        return Row;
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ consteval size_t CompactMatrixBlock<M, Row, Col>::getColAtCompile() noexcept {
+        return Col;
+    }
 }
 
 namespace Physica {
@@ -470,8 +483,5 @@ namespace Physica {
     public:
         using ScalarType = M1::ScalarType;
         constexpr static int Major = M1::Major;
-        constexpr static size_t RowAtCompile = Row;
-        constexpr static size_t ColAtCompile = Col;
-        constexpr static size_t SizeAtCompile = Row * Col;
     };
 }

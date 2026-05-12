@@ -29,7 +29,7 @@ namespace Physica {
         using Self = decltype(self);
         using V = decltype(v);
         static_assert(!is_device_obj<V>::value, "[Error]: host-device mismatch");
-        if constexpr (RowAtCompile == 1)
+        if constexpr (self.getRowAtCompile() == 1)
             return std::forward<Self>(self).row(0) * v;
         else
             return GEMV<Self, V&&>(std::forward<Self>(self), std::forward<V>(v));
@@ -40,10 +40,10 @@ namespace Physica {
         using Self = decltype(self);
         using M = decltype(m);
         static_assert(!is_device_obj<M>::value, "[Error]: host-device mismatch");
-        constexpr bool ColVectorLHS = ColAtCompile == 1;
-        constexpr bool RowVectorLHS = RowAtCompile == 1;
-        constexpr bool ColVectorRHS = Traits<M>::ColAtCompile == 1;
-        constexpr bool RowVectorRHS = Traits<M>::RowAtCompile == 1;
+        constexpr bool ColVectorLHS = self.getColAtCompile() == 1;
+        constexpr bool RowVectorLHS = self.getRowAtCompile() == 1;
+        constexpr bool ColVectorRHS = m.getColAtCompile() == 1;
+        constexpr bool RowVectorRHS = m.getRowAtCompile() == 1;
         if constexpr (RowVectorLHS)
             return (std::forward<M>(m).transpose() * std::forward<Self>(self).row(0)).transpose();
         else if constexpr (ColVectorRHS)
@@ -106,20 +106,20 @@ namespace Physica {
     void RValueMatrix<Derived>::assert_assign(const Matrix auto& source) const noexcept {
         static_assert_assign(source);
 
-        constexpr size_t Row1 = RowAtCompile;
-        constexpr size_t Row2 = source.RowAtCompile;
+        constexpr size_t Row1 = Derived::getRowAtCompile();
+        constexpr size_t Row2 = source.getRowAtCompile();
         if constexpr (Row1 == Dynamic || Row2 == Dynamic)
             assert(getRow() == source.getRow() && "[Error]: Dimensions do not match");
 
-        constexpr size_t Col1 = RowAtCompile;
-        constexpr size_t Col2 = source.RowAtCompile;
+        constexpr size_t Col1 = Derived::getColAtCompile();
+        constexpr size_t Col2 = source.getColAtCompile();
         if constexpr (Col1 == Dynamic || Col2 == Dynamic)
             assert(getCol() == source.getCol() && "[Error]: Dimensions do not match");
         
-        constexpr size_t Size1 = SizeAtCompile;
-        constexpr size_t Size2 = source.SizeAtCompile;
+        constexpr size_t Size1 = Derived::getSizeAtCompile();
+        constexpr size_t Size2 = source.getSizeAtCompile();
         if constexpr (Size1 == Dynamic || Size2 == Dynamic)
-            assert(getSize() > 0);
+            assert(getSize() > 0 && "[Error]: Assign a empty matrix is not allowed");
     }
 
     template<class Derived>
@@ -409,7 +409,7 @@ namespace Physica {
     template<class Derived>
     auto RValueMatrix<Derived>::det() const -> CoDiff<T> {
         assert(isSquare() && "[Error]: Determinate requires square matrix");
-        constexpr size_t Order = RowAtCompile > ColAtCompile ? RowAtCompile : ColAtCompile;
+        constexpr size_t Order = std::max(Derived::getRowAtCompile(), Derived::getColAtCompile());
         if constexpr (Order == 1)
             return calc(0, 0);
         else if constexpr (Order == 2)
@@ -654,12 +654,17 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ consteval size_t RValueMatrix<Derived>::getRowAtCompile() noexcept {
-        return Traits<Derived>::RowAtCompile;
+        return Dynamic;
     }
 
     template<class Derived>
     __host__ __device__ consteval size_t RValueMatrix<Derived>::getColAtCompile() noexcept {
-        return Traits<Derived>::ColAtCompile;
+        return Dynamic;
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval size_t RValueMatrix<Derived>::getSizeAtCompile() noexcept {
+        return Derived::getRowAtCompile() * Derived::getColAtCompile();
     }
 
     template<class Derived>
@@ -675,11 +680,14 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ consteval void RValueMatrix<Derived>::static_assert_assign(const Matrix auto& source) noexcept {
-        using Src = std::remove_cvref_t<decltype(source)>;
-        static_assert(RowAtCompile == Src::RowAtCompile || RowAtCompile == Dynamic || Src::RowAtCompile == Dynamic, "[Error]: Row mismatch between two matrix");
-        static_assert(ColAtCompile == Src::ColAtCompile || ColAtCompile == Dynamic || Src::ColAtCompile == Dynamic, "[Error]: Col mismatch between two matrix");
+        constexpr size_t R1 = Derived::getRowAtCompile();
+        constexpr size_t C1 = Derived::getColAtCompile();
+        constexpr size_t R2 = source.getRowAtCompile();
+        constexpr size_t C2 = source.getColAtCompile();
+        static_assert(R1 == R2 || R1 == Dynamic || R2 == Dynamic, "[Error]: Row mismatch between two matrix");
+        static_assert(C1 == C2 || C1 == Dynamic || C2 == Dynamic, "[Error]: Col mismatch between two matrix");
 
-        using U = Src::ScalarType;
+        using U = std::remove_cvref_t<decltype(source)>::ScalarType;
         T::template static_assert_assign<U>();
     }
 

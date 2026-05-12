@@ -53,7 +53,7 @@ namespace Physica {
     template<Matrix M>
     __host__ __device__ consteval size_t DiagVectorL<M>::getSizeAtCompile() noexcept {
         using Expr = std::remove_cvref<M>::type;
-        return std::max(Expr::RowAtCompile, Expr::ColAtCompile);
+        return std::max(Expr::getRowAtCompile(), Expr::getColAtCompile());
     }
 }
 

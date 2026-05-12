@@ -53,7 +53,7 @@ namespace Physica {
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
-        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return M1::getRowAtCompile(); }
     private:
         /* Getters */
         [[nodiscard]] const auto& getRepr() const noexcept { return mat.getRepr(); }
@@ -124,12 +124,9 @@ namespace Physica {
 namespace Physica {
     template<Matrix M, Vector V> requires(instanceof_tx<J1J2Matrix, M>)
     class Traits<GEMV<M, V>> {
-        using M1 = std::remove_cvref<M>::type;
-        using V1 = std::remove_cvref<V>::type;
-        using T1 = M1::ScalarType;
-        using T2 = V1::ScalarType;
+        using T1 = std::remove_cvref_t<M>::ScalarType;
+        using T2 = std::remove_cvref_t<V>::ScalarType;
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
-        constexpr static size_t SizeAtCompile = M1::RowAtCompile;
     };
 }

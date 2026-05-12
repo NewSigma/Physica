@@ -234,7 +234,7 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     __host__ __device__ consteval size_t GEMV<M, V>::getSizeAtCompile() noexcept {
-        return std::remove_cvref_t<M>::RowAtCompile;
+        return std::remove_cvref_t<M>::getRowAtCompile();
     }
 
     template<Matrix M, Vector V>
@@ -253,7 +253,7 @@ namespace Physica {
     class Traits<GEMV<M, V>> {
         using M1 = std::remove_cvref_t<M>;
         using V1 = std::remove_cvref_t<V>;
-        static_assert(M1::ColAtCompile == V1::getSizeAtCompile() || M1::ColAtCompile == Dynamic || V1::getSizeAtCompile() == Dynamic,
+        static_assert(M1::getColAtCompile() == V1::getSizeAtCompile() || M1::getColAtCompile() == Dynamic || V1::getSizeAtCompile() == Dynamic,
                 "Row and column do not match in matrix-vector product");
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename V1::ScalarType>::Type;

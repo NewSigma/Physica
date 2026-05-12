@@ -70,6 +70,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getOrder(); }
         [[nodiscard]] auto&& asVector(this auto&& self) noexcept { return self.storage.asArray(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] static This identity(size_t order);
         template<RNG R>
         [[nodiscard]] static This random_uniform(size_t order);
@@ -152,6 +154,16 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
+    __host__ __device__ consteval size_t DenseHermiteMatrix<T, Order>::getRowAtCompile() noexcept {
+        return Order;
+    }
+
+    template<Scalar T, size_t Order>
+    __host__ __device__ consteval size_t DenseHermiteMatrix<T, Order>::getColAtCompile() noexcept {
+        return Order;
+    }
+
+    template<Scalar T, size_t Order>
     auto DenseHermiteMatrix<T, Order>::identity(size_t order) -> This {
         This result(order);
         result.toIdentity();
@@ -208,8 +220,5 @@ namespace Physica {
     public:
         using ScalarType = T;
         constexpr static int Major = MatrixMajor::BothMajor;
-        constexpr static size_t RowAtCompile = Order;
-        constexpr static size_t ColAtCompile = Order;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }

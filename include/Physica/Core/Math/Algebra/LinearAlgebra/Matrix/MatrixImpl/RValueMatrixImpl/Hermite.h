@@ -61,6 +61,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return m.getCol(); }
         [[nodiscard]] size_t getCol() const noexcept { return m.getRow(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
     };
 
     template<Matrix M>
@@ -71,6 +74,16 @@ namespace Physica {
     template<Matrix M>
     auto&& Hermite<M>::hermite(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.m);
+    }
+
+    template<Matrix M>
+    __host__ __device__ consteval size_t Hermite<M>::getRowAtCompile() noexcept {
+        return std::remove_cvref_t<M>::getColAtCompile();
+    }
+
+    template<Matrix M>
+    __host__ __device__ consteval size_t Hermite<M>::getColAtCompile() noexcept {
+        return std::remove_cvref_t<M>::getRowAtCompile();
     }
 
     template<Vector V>
@@ -98,6 +111,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] size_t getCol() const noexcept { return v.getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
     };
 
     template<Vector V>
@@ -114,6 +130,16 @@ namespace Physica {
     template<Vector V>
     auto&& Hermite<V>::hermite(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v);
+    }
+
+    template<Vector V>
+    __host__ __device__ consteval size_t Hermite<V>::getRowAtCompile() noexcept {
+        return 1;
+    }
+
+    template<Vector V>
+    __host__ __device__ consteval size_t Hermite<V>::getColAtCompile() noexcept {
+        return std::remove_cvref_t<V>::getSizeAtCompile();
     }
 }
 

@@ -324,7 +324,7 @@ namespace Physica {
     T JacobiDavidson<T>::updateGoal(const Matrix auto& source, VectorND<T>& buffer, T eigenvalue, Tr squaredRes, Tr& lastDeltaEigen, const T eigenGoal) {
         const VectorND<T> eigenvector2 = searchSpace.leftCols(curSearchDim) * eigenSolver.getRawEigenvectors().col(1);
         buffer = source * eigenvector2;
-        const T eigenvalue2 = eigenvector2.hermite() * buffer;
+        const T eigenvalue2 = eigenvector2.conjugate() * buffer;
         const Tr deltaEigen = abs(eigenvalue2.real() - eigenvalue.real());
         const bool nearConverge = squaredRes < square(deltaEigen);
         const bool deltaEigenStable = abs(deltaEigen - lastDeltaEigen) < stableThreshold * lastDeltaEigen;
