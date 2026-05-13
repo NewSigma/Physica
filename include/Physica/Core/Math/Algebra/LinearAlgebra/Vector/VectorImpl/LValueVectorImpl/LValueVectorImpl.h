@@ -80,6 +80,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto LValueVector<Derived>::operator=(std::ranges::range auto&& r) noexcept -> Derived& requires(!Vector<decltype(r)>) {
+        static_assert(Scalar<std::ranges::range_value_t<decltype(r)>>, "[Error]: Cannot assign this range to vector");
+        auto& v = Base::getDerived();
+        v.resize(std::ranges::distance(r));
+        for (auto [lhs, rhs] : zip(v, r))
+            lhs = rhs;
+        return v;
+    }
+
+    template<class Derived>
     decltype(auto) LValueVector<Derived>::operator[](this auto&& self, size_t index) {
         return *self.data_ptr(index);
     }

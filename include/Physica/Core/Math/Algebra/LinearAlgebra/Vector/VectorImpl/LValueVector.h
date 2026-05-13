@@ -62,6 +62,7 @@ namespace Physica {
         void operator+=(const Vector auto& v);
         void operator-=(const Vector auto& v);
 
+        auto operator=(std::ranges::range auto&& r) noexcept -> Derived& requires(!Vector<decltype(r)>);
         [[nodiscard]] decltype(auto) operator[](this auto&&, size_t index);
         /* Operations */
         [[nodiscard]] decltype(auto) calc(size_t index) const;

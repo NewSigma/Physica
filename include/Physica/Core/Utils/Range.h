@@ -63,7 +63,7 @@ namespace Physica {
             /* Friends */
             friend constexpr This operator+(difference_type n, const This& ite) noexcept { return ite + n; }
             friend constexpr auto iter_move(const This& ite) noexcept {
-                return std::apply([](auto&... ites) {
+                return std::apply([](auto&... ites) static noexcept {
                     return std::make_tuple(std::ranges::iter_move(ites)...);
                 }, ite.current);
             }
@@ -79,7 +79,7 @@ namespace Physica {
 
         template<class Tuple, std::ranges::view... Vs>
         constexpr auto common_zip_iterator<Tuple, Vs...>::operator++() noexcept -> This& {
-            std::apply([](auto&... ites) {
+            std::apply([](auto&... ites) static noexcept {
                 (++ites, ...);
             }, current);
             return *this;
@@ -88,7 +88,7 @@ namespace Physica {
         template<class Tuple, std::ranges::view... Vs>
         constexpr auto common_zip_iterator<Tuple, Vs...>::operator--() noexcept -> This& {
             static_assert(std::bidirectional_iterator<StdIterator>, "[Error]: Unavailable");
-            std::apply([](auto&... ites) {
+            std::apply([](auto&... ites) static noexcept {
                 (--ites, ...);
             }, current);
             return *this;
@@ -130,7 +130,7 @@ namespace Physica {
 
         template<class Tuple, std::ranges::view... Vs>
         constexpr auto common_zip_iterator<Tuple, Vs...>::operator*() const noexcept {
-            return std::apply([](auto&... ites) {
+            return std::apply([](auto&... ites) static noexcept {
                 return std::make_tuple(*ites...);
             }, current);
         }
@@ -207,16 +207,15 @@ namespace Physica {
 
         template<std::ranges::view... Vs>
         constexpr common_zip<Vs...>::common_zip(Vs... views_) noexcept : views(std::move(views_)...) {
-            std::apply([](const auto& view0, const auto&... rest) {
-                auto size = std::ranges::size(view0);
-                assert(((std::ranges::size(rest) == size) && ...) && "[Error]: Sizes mismatch");
-                static_assert(((std::same_as<decltype(size), decltype(std::ranges::size(rest))>) && ...), "[Error]: Size type mismatch");
+            std::apply([](auto& view0, [[maybe_unused]] auto&... rest) static noexcept {
+                [[maybe_unused]] auto size = std::ranges::distance(view0);
+                assert(((std::ranges::distance(rest) == size) && ...) && "[Error]: Sizes mismatch");
             }, views);
         }
 
         template<std::ranges::view... Vs>
         constexpr auto common_zip<Vs...>::begin(this auto&& self) noexcept {
-            auto current = std::apply([](auto&... views) {
+            auto current = std::apply([](auto&... views) static noexcept {
                 return std::make_tuple(std::ranges::begin(std::forward<decltype(views)>(views))...);
             }, self.views);
             return common_zip_iterator<decltype(current), Vs...>(std::move(current));
@@ -227,7 +226,7 @@ namespace Physica {
             if constexpr ((std::ranges::random_access_range<Vs> && ...))
                 return self.begin() + self.size();
             else {
-                auto current = std::apply([](auto&... views) {
+                auto current = std::apply([](auto&... views) static noexcept {
                     return std::make_tuple(std::ranges::end(views)...);
                 }, self.views);
                 return common_zip_iterator<decltype(current), Vs...>(std::move(current));
