@@ -15,53 +15,53 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ## Introduction
 
-众所周知，大规模稀疏本征值问题(Sparse Eigenvalue Problem, SEP)在科学和工程领域有极为重要和广泛的应用。求解SEP的数值算法主要包括幂法$^{[1]}$, Lanzcos$^{[1]}$, Arnoldi$^{[2]}$, Davidson$^{[3]}$, Jacobi-Davidson$^{[4]}$, FEAST$^{[5]}$, LOBPCG$^{[6]}$。其中幂法只能求解极端特征值，适用范围有限。Lanczos算法可被视作Arnoldi算法在厄米情形下的特例。Arnoldi算法是目前主流科学计算软件Matlab$^{[7]}$, Mathematica$^{[8]}$所使用的算法。基于幂法改进而来的Lanczos算法和Arnoldi算法在处理内部本征值问题时将遇到困难。Davidson算法是求解对角占优矩阵的快速算法，但对于非对角占优的矩阵将会遇到难以收敛的问题。Jacobi-Davidson算法将Jacobi正交补修正技术引入Davidson算法，在保持Davidson算法高效的同时解决了Davidson算法只适用于对角占优矩阵的问题$^{[4]}$。FEAST算法用于求解任意给定区间中所有的本征值，但速度慢于Jacobi-Davidson算法。Mathematica中实现了FEAST算法。LOBPCG算法不适用于非对称矩阵。LOBPCG和JDCG(Jacobi-Davidson针对对称矩阵的变式)的作者均称自己的算法优于对方$^{[6, 10]}$, 这不免令人感到困惑。
+The large-scale sparse eigenvalue problem (SEP) has extremely important and widespread applications in science and engineering. Numerical algorithms for solving SEP mainly include the power method$^{[1]}$, Lanczos$^{[1]}$, Arnoldi$^{[2]}$, Davidson$^{[3]}$, Jacobi-Davidson$^{[4]}$, FEAST$^{[5]}$, and LOBPCG$^{[6]}$. The power method can only solve for extreme eigenvalues, limiting its applicability. The Lanczos algorithm can be viewed as a special case of the Arnoldi algorithm for Hermitian matrices. The Arnoldi algorithm is used by mainstream scientific computing software such as Matlab$^{[7]}$ and Mathematica$^{[8]}$. Lanczos and Arnoldi algorithms, which are improvements on the power method, encounter difficulties with interior eigenvalue problems. The Davidson algorithm is fast for diagonally dominant matrices, but struggles to converge for non-diagonally dominant matrices. The Jacobi-Davidson algorithm introduces Jacobi orthogonal complement correction into the Davidson algorithm, maintaining Davidson's efficiency while solving its limitation to diagonally dominant matrices$^{[4]}$. The FEAST algorithm solves for all eigenvalues within a given interval, but is slower than Jacobi-Davidson. FEAST is implemented in Mathematica. LOBPCG is not suitable for non-symmetric matrices. The authors of both LOBPCG and JDCG (the symmetric variant of Jacobi-Davidson) claim their algorithm outperforms the other$^{[6, 10]}$, which is understandably confusing.
 
-Jacobi-Davidson算法具有以下优点:
+The Jacobi-Davidson algorithm has the following advantages:
 
-- 速度快：Jacobi-Davidson算法收敛速度快于Davidson, Lanczos和FEAST$^{[4, 9]}$
-- 适用范围广：Jacobi-Davidson算法可适用于极端特征值和内部特征值。不同于Davidson和LOBPCG，Jacobi-Davidson对矩阵类型没有要求
-- 灵活性强：Jacobi-Davidson算法可分解为若干独立的模块，各种模块可自由组合以适应问题
+- Fast convergence: Jacobi-Davidson converges faster than Davidson, Lanczos, and FEAST$^{[4, 9]}$
+- Wide applicability: Jacobi-Davidson handles both extreme and interior eigenvalues. Unlike Davidson and LOBPCG, it imposes no requirements on the matrix type
+- Strong modularity: Jacobi-Davidson decomposes into several independent components that can be freely combined to suit the problem
 
 ## Main
 
-考虑本征值问题
+Consider the eigenvalue problem
 
 $$\mathbf{Ax} = \lambda \mathbf{x}$$
 
-其中特征向量$\mathbf{x}$和特征值$\lambda$待求解。我们可以随机生成一个向量$\mathbf{x_0}$并带入上式，此时等式必不成立，有残差
+where the eigenvector $\mathbf{x}$ and eigenvalue $\lambda$ are to be solved. We can randomly generate a vector $\mathbf{x_0}$ and substitute it into the above equation; the equality will not hold, giving a residual
 
 $$\mathbf{r}_0(\lambda) = \mathbf{Ax}_0 - \lambda \mathbf{x}_0 \neq \mathbf{0}$$
 
-此时$\lambda$仍是未知的。我们可以做得比随机猜测更好，即使用矩阵的Rayleigh商，它是最小二乘意义下对特征值的最优估计
+At this point $\lambda$ is still unknown. We can do better than random guessing by using the Rayleigh quotient, which is the optimal estimate of the eigenvalue in the least-squares sense:
 
 $$\theta_0 = \argmin_\lambda |\mathbf{r}_0(\lambda)| = \frac{\mathbf{x}_0^T \mathbf{Ax}}{\mathbf{x}_0^T \mathbf{x}}$$
 
-显然$\mathbf{r}_0(\theta_0)$与$\mathbf{x_0}$正交。随机猜测的$\mathbf{x_0}$并不能让我们满意，下面我们采用Jacobi正交补修正逐步改善解的精度。
+Clearly $\mathbf{r}_0(\theta_0)$ is orthogonal to $\mathbf{x_0}$. The random initial guess $\mathbf{x_0}$ is not satisfactory, so we use Jacobi orthogonal complement correction to iteratively improve the solution accuracy.
 
-我们记精确解可以通过修正得到$\mathbf{x} = \mathbf{x}_k + \delta \mathbf{x}_k$, $\lambda = \theta_k + \delta \theta_k$, 其中$\mathbf{x}_k, \theta_k$是第$k$次迭代得到的特征向量和特征值, 将上式带入本征值问题方程
+Let the exact solution be expressed as corrections: $\mathbf{x} = \mathbf{x}_k + \delta \mathbf{x}_k$, $\lambda = \theta_k + \delta \theta_k$, where $\mathbf{x}_k, \theta_k$ are the eigenvector and eigenvalue at the $k$-th iteration. Substituting into the eigenvalue equation:
 
 $$\mathbf{A} (\mathbf{x}_k + \delta \mathbf{x}_k) = (\theta_k + \delta \theta_k) (\mathbf{x}_k + \delta \mathbf{x}_k)$$
 
-整理并忽略二阶小量$\delta \theta_k \cdot \delta \mathbf{x}_k$有
+Rearranging and neglecting the second-order term $\delta \theta_k \cdot \delta \mathbf{x}_k$:
 
 $$(\mathbf{A} - \theta I) \delta \mathbf{x}_k - \mathbf{x}_k \delta \theta_k = -\mathbf{r}_k(\theta_k)$$
 
-为了求解该方程，我们可以在两边乘以一个投影矩阵$I - \mathbf{x}_k \mathbf{x}_k^T$，第二项投影后结果为$0$
+To solve this equation, we multiply both sides by a projection matrix $I - \mathbf{x}_k \mathbf{x}_k^T$; the second term vanishes after projection:
 
 $$(I - \mathbf{x}_k \mathbf{x}_k^T) (\mathbf{A} - \theta I) \delta \mathbf{x}_k = -\mathbf{r}_k(\theta_k)$$
 
-显然沿着$\mathbf{x}_k$方向对修正近似解没有帮助，我们感兴趣的$\delta \mathbf{x}_k$必定与$\mathbf{x}_k$正交，将解空间限制在$\mathbf{x}_k$的正交补空间:
+Clearly, corrections along the $\mathbf{x}_k$ direction do not help improve the approximate solution. The $\delta \mathbf{x}_k$ of interest must be orthogonal to $\mathbf{x}_k$. Restricting the solution space to the orthogonal complement of $\mathbf{x}_k$:
 
 $$(I - \mathbf{x}_k \mathbf{x}_k^T) (\mathbf{A} - \theta I) (I - \mathbf{x}_k \mathbf{x}_k^T) \delta \mathbf{x}_k = -\mathbf{r}_k(\theta_k)$$
 
-此即Jacobi-Davidson修正方程，修正可以如下进行直至结果收敛
+This is the Jacobi-Davidson correction equation. The correction proceeds iteratively until convergence:
 
 $$\mathbf{x}_{k + 1} = \mathbf{x}_k + \delta \mathbf{x}_k$$
 
 $$\theta_{k + 1} = \argmin_\lambda |\mathbf{r}_{k + 1}(\lambda)|$$
 
-物理上，我们通常感兴趣的是基态和最低的几个激发态，即厄米矩阵$\mathbf{A}$最小的若干本征值。Y. Notay针对这种情况提出了Jacobi-Davidson算法的一种变式，即使用共轭梯度算法(CG)求解Jacobi-Davidson修正方程。如果要求解的不是厄米矩阵或感兴趣的不是极端特征值，只需将线性求解器模块切换为MINRES、GMRES等更通用的线性求解器。这种模块的可替换性是Jacobi-Davidson算法的优点之一。
+In physics, we are typically interested in the ground state and the lowest few excited states, i.e., the smallest eigenvalues of a Hermitian matrix $\mathbf{A}$. Y. Notay proposed a variant of the Jacobi-Davidson algorithm for this case, using the conjugate gradient (CG) method to solve the Jacobi-Davidson correction equation. If the matrix is not Hermitian or if non-extreme eigenvalues are of interest, the linear solver module can be switched to more general solvers like MINRES or GMRES. This modular replaceability is one of the advantages of the Jacobi-Davidson algorithm.
 
 ## Reference
 

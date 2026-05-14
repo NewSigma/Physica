@@ -13,33 +13,33 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # Vegas
 
-## 关于卡方统计
+## On Chi-Square Statistics
 
-使用卡方统计评估网格优化的可靠性$^{[1]}$:
+The chi-square statistic is used to evaluate the reliability of grid refinement$^{[1]}$:
 
 $$\chi_0^2 = \sum_j \frac{(I_j - \overline{I})^2}{\sigma_j^2}$$
 
-根据中心极限定理, 求和式的每一项满足标准差为$(N_s)^{-1/2}$的正态分布, $N_s$为样本数NumSample. 因此$N_s\chi_0^2$满足自由度为$N_r - 1$的卡方分布, $N_r$为网格迭代次数NumRefine. 对上式进行归一化
+According to the central limit theorem, each term in the sum follows a normal distribution with standard deviation $(N_s)^{-1/2}$, where $N_s$ is the number of samples (NumSample). Therefore $N_s\chi_0^2$ follows a chi-square distribution with $N_r - 1$ degrees of freedom, where $N_r$ is the number of grid refinement iterations (NumRefine). Normalizing the above:
 
 $$\chi^2 = \frac{N_s}{N_r - 1} \sum_j \frac{(I_j - \overline{I})^2}{\sigma_j^2}$$
 
-与[1]中定义不同, 上式的平均值为1. 特别地, $N_r = 1$时不涉及网格优化, 规定$\chi^2 = 1$
+Unlike the definition in [1], the above expression has an expected value of 1. Specifically, when $N_r = 1$, no grid refinement is involved, and we define $\chi^2 = 1$.
 
-## 模板参数TakeLn
+## Template Parameter
 
-对一系列大数量级样本进行平均通常导致上溢或下溢。`TakeLn = true`时计算对数均值和对数方差以缓解该问题. 核心思想是利用恒等式$x = e^{\ln x} \quad (x > 0)$, 将数量级最大的部分分离出去。对数均值:
+**TakeLn**: Averaging a series of samples spanning many orders of magnitude often leads to overflow or underflow. When `TakeLn = true`, the log-mean and log-variance are computed to alleviate this issue. The core idea is to use the identity $x = e^{\ln x} \quad (x > 0)$ to separate the largest magnitude component. Log-mean:
 
 $$\ln\braket{x} = \ln\left( \frac{1}{n} \sum_i^n x_i \right) = \ln\left( \frac{1}{n} \sum_i^n e^{\ln x_i + \ln x_m - \ln x_m} \right) = \ln x_m + \ln\left( \frac{1}{n} \sum_i^n e^{\ln x_i - \ln x_m} \right)$$
 
 $$= \ln x_m + \ln\braket{e^{\ln x_i - \ln x_m}}$$
 
-同理, 对数方差
+Similarly, log-variance:
 
 $$\ln \sigma^2(x) = \ln(\braket{x_i^2} - \braket{x_i}^2) = 2\ln x_m + \ln \sigma^2(e^{\ln x_i - \ln x_m})$$
 
-其中$x_m = \max(x_1, x_2, ..., x_n)$. $e^{\ln x_i - \ln x_m} \le 1$, 对其求和通常性质良好.
+where $x_m = \max(x_1, x_2, ..., x_n)$. Since $e^{\ln x_i - \ln x_m} \le 1$, summing these terms is generally well-behaved.
 
-对不同迭代次数的结果进行加权求和可得到不确定度更低的统计量(Ref. [1] Eq. 30 ~ Eq. 32), 对数模式类似地有:
+Weighted summation of results from different iteration counts yields statistics with lower uncertainty (Ref. [1] Eq. 30 ~ Eq. 32). The log-mode equivalents are:
 
 $$\ln\overline{I} = \ln\sum_j e^{\ln I_j - \ln\sigma_j^2} + \ln\sigma_{\overline I}^2$$
 

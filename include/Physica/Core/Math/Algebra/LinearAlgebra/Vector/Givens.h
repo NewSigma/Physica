@@ -28,7 +28,7 @@ namespace Physica {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:240-244
      */
     template<Vector V>
-    auto givens(const V& vector, size_t i, size_t j) noexcept {
+    [[nodiscard]] auto givens(const V& vector, size_t i, size_t j) noexcept {
         static_assert(!ReverseDiff<V>, "[Error]: Not implemented, wait for P2014Rx");
         using T = V::ScalarType;
         using Tr = T::RealType;

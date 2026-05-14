@@ -30,7 +30,7 @@ Reference:
 mathjax_path = 'https://cdn.staticfile.net/mathjax/3.2.2/es5/tex-mml-chtml.js'
 
 templates_path = ['_templates']
-language = 'zh_CN'
+language = 'en'
 exclude_patterns = []
 
 # HTML Options

@@ -33,7 +33,7 @@ namespace Physica {
         VectorND<T> dot;
         Tr squaredRes0;
         Tr squaredRes;
-        Tr error = std::numeric_limits<T>::epsilon();
+        Tr tolerance = std::numeric_limits<T>::epsilon();
         size_t itelim = Unlimited;
     public:
         bool mustConverge = true;
@@ -56,7 +56,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return residual.getLength(); }
         /* Setters */
-        void setError(Tr error_) noexcept { error = std::move(error_); }
+        void setTolerance(Tr tol) noexcept { tolerance = std::move(tol); }
         void setIterationLimit(size_t limit) noexcept { itelim = limit; }
     private:
         [[nodiscard]] bool isConverged() const noexcept;
@@ -177,14 +177,14 @@ namespace Physica {
         dot.swap(obj.dot);
         squaredRes0.swap(obj.squaredRes0);
         squaredRes.swap(obj.squaredRes);
-        error.swap(obj.error);
+        tolerance.swap(obj.tolerance);
         std::swap(itelim, obj.itelim);
         std::swap(mustConverge, obj.mustConverge);
     }
 
     template<Scalar T>
     bool LinearCG<T>::isConverged() const noexcept {
-        return squaredRes < squaredRes0 * error;
+        return squaredRes < squaredRes0 * tolerance;
     }
 
     template<Scalar T>

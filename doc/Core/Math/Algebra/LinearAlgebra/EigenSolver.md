@@ -130,25 +130,25 @@ The equation can be written as
 
 $$\left[ \begin{matrix} A_{i i - 1} & 0 & A_{ii} & -B_{ii} \\ 0 & A_{i i - 1} & B_{ii} & A_{ii} \\ A_{i - 1 i - 1} & -B_{i - 1 i - 1} & A_{i - 1 i} & 0 \\ B_{i - 1 i - 1} & A_{i - 1 i - 1} & 0 & A_{i - 1 i} \end{matrix} \right] \left[ \begin{matrix} r_{i - 1} \\ c_{i - 1} \\ r_i \\ c_i \end{matrix} \right] = \left[ \begin{matrix} \xi_1 \\ \xi_2 \\ \xi_3 \\ \xi_4 \end{matrix} \right]$$
 
-## 前向自动微分
+## Forward-Mode Automatic Differentiation
 
-沿用[3]的符号, 对于右特征值分解$\mathbf{AU = UD}$有
+Following the notation of [3], for the right eigenvalue decomposition $\mathbf{AU = UD}$ we have:
 
 $$\mathbf{E} \circ \text{d}\mathbf{C} + \text{d}\mathbf{D} = \mathbf{U}^{-1} \text{d}\mathbf{AU}$$
 
-特征值的导数:
+Derivative of eigenvalues:
 
 $$\text{d}\mathbf{D} = \mathbf{I} \circ (\mathbf{U}^{-1} \text{d}\mathbf{AU})$$
 
-特征向量的导数:
+Derivative of eigenvectors:
 
 $$\text{d}\mathbf{U} = \mathbf{U}[\mathbf{F} \circ (\mathbf{U}^{-1} \text{d}\mathbf{AU})] + \mathbf{UD'}$$
 
-其中$\mathbf{D'}$为任意对角矩阵。第一项中$\mathbf{F}$对角元为0, 特征向量自身对其梯度没有贡献。第二项若特征向量是归一化的$|\mathbf{u}|^2 = 1$, 两边微分有$\mathbf{u} \cdot \text{d}\mathbf{u} = 0$, 代入上式可知
+where $\mathbf{D'}$ is an arbitrary diagonal matrix. In the first term, the diagonal entries of $\mathbf{F}$ are 0, meaning eigenvectors do not contribute to their own gradient. In the second term, if the eigenvectors are normalized $|\mathbf{u}|^2 = 1$, differentiating both sides gives $\mathbf{u} \cdot \text{d}\mathbf{u} = 0$, and substituting into the above yields:
 
 $$\mathbf{D'} = 0$$
 
-左特征值分解的情况可类似得到。
+The left eigenvalue decomposition case follows analogously.
 
 ## References
 

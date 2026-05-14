@@ -66,7 +66,7 @@ namespace Physica {
         VectorND<T> eigenvalues;
         MatrixND<T> eigenvectors;
 
-        Tr error = std::numeric_limits<Tr>::epsilon();
+        Tr tolerance = std::numeric_limits<Tr>::epsilon();
         Tr stableThreshold = DefaultStableThreshold;
     public:
         JacobiDavidson();
@@ -87,7 +87,7 @@ namespace Physica {
         [[nodiscard]] const auto& getEigenvalues() const noexcept { return eigenvalues; }
         [[nodiscard]] const auto& getEigenvectors() const noexcept { return eigenvectors; }
         /* Setters */
-        void setError(Tr error_) noexcept;
+        void setTolerance(Tr tol) noexcept;
         void setStableThreshold(Tr value) noexcept;
     private:
         void initSearchSpace(const Matrix auto& source, const VectorND<T>& initial);
@@ -106,7 +106,7 @@ namespace Physica {
     template<Scalar T>
     JacobiDavidson<T>::JacobiDavidson() : curSearchDim() {
         linearSolver.mustConverge = false;
-        linearSolver.setError(LinearSolverPrecision);
+        linearSolver.setTolerance(LinearSolverPrecision);
         linearSolver.setIterationLimit(MaxLinearSolverIteration);
     }
 
@@ -198,14 +198,14 @@ namespace Physica {
         eigenvalues.swap(obj.eigenvalues);
         eigenvectors.swap(obj.eigenvectors);
 
-        error.swap(obj.error);
+        tolerance.swap(obj.tolerance);
         stableThreshold.swap(obj.stableThreshold);
     }
 
     template<Scalar T>
-    void JacobiDavidson<T>::setError(Tr error_) noexcept {
-        assert(error_.isPositive() && "[Error]: Invalid argument");
-        error = std::move(error_);
+    void JacobiDavidson<T>::setTolerance(Tr tol) noexcept {
+        assert(tol.isPositive() && "[Error]: Invalid argument");
+        tolerance = std::move(tol);
     }
 
     template<Scalar T>
@@ -308,7 +308,7 @@ namespace Physica {
                     residual -= eigenvalue * eigenvector;
                 }
                 Tr squaredRes = residual.squaredNorm();
-                bool converged = squaredRes < error;
+                bool converged = squaredRes < tolerance;
                 bool shouldRestart = curSearchDim == searchSpace.getCol();
                 if (converged || shouldRestart)
                     return converged;

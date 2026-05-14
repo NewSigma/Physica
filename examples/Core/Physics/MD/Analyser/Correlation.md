@@ -15,7 +15,7 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ![](./Correlation.png)
 
-**图1** 186K下，Kr晶体$^{[1]}$的归一化动量自相关函数，分别采用直接法和FFT法计算。统计误差允许的范围下两种方法给出一致的结果。其中实现的直接法只考虑$t = 0$与之后的关联，直接法的不确定度大于FFT法的不确定度。
+**Figure 1** Normalized momentum autocorrelation function of Kr crystal$^{[1]}$ at 186K, computed using both the direct method and the FFT method. Within statistical error, the two methods give consistent results. The implemented direct method only considers correlations from $t = 0$ forward, resulting in larger uncertainty compared to the FFT method.
 
 ## Reference
 

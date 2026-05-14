@@ -13,9 +13,9 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # Exception
 
-在顶层处理复杂数值计算程序的错误通常更具有实用价值。常见数值计算库(LAPACK, cuBLAS)通常使用错误码报告错误，在调用C规范库函数时使用异常进行封装。
+Handling errors at the top level is often more practical for complex numerical computation programs. Common numerical libraries (LAPACK, cuBLAS) typically report errors via error codes, and exceptions are used to wrap C-compatible library function calls.
 
-对任意错误码类型ErrorCodeType，Physica::check使用函数重载进行处理，如有错误则抛出对应的异常对象，其一般实现为:
+For any error code type `ErrorCodeType`, `Physica::check` uses function overloading to handle it, throwing the corresponding exception object if an error occurs. The general implementation is:
 
 ``` C++
 namespace Physica {

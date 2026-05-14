@@ -13,14 +13,14 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # ProbDistribution
 
-ProbDistribution使用采样语义计算一维随机变量的概率分布函数, 考虑随机变量
+ProbDistribution computes the probability distribution function of a one-dimensional random variable using sampling semantics. Consider the random variable:
 
 $$y = \ln\left( 1 + \sqrt{1-e^{-1/n}} \right) \sum_{i = 1}^n s_i$$
 
-其中独立随机变量$s_i = \pm 1$满足$p = 1/2$的二项分布
+where the independent random variables $s_i = \pm 1$ follow a binomial distribution with $p = 1/2$.
 
 ![](./ProbDistribution.png)
 
-**图1** 蓝色: 随机变量$y$的概率密度分布; 绿色: 标准正态分布
+**Fig. 1** Blue: probability density distribution of the random variable $y$; Green: standard normal distribution
 
-随机变量$y$的各阶矩与标准正态分布的随机变量相等, 且矩母函数存在, 故$n \to \infty$时$y \sim N(0, 1)$
+All moments of the random variable $y$ equal those of a standard normal variable, and its moment-generating function exists, so $y \sim N(0, 1)$ as $n \to \infty$.

@@ -13,27 +13,27 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # BKSModel
 
-## 模板参数
+## Template Parameters
 
 **AvoidTooNear**
 
 ![](./BKSModel.png)
 
-**图1** BKS势$^{[1]}$属于类Buckingham势，Buckingham势在$r \to 0$时将出现上图所示的不合理的吸引力，这将导致两个原子无限接近。在实践中低温下的固体SiO2不会出现原子过近的现象。但在高温的SiO2中，原子有足够的动能翻越势垒而进入左侧的吸引区，这将导致原子坐标发散。
+**Figure 1** The BKS potential$^{[1]}$ is a Buckingham-type potential. The Buckingham potential exhibits an unphysical attractive force as $r \to 0$, as shown in the figure above, causing two atoms to approach each other indefinitely. In practice, solid SiO2 at low temperatures does not exhibit atoms coming too close. However, in high-temperature SiO2, atoms have sufficient kinetic energy to overcome the barrier and enter the attractive region on the left, leading to divergence of atomic coordinates.
 
-Buckingham势为
+The Buckingham potential is:
 
 $$V(r) = A e^{-br} - \frac{c}{r^6}$$
 
 $$F(r) = -\frac{\partial V}{\partial r} = Ab e^{-br} - \frac{6c}{r^7}$$
 
-实践上，低温状态下可以使用上式，为避免原子过近，高温下将Buckingham修正为
+In practice, the above formula can be used at low temperatures. To prevent atoms from coming too close at high temperatures, the Buckingham potential is corrected as:
 
 $$V_1(r) = \left\{ \begin{matrix} 2V(r_0) - V(r) \\ V(r) \end{matrix} \quad \begin{matrix} (r < r_0) \\ (r_0 \le r) \end{matrix} \right.$$
 
 $$F_1(r) = \left\{ \begin{matrix} -F(r) \\ F(r) \end{matrix} \quad \begin{matrix} (r < r_0) \\ (r_0 \le r) \end{matrix} \right.$$
 
-其中$r_0$应满足$F(r_0) = 0$，数值解得
+where $r_0$ satisfies $F(r_0) = 0$, solved numerically as:
 
 $$r_0(\mathrm{O-O}) = 2.8414313142730038 \; \mathrm{Bohr}$$
 

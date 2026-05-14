@@ -15,70 +15,70 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ## Introduction
 
-在分子动力学模拟中，我们通常采用波恩奥本海默近似。即考虑到原子核质量远大于电子质量，忽略电子和声子的相互作用。原子核坐标作为体系哈密顿量的参数，其运动规律由牛顿第二定律描述。但是在含有轻元素的体系中，该近似不能很好的解释实验现象。比如室温下水的RDF:
+In molecular dynamics simulations, we typically employ the Born-Oppenheimer approximation, which assumes that because the mass of atomic nuclei is much larger than that of electrons, the interaction between electrons and phonons can be neglected. The nuclear coordinates serve as parameters in the system Hamiltonian, and their motion is described by Newton's second law. However, in systems containing light elements, this approximation cannot adequately explain experimental observations. For example, the RDF of water at room temperature:
 
 ![](./Analyser/RDF.png)
 
-**图1** 298K下水的氢原子间RDF，PIMD结果与文献[1]吻合良好。由于核量子效应PIMD的第一个峰显著低于MD的第一个峰。
+**Fig. 1** RDF between hydrogen atoms in water at 298K. The PIMD results agree well with Ref. [1]. Due to nuclear quantum effects, the first peak of PIMD is significantly lower than that of MD.
 
-在经典分子动力学(MD)模拟中，由于未考虑核量子效应(NQE)，MD的第一个峰显著高于考虑了核量子效应的路径积分分子动力学(PIMD)的第一个峰。对比文献[1]发现，PIMD的结果更接近实验。可以得出结论：在常温常压下水的核量子效应是显著的。理论分析指出，随着温度降低或压强增加，一些较重的元素也会表现出显著的核量子效应。模拟核量子效应的数值方法主要有路径积分蒙特卡罗(PIMC)，路径积分分子动力学和量子热浴方法(QTB)。其中，PIMC不能计算系统的动力学性质。而QTB相比PIMD忽略了不同弹簧环间声子气体的散射效应，所以一般应以PIMD为基准$[2]$。因此本文只讨论PIMD方法。
+In classical molecular dynamics (MD) simulations, because nuclear quantum effects (NQE) are not considered, the first peak of MD is significantly higher than that of path integral molecular dynamics (PIMD), which does account for NQE. Comparison with Ref. [1] shows that PIMD results are closer to experiment. This leads to the conclusion that nuclear quantum effects in water are significant at ambient temperature and pressure. Theoretical analysis indicates that as temperature decreases or pressure increases, even heavier elements exhibit significant nuclear quantum effects. The main numerical methods for simulating NQE include path integral Monte Carlo (PIMC), path integral molecular dynamics (PIMD), and the quantum thermal bath (QTB) method. PIMC cannot compute dynamical properties of the system. QTB neglects the phonon gas scattering effects between different ring polymers compared to PIMD, so PIMD should generally serve as the benchmark$[2]$. Therefore, this document only discusses the PIMD method.
 
 ## PIMD
 
-PIMD可以视作MD的推广，当副本(Replica)数$n = 1$时(详见下文)，PIMD将退化为MD。注意在讨论PIMD时“经典”可以有电子和原子核两方面的含义:
+PIMD can be seen as a generalization of MD. When the number of replicas $n = 1$ (detailed below), PIMD reduces to MD. Note that when discussing PIMD, "classical" can refer to both electrons and nuclei:
 
 |          | MD | AIMD | PIMD | AI-PIMD |
 | -------- | -- | ---- | ---- | ------- |
-| 电子 | 经典 | 量子 | 经典 | 量子 |
-| 原子核 | 经典 | 经典 | 量子 | 量子 |
+| Electrons| Classical | Quantum | Classical | Quantum |
+| Nuclei   | Classical | Classical | Quantum | Quantum |
 
-MD相当于在玻尔兹曼分布中进行采样，对N粒子系统，正则系综配分函数为
+MD corresponds to sampling from the Boltzmann distribution. For an N-particle system, the canonical ensemble partition function is:
 
 $$Q_c = \frac{1}{(2\pi\hbar)^N} \int e^{-\beta H(\mathbf{p, q})} \text{d}\mathbf{p}\text{d}\mathbf{q}$$
 
-类似地, PIMD相当于在量子玻尔兹曼分布中进行采样。将积分改为求迹，将哈密顿量改为哈密顿算符可得(不严格地):
+Similarly, PIMD corresponds to sampling from the quantum Boltzmann distribution. Replacing the integral with a trace and the Hamiltonian with the Hamiltonian operator (informally):
 
 $$Q = \text{tr}[e^{-\beta \hat{H}}]$$
 
-迹一般是难以计算的，我们利用路径积分近似计算配分函数。将路径分成$n$段:
+The trace is generally difficult to compute. We use the path integral approximation to compute the partition function by splitting the path into $n$ segments:
 
 $$Q = \text{tr}[e^{-\beta \hat{H}}] = \text{tr}[(e^{-\frac{\beta}{n} \hat{H}})^n]$$
 
-利用Trotter分解，由于动能和势能算符一般不对易，简单拆开将导致小的误差
+Using the Trotter decomposition, since kinetic and potential energy operators generally do not commute, simply splitting them introduces a small error:
 
 $$e^{-\frac{\beta}{n} \hat{H}} = e^{-\frac{\beta}{n} \hat{T}} e^{-\frac{\beta}{n} \hat{V}} + o(\frac{1}{n^2})$$
 
-显然$n$越大，该近似越精确。丢弃二阶小量，配分函数近似为
+Clearly, the larger $n$ is, the more accurate this approximation. Dropping the second-order term, the partition function is approximately:
 
 $$Q \approx \text{tr}[\Lambda_0 e^{-\frac{\beta}{n} \hat{T}} e^{-\frac{\beta}{n} \hat{V}} \lambda_1 e^{-\frac{\beta}{n} \hat{T}} e^{-\frac{\beta}{n} \hat{V}} \Lambda_2 ... \Lambda_{n - 1} e^{-\frac{\beta}{n} \hat{T}} e^{-\frac{\beta}{n} \hat{V}} \Lambda_n]$$
 
-在每个$\Lambda_i$处插入一组正交完备的基矢
+Inserting a complete set of basis vectors at each $\Lambda_i$:
 
 $$\text{id} = \int \text{d} q_i \text{d} p_i \ket{q_i} \braket{q_i|p_i} \bra{p_i}$$
 
-我们熟知从路径积分的定义出发进行计算是繁琐的，感兴趣的读者可参考相关文献$^{[3]}$。我们只给出化简结果并着重讨论它的物理意义:
+Carrying out the full derivation from the path integral definition is tedious; interested readers may refer to the relevant literature$^{[3]}$. We only give the simplified result and focus on its physical interpretation:
 
 $$Q \approx \frac{1}{(2\pi\hbar)^{Nn}} \int e^{-\beta_n H_n} \text{d}\mathbf{q} \text{d}\mathbf{p}$$
 
-其中
+where
 
 $$H_n = \sum^N_{i = 1} \sum^n_{j = 1} [\frac{[p_i^{(j)}]^2}{2m} + \frac{1}{2}m\omega_n^2 (q_i^{(j)} - q_i^{(j + 1)})^2 + V(q_i^{(j)})]; \quad \beta_n = \beta/n \quad \omega_n = (\beta_n \hbar)^{-1}$$
 
-当$n = 1$时，$H_1$是经典系统的哈密顿量，对应着PIMD退化为MD。当$n \neq 1$, 上式相当于将粒子数为$N$, 温度为$\beta$的量子系统映射为粒子数为$nN$, 温度为$\beta_n$的经典系统。为了理解$H_n$的物理意义，我们注意到第二项为简谐势贡献，其弹性常数$k \propto \omega_n^2 = (\beta_n \hbar)^{-2}$包含量子力学的特征常数$\hbar$。因此第二项为纯粹的量子效应。若不考虑量子贡献，配分函数可以分离变量
+When $n = 1$, $H_1$ is the Hamiltonian of the classical system, corresponding to PIMD reducing to MD. When $n \neq 1$, the above formula maps a quantum system with $N$ particles at temperature $\beta$ to a classical system with $nN$ particles at temperature $\beta_n$. To understand the physical meaning of $H_n$, note that the second term is a harmonic potential contribution whose spring constant $k \propto \omega_n^2 = (\beta_n \hbar)^{-2}$ contains the characteristic quantum constant $\hbar$. Therefore, the second term is a purely quantum effect. Without quantum contributions, the partition function separates variables:
 
 $$Q = Q_c^n$$
 
-上式表明, 如不考虑耦合项，$H_n$将分成$n$个完全独立的经典系统。量子效应将这$n$个经典系统用等效的弹簧耦合。
+This shows that without the coupling term, $H_n$ splits into $n$ completely independent classical systems. Quantum effects couple these $n$ classical systems through effective springs.
 
-为了理解这个图像，我们设想存在$n$个平行宇宙，每个宇宙都存在一个装有经典理想气体的容器。每个容器内理想气体具有相同的粒子数$N$、体积$V$和温度$T$。我们对每个粒子给定序号$i \quad (1 \le i \le N)$。我们对所有粒子进行如下操作：按照 $1, 2, 3, ..., (n - 1), n, 1$的顺序将 $n$个宇宙的 $i$粒子用弹性系数为 $k$的弹簧首尾相连，形成一个弹簧环。由于处在不同的宇宙当中，除了弹簧外，不同宇宙的粒子不存在静电、引力、交换等相互作用。这里的弹簧正是核量子效应。现在我们将 $n$个平行宇宙“拍”到一个宇宙当中，我们就得到一个相对符合实际的宇宙。即考虑到量子统计效应后，任何物体都是由$n$个经典对象组成的一个弹簧环，物体不再是质点而是存在一个确定的密度分布。这个图像为我们理解量子力学和量子统计提供了一个有趣的角度。
+To visualize this, imagine there exist $n$ parallel universes, each containing a container filled with a classical ideal gas. Each container has the same number of particles $N$, volume $V$, and temperature $T$. We assign an index $i \quad (1 \le i \le N)$ to each particle. We then perform the following operation on all particles: connect the $i$-th particles from $n$ universes end-to-end in the order $1, 2, 3, ..., (n - 1), n, 1$ using a spring of stiffness $k$, forming a ring. Since they exist in different universes, particles from different universes have no electrostatic, gravitational, exchange, or other interactions except through the springs. These springs represent nuclear quantum effects. Now, if we "collapse" the $n$ parallel universes into one, we obtain a relatively realistic universe. That is, after accounting for quantum statistical effects, any object consists of a spring ring made of $n$ classical copies. Objects are no longer point masses but have a well-defined density distribution. This picture provides an interesting perspective for understanding quantum mechanics and quantum statistics.
 
-一般来说$\hbar$是一个相对很小的量，这导致以$\hbar^2$为分母的弹性常数$k$很大，弹簧近乎刚性。因此被弹簧连接的粒子将局域在一个很小的空间范围内。由于 $k \propto T^2$，温度越高弹性系数越大，核量子效应越不显著。在高温情况下，可以近似认为弹簧几乎不会伸长，弹簧环退化为质点，量子将过渡到经典情况。
+In general, $\hbar$ is relatively small, which makes the spring constant $k$, with $\hbar^2$ in the denominator, very large -- the springs are nearly rigid. Consequently, the particles connected by springs are localized within a very small spatial region. Since $k \propto T^2$, higher temperatures lead to larger spring constants and less significant nuclear quantum effects. At high temperatures, the springs can be approximately considered inextensible, the spring ring degenerates into a point particle, and the quantum case transitions to the classical one.
 
-在理解了PIMD的物理图像后，我们重新回顾上述理论框架。在量子力学的路径积分表述中，从初态到末态的所有可能路径都使用一个作用量的指数因子$\exp(\frac{i}{\hbar} S)$进行加权求和。但是在上面的推导中，我们完全没有用到系统的作用量 $S$。因此PIMD中的路径积分并非“物理”的路径积分，而单纯只是一种计算配分函数的数学技巧。它只能给出近似的量子动力学。在前文讲述的平行宇宙图像中，我们对所有粒子进行了序号标记。这意味着我们先验地假设了粒子是可分辨的，即忽略了粒子间的交换相互作用。这个近似在温度不十分低的凝聚态体系中可以适用，但是在温度达到十几K甚至更低的时候就必须考虑粒子间的交换相互作用。近年来费米子和玻色子的PIMD理论也得到一些发展，感兴趣的读者可以关注。
+Having understood the physical picture of PIMD, we revisit the theoretical framework above. In the path integral formulation of quantum mechanics, all possible paths from the initial to the final state are weighted by an exponential factor of the action $\exp(\frac{i}{\hbar} S)$. However, in the derivation above, we never used the action $S$ of the system. Thus, the path integral in PIMD is not a "physical" path integral; it is purely a mathematical technique for computing the partition function. It can only provide approximate quantum dynamics. In the parallel universe picture described earlier, we labeled all particles with indices. This means we a priori assumed particles are distinguishable, i.e., we neglected exchange interactions between particles. This approximation is valid in condensed matter systems at not-too-low temperatures, but at temperatures of tens of K or lower, exchange interactions must be considered. In recent years, PIMD theory for fermions and bosons has also seen some development; interested readers may follow up.
 
-## 结语
+## Conclusion
 
-最后引用文献[2]中的一段话:
+Finally, quoting from Ref. [2]:
 
     If one performs only classical simulations,
     one will never know whether quantum effects are important.
@@ -86,7 +86,7 @@ $$Q = Q_c^n$$
     even if only approximately,
     to know when they are important and when they are not.
 
-先验地判断一个体系中核量子效应是否重要是困难的。在下定结论前可以使用PIMD等方法进行简单测试，有可能会发现新奇的现象。
+It is difficult to determine a priori whether nuclear quantum effects are important in a system. Before drawing conclusions, one can perform simple tests using methods like PIMD, and may discover novel phenomena.
 
 ## Reference
 

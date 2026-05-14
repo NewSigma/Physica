@@ -13,7 +13,7 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # Schur
 
-## 关于splitOffTwoRows()的实现
+## On the implementation of splitOffTwoRows()
 
 Given a 2x2 matrix:
 $$ A = \left[ \begin{matrix} a & b \\ c & d \end{matrix} \right] ,$$
@@ -42,20 +42,20 @@ $$\cot{\theta} = \frac{\frac{a - d}{2}  \pm \sqrt{\frac{(a - d)^2}{4} + bc}}{c}$
 
 which is similiar to the expression of eigenvalues.
 
-## 关于francisQR()的实现
+## On the implementation of francisQR()
 
-考虑3x3矩阵
+Consider a 3x3 matrix
 
 $$ A = \left[ \begin{matrix} a & \epsilon & 0 \\ \epsilon & a & \epsilon \\ 0 & \epsilon & a \end{matrix} \right]$$
 
-其中$a \gg \epsilon$，需要使用QR算法将$A_{21}$化为0，令
+where $a \gg \epsilon$. The QR algorithm is used to reduce $A_{21}$ to 0. Let
 
 $$s = A_{22} + A_{33} = 2a \qquad t_1 = A_{22} * A_{33} = a^2 \qquad t_2 = A_{23} * A_{32} = \epsilon^2$$
 
-使用下式计算约化向量$c$的第一个元素
+Use the following to compute the first element of the reduction vector $c$:
 
 $$c_0 = (A_{00} - s) * A_{00} + t_1 + (A_{01} * A_{10} - t_2)$$
 
 $$= (a - 2a) * a + a^2 + (\epsilon^2 - \epsilon^2)$$
 
-注意这种括号的配置避免了$a$和$\epsilon$的直接加减运算，可以减少浮点误差的影响从而改进算法的稳定性。
+Note that this parenthesization avoids direct addition/subtraction between $a$ and $\epsilon$, reducing floating-point error and improving the stability of the algorithm.

@@ -13,11 +13,11 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # HF
 
-本示例展示如何使用Hartree-Fock近似计算孤立分子体系，以氢分子的解离曲线为例
+This example demonstrates how to use the Hartree-Fock approximation to compute isolated molecular systems, using the dissociation curve of the hydrogen molecule as an example.
 
 ![](./HF.png)
 
-**图1** 氢分子的解离曲线，能量最小值为$E_{min} = -1.126545057 \; \mathrm{Hartree}$，位置$r_0 = 1.38375 \; \mathrm{Bohr}$，与文献[1]的$r_0 = 1.38 \; \mathrm{Bohr}$吻合良好
+**Figure 1** Dissociation curve of the hydrogen molecule. The energy minimum is $E_{min} = -1.126545057 \; \mathrm{Hartree}$ at $r_0 = 1.38375 \; \mathrm{Bohr}$, in good agreement with Ref. [1] which reports $r_0 = 1.38 \; \mathrm{Bohr}$.
 
 ## Reference
 

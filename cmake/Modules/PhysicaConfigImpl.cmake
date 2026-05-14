@@ -13,6 +13,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
 else()
     add_compile_options(-Wall -Wfatal-errors -mrdrnd -march=native -ffunction-sections -fdata-sections -fno-semantic-interposition -fno-plt -fno-rtti)
     add_compile_options(-fno-math-errno -fno-trapping-math -fno-signed-zeros -fassociative-math)
+    add_compile_options(-Werror=literal-conversion)
     add_link_options(-Wl,-O2,-Bsymbolic,--gc-sections)
 
     if(CMAKE_BUILD_TYPE MATCHES Debug)

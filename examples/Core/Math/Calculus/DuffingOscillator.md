@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -13,19 +13,19 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # DuffingOscillator
 
-Duffing振子示例展示如何使用Physica的ODESolver求解常微分方程
+The example demonstrates how to use *Physica*'s ODESolver to solve ordinary dfferential equations
 
 ![](./DuffingOscillator1.png)
 
-**图1** Duffing振子位置x随时间变化
+**Figure 1** Duffing oscillator position x as a function of time
 
 ![](./DuffingOscillator2.png)
 
-**图2** Duffing振子动量p随时间变化
+**Figure 2** Duffing oscillator momentum p as a function of time
 
 ![](./DuffingOscillator3.png)
 
-**图3** Duffing振子的x-p相图
+**Figure 3** Phase portrait (x-p) of the Duffing oscillator
 
 ## Reference
 

@@ -13,9 +13,9 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # Notes on Implementation of DQMC
 
-## 秩1更新
+## Rank-1 Update
 
-我们将$\Delta$矩阵从右边作用, 因此更新形式与$[1]$略有不同, 忽略自旋指标, Eq. (7.43)与Eq. (7.45)应分别修改为
+We apply the $\Delta$ matrix from the right, so the update formulas differ slightly from [1]. Ignoring spin indices, Eq. (7.43) and Eq. (7.45) should be modified respectively to:
 
 $$R = 1 + (1 - G_{ii})\Delta_{ii}$$
 

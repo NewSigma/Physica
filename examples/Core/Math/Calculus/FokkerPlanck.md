@@ -13,17 +13,17 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # FokkerPlanck
 
-本示例演示如何使用有限元方法求解偏微分方程(PDE)
+This example demonstrates how to solve a partial differential equation (PDE) using the finite element method.
 
-以有阻尼的谐振子的Fokker-Planck方程为例$^{[1]}$:
+Taking the Fokker-Planck equation for a damped harmonic oscillator as an example$^{[1]}$:
 
 $$\frac{\partial W(x, p, t)}{\partial t} = [-\frac{p}{m} \frac{\partial}{\partial x} + \frac{\partial}{\partial p} (x + \gamma p) + \frac{\partial^2}{\partial p^2} D] W(x, p, t)$$
 
-其中谐振子质量为$m$。$x$和$p$分别为谐振子的位置和动量。$\gamma$为阻尼系数，$D$为扩散系数。$W$为系统的概率密度分布。
+where $m$ is the mass of the oscillator, $x$ and $p$ are the position and momentum of the oscillator respectively, $\gamma$ is the damping coefficient, $D$ is the diffusion coefficient, and $W$ is the probability density distribution of the system.
 
 ![](FokkerPlanck.gif)
 
-**图1** 概率密度$W(x, p, t)$随时间演化。x轴表示位置，y轴表示动量。可视化使用Paraview$^{[2]}$完成
+**Figure 1** Evolution of the probability density $W(x, p, t)$ over time. The x-axis represents position and the y-axis represents momentum. Visualization was done using Paraview$^{[2]}$.
 
 ## Reference
 
