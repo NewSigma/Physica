@@ -260,8 +260,10 @@ namespace Physica {
     void JacobiDavidson<T>::expandSpace(const Matrix auto& source, size_t dim) {
         const size_t i = dim;
         auto dir = searchSpace.col(i);
-        if (i != 0)
+        if (i != 0) {
             gram_schmidt(searchSpace.leftCols(i), dir, searchSpaceProj.col(i).head(i));
+            dir.toUnit();
+        }
 
         auto dot = dotSpace.col(i);
         dot = source * dir;

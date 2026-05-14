@@ -35,7 +35,6 @@ namespace Physica {
             const auto dot = col.conjugate() * v;
             v -= dot * col;
         }
-        v.toUnit();
     }
 
     void gram_schmidt(const Matrix auto& base, Vector auto& v, Vector auto&& dots) {
@@ -47,7 +46,6 @@ namespace Physica {
             v -= dot * col;
             dots[i] = dot;
         }
-        v.toUnit();
     }
 
     void gram_schmidt(Matrix auto& m) {

@@ -259,6 +259,7 @@ namespace Physica {
 
     template<class Derived>
     void LValueVector<Derived>::toUnit() {
+        assert(!Base::getDerived().normInf().isSubNormal() && "[Error]: Cannot normalize a empty vector");
         auto& x = Base::getDerived();
         x *= reciprocal(x.norm());
     }
