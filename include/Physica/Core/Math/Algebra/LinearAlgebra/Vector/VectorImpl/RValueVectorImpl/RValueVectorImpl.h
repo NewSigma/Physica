@@ -671,22 +671,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    bool RValueVector<Derived>::isZeros() const {
-        for (size_t i = 0; i < getLength(); ++i)
-            if (!calc(i).isZero())
-                return false;
-        return true;
-    }
-
-    template<class Derived>
-    bool RValueVector<Derived>::isFinite() const {
-        for (size_t i = 0; i < getLength(); ++i)
-            if (!calc(i).isFinite())
-                return false;
-        return true;
-    }
-
-    template<class Derived>
     auto RValueVector<Derived>::cross(const Vector auto& v) const noexcept {
         using V = std::remove_cvref_t<decltype(v)>;
         return CrossProduct<Derived, V>(Base::getDerived(), v);
@@ -779,6 +763,30 @@ namespace Physica {
             return GradMaskVector<Self, MaskOrder>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);
+    }
+
+    template<class Derived>
+    bool RValueVector<Derived>::isZero() const {
+        for (size_t i = 0; i < getLength(); ++i)
+            if (!calc(i).isZero())
+                return false;
+        return true;
+    }
+
+    template<class Derived>
+    bool RValueVector<Derived>::isFinite() const {
+        for (size_t i = 0; i < getLength(); ++i)
+            if (!calc(i).isFinite())
+                return false;
+        return true;
+    }
+
+    template<class Derived>
+    bool RValueVector<Derived>::isSubNormal() const {
+        for (size_t i = 0; i < getLength(); ++i)
+            if (!calc(i).isSubNormal())
+                return false;
+        return true;
     }
 
     template<class Derived>

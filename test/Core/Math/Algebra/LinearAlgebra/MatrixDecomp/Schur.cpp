@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,13 +29,13 @@ namespace {
         for (size_t i = 0; i < m.getRow() - 1; ++i) {
             if (m[i + 1, i].isZero()) {
                 auto col = m.col(i);
-                if (!col.tail(i + 1).isZeros())
+                if (!col.tail(i + 1).isZero())
                     return false;
             }
             else if(i < m.getRow() - 2) {
                 auto col1 = m.col(i);
                 auto col2 = m.col(i + 1);
-                if (!col1.tail(i + 2).isZeros() || !col2.tail(i + 2).isZeros())
+                if (!col1.tail(i + 2).isZero() || !col2.tail(i + 2).isZero())
                     return false;
                 ++i;
             }
@@ -48,7 +48,7 @@ namespace {
             return false;
         for (size_t i = 0; i < m.getRow() - 1; ++i) {
             auto col = m.col(i);
-            if (!col.tail(i + 1).isZeros())
+            if (!col.tail(i + 1).isZero())
                 return false;
         }
         return true;

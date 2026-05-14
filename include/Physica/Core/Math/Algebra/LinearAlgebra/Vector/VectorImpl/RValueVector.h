@@ -181,8 +181,6 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> lnSoftmax(size_t index) const noexcept;
         [[nodiscard]] CoDiff<T> softmax(size_t index) const noexcept;
         [[nodiscard]] CoDiff<T> prod() const noexcept;
-        [[nodiscard]] bool isZeros() const;
-        [[nodiscard]] bool isFinite() const;
         [[nodiscard]] auto cross(const Vector auto& v) const noexcept;
         Tr householder(Vector auto& __restrict target) const __restrict;
 
@@ -198,6 +196,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         [[nodiscard]] bool empty() const noexcept { return getLength() == 0; }
+        [[nodiscard]] bool isZero() const;
+        [[nodiscard]] bool isFinite() const;
+        [[nodiscard]] bool isSubNormal() const;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isComplex() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isDiffable() noexcept;
