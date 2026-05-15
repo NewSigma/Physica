@@ -39,7 +39,7 @@ namespace {
         const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, ChemMu, NumSplit);
         int maxBoson = std::uniform_int_distribution<>(1, numFreq)(RandomSource::getInstance());
         ActionMatrix<Tc> action(params, numFreq, maxBoson);
-        action.randAuxField<RandomSource>();
+        action.random_normal<RandomSource>();
 
         const MatrixND<Tc> result = action;
         size_t order = action.getOrder();
@@ -55,7 +55,7 @@ namespace {
         const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, ChemMu, NumSplit);
         int maxBoson = std::uniform_int_distribution<>(1, numFreq)(RandomSource::getInstance());
         ActionMatrix<Tc> action(params, numFreq, maxBoson);
-        action.randAuxField<RandomSource>();
+        action.random_normal<RandomSource>();
 
         size_t order = action.getOrder();
         const MatrixND<Tc> answer = action;

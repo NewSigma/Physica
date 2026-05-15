@@ -35,6 +35,7 @@ namespace Physica {
     private:
         Array<DenseLU<T, false>, 2> lu;
         ActionMatrix<T> action;
+        HamiltonMC<Tr> hmc;
         Trv correction;
 
         GreenPair greens;
@@ -50,18 +51,10 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<RNG R, ExecutePolicy P = Sequential>
+        template<RNG R>
         void step_random();
         template<RNG R, ExecutePolicy P = Sequential>
-        bool step(bool warmup = false);
-        template<RNG R, ExecutePolicy P = Sequential>
-        void step_for(int numStep);
-
-        template<RNG R>
-        void step_random(HamiltonMC<Tr>& hmc);
-        template<RNG R, ExecutePolicy P = Sequential>
-        Trv step(HamiltonMC<Tr>& hmc);
-        [[nodiscard]] VectorND<Trv> makeDefaultMass() const;
+        Trv step();
 
         template<ExecutePolicy P = Sequential>
         [[nodiscard]] Trv potentialV(const Vector auto& pos);
@@ -77,6 +70,7 @@ namespace Physica {
         [[nodiscard]] int getNumSite() const noexcept { return getParams().getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
         [[nodiscard]] int getMaxBoson() const noexcept { return action.getMaxBoson(); }
+        [[nodiscard]] auto&& getHMC(this auto&& self) noexcept { return self.hmc; }
         [[nodiscard]] const auto& getGreens() noexcept { return greens; }
         [[nodiscard]] Trv getSign() const noexcept { return sign; }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
@@ -91,11 +85,16 @@ namespace Physica {
         auto calcGreen();
         /* Getters */
         [[nodiscard]] Trv getBetaU() const noexcept;
+        /* Static members */
+        [[nodiscard]] static VectorND<Trv> makeDefaultMass(const Matrix auto& auxField);
+        /* Friends */
+        friend class device_obj<This>;
     };
 
     template<Scalar T>
     FreqDQMC<T>::FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity, int maxBoson)
             : action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity), maxBoson)
+            , hmc(makeDefaultMass(getAuxField()))
             , correction(ElasticDQMC<Trv>::calcLocalCorrection(params.getBeta(), params.getRepelU(), params.getChemMu(), getNumFreq()))
             , greens(2, params.getNumSite()) {
         size_t size = action.getOrder();
@@ -106,6 +105,7 @@ namespace Physica {
     template<Scalar T>
     FreqDQMC<T>::FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity)
             : action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity))
+            , hmc(makeDefaultMass(getAuxField()))
             , correction(ElasticDQMC<Trv>::calcLocalCorrection(params.getBeta(), params.getRepelU(), params.getChemMu(), getNumFreq()))
             , greens(2, params.getNumSite()) {
         size_t size = action.getOrder();
@@ -114,47 +114,9 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RNG R, ExecutePolicy P>
-    void FreqDQMC<T>::step_random() {
-        action.template randAuxField<R>();
-        auto [lnAD, sgnD] = calcLnWeight<P>();
-        lnWeight = lnAD;
-        sign = sgnD;
-    }
-
-    template<Scalar T>
-    template<RNG R, ExecutePolicy P>
-    bool FreqDQMC<T>::step(bool warmup) {
-        assert(lnWeight.isFinite() && "[Error]: Should random initialize before monte carlo step");
-        const int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
-        const int freq = std::uniform_int_distribution<int>(0, getMaxBoson() - 1)(R::getInstance());
-        const T save = action.template randAuxField<R>(freq, site);
-
-        auto [lnW, sgnD] = calcLnWeight<P>();
-        const bool accept = Trv::template random_uniform<R>() < exp(lnW - lnWeight);
-        if (accept) {
-            lnWeight = lnW;
-            sign = sgnD;
-            if (!warmup)
-                calcGreen<P>();
-        }
-        else
-            getAuxField()[freq, site] = save;
-        return accept;
-    }
-
-    template<Scalar T>
-    template<RNG R, ExecutePolicy P>
-    void FreqDQMC<T>::step_for(int numStep) {
-        for (int i = 0; i < numStep; ++i)
-            step<R, P>(true);
-        calcGreen<P>();
-    }
-
-    template<Scalar T>
     template<RNG R>
-    void FreqDQMC<T>::step_random(HamiltonMC<Tr>& hmc) {
-        action.template randAuxField<R>();
+    void FreqDQMC<T>::step_random() {
+        action.template random_normal<R>();
 
         VectorND<Tr> init(getAuxField().getSize() * 2);
         init.read(getAuxField());
@@ -163,7 +125,7 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R, ExecutePolicy P>
-    auto FreqDQMC<T>::step(HamiltonMC<Tr>& hmc) -> Trv {
+    auto FreqDQMC<T>::step() -> Trv {
         Trv acceptR = hmc.template step<R, P>(*this);
         getAuxField().read(hmc.getSample());
 
@@ -172,15 +134,6 @@ namespace Physica {
         sign = sgnD;
         calcGreen<P>();
         return acceptR;
-    }
-
-    template<Scalar T>
-    auto FreqDQMC<T>::makeDefaultMass() const -> VectorND<Trv> {
-        constexpr int Major = getAuxField().getMajor();
-        VectorND<Trv> result(getAuxField().getSize() * 2, 1);
-        auto mat = result.template reshape<Major>(getAuxField().getRow(), getAuxField().getCol() * 2);
-        mat.bottomRows(1) *= Trv(2);
-        return result;
     }
 
     template<Scalar T>
@@ -313,5 +266,14 @@ namespace Physica {
     template<Scalar T>
     auto FreqDQMC<T>::getBetaU() const noexcept -> Trv {
         return getParams().getBeta() * getParams().getRepelU();
+    }
+
+    template<Scalar T>
+    auto FreqDQMC<T>::makeDefaultMass(const Matrix auto& auxField) -> VectorND<Trv> {
+        constexpr int Major = auxField.getMajor();
+        VectorND<Trv> result(auxField.getSize() * 2, 1);
+        auto mat = result.template reshape<Major>(auxField.getRow(), auxField.getCol() * 2);
+        mat.bottomRows(1) *= Trv(2);
+        return result;
     }
 }

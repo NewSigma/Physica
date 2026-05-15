@@ -41,6 +41,7 @@ namespace Physica {
         device_obj<ActionMatrix<T>> action;
         device_obj<MatrixND<T>> forceBuffer;
         device_obj<MatrixND<T>> solBuffer;
+        HamiltonMC<Tr> hmc;
         Trv correction;
 
         Array<device_obj<MatrixND<Tr>>, 2> greensD;
@@ -59,16 +60,8 @@ namespace Physica {
         /* Operations */
         template<RNG R>
         void step_random();
-        template<RNG R>
-        bool step(bool warmup = false);
-        template<RNG R>
-        void step_for(int numStep);
-
-        template<RNG R>
-        void step_random(HamiltonMC<Tr>& hmc);
         template<RNG R, ExecutePolicy P = Sequential>
-        Trv step(HamiltonMC<Tr>& hmc);
-        [[nodiscard]] VectorND<Trv> makeDefaultMass() const;
+        Trv step();
 
         template<ExecutePolicy P = Sequential>
         [[nodiscard]] Trv potentialV(const Vector auto& pos);
@@ -83,6 +76,7 @@ namespace Physica {
         [[nodiscard]] int getNumSite() const noexcept { return action.getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
         [[nodiscard]] int getMaxBoson() const noexcept { return action.getMaxBoson(); }
+        [[nodiscard]] auto&& getHMC(this auto&& self) noexcept { return self.hmc; }
         [[nodiscard]] const auto& getGreens() noexcept { return greensH; }
         [[nodiscard]] Trv getSign() const noexcept { return Trv(sign); }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
@@ -102,6 +96,7 @@ namespace Physica {
     template<Scalar T>
     device_obj<FreqDQMC<T>>::device_obj(const HubbardParams<Tr>& params, Trv freqDensity, int maxBoson)
             : action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity), maxBoson)
+            , hmc(host_obj::makeDefaultMass(getAuxField()))
             , correction(ElasticDQMC<Trv>::calcLocalCorrection(params.getBeta(), params.getRepelU(), params.getChemMu(), getNumFreq()))
             , greensD(2, params.getNumSite())
             , greensH(2, params.getNumSite()) {
@@ -115,6 +110,7 @@ namespace Physica {
     template<Scalar T>
     device_obj<FreqDQMC<T>>::device_obj(const HubbardParams<Tr>& params, Trv freqDensity)
             : action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity))
+            , hmc(host_obj::makeDefaultMass(getAuxField()))
             , correction(ElasticDQMC<Trv>::calcLocalCorrection(params.getBeta(), params.getRepelU(), params.getChemMu(), getNumFreq()))
             , greensD(2, params.getNumSite())
             , greensH(2, params.getNumSite()) {
@@ -128,45 +124,7 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     void device_obj<FreqDQMC<T>>::step_random() {
-        action.template randAuxField<R>();
-        auto [lnW, sgnD] = calcLnWeight();
-        lnWeight = lnW;
-        sign = sgnD;
-    }
-
-    template<Scalar T>
-    template<RNG R>
-    bool device_obj<FreqDQMC<T>>::step(bool warmup) {
-        assert(lnWeight.isFinite() && "[Error]: Should random initialize before monte carlo step");
-        const int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
-        const int freq = std::uniform_int_distribution<int>(0, getMaxBoson() - 1)(R::getInstance());
-        const T save = action.template randAuxField<R>(freq, site);
-
-        auto [lnW, sgnD] = calcLnWeight();
-        const bool accept = Trv::template random_uniform<R>() < exp(lnW - lnWeight);
-        if (accept) {
-            lnWeight = lnW;
-            sign = sgnD;
-            if (!warmup)
-                calcGreen();
-        }
-        else
-            getAuxField()[freq, site] = save;
-        return accept;
-    }
-
-    template<Scalar T>
-    template<RNG R>
-    void device_obj<FreqDQMC<T>>::step_for(int numStep) {
-        for (int i = 0; i < numStep; ++i)
-            step<R>(true);
-        calcGreen();
-    }
-
-    template<Scalar T>
-    template<RNG R>
-    void device_obj<FreqDQMC<T>>::step_random(HamiltonMC<Tr>& hmc) {
-        action.template randAuxField<R>();
+        action.template random_normal<R>();
 
         VectorND<Tr> init(getAuxField().getSize() * 2);
         check(cudaMemcpyAsync(init.data(), getAuxField().data(), sizeof(Tr) * init.getLength(), cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
@@ -176,7 +134,7 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R, ExecutePolicy P>
-    auto device_obj<FreqDQMC<T>>::step(HamiltonMC<Tr>& hmc) -> Trv {
+    auto device_obj<FreqDQMC<T>>::step() -> Trv {
         Trv acceptR = hmc.template step<R, P>(*this);
         check(cudaMemcpyAsync(getAuxField().data(), hmc.getSample().data(), sizeof(Tr) * hmc.getDOF(), cudaMemcpyHostToDevice, CUDAContext::getInstance()));
 
@@ -185,15 +143,6 @@ namespace Physica {
         sign = sgnD;
         calcGreen();
         return acceptR;
-    }
-
-    template<Scalar T>
-    auto device_obj<FreqDQMC<T>>::makeDefaultMass() const -> VectorND<Trv> {
-        constexpr int Major = std::remove_cvref_t<decltype(getAuxField())>::getMajor();
-        VectorND<Trv> result(getAuxField().getSize() * 2, 1);
-        auto mat = result.template reshape<Major>(getAuxField().getRow(), getAuxField().getCol() * 2);
-        mat.bottomRows(1) *= Trv(2);
-        return result;
     }
 
     template<Scalar T>

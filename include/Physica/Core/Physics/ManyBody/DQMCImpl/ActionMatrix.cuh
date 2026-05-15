@@ -61,7 +61,7 @@ namespace Physica {
 
         void flip();
         template<RNG R>
-        void randAuxField();
+        void random_normal();
         /* Getters */
         [[nodiscard]] size_t getOrder() const noexcept { return matsubara.getOrder() * getNumSite(); }
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
@@ -187,7 +187,7 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    void device_obj<ActionMatrix<T>>::randAuxField() {
+    void device_obj<ActionMatrix<T>>::random_normal() {
         Tr factor = sqrt(repelU * beta);
         MatrixND<T> buffer;
         buffer.resize(auxField);

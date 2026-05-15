@@ -66,8 +66,7 @@ namespace {
         const SquareLattice<Dim> lattice({numSite}, 1);
         const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, 1);
         auto dqmc = device_obj<FreqDQMC<Tc>>(params, freqDensity);
-        auto hmc = HamiltonMC<T>(dqmc.makeDefaultMass());
-        auto& engine = hmc.getRoot();
+        auto& engine = dqmc.getHMC().getRoot();
         engine.setTimeStep(StepSize);
 
         using Kinetic = OpenModel<T, 1, 1>;
@@ -82,7 +81,6 @@ namespace {
 }
 
 int main() {
-    printf("%zu\n", Random<>::getInstance().getSeed());
     hostDeviceCross();
     conserve();
     return 0;

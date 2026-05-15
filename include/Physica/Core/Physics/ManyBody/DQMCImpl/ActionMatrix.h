@@ -57,9 +57,7 @@ namespace Physica {
 
         void flip();
         template<RNG R>
-        void randAuxField();
-        template<RNG R>
-        [[nodiscard]] T randAuxField(int freq, int site);
+        void random_normal();
         /* Getters */
         [[nodiscard]] size_t getOrder() const noexcept { return matsubara.getOrder() * getNumSite(); }
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
@@ -183,26 +181,12 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    void ActionMatrix<T>::randAuxField() {
+    void ActionMatrix<T>::random_normal() {
         Tr factor = sqrt(params.getRepelU() * params.getBeta());
         auxField.template random_normal<R>();
         auxField.row(0) *= factor;
         if (getMaxBoson() > 1)
             auxField.bottomRows(1) *= factor / sqrt(Trv(2));
-    }
-
-    template<Scalar T>
-    template<RNG R>
-    T ActionMatrix<T>::randAuxField(int freq, int site) {
-        const Tr betaU = params.getBeta() * params.getRepelU();
-        const Vector3D<Tr> shifts{-betaU, 0, betaU};
-        const Tr factor = sqrt(betaU);
-        T result = T::template random_normal<R>() * factor;
-        result.real() += shifts[std::uniform_int_distribution<int>(0, 2)(R::getInstance())];
-        result.imag() += shifts[std::uniform_int_distribution<int>(0, 2)(R::getInstance())];
-        if (freq != 0)
-            result /= sqrt(Trv(2));
-        return std::exchange(auxField[freq, site], result);
     }
 
     template<Scalar T>

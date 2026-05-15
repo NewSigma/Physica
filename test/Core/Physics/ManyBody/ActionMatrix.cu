@@ -40,7 +40,7 @@ namespace {
         const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, ChemMu, NumSplit);
         int maxBoson = std::uniform_int_distribution<>(1, numFreq)(RandomSource::getInstance());
         device_obj<ActionMatrix<Tc>> d_action(params, numFreq, maxBoson);
-        d_action.randAuxField<Random<>>();
+        d_action.random_normal<Random<>>();
         device_obj<MatrixND<Tc>> result = d_action;
 
         ActionMatrix<Tc> action(params, numFreq, maxBoson);
