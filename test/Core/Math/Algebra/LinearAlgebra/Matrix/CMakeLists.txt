@@ -3,6 +3,8 @@ physica_add_test(MatrixPow MatrixFunc/MatrixPow.cpp)
 
 add_subdirectory(MatrixImpl)
 
+physica_add_test(HermiteToeplitzMatrix Toeplitz/HermiteToeplitzMatrix.cpp)
+
 physica_add_test(DenseMatrix DenseMatrix.cpp)
 physica_add_test(DenseSymmMatrix DenseSymmMatrix.cpp)
 physica_add_test(DiagMatrix DiagMatrix.cpp)
