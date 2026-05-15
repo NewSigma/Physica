@@ -1,0 +1,155 @@
+/*
+ * Copyright 2026 Weibo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include "Physica/Core/Exception/BadConvergenceException.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Orthogonalize.h"
+
+namespace Physica {
+    /**
+     * Reference:
+     * [1] SIAM J. Sci. Stat. Comput. 44, 856-869, (1986); https://doi.org/10.1137/0907058
+     */
+    template<Scalar T>
+    class GMRES {
+        using This = GMRES<T>;
+        using Tr = T::RealType;
+        constexpr static size_t Unlimited = std::numeric_limits<size_t>::max();
+    private:
+        MatrixND<T> krylov;
+        MatrixND<T> hess;
+        VectorND<T> residual;
+        VectorND<T> coeffs;
+        VectorND<T> buffer;
+        size_t iteration{};
+        size_t itelim = Unlimited;
+        Tr tolerance = std::numeric_limits<T>::epsilon();
+    public:
+        GMRES() = default;
+        GMRES(size_t size, size_t krylovDim);
+        GMRES(const This&) = default;
+        GMRES(This&&) noexcept = default;
+        ~GMRES() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        void solve(const Matrix auto& A, VectorND<T>& b);
+        void solve(const Matrix auto& A, const VectorND<T>& b, VectorND<T>& x);
+        /* Getters */
+        [[nodiscard]] size_t getLength() const noexcept { return krylov.getRow(); }
+        [[nodiscard]] size_t getKrylovDim() const noexcept { return krylov.getCol(); }
+        [[nodiscard]] const auto& getResidual() noexcept { return residual; }
+        [[nodiscard]] size_t getIteration() const noexcept { return iteration; }
+        /* Setters */
+        void setIterationLimit(size_t limit) noexcept { itelim = limit; }
+        void setTolerance(Tr tol) noexcept { tolerance = tol; }
+    private:
+        void solve_impl(const Matrix auto& A, const VectorND<T>& b, VectorND<T>& x);
+        void spanKrylov(const Matrix auto& A);
+        [[nodiscard]] bool isConverged(Tr res, Tr res0) const noexcept;
+        [[nodiscard]] size_t getMaxIteration() const noexcept;
+    };
+
+    template<Scalar T>
+    GMRES<T>::GMRES(size_t size, size_t krylovDim)
+            : krylov(size, krylovDim)
+            , hess(krylovDim, krylovDim - 1, 0)
+            , residual(size)
+            , coeffs(krylovDim)
+            , buffer(size) {
+        assert(1 < krylovDim && krylovDim <= size);
+    }
+
+    template<Scalar T>
+    void GMRES<T>::solve(const Matrix auto& A, VectorND<T>& b) {
+        assert(b.getLength() == getLength());
+        VectorND<T> x(getLength(), 0);
+        b.assign(residual);
+        solve_impl(A, b, x);
+        x.assign(b);
+    }
+
+    template<Scalar T>
+    void GMRES<T>::solve(const Matrix auto& A, const VectorND<T>& b, VectorND<T>& x) {
+        residual = b - A * x;
+        solve_impl(A, b, x);
+    }
+
+    template<Scalar T>
+    void GMRES<T>::solve_impl(const Matrix auto& A, const VectorND<T>& b, VectorND<T>& x) {
+        assert(A.isSquare());
+        assert(A.getRow() == krylov.getRow());
+        const size_t maxIte = getMaxIteration();
+        const size_t dim = getKrylovDim();
+        const Tr res0 = residual.norm();
+        Tr res = res0;
+        iteration = 0;
+        while (!isConverged(res, res0)) {
+            if (iteration++ == maxIte) [[unlikely]]
+                throw BadConvergenceException("[Error]: GMRES failed to converge");
+
+            krylov.col(0) = residual * reciprocal(res);
+            spanKrylov(A);
+            // least-squares
+            auto head = buffer.head(dim);
+            head.zeros();
+            head[0] = res;
+            for (size_t i = 0; i < dim - 1; ++i) {
+                auto rotater = givens(hess.col(i), i, i + 1);
+                applyGivens(rotater, hess.rightCols(i), i, i + 1);
+                applyGivensCol(rotater, head, i, i + 1);
+            }
+            coeffs = hess.triu().inv() * buffer.head(dim - 1);
+            x += krylov.leftCols(dim - 1) * coeffs;
+            residual = b - A * x;
+            res = residual.norm();
+        }
+    }
+
+    template<Scalar T>
+    void GMRES<T>::spanKrylov(const Matrix auto& A) {
+        bool isKrylovComplete = getKrylovDim() == getLength(); // TODO: maybe singular and not decreasing
+        for (size_t c = 0; c < hess.getCol(); ++c) {
+            (A * krylov.col(c)).assign(buffer);
+
+            auto v = krylov.col(c + 1);
+            v = buffer;
+            gram_schmidt(krylov.leftCols(c + 1), v, hess.col(c).head(c + 1));
+            v.toUnit();
+
+            bool isFinal = c + 1 == hess.getCol();
+            if (!isFinal || !isKrylovComplete)
+                hess[c + 1, c] = v.conjugate() * buffer;
+        }
+    }
+
+    template<Scalar T>
+    bool GMRES<T>::isConverged(Tr res, Tr res0) const noexcept {
+        return res <= res0 * tolerance;
+    }
+
+    template<Scalar T>
+    size_t GMRES<T>::getMaxIteration() const noexcept {
+        constexpr static int MaxIterationFactor = 8;
+        return itelim == Unlimited ? (MaxIterationFactor * getLength()) : itelim;
+    }
+}
