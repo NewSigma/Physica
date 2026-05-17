@@ -26,8 +26,6 @@ using namespace llvm;
 #define DEBUG_TYPE "lifetime-move"
 
 namespace {
-    const cl::opt<bool> NonCoro("lifetime-move-noncoro", cl::init(false), cl::Hidden, cl::desc("Enable lifetime-move pass for non-coro functions"));
-
     class LifetimeMover : public PtrUseVisitor<LifetimeMover> {
         using This = LifetimeMover;
         using Base = PtrUseVisitor<LifetimeMover>;
@@ -381,10 +379,6 @@ void LifetimeMover::reset() {
 }
 
 PreservedAnalyses LifetimeMovePass::run(Function& F, FunctionAnalysisManager& AM) {
-    // FIXME: Only enable by default for coroutines for now
-    if (!NonCoro && !F.isPresplitCoroutine())
-        return PreservedAnalyses::all();
-
     const DominatorTree& DT = AM.getResult<DominatorTreeAnalysis>(F);
     const LoopInfo& LI = AM.getResult<LoopAnalysis>(F);
     LifetimeMover Mover(F, DT, LI);

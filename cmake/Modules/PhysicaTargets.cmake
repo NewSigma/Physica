@@ -30,7 +30,7 @@ if(${PHYSICA_MIMALLOC})
 endif()
 
 if(${PHYSICA_TRANSFORMS})
-    target_compile_options(Physica::Core INTERFACE -fpass-plugin=$<TARGET_FILE:PhysicaTransforms> -mllvm -lifetime-move-noncoro)
+    target_compile_options(Physica::Core INTERFACE -fpass-plugin=$<TARGET_FILE:PhysicaTransforms>)
 endif()
 ##############################################Gui################################################
 if(${PHYSICA_GUI})
