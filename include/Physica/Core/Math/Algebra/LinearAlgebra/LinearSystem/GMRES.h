@@ -65,7 +65,7 @@ namespace Physica {
         void setTolerance(Tr tol) noexcept { tolerance = tol; }
     private:
         void solve_impl(const Matrix auto& A, const VectorND<T>& b, VectorND<T>& x);
-        void spanKrylov(const Matrix auto& A);
+        [[nodiscard]] size_t spanKrylov(const Matrix auto& A, Tr res);
         [[nodiscard]] bool isConverged(Tr res, Tr res0) const noexcept;
         [[nodiscard]] size_t getMaxIteration() const noexcept;
     };
@@ -119,7 +119,6 @@ namespace Physica {
         assert(A.isSquare());
         assert(A.getRow() == krylov.getRow());
         const size_t maxIte = getMaxIteration();
-        const size_t dim = getKrylovDim();
         const Tr res0 = b.norm();
         Tr res = res0;
         iteration = 0;
@@ -127,39 +126,41 @@ namespace Physica {
             if (iteration++ == maxIte) [[unlikely]]
                 throw BadConvergenceException("[Error]: GMRES failed to converge");
 
-            krylov.col(0) = residual * reciprocal(res);
-            spanKrylov(A);
-            // least-squares
-            auto head = buffer.head(dim);
-            head.zeros();
-            head[0] = res;
-            for (size_t i = 0; i < dim - 1; ++i) {
+            const size_t dimK = spanKrylov(A, res);
+            const size_t dimV = dimK - (dimK == getKrylovDim());
+            buffer.head(dimK).zeros();
+            buffer[0] = res;
+            for (size_t i = 0; i < dimV; ++i) {
                 auto rotater = givens(hess.col(i), i, i + 1);
                 applyGivens(rotater, hess.rightCols(i), i, i + 1);
-                applyGivensCol(rotater, head, i, i + 1);
+                applyGivensCol(rotater, buffer, i, i + 1);
             }
-            coeffs = hess.triu().inv() * buffer.head(dim - 1);
-            x += krylov.leftCols(dim - 1) * coeffs;
+            coeffs = hess.leftCols(dimV).triu().inv() * buffer.head(dimV);
+            x += krylov.leftCols(dimV) * coeffs;
             residual = b - A * x;
             res = residual.norm();
         }
     }
 
     template<Scalar T>
-    void GMRES<T>::spanKrylov(const Matrix auto& A) {
-        bool isKrylovComplete = getKrylovDim() == getLength(); // TODO: maybe singular and not decreasing
+    size_t GMRES<T>::spanKrylov(const Matrix auto& A, Tr res) {
+        const bool isKrylovComplete = getKrylovDim() == getLength();
+        krylov.col(0) = residual * reciprocal(res);
         for (size_t c = 0; c < hess.getCol(); ++c) {
             (A * krylov.col(c)).assign(buffer);
 
             auto v = krylov.col(c + 1);
             v = buffer;
             gram_schmidt(krylov.leftCols(c + 1), v, hess.col(c).head(c + 1));
+            if (v.normInf().isSubNormal())
+                return c + 1;
             v.toUnit();
 
             bool isFinal = c + 1 == hess.getCol();
             if (!isFinal || !isKrylovComplete)
                 hess[c + 1, c] = v.conjugate() * buffer;
         }
+        return getKrylovDim();
     }
 
     template<Scalar T>

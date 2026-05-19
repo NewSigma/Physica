@@ -25,7 +25,7 @@ using Tc = cfloat64;
 
 namespace {
     void simple() noexcept {
-        {
+        /* Real */ {
             DenseMatrix<T, MatrixMajor::Row, 3, 3> A{
                 {3,  2, 0},
                 {1, -1, 0},
@@ -37,7 +37,7 @@ namespace {
             gmres.solve(A, x);
             expect(vectorNear(A * x, b, 1E-15));
         }
-        {
+        /* Complex */ {
             DenseMatrix<Tc, MatrixMajor::Row, 3, 3> A{
                 {{2, 1},      -1,  0},
                 {    -1, {2, -1}, -1},
@@ -51,22 +51,34 @@ namespace {
         }
     }
 
-    void krylov() noexcept {
-        // Test that we handle special $A \cdot r$ properly when generating Krylov space K(A, r)
-        DenseMatrix<T, MatrixMajor::Row, 2, 2> A{
-            {1, 2},
-            {3, 0}
-        };
-        VectorND<T> x{1, 1};
-        auto gmres = GMRES<T>(2, 2);
-        gmres.solve(A, x);
-        expect(vectorNear(x, VectorND<T>{1.0 / 3, 1.0 / 3}, 1E-15));
-        expect(gmres.getIteration() == 1);
+    void eigen() noexcept {
+        /* Test that the RHS is an eigenvector */ {
+            DenseMatrix<T, MatrixMajor::Row, 2, 2> A{
+                {1, 2},
+                {3, 0}
+            };
+            VectorND<T> x{1, 1};
+            auto gmres = GMRES<T>(2, 2);
+            gmres.solve(A, x);
+            expect(vectorNear(x, VectorND<T>{1.0 / 3, 1.0 / 3}, 1E-15));
+            expect(gmres.getIteration() == 1);
+        }
+        /* Test that the RHS is an eigenvector with eigenvalue 1 */ {
+            DenseMatrix<T, MatrixMajor::Row, 3, 3> A{
+                {3,  2, 0},
+                {1, -1, 0},
+                {0,  5, 1}
+            };
+            VectorND<T> x{0, 0, 1};
+            auto gmres = GMRES<T>(3, 3);
+            gmres.solve(A, x);
+            expect(vectorNear(A * x, x, 1E-15));
+        }
     }
 }
 
 int main() {
     simple();
-    krylov();
+    eigen();
     return 0;
 }
