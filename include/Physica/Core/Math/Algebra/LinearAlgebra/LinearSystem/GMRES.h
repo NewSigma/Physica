@@ -41,6 +41,8 @@ namespace Physica {
         VectorND<T> buffer;
         size_t iteration{};
         size_t itelim = Unlimited;
+        Tr res0;
+        Tr res;
         Tr tolerance = std::numeric_limits<T>::epsilon();
     public:
         GMRES() = default;
@@ -60,14 +62,14 @@ namespace Physica {
         [[nodiscard]] size_t getKrylovDim() const noexcept { return krylov.getCol(); }
         [[nodiscard]] const auto& getResidual() noexcept { return residual; }
         [[nodiscard]] size_t getIteration() const noexcept { return iteration; }
+        [[nodiscard]] size_t getMaxIteration() const noexcept;
+        [[nodiscard]] bool isConverged() const noexcept;
         /* Setters */
         void setIterationLimit(size_t limit) noexcept { itelim = limit; }
         void setTolerance(Tr tol) noexcept { tolerance = tol; }
     private:
         void solve_impl(const Matrix auto& A, const VectorND<T>& b, VectorND<T>& x);
-        [[nodiscard]] size_t spanKrylov(const Matrix auto& A, Tr res);
-        [[nodiscard]] bool isConverged(Tr res, Tr res0) const noexcept;
-        [[nodiscard]] size_t getMaxIteration() const noexcept;
+        [[nodiscard]] size_t spanKrylov(const Matrix auto& A);
     };
 
     template<Scalar T>
@@ -91,6 +93,7 @@ namespace Physica {
         assert(b.getLength() == getLength());
         VectorND<T> x(getLength(), 0);
         b.assign(residual);
+        res = res0 = b.norm();
         solve_impl(A, b, x);
         x.assign(b);
     }
@@ -98,6 +101,8 @@ namespace Physica {
     template<Scalar T>
     void GMRES<T>::solve(const Matrix auto& A, const VectorND<T>& b, VectorND<T>& x) {
         residual = b - A * x;
+        res0 = b.norm();
+        res = residual.norm();
         solve_impl(A, b, x);
     }
 
@@ -115,18 +120,27 @@ namespace Physica {
     }
 
     template<Scalar T>
+    size_t GMRES<T>::getMaxIteration() const noexcept {
+        constexpr static int MaxIterationFactor = 8;
+        return itelim == Unlimited ? (MaxIterationFactor * getLength()) : itelim;
+    }
+
+    template<Scalar T>
+    bool GMRES<T>::isConverged() const noexcept {
+        return res <= res0 * tolerance;
+    }
+
+    template<Scalar T>
     void GMRES<T>::solve_impl(const Matrix auto& A, const VectorND<T>& b, VectorND<T>& x) {
         assert(A.isSquare());
         assert(A.getRow() == krylov.getRow());
         const size_t maxIte = getMaxIteration();
-        const Tr res0 = b.norm();
-        Tr res = res0;
         iteration = 0;
-        while (!isConverged(res, res0)) {
+        while (!isConverged()) {
             if (iteration++ == maxIte) [[unlikely]]
                 throw BadConvergenceException("[Error]: GMRES failed to converge");
 
-            const size_t dimK = spanKrylov(A, res);
+            const size_t dimK = spanKrylov(A);
             const size_t dimV = dimK - (dimK == getKrylovDim());
             buffer.head(dimK).zeros();
             buffer[0] = res;
@@ -143,7 +157,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    size_t GMRES<T>::spanKrylov(const Matrix auto& A, Tr res) {
+    size_t GMRES<T>::spanKrylov(const Matrix auto& A) {
         const bool isKrylovComplete = getKrylovDim() == getLength();
         krylov.col(0) = residual * reciprocal(res);
         for (size_t c = 0; c < hess.getCol(); ++c) {
@@ -161,16 +175,5 @@ namespace Physica {
                 hess[c + 1, c] = v.conjugate() * buffer;
         }
         return getKrylovDim();
-    }
-
-    template<Scalar T>
-    bool GMRES<T>::isConverged(Tr res, Tr res0) const noexcept {
-        return res <= res0 * tolerance;
-    }
-
-    template<Scalar T>
-    size_t GMRES<T>::getMaxIteration() const noexcept {
-        constexpr static int MaxIterationFactor = 8;
-        return itelim == Unlimited ? (MaxIterationFactor * getLength()) : itelim;
     }
 }

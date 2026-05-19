@@ -75,10 +75,25 @@ namespace {
             expect(vectorNear(A * x, x, 1E-15));
         }
     }
+
+    void exact() {
+        // Test GMRES do not iterate if we provide exact solution
+        DenseMatrix<T, MatrixMajor::Row, 3, 3> A{
+            {1, 2, 0},
+            {2, 1, 2},
+            {0, 2, 1}
+        };
+        VectorND<T> b{3, 5, 3};
+        VectorND<T> x{1, 1, 1};
+        auto gmres = GMRES<T>(3, 3);
+        gmres.solve(A, b, x);
+        expect(gmres.getIteration() == 0);
+    }
 }
 
 int main() {
     simple();
     eigen();
+    exact();
     return 0;
 }
