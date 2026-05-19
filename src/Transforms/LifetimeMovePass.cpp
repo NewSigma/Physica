@@ -30,6 +30,7 @@ namespace {
         using This = LifetimeMover;
         using Base = PtrUseVisitor<LifetimeMover>;
 
+        IRBuilder<> Builder;
         const DominatorTree& DT;
         const LoopInfo& LI;
 
@@ -68,13 +69,13 @@ namespace {
     private:
         void addIndirectUser(Instruction& I);
         bool sinkLifetimeStartMarkers(AllocaInst* AI);
-        bool riseLifetimeEndMarkers();
+        bool riseLifetimeEndMarkers(AllocaInst* AI);
         void reset();
     };
 } // namespace
 
 LifetimeMover::LifetimeMover(Function& F, const DominatorTree& DT, const LoopInfo& LI)
-        : Base(F.getDataLayout()), DT(DT), LI(LI) {
+        : Base(F.getDataLayout()), Builder(F.getContext()), DT(DT), LI(LI) {
     for (Instruction& I : instructions(F)) {
         if (auto* AI = dyn_cast<AllocaInst>(&I)) {
             Allocas.push_back(AI);
@@ -93,7 +94,6 @@ LifetimeMover::LifetimeMover(Function& F, const DominatorTree& DT, const LoopInf
 bool LifetimeMover::run() {
     bool Changed = false;
     for (auto* AI : Allocas) {
-        reset();
         Base::visitPtr(*AI);
 
         LLVM_DEBUG(AI->dump());
@@ -108,8 +108,9 @@ bool LifetimeMover::run() {
             if (PI.isEscaped())
                 LLVM_DEBUG(dbgs() << "Escaped\n");
             else
-                Changed |= riseLifetimeEndMarkers();
+                Changed |= riseLifetimeEndMarkers(AI);
         }
+        reset();
     }
     return Changed;
 }
@@ -133,15 +134,12 @@ void LifetimeMover::visitCallBase(CallBase& CB) {
     switch (CB.getIntrinsicID()) {
     case Intrinsic::coro_await_suspend_bool:
     case Intrinsic::coro_await_suspend_handle:
-    case Intrinsic::coro_await_suspend_void: {
+    case Intrinsic::coro_await_suspend_void:
         auto* AS = cast<CoroAwaitSuspendInst>(&CB);
         if (AS->getWrapperFunction()->arg_begin()->hasNoCaptureAttr()) {
             visitInstruction(CB);
             return;
         }
-        break;
-    }
-    default:
     }
 
     for (unsigned Op = 0, OpCount = CB.arg_size(); Op < OpCount; ++Op)
@@ -200,10 +198,8 @@ void LifetimeMover::visitSelectInst(SelectInst& I) {
 }
 
 void LifetimeMover::visitStoreInst(StoreInst& SI) {
-    if (SI.getPointerOperand() == U->get()) {
-        InstVisitor<This>::visitStoreInst(SI);
-        return;
-    }
+    if (SI.getPointerOperand() == U->get())
+        return InstVisitor<This>::visitStoreInst(SI);
 
     PI.setEscaped(&SI);
     InstVisitor<This>::visitStoreInst(SI);
@@ -261,7 +257,6 @@ bool LifetimeMover::sinkLifetimeStartMarkers(AllocaInst* AI) {
         }
 
         // All the outsided lifetime.start markers are no longer necessary.
-        auto* NewStart = LifetimeStarts[0]->clone();
         bool AnyErase = false;
         for (auto* I : LifetimeStarts) {
             if (DT.dominates(DomPoint, I) || LI.getLoopFor(I->getParent()))
@@ -281,15 +276,14 @@ bool LifetimeMover::sinkLifetimeStartMarkers(AllocaInst* AI) {
         if (AnyErase) {
             LLVM_DEBUG(dbgs() << "Success: " << *DomPoint << '\n');
             if (DomPoint->isTerminator())
-                NewStart->insertBefore(
-                        cast<InvokeInst>(DomPoint)->getNormalDest()->getFirstNonPHIIt());
+                Builder.SetInsertPoint(cast<InvokeInst>(DomPoint)->getNormalDest()->getFirstNonPHIIt());
             else
-                NewStart->insertAfter(DomPoint->getIterator());
+                Builder.SetInsertPoint(DomPoint->getNextNode());
+            Builder.CreateLifetimeStart(AI);
         }
         else {
             // It is not beneficial if we failed to remove any lifetime markers
             LLVM_DEBUG(dbgs() << "No erase\n");
-            NewStart->deleteValue();
         }
         return AnyErase;
     }
@@ -298,7 +292,7 @@ bool LifetimeMover::sinkLifetimeStartMarkers(AllocaInst* AI) {
 }
 // Find the critical point that is dominated by all users of alloca,
 // we will rise lifetime.end markers before the critical point.
-bool LifetimeMover::riseLifetimeEndMarkers() {
+bool LifetimeMover::riseLifetimeEndMarkers(AllocaInst* AI) {
     auto Update = [this](Instruction* Old, Instruction* New) {
         if (Old == New)
             return Old;
@@ -324,7 +318,6 @@ bool LifetimeMover::riseLifetimeEndMarkers() {
                     return DT.dominates(EB, NewBB);
                 });
             }
-
             return DT.dominates(UserBB, NewBB);
         });
         return DomAll ? New : Old;
@@ -342,7 +335,6 @@ bool LifetimeMover::riseLifetimeEndMarkers() {
             }
         }
 
-        auto* NewEnd = LifetimeEnds[0]->clone();
         bool AnyErase = false;
         for (auto* I : LifetimeEnds) {
             if (!LI.getLoopFor(I->getParent())) {
@@ -353,12 +345,11 @@ bool LifetimeMover::riseLifetimeEndMarkers() {
 
         if (AnyErase) {
             LLVM_DEBUG(dbgs() << "Success: " << *DomPoint << '\n');
-            NewEnd->insertBefore(DomPoint->getIterator());
+            Builder.SetInsertPoint(DomPoint);
+            Builder.CreateLifetimeEnd(AI);
         }
-        else {
+        else
             LLVM_DEBUG(dbgs() << "No erase\n");
-            NewEnd->deleteValue();
-        }
         return AnyErase;
     }
     LLVM_DEBUG(dbgs() << "Missing DomPoint\n");
