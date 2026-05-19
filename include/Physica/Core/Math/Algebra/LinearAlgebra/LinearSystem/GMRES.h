@@ -49,11 +49,12 @@ namespace Physica {
         GMRES(This&&) noexcept = default;
         ~GMRES() = default;
         /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
+        This& operator=(This obj) noexcept;
         /* Operations */
         void solve(const Matrix auto& A, VectorND<T>& b);
         void solve(const Matrix auto& A, const VectorND<T>& b, VectorND<T>& x);
+
+        void swap(This& obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return krylov.getRow(); }
         [[nodiscard]] size_t getKrylovDim() const noexcept { return krylov.getCol(); }
@@ -80,6 +81,12 @@ namespace Physica {
     }
 
     template<Scalar T>
+    auto GMRES<T>::operator=(This obj) noexcept -> This& {
+        swap(obj);
+        return *this;
+    }
+
+    template<Scalar T>
     void GMRES<T>::solve(const Matrix auto& A, VectorND<T>& b) {
         assert(b.getLength() == getLength());
         VectorND<T> x(getLength(), 0);
@@ -95,12 +102,25 @@ namespace Physica {
     }
 
     template<Scalar T>
+    void GMRES<T>::swap(This& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        krylov.swap(obj.krylov);
+        hess.swap(obj.hess);
+        residual.swap(obj.residual);
+        coeffs.swap(obj.coeffs);
+        buffer.swap(obj.buffer);
+        std::swap(iteration, obj.iteration);
+        std::swap(itelim, obj.itelim);
+        tolerance.swap(obj.tolerance);
+    }
+
+    template<Scalar T>
     void GMRES<T>::solve_impl(const Matrix auto& A, const VectorND<T>& b, VectorND<T>& x) {
         assert(A.isSquare());
         assert(A.getRow() == krylov.getRow());
         const size_t maxIte = getMaxIteration();
         const size_t dim = getKrylovDim();
-        const Tr res0 = residual.norm();
+        const Tr res0 = b.norm();
         Tr res = res0;
         iteration = 0;
         while (!isConverged(res, res0)) {

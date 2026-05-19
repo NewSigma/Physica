@@ -163,6 +163,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return Base::getDerived().getCol(); }
+        [[nodiscard]] size_t getOrder() const noexcept;
         [[nodiscard]] size_t getSize() const noexcept { return getRow() * getCol(); }
         [[nodiscard]] size_t getMaxMajor() const noexcept { return MatrixMajor::getMaxMajor<Derived>(Base::getDerived()); }
         [[nodiscard]] size_t getMaxMinor() const noexcept { return MatrixMajor::getMaxMinor<Derived>(Base::getDerived()); }

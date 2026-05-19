@@ -294,6 +294,14 @@ namespace Physica {
 
     template<class Derived>
     template<RNG R>
+    void LValueVector<Derived>::random_rademacher(this auto& self) {
+        self.template random_uniform<R>();
+        for (auto& elem : self.view())
+            elem = (elem > T(0.5)) ? T(1) : T(-1);
+    }
+
+    template<class Derived>
+    template<RNG R>
     void LValueVector<Derived>::random_any(auto& distribution) {
         for (size_t i = 0; i < this->getLength(); ++i)
             this->operator[](i) = T::template random_any<R>(distribution);

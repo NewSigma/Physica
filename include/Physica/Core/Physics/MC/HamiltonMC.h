@@ -77,7 +77,7 @@ namespace Physica {
         template<RNG R, ExecutePolicy P = Sequential>
         void initTimeStep(auto&& forceModel);
         template<RNG R, ExecutePolicy P>
-        Proposal traverse(Node& node, bool forward, int height, auto&& forceModel);
+        Proposal traverse(bool forward, int height, auto&& forceModel);
 
         bool canProgress(const Node& forward, const Node& reverse) const noexcept;
         /* Static members */
@@ -146,8 +146,7 @@ namespace Physica {
         int numAccept = 1;
         while (true) {
             bool forward = R::coin();
-            auto& node = forward ? nodeF : nodeR;
-            auto [curX, numAccept_, converge, acceptR, _] = traverse<R, P>(node, forward, iteration, forceModel);
+            auto [curX, numAccept_, converge, acceptR, _] = traverse<R, P>(forward, iteration, forceModel);
             if (!converge && (numAccept_ > 0)) {
                 Trv prob = Trv(numAccept_) / Trv(numAccept);
                 bool accept = Trv::template random_uniform<R>() < prob;
@@ -199,13 +198,14 @@ namespace Physica {
         }
     }
     /**
-     * Traverse the balancing tree from \param node at \param height in the \param forward direction.
+     * Traverse the balanced tree starting from \param node at \param height; moving in the \param forward direction.
      *
      * \returns a proposed sample with metadata; one may accept or reject it
      */
     template<Scalar T>
     template<RNG R, ExecutePolicy P>
-    auto HamiltonMC<T>::traverse(Node& node, bool forward, int height, auto&& forceModel) -> Proposal {
+    auto HamiltonMC<T>::traverse(bool forward, int height, auto&& forceModel) -> Proposal {
+        auto& node = forward ? nodeF : nodeR;
         if (height == 0) { // Leaf node
             Trv prevE = node.template calcClassicalInternalEnergy<P>(forceModel);
             if (forward)
@@ -214,19 +214,20 @@ namespace Physica {
                 node.template nve_step_back<P>(kinetic, forceModel);
             root = node;
 
-            VectorND<T> curX = node.getPhaseMatrix().col(0).tail(getDOF());
             Trv curE = node.template calcClassicalInternalEnergy<P>(forceModel);
-            bool accept = curE < upperE;
-            bool converge = curE >= upperE + maxDelta;
-            Trv acceptR = std::min(exp(prevE - curE), Trv(1));
-            constexpr int NumVisited = 1;
-            return {std::move(curX), accept, converge, acceptR, NumVisited};
+            return {
+                .curX = node.getPhaseMatrix().col(0).tail(getDOF()),
+                .numAccept = curE < upperE,
+                .converge = curE >= upperE + maxDelta,
+                .acceptR = std::min(exp(prevE - curE), Trv(1)),
+                .numVisited = 1
+            };
         }
 
         assert(height > 0);
-        auto [curX, numAccept, converge, acceptR, numVisited] = traverse<R, P>(node, forward, height - 1, forceModel);
+        auto [curX, numAccept, converge, acceptR, numVisited] = traverse<R, P>(forward, height - 1, forceModel);
         if (!converge) {
-            auto [curX_, numAccept_, converge_, acceptR_, numVisited_] = traverse<R, P>(node, forward, height - 1, forceModel);
+            auto [curX_, numAccept_, converge_, acceptR_, numVisited_] = traverse<R, P>(forward, height - 1, forceModel);
             if (numAccept_ > 0) {
                 Trv prob = Trv(numAccept_) / Trv(numAccept + numAccept_);
                 bool accept = Trv::template random_uniform<R>() < prob;
@@ -235,8 +236,8 @@ namespace Physica {
             }
 
             bool process = forward ? canProgress(node, root) : canProgress(root, node);
-            converge = converge_ || !process;
             numAccept += numAccept_;
+            converge = converge_ || !process;
             acceptR = [=]() -> Trv {
                 Trv total = numVisited + numVisited_;
                 Trv factor1 = Trv(numVisited) / total;

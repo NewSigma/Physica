@@ -178,9 +178,7 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     void TPQ<T>::random_rademacher() {
-        Base::template random_uniform<R>();
-        for (auto& elem : asVector())
-            elem = (elem > T(0.5)) ? T(1) : T(-1);
+        Base::template random_rademacher<R>();
         beta = 0;
         lnZ0 = 0;
     }

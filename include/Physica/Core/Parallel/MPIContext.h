@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -33,20 +33,25 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Getters */
-        [[nodiscard]] inline static int getNumProcess() noexcept;
-        [[nodiscard]] inline static int getProcessID() noexcept; 
         /* Static memebers */
-    #ifdef PHYSICA_MPI
-        [[nodiscard]] static MPI_Comm getWorld() noexcept { return MPI_COMM_WORLD; }
-    #endif
         [[nodiscard]] static MPIContext& getInstance() noexcept;
+        [[nodiscard]] constexpr static auto getWorld() noexcept;
+        [[nodiscard]] static inline int getNumProcess() noexcept;
+        [[nodiscard]] static inline int getProcessID() noexcept; 
         static void wait();
     private:
         MPIContext() noexcept;
     };
 
-    inline int MPIContext::getNumProcess() noexcept {
+    constexpr auto MPIContext::getWorld() noexcept {
+    #ifdef PHYSICA_MPI
+        return MPI_COMM_WORLD;
+    #else
+        return 0;
+    #endif
+    }
+
+    int MPIContext::getNumProcess() noexcept {
         int result = 1;
     #ifdef PHYSICA_MPI
         MPI_Comm_size(getWorld(), &result);
@@ -54,7 +59,7 @@ namespace Physica {
         return result;
     }
 
-    inline int MPIContext::getProcessID() noexcept {
+    int MPIContext::getProcessID() noexcept {
         int result = 0;
     #ifdef PHYSICA_MPI
         MPI_Comm_rank(getWorld(), &result);

@@ -103,6 +103,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
 
+        using Base::operator*;
         [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept;
         /* Operations */
         [[nodiscard]] decltype(auto) transpose(this auto&&) noexcept;

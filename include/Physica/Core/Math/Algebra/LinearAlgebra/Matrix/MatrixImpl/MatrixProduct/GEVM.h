@@ -28,7 +28,7 @@ namespace Physica {
      * To compute (row vector) * (matrix), users should convert it to (matrix)^T * (col vector).
      */
     template<Vector V, Matrix M>
-    class GEVM : public RValueMatrix<GEVM<V, M>> {
+    class GEVM final : public RValueMatrix<GEVM<V, M>> {
         using This = GEVM<V, M>;
         using Base = RValueMatrix<This>;
     protected:
@@ -45,6 +45,8 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept;
+        using Base::operator*;
         /* Operations */
         void assign(Matrix auto& target) const;
         void assign_base(Matrix auto& target) const;
@@ -70,6 +72,11 @@ namespace Physica {
     GEVM<V, M>::GEVM(V vec_, M mat_) : vec(std::forward<V>(vec_)), mat(std::forward<M>(mat_)) {
         assert(vec.getLength() > 0 && mat.getCol() > 0 && "[Error]: Empty vector or matrix");
         assert(mat.getRow() == 1 && "[Error]: Dimensions do not match");
+    }
+
+    template<Vector V, Matrix M>
+    auto GEVM<V, M>::operator*(this auto&& self, Vector auto&& v) noexcept {
+        return std::forward<This>(self).getLHS() * (std::forward<This>(self).getRHS() * std::forward<decltype(v)>(v));
     }
 
     template<Vector V, Matrix M>
@@ -117,8 +124,7 @@ namespace Physica {
 
     template<Vector V, Matrix M>
     auto GEVM<V, M>::values(this auto&& self) noexcept {
-        using Self = decltype(self);
-        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
+        return std::forward<This>(self).getLHS().values() * std::forward<This>(self).getRHS().values();
     }
 
     template<Vector V, Matrix M>

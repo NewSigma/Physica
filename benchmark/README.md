@@ -5,7 +5,7 @@
 - Select backend based on benchmark data
 - Monitor performance regression
 
-Since performance testing is highly dependent on the platform, the test results are for reference only.$^{[1]}$。
+Since performance testing is highly dependent on the platform, the test results are for reference only $^{[1]}$.
 
 ## Notes
 
@@ -14,4 +14,4 @@ The [[clang::noinline]] attribute is used to prevent inlining of the callee of i
 
 ## References
 
-[1] Physica Benchmark Results; <https://gitee.com/newsigma/llvm-opt-benchmark/tree/main/bench/Physica/Results>
+[1] Physica Benchmark Results; <https://gitee.com/newsigma/physica-benchmark/tree/main/bench/Physica/Results>

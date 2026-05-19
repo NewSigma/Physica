@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  * 
@@ -21,7 +21,7 @@
 #include "IntegrateImpl/IntegrateRange.h"
 
 namespace Physica {
-    enum class IntegrateMethod {
+    enum class IntegrateMethod : int8_t {
         Rectangular,
         Ladder,
         Simpson,
@@ -47,7 +47,7 @@ namespace Physica {
     public:
         explicit Integrate(Base range, T stepSize_);
         /* Operations */
-        T solve(std::invocable<T> auto fn) const;
+        [[nodiscard]] T solve(std::invocable<T> auto fn) const;
     };
     //////////////////////////////////Ladder//////////////////////////////////
     template<Scalar T, size_t dim>
@@ -65,7 +65,7 @@ namespace Physica {
     public:
         explicit Integrate(Base range, T stepSize_);
         /* Operations */
-        T solve(std::invocable<T> auto fn) const;
+        [[nodiscard]] T solve(std::invocable<T> auto fn) const;
     };
     //////////////////////////////////Simpson//////////////////////////////////
     template<Scalar T, size_t dim>
@@ -83,7 +83,7 @@ namespace Physica {
     public:
         explicit Integrate(Base range, T stepSize_);
         /* Operations */
-        T solve(std::invocable<T> auto fn) const;
+        [[nodiscard]] T solve(std::invocable<T> auto fn) const;
     };
     //////////////////////////////////Tanh_Sinh//////////////////////////////////
     /**
@@ -106,7 +106,7 @@ namespace Physica {
     public:
         Integrate(Base range, T stepSize_, uint64_t pointCount_);
         /* Operations */
-        T solve(std::invocable<T> auto fn) const;
+        [[nodiscard]] T solve(std::invocable<T> auto fn) const;
     };
     //////////////////////////////////MonteCarlo//////////////////////////////////
     template<Scalar T, size_t dim>
@@ -120,18 +120,18 @@ namespace Physica {
         Integrate(Base range, uint64_t sampleCount_);
         /* Operations */
         template<RNG R>
-        T solve(std::invocable<VectorType> auto fn) const;
+        [[nodiscard]] T solve(std::invocable<VectorType> auto fn) const;
         template<RNG R>
-        T solve_e(unsigned int numSequence, std::invocable<VectorType> auto fn, T& deviation) const;
+        [[nodiscard]] T solve_e(unsigned int numSequence, std::invocable<VectorType> auto fn, T& deviation) const;
 
         template<RNG R>
-        T solve(std::invocable<VectorType> auto fn, std::invocable<VectorType> auto importance, auto& distribution) const;
+        [[nodiscard]] T solve(std::invocable<VectorType> auto fn, std::invocable<VectorType> auto importance, auto& distribution) const;
         template<RNG R>
-        T solve_e(unsigned int numSequence,
-                  std::invocable<VectorType> auto fn,
-                  std::invocable<VectorType> auto importance,
-                  auto& distribution,
-                  T& deviation) const;
+        [[nodiscard]] T solve_e(unsigned int numSequence,
+                                std::invocable<VectorType> auto fn,
+                                std::invocable<VectorType> auto importance,
+                                auto& distribution,
+                                T& deviation) const;
     };
 }
 

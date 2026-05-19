@@ -86,7 +86,7 @@ namespace Physica {
     }
 
     inline void Task<Thread>::wait() {
-        if (auto ex = wait(std::nothrow))
+        if (auto ex = wait(std::nothrow)) [[unlikely]]
             std::rethrow_exception(ex);
     }
 
@@ -120,7 +120,7 @@ namespace Physica {
             firstEx = (firstEx == nullptr) ? ex : firstEx;
         }
 
-        if (firstEx)
+        if (firstEx) [[unlikely]]
             std::rethrow_exception(firstEx);
     }
 
@@ -148,7 +148,7 @@ namespace Physica {
             firstEx = (firstEx == nullptr) ? ex : firstEx;
         }
 
-        if (firstEx)
+        if (firstEx) [[unlikely]]
             std::rethrow_exception(firstEx);
     }
 }

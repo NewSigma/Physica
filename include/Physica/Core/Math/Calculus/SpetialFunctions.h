@@ -85,68 +85,6 @@ namespace Physica {
     Real<Prec> standardNormalDistribution(const Real<Prec>& x);
 
     template<FloatPrec Prec>
-    Real<Prec> besselJ0(const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> besselJ1(const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> besselJn(const Integer& n, const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> besselJ(const Integer& n, const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> besselY0(const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> besselY1(const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> besselYn(const Integer& n, const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    void besselJn_Yn_dJn_dYn(
-            const Real<Prec>& n
-            , const Real<Prec>& x
-            , Real<Prec>& __restrict Jn
-            , Real<Prec>& __restrict Yn
-            , Real<Prec>& __restrict dJn
-            , Real<Prec>& __restrict dYn);
-
-    template<FloatPrec Prec>
-    Real<Prec> besselJn(const Real<Prec>& n, const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> besseldJn(const Real<Prec>& n, const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> besselYn(const Real<Prec>& n, const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> besseldYn(const Real<Prec>& n, const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    void sphericalBesselJn_Yn_dJn_dYn(const Real<Prec>& n
-            , const Real<Prec>& x
-            , Real<Prec>& __restrict jn
-            , Real<Prec>& __restrict yn
-            , Real<Prec>& __restrict djn
-            , Real<Prec>& __restrict dyn);
-
-    template<FloatPrec Prec>
-    Real<Prec> sphericalBesselJn(const Real<Prec>& n, const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> sphericalBesseldJn(const Real<Prec>& n, const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> sphericalBesselYn(const Real<Prec>& n, const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> sphericalBesseldYn(const Real<Prec>& n, const Real<Prec>& x);
-
-    template<FloatPrec Prec>
     Real<Prec> legendreP(unsigned int l, const Real<Prec>& x);
 
     template<FloatPrec Prec>

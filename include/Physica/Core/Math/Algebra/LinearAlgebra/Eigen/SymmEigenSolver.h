@@ -212,7 +212,7 @@ namespace Physica {
             const Tr factor = (subBlock[sub_order - 2, sub_order - 2].real() - subBlock[sub_order - 1, sub_order - 1].real()) * T(0.5);
             const Tr factor2 = square(subBlock[sub_order - 1, sub_order - 2]);
             const Tr factor3 = sqrt(fma(factor, factor, factor2));
-            const T shift = subBlock[sub_order - 1, sub_order - 1] - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3)); // TODO: why we introduce a divide operation
+            const T shift = subBlock[sub_order - 1, sub_order - 1] - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3));
             buffer[0] = subBlock[0, 0] - shift;
             buffer[1] = subBlock[1, 0];
         }

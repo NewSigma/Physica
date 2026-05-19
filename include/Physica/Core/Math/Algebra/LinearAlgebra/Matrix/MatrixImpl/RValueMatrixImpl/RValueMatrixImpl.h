@@ -524,6 +524,12 @@ namespace Physica {
     }
 
     template<class Derived>
+    size_t RValueMatrix<Derived>::getOrder() const noexcept {
+        assert(isSquare() && "[Error]: getOrder() assumes square matrix");
+        return getRow();
+    }
+
+    template<class Derived>
     bool RValueMatrix<Derived>::isOverdetermined() const noexcept {
         return getRow() > getCol();
     }

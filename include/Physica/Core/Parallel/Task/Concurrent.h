@@ -71,8 +71,7 @@ namespace Physica {
     }
 
     inline void Task<Concurrent>::wait() {
-        std::exception_ptr ex = wait(std::nothrow);
-        if (ex)
+        if (auto ex = wait(std::nothrow)) [[unlikely]]
             std::rethrow_exception(ex);
     }
 

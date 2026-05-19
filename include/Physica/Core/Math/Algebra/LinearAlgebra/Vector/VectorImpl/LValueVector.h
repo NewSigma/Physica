@@ -96,12 +96,10 @@ namespace Physica {
         void standardize();
         using Base::householder;
         Tr householder();
-        template<RNG R>
-        void random_uniform();
-        template<RNG R>
-        void random_normal();
-        template<RNG R>
-        void random_any(auto& distribution);
+        template<RNG R> void random_uniform();
+        template<RNG R> void random_normal();
+        template<RNG R> void random_rademacher(this auto&);
+        template<RNG R> void random_any(auto& distribution);
 
         [[nodiscard]] decltype(auto) reals(this auto&&) noexcept;
         [[nodiscard]] auto imags(this auto&&) noexcept;
