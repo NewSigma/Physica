@@ -29,6 +29,7 @@ namespace Physica {
     template<class Derived> class CompactVector;
     template<class Derived> class RValueMatrix;
     template<class Derived> class CompactMatrix;
+    template<Scalar, size_t Length, class Allocator> class DenseVector;
     template<Vector, int MatrixMajor, size_t Row, size_t Col> class RValueReshapedVector;
     template<class> class Transpose;
     template<class> class Conjugate;
@@ -176,7 +177,7 @@ namespace Physica {
         [[nodiscard]] T deviation() const;
         [[nodiscard]] T deviation(const T& prior_mean) const;
         [[nodiscard]] T deviation_stable() const;
-        [[nodiscard]] CoDiff<T> lnSumExp() const noexcept;
+        [[nodiscard]] CoDiff<T> lnSumExp(this const auto&) noexcept;
         [[nodiscard]] CoDiff<T> crossEntropy(size_t index) const noexcept;
         [[nodiscard]] CoDiff<T> lnSoftmax(size_t index) const noexcept;
         [[nodiscard]] CoDiff<T> softmax(size_t index) const noexcept;

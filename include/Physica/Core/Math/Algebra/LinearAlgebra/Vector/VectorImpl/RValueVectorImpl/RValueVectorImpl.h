@@ -593,29 +593,31 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::lnSumExp() const noexcept -> CoDiff<T> {
-        const Derived& v = Base::getDerived();
-        Tv m;
-        if constexpr (isComplex())
-            m = v.values().reals().max();
-        else
-            m = v.values().max();
+    auto RValueVector<Derived>::lnSumExp(this const auto& self) noexcept -> CoDiff<T> {
+        if constexpr (self.isLValueVector()) {
+            Tv m;
+            if constexpr (isComplex())
+                m = self.values().reals().max();
+            else
+                m = self.values().max();
 
-        auto expr1 = v - m;
-        auto expr2 = exp(expr1);
-        auto y = ln(expr2.sum() + Trv(std::numeric_limits<Trv>::min())) + m; // Add min() to avoid ln(0)
-        if constexpr (isReverseDiff()) {
-            auto& tmp = co_yield y.value();
-            y.reverse_final(tmp.grad());
+            auto expr = exp(self - m);
+            auto y = ln(expr.sum() + Trv(std::numeric_limits<Trv>::min())) + m;
+            if constexpr (isReverseDiff()) {
+                auto& tmp = co_yield y.value();
+                y.reverse_final(tmp.grad());
+            }
+            else
+                co_return std::move(y);
         }
         else
-            co_return std::move(y);
+            co_return DenseVector<T, getSizeAtCompile(), HostAllocator<T>>(self).lnSumExp();
     }
 
     template<class Derived>
     auto RValueVector<Derived>::crossEntropy(size_t index) const noexcept -> CoDiff<T> {
         assert(index < getLength() && "[Error]: Index overflow");
-        auto y = lnSumExp() - calc_value(index);
+        auto y = Base::getDerived().lnSumExp() - calc_value(index);
         if constexpr (isReverseDiff()) {
             auto& tmp = co_yield y.value();
             auto g = tmp.grad();
