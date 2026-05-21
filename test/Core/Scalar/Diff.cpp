@@ -152,5 +152,6 @@ int main() {
     testForwardMath();
     testForwardSIMD();
     testReverse();
+    testCompare();
     return 0;
 }

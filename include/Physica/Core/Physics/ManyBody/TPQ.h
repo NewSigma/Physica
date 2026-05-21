@@ -30,6 +30,9 @@ namespace Physica {
      * Reference:
      * [1] Phys. Rev. Lett. 108, 240401 (2012); https://doi.org/10.1103/PhysRevLett.108.240401
      * [2] Phys. Rev. Lett. 111, 010401 (2013); https://doi.org/10.1103/PhysRevLett.111.010401
+     *
+     * Publication:
+     * [3] Chin. Phys. B 35(1), 010101 (2026); https://doi.org/10.1088/1674-1056/ae1c21
      */
     template<Scalar T>
     class TPQ : public VectorND<T> {

@@ -28,13 +28,7 @@ It is also an open source platform that maintains scientific code and related da
 
 ## Usage
 
-We provide a conda package to help with fast deployment:
-
-``` Bash
-conda install -c conda-forge -c nvidia newsigma::physica
-```
-
-which should install the required dependencies. Refer to [Install.md](doc/Install.md) for a detailed guide on using *Physica*.
+Refer to [Install.md](doc/Install.md) for a detailed guide on using *Physica*.
 
 ## Maintainers
 

@@ -53,7 +53,6 @@ In principle, all "mathematical" vector operations can be implemented on the bas
 
 The only core operation on LValue objects:
 
-
 ``` C++
 Scalar* LValueVector::data_ptr(size_t index) { ... }
 ```
@@ -103,7 +102,7 @@ template<class T>
 concept Matrix = ...;
 ```
 
-We provide four mutually exclusive concepts: `Scalar`, `Vector`, `Matrix`, and `Tensor`. For example: under this design, a `Matrix` with only one column is not considered a `Vector`.
+We provide four mutually exclusive concepts: `Scalar`, `Vector`, `Matrix`, and `Tensor`. For example: under this design, a `Matrix` with only one column is not considered a `Vector`, which is different from *Eigen*.
 
 ## Expression templates
 
@@ -121,7 +120,7 @@ template<ExprID, class LHS, class RHS>
 class BinaryMatrixExpr { ... };
 ```
 
-Using C++23 explicit object parameter techniques to construct return objects, avoiding a common category of expression template lifetime issues.
+Using C++23 explicit object parameter techniques to construct return objects, avoiding a common category of expression template lifetime issues (If you are not familiar with *Eigen*, you are likely to be bitten by this.).
 
 ``` C++
 auto c = (MatrixND<T>::identity(3) + MatrixND<T>(3, 3, 5)).diag();
@@ -148,6 +147,40 @@ This option is used to implement heuristic expression transformations.
 
 `false`: Construction of SIMD objects requires creating a temporary array on the stack.
 `true`: No additional overhead
+
+## Expression template: Why bother?
+
+Q: Handwritten loops can also avoid intermediate object allocations; Why expression templates?
+A: The answer is diverse, one thing for example is: Semantic Preservation Across Call Boundaries
+
+Consider the implementation of matrix-vector products, a common approach is to lower it to a BLAS implementation (pseudocode!):
+
+``` C++
+Vector operator*(Matrix A, Vector x) {
+    return BLAS_GEMV(A, x);
+}
+```
+
+Looks good, right? However, when we actually use it:
+
+``` C++
+void somefn(Matrix B, IdentityMatrix I, Vector x) {
+    Vector v = (B + I) * x;
+    use(v);
+}
+```
+
+There are a number of special matrices we can use, but here I'm using the identity matrix for clarity. The return value is obviously $B\mathbf x + \mathbf x$, but `operator*` is unaware that matrix $(\mathbf{B + I})$ has special properties, because the function call boundary hinders the propagation of semantics. A BLAS implementation would faithfully iterate over every element of the identity matrix, which is not good. With expression templates, the type `MatrixPlusIdentity` carries the proper semantics:
+
+``` C++
+Vector operator*(MatrixPlusIdentity B_plus_I, Vector x) {
+    return B_plus_I.B() * x + x;
+}
+```
+
+where we avoid iterating over the identity matrix and the simplification is zero-overhead. (We really do not want any overhead! Think about $(\mathbf{B + I})^n x$, which appears in exponential matrix functions. If that doesn't scare you, what about $\mathbf{B = C + \lambda I}$ in a shift-and-invert solver?)
+
+Having said that, you do not have to solve the problem using expression templates. But the overall idea is clear: remember to make sufficient use of the information you have!
 
 ## Reference
 

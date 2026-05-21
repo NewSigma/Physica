@@ -20,7 +20,6 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 """
     Generates LLVM IR for benchmarks. It is driven by CMake.
 """
-import os
 import shutil
 import subprocess
 import sys
