@@ -9,3 +9,7 @@ add_subdirectory(MatrixDecomp)
 add_subdirectory(Vector)
 
 physica_add_test(GMRES GMRES.cpp)
+
+if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    include(SlowTests.cmake)
+endif()

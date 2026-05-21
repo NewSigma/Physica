@@ -122,7 +122,7 @@ namespace Physica {
     template<Scalar T>
     size_t GMRES<T>::getMaxIteration() const noexcept {
         constexpr static int MaxIterationFactor = 8;
-        return itelim == Unlimited ? (MaxIterationFactor * getLength()) : itelim;
+        return itelim == Unlimited ? std::max<size_t>(50, MaxIterationFactor * getLength()) : itelim;
     }
 
     template<Scalar T>

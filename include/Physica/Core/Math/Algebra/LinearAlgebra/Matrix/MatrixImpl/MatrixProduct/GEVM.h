@@ -66,12 +66,13 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+    private:
+        void check_prod() const noexcept;
     };
 
     template<Vector V, Matrix M>
     GEVM<V, M>::GEVM(V vec_, M mat_) : vec(std::forward<V>(vec_)), mat(std::forward<M>(mat_)) {
         assert(vec.getLength() > 0 && mat.getCol() > 0 && "[Error]: Empty vector or matrix");
-        assert(mat.getRow() == 1 && "[Error]: Dimensions do not match");
     }
 
     template<Vector V, Matrix M>
@@ -86,6 +87,7 @@ namespace Physica {
 
     template<Vector V, Matrix M>
     void GEVM<V, M>::assign_base(Matrix auto& target) const {
+        check_prod();
         if constexpr (MatrixMajor::isColMatrix<decltype(target)>()) {
             for (size_t c = 0; c < getCol(); ++c)
                 target.col(c) = vec * mat(0, c);
@@ -98,6 +100,7 @@ namespace Physica {
 
     template<Vector V, Matrix M>
     void GEVM<V, M>::assign_add(Matrix auto& target) const {
+        check_prod();
         if constexpr (MatrixMajor::isColMatrix<decltype(target)>()) {
             for (size_t c = 0; c < getCol(); ++c)
                 target.col(c) += vec * mat.calc(0, c);
@@ -110,6 +113,7 @@ namespace Physica {
 
     template<Vector V, Matrix M>
     auto GEVM<V, M>::calc(size_t row, size_t col) const -> T {
+        check_prod();
         return vec.calc(row) * mat.calc(0, col);
     }
 
@@ -146,6 +150,15 @@ namespace Physica {
     __host__ __device__ consteval size_t GEVM<V, M>::getColAtCompile() noexcept {
         return std::remove_cvref_t<M>::getColAtCompile();
     }
+
+    template<Vector V, Matrix M>
+    void GEVM<V, M>::check_prod() const noexcept {
+        static_assert(!instanceof_tx<IdentityMatrix, M>, "[Error]: This pattern is unusual and is likely a bug. Consider drop it if this is a false-positive");
+        if constexpr (mat.getRowAtCompile() == Dynamic)
+            assert(mat.getRow() == 1 && "[Error]: Outer product requires that the rows of M be 1");
+        else
+            static_assert(mat.getRowAtCompile() == 1, "[Error]: Outer product requires that the rows of M be 1");
+    }
 }
 
 namespace Physica {
@@ -155,9 +168,6 @@ namespace Physica {
         using M1 = std::remove_cvref<M>::type;
         using T1 = V1::ScalarType;
         using T2 = M1::ScalarType;
-
-        static_assert(M1::getRowAtCompile() == 1 || M1::getRowAtCompile() == Dynamic, "[Error]: Outer product requires that the rows of M be 1");
-        static_assert(!instanceof_tx<IdentityMatrix, M>, "[Error]: This pattern is unusual and is likely a bug. Consider rewriting if this is a false-positive");
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
         constexpr static int Major = MatrixMajor::BothMajor;
