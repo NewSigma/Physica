@@ -168,7 +168,7 @@ namespace Physica {
         [[nodiscard]] size_t argmin() const noexcept;
         [[nodiscard]] CoDiff<T> max() const noexcept;
         [[nodiscard]] CoDiff<T> min() const noexcept;
-        [[nodiscard]] CoDiff<T> sum() const noexcept;
+        [[nodiscard]] CoDiff<T> sum(this auto&&) noexcept;
         [[nodiscard]] CoDiff<T> mean() const noexcept;
         [[nodiscard]] CoDiff<T> mean_stable() const noexcept;
         [[nodiscard]] CoDiff<T> variance() const noexcept;

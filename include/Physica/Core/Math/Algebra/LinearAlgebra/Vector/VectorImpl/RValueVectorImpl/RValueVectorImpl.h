@@ -477,10 +477,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::sum() const noexcept -> CoDiff<T> {
-        assert(getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
-        const auto& v = Base::getDerived();
+    auto RValueVector<Derived>::sum(this auto&& self) noexcept -> CoDiff<T> {
+        assert(self.getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
         if constexpr (isReverseDiff()) {
+            using Self = decltype(self);
+            LazyDestroy<Self> v = std::forward<Self>(self);
             auto& result = co_yield v.values().sum();
             v.reverse(result.grad());
         }
@@ -492,39 +493,39 @@ namespace Physica {
             if constexpr (SizeV != Dynamic) {
                 constexpr size_t to = SizeV / SizeP * SizeP;
                 for (size_t i = 0; i < to; i += SizeP)
-                    buffer += v.template packet<SizeP>(i);
+                    buffer += self.template packet<SizeP>(i);
 
                 constexpr size_t i = SizeV - SizeV % SizeP;
                 if constexpr (i != SizeV) {
                     constexpr size_t count = SizeV - i;
-                    buffer += v.template packet<SizeP>(i, count);
+                    buffer += self.template packet<SizeP>(i, count);
                 }
             }
             else {
-                const size_t length = getLength();
+                const size_t length = self.getLength();
                 size_t i = 0;
                 const size_t to = length / SizeP * SizeP;
                 for (; i < to; i += SizeP)
-                    buffer += v.template packet<SizeP>(i);
+                    buffer += self.template packet<SizeP>(i);
 
                 if (to != length) {
                     const size_t count = length - i;
-                    buffer += v.template packet<SizeP>(i, count);
+                    buffer += self.template packet<SizeP>(i, count);
                 }
             }
             co_return buffer.sum();
         }
         else {
             auto result = T(0);
-            for (size_t i = 0; i < getLength(); ++i)
-                result += calc(i);
+            for (size_t i = 0; i < self.getLength(); ++i)
+                result += self.calc(i);
             co_return std::move(result);
         }
     }
 
     template<class Derived>
     auto RValueVector<Derived>::mean() const noexcept -> CoDiff<T> {
-        return sum() / Trv(getLength());
+        return Base::getDerived().sum() / Trv(getLength());
     }
 
     template<class Derived>
@@ -601,8 +602,7 @@ namespace Physica {
             else
                 m = self.values().max();
 
-            auto expr = exp(self - m);
-            auto y = ln(expr.sum() + Trv(std::numeric_limits<Trv>::min())) + m;
+            auto y = ln(exp(self - m).sum() + Trv(std::numeric_limits<Trv>::min())) + m;
             if constexpr (isReverseDiff()) {
                 auto& tmp = co_yield y.value();
                 y.reverse_final(tmp.grad());
