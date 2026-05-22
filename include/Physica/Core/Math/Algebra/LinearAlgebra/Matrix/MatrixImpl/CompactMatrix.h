@@ -109,9 +109,10 @@ namespace Physica {
     class Traits<CompactMatrix<Derived>> : public Traits<Derived> {};
 }
 
-#include "CompactMatrixImpl/CompactMatrixImpl.h" // IWYU pragma: export
-#include "CompactMatrixImpl/Flatten.h"
+#include "CompactMatrixImpl/CompactMatrixImpl.h"
 #ifdef PHYSICA_MKL
     #include "CompactMatrixImpl/CompactMatrix_MKL.h"
 #endif
+#include "CompactMatrixImpl/Flatten.h"
+#include "CompactMatrixImpl/Transpose.h"
 #include "CompactMatrixImpl/ReshapedVector.h"

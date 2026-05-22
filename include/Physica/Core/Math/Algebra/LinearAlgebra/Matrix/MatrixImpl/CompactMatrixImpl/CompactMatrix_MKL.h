@@ -18,7 +18,8 @@
  */
 #pragma once
 
-#include "mkl_lapacke.h"
+#include <mkl_lapacke.h>
+#include <mkl_trans.h>
 #include "../CompactMatrix.h"
 
 namespace Physica {

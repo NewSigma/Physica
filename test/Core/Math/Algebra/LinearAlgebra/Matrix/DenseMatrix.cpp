@@ -120,6 +120,8 @@ namespace {
     }
 }
 
+static_assert(MatrixND<float32>{}.transpose().isCompact(), "Transpose of a compact matrix is a compact matrix");
+
 int main() {
     formatTest();
     CompactRowCol();

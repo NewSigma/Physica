@@ -22,7 +22,7 @@
 #include "Transpose.h"
 
 namespace Physica {
-    template<Matrix M>
+    template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
     void Transpose<M>::assign_mkl(Matrix auto&& target) const {
         static_assert(MatrixMajor::isSameMajor<M, decltype(target)>(), "[Error]: Cannot apply MKL to this expr");
         using Tm = decltype(std::declval<T>().toMKL());

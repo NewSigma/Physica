@@ -213,6 +213,8 @@ namespace {
     }
 }
 
+static_assert(VectorND<float32>{}.transpose().isCompact(), "Transpose of a compact vector is a compact vector");
+
 int main() {
     rangeTest<Vector4D<float32>>();
     rangeTest<VectorND<float64>>();
