@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -51,4 +51,4 @@ $U_1$ can differ by an arbitrary constant. To eliminate this arbitrariness, we a
 
 ## Reference
 
-[1] Comput. Mater. Sci. 112, 333-341 (2016); https://doi.org/10.1016/j.commatsci.2015.10.050
+[1] Comput. Mater. Sci. 112, 333-341 (2016); <https://doi.org/10.1016/j.commatsci.2015.10.050>

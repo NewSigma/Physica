@@ -1,5 +1,5 @@
 <!--
-Copyright 2025 Weibo He.
+Copyright 2025-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -27,4 +27,4 @@ If the constant $e^\mu$ is not essential, we may ignore it, which will improve n
 
 ## Reference
 
-[1] SIAM J. Sci. Comput. 33(2), 488–511 (2011); https://doi.org/10.1137/100788860
+[1] SIAM J. Sci. Comput. 33(2), 488–511 (2011); <https://doi.org/10.1137/100788860>

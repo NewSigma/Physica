@@ -39,5 +39,5 @@ The chi-square statistic can be used to evaluate the reliability of grid improve
 
 ## Reference
 
-[1] J. Comput. Phys. 27, 192 (1978); https://doi.org/10.1016/0021-9991(78)90004-9
-[2] J. Comput. Phys. 439, 110386 (2021); https://doi.org/10.1016/j.jcp.2021.110386
+[1] J. Comput. Phys. 27, 192 (1978); <https://doi.org/10.1016/0021-9991(78)90004-9>
+[2] J. Comput. Phys. 439, 110386 (2021); <https://doi.org/10.1016/j.jcp.2021.110386>

@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -21,4 +21,4 @@ This example demonstrates how to use the Hartree-Fock approximation to compute i
 
 ## Reference
 
-[1] Larsen A, Poulsen R S. Applied Hartree-Fock methods. https://projekter.aau.dk/projekter/files/213481562/report.pdf
+[1] Larsen A, Poulsen R S. Applied Hartree-Fock methods. <https://projekter.aau.dk/projekter/files/213481562/report.pdf>

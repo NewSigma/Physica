@@ -1,5 +1,5 @@
 <!--
-Copyright 2024-2025 Weibo He.
+Copyright 2024-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -50,5 +50,5 @@ Benchmarking on an Intel(R) Xeon(R) Platinum 8358 + 256G platform, Physica is 13
 
 ## Reference
 
-[1] Phys. Rev. Lett. 111, 010401 (2013); https://doi.org/10.1103/PhysRevLett.108.240401
-[2] HPhi; https://github.com/issp-center-dev/HPhi.git
+[1] Phys. Rev. Lett. 111, 010401 (2013); <https://doi.org/10.1103/PhysRevLett.108.240401>
+[2] HPhi; <https://github.com/issp-center-dev/HPhi.git>

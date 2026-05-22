@@ -152,6 +152,6 @@ The left eigenvalue decomposition case follows analogously.
 
 ## References
 
-[1] Eigen; https://eigen.tuxfamily.org  
+[1] Eigen; <https://eigen.tuxfamily.org>  
 [2] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013  
-[3] Giles, M. An extended collection of matrix derivative results for forward and reverse mode algorithmic differentiation (2008); https://people.maths.ox.ac.uk/gilesm/files/NA-08-01.pdf.
+[3] Giles, M. An extended collection of matrix derivative results for forward and reverse mode algorithmic differentiation (2008); <https://people.maths.ox.ac.uk/gilesm/files/NA-08-01.pdf>.

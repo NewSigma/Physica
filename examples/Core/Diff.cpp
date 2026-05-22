@@ -33,10 +33,10 @@ namespace {
         using dfloat = Diff<float64, DiffMode::Reverse>;
         dfloat x(0.5); // x = 0.5, initial grad is 0
         {
-            auto y = sin(x) / x; // Compute value, sequence compute graph
-            static_assert(std::same_as<decltype(y), CoDiff<dfloat>>); // The return type contains a dfloat and a compute graph
-            y.reverse(); // We will propagate 1 in reverse
-        } // Start reverse propagating and destroy y
+            auto y = sin(x) / x; // Compute value, push compute graph node
+            static_assert(std::same_as<decltype(y), CoDiff<dfloat>>, "Struct CoDiff<dfloat> contains a dfloat and a handle to compute graph node");
+            y.reverse(1); // dy/dy = 1, prepare for lazy reverse propagating
+        } // Pop compute graph node, propagate grads
         return x.grad(); // x receives grad
     }
 }

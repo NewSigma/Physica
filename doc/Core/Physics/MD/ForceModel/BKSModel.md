@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -41,4 +41,4 @@ $$r_0(\mathrm{Si-O}) = 2.0754014858102230 \; \mathrm{Bohr}$$
 
 ## Reference
 
-[1] Phys. Rev. Lett. 64, 1955 (1990); https://doi.org/10.1103/PhysRevLett.64.1955
+[1] Phys. Rev. Lett. 64, 1955 (1990); <https://doi.org/10.1103/PhysRevLett.64.1955>

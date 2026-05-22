@@ -90,6 +90,6 @@ It is difficult to determine a priori whether nuclear quantum effects are import
 
 ## Reference
 
-[1] J. Chem. Phys. 131, 024501 (2009); https://doi.org/10.1063/1.3167790
-[2] Rev. Mod. Phys. 89, 035003 (2017); https://doi.org/10.1103/RevModPhys.89.035003
+[1] J. Chem. Phys. 131, 024501 (2009); <https://doi.org/10.1063/1.3167790>
+[2] Rev. Mod. Phys. 89, 035003 (2017); <https://doi.org/10.1103/RevModPhys.89.035003>
 [3] A. Altland, B. Simons Condensed Matter Field Theory 2nd edition[M]. Cambridge University Press, 2010:97-100

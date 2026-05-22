@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -92,4 +92,4 @@ After $n$ time steps, the molecular dynamics process is $\hat S^n$. For implemen
 
 ## Reference
 
-[1] J. Chem. Phys. 133, 124104 (2010); https://doi.org/10.1063/1.3489925
+[1] J. Chem. Phys. 133, 124104 (2010); <https://doi.org/10.1063/1.3489925>

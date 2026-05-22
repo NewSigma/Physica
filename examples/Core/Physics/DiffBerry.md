@@ -27,4 +27,4 @@ Here $\ket{\psi}$ is a nondegenerate eigenstate. The Chern numbers of the ground
 
 ## Reference
 
-[1] Phys. Rev. B 91, 165140; https://doi.org/10.1103/PhysRevB.91.165140
+[1] Phys. Rev. B 91, 165140; <https://doi.org/10.1103/PhysRevB.91.165140>

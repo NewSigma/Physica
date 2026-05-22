@@ -90,10 +90,10 @@ namespace {
  */
 int main(int argc, char** argv) {
     ThreadPool::numThreadRequired = 4;
-    const auto betaJs = VectorND<T>::linspace(1, 7, NumPoint);
+    const auto t = VectorND<T>::linspace(1, 7, NumPoint);
     VectorND<T> Cv(NumPoint);
     parallel_for<Thread>([&](size_t i) {
-        Ising ising(20, betaJs[i]);
+        Ising ising(20, reciprocal(t[i]));
         ising.init<RandomSource>();
         ising.step<RandomSource>(2000);
 

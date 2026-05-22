@@ -21,4 +21,4 @@ Example-Mnist is used to demonstrate how to build a neural network using corouti
 
 ## Reference
 
-[1] 2-layer NN; http://yann.lecun.com/exdb/mnist/
+[1] 2-layer NN; <http://yann.lecun.com/exdb/mnist/>

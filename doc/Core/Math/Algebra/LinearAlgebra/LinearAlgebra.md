@@ -145,13 +145,13 @@ This option is used to implement heuristic expression transformations.
 
 **FastPacket**:
 
-`false`: Construction of SIMD objects requires creating a temporary array on the stack.
-`true`: No additional overhead
+`false`: Construction of SIMD objects requires creating a temporary array on the stack  
+`true`: No additional overhead  
 
 ## Expression template: Why bother?
 
-Q: Handwritten loops can also avoid intermediate object allocations; Why expression templates?
-A: The answer is diverse, one thing for example is: Semantic Preservation Across Call Boundaries
+Q: Handwritten loops can also avoid intermediate object allocations; Why expression templates?  
+A: The answer is diverse, one thing for example is: Semantic Preservation Across Call Boundaries  
 
 Consider the implementation of matrix-vector products, a common approach is to lower it to a BLAS implementation (pseudocode!):
 

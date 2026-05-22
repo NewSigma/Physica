@@ -1,5 +1,5 @@
 <!--
-Copyright 2024-2025 Weibo He.
+Copyright 2024-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -49,4 +49,4 @@ $$\chi^2 = \sum_j\exp(2\ln\overline{I} + 2\ln|e^{\ln I_j - \ln\overline{I}} - 1|
 
 ## Reference
 
-[1] J. Comput. Phys. 439, 110386 (2021); https://doi.org/10.1016/j.jcp.2021.110386
+[1] J. Comput. Phys. 439, 110386 (2021); <https://doi.org/10.1016/j.jcp.2021.110386>

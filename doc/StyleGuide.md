@@ -64,6 +64,6 @@ Template parameters: Encourage the use of abbreviated function templates to elim
 
 ## Reference
 
-[1] Google C++ Style Guide; https://google.github.io/styleguide/cppguide.html  
-[2] LLVM Coding Standards; https://llvm.org/docs/CodingStandards.html  
+[1] Google C++ Style Guide; <https://google.github.io/styleguide/cppguide.html>  
+[2] LLVM Coding Standards; <https://llvm.org/docs/CodingStandards.html>  
 [3] Scott Meyers 著，侯捷 译. Effective C++：改善程序与设计的55个具体做法[M]. 北京: 电子工业出版社, 2011  

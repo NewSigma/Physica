@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -27,5 +27,5 @@ where $m$ is the mass of the oscillator, $x$ and $p$ are the position and moment
 
 ## Reference
 
-[1] Nonlinear Dyn. 4, 357–372 (1993); https://doi.org/10.1007/BF00120671
-[2] Paraview; https://www.paraview.org/
+[1] Nonlinear Dyn. 4, 357–372 (1993); <https://doi.org/10.1007/BF00120671>
+[2] Paraview; <https://www.paraview.org/>

@@ -1,5 +1,5 @@
 <!--
-Copyright 2024-2025 Weibo He.
+Copyright 2024-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -91,9 +91,9 @@ $$\mathbf{\Pi} = (1 - \alpha) \mathbf{\Pi}' + \alpha \frac{|\mathbf{\Pi}|}{|\mat
 
 ## Reference
 
-[1] Phys. Rev. Lett. 97, 170201 (2006); https://doi.org/10.1103/PhysRevLett.97.170201
-[2] Comput. Mater. Sci. 175, 109584 (2020); https://doi.org/10.1016/j.commatsci.2020.109584  
-[3] https://doi.org/10.48550/arXiv.2111.06402  
-[4] LAMMPS Doc; https://docs.lammps.org/min_style.html  
-[5] QE Doc; https://www.quantum-espresso.org/Doc/INPUT_PW.html  
-[6] Phys. Rev. B 93, 020508(R); https://doi.org/10.1103/PhysRevB.93.020508  
+[1] Phys. Rev. Lett. 97, 170201 (2006); <https://doi.org/10.1103/PhysRevLett.97.170201>
+[2] Comput. Mater. Sci. 175, 109584 (2020); <https://doi.org/10.1016/j.commatsci.2020.109584>  
+[3] <https://doi.org/10.48550/arXiv.2111.06402>  
+[4] LAMMPS Doc; <https://docs.lammps.org/min_style.html>  
+[5] QE Doc; <https://www.quantum-espresso.org/Doc/INPUT_PW.html>  
+[6] Phys. Rev. B 93, 020508(R); <https://doi.org/10.1103/PhysRevB.93.020508>  

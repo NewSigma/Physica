@@ -39,4 +39,4 @@ Note that $\mathbf B^H \mathbf B$ is positive definite. The minimum value of the
 
 ## Reference
 
-[1] GAMM-Mitteilungen 29(2), 368-382 (2006); https://doi.org/10.1002/gamm.201490038
+[1] GAMM-Mitteilungen 29(2), 368-382 (2006); <https://doi.org/10.1002/gamm.201490038>
