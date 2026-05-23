@@ -28,11 +28,15 @@ namespace Physica {
     class GEMM : public RValueMatrix<GEMM<M1, M2>> {
         using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
-    public:
-        constexpr static int Critical = 32;
+        constexpr static int ThresholdMKL = 32; // Based on benchmark
+
+        enum InnerDim : char {
+            M, K, N
+        };
     protected:
         using typename Base::T;
         using typename Base::Tv;
+        using typename Base::Trv;
     private:
         LazyDestroy<M1> mat1;
         LazyDestroy<M2> mat2;
@@ -49,7 +53,11 @@ namespace Physica {
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Matrix auto&& target) const;
-        void assign_mkl(Matrix auto& target) const noexcept;
+        void assign_mkl(Matrix auto&& target) const noexcept;
+        template<ExecutePolicy P = Sequential>
+        void assign_base(Matrix auto&& target) const noexcept;
+        template<ExecutePolicy P = Sequential>
+        void assign_add(Matrix auto&& target) const noexcept;
         [[nodiscard]] auto compute() const;
 
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
@@ -66,7 +74,14 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
     private:
+        void assign_add_blocking(Matrix auto&& target) const noexcept;
+        void assign_add_m(Matrix auto&& target) const noexcept;
+        void assign_add_k(Matrix auto&& target) const noexcept;
+        void assign_add_n(Matrix auto&& target) const noexcept;
         /* Static members */
+        [[nodiscard]] consteval static InnerDim getInnerDim(Matrix auto&& target) noexcept;
+        [[nodiscard]] constexpr static size_t bisection(size_t size) noexcept;
+        [[nodiscard]] consteval static bool isStaticGEMM() noexcept;
         [[nodiscard]] consteval static bool UseMKL(const Matrix auto& target) noexcept;
         template<Matrix Target, Matrix MaybeTrans>
         consteval static bool MatOrTransUseMKL() noexcept;
@@ -80,6 +95,7 @@ namespace Physica {
         assert(mat1.getCol() > 0);
         assert(mat2.getCol() > 0);
         assert(mat1.getCol() == mat2.getRow());
+        static_assert(getRowAtCompile() != 1 && getColAtCompile() != 1, "[Error]: We reject it and expect higher layers to handle it");
     }
 
     template<Matrix M1, Matrix M2>
@@ -94,13 +110,33 @@ namespace Physica {
     void GEMM<M1, M2>::assign(Matrix auto&& target) const {
         target.assert_assign(*this);
         if constexpr (UseMKL(target)) {
-            if (getLHS().getSize() > Critical && getRHS().getSize() > Critical)
+            if (getLHS().getSize() > ThresholdMKL && getRHS().getSize() > ThresholdMKL)
                 assign_mkl(target);
             else
-                Base::template assign_base<P>(target);
+                assign_base(target);
         }
         else
+            assign_base(target);
+    }
+
+    template<Matrix M1, Matrix M2>
+    template<ExecutePolicy P>
+    void GEMM<M1, M2>::assign_base(Matrix auto&& target) const noexcept {
+        if constexpr (isStaticGEMM())
             Base::template assign_base<P>(target);
+        else {
+            target.zeros();
+            assign_add(target);
+        }
+    }
+
+    template<Matrix M1, Matrix M2>
+    template<ExecutePolicy P>
+    void GEMM<M1, M2>::assign_add(Matrix auto&& target) const noexcept {
+        if constexpr (isStaticGEMM())
+            Base::assign_add(target);
+        else
+            assign_add_blocking(target);
     }
 
     template<Matrix M1, Matrix M2>
@@ -160,12 +196,146 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
+    void GEMM<M1, M2>::assign_add_blocking(Matrix auto&& target) const noexcept {
+        auto blockingM = [&](int size) noexcept -> bool {
+            size_t m = getRow();
+            bool success = m > size;
+            if (success) {
+                size_t half = bisection(m);
+                (getLHS().topRows(half) * getRHS()).assign_add(target.topRows(half));
+                (getLHS().bottomRows(half) * getRHS()).assign_add(target.bottomRows(half));
+            }
+            return success;
+        };
+
+        auto blockingK = [&](int size) noexcept -> bool {
+            size_t k = getLHS().getCol();
+            bool success = k > size;
+            if (success) {
+                size_t half = bisection(k);
+                (getLHS().leftCols(half) * getRHS().topRows(half)).assign_add(target);
+                (getLHS().rightCols(half) * getRHS().bottomRows(half)).assign_add(target);
+            }
+            return success;
+        };
+
+        auto blockingN = [&](int size) noexcept -> bool {
+            size_t n = getCol();
+            bool success = n > size;
+            if (success) {
+                size_t half = bisection(n);
+                (getLHS() * getRHS().leftCols(half)).assign_add(target.leftCols(half));
+                (getLHS() * getRHS().rightCols(half)).assign_add(target.rightCols(half));
+            }
+            return success;
+        };
+
+        constexpr static int BlockingL1 = Base::calcBlockingSize(HostDevAttr::CacheSizeL1D);
+        switch (getInnerDim(target)) {
+        case InnerDim::M:
+            if (blockingK(BlockingL1))
+                return;
+            return assign_add_m(target);
+        case InnerDim::K:
+            if constexpr (MatrixMajor::isRowMatrix<M1>() && MatrixMajor::isColMatrix<M2>()) {
+                if (blockingM(BlockingL1) || blockingN(BlockingL1))
+                    return;
+            }
+            else {
+                if (blockingK(BlockingL1))
+                    return;
+            }
+            return assign_add_k(target);
+        case InnerDim::N:
+            if (blockingK(BlockingL1))
+                return;
+            return assign_add_n(target);
+        default:
+            unreachable();
+        }
+    }
+
+    template<Matrix M1, Matrix M2>
+    void GEMM<M1, M2>::assign_add_m(Matrix auto&& target) const noexcept {
+        const auto& lhs = getLHS();
+        const auto& rhs = getRHS();
+        const size_t k = lhs.getCol();
+        const size_t n = getCol();
+        for (size_t c = 0; c < n; ++c) {
+            auto col = target.col(c);
+            for (size_t i = 0; i < k; ++i)
+                col += lhs.col(i) * rhs.calc(i, c);
+        }
+    }
+
+    template<Matrix M1, Matrix M2>
+    void GEMM<M1, M2>::assign_add_k(Matrix auto&& target) const noexcept {
+        Base::assign_add(target);
+    }
+
+    template<Matrix M1, Matrix M2>
+    void GEMM<M1, M2>::assign_add_n(Matrix auto&& target) const noexcept {
+        const auto& lhs = getLHS();
+        const auto& rhs = getRHS();
+        const size_t m = getRow();
+        const size_t k = lhs.getCol();
+        for (size_t r = 0; r < m; ++r) {
+            auto row = target.row(r);
+            for (size_t i = 0; i < k; ++i)
+                row += lhs.calc(r, i) * rhs.row(i);
+        }
+    }
+
+    template<Matrix M1, Matrix M2>
+    consteval auto GEMM<M1, M2>::getInnerDim(Matrix auto&& target) noexcept -> InnerDim {
+        using M = decltype(target);
+        if constexpr (MatrixMajor::isSameMajor<M, M1>()) {
+            if constexpr (MatrixMajor::isSameMajor<M, M2>()) {
+                if constexpr (MatrixMajor::isColMatrix<M>())
+                    return InnerDim::M;
+                else
+                    return InnerDim::N;
+            }
+            else {
+                if constexpr (MatrixMajor::isColMatrix<M>())
+                    return InnerDim::M;
+                else
+                    return InnerDim::K;
+            }
+        }
+        else {
+            if constexpr (MatrixMajor::isSameMajor<M, M2>()) {
+                if constexpr (MatrixMajor::isColMatrix<M>())
+                    return InnerDim::K;
+                else
+                    return InnerDim::N;
+            }
+            else
+                return InnerDim::K;
+        }
+    }
+
+    template<Matrix M1, Matrix M2>
+    constexpr size_t GEMM<M1, M2>::bisection(size_t size) noexcept {
+        constexpr int PacketSize = BestPacket<T, Dynamic>::Size;
+        size_t result = (size / 2 + (PacketSize - 1)) / PacketSize * PacketSize;
+        assert(result < size && "[Error]: Input size is too small");
+        return result;
+    }
+
+    template<Matrix M1, Matrix M2>
+    consteval bool GEMM<M1, M2>::isStaticGEMM() noexcept {
+        return std::remove_cvref_t<M1>::getSizeAtCompile() != Dynamic
+            && std::remove_cvref_t<M2>::getSizeAtCompile() != Dynamic;
+    }
+
+    template<Matrix M1, Matrix M2>
     consteval bool GEMM<M1, M2>::UseMKL(const Matrix auto& target) noexcept {
         using M = decltype(target);
         using T1 = std::remove_cvref_t<M1>;
         using T2 = std::remove_cvref_t<M2>;
-        constexpr bool Large1 = T1::getSizeAtCompile() == Dynamic || T1::getSizeAtCompile() > Critical;
-        constexpr bool Large2 = T2::getSizeAtCompile() == Dynamic || T2::getSizeAtCompile() > Critical;
+        constexpr bool Large1 = T1::getSizeAtCompile() == Dynamic || T1::getSizeAtCompile() > ThresholdMKL;
+        constexpr bool Large2 = T2::getSizeAtCompile() == Dynamic || T2::getSizeAtCompile() > ThresholdMKL;
         constexpr bool UseMKL1 = Large1 && Large2;
         constexpr bool UseMKL2 = MatOrTransUseMKL<M, T1>();
         constexpr bool UseMKL3 = MatOrTransUseMKL<M, T2>();
@@ -191,7 +361,7 @@ namespace Physica {
                       "[Error]: Row and column do not match in matrix-vector product");
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
-        constexpr static int Major = MatrixMajor::BothMajor;
+        constexpr static int Major = MatrixMajor::isSameMajor<M1, M2>() ? MatrixMajor::getMajor<M1>() : MatrixMajor::BothMajor;
     };
 }
 

@@ -26,9 +26,11 @@ namespace Physica {
         return Real<Prec>(x.isNegative() ? -1 : 1);
     }
 
-    template<FloatPrec Prec>
-    [[nodiscard]] __host__ __device__ Real<Prec> fma(Real<Prec> x, Real<Prec> y, Real<Prec> z) noexcept {
-        return Real<Prec>(std::fma(x.toMachine(), y.toMachine(), z.toMachine()));
+    template<FloatPrec FP1, FloatPrec FP2, FloatPrec FP3>
+    [[nodiscard]] __host__ __device__ auto fma(Real<FP1> x, Real<FP2> y, Real<FP3> z) noexcept {
+        using T = Internal::BinaryScalarOpRtnTy<Real<FP1>, Real<FP2>>::Type;
+        using RtnTy = Internal::BinaryScalarOpRtnTy<T, Real<FP3>>::Type;
+        return RtnTy(std::fma(RtnTy(x).toMachine(), RtnTy(y).toMachine(), RtnTy(z).toMachine()));
     }
 
     template<FloatPrec Prec>

@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Matrix M1, Matrix M2>
-    void GEMM<M1, M2>::assign_mkl(Matrix auto& target) const noexcept {
+    void GEMM<M1, M2>::assign_mkl(Matrix auto&& target) const noexcept {
         using M = decltype(target);
         using Tm = decltype(std::declval<T>().toMKL());
         constexpr auto Layout = MatrixMajor::getMajor<M>() == MatrixMajor::Row ? CblasRowMajor : CblasColMajor;
