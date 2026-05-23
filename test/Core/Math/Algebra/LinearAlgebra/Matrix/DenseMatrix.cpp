@@ -20,7 +20,6 @@
 #include "Physica/Core/Scalar/Complex.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
 #include "Test.h"
-#include <print>
 
 using namespace Physica;
 using RandomSource = Random<>;

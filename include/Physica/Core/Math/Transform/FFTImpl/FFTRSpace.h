@@ -105,6 +105,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::Row; }
     protected:
         FFTRSpace() = default;
         FFTRSpace(const FFTRSpace&) = default;
@@ -223,7 +225,6 @@ namespace Physica {
     public:
         using Derived = T;
         using ScalarType = Traits<T>::ScalarType;
-        constexpr static int Major = MatrixMajor::Row;
     };
 
     template<class T>

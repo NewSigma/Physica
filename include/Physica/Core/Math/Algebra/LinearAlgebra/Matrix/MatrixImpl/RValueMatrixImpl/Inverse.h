@@ -44,6 +44,8 @@ namespace Physica {
         [[nodiscard]] const M& getExpr() const noexcept { return mat; }
         [[nodiscard]] size_t getRow() const noexcept { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     private:
         void assign2D(Matrix auto& target) const;
         void assign3D(Matrix auto& target) const;
@@ -106,6 +108,11 @@ namespace Physica {
             target[2, 2] = (mat[0, 0] * mat[1, 1] - mat[1, 0] * mat[0, 1]);
         }
         target *= reciprocal(mat.det());
+    }
+
+    template<Matrix M>
+    __host__ __device__ consteval int Inverse<M>::getMajor() noexcept {
+        return std::remove_cvref_t<M>::getMajor();
     }
 }
 

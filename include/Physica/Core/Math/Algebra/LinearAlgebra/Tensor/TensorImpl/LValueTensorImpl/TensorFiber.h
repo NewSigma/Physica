@@ -77,6 +77,5 @@ namespace Physica {
     class Traits<TensorFiber<X>> {
     public:
         using ScalarType = std::remove_cvref_t<X>::ScalarType;
-        constexpr static int Major = MatrixMajor::BothMajor;
     };
 }

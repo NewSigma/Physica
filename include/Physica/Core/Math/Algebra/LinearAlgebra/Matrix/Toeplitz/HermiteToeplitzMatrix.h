@@ -46,6 +46,8 @@ namespace Physica {
         [[nodiscard]] const auto& getFirstCol() const noexcept { return firstCol; }
         [[nodiscard]] size_t getRow() const noexcept { return firstCol.getLength(); }
         [[nodiscard]] size_t getCol() const noexcept { return firstCol.getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
 
     template<Scalar T>
@@ -83,6 +85,5 @@ namespace Physica {
     class Traits<HermiteToeplitzMatrix<T>> {
     public:
         using ScalarType = T;
-        constexpr static int Major = MatrixMajor::BothMajor;
     };
 }

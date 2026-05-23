@@ -58,6 +58,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
         /* Friends */
         friend class device_obj<This>;
     };
@@ -153,7 +154,6 @@ namespace Physica {
         static_assert(!T::isComplex() && !T::isDiffable(), "[Error]: Invalid scalar for identity matrix");
     public:
         using ScalarType = T;
-        constexpr static int Major = MatrixMajor::BothMajor;
     };
 }
 

@@ -64,10 +64,11 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
         [[nodiscard]] static This identity(size_t order);
-        [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
     };
 
     template<Scalar T, size_t Order>
@@ -166,7 +167,6 @@ namespace Physica {
     class Traits<DiagMatrix<T, Order>> {
     public:
         using ScalarType = T;
-        constexpr static int Major = MatrixMajor::BothMajor;
     };
 }
 

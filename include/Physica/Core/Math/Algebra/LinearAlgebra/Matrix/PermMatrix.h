@@ -58,6 +58,7 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept { return indices.getLength(); }
         [[nodiscard]] size_t getCol() const noexcept { return indices.getLength(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
         [[nodiscard]] static This fromMKL(Array<MKL_INT64> ipiv);
     };
 
@@ -157,6 +158,5 @@ namespace Physica {
     class Traits<PermMatrix<T>> {
     public:
         using ScalarType = T;
-        constexpr static int Major = MatrixMajor::BothMajor;
     };
 }

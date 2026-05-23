@@ -183,9 +183,5 @@ namespace Physica {
 
 namespace Physica {
     template<Matrix M>
-    class Traits<BiDiagMatrixB<M>> : public Traits<M> {
-    private:
-        using Base = Traits<M>;
-        using Base::Major;
-    };
+    class Traits<BiDiagMatrixB<M>> : public Traits<M> {};
 }

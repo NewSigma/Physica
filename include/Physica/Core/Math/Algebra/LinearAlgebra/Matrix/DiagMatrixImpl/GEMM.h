@@ -49,6 +49,8 @@ namespace Physica {
         [[nodiscard]] size_t getCol() const { return rhs.getCol(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
@@ -81,6 +83,11 @@ namespace Physica {
         return propagate_rvalue_reference<decltype(self), M2>(self.rhs);
     }
 
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    __host__ __device__ consteval int GEMM<M1, M2>::getMajor() noexcept {
+        return MatrixMajor::getMajor<M1>();
+    }
+
     template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
     class GEMM<M1, M2> : public RValueMatrix<GEMM<M1, M2>> {
         using This = GEMM<M1, M2>;
@@ -109,6 +116,8 @@ namespace Physica {
         [[nodiscard]] size_t getCol() const { return rhs.getCol(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
@@ -139,5 +148,10 @@ namespace Physica {
     template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
     auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M2>(self.rhs);
+    }
+
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    __host__ __device__ consteval int GEMM<M1, M2>::getMajor() noexcept {
+        return MatrixMajor::getMajor<M2>();
     }
 }

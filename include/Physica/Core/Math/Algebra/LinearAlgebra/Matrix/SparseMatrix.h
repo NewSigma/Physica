@@ -65,6 +65,8 @@ namespace Physica {
         [[nodiscard]] const auto& getElements() const { return elements; }
         [[nodiscard]] const auto& getMinorIndexes() const { return minorIndexes; }
         [[nodiscard]] const auto& getMajorStarts() const { return majorStarts; }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return Major; }
         /* Friends */
         friend class device_obj<This>;
     };
@@ -193,7 +195,6 @@ namespace Physica {
     class Traits<SparseMatrix<T, Op>> {
     public:
         using ScalarType = T;
-        constexpr static int Major = Op;
     };
 }
 

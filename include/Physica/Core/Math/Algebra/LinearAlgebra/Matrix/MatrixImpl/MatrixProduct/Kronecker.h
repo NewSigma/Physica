@@ -55,6 +55,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
 
     template<Matrix M1, Matrix M2>
@@ -175,7 +176,6 @@ namespace Physica {
         using M2 = std::remove_cvref<M2_>::type;
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename M2::ScalarType>::Type;
-        constexpr static int Major = MatrixMajor::BothMajor;
     };
 }
 

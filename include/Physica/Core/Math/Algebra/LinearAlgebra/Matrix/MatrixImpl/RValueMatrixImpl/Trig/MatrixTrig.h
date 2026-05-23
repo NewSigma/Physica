@@ -61,6 +61,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
     template<Matrix M, bool Upper, bool Unit>
@@ -159,13 +160,17 @@ namespace Physica {
         else
             return std::min(M1::getRowAtCompile(), M1::getColAtCompile());
     }
+
+    template<Matrix M, bool Upper, bool Unit>
+    __host__ __device__ consteval int MatrixTrig<M, Upper, Unit>::getMajor() noexcept {
+        return std::remove_cvref_t<M>::getMajor();
+    }
 }
 
 namespace Physica {
     template<Matrix M, bool Upper_, bool Unit_>
     class Traits<MatrixTrig<M, Upper_, Unit_>> : public Traits<M> {
     public:
-        constexpr static int Major = MatrixMajor::getMajor<M>();
         constexpr static bool Upper = Upper_;
         constexpr static bool Unit = Unit_;
 

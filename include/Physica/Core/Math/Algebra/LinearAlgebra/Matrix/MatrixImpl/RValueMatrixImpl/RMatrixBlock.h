@@ -160,6 +160,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return rowCount; }
         [[nodiscard]] size_t getCol() const noexcept { return colCount; }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
     template<Matrix M>
@@ -305,14 +307,17 @@ namespace Physica {
         using M1 = decltype(v);
         return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(v), self.fromRow, self.rowCount, self.fromCol, self.colCount);
     }
+
+    template<Matrix M>
+    __host__ __device__ consteval int RMatrixBlock<M, Dynamic, Dynamic>::getMajor() noexcept {
+        return std::remove_cvref_t<M>::getMajor();
+    }
 }
 
 namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
     class Traits<RMatrixBlock<M, Row, Col>> {
-        using M1 = std::remove_cvref<M>::type;
     public:
-        using ScalarType = M1::ScalarType;
-        constexpr static int Major = M1::Major;
+        using ScalarType = std::remove_cvref_t<M>::ScalarType;
     };
 }

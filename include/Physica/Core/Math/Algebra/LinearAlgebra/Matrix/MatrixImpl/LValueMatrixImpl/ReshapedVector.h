@@ -48,6 +48,8 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor; }
     };
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>

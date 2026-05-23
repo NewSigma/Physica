@@ -38,7 +38,7 @@ namespace Physica {
         using HouseholderNorm = DenseVector<T, NormVectorLength>;
         using This = Hessenberg<T, Order>;
     public:
-        using WorkingMatrix = DenseMatrix<T, Traits<MatrixH>::Major, Order, Order>;
+        using WorkingMatrix = DenseMatrix<T, MatrixH::getMajor(), Order, Order>;
     protected:
         using Tr = T::RealType;
         using Trv = Tr::ValueType;
@@ -142,6 +142,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return Order; }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return Order; }
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::Col; }
     };
 
     template<Scalar T, size_t Order>
@@ -168,6 +169,5 @@ namespace Physica {
     class Traits<HessenbergMatrixH<T, Order>> {
     public:
         using ScalarType = T;
-        constexpr static int Major = MatrixMajor::Col;
     };
 }

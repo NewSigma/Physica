@@ -321,7 +321,7 @@ namespace Physica {
     template<class Derived>
     auto RValueMatrix<Derived>::max() const -> T {
         T result;
-        if constexpr (MatrixMajor::isColMatrix<This>()) {
+        if constexpr (Derived::isColMatrix()) {
             result = Base::getDerived().col(0).max();
             for (size_t i = 1; i < getCol(); ++i) {
                 T temp = Base::getDerived().col(i).max();
@@ -343,7 +343,7 @@ namespace Physica {
     template<class Derived>
     auto RValueMatrix<Derived>::min() const -> T {
         T result;
-        if constexpr (MatrixMajor::isColMatrix<This>()) {
+        if constexpr (Derived::isColMatrix()) {
             result = Base::getDerived().col(0).min();
             for (size_t i = 1; i < getCol(); ++i) {
                 T temp = Base::getDerived().col(i).min();
@@ -640,17 +640,17 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ consteval bool RValueMatrix<Derived>::isColMatrix() noexcept {
-        return (getMajor() & MatrixMajor::Col) != 0;
+        return (Derived::getMajor() & MatrixMajor::Col) != 0;
     }
 
     template<class Derived>
     __host__ __device__ consteval bool RValueMatrix<Derived>::isRowMatrix() noexcept {
-        return (getMajor() & MatrixMajor::Row) != 0;
+        return (Derived::getMajor() & MatrixMajor::Row) != 0;
     }
 
     template<class Derived>
     __host__ __device__ consteval bool RValueMatrix<Derived>::isBothMajor() noexcept {
-        return getMajor() == MatrixMajor::BothMajor;
+        return Derived::getMajor() == MatrixMajor::BothMajor;
     }
 
     template<class Derived>
@@ -674,8 +674,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ consteval int RValueMatrix<Derived>::getMajor() noexcept {
-        return Traits<Derived>::Major;
+    __host__ __device__ consteval auto RValueMatrix<Derived>::getMajor() noexcept {
+        return Derived::getMajor();
     }
 
     template<class Derived>

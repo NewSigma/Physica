@@ -69,6 +69,8 @@ namespace Physica {
         [[nodiscard]] Tr getRepelU() const noexcept { return params.getRepelU(); }
         [[nodiscard]] Tr getBeta() const noexcept { return params.getBeta(); }
         [[nodiscard]] const auto& getParams() const noexcept { return params; }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
         /* Friends */
         template<Matrix, Vector> friend class GEMV;
     private:
@@ -201,7 +203,6 @@ namespace Physica {
         static_assert(T::isComplex(), "[Error]: Action is complex");
     public:
         using ScalarType = T;
-        constexpr static int Major = MatrixMajor::BothMajor;
     };
 }
 

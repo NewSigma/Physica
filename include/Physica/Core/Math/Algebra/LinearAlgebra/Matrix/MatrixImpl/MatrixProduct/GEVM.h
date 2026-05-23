@@ -66,6 +66,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     private:
         void check_prod() const noexcept;
     };
@@ -164,12 +165,9 @@ namespace Physica {
 namespace Physica {
     template<Vector V, Matrix M>
     class Traits<GEVM<V, M>> {
-        using V1 = std::remove_cvref<V>::type;
-        using M1 = std::remove_cvref<M>::type;
-        using T1 = V1::ScalarType;
-        using T2 = M1::ScalarType;
+        using T1 = std::remove_cvref<V>::type::ScalarType;
+        using T2 = std::remove_cvref<M>::type::ScalarType;
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
-        constexpr static int Major = MatrixMajor::BothMajor;
     };
 }

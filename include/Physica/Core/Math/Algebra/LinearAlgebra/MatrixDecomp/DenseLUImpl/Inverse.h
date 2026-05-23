@@ -48,6 +48,8 @@ namespace Physica {
         [[nodiscard]] const LU& getDenseLU() const noexcept { return lu; }
         [[nodiscard]] size_t getRow() const noexcept { return lu.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::Col; }
     };
 
     template<Scalar T, bool Pivot>
@@ -76,8 +78,6 @@ namespace Physica {
     class Traits<Inverse<DenseLU<T, P>>> {
     public:
         using ScalarType = T;
-        constexpr static int Major = MatrixMajor::Col;
-
         using ExprType = DenseLU<T, P>;
     };
 }

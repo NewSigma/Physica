@@ -47,6 +47,8 @@ namespace Physica {
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] size_t getRow() const noexcept { return trig.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
@@ -81,6 +83,11 @@ namespace Physica {
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
     auto&& Inverse<M>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.trig);
+    }
+
+    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    __host__ __device__ consteval int Inverse<M>::getMajor() noexcept {
+        return std::remove_cvref_t<M>::getMajor();
     }
 }
 

@@ -60,7 +60,7 @@ namespace Physica {
         if constexpr (IsMat1x1)
             return CompactMatrixBlock<Self, 1, 1>(std::forward<Self>(self), r, 0);
         else {
-            if constexpr (MatrixMajor::isRowMatrix<This>())
+            if constexpr (Derived::isRowMatrix())
                 return CompactMatrixBlock<Self, 1, ColAtCompile>(std::forward<Self>(self), r, 0, self.getCol());
             else
                 return LMatrixBlock<Self, 1, ColAtCompile>(std::forward<Self>(self), r, 0, self.getCol());
@@ -75,7 +75,7 @@ namespace Physica {
         if constexpr (IsMat1x1)
             return CompactMatrixBlock<Self, 1, 1>(std::forward<Self>(self), 0, c);
         else {
-            if constexpr (MatrixMajor::isColMatrix<This>())
+            if constexpr (Derived::isColMatrix())
                 return CompactMatrixBlock<Self, RowAtCompile, 1>(std::forward<Self>(self), 0, self.getRow(), c);
             else
                 return LMatrixBlock<Self, RowAtCompile, 1>(std::forward<Self>(self), 0, self.getRow(), c);
@@ -219,7 +219,7 @@ namespace Physica {
         auto fileSpace = H5DataSpace<2>({Base::getMaxMajor(), Base::getMaxMinor()});
         for (size_t major = 0; major < maxMajor; ++major) {
             fileSpace.selectHyperslab(H5S_SELECT_SET, {1, maxMinor}, {major, 0});
-            if constexpr (MatrixMajor::isColMatrix<This>())
+            if constexpr (Derived::isColMatrix())
                 dataset.read(Base::getDerived().col(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
             else
                 dataset.read(Base::getDerived().row(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
@@ -242,7 +242,7 @@ namespace Physica {
         auto fileSpace = H5DataSpace<2>({Base::getMaxMajor(), Base::getMaxMinor()});
         for (size_t major = 0; major < maxMajor; ++major) {
             fileSpace.selectHyperslab(H5S_SELECT_SET, {1, maxMinor}, {major, 0});
-            if constexpr (MatrixMajor::isColMatrix<This>())
+            if constexpr (Derived::isColMatrix())
                 dataset.write(Base::getDerived().col(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
             else
                 dataset.write(Base::getDerived().row(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
@@ -265,7 +265,7 @@ namespace Physica {
     auto CompactMatrix<Derived>::data_ptr(this auto&& self, size_t r, size_t c) noexcept {
         assert(r < self.getRow());
         assert(c < self.getCol());
-        if constexpr (MatrixMajor::isRowMatrix<This>())
+        if constexpr (Derived::isRowMatrix())
             return self.data() + r * self.getCol() + c;
         else
             return self.data() + c * self.getRow() + r;

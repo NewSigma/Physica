@@ -33,11 +33,6 @@ namespace Physica {
         using Type = T;
     };
 
-    template<class T>
-    struct is_hermite {
-        constexpr static bool value = !std::is_same<T, typename remove_hermite<T>::Type>::value;
-    };
-
     template<Matrix M>
     class Hermite<M> : public RValueMatrix<Hermite<M>> {
         using This = Hermite<M>;
@@ -64,6 +59,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
     template<Matrix M>
@@ -84,6 +80,11 @@ namespace Physica {
     template<Matrix M>
     __host__ __device__ consteval size_t Hermite<M>::getColAtCompile() noexcept {
         return std::remove_cvref_t<M>::getRowAtCompile();
+    }
+
+    template<Matrix M>
+    __host__ __device__ consteval int Hermite<M>::getMajor() noexcept {
+        return Transpose<M>::getMajor();
     }
 
     template<Vector V>
@@ -114,6 +115,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
     template<Vector V>
@@ -140,6 +142,11 @@ namespace Physica {
     template<Vector V>
     __host__ __device__ consteval size_t Hermite<V>::getColAtCompile() noexcept {
         return std::remove_cvref_t<V>::getSizeAtCompile();
+    }
+
+    template<Vector V>
+    __host__ __device__ consteval int Hermite<V>::getMajor() noexcept {
+        return MatrixMajor::Row;
     }
 }
 

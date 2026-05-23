@@ -51,6 +51,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return Row; }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return Col; }
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor; }
     };
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
@@ -96,6 +97,5 @@ namespace Physica {
         static_assert(MatrixMajor == MatrixMajor::Col || MatrixMajor == MatrixMajor::Row, "[Error]: Invalid major");
     public:
         using ScalarType = std::remove_cvref_t<V>::ScalarType;
-        constexpr static int Major = MatrixMajor;
     };
 }

@@ -94,6 +94,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept;
         [[nodiscard]] __host__ __device__ bool empty() const noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return Major; }
         [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) noexcept;
     private:
         Array2D(ArrayType arr_, IndexType r_);
@@ -102,14 +103,6 @@ namespace Physica {
         /* Friends */
         friend class Array2D<T, TransOption, Col, Row, Allocator>;
         friend class device_obj<This>;
-    };
-}
-
-namespace Physica {
-    template<class T, int Major_, size_t Row, size_t Col, class Allocator>
-    class Traits<Array2D<T, Major_, Row, Col, Allocator>> {
-    public:
-        constexpr static int Major = Major_;
     };
 }
 

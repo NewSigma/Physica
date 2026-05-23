@@ -38,6 +38,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
     template<Matrix M>
@@ -93,6 +94,11 @@ namespace Physica {
     __host__ __device__ consteval size_t Cholesky<M>::getColAtCompile() noexcept {
         return std::remove_cvref_t<M>::getColAtCompile();
     }
+
+    template<Matrix M>
+    __host__ __device__ consteval int Cholesky<M>::getMajor() noexcept {
+        return M::getMajor();
+    }
 }
 
 namespace Physica {
@@ -100,6 +106,5 @@ namespace Physica {
     class Traits<Cholesky<M>> {
     public:
         using ScalarType = M::ScalarType;
-        constexpr static int Major = M::MatrixMajor;
     };
 }

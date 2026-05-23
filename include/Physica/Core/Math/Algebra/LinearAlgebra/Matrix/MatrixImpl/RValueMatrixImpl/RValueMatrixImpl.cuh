@@ -501,7 +501,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ consteval int device_obj<RValueMatrix<Derived>>::getMajor() noexcept {
-        return Traits<Derived>::Major;
+        return Derived::getMajor();
     }
 
     template<class Derived>

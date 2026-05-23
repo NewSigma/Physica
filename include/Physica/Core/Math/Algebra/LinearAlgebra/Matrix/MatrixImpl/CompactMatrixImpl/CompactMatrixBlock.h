@@ -303,6 +303,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
     template<Matrix M, size_t Row, size_t Col>
@@ -474,14 +475,17 @@ namespace Physica {
     __host__ __device__ consteval size_t CompactMatrixBlock<M, Row, Col>::getColAtCompile() noexcept {
         return Col;
     }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ consteval int CompactMatrixBlock<M, Row, Col>::getMajor() noexcept {
+        return std::remove_cvref_t<M>::getMajor();
+    }
 }
 
 namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
     class Traits<CompactMatrixBlock<M, Row, Col>> {
-        using M1 = std::remove_cvref<M>::type;
     public:
-        using ScalarType = M1::ScalarType;
-        constexpr static int Major = M1::Major;
+        using ScalarType = std::remove_cvref_t<M>::ScalarType;
     };
 }

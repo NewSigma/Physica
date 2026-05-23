@@ -59,6 +59,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return 2; }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return 2; }
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
 
     template<Scalar U, PauliIndex Idx>
@@ -110,6 +111,5 @@ namespace Physica {
         static_assert(!U::isComplex());
     public:
         using ScalarType = std::conditional<Idx == PauliIndex::Y, typename U::ComplexType, U>::type;
-        constexpr static int Major = MatrixMajor::BothMajor;
     };
 }

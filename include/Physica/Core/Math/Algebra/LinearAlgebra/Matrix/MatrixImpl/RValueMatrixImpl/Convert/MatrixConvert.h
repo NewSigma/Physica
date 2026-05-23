@@ -48,6 +48,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return std::remove_cvref_t<M>::getMajor(); }
     };
 
     template<class M>
@@ -82,6 +83,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return std::remove_cvref_t<M>::getMajor(); }
     };
 
     template<class M>
@@ -120,6 +122,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return std::remove_cvref_t<M>::getMajor(); }
     };
 
     template<class M>
@@ -165,6 +168,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return std::remove_cvref_t<M>::getMajor(); }
     };
 
     template<class M>
@@ -197,6 +201,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return std::remove_cvref_t<M>::getMajor(); }
     };
 
     template<class M, int GradOrder>
@@ -225,6 +230,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return std::remove_cvref_t<M>::getMajor(); }
     };
 }
 
@@ -234,7 +240,6 @@ namespace Physica {
         using M1 = std::remove_cvref_t<M>;
     public:
         using ScalarType = typename M1::ScalarType::RealType;
-        constexpr static int Major = M1::Major;
     };
 
     template<class M>
@@ -251,7 +256,6 @@ namespace Physica {
         using M1 = std::remove_cvref_t<M>;
     public:
         using ScalarType = typename M1::ScalarType::ValueType;
-        constexpr static int Major = M1::Major;
     };
 
     template<class M, int GradOrder>
@@ -260,6 +264,5 @@ namespace Physica {
         static_assert(M1::ScalarType::isDiffable(), "[Error]: Redundant GradMatrix");
     public:
         using ScalarType = Internal::GradTypeHelper<typename M1::ScalarType, GradOrder>::Type;
-        constexpr static int Major = M1::Major;
     };
 }

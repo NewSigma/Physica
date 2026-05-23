@@ -38,7 +38,7 @@ namespace Physica {
         using device_obj_type = device_obj<This>;
         using ColMatrix = DenseMatrix<T, MatrixMajor::Col, Row, Col>;
         using RowMatrix = DenseMatrix<T, MatrixMajor::Row, Row, Col>;
-        using VectorIniter = DenseVector<T, MatrixMajor::isColMatrix<This>() ? Row : Col>;
+        using VectorIniter = DenseVector<T, (Major == MatrixMajor::Col) ? Row : Col>;
         template<Scalar U>
         using rebind_scalar = DenseMatrix<U, Major, Row, Col, Allocator>;
     private:
@@ -88,6 +88,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
         [[nodiscard]] static This zeros(size_t order) { return zeros(order, order); }
         [[nodiscard]] static This zeros(size_t row, size_t col);
         [[nodiscard]] static This identity(size_t order);
@@ -121,7 +122,6 @@ namespace Physica {
         static_assert(!Diffable<T>, "[Error]: Use diffable matrix instead");
     public:
         using ScalarType = T;
-        constexpr static int Major = Major_;
         using AllocatorType = Allocator;
     };
 }

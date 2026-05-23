@@ -50,6 +50,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
     template<ExprID ID, Matrix M>
@@ -79,6 +80,11 @@ namespace Physica {
     template<ExprID ID, Matrix M>
     constexpr auto&& UnitaryMatrixExpr<ID, M>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.expr);
+    }
+
+    template<ExprID ID, Matrix M>
+    __host__ __device__ consteval int UnitaryMatrixExpr<ID, M>::getMajor() noexcept {
+        return std::remove_cvref_t<M>::getMajor();
     }
 
     template<ExprID ID, class LHS, class RHS>
@@ -120,6 +126,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
     template<ExprID ID, class LHS, class RHS>
@@ -253,6 +260,18 @@ namespace Physica {
         else
             return std::max(std::remove_cvref_t<LHS>::getColAtCompile(), std::remove_cvref_t<RHS>::getColAtCompile());
     }
+
+    template<ExprID ID, class LHS, class RHS>
+    __host__ __device__ consteval int BinaryMatrixExpr<ID, LHS, RHS>::getMajor() noexcept {
+        if constexpr (Scalar<LHS> || Vector<LHS>)
+            return std::remove_cvref_t<RHS>::getMajor();
+        else if constexpr (Scalar<RHS> || Vector<RHS>)
+            return std::remove_cvref_t<LHS>::getMajor();
+        else  {
+            constexpr static bool SameMajor = MatrixMajor::isSameMajor<LHS, RHS>();
+            return SameMajor ?  std::remove_cvref_t<LHS>::getMajor() : MatrixMajor::BothMajor;
+        }
+    }
 }
 
 namespace Physica {
@@ -266,12 +285,9 @@ namespace Physica {
         using LHS1 = std::remove_cvref_t<LHS>;
         using RHS1 = std::remove_cvref_t<RHS>;
         using ResultType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, typename RHS1::ScalarType>::Type;
-
-        constexpr static bool SameMajor = MatrixMajor::isSameMajor<LHS1, RHS1>();
         constexpr static bool IsReal = ID == ExprID::Abs || ID == ExprID::Square;
     public:
         using ScalarType = std::conditional<IsReal, typename ResultType::RealType, ResultType>::type;
-        constexpr static int Major = SameMajor ? MatrixMajor::getMajor<LHS1>() : MatrixMajor::BothMajor;
     };
 
     template<ExprID ID, Matrix LHS_, Vector RHS_>
@@ -284,7 +300,6 @@ namespace Physica {
         using RHS1 = std::remove_cvref_t<RHS>;
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, typename RHS1::ScalarType>::Type;
-        constexpr static int Major = LHS1::Major;
     };
 
     template<ExprID ID, Vector LHS, Matrix RHS>
@@ -300,7 +315,6 @@ namespace Physica {
         using RHS1 = std::remove_cvref_t<RHS>;
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, RHS1>::Type;
-        constexpr static int Major = LHS1::Major;
     };
 
     template<ExprID ID, Scalar LHS, Matrix RHS>

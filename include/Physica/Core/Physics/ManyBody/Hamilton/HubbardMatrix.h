@@ -77,6 +77,8 @@ namespace Physica {
         [[nodiscard]] const auto& getPlan() const noexcept { return plan; }
         /* Setters */
         void setPhaseArgs(ArgVector phaseArgs) noexcept requires(BC == BoundaryCond::TBC);
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     protected:
         Tr repelElem(StateType psi) const noexcept;
         T hoppingElem(StateType rowPsi, StateType colPsi) const noexcept;
@@ -88,7 +90,7 @@ namespace Physica {
 
 namespace Physica {
     template<Scalar T, Representation Repr, BoundaryCond BC>
-    class Traits<HubbardMatrix<T, Repr, BC>> : public Traits<HamiltonMatrix<HubbardMatrix<T, Repr, BC>>> {
+    class Traits<HubbardMatrix<T, Repr, BC>> {
     public:
         using ScalarType = T;
         using ReprType = Repr;

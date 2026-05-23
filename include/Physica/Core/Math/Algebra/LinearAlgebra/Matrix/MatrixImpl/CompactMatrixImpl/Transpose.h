@@ -52,6 +52,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
@@ -94,6 +95,12 @@ namespace Physica {
         return std::remove_cvref_t<M>::getRowAtCompile();
     }
 
+    template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
+    __host__ __device__ consteval int Transpose<M>::getMajor() noexcept {
+        constexpr static int OtherMajor = MatrixMajor::isColMatrix<M>() ? MatrixMajor::Row : MatrixMajor::Col;
+        return MatrixMajor::isBothMajor<M>() ? MatrixMajor::BothMajor : OtherMajor;
+    }
+
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
     class Transpose<V> : public CompactMatrix<Transpose<V>> {
         using This = Transpose<V>;
@@ -121,6 +128,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::Row; }
     };
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
@@ -152,19 +160,14 @@ namespace Physica {
 namespace Physica {
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
     class Traits<Transpose<M>> {
-        using M1 = std::remove_cvref_t<M>;
-        constexpr static int OtherMajor = MatrixMajor::isColMatrix<M>() ? MatrixMajor::Row : MatrixMajor::Col;
     public:
-        using ScalarType = M1::ScalarType;
-        constexpr static int Major = MatrixMajor::isBothMajor<M>() ? MatrixMajor::BothMajor : OtherMajor;
+        using ScalarType = std::remove_cvref_t<M>::ScalarType;
     };
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
     class Traits<Transpose<V>> {
-        using V1 = std::remove_cvref_t<V>;
     public:
-        using ScalarType = V1::ScalarType;
-        constexpr static int Major = MatrixMajor::Row;
+        using ScalarType = std::remove_cvref_t<V>::ScalarType;
     };
 }
 

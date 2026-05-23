@@ -73,6 +73,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     private:
         void assign_add_blocking(Matrix auto&& target) const noexcept;
         void assign_add_m(Matrix auto&& target) const noexcept;
@@ -193,6 +194,11 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     __host__ __device__ consteval size_t GEMM<M1, M2>::getColAtCompile() noexcept {
         return std::remove_cvref_t<M2>::getColAtCompile();
+    }
+
+    template<Matrix M1, Matrix M2>
+    __host__ __device__ consteval int GEMM<M1, M2>::getMajor() noexcept {
+        return MatrixMajor::isSameMajor<M1, M2>() ? MatrixMajor::getMajor<M1>() : MatrixMajor::BothMajor;
     }
 
     template<Matrix M1, Matrix M2>
@@ -361,7 +367,6 @@ namespace Physica {
                       "[Error]: Row and column do not match in matrix-vector product");
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
-        constexpr static int Major = MatrixMajor::isSameMajor<M1, M2>() ? MatrixMajor::getMajor<M1>() : MatrixMajor::BothMajor;
     };
 }
 

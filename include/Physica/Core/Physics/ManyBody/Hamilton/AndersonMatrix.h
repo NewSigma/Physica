@@ -59,6 +59,8 @@ namespace Physica {
         [[nodiscard]] const auto& getRepr() const noexcept { return repr; }
         [[nodiscard]] T getOnSiteE(int site) const noexcept;
         [[nodiscard]] T getHoppingT(int bond) const noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     private:
         MatrixND<T> makeSingleParticleMatrix() const;
     };
@@ -145,7 +147,7 @@ namespace Physica {
 
 namespace Physica {
     template<Scalar T, int I, bool B>
-    class Traits<AndersonMatrix<T, I, B>> : public Traits<HamiltonMatrix<AndersonMatrix<T, I, B>>> {
+    class Traits<AndersonMatrix<T, I, B>> {
     public:
         using ScalarType = T;
         constexpr static int NumSite = I;

@@ -55,6 +55,8 @@ namespace Physica {
         [[nodiscard]] const auto& getMatrix() const noexcept { return m; }
         [[nodiscard]] size_t getRow() const noexcept { return m.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return m.getCol(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
 
     template<Matrix M>
@@ -100,10 +102,7 @@ namespace Physica {
 
 namespace Physica {
     template<Matrix M>
-    class Traits<MatrixExp<M>> : public Traits<std::remove_cvref_t<M>> {
-    public:
-        constexpr static int Major = MatrixMajor::BothMajor;
-    };
+    class Traits<MatrixExp<M>> : public Traits<std::remove_cvref_t<M>> {};
 }
 
 #include "MatExpVecProd.h"

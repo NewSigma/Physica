@@ -50,22 +50,22 @@ namespace Physica {
         /* Static members */
         template<class M>
         consteval static bool isColMatrix() noexcept {
-            return (Traits<M>::Major & Col) != 0;
+            return (getMajor<M>() & Col) != 0;
         }
 
         template<class M>
         consteval static bool isRowMatrix() noexcept {
-            return (Traits<M>::Major & Row) != 0;
+            return (getMajor<M>() & Row) != 0;
         }
 
         template<class M>
         consteval static bool isBothMajor() noexcept {
-            return Traits<M>::Major == BothMajor;
+            return getMajor<M>() == BothMajor;
         }
 
         template<class M>
         consteval static int getMajor() noexcept {
-            return Traits<M>::Major;
+            return std::remove_cvref_t<M>::getMajor();
         }
 
         template<class M1, class M2>

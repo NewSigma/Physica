@@ -72,6 +72,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
         [[nodiscard]] static This identity(size_t order);
         template<RNG R>
         [[nodiscard]] static This random_uniform(size_t order);
@@ -219,6 +220,5 @@ namespace Physica {
         static_assert(T::isComplex(), "[Error]: Using a symmetric matrix is preferred for real numbers");
     public:
         using ScalarType = T;
-        constexpr static int Major = MatrixMajor::BothMajor;
     };
 }

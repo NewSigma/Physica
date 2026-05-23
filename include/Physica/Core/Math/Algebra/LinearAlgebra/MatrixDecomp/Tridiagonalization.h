@@ -64,7 +64,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] MatrixT getMatrixT() const noexcept { return MatrixT(*this); }
         [[nodiscard]] HouseholderSequence<WorkingMatrix> getMatrixQ() const noexcept;
-
+        /* Friends */
         friend class TridiagonalMatrixT<T, Order>;
     };
 
@@ -155,6 +155,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
 
     template<Scalar T, size_t Order>
@@ -196,6 +197,5 @@ namespace Physica {
     class Traits<TridiagonalMatrixT<T, Order>> {
     public:
         using ScalarType = T;
-        constexpr static int Major = MatrixMajor::BothMajor;
     };
 }

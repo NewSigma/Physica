@@ -62,6 +62,8 @@ namespace Physica {
         /* Setters */
         void setSize(size_t size_);
         void setShift(size_t shift_);
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
 
     template<Matrix M, bool ColWiseRead>
@@ -106,6 +108,5 @@ namespace Physica {
     class Traits<HouseholderSequence<M, ColWiseRead>> {
     public:
         using ScalarType = M::ScalarType;
-        constexpr static int Major = MatrixMajor::BothMajor;
     };
 }

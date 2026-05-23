@@ -97,6 +97,7 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] auto&& grads(this auto&&) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return Major; }
         [[nodiscard]] static This identity(size_t order);
         template<RNG R>
         [[nodiscard]] static auto random_uniform(size_t row, size_t col);

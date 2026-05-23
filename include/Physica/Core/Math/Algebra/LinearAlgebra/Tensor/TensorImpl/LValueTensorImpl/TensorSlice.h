@@ -45,6 +45,8 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept { return tensor.dim(dimRow); }
         [[nodiscard]] size_t getCol() const noexcept { return tensor.dim(dimCol); }
         [[nodiscard]] auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
 
     template<Tensor X>
@@ -81,6 +83,5 @@ namespace Physica {
     class Traits<TensorSlice<X>> {
     public:
         using ScalarType = std::remove_cvref_t<X>::ScalarType;
-        constexpr static int Major = MatrixMajor::BothMajor;
     };
 }

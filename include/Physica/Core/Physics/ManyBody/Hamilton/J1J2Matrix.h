@@ -61,6 +61,8 @@ namespace Physica {
         [[nodiscard]] Tr getCouplingJ2() const noexcept { return couplingJ2; }
         [[nodiscard]] const Lattice& getModel() const noexcept { return *this; }
         [[nodiscard]] const Repr& getRepr() const noexcept { return repr; }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
 
     template<Scalar T, int Dim, int NumSite, BoundaryCond BC>
@@ -131,7 +133,7 @@ namespace Physica {
 
 namespace Physica {
     template<Scalar T, int Dim, int NumSite, BoundaryCond BC>
-    class Traits<J1J2Matrix<T, Dim, NumSite, BC>> : public Traits<HamiltonMatrix<J1J2Matrix<T, Dim, NumSite, BC>>> {
+    class Traits<J1J2Matrix<T, Dim, NumSite, BC>> {
     public:
         using ScalarType = T;
         using ReprType = SpinRepr<Dim, NumSite>;

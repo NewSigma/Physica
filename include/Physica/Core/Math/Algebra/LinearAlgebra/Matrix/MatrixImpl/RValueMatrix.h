@@ -68,7 +68,6 @@ namespace Physica {
         using Base = CRTPBase<This>;
     public:
         using ScalarType = Traits<Derived>::ScalarType;
-        constexpr static int Major = Traits<Derived>::Major;
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
@@ -192,7 +191,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
-        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static auto getMajor() noexcept;
         [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixMajor::rowFromMajorMinor<Derived>(major, minor); }
         [[nodiscard]] static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixMajor::colFromMajorMinor<Derived>(major, minor); }
         __host__ __device__ consteval static void static_assert_assign(const Scalar auto& source) noexcept;
@@ -255,7 +254,7 @@ namespace Physica {
 
 namespace Physica {
     template<class T>
-    class Traits<RValueMatrix<T>> : public Traits<T> {
+    class Traits<RValueMatrix<T>> {
     public:
         using Derived = T;
     };

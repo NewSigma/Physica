@@ -54,6 +54,8 @@ namespace Physica {
         [[nodiscard]] size_t getNumState() const noexcept { return getRepr().getNumState(); }
         [[nodiscard]] size_t getRow() const noexcept { return getNumState(); }
         [[nodiscard]] size_t getCol() const noexcept { return getNumState(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     protected:
         HamiltonMatrix() = default;
         HamiltonMatrix(const This&) = default;
@@ -74,12 +76,4 @@ namespace Physica {
         else
             return std::forward<Self>(self);
     }
-}
-
-namespace Physica {
-    template<class Derived>
-    class Traits<HamiltonMatrix<Derived>> {
-    public:
-        constexpr static int Major = MatrixMajor::BothMajor;
-    };
 }
