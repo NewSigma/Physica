@@ -89,12 +89,9 @@ namespace Physica {
 
     template<FloatPrec Prec>
     [[nodiscard]] __host__ __device__ Real<Prec> exp(const Real<Prec>& x) noexcept {
-        if constexpr (Prec == Float32)
-            return Real<Prec>(::expf(x.toMachine()));
-        else {
-            static_assert(Prec == Float64, "[Error]: Unexpected type");
-            return Real<Prec>(::exp(x.toMachine()));
-        }
+        auto expx = Real<Prec>(std::exp(x.toMachine()));
+        assert(expx.isFinite() && "[Error]: exp overflow");
+        return expx;
     }
 
     template<FloatPrec Prec>

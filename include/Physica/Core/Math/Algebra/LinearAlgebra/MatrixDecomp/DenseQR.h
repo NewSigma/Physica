@@ -33,7 +33,7 @@ namespace Physica {
     class DenseQR {
         using This = DenseQR<T, Pivot>;
         constexpr static bool isComplex = T::isComplex();
-        constexpr static size_t Threhold = 16;
+        constexpr static size_t Threshold = 16;
 
         using Tr = T::RealType;
         using Trv = Tr::ValueType;
@@ -98,14 +98,14 @@ namespace Physica {
     void DenseQR<T, Pivot>::compute(const M& source) {
         assert(getRow() == source.getRow());
         assert(getCol() == source.getCol());
-        constexpr bool SmallMatrix = M::getSizeAtCompile() <= Threhold && M::getSizeAtCompile() != Dynamic;
+        constexpr bool SmallMatrix = M::getSizeAtCompile() <= Threshold && M::getSizeAtCompile() != Dynamic;
         if constexpr (HasMKL() && !SmallMatrix) {
-            if constexpr (M::getSizeAtCompile() > Threhold) {
+            if constexpr (M::getSizeAtCompile() > Threshold) {
                 compute_mkl<M>(source);
                 return;
             }
 
-            if (source.getSize() > Threhold)
+            if (source.getSize() > Threshold)
                 compute_mkl<M>(source);
             else
                 compute_base<M>(source);
@@ -209,7 +209,7 @@ namespace Physica {
             if constexpr (isComplex) // Our complex householder is slightly different from MKL, getMatrixQ_base() cannot apply to compute_mkl.
                 return getMatrixQ_mkl();
 
-            if (working.getSize() > Threhold)
+            if (working.getSize() > Threshold)
                 return getMatrixQ_mkl();
             return getMatrixQ_base();
         }

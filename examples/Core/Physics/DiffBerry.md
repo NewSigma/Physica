@@ -13,7 +13,7 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # DiffBerry - AutoDiff approach to Berry curvature
 
-This example uses automatic differentiation to compute the Berry curvature and the band Chern number. The advantage of automatic differentiation is that it requires only one eigenstate, providing a neat approach to circumvent the gauge ambiguity issue inherent in finite difference methods.
+This example uses automatic differentiation to compute the Berry curvature and band Chern number. The advantage of automatic differentiation is that it requires only a single eigenstate, providing an elegant approach to circumvent the well-known gauge ambiguity inherent in finite difference methods.
 
 Consider a two-band Chern insulator on a two-dimensional lattice $^{[1]}$:
 

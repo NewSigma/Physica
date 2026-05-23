@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,8 +18,8 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/ForwardEigenSolver.h"
-#include "Physica/Core/Physics/ManyBody/ReprSpace/PauliMatrix.h"
 #include "Physica/Core/Math/Calculus/Integrate/Vegas.h"
+#include "Physica/Core/Physics/ManyBody/ReprSpace/PauliMatrix.h"
 
 using namespace Physica;
 using T = float64;
@@ -38,7 +38,7 @@ namespace {
             eig.sort();
             return eig.getEigenvectors().col(band).grads();
         };
-        return T(-2) *(diag(0).conjugate() * diag(1)).imag();
+        return T(-2) * (diag(0).conjugate() * diag(1)).imag();
     }
 
     void chern(int band) {

@@ -305,7 +305,7 @@ namespace Physica {
     auto RValueVector<Derived>::lnSquaredNorm() const -> Tr {
         const auto& derived = Base::getDerived();
         const Tr maxabs = abs(derived).max();
-        // We require a small threhold to avoid latter ill-conditioned reciprocal.
+        // We require a small threshold to avoid latter ill-conditioned reciprocal.
         assert(!maxabs.isSubNormal() && "[Error]: Vectors near zero are invalid");
         const Tr factor = reciprocal(maxabs);
         return ln((derived * factor).squaredNorm()) + Tr(2) * ln(maxabs);
