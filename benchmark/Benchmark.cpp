@@ -16,13 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <algorithm>
 #include <cmath>
 #include <chrono>
 #include <fstream>
-#include <iostream>
 #include <print>
-#include <unordered_map>
 #include "Physica/Core/Version.h"
 #include "Physica/Config.h"
 #include "Benchmark.h"
@@ -42,49 +39,21 @@ namespace {
 
     class Reporter : public ConsoleReporter {
         using Base = ConsoleReporter;
-    private:
-        std::unordered_map<std::string, std::vector<Run>> subReportMap;
     public:
         Reporter();
         ~Reporter() = default;
         /* Operations */
-        bool ReportContext(const Context&) override { return true; }
-        void ReportRuns(const std::vector<Run>& reports) override;
-        void Finalize() override;
+        void PrintRunData(const Run& run) final;
     private:
         [[nodiscard]] static TimeUnit selectTimeUnit(const Run& r);
     };
 
-    Reporter::Reporter() : ConsoleReporter(OutputOptions::OO_None) {
-        std::ofstream fout("Version", std::ios_base::trunc);
-        fout << Physica::version();
-    }
+    Reporter::Reporter() : ConsoleReporter(OutputOptions::OO_Tabular) {}
 
-    void Reporter::ReportRuns(const std::vector<Run>& reports) {
-        for (const auto& r : reports) {
-            const std::string_view name = r.run_name.function_name;
-            const size_t pos = name.find_first_not_of(' ');
-            const size_t n = name.find_first_of(' ', pos) - pos;
-            const auto first_word = std::string(name.substr(pos, n));
-
-            subReportMap[first_word].push_back(r);
-        }
-    }
-
-    void Reporter::Finalize() {
-        for (auto& pair : subReportMap) {
-            std::ofstream fout(pair.first, std::ios_base::trunc);
-            Base::SetOutputStream(&fout);
-
-            auto& subReports = pair.second;
-            Base::PrintHeader(subReports[0]);
-            for (auto& r : subReports) {
-                r.time_unit = selectTimeUnit(r);
-                Base::PrintRunData(r);
-            }
-
-        }
-        Base::SetOutputStream(&std::cout);
+    void Reporter::PrintRunData(const Run& run) {
+        auto r = run;
+        r.time_unit = selectTimeUnit(r);
+        Base::PrintRunData(r);
     }
 
     TimeUnit Reporter::selectTimeUnit(const Run& r) {
@@ -98,22 +67,6 @@ namespace {
 }
 
 namespace Physica {
-    std::string makeBenchID(std::source_location loc) noexcept {
-        std::string result = loc.file_name();
-        {
-            std::string cur = std::source_location::current().file_name();
-            size_t beginBaseDir = cur.find_last_of('/');
-            result = result.substr(beginBaseDir + 1);
-        }
-        {
-            size_t lastDot = result.find_last_of('.');
-            assert(lastDot != std::string::npos && "[Error]: Unexpected missing extension");
-            result = result.substr(0, lastDot);
-        }
-        std::ranges::replace(result, '/', '.');
-        return result;
-    }
-
     size_t makeVectorSize(int64_t level, size_t sizeElem) noexcept {
         return CacheSizes.at(level) / sizeElem;
     }
@@ -124,8 +77,8 @@ namespace Physica {
 }
 
 int main(int argc, char** argv) {
-    const char* const Executable = "Benchmark";
     if (!argv) {
+        const char* const Executable = "Benchmark";
         argc = 1;
         argv = const_cast<char**>(&Executable);
     }
@@ -133,6 +86,7 @@ int main(int argc, char** argv) {
     if (ReportUnrecognizedArguments(argc, argv))
         return 1;
 
+    std::ofstream("Version", std::ios_base::trunc) << Physica::version();
     auto start = std::chrono::steady_clock::now();
     {
         Reporter reporter{};

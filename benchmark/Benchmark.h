@@ -19,10 +19,8 @@
 #pragma once
 
 #include <benchmark/benchmark.h>
-#include <source_location>
 
 namespace Physica {
-    std::string makeBenchID(std::source_location loc = std::source_location::current()) noexcept;
     size_t makeVectorSize(int64_t level, size_t sizeElem) noexcept;
     size_t makeMatrixSize(int64_t level, size_t sizeElem) noexcept;
 }
