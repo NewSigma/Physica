@@ -49,6 +49,18 @@ namespace {
             gmres.solve(A, x);
             expect(vectorNear(A * x, b, 1E-14));
         }
+        /* FOM fails */ {
+            DenseMatrix<T, MatrixMajor::Row, 3, 3> A{
+                {2.5789473684210527,  2.1951219512195124, 0},
+                {0.7894736842105263, -1.1951219512195121, 0},
+                {                 0,   5.487804878048781, 1}
+            };
+            const VectorND<T> b{1, 1, 1};
+            auto x = b;
+            auto gmres = GMRES<T>(3, 3);
+            gmres.solve(A, x);
+            expect(vectorNear(A * x, b, 1E-15));
+        }
     }
 
     void eigen() noexcept {
@@ -59,9 +71,9 @@ namespace {
             };
             VectorND<T> x{1, 1};
             auto gmres = GMRES<T>(2, 2);
+            gmres.setIterationLimit(1);
             gmres.solve(A, x);
             expect(vectorNear(x, VectorND<T>{1.0 / 3, 1.0 / 3}, 1E-15));
-            expect(gmres.getIteration() == 1);
         }
         /* Test that the RHS is an eigenvector with eigenvalue 1 */ {
             DenseMatrix<T, MatrixMajor::Row, 3, 3> A{

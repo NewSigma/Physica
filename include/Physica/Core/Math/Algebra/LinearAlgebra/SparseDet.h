@@ -104,8 +104,8 @@ namespace Physica {
         precond = precond.inv();
 
         auto m = integralT * matA + (Trv(1) - integralT) * matD;
-        solX.zeros();
-        gmres.solve(m * precond, rand, solX);
+        rand.assign(solX);
+        gmres.solve(m * precond, solX);
         return (rand.conjugate() * (matA - matD) * (precond * solX)).real();
     }
 }

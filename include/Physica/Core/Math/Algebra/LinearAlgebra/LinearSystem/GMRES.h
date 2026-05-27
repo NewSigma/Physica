@@ -158,7 +158,6 @@ namespace Physica {
 
     template<Scalar T>
     size_t GMRES<T>::spanKrylov(const Matrix auto& A) {
-        const bool isKrylovComplete = getKrylovDim() == getLength();
         krylov.col(0) = residual * reciprocal(res);
         for (size_t c = 0; c < hess.getCol(); ++c) {
             (A * krylov.col(c)).assign(buffer);
@@ -166,13 +165,10 @@ namespace Physica {
             auto v = krylov.col(c + 1);
             v = buffer;
             gram_schmidt(krylov.leftCols(c + 1), v, hess.col(c).head(c + 1));
-            if (v.normInf().isSubNormal())
+            if (v.normInf() < buffer.normInf() * std::numeric_limits<T>::epsilon())
                 return c + 1;
             v.toUnit();
-
-            bool isFinal = c + 1 == hess.getCol();
-            if (!isFinal || !isKrylovComplete)
-                hess[c + 1, c] = v.conjugate() * buffer;
+            hess[c + 1, c] = v.conjugate() * buffer;
         }
         return getKrylovDim();
     }
