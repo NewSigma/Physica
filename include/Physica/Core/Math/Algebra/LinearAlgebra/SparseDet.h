@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include <iostream>
 #include "Vector/DenseVector.h"
 #include "LinearSystem/GMRES.h"
 #include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
@@ -59,6 +58,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto&& getGMRES(this auto&& self) noexcept { return self.gmres; }
         [[nodiscard]] size_t getOrder() const noexcept { return gmres.getLength(); }
+    private:
+        [[nodiscard]] Tr integrand(const Matrix auto& matA, Tr integralT);
     };
 
     template<Scalar T>
@@ -74,24 +75,14 @@ namespace Physica {
         matD.diag() = matA.diag();
 
         Integrate<IM, Tr, 1> integral({{0}, {1}}, stepsize);
-        T result = 0;
+        T lnAbsDet = 0;
         for (int64_t i = 0; i < numSample; ++i) {
             rand.template random_rademacher<R>();
-            const T sample = integral.solve([this, matA](Tr integralT) {
-                precond.diag() = integralT + (Trv(1) - integralT) * matD.diag();
-                for (auto& elem : precond.diag())
-                    if (abs(elem) < Trv(1E-4)) // Select by experience
-                        elem = 1;
-                precond = precond.inv();
-
-                auto m = integralT * matA + (Trv(1) - integralT) * matD;
-                solX.zeros();
-                gmres.solve(m * precond, rand, solX);
-                return (rand.conjugate() * (matA - matD) * (precond * solX)).real();
-            });
-            result.toNextMean(i, sample);
+            const T sample = integral.solve([this, matA](Tr tau) { return integrand(matA, tau); });
+            lnAbsDet.toNextMean(i, sample);
         }
-        return matD.lnAbsDet() + result;
+        lnAbsDet += matD.lnAbsDet();
+        return lnAbsDet;
     }
 
     template<Scalar T>
@@ -102,5 +93,19 @@ namespace Physica {
         matD.swap(obj.matD);
         rand.swap(obj.rand);
         solX.swap(obj.solX);
+    }
+
+    template<Scalar T>
+    auto SparseDet<T>::integrand(const Matrix auto& matA, Tr integralT) -> Tr {
+        precond.diag() = integralT + (Trv(1) - integralT) * matD.diag();
+        for (auto& elem : precond.diag())
+            if (abs(elem) < Trv(1E-4)) // Select by experience
+                elem = 1;
+        precond = precond.inv();
+
+        auto m = integralT * matA + (Trv(1) - integralT) * matD;
+        solX.zeros();
+        gmres.solve(m * precond, rand, solX);
+        return (rand.conjugate() * (matA - matD) * (precond * solX)).real();
     }
 }

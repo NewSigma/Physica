@@ -37,9 +37,7 @@ namespace Physica {
         template<int Size>
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
-        [[nodiscard]] CoDiff<T> calc(size_t index) const {
-            return lncosh(Base::getExpr().calc(index));
-        }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const;
 
         [[nodiscard]] auto values(this auto&&) noexcept;
 };
@@ -59,6 +57,11 @@ namespace Physica {
     template<int Size>
     auto VectorExpr<ExprID::LnCosh, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept -> SIMD<T, Size> {
         return lncosh(input.template load<Size>(count));
+    }
+
+    template<Vector V>
+    auto VectorExpr<ExprID::LnCosh, V>::calc(size_t index) const -> CoDiff<T> {
+        return lncosh(Base::getExpr().calc(index));
     }
 
     template<Vector V>

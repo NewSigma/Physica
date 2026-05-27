@@ -53,6 +53,7 @@ namespace Physica {
 
         DenseMatrix<Trv> losses;
         Array2D<int> counts;
+        Array2D<int> indices;
     public:
         Vegas() = default;
         Vegas(VectorND<Trv> from,
@@ -89,7 +90,8 @@ namespace Physica {
         /* Setters */
         void setLearnRate(Trv lr_) { lr = lr_; }
     private:
-        void pre_trial();
+        template<RNG R>
+        void init();
         template<ExecutePolicy P>
         void compress();
         template<ExecutePolicy P>
@@ -97,11 +99,15 @@ namespace Physica {
         Trv calcGridLossImpl() const;
 
         template<RNG R>
-        [[nodiscard]] Array<VectorND<Trv>, 2> sample(std::span<int> indices) const;
+        [[nodiscard]] Array<VectorND<Trv>, 2> transform(std::span<int> indices) const;
+        [[nodiscard]] Vector2D<T> statistic(const VectorND<T>& samples);
         template<RNG R, ExecutePolicy P>
-        void trial_normal(std::invocable<VectorND<Trv>> auto fn, T& mean, T& var);
+        Vector2D<T> sample(std::invocable<VectorND<Trv>> auto fn);
         template<RNG R, ExecutePolicy P>
-        void trial_ln(std::invocable<VectorND<Trv>> auto fn, T& mean, T& var);
+        Vector2D<T> sample_ln(std::invocable<VectorND<Trv>> auto fn);
+        /* Static members */
+        template<class Sample>
+        consteval static void checkIntegrand(std::invocable<Sample> auto& fn) noexcept;
     };
 }
 

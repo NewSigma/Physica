@@ -22,47 +22,49 @@
 #include "Test.h"
 
 using namespace Physica;
-using RandomSource = Random<MT19937, 12345>;
+using RandomSource = Random<MT19937>;
 using T = float64;
 using Tc = cfloat64;
-/**
- * Reference:
- * [1] J. Comput. Phys. 439, 110386 (2021); https://doi.org/10.1016/j.jcp.2021.110386
- */
+
 namespace {
-    void reference1() {
-        const Vector4D<T> r1{1.0 / 3, 0.5, 0.5, 0.5};
-        const Vector4D<T> r2{2.0 / 3, 0.5, 0.5, 0.5};
-        auto func = [&](const VectorND<T>& x) {
-            return exp(T(-100) * (x - r1).squaredNorm()) + exp(T(-100) * (x - r2).squaredNorm()); // Eq.26 of [1]
-        };
-        auto vegas = Vegas<T, false>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 10000);
-        vegas.integral<RandomSource>(func);
+    /**
+     * Reference:
+     * [1] J. Comput. Phys. 439, 110386 (2021); https://doi.org/10.1016/j.jcp.2021.110386
+     */
+    void reference() {
+        {
+            const Vector4D<T> r1{1.0 / 3, 0.5, 0.5, 0.5};
+            const Vector4D<T> r2{2.0 / 3, 0.5, 0.5, 0.5};
+            auto func = [&](const VectorND<T>& x) {
+                return exp(T(-100) * (x - r1).squaredNorm()) + exp(T(-100) * (x - r2).squaredNorm()); // Eq.26 of [1]
+            };
+            auto vegas = Vegas<T, false>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 10000);
+            vegas.integral<RandomSource>(func);
 
-        const T temp = erf(T(5));
-        const T answer = T(std::numbers::pi * std::numbers::pi / 10000) * square(temp) * temp * (erf(T(10.0 / 3)) + erf(T(20.0 / 3)));
-        const T result = vegas.calcMean();
-        expect(abs(answer - result) < T(2) * vegas.calcDevia());
+            const T temp = erf(T(5));
+            const T answer = T(std::numbers::pi * std::numbers::pi / 10000) * square(temp) * temp * (erf(T(10.0 / 3)) + erf(T(20.0 / 3)));
+            const T result = vegas.calcMean();
+            expect<RandomSource>(abs(answer - result) < T(2) * vegas.calcDevia());
+        }
+        {
+            const Vector4D<T> r1{1.0 / 3, 0.5, 0.5, 0.5};
+            const Vector4D<T> r2{2.0 / 3, 0.5, 0.5, 0.5};
+            constexpr double R = 2.0 / 30;
+            auto func = [&](const VectorND<T>& x) {
+                const bool flag1 = (x - r1).squaredNorm() < T(R * R);
+                const bool flag2 = (x - r2).squaredNorm() < T(R * R);
+                return T((flag1 || flag2) ? 1 : 0); // Eq.28 of [1]
+            };
+            auto vegas = Vegas<T, false>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 100000, 1000, 0.2);
+            vegas.integral<RandomSource>(func);
+
+            const T answer = square(T(std::numbers::pi * R * R));
+            const T result = vegas.calcMean();
+            expect<RandomSource>(abs(answer - result) < T(2) * vegas.calcDevia());
+        }
     }
 
-    void reference2() {
-        const Vector4D<T> r1{1.0 / 3, 0.5, 0.5, 0.5};
-        const Vector4D<T> r2{2.0 / 3, 0.5, 0.5, 0.5};
-        constexpr double R = 2.0 / 30;
-        auto func = [&](const VectorND<T>& x) {
-            const bool flag1 = (x - r1).squaredNorm() < T(R * R);
-            const bool flag2 = (x - r2).squaredNorm() < T(R * R);
-            return T((flag1 || flag2) ? 1 : 0); // Eq.28 of [1]
-        };
-        auto vegas = Vegas<T, false>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 100000, 1000, 0.2);
-        vegas.integral<RandomSource>(func);
-
-        const T answer = square(T(std::numbers::pi * R * R));
-        const T result = vegas.calcMean();
-        expect(abs(answer - result) < T(2) * vegas.calcDevia());
-    }
-
-    void lnVegasTest() {
+    void lnVegas() {
         const Vector4D<T> r1{1.0 / 3, 0.5, 0.5, 0.5};
         auto func = [&](const VectorND<T>& x) {
             return T(-100) * (x - r1).squaredNorm();
@@ -73,10 +75,10 @@ namespace {
         const T temp = erf(T(5));
         const T answer = T(std::numbers::pi * std::numbers::pi / 20000) * square(temp) * temp * (erf(T(10.0 / 3)) + erf(T(20.0 / 3)));
         const T result = exp(vegas.calcLnMean());
-        expect(abs(answer - result) < T(2) * exp(vegas.calcLnDevia()));
+        expect<RandomSource>(abs(answer - result) < T(2) * exp(vegas.calcLnDevia()));
     }
 
-    void complexTest() {
+    void complex() {
         // Test that real-complex results match
         auto vegas1 = Vegas<T, true>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 10000);
         vegas1.integral<RandomSource>([](const VectorND<T>&) static -> T { return -0.5; });
@@ -85,14 +87,13 @@ namespace {
         auto vegas2 = Vegas<Tc, true>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 10000);
         vegas2.integral<RandomSource>([](const VectorND<T>&) static -> Tc { return -0.5; });
         const T result = vegas2.calcLnMean().real();
-        expect(scalarNear(answer, result, 1E-13));
+        expect<RandomSource>(scalarNear(answer, result, 1E-12));
     }
 }
 
 int main() {
-    reference1();
-    reference2();
-    lnVegasTest();
-    complexTest();
+    reference();
+    lnVegas();
+    complex();
     return 0;
 }

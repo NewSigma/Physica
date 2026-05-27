@@ -254,10 +254,7 @@ namespace Physica {
             mean = sample;
             return;
         }
-
-        const auto factor1 = ScalarType(lastNumSample);
-        const auto factor2 = reciprocal(ScalarType(lastNumSample + 1));
-        mean = fma(factor1, mean, sample) * factor2;
+        mean = fma(ScalarType(lastNumSample), mean, sample) / ScalarType(lastNumSample + 1);
     }
 
     template<class Derived>
@@ -269,10 +266,8 @@ namespace Physica {
             var = 0;
             return;
         }
-
-        const auto factor1 = ScalarType(lastNumSample);
-        const auto factor2 = reciprocal(ScalarType(lastNumSample + 1));
-        var = fma(square(mean - sample), factor2, var) * (factor1 * factor2);
+        const auto factor = reciprocal(ScalarType(lastNumSample + 1));
+        var = fma(square(mean - sample), factor, var) * (ScalarType(lastNumSample) * factor);
         mean.toNextMean(lastNumSample, sample);
     }
 

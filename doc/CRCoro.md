@@ -15,7 +15,6 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ## Motivation
 
-
 C++20 stackless coroutines are currently relatively mature, but migrating legacy codebases to the new language standard often comes with some difficulties. Specifically regarding the migration of templates, we might try to write code like this:
 
 ```C++
@@ -28,10 +27,9 @@ Result fn() {
 }
 ```
 
-Unfortunately, the above code cannot be compiled. This is because the C++ standard prohibits the `return` keyword and coroutine keywords from appearing in the same function. For migrating such functions, we have no choice but to adopt a compromise approach. This paper proposes a non-intrusive paradigm that combines the Curiously Recurring Template Pattern (CRTP) and coroutines in an attempt to solve this problem.
+Unfortunately, the above code does not compile. This is because the C++ standard prohibits the `return` keyword and coroutine keywords from appearing in the same function. For migrating such functions, we have no choice but to adopt a compromise — there are simply too many of them. This paper proposes a non-intrusive paradigm that combines the Curiously Recurring Template Pattern (CRTP) and coroutines in an attempt to solve this problem.
 
 ## Implementation
-
 
 The core design philosophy of *curiously recurring coroutine* is to require ordinary functions to be transformed into a trivial coroutine with zero or low overhead (relying on compiler optimizations), with minimal code as follows:
 
@@ -63,19 +61,19 @@ struct CRCoro { // Curiously Recurring Coroutine
 
 To design a coroutine, we need to specify the following functions:
 
-`get_return_object`: returns an object, required
-`initial_suspend`: initial suspension behavior, required
-`final_suspend`: final suspension behavior, required
-`return_value/return_void`: return value / return void, choose one
-`yield_value`: yield value, optional
-`unhandled_exception`: unhandled exception, required
+`get_return_object`: returns an object, required  
+`initial_suspend`: initial suspension behavior, required  
+`final_suspend`: final suspension behavior, required  
+`return_value/return_void`: return value / return void, choose one  
+`yield_value`: yield value, optional  
+`unhandled_exception`: unhandled exception, required  
 
 A trivial coroutine should not contain any suspension points, so we require that `initial_suspend` and `final_suspend` return `std::suspend_never`, and that `yield_value` is not implemented.  
 We want the coroutine to return the value produced by the coroutine body, so we choose `return_value` from the two return versions, and the return value must be stored in the promise object.  
-In the implementation of the return object, we construct an rvalue wrapper object `RValueWrapper`, which returns the promise object to the caller via move construction.  
+In the implementation of `get_return_object`, we construct a wrapper object `RValueWrapper`, which returns the promise object to the caller via move construction.  
 We choose not to handle exceptions, so `unhandled_exception` is left empty.  
 
-In specific usage, we require the return object to inherit from `CRCoro`, just as we are accustomed to doing in CRTP:
+In specific usage, we require the coroutine return type `A` to inherit from `CRCoro<A>`, just as we are accustomed to doing in CRTP:
 
 ```C++
 #include <cassert>

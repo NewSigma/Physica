@@ -41,10 +41,10 @@ namespace Physica {
         This& operator=(const This& v) = default;
         This& operator=(This&& v) noexcept = default;
         /* Operations */
-        [[nodiscard]] size_t loop_recursive(std::invocable<Pack&, size_t> auto body, size_t length) noexcept;
+        [[nodiscard]] size_t loop_recursive(std::invocable<Pack, size_t> auto body, size_t length) noexcept;
         [[nodiscard]] Pack sum() noexcept;
     private:
-        [[nodiscard]] static size_t loop_recursive(Pack* packs, std::invocable<Pack&, size_t> auto body, size_t length, size_t consumed) noexcept;
+        [[nodiscard]] static size_t loop_recursive(std::span<Pack, NumUnroll> packs, std::invocable<Pack, size_t> auto body, size_t length, size_t consumed) noexcept;
 
         template<Packet, int> friend class Unroller;
     };
@@ -57,8 +57,8 @@ namespace Physica {
             : packs(Array<Pack, NumUnroll>::generate(std::move(generator))) {}
 
     template<Packet Pack, int NumUnroll>
-    size_t Unroller<Pack, NumUnroll>::loop_recursive(std::invocable<Pack&, size_t> auto body, size_t length) noexcept {
-        return loop_recursive(packs.data(), std::move(body), length, 0);
+    size_t Unroller<Pack, NumUnroll>::loop_recursive(std::invocable<Pack, size_t> auto body, size_t length) noexcept {
+        return loop_recursive(std::span<Pack, NumUnroll>(packs), std::move(body), length, 0);
     }
 
     template<Packet Pack, int NumUnroll>
@@ -73,7 +73,7 @@ namespace Physica {
     }
 
     template<Packet Pack, int NumUnroll>
-    size_t Unroller<Pack, NumUnroll>::loop_recursive(Pack* packs, std::invocable<Pack&, size_t> auto body, const size_t length, size_t consumed) noexcept {
+    size_t Unroller<Pack, NumUnroll>::loop_recursive(std::span<Pack, NumUnroll> packs, std::invocable<Pack, size_t> auto body, const size_t length, size_t consumed) noexcept {
         constexpr size_t StepSize = Pack::size() * NumUnroll;
         for (; consumed < length / StepSize * StepSize; consumed += StepSize) {
             #pragma unroll
@@ -84,6 +84,6 @@ namespace Physica {
         if constexpr (NumUnroll == 1)
             return consumed;
         else
-            return Unroller<Pack, NumUnroll / 2>::loop_recursive(packs, std::move(body), length, consumed);
+            return Unroller<Pack, NumUnroll / 2>::loop_recursive(packs.template first<NumUnroll / 2>(), std::move(body), length, consumed);
     }
 }

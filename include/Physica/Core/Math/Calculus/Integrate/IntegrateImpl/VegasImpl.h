@@ -29,7 +29,8 @@ namespace Physica {
             , lr(std::move(lr))
             , momentum(std::move(momentum))
             , losses(numPoint - 1, getDim())
-            , counts(numPoint - 1, getDim()) {
+            , counts(numPoint - 1, getDim())
+            , indices(getDim(), numSample) {
         assert(numPoint > 2 && "[Error]: Invalid point number");
         assert(compressRate.isPositive() && "[Error]: Rate = 0 implies no grid refinement");
         assert(compressRate < Trv(2) && "[Error]: Rate should be ~ 1");
@@ -59,9 +60,8 @@ namespace Physica {
     template<Scalar T, bool TakeLn>
     template<RNG R, ExecutePolicy P>
     auto Vegas<T, TakeLn>::warmup(std::invocable<VectorND<Trv>> auto fn, int numWarm) -> Trv {
-        using CallResult = std::invoke_result<decltype(fn), VectorND<T>>::type;
-        static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
         assert(numWarm >= 0 && "[Error]: Invalid param");
+        checkIntegrand<VectorND<Trv>>(fn);
 
         T mean, var;
         DenseMatrix<Trv> losses_old;
@@ -72,11 +72,11 @@ namespace Physica {
         }
 
         for (int i = 0; i < numWarm; ++i) {
-            pre_trial();
+            init<R>();
             if constexpr (TakeLn)
-                trial_ln<R, P>(fn, mean, var);
+                sample_ln<R, P>(fn, mean, var);
             else
-                trial_normal<R, P>(fn, mean, var);
+                sample<R, P>(fn, mean, var);
 
             compress<P>();
             if (hasMomentum) {
@@ -94,11 +94,9 @@ namespace Physica {
     template<Scalar T, bool TakeLn>
     template<RNG R, ExecutePolicy P>
     void Vegas<T, TakeLn>::integral(std::invocable<VectorND<Trv>> auto fn) {
-        using CallResult = std::invoke_result<decltype(fn), VectorND<T>>::type;
-        static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
+        checkIntegrand<VectorND<Trv>>(fn);
 
         const int numRefine = Base::getNumRefine();
-        T mean = 0, var = 0;
         DenseMatrix<Trv> losses_old;
         bool hasMomentum = momentum.isPositive();
         if (hasMomentum) {
@@ -107,13 +105,17 @@ namespace Physica {
         }
 
         for (int i = 0; i < numRefine; ++i) {
-            pre_trial();
-            if constexpr (TakeLn)
-                trial_ln<R, P>(fn, mean, var);
-            else
-                trial_normal<R, P>(fn, mean, var);
-            means[i] = mean;
-            vars[i] = var;
+            init<R>();
+            if constexpr (TakeLn) {
+                auto [mean, var] = sample_ln<R, P>(fn);
+                means[i] = mean;
+                vars[i] = var;
+            }
+            else {
+                auto [mean, var] = sample<R, P>(fn);
+                means[i] = mean;
+                vars[i] = var;
+            }
             loss[i] = calcGridLossImpl();
 
             compress<P>();
@@ -131,12 +133,11 @@ namespace Physica {
     template<Scalar T, bool TakeLn>
     template<RNG R, ExecutePolicy P>
     auto Vegas<T, TakeLn>::calcGridLoss(std::invocable<VectorND<Trv>> auto fn) const -> Trv {
-        T mean, var;
-        pre_trial();
+        init<R>();
         if constexpr (TakeLn)
-            trial_ln<R, P>(fn, mean, var);
+            sample_ln<R, P>(fn);
         else
-            trial_normal<R, P>(fn, mean, var);
+            sample<R, P>(fn);
         return calcGridLossImpl();
     }
 
@@ -195,10 +196,12 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    void Vegas<T, TakeLn>::pre_trial() {
-        // Initial value avoids situation where number of samples is too small to sample effective data
+    template<RNG R>
+    void Vegas<T, TakeLn>::init() {
+        // Loss has minimal value to avoid the grid size reducing to 0
         losses = Trv(std::numeric_limits<T>::min());
         counts.zeros();
+        R::getInstance().random_int(indices.asArray(), 0, getNumPoint() - 2);
     }
 
     template<Scalar T, bool TakeLn>
@@ -238,7 +241,7 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     template<RNG R>
-    auto Vegas<T, TakeLn>::sample(std::span<int> indices) const -> Array<VectorND<Trv>, 2> {
+    auto Vegas<T, TakeLn>::transform(std::span<int> indices) const -> Array<VectorND<Trv>, 2> {
         VectorND<Trv> x(getDim());
         VectorND<Trv> deltas(getDim());
         for (size_t i = 0; i < getDim(); ++i) {
@@ -254,44 +257,29 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     template<RNG R, ExecutePolicy P>
-    void Vegas<T, TakeLn>::trial_normal(std::invocable<VectorND<Trv>> auto fn, T& mean, T& var) {
+    Vector2D<T> Vegas<T, TakeLn>::sample(std::invocable<VectorND<Trv>> auto fn) {
         const int numSample = Base::getNumSample();
-        Array2D<int> indices(getDim(), numSample);
-        R::getInstance().random_int(indices.asArray(), 0, getNumPoint() - 2);
         VectorND<T> samples(numSample);
         parallel_for<P>([&, this](size_t n) {
-            const auto [x, deltas] = sample<R>(indices.col(n));
+            const auto [x, deltas] = transform<R>(indices.col(n));
             const T y = fn(x);
             assert(y.isFinite() && "[Error]: Bad value");
 
             const T xy = y * (deltas * Trv(getNumPoint())).prod();
             samples[n] = xy;
         }, numSample, 0).wait();
-
-        for (int n = 0; n < numSample; ++n) {
-            const T xy = samples[n];
-            var.toNextVariance(mean, n, xy);
-
-            const auto l = xy.value().squaredNorm();
-            for (size_t i = 0; i < getDim(); ++i) {
-                const auto index = indices[i, n];
-                losses[index, i].toNextMean(counts[index, i], l);
-                counts[index, i] += 1;
-            }
-        }
-        // Loss has minimal value to avoid the grid size reducing to 0
-        losses.clamp_min(std::numeric_limits<Trv>::min());
+        return statistic(samples);
     }
-
+    /**
+     * Assuming ln(f(x)) is defined
+     */
     template<Scalar T, bool TakeLn>
     template<RNG R, ExecutePolicy P>
-    void Vegas<T, TakeLn>::trial_ln(std::invocable<VectorND<Trv>> auto fn, T& mean, T& var) {
+    Vector2D<T> Vegas<T, TakeLn>::sample_ln(std::invocable<VectorND<Trv>> auto fn) {
         const int numSample = Base::getNumSample();
-        Array2D<int> indices(getDim(), numSample);
-        R::getInstance().random_int(indices.asArray(), 0, getNumPoint() - 2);
         VectorND<T> samples(numSample);
         parallel_for<P>([&, this](size_t n) {
-            const auto [x, deltas] = sample<R>(indices.col(n));
+            const auto [x, deltas] = transform<R>(indices.col(n));
             const T lny = fn(x);
             assert(lny.isFinite() && "[Error]: Bad value");
 
@@ -300,14 +288,26 @@ namespace Physica {
             samples[n] = lnxy;
         }, numSample, 0).wait();
 
-        Trv maxSample;
-        if constexpr (T::isComplex())
-            maxSample = samples.reals().max().value();
-        else
-            maxSample = samples.max().value(); // Assuming f(x) > 0, so ln(f(x)) is defined
-        samples = exp(samples - maxSample);
+        const Trv maximum = [&]() {
+            if constexpr (T::isComplex())
+                return samples.reals().max().value();
+            else
+                return samples.max().value();
+        }();
+        samples = exp(samples - maximum);
 
-        for (int n = 0; n < numSample; ++n) {
+        auto [mean, var] = statistic(samples);
+        mean = ln(mean) + maximum;
+        var = ln(var + Trv(std::numeric_limits<T>::min()));
+        var.value().real() = fma(Trv(2), maximum, var.value().real());
+        assert(var.isFinite() && "[Error]: maximum is subnormal?");
+        return {mean, var};
+    }
+
+    template<Scalar T, bool TakeLn>
+    Vector2D<T> Vegas<T, TakeLn>::statistic(const VectorND<T>& samples) {
+        T mean, var;
+        for (size_t n = 0; n < samples.getLength(); ++n) {
             const T xy = samples[n];
             var.toNextVariance(mean, n, xy);
 
@@ -319,10 +319,13 @@ namespace Physica {
             }
         }
         losses.clamp_min(std::numeric_limits<Trv>::min());
+        return {mean, var};
+    }
 
-        mean = ln(mean) + maxSample;
-        var = ln(var + Trv(std::numeric_limits<T>::min()));
-        var.value().real() = fma(Trv(2), maxSample, var.value().real());
-        assert(var.isFinite() && "[Error]: maxSample is too small?");
+    template<Scalar T, bool TakeLn>
+    template<class Sample>
+    consteval void Vegas<T, TakeLn>::checkIntegrand(std::invocable<Sample> auto& fn) noexcept {
+        using R = std::invoke_result<decltype(fn), Sample>::type;
+        static_assert(std::is_same<R, T>::value, "[Error]: Return type does not match Vegas's working type");
     }
 }

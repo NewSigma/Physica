@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,25 +27,21 @@ namespace Physica {
      */
     template<Scalar T>
     void chebyshev_fit(const T& from, const T& to, Vector auto& coeff, std::invocable<T> auto fn) {
-        constexpr double pi = M_PI;
         assert(from < to);
-
         const size_t n = coeff.getLength();
-        const double n_1 = 1.0 / n;
-        VectorND<T> funcArr(n);
-        /* Fill func arr */ {
-            const T& temp1 = (to - from) * T(0.5);
-            const T& temp2 = (to + from) * T(0.5);
-            for (size_t i = 0; i < n; ++i) {
-                const T y = T(std::cos(pi * (i + 0.5) * n_1)); //Optimize: 1. pi * n_1 can be stored in a variable  2. use add to avoid mul  3. store pi / 2 and calculate 2 / n
-                funcArr[i] = fn(y * temp1 + temp2);
-            }
-        }
-        const T factor(2.0 * n_1);
+        const T rep = reciprocal(T(n));
+        const auto funcArr = VectorND<T>::generate(n, [from, to, fn, rep](size_t i) {
+            const T temp1 = (to - from) * T(0.5);
+            const T temp2 = (to + from) * T(0.5);
+            const T y = cospi((T(i) + 0.5) * rep);
+            return fn(fma(y, temp1, temp2));
+        });
+
+        const T factor = rep * 2;
         for (size_t i = 0; i < n; ++i) {
             T sum(0);
             for (size_t j = 0; j < n; ++j)
-                sum += funcArr[j] * std::cos(pi * i * (j + 0.5) * n_1);
+                sum += funcArr[j] * cospi(T(i) * (T(j) + 0.5) * rep);
             coeff[i] = factor * sum;
         }
     }
@@ -57,26 +53,22 @@ namespace Physica {
      */
     template<Scalar T>
     void chebyshev_fit_even(const T& from, const T& to, Vector auto& coeff, std::invocable<T> auto fn) {
-        constexpr double pi = M_PI;
         assert(from < to);
-
         const size_t n = coeff.getLength();
-        const size_t n_2 = n << 1U;
-        const double n_2_1 = 1.0 / n_2;
-        VectorND<T> funcArr(n_2);
-        /* Fill func arr */ {
-            const T& temp1 = (to - from) * T(0.5);
-            const T& temp2 = (to + from) * T(0.5);
-            for (size_t i = 0; i < n_2; ++i) {
-                const T y = T(std::cos(pi * (i + 0.5) * n_2_1));
-                funcArr[i] = fn(y * temp1 + temp2);
-            }
-        }
-        const T factor(4.0 * n_2_1);
+        const size_t n2 = n * 2;
+        const T rep = reciprocal(T(n2));
+        const auto funcArr = VectorND<T>::generate(n2, [from, to, fn, rep](size_t i) {
+            const T temp1 = (to - from) * T(0.5);
+            const T temp2 = (to + from) * T(0.5);
+            const T y = cospi((T(i) + 0.5) * rep);
+            return fn(fma(y, temp1, temp2));
+        });
+
+        const T factor = rep * 4;
         for (size_t i = 0; i < n; ++i) {
             T sum(0);
             for (size_t j = 0; j < n; ++j)
-                sum += funcArr[j] * std::cos(2 * pi * i * (j + 0.5) * n_2_1);
+                sum += funcArr[j] * cospi(T(2 * i) * (T(j) + 0.5) * rep);
             coeff[i] = factor * sum;
         }
     }
@@ -88,27 +80,23 @@ namespace Physica {
      */
     template<Scalar T>
     void chebyshev_fit_odd(const T& from, const T& to, Vector auto& coeff, std::invocable<T> auto fn) {
-        constexpr double pi = M_PI;
         assert(from < to);
-
         const size_t n = coeff.getLength();
-        const size_t n_2 = n << 1U;
-        const double n_2_1 = 1.0 / n_2;
-        VectorND<T> funcArr(n_2);
-        /* Fill func arr */ {
-            const T& temp1 = (to - from) * T(0.5);
-            const T& temp2 = (to + from) * T(0.5);
-            for (size_t i = 0; i < n_2; ++i) {
-                const T y = T(std::cos(pi * (i + 0.5) * n_2_1));
-                const T x = y * temp1 + temp2;
-                funcArr[i] = fn(x) / x;
-            }
-        }
-        const T factor(4.0 * n_2_1);
+        const size_t n2 = n * 2;
+        const T rep = reciprocal(T(n2));
+        const auto funcArr = VectorND<T>::generate(n2, [from, to, fn, rep](size_t i) {
+            const T temp1 = (to - from) * T(0.5);
+            const T temp2 = (to + from) * T(0.5);
+            const T y = cospi((T(i) + 0.5) * rep);
+            const T x = fma(y, temp1, temp2);
+            return fn(x) / x;
+        });
+
+        const T factor = rep * 4;
         for (size_t i = 0; i < n; ++i) {
             T sum(0);
             for (size_t j = 0; j < n; ++j)
-                sum += funcArr[j] * std::cos(2 * pi * i * (j + 0.5) * n_2_1);
+                sum += funcArr[j] * cospi(T(2 * i) * (T(j) + 0.5) * rep);
             coeff[i] = factor * sum;
         }
     }
@@ -119,15 +107,15 @@ namespace Physica {
     template<Scalar T>
     T chebyshev_calc(const T& from, const T& to, const Vector auto& coeff, const T& x) {
         assert(from <= x && x <= to);
-        const T y = T(x * T(2) - to - from) / T(to - from);
+        const T y = T(fma(x, T(2), -(to + from))) / T(to - from);
         const T y2 = y * T(2);
         T d1(0), d2(0);
         for (size_t i = coeff.getLength() - 1; i > 0; --i) {
             const T temp = d1;
-            d1 = y2 * d1 - d2 + coeff.calc(i);
+            d1 = fma(y2, d1, coeff.calc(i) - d2);
             d2 = temp;
         }
-        return y * d1 - d2 + coeff.calc(0) * T(0.5);
+        return fma(y, d1, fma(coeff.calc(0), T(0.5), -d2));
     }
     /**
      * Reference:
@@ -136,7 +124,7 @@ namespace Physica {
     template<Scalar T>
     T chebyshev_calc_even(const T& from, const T& to, const Vector auto& coeff, const T& x) {
         assert(from <= x && x <= to);
-        return chebyshev_calc<T>(from, to, coeff, square(x) * T(2) - T(1));
+        return chebyshev_calc<T>(from, to, coeff, fma(x * 2, x, T(-1)));
     }
 
     template<Scalar T>
