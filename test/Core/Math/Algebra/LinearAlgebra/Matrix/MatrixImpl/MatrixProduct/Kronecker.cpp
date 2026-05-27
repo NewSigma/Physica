@@ -27,6 +27,6 @@ int main() {
     const auto a = MatrixND<T>::random_uniform<RandomSource>(4, 4);
     const auto b = MatrixND<T>::random_uniform<RandomSource>(6, 6);
     const auto v = VectorND<T>::random_uniform<RandomSource>(kronecker(a, b).getRow());
-    expect(vectorNear(MatrixND<T>(kronecker(a, b)) * v, kronecker(a, b) * v, 3UL));
+    expect<RandomSource>(vectorNear(MatrixND<T>(kronecker(a, b)) * v, kronecker(a, b) * v, 3UL));
     return 0;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -38,12 +38,12 @@ namespace Physica {
             auto& orbit = solver.getOrbits()[0][SpinState::Up];
             orbit.random_normal<RandomSource>();
             orbit.normalize();
-            expect(scalarNear(orbit.calcNumElectron(), ScalarType(1), 1E-15));
+            expect<RandomSource>(scalarNear(orbit.calcNumElectron(), ScalarType(1), 1E-15));
 
             solver.calcDensity(orbit);
             auto& rSpace = solver.fft.getRSpace();
             const ScalarType numElectron = rSpace.flatten().squaredNorm();
-            expect(scalarNear(numElectron, ScalarType(1), 1E-15));
+            expect<RandomSource>(scalarNear(numElectron, ScalarType(1), 1E-15));
         }
     };
 }
@@ -63,7 +63,7 @@ void testSi() {
         const auto& band = solver.getBand();
         VectorND<ComplexType> delta = abs(band.getKPointGrid()(0, 0, 0).getBandEnergy(SpinState::Up) - data);
         for (size_t i = 0; i < delta.getLength(); ++i)
-            expect(scalarNear(delta.calc(i), ComplexType(0), 1E-15));
+            expect<RandomSource>(scalarNear(delta.calc(i), ComplexType(0), 1E-15));
     }
 }
 

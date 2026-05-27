@@ -21,6 +21,7 @@
 #include "Test.h"
 
 using namespace Physica;
+using RandomSource = Random<>;
 using T = float64;
 using Tc = cfloat64;
 
@@ -29,6 +30,6 @@ int main() {
     auto x = VectorND<T>::random_uniform<Random<>>(16);
     VectorND<T> result = hadamard(x, matD.diag());
     x = matD * x;
-    expect(x == result); // Test that there is no aliasing problem
+    expect<RandomSource>(x == result); // Test that there is no aliasing problem
     return 0;
 }

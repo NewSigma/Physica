@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -75,6 +75,6 @@ int main() {
         }
     }
     const bool isEnergyConserved = scalarNear(nve.max(), nve.min(), 1E-11);
-    expect(isEnergyConserved);
+    expect<RandomSource>(isEnergyConserved);
     return 0;
 }

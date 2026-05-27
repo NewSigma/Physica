@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -45,7 +45,7 @@ namespace {
         dqmc.step_random<RandomSource>();
         for (int i = 0; i < NumSample; ++i) {
             dqmc.step<RandomSource>();
-            expect(dqmc.getRSign().isPositive());
+            expect<RandomSource>(dqmc.getRSign().isPositive());
         }
     }
 }

@@ -41,15 +41,15 @@ namespace {
     void sum() {
         using T = float32;
         const auto x = VectorND<T>::random_uniform<Random<>>(16);
-        expect(scalarNear(x.sum(), std::ranges::fold_left(x.view(), T(0), std::plus<>()), 3UL));
+        expect<RandomSource>(scalarNear(x.sum(), std::ranges::fold_left(x.view(), T(0), std::plus<>()), 3UL));
 
         const auto y = VectorND<T>::random_uniform<Random<>>(17);
-        expect(scalarNear(y.sum(), std::ranges::fold_left(y.view(), T(0), std::plus<>()), 3UL));
+        expect<RandomSource>(scalarNear(y.sum(), std::ranges::fold_left(y.view(), T(0), std::plus<>()), 3UL));
     }
 
     void argminTest() noexcept {
         const auto x = VectorND<float32>::random_uniform<Random<>>(16);
-        expect(x.min() == x[x.argmin()]);
+        expect<RandomSource>(x.min() == x[x.argmin()]);
     }
 
     void reshapeTest() {
@@ -57,7 +57,7 @@ namespace {
         auto id = IdentityMatrix<T>(3);
         auto x = VectorND<T>::random_uniform<RandomSource>(id.getSize());
         MatrixND<T> y = id * (x + x).reshape_col(3, 3);
-        expect(vectorNear(y.flatten(), x * T(2), uint64_t(0)));
+        expect<RandomSource>(vectorNear(y.flatten(), x * T(2), uint64_t(0)));
 
         // Test that we fallback to Col major if cannot infer major from input matrix
         syntax_only([]() {

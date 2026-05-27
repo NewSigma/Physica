@@ -141,7 +141,7 @@ namespace {
         auto yv = float32::random_uniform<RandomSource>();
         auto x = dfloat(xv, float32::random_uniform<RandomSource>());
         auto y = dfloat(yv, float32::random_uniform<RandomSource>());
-        expect((x <=> y) == (xv <=> yv));
+        expect<RandomSource>((x <=> y) == (xv <=> yv));
     }
 }
 

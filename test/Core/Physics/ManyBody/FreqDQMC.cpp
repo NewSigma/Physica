@@ -49,6 +49,6 @@ int main() {
     engine.nve_step_for(Duration, kinetic, dqmc);
     const T curE = engine.calcClassicalInternalEnergy(dqmc);
 
-    expect(scalarNear(prevE, curE, 1E-4)); // Energe conserves
+    expect<RandomSource>(scalarNear(prevE, curE, 1E-4)); // Energe conserves
     return 0;
 }

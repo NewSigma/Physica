@@ -20,6 +20,7 @@
 #include "Test.h"
 
 using namespace Physica;
+using RandomSource = Random<>;
 
 namespace {
     void simd() {
@@ -27,7 +28,7 @@ namespace {
         auto y = SIMD<cfloat64, 2>::random_uniform<Random<>>();
         auto z = (x / y) * y;
         for (int i = 0; i < x.size(); ++i)
-            expect(scalarNear(x[i], z[i].real(), 2UL));
+            expect<RandomSource>(scalarNear(x[i], z[i].real(), 2UL));
     }
 }
 
