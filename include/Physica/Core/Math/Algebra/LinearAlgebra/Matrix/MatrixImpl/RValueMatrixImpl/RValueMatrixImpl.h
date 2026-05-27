@@ -115,7 +115,7 @@ namespace Physica {
         constexpr size_t Col2 = source.getColAtCompile();
         if constexpr (Col1 == Dynamic || Col2 == Dynamic)
             assert(getCol() == source.getCol() && "[Error]: Dimensions do not match");
-        
+
         constexpr size_t Size1 = Derived::getSizeAtCompile();
         constexpr size_t Size2 = source.getSizeAtCompile();
         if constexpr (Size1 == Dynamic || Size2 == Dynamic)
@@ -413,19 +413,22 @@ namespace Physica {
         if constexpr (Order == 1)
             return calc(0, 0);
         else if constexpr (Order == 2)
-            return calc(0, 0) * calc(1, 1) - calc(0, 1) * calc(1, 0);
+            return fma(calc(0, 0), calc(1, 1), -calc(0, 1) * calc(1, 0));
         else if constexpr (Order == 3)
-            return calc(0, 0) * (calc(1, 1) * calc(2, 2) - calc(1, 2) * calc(2, 1))
-                 + calc(0, 1) * (calc(1, 2) * calc(2, 0) - calc(1, 0) * calc(2, 2))
-                 + calc(0, 2) * (calc(1, 0) * calc(2, 1) - calc(1, 1) * calc(2, 0));
+            return fma(calc(0, 0), fma(calc(1, 1), calc(2, 2), -calc(1, 2) * calc(2, 1)), fma(calc(0, 1), fma(calc(1, 2), calc(2, 0), -calc(1, 0) * calc(2, 2)), calc(0, 2) * fma(calc(1, 0), calc(2, 1), -calc(1, 1) * calc(2, 0))));
         else
             return DenseLU<T, false>(Base::getDerived()).det();
     }
 
     template<class Derived>
     auto RValueMatrix<Derived>::lnAbsDet() const -> Tr {
-        DenseLU<T, false> lu(Base::getDerived());
-        return ln(abs(lu.getMatrixLU().diag())).sum();
+        constexpr size_t Order = std::max(Derived::getRowAtCompile(), Derived::getColAtCompile());
+        if constexpr (Order <= 3)
+            return ln(abs(Base::getDerived().det()));
+        else {
+            DenseLU<T, false> lu(Base::getDerived());
+            return ln(abs(lu.getMatrixLU().diag())).sum();
+        }
     }
 
     template<class Derived>
@@ -494,7 +497,7 @@ namespace Physica {
         using Self = decltype(self);
         return ImagMatrix<Self>(std::forward<Self>(self));
     }
-    
+
     template<class Derived>
     auto RValueMatrix<Derived>::squaredNorms(this auto&& self) noexcept {
         using Self = decltype(self);
@@ -618,12 +621,12 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ consteval bool RValueMatrix<Derived>::isCompact() noexcept {
-        return requires{ std::declval<Derived>().data(); };
+        return requires { std::declval<Derived>().data(); };
     }
 
     template<class Derived>
     __host__ __device__ consteval bool RValueMatrix<Derived>::isSparse() noexcept {
-        return requires{ std::declval<Derived>().getNumNonzero(); };
+        return requires { std::declval<Derived>().getNumNonzero(); };
     }
 
     template<class Derived>
@@ -707,7 +710,7 @@ namespace Physica {
     /**
      * See if the block range is legal to the matrix
      */
-     template<class Derived>
+    template<class Derived>
     __host__ __device__ void RValueMatrix<Derived>::checkBlock(
             [[maybe_unused]] const Matrix auto& m,
             [[maybe_unused]] size_t fromRow,
