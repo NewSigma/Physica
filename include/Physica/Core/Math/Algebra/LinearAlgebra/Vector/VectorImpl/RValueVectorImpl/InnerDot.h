@@ -51,6 +51,8 @@ namespace Physica {
         T calc_base_simd() const noexcept;
         T calc_base_simd_complex_real() const noexcept;
         T calc_base_fallback() const noexcept;
+
+        [[nodiscard]] constexpr bool useMKL() const noexcept;
     };
 
     template<Vector V1, Vector V2>
@@ -71,7 +73,7 @@ namespace Physica {
             }
         }
         else if constexpr (HasMKL() && Internal::EnableLAPACK<V1, V2>::value)
-            return calc_mkl();
+            return useMKL() ? calc_mkl() : calc_base();
         else
             return calc_base();
     }
@@ -158,6 +160,15 @@ namespace Physica {
         for(size_t i = 0; i < v1.getLength(); ++i)
             result += v1.calc(i) * v2.calc(i);
         return result;
+    }
+
+    template<Vector V1, Vector V2>
+    constexpr bool InnerDot<V1, V2>::useMKL() const noexcept {
+        constexpr int Threshold = HostDevAttr::ThresholdInnerDot_MKL;
+        if constexpr (getSizeAtCompile() == Dynamic)
+            return Threshold < v1.getLength();
+        else
+            return Threshold < getSizeAtCompile();
     }
 
     template<Vector V1, Vector V2>

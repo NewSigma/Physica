@@ -217,6 +217,8 @@ namespace Physica {
         RValueVector() = default;
         RValueVector(const This&) = default;
         RValueVector(This&&) noexcept = default;
+        /* Static members */
+        [[nodiscard]] consteval static int calcBlockingSize(int CacheSize) noexcept;
     private:
         template<ExecutePolicy P>
         void assign_for(Vector auto& v) const noexcept;

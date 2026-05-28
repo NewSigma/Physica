@@ -114,9 +114,12 @@ namespace Physica {
                 (mat.col(i) * vec.calc(i)).template assign_add<P>(target);
         }
         else {
-            size_t length = getLength();
+            const size_t length = getLength();
+            const size_t col = mat.getCol();
+            auto it = target.view().begin();
+            const auto& flat = mat.flatten();
             for (size_t i = 0; i < length; ++i)
-                target[i] = calc(i);
+                *(it + i) = flat.segment(col * i, col * i + col) * vec;
         }
     }
 
@@ -124,14 +127,17 @@ namespace Physica {
     template<ExecutePolicy P>
     void GEMV<M, V>::assign_add(Vector auto&& target) const noexcept {
         if constexpr (MatrixMajor::isColMatrix<M>()) {
-            size_t length = vec.getLength();
+            const size_t length = vec.getLength();
             for (size_t i = 0; i < length; ++i)
                 (mat.col(i) * vec.calc(i)).template assign_add<P>(target);
         }
         else {
-            size_t length = getLength();
+            const size_t length = getLength();
+            const size_t col = mat.getCol();
+            auto it = target.view().begin();
+            const auto& flat = mat.flatten();
             for (size_t i = 0; i < length; ++i)
-                target[i] += calc(i);
+                *(it + i) += flat.segment(col * i, col * i + col) * vec;
         }
     }
 

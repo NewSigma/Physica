@@ -38,4 +38,5 @@ namespace {
     }
 }
 
-BENCHMARK(gemv_mkl<float64, MatrixMajor::Col>)->Name("GEMV mkl")->Arg(16)->Arg(32)->Arg(512);
+BENCHMARK(gemv_mkl<float64, MatrixMajor::Col>)->Name("GEMV col mkl")->Arg(16)->Arg(32)->Arg(512);
+BENCHMARK(gemv_mkl<float64, MatrixMajor::Row>)->Name("GEMV row mkl")->Arg(16)->Arg(32)->Arg(512);

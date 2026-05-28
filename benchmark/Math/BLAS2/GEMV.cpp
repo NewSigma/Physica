@@ -74,6 +74,7 @@ namespace {
     }
 }
 
-BENCHMARK(gemv<float64, MatrixMajor::Col>)->Name("GEMV base")->Arg(16)->Arg(32)->Arg(512);
+BENCHMARK(gemv<float64, MatrixMajor::Col>)->Name("GEMV col base")->Arg(16)->Arg(32)->Arg(512);
+BENCHMARK(gemv<float64, MatrixMajor::Row>)->Name("GEMV row base")->Arg(16)->Arg(32)->Arg(512);
 BENCHMARK(complex_real)->Name("GEMV complex-real");
 BENCHMARK(forward2_grad)->Name("GEMV forward2");

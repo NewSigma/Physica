@@ -859,6 +859,14 @@ namespace Physica {
     }
 
     template<class Derived>
+    consteval int RValueVector<Derived>::calcBlockingSize(int CacheSize) noexcept {
+        int result = 1;
+        while (result * int(sizeof(Trv)) < CacheSize)
+            result *= 2;
+        return result / 2;
+    }
+
+    template<class Derived>
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign_for(Vector auto& v) const noexcept {
         auto it = zip(v.view(), Base::getDerived().view()).begin();
