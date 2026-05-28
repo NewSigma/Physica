@@ -38,7 +38,7 @@ namespace {
     }
 }
 
-BENCHMARK(trans)->Name("trans default")
+BENCHMARK(trans)->Name("trans dispatch")
     ->Arg(2)
     ->Arg(4)
     ->Arg(8)

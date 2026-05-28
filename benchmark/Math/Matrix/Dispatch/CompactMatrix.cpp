@@ -36,4 +36,4 @@ namespace {
     }
 }
 
-BENCHMARK(assign_mismatch)->Name("Compact mismatch default")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(assign_mismatch)->Name("Compact mismatch dispatch")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);

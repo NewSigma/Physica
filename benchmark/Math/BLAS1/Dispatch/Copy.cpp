@@ -36,7 +36,7 @@ namespace {
     }
 }
 
-BENCHMARK(copy)->Name("copy default")
+BENCHMARK(copy)->Name("copy dispatch")
     ->Arg(4)
     ->Arg(8)
     ->Arg(4UL * 1024UL / sizeof(float64))

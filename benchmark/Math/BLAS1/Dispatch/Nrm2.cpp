@@ -35,7 +35,7 @@ namespace {
     }
 }
 
-BENCHMARK(nrm2)->Name("nrm2 default")
+BENCHMARK(nrm2)->Name("nrm2 dispatch")
     ->Arg(2)
     ->Arg(4)
     ->Arg(8)

@@ -36,7 +36,7 @@ namespace {
     }
 }
 
-BENCHMARK(qr)->Name("DenseQR default")
+BENCHMARK(qr)->Name("DenseQR dispatch")
     ->Arg(4)
     ->Arg(8)
     ->Arg(16)

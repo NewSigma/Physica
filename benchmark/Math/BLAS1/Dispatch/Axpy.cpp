@@ -38,7 +38,7 @@ namespace {
     }
 }
 
-BENCHMARK(axpy)->Name("axpy default")
+BENCHMARK(axpy)->Name("axpy dispatch")
     ->Arg(2)
     ->Arg(4)
     ->Arg(8)

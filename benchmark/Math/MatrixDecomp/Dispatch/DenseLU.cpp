@@ -36,7 +36,7 @@ namespace {
     }
 }
 
-BENCHMARK(lu)->Name("DenseLU default")
+BENCHMARK(lu)->Name("DenseLU dispatch")
     ->Arg(4)
     ->Arg(8)
     ->Arg(16)

@@ -37,5 +37,5 @@ namespace {
     }
 }
 
-BENCHMARK(square<float32>)->Name("square float32 default")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(square<float64>)->Name("square float64 default")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(square<float32>)->Name("square float32 dispatch")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(square<float64>)->Name("square float64 dispatch")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);

@@ -37,5 +37,5 @@ namespace {
     }
 }
 
-BENCHMARK(direct<false>)->Name("EigenSolver s default");
-BENCHMARK(direct<true>)->Name("EigenSolver sv default");
+BENCHMARK(direct<false>)->Name("EigenSolver s dispatch");
+BENCHMARK(direct<true>)->Name("EigenSolver sv dispatch");

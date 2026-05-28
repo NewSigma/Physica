@@ -38,5 +38,5 @@ namespace {
     }
 }
 
-BENCHMARK(mul<float32>)->Name("mul float32 default")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(mul<float64>)->Name("mul float64 default")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(mul<float32>)->Name("mul float32 dispatch")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(mul<float64>)->Name("mul float64 dispatch")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);

@@ -38,7 +38,7 @@ namespace {
     }
 }
 
-BENCHMARK(scal)->Name("scal default")
+BENCHMARK(scal)->Name("scal dispatch")
     ->Arg(2)
     ->Arg(4)
     ->Arg(8)

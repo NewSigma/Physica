@@ -71,5 +71,5 @@ namespace {
 }
 
 constexpr int N = 1 << 20;
-BENCHMARK(axpy)->Name("axpy cuda default")->UseManualTime()->Arg(N);
+BENCHMARK(axpy)->Name("axpy cuda dispatch")->UseManualTime()->Arg(N);
 BENCHMARK(axpy_cublas)->Name("axpy cuda cublas")->UseManualTime()->Arg(N);

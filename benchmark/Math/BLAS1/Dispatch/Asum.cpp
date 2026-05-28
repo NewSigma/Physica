@@ -36,7 +36,7 @@ namespace {
     }
 }
 
-BENCHMARK(asum)->Name("asum default")
+BENCHMARK(asum)->Name("asum dispatch")
     ->Arg(2)
     ->Arg(4)
     ->Arg(8)

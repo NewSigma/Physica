@@ -36,7 +36,7 @@ namespace {
     }
 }
 
-BENCHMARK(assign)->Name("Trig assign default")
+BENCHMARK(assign)->Name("Trig assign dispatch")
     ->Arg(256)
     ->Arg(1024)
     ->Arg(8192);

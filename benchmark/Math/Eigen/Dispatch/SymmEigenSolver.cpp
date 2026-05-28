@@ -38,5 +38,5 @@ namespace {
     }
 }
 
-BENCHMARK(direct<false>)->Name("SymmEigenSolver s default")->Arg(4)->Arg(64)->Arg(1024);
-BENCHMARK(direct<true>)->Name("SymmEigenSolver sv default")->Arg(4)->Arg(64)->Arg(1024);
+BENCHMARK(direct<false>)->Name("SymmEigenSolver s dispatch")->Arg(4)->Arg(64)->Arg(1024);
+BENCHMARK(direct<true>)->Name("SymmEigenSolver sv dispatch")->Arg(4)->Arg(64)->Arg(1024);

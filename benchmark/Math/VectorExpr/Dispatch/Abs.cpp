@@ -37,5 +37,5 @@ namespace {
     }
 }
 
-BENCHMARK(abs<float32>)->Name("abs float32 default")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(abs<float64>)->Name("abs float64 default")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(abs<float32>)->Name("abs float32 dispatch")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(abs<float64>)->Name("abs float64 dispatch")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);

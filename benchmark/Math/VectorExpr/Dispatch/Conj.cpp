@@ -37,5 +37,5 @@ namespace {
     }
 }
 
-BENCHMARK(conj<cfloat32>)->Name("conj cfloat32 default")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(conj<cfloat64>)->Name("conj cfloat64 default")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(conj<cfloat32>)->Name("conj cfloat32 dispatch")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(conj<cfloat64>)->Name("conj cfloat64 dispatch")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);

@@ -37,7 +37,7 @@ namespace {
     }
 }
 
-BENCHMARK(lu)->Name("DenseLU inv default")
+BENCHMARK(lu)->Name("DenseLU inv dispatch")
     ->Arg(8)
     ->Arg(64)
     ->Arg(1024);
