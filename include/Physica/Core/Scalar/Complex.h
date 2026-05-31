@@ -46,11 +46,11 @@ namespace Physica {
         T im;
     public:
         Complex() = default;
-        Complex(double _Complex x);
+        __host__ __device__ Complex(double _Complex x);
         __host__ __device__ Complex(Tm x);
         __host__ __device__ Complex(T re_);
         __host__ __device__ Complex(T re_, T im_);
-        Complex(std::complex<Tm> x);
+        __host__ __device__ Complex(std::complex<Tm> x);
         Complex(MKL_Complex8 x);
         Complex(MKL_Complex16 x);
     #ifdef PHYSICA_CUDA

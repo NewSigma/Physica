@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Scalar T>
-    Complex<T>::Complex(double _Complex x) : This(std::complex<Tm>(x)) {}
+    __host__ __device__ Complex<T>::Complex(double _Complex x) : This(std::complex<Tm>(x)) {}
 
     template<Scalar T>
     __host__ __device__ Complex<T>::Complex(Tm x) : This(T(x)) {}
@@ -34,7 +34,7 @@ namespace Physica {
     __host__ __device__ Complex<T>::Complex(T re_, T im_) : re(re_), im(im_) {}
 
     template<Scalar T>
-    Complex<T>::Complex(std::complex<Tm> x) : re(x.real()), im(x.imag()) {}
+    __host__ __device__ Complex<T>::Complex(std::complex<Tm> x) : re(x.real()), im(x.imag()) {}
 
 #ifdef PHYSICA_MKL
     template<Scalar T>

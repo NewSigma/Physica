@@ -47,14 +47,14 @@ namespace Physica {
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> square(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> square(const Complex<T>& c) noexcept {
         const auto& re = c.real();
         const auto& im = c.imag();
         return Complex<T>(fma(re, re, -square(im)), (re * im) * T(2));
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> reciprocal(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> reciprocal(const Complex<T>& c) noexcept {
         assert(!c.isSubNormal() && "[Error]: Division overflow");
         const auto& real = c.real();
         const auto& imag = c.imag();
@@ -66,7 +66,7 @@ namespace Physica {
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. Numerical Recipes(3rd edition)[M]. London: Cambridge University Press, 2007:226
      */
     template<Scalar T>
-    [[nodiscard]] Complex<T> sqrt(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> sqrt(const Complex<T>& c) noexcept {
         using ResultType = Complex<T>;
         if (c.isZero())
             return ResultType(0);
@@ -99,7 +99,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> ln1pexp(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> ln1pexp(const Complex<T>& c) noexcept {
         if (c.real().isPositive()) {
             T norm = c.norm();
             return norm + ln(exp(-norm) + exp(c - norm));
@@ -108,67 +108,67 @@ namespace Physica {
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> exp(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> exp(const Complex<T>& c) noexcept {
         return Complex<T>(std::exp(c.toMachine()));
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> cos(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> cos(const Complex<T>& c) noexcept {
         return Complex<T>(std::cos(c.toMachine()));
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> sin(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> sin(const Complex<T>& c) noexcept {
         return Complex<T>(std::sin(c.toMachine()));
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> tan(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> tan(const Complex<T>& c) noexcept {
         return Complex<T>(std::tan(c.toMachine()));
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> sec(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> sec(const Complex<T>& c) noexcept {
         return reciprocal(cos(c));
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> csc(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> csc(const Complex<T>& c) noexcept {
         return reciprocal(sin(c));
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> cot(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> cot(const Complex<T>& c) noexcept {
         return reciprocal(tan(c));
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> cosh(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> cosh(const Complex<T>& c) noexcept {
         return Complex<T>(std::cosh(c.toMachine()));
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> sinh(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> sinh(const Complex<T>& c) noexcept {
         return Complex<T>(std::sinh(c.toMachine()));
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> tanh(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> tanh(const Complex<T>& c) noexcept {
         return Complex<T>(std::tanh(c.toMachine()));
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> sech(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> sech(const Complex<T>& c) noexcept {
         return reciprocal(cosh(c));
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> csch(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> csch(const Complex<T>& c) noexcept {
         return reciprocal(sinh(c));
     }
 
     template<Scalar T>
-    [[nodiscard]] Complex<T> coth(const Complex<T>& c) noexcept {
+    [[nodiscard]] __host__ __device__ Complex<T> coth(const Complex<T>& c) noexcept {
         return reciprocal(tanh(c));
     }
 
