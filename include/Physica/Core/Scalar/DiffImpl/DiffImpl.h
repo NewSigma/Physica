@@ -119,6 +119,7 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     template<int MaskOrder>
     __host__ __device__ auto Diff<T, Mode, Order>::grad_mask() const noexcept {
+        static_assert(MaskOrder >= 0, "[Error]: Invalid order");
         if constexpr (MaskOrder == 0)
             return v;
         else if constexpr (MaskOrder >= Order)

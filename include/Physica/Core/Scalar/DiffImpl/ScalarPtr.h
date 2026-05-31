@@ -85,6 +85,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto value_ptr() const noexcept { return pValue; }
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ auto grad_ptr() const noexcept;
+        template<int MaskOrder>
+        [[nodiscard]] __host__ __device__ auto grad_mask() const noexcept;
         template<size_t Index>
         [[nodiscard]] __host__ __device__ constexpr ValuePtrTy get() const noexcept;
         [[nodiscard]] __host__ __device__ constexpr ValuePtrTy get(int index) const noexcept;
@@ -224,6 +226,21 @@ namespace Physica {
             return pGrad;
         else
             return pGrad.template grad_ptr<GradOrder - 1>();
+    }
+
+    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<int MaskOrder>
+    __host__ __device__ auto ScalarPtr<T>::grad_mask() const noexcept {
+        static_assert(MaskOrder >= 0, "[Error]: Invalid order");
+        if constexpr (MaskOrder == 0)
+            return pValue;
+        else if constexpr (MaskOrder >= Order)
+            return *this;
+        else {
+            using U = Diff<Tv, Mode, MaskOrder>;
+            using MaybeConstU = std::conditional_t<IsConst, const U, U>;
+            return ScalarPtr<MaybeConstU>(pValue, pGrad.template grad_mask<MaskOrder - 1>());
+        }
     }
 
     template<Scalar T> requires(instanceof_tx<Diff, T>)

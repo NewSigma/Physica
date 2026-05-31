@@ -84,8 +84,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto operator<=>(this const auto& x, double y) noexcept;
         [[nodiscard]] __host__ __device__ auto operator<=>(this const auto& x, const Scalar auto& y) noexcept;
         /* Operations */
-        [[nodiscard]] ScalarType calc() const;
-
         [[nodiscard]] __host__ __device__ ScalarType conjugate() const noexcept;
         [[nodiscard]] __host__ __device__ RealType norm() const noexcept;
         [[nodiscard]] __host__ __device__ auto squaredNorm() const noexcept;
@@ -110,7 +108,7 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ auto& grad(this auto&&) noexcept;
         template<int MaskOrder>
-        [[nodiscard]] __host__ __device__ auto grad_mask() const noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) grad_mask(this auto&&) noexcept;
 
         [[nodiscard]] __host__ __device__ auto isZero() const noexcept;
         [[nodiscard]] __host__ __device__ auto isSubNormal() const noexcept;
@@ -187,11 +185,6 @@ namespace Physica {
         static_assert(X::isDiffable() || Y::isDiffable() || !std::same_as<X, Y>, "[Error]: This function handles type casts only");
         using Z = Internal::BinaryScalarOpRtnTy<typename X::ValueType, typename Y::ValueType>::Type;
         return Z(x.value()) <=> Z(y.value());
-    }
-
-    template<class Derived>
-    auto ScalarBase<Derived>::calc() const -> ScalarType {
-        return ScalarType(Base::getDerived());
     }
 
     template<class Derived>
@@ -319,11 +312,12 @@ namespace Physica {
 
     template<class Derived>
     template<int MaskOrder>
-    __host__ __device__ auto ScalarBase<Derived>::grad_mask() const noexcept {
+    __host__ __device__ decltype(auto) ScalarBase<Derived>::grad_mask(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (isDiffable())
-            return calc().template grad_mask<MaskOrder>();
+            return std::forward<Self>(self).template grad_mask<MaskOrder>();
         else
-            return Base::getDerived();
+            return std::forward<Self>(self); // Provides a syntactic sugar for non-diffable scalar
     }
 
     template<class Derived>

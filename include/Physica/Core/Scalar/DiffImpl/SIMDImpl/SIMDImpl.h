@@ -206,6 +206,7 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, int Size>
     template<int MaskOrder>
     auto SIMD<Diff<T, Mode, Order>, Size>::grad_mask() const noexcept {
+        static_assert(MaskOrder >= 0, "[Error]: Invalid order");
         if constexpr (MaskOrder == 0)
             return values;
         else if constexpr (MaskOrder >= Order)

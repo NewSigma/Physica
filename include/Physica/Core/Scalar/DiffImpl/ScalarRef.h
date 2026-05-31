@@ -77,6 +77,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ decltype(auto) value() const noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ decltype(auto) grad() const noexcept;
+        template<int MaskOrder>
+        [[nodiscard]] __host__ __device__ auto grad_mask() const noexcept;
     };
 
     template<Scalar T> requires(instanceof_tx<Diff, T>)
@@ -218,6 +220,12 @@ namespace Physica {
     template<int GradOrder>
     __host__ __device__ decltype(auto) ScalarRef<T>::grad() const noexcept {
         return *(ptr.template grad_ptr<GradOrder>());
+    }
+
+    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<int MaskOrder>
+    __host__ __device__ auto ScalarRef<T>::grad_mask() const noexcept {
+        return *(ptr.template grad_mask<MaskOrder>());
     }
 
     template<Scalar T>
