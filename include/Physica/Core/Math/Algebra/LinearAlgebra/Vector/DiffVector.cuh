@@ -56,8 +56,6 @@ namespace Physica {
         using Base::operator=;
         using Base::operator[];
         /* Operations */
-        void zero_grad();
-
         void resize(const Vector auto& x);
         void resize(size_t size);
 
@@ -68,6 +66,7 @@ namespace Physica {
         using Base::toHost;
         using Base::toHostAsync;
 
+        void zero_grad();
         template<RNG R>
         void random_uniform();
         template<RNG R>

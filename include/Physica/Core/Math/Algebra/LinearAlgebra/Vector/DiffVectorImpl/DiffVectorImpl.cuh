@@ -46,11 +46,6 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    void device_obj<DenseVector<Diff<T, Mode, Order>>>::zero_grad() {
-        g.zeros();
-    }
-
-    template<Scalar T, DiffMode Mode, int Order>
     void device_obj<DenseVector<Diff<T, Mode, Order>>>::resize(const Vector auto& x) {
         resize(x.getLength());
     }
@@ -87,6 +82,11 @@ namespace Physica {
     void device_obj<DenseVector<Diff<T, Mode, Order>>>::toHostAsync(host_obj& obj) const {
         v.toHostAsync(obj.v);
         g.toHostAsync(obj.g);
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::zero_grad() {
+        g.zeros();
     }
 
     template<Scalar T, DiffMode Mode, int Order>

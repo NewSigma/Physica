@@ -72,8 +72,19 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::zero_grad() {
-        g.zeros();
+    template<size_t I>
+    constexpr auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::get(this auto&& self) noexcept {
+        return self[I];
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
+    constexpr auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::begin(this auto&& self) noexcept {
+        return self.data();
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
+    constexpr auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::end(this auto&& self) noexcept {
+        return self.data() + self.getLength();
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
@@ -83,6 +94,11 @@ namespace Physica {
             g.resize(size);
         else
             assert(g.empty() && "[Error]: Reject resize-after-reverse");
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
+    void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::zero_grad() {
+        g.zeros();
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>

@@ -58,11 +58,15 @@ namespace Physica {
         using Base::operator=;
         using Base::operator[];
         /* Operations */
-        void zero_grad();
+        template<size_t I>
+        [[nodiscard]] constexpr auto get(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto begin(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto end(this auto&&) noexcept;
 
         using Base::resize;
         void resize(size_t size);
 
+        void zero_grad();
         template<RNG R> void random_uniform();
         template<RNG R> void random_normal();
         template<RNG R>

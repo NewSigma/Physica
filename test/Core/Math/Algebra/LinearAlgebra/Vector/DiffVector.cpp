@@ -25,6 +25,14 @@ using namespace Physica;
 using RandomSource = Random<>;
 
 namespace {
+    void struct_bind() noexcept {
+        Vector3D<Diff<float64, DiffMode::Forward>> arr = Vector3D<float64>{1, 2, 3};
+        auto [x, y, z] = arr;
+        expect(x == 1);
+        expect(y == 2);
+        expect(z == 3);
+    }
+
     void forward() {
         syntax_only([]() {
             // Test mixed types for binary operation
@@ -64,6 +72,7 @@ namespace {
 }
 
 int main() {
+    struct_bind();
     forward();
     reverse();
     test_hdf5();
