@@ -122,6 +122,9 @@ namespace Physica {
         [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& lattice, Tv cutoff);
         static void forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, std::invocable<VectorType> auto fn);
         static void forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, std::invocable<VectorType> auto fn);
+
+        template<bool IsUnitLattice>
+        static void forLatticeCloud(std::invocable<Vector3D<T>, Index3D> auto fn, const LatticeMatrix& lattice, Index3D dim);
     protected:
         [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inv(); }
         void toDirect(const InvLatticeMatrix& invLattice);
@@ -708,6 +711,34 @@ namespace Physica {
                         v3 = v2 + T(z) * a3;
                         fn(v3);
                     }
+                }
+            }
+        }
+    }
+
+    template<Scalar T, unsigned int Dim>
+    template<bool IsUnitLattice>
+    void PeriodicCell<T, Dim>::forLatticeCloud(std::invocable<Vector3D<T>, Index3D> auto fn, const LatticeMatrix& lattice, Index3D dim) {
+        static_assert(Dim == 3, "[Error]: Not implemented");
+        LatticeMatrix sub_lattice{};
+        if constexpr (IsUnitLattice)
+            sub_lattice = lattice;
+        else {
+            for (int i = 0; i < Dim; ++i)
+                sub_lattice.row(i) = lattice.row(i) * reciprocal(T(dim[i]));
+        }
+
+        Vector3D<T> v1, v2, v3;
+        auto a1 = sub_lattice.row(0);
+        auto a2 = sub_lattice.row(1);
+        auto a3 = sub_lattice.row(2);
+        for (size_t x = 0; x < dim[0]; ++x) {
+            v1 = T(x) * a1;
+            for (size_t y = 0; y < dim[1]; ++y) {
+                v2 = v1 + T(y) * a2;
+                for (size_t z = 0; z < dim[2]; ++z) {
+                    v3 = v2 + T(z) * a3;
+                    fn(v3, Index3D{x, y, z});
                 }
             }
         }

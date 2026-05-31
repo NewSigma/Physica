@@ -76,11 +76,6 @@ namespace Physica {
     [[maybe_unused]] constexpr static unsigned int PhysicaWordSize = sizeof(void*) * CHAR_BIT;
     [[maybe_unused]] constexpr size_t Dynamic = 0;
 
-    enum class Backend : char {
-        Base,
-        MKL
-    };
-
     __host__ __device__ consteval static bool IsHost() noexcept {
     #ifdef __CUDA_ARCH__
         return false;

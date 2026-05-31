@@ -51,7 +51,6 @@ namespace Physica {
 
         template<Matrix M> void toDevice(device_obj<CompactMatrix<M>>& obj) const;
         template<Matrix M> void toDeviceAsync(device_obj<CompactMatrix<M>>& obj) const;
-        [[nodiscard]] auto toNumpy() const;
 
         [[nodiscard]] auto row(this auto&&, size_t r) noexcept;
         [[nodiscard]] auto col(this auto&&, size_t c) noexcept;

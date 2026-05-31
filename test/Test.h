@@ -24,6 +24,11 @@
 #include "Physica/Core/Math/Random/Random.h"
 
 namespace Physica {
+    enum class Backend : char {
+        Base,
+        MKL
+    };
+
     [[noreturn]] inline void expect_fail(std::source_location loc, uint64_t seed) noexcept {
         std::println("Failed at file: {}:{}:{}", loc.file_name(), loc.line(), loc.column());
         std::println("          func: {}", loc.function_name());

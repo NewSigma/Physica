@@ -118,7 +118,7 @@ namespace Physica {
             const Tr r4 = square(r2);
             result += baseCoeff[index].squaredNorm() * (Tr(1) + smoothFactor1 * r2 + smoothFactor2 * r4);
         };
-        TensorBase::forPointIndexInTensor<true, decltype(kernel)>(getBaseDim(), lattice, kernel);
+        PeriodicCell<Tr, 3>::template forLatticeCloud<true>(kernel, lattice, getBaseDim());
         return result;
     }
 
@@ -246,7 +246,7 @@ namespace Physica {
             else
                 baseCoeff[index] = reciprocal(Tr(1) + (smoothFactor1 + smoothFactor2 * r2) * r2);
         };
-        TensorBase::forPointIndexInTensor<Tr, true, decltype(kernel)>(getBaseDim(), lattice, kernel);
+        PeriodicCell<Tr, 3>::template forLatticeCloud<true>(kernel, lattice, getBaseDim());
     }
     /**
      * Matrix M as defined in [1]

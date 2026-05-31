@@ -63,7 +63,6 @@ namespace Physica {
         assert(numWarm >= 0 && "[Error]: Invalid param");
         checkIntegrand<VectorND<Trv>>(fn);
 
-        T mean, var;
         DenseMatrix<Trv> losses_old;
         bool hasMomentum = momentum.isPositive();
         if (hasMomentum) {
@@ -74,9 +73,9 @@ namespace Physica {
         for (int i = 0; i < numWarm; ++i) {
             init<R>();
             if constexpr (TakeLn)
-                sample_ln<R, P>(fn, mean, var);
+                sample_ln<R, P>(fn);
             else
-                sample<R, P>(fn, mean, var);
+                sample<R, P>(fn);
 
             compress<P>();
             if (hasMomentum) {

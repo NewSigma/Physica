@@ -19,6 +19,7 @@
 #pragma once
 
 #include "../LValueTensor.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 
 namespace Physica {
     template<Tensor X>

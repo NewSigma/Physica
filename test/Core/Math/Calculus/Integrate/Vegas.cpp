@@ -70,6 +70,7 @@ namespace {
             return T(-100) * (x - r1).squaredNorm();
         };
         auto vegas = Vegas<T, true>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 10000);
+        vegas.warmup<RandomSource>(func, 50);
         vegas.integral<RandomSource>(func);
 
         const T temp = erf(T(5));

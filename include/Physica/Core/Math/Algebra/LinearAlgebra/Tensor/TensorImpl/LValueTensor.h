@@ -68,7 +68,6 @@ namespace Physica {
         [[nodiscard]] auto data_ptr(this auto&&, Index3D index) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isLValueTensor() noexcept { return true; }
-        using Base::forPointIndexInTensor;
     protected:
         LValueTensor() = default;
         LValueTensor(const This&) = default;

@@ -65,7 +65,6 @@ namespace Physica {
 
         template<Vector V> void toDevice(device_obj<CompactVector<V>>& obj) const;
         template<Vector V> void toDeviceAsync(device_obj<CompactVector<V>>& obj) const;
-        [[nodiscard]] auto toNumpy() const;
 
         template<size_t Length = Dynamic>
         [[nodiscard]] auto head(this auto&&, size_t to = Length) noexcept;

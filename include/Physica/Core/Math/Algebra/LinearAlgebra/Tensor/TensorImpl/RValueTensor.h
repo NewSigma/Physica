@@ -20,7 +20,7 @@
 
 #include "Physica/CRTPBase.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
-#include "TensorBase.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica {
     template<class Derived> class LValueTensor;
@@ -33,7 +33,7 @@ namespace Physica {
     template<class T, int GradOrder> class GradTensor;
 
     template<class Derived>
-    class RValueTensor : public CRTPBase<RValueTensor<Derived>>, public TensorBase {
+    class RValueTensor : public CRTPBase<RValueTensor<Derived>> {
         static_assert(!DeviceObj<Derived>, "[Error]: device_obj<> must be outside RValueTensor<>");
         using This = RValueTensor<Derived>;
         using Base = CRTPBase<This>;
@@ -82,9 +82,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isLValueTensor() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
-        using TensorBase::forPointIndexInTensor;
-        template<Scalar T, bool IsUnitLattice>
-        static void forPointIndexInTensor(const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, std::invocable<Vector3D<T>, Index3D> auto fn);
     protected:
         RValueTensor() = default;
         RValueTensor(const This&) = default;

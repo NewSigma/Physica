@@ -156,15 +156,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Scalar T, bool IsUnitLattice>
-    void RValueTensor<Derived>::forPointIndexInTensor(
-            const RValueTensor& grid,
-            const PeriodicCell<T, 3>::LatticeMatrix& lattice,
-            std::invocable<Vector3D<T>, Index3D> auto fn) {
-        forPointIndexInTensor<T, IsUnitLattice>(grid.getDim(), lattice, fn);
-    }
-
-    template<class Derived>
     template<int GradOrder>
     auto RValueTensor<Derived>::grads_impl() const noexcept {
         return GradTensor<Derived, GradOrder>(Base::getDerived());

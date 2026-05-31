@@ -110,7 +110,7 @@ namespace Physica {
                 const T factor = T(amix) * std::min(kNorm / (kNorm + square(T(bmix))), T(amin));
                 kSpace(index) *= factor;
             };
-            GridType::template forPointIndexInTensor<T, true, decltype(kernel)>(kSpace.getShape(), repLatt, kernel);
+            PeriodicCell<T, 3>::template forLatticeCloud<true>(kernel, kSpace.getShape(), repLatt);
             fft.invTransform();
 
             const auto& rho_old = oldDensities[0].getTotalDensity().flatten();

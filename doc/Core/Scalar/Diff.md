@@ -19,7 +19,7 @@ Implemented using the well-known dual number approach.
 
 ## Reverse - Coroutine-based backpropagation
 
-Coroutine-based backpropagation is defined as a backpropagation implementation that uses coroutines to manage the lifetime of the computation graph. We treat forward propagation and backpropagation as a unified process that crosses function call boundaries, exposing more optimization opportunities to the compiler.
+Coroutine-based backpropagation is defined as a backpropagation implementation that uses coroutines to manage the lifetime of the computation graph nodes. *Physica* view forward propagation and backpropagation as a unified process, cross function call boundaries, and expose more optimization opportunities to the compiler.
 
 Physica suspends the coroutine upon completing the forward pass to wait for future gradients, uses RAII to resume coroutine execution upon destruction, and performs gradient accumulation when the coroutine resumes execution.
 
@@ -27,36 +27,32 @@ By [1]:
 
     Rule  2: What’s good for function values is good for their derivatives.
 
-The rule stipulates that if forward propagation does not throw an exception, then backpropagation must also not throw an exception; otherwise, the program is ill-formed.
+*Physica* stipulates that if forward propagation does not throw an exception, then backpropagation must also not throw an exception; otherwise, the program is ill-formed.
 
-For types that satisfy concept `ReverseDiff`, the following functions are provided.
+### Lazy propagation
+
+For types that satisfy concept `ReverseDiff`, the following functions are provided:
 
 ``` C++
 // Accumulate gradients but don't propagate
 void reverse(GradType grad = 1) const noexcept { ... }
 ```
 
-Consider
+**Notes**:
+
+1. Although `reverse` is declared `const`, it **does** modify internal state. To see why, consider:
 
 ``` C++
 VectorND<dfloat> x = ...;
 use(x.sum());
 ```
 
-We want to declare `sum()` as `const`, and the declaration of `reverse` should be consistent:
+`sum()` is expected to be `const`. This is natural for forward passes. And the declaration of `reverse` must be consistent. The lowest-level `reverse` implementation has to use `const_cast`.
+
+2. CoDiff:
 
 ``` C++
-// const reverse: working
-// non-const reverse: does not compile
-x.sum().reverse();
-```
-
-The lowest-level `reverse` implementation requires the use of `const_cast`.
-
-### CoDiff
-
-``` C++
-tempalate<class T>
+template<class T>
 using CoDiff = ...
 ```
 
