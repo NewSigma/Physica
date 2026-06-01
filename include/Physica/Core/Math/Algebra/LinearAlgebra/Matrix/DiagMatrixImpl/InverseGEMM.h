@@ -21,7 +21,7 @@
 #include "../DiagMatrix.h"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M2> && instanceof_tx<DiagMatrix, typename Traits<M2>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M2, Inverse> && instanceof_tx<typename Traits<M2>::ExprType, DiagMatrix>)
     class GEMM<M1, M2> : public RValueMatrix<GEMM<M1, M2>> {
         using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
@@ -47,26 +47,26 @@ namespace Physica {
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M2> && instanceof_tx<DiagMatrix, typename Traits<M2>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M2, Inverse> && instanceof_tx<typename Traits<M2>::ExprType, DiagMatrix>)
     GEMM<M1, M2>::GEMM(M1&& mat1_, M2&& mat2_) : mat1(std::forward<M1>(mat1_)), mat2(std::forward<M2>(mat2_)) {}
 
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M2> && instanceof_tx<DiagMatrix, typename Traits<M2>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M2, Inverse> && instanceof_tx<typename Traits<M2>::ExprType, DiagMatrix>)
     void GEMM<M1, M2>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < getCol(); ++i)
             target.col(i) = mat1.col(i) * reciprocal(mat2.diag()[i]);
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M2> && instanceof_tx<DiagMatrix, typename Traits<M2>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M2, Inverse> && instanceof_tx<typename Traits<M2>::ExprType, DiagMatrix>)
     auto&& GEMM<M1, M2>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M1>(self.mat1);
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M2> && instanceof_tx<DiagMatrix, typename Traits<M2>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M2, Inverse> && instanceof_tx<typename Traits<M2>::ExprType, DiagMatrix>)
     auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M2>(self.mat2);
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<DiagMatrix, typename Traits<M1>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, DiagMatrix>)
     class GEMM<M1, M2> : public RValueMatrix<GEMM<M1, M2>> {
         using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
@@ -92,21 +92,21 @@ namespace Physica {
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<DiagMatrix, typename Traits<M1>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, DiagMatrix>)
     GEMM<M1, M2>::GEMM(M1&& mat1_, M2&& mat2_) : mat1(std::forward<M1>(mat1_)), mat2(std::forward<M2>(mat2_)) {}
 
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<DiagMatrix, typename Traits<M1>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, DiagMatrix>)
     void GEMM<M1, M2>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < getCol(); ++i)
             target.row(i) = reciprocal(mat1.diag()[i]) * mat2.row(i);
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<DiagMatrix, typename Traits<M1>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, DiagMatrix>)
     auto&& GEMM<M1, M2>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M1>(self.mat1);
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<DiagMatrix, typename Traits<M1>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, DiagMatrix>)
     auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M2>(self.mat2);
     }

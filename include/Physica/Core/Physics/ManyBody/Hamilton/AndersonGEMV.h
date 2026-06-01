@@ -21,7 +21,7 @@
 #include "AndersonMatrix.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_tx<AndersonMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, AndersonMatrix>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
@@ -56,10 +56,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
-    template<Matrix M, Vector V> requires(instanceof_tx<AndersonMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, AndersonMatrix>)
     GEMV<M, V>::GEMV(M mat_, V vec_) : mat(std::forward<M>(mat_)), vec(std::forward<V>(vec_)) {}
 
-    template<Matrix M, Vector V> requires(instanceof_tx<AndersonMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, AndersonMatrix>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const noexcept {
         target.assert_assign(*this);
@@ -93,19 +93,19 @@ namespace Physica {
         }
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<AndersonMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, AndersonMatrix>)
     auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<AndersonMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, AndersonMatrix>)
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
 }
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_tx<AndersonMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, AndersonMatrix>)
     class Traits<GEMV<M, V>> {
         using M1 = std::remove_cvref<M>::type;
         using V1 = std::remove_cvref<V>::type;

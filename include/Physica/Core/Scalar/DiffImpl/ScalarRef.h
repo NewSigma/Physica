@@ -24,7 +24,7 @@ namespace Physica {
     /**
      * \class ScalarRef is a proxy type returned when dereferencing \class ScalarPtr
      */
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     class ScalarRef<T> : public ScalarBase<ScalarRef<T>> {
         using This = ScalarRef<T>;
         using Base = ScalarBase<This>;
@@ -81,24 +81,24 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto grad_mask() const noexcept;
     };
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ ScalarRef<T>::ScalarRef(ScalarPtr<T> ptr_) noexcept : ptr(ptr_) {}
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ auto ScalarRef<T>::operator=(const This& other) -> This& {
         value() = other.value();
         grad() = other.grad();
         return *this;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ auto ScalarRef<T>::operator=(This&& other) noexcept -> This& {
         value() = other.value();
         grad() = other.grad();
         return *this;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ auto ScalarRef<T>::operator=(Scalar auto other) noexcept -> This& {
         using U = std::remove_reference<decltype(other)>::type;
         Base::template static_assert_assign<U>();
@@ -110,58 +110,58 @@ namespace Physica {
         return *this;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ auto ScalarRef<T>::operator=(int x) -> This& {
         operator=(T(x));
         return *this;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ auto ScalarRef<T>::operator=(double x) -> This& {
         operator=(T(x));
         return *this;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ void ScalarRef<T>::operator+=(const Scalar auto& x) noexcept {
         Base::template static_assert_assign<decltype(x)>();
         *this = *this + x;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ void ScalarRef<T>::operator-=(const Scalar auto& x) noexcept {
         Base::template static_assert_assign<decltype(x)>();
         *this = *this - x;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ void ScalarRef<T>::operator*=(const Scalar auto& x) noexcept {
         Base::template static_assert_assign<decltype(x)>();
         *this = *this * x;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ void ScalarRef<T>::operator/=(const Scalar auto& x) noexcept {
         Base::template static_assert_assign<decltype(x)>();
         *this = *this / x;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ bool ScalarRef<T>::operator==(const This& other) const {
         return value() == other.value() && grad() == other.grad();
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ ScalarRef<T>::operator ScalarRef<const T>() const noexcept requires(!IsConst) {
         return ScalarRef<const T>(ScalarPtr<T>(value_ptr(), grad_ptr()));
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ ScalarRef<T>::operator T() const requires(!ReverseDiff<T>) {
         return T(value(), grad());
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ T ScalarRef<T>::reverse(GradType grad) const noexcept {
         static_assert(Mode == DiffMode::Reverse, "[Error]: Call reverse() of a forward diff scalar is not well defined");
         decltype(auto) g = this->grad();
@@ -171,12 +171,12 @@ namespace Physica {
         return value();
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ void ScalarRef<T>::zero_grad() {
         grad() = 0;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ void ScalarRef<T>::swap(This&& obj) noexcept {
         static_assert(!IsConst, "[Error]: Cannot modify const reference");
         std::ignore = std::move(obj); // Silent clang-tidy warning
@@ -184,24 +184,24 @@ namespace Physica {
         grad().swap(obj.grad());
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ void ScalarRef<T>::swap(T& obj) noexcept {
         static_assert(!IsConst, "[Error]: Cannot modify const reference");
         obj.swap(*this);
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ auto ScalarRef<T>::value_ptr() const noexcept {
         return ptr.value_ptr();
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     template<int GradOrder>
     __host__ __device__ auto ScalarRef<T>::grad_ptr() const noexcept {
         return ptr.template grad_ptr<GradOrder>();
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ auto ScalarRef<T>::real_ptr(this auto&& self) noexcept {
         constexpr bool ConstPtr = std::is_const_v<std::remove_reference_t<decltype(self)>>;
         using RetTy = std::conditional<ConstPtr, ScalarPtr<const Tr>, ScalarPtr<Tr>>::type;
@@ -211,18 +211,18 @@ namespace Physica {
             return RetTy(self.ptr);
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ decltype(auto) ScalarRef<T>::value() const noexcept {
         return *value_ptr();
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     template<int GradOrder>
     __host__ __device__ decltype(auto) ScalarRef<T>::grad() const noexcept {
         return *(ptr.template grad_ptr<GradOrder>());
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     template<int MaskOrder>
     __host__ __device__ auto ScalarRef<T>::grad_mask() const noexcept {
         return *(ptr.template grad_mask<MaskOrder>());

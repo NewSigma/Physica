@@ -22,7 +22,7 @@
 #include "Physica/Core/Utils/Container/Array.cuh"
 
 namespace Physica {
-    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     class device_obj<Inverse<M>> : public device_obj<RValueMatrix<Inverse<M>>> {
         using host_obj = Inverse<M>;
         using This = device_obj<host_obj>;
@@ -57,12 +57,12 @@ namespace Physica {
         void allocate();
     };
 
-    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     device_obj<Inverse<M>>::device_obj(Ref trig) : trig(asStruct(trig)) {
         allocate();
     }
 
-    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     void device_obj<Inverse<M>>::assign(Matrix auto& target) const {
         using Expr = Traits<M>::ExprType;
         if constexpr (Internal::EnableLAPACK<Expr, decltype(target)>::value)
@@ -71,7 +71,7 @@ namespace Physica {
             noImpl();
     }
 
-    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     void device_obj<Inverse<M>>::assign_cusolver(Matrix auto& target) const {
         using Tm = decltype(std::declval<T>().toCUDA());
         getExpr().assign(target);
@@ -89,12 +89,12 @@ namespace Physica {
         check(cusolverDnXtrtri(ctx, Uplo, Diag, n, DataType, A, n, bufferOnDevice, workspaceInBytesOnDevice, bufferOnHost, workspaceInBytesOnHost, info));
     }
 
-    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     auto&& device_obj<Inverse<M>>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.trig.getDerived());
     }
 
-    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     void device_obj<Inverse<M>>::allocate() {
         size_t workspaceInBytesOnDevice{}, workspaceInBytesOnHost{};
         {

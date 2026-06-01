@@ -22,7 +22,7 @@
 #include "TransIsingMatrix.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_tx<TransIsingMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, TransIsingMatrix>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
@@ -60,12 +60,12 @@ namespace Physica {
         [[nodiscard]] T getTransG() const noexcept { return mat.getTransG(); }
     };
 
-    template<Matrix M, Vector V> requires(instanceof_tx<TransIsingMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, TransIsingMatrix>)
     GEMV<M, V>::GEMV(M&& mat_, V&& vec_) : mat(std::forward<M>(mat_)), vec(std::forward<V>(vec_)) {
         assert(mat.getCol() == vec.getLength());
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<TransIsingMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, TransIsingMatrix>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
         target.assert_assign(*this);
@@ -101,19 +101,19 @@ namespace Physica {
         }
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<TransIsingMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, TransIsingMatrix>)
     auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<TransIsingMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, TransIsingMatrix>)
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
 }
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_tx<TransIsingMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, TransIsingMatrix>)
     class Traits<GEMV<M, V>> {
         using M1 = std::remove_cvref<M>::type;
         using V1 = std::remove_cvref<V>::type;

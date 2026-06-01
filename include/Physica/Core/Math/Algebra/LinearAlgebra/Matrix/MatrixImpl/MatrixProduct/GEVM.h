@@ -154,7 +154,7 @@ namespace Physica {
 
     template<Vector V, Matrix M>
     void GEVM<V, M>::check_prod() const noexcept {
-        static_assert(!instanceof_tx<IdentityMatrix, M>, "[Error]: This pattern is unusual and is likely a bug. Consider drop it if this is a false-positive");
+        static_assert(!instanceof_tx<M, IdentityMatrix>, "[Error]: This pattern is unusual and is likely a bug. Consider drop it if this is a false-positive");
         if constexpr (mat.getRowAtCompile() == Dynamic)
             assert(mat.getRow() == 1 && "[Error]: Outer product requires that the rows of M be 1");
         else

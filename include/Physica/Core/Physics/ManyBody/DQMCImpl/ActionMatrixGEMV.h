@@ -21,7 +21,7 @@
 #include "ActionMatrix.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof<ActionMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, ActionMatrix>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
@@ -60,10 +60,10 @@ namespace Physica {
         void assign_add_potential(Vector auto& target) const noexcept;
     };
 
-    template<Matrix M, Vector V> requires(instanceof<ActionMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, ActionMatrix>)
     GEMV<M, V>::GEMV(M&& mat, V&& vec) : mat(std::forward<M>(mat)), vec(std::forward<V>(vec)) {}
 
-    template<Matrix M, Vector V> requires(instanceof<ActionMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, ActionMatrix>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const noexcept {
         target.assert_assign(*this);
@@ -80,7 +80,7 @@ namespace Physica {
         }
     }
 
-    template<Matrix M, Vector V> requires(instanceof<ActionMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, ActionMatrix>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign_add(Vector auto& target) const noexcept {
         target.assert_assign(*this);
@@ -92,28 +92,28 @@ namespace Physica {
         assign_add_potential(target);
     }
 
-    template<Matrix M, Vector V> requires(instanceof<ActionMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, ActionMatrix>)
     auto GEMV<M, V>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
-    template<Matrix M, Vector V> requires(instanceof<ActionMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, ActionMatrix>)
     auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 
-    template<Matrix M, Vector V> requires(instanceof<ActionMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, ActionMatrix>)
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
 
-    template<Matrix M, Vector V> requires(instanceof<ActionMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, ActionMatrix>)
     __host__ __device__ consteval bool GEMV<M, V>::isFastAssign() noexcept {
         return MatrixMajor::isColMatrix<M>();
     }
 
-    template<Matrix M, Vector V> requires(instanceof<ActionMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, ActionMatrix>)
     void GEMV<M, V>::assign_add_potential(Vector auto& target) const noexcept {
         const int numSite = mat.getNumSite();
         const int numFreq2 = mat.getNumFreq() * 2;
@@ -129,7 +129,7 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof<ActionMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, ActionMatrix>)
     class Traits<GEMV<M, V>> {
         using M1 = std::remove_cvref_t<M>;
         using V1 = std::remove_cvref_t<V>;

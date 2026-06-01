@@ -131,8 +131,8 @@ namespace Physica {
     void device_obj<GEMM<M1, M2>>::assign_impl_cublas(Matrix auto& target) const {
         using Tm = decltype(std::declval<T>().toCUDA());
         constexpr bool IsDeviceMatrix = getLHS().getSizeAtCompile() == Dynamic && getRHS().getSizeAtCompile() == Dynamic;
-        constexpr bool isTranspose1 = instanceof<Transpose, M1>;
-        constexpr bool isTranspose2 = instanceof<Transpose, M2>;
+        constexpr bool isTranspose1 = instanceof<M1, Transpose>;
+        constexpr bool isTranspose2 = instanceof<M2, Transpose>;
         static_assert(IsDeviceMatrix, "[Error]: Fixed matrix is on host, pass it to device before calling cuBLAS");
         static_assert(MatrixMajor::isColMatrix<M1>() && MatrixMajor::isColMatrix<M2>(), "[Error]: cuBLAS uses column major");
         static_assert(!Diffable<This>);

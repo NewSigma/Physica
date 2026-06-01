@@ -21,7 +21,7 @@
 #include "MatrixTrig.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof<Inverse, M> && instanceof_tx<MatrixTrig, typename Traits<M>::ExprType>)
+    template<Matrix M, Vector V> requires(instanceof<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, MatrixTrig>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
@@ -52,10 +52,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
-    template<Matrix M, Vector V> requires(instanceof<Inverse, M> && instanceof_tx<MatrixTrig, typename Traits<M>::ExprType>)
+    template<Matrix M, Vector V> requires(instanceof<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, MatrixTrig>)
     GEMV<M, V>::GEMV(M&& inv, V&& rhs) : inv(std::forward<M>(inv)), rhs(std::forward<V>(rhs)) {}
 
-    template<Matrix M, Vector V> requires(instanceof<Inverse, M> && instanceof_tx<MatrixTrig, typename Traits<M>::ExprType>)
+    template<Matrix M, Vector V> requires(instanceof<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, MatrixTrig>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
         using Expr = std::remove_cvref<M>::type;
@@ -95,17 +95,17 @@ namespace Physica {
         }
     }
 
-    template<Matrix M, Vector V> requires(instanceof<Inverse, M> && instanceof_tx<MatrixTrig, typename Traits<M>::ExprType>)
+    template<Matrix M, Vector V> requires(instanceof<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, MatrixTrig>)
     auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.inv);
     }
 
-    template<Matrix M, Vector V> requires(instanceof<Inverse, M> && instanceof_tx<MatrixTrig, typename Traits<M>::ExprType>)
+    template<Matrix M, Vector V> requires(instanceof<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, MatrixTrig>)
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.rhs);
     }
 
-    template<Matrix M, Vector V> requires(instanceof<Inverse, M> && instanceof_tx<MatrixTrig, typename Traits<M>::ExprType>)
+    template<Matrix M, Vector V> requires(instanceof<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, MatrixTrig>)
     __host__ __device__ consteval size_t GEMV<M, V>::getSizeAtCompile() noexcept {
         return std::max(std::remove_cvref_t<M>::getRowAtCompile(), std::remove_cvref_t<V>::getSizeAtCompile());
     }

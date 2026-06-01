@@ -45,7 +45,7 @@ namespace Physica {
 
     template<class T>
     struct is_device_obj {
-        constexpr static bool value = instanceof<device_obj, remove_codiff_t<std::remove_cvref_t<T>>>;
+        constexpr static bool value = instanceof<remove_codiff_t<std::remove_cvref_t<T>>, device_obj>;
     };
 
     template<class T>

@@ -21,7 +21,7 @@
 #include "HubbardMatrix.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_ttx<M, HubbardMatrix>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
@@ -71,12 +71,12 @@ namespace Physica {
         [[nodiscard]] const auto& getRepr() const noexcept { return mat.getRepr(); }
     };
 
-    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_ttx<M, HubbardMatrix>)
     GEMV<M, V>::GEMV(M&& mat_, V&& vec_) : mat(std::forward<M>(mat_)), vec(std::forward<V>(vec_)) {
         assert(mat.getCol() == vec.getLength());
     }
 
-    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_ttx<M, HubbardMatrix>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
         target.assert_assign(*this);
@@ -93,7 +93,7 @@ namespace Physica {
         }
     }
 
-    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_ttx<M, HubbardMatrix>)
     auto GEMV<M, V>::calc(size_t index) const -> T {
         static_assert(!IsTransInvariant && "[Error]: Not implemented");
         const T hop = -mat.getHoppingT();
@@ -126,17 +126,17 @@ namespace Physica {
         return result;
     }
 
-    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_ttx<M, HubbardMatrix>)
     auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_ttx<M, HubbardMatrix>)
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_ttx<M, HubbardMatrix>)
     void GEMV<M, V>::sumHopping(Vector auto& target, FFT1D& fft, T factor, StateType psi) const {
         if (psi.isVacuum())
             return;
@@ -154,7 +154,7 @@ namespace Physica {
         target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(Tr(repr.getPeriods()[index])) * factor;
     }
 
-    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_ttx<M, HubbardMatrix>)
     void GEMV<M, V>::dotImpl(Vector auto& target, T factor, size_t index) const {
         const auto state = getRepr()[index];
         /* On site contribution */ {
@@ -209,7 +209,7 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_ttx<M, HubbardMatrix>)
     class Traits<GEMV<M, V>> {
         using M1 = std::remove_cvref<M>::type;
         using V1 = std::remove_cvref<V>::type;

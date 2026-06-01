@@ -54,7 +54,7 @@ namespace Physica {
         struct is_instance_of_txxxt<Template, Template<Arg0, Arg1, Arg2, Arg3, Args...>> : std::true_type {};
     }
 
-    template<template<class...> class Template, class T>
+    template<class T, template<class...> class Template>
     concept instanceof = Internal::is_instance_of<Template, std::remove_cvref_t<T>>::value;
     /**
      * x: Non type template param
@@ -62,16 +62,16 @@ namespace Physica {
      *
      * It is unfortunate that we cannot implement instanceof in an elegant way.
      */
-    template<template<auto, class...> class Template, class T>
+    template<class T, template<auto, class...> class Template>
     concept instanceof_xt = Internal::is_instance_of_xt<Template, std::remove_cvref_t<T>>::value;
 
-    template<template<class, auto...> class Template, class T>
+    template<class T, template<class, auto...> class Template>
     concept instanceof_tx = Internal::is_instance_of_tx<Template, std::remove_cvref_t<T>>::value;
 
-    template<template<class, class, auto...> class Template, class T>
+    template<class T, template<class, class, auto...> class Template>
     concept instanceof_ttx = Internal::is_instance_of_ttx<Template, std::remove_cvref_t<T>>::value;
 
-    template<template<class, auto, auto, auto, class...> class Template, class T>
+    template<class T, template<class, auto, auto, auto, class...> class Template>
     concept instanceof_txxxt = Internal::is_instance_of_txxxt<Template, std::remove_cvref_t<T>>::value;
     /**
      * Reject const&& to avoid potential bad pattern

@@ -22,7 +22,7 @@
 #include "Physica/Core/Exception/MKL/Lapack.h"
 
 namespace Physica {
-    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     void Inverse<M>::assign_mkl(Matrix auto& target) const {
         using Tm = decltype(std::declval<T>().toMKL());
         trig.assign(target);

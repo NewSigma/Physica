@@ -21,7 +21,7 @@
 #include "../SparseMatrix.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_tx<SparseMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, SparseMatrix>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using Base = RValueVector<GEMV<M, V>>;
     protected:
@@ -44,12 +44,12 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
-    template<Matrix M, Vector V> requires(instanceof_tx<SparseMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, SparseMatrix>)
     GEMV<M, V>::GEMV(M&& mat_, V&& vec_) : mat(std::forward<M>(mat_)), vec(std::forward<V>(vec_)) {
         assert(mat.getCol() == vec.getLength());
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<SparseMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, SparseMatrix>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
         const auto& elements = mat.getElements();
@@ -79,7 +79,7 @@ namespace Physica {
         }
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<SparseMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, SparseMatrix>)
     auto GEMV<M, V>::calc(size_t index) const -> T {
         const auto& elements = mat.getElements();
         const auto& minorIndexes = mat.getMinorIndexes();

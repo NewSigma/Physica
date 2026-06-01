@@ -21,7 +21,7 @@
 #include "InvGEMM.h"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<MatrixTrig, typename Traits<M1>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
     void GEMM<M1, M2>::assign_mkl(Matrix auto& target) const noexcept {
         using M = std::remove_cvref_t<decltype(target)>;
         using Tm = decltype(std::declval<T>().toMKL());

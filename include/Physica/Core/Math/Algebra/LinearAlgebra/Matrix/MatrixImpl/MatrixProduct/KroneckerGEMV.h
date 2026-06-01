@@ -21,7 +21,7 @@
 #include "Kronecker.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof<Kronecker, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, Kronecker>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
@@ -57,10 +57,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
-    template<Matrix M, Vector V> requires(instanceof<Kronecker, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, Kronecker>)
     GEMV<M, V>::GEMV(M&& mat, V&& vec) : mat(std::forward<M>(mat)), vec(std::forward<V>(vec)) {}
 
-    template<Matrix M, Vector V> requires(instanceof<Kronecker, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, Kronecker>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const noexcept {
         target.assert_assign(*this);
@@ -70,7 +70,7 @@ namespace Physica {
         (mat.getRHS() * vec.reshape_col(row, col) * mat.getLHS().transpose()).flatten().assign(target);
     }
 
-    template<Matrix M, Vector V> requires(instanceof<Kronecker, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, Kronecker>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign_add(Vector auto& target) const noexcept {
         target.assert_assign(*this);
@@ -80,42 +80,42 @@ namespace Physica {
         (mat.getRHS() * vec.reshape_col(row, col) * mat.getLHS().transpose()).flatten().assign_add(target);
     }
 
-    template<Matrix M, Vector V> requires(instanceof<Kronecker, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, Kronecker>)
     auto GEMV<M, V>::calc(size_t index) const -> CoDiff<T> {
         size_t row = mat.getRHS().getCol();
         size_t col = mat.getLHS().getCol();
         return (mat.getRHS() * vec.reshape_col(row, col) * mat.getLHS().transpose()).flatten().calc(index);
     }
 
-    template<Matrix M, Vector V> requires(instanceof<Kronecker, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, Kronecker>)
     auto GEMV<M, V>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
-    template<Matrix M, Vector V> requires(instanceof<Kronecker, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, Kronecker>)
     auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 
-    template<Matrix M, Vector V> requires(instanceof<Kronecker, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, Kronecker>)
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
 
-    template<Matrix M, Vector V> requires(instanceof<Kronecker, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, Kronecker>)
     __host__ __device__ consteval bool GEMV<M, V>::isFastAssign() noexcept {
         return MatrixMajor::isColMatrix<M>();
     }
 
-    template<Matrix M, Vector V> requires(instanceof<Kronecker, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, Kronecker>)
     __host__ __device__ consteval size_t GEMV<M, V>::getSizeAtCompile() noexcept {
         return std::max(std::remove_cvref_t<M>::getRowAtCompile(), std::remove_cvref_t<V>::getSizeAtCompile());
     }
 }
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof<Kronecker, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, Kronecker>)
     class Traits<GEMV<M, V>> {
         using M1 = std::remove_cvref_t<M>;
         using V1 = std::remove_cvref_t<V>;

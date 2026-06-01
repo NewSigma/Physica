@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/BlockMatrix.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof<BlockMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, BlockMatrix>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
@@ -53,12 +53,12 @@ namespace Physica {
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
-    template<Matrix M, Vector V> requires(instanceof<BlockMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, BlockMatrix>)
     GEMV<M, V>::GEMV(M m_, V v_) : m(std::forward<M>(m_)), v(std::forward<V>(v_)) {
         assert(m.getCol() == v.getLength() && "[Error]: Dimensions do not match");
     }
 
-    template<Matrix M, Vector V> requires(instanceof<BlockMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, BlockMatrix>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
         assert(getLength() == target.getLength() && "[Error]: Dimensions do not match");
@@ -72,18 +72,18 @@ namespace Physica {
         }
     }
 
-    template<Matrix M, Vector V> requires(instanceof<BlockMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, BlockMatrix>)
     auto GEMV<M, V>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
-    template<Matrix M, Vector V> requires(instanceof<BlockMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, BlockMatrix>)
     auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.m);
     }
 
-    template<Matrix M, Vector V> requires(instanceof<BlockMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof<M, BlockMatrix>)
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v);
     }

@@ -54,9 +54,9 @@ namespace Physica {
                 result -= int64_t(T::isSparse());
             result += int64_t(T::isComplex());
             result += int64_t(T::isDiffable()) * 2;
-            result += int64_t(instanceof_xt<VectorExpr, T>) * 10;
-            result += int64_t(instanceof_xt<MatrixExpr, T>) * 10;
-            result += int64_t(instanceof_xt<TensorExpr, T>) * 10;
+            result += int64_t(instanceof_xt<T, VectorExpr>) * 10;
+            result += int64_t(instanceof_xt<T, MatrixExpr>) * 10;
+            result += int64_t(instanceof_xt<T, TensorExpr>) * 10;
             return result;
         }
 

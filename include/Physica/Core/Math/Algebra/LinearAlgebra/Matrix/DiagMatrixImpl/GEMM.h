@@ -21,7 +21,7 @@
 #include "../DiagMatrix.h"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M2, DiagMatrix>)
     class GEMM<M1, M2> : public RValueMatrix<GEMM<M1, M2>> {
         using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
@@ -53,42 +53,42 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M2, DiagMatrix>)
     GEMM<M1, M2>::GEMM(M1&& lhs_, M2&& rhs_) : lhs(std::forward<M1>(lhs_)), rhs(std::forward<M2>(rhs_)) {}
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M2, DiagMatrix>)
     void GEMM<M1, M2>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < getCol(); ++i)
             target.col(i) = lhs.col(i) * rhs.diag()[i];
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M2, DiagMatrix>)
     auto GEMM<M1, M2>::calc(size_t row, size_t col) const -> T {
         return lhs.calc(row, col) * rhs.diag()[col];
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M2, DiagMatrix>)
     auto GEMM<M1, M2>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         return std::forward<Self>(self).getLHS() * std::forward<Self>(self).getRHS();
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M2, DiagMatrix>)
     auto&& GEMM<M1, M2>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M1>(self.lhs);
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M2, DiagMatrix>)
     auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M2>(self.rhs);
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M2, DiagMatrix>)
     __host__ __device__ consteval int GEMM<M1, M2>::getMajor() noexcept {
         return MatrixMajor::getMajor<M1>();
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, DiagMatrix>)
     class GEMM<M1, M2> : public RValueMatrix<GEMM<M1, M2>> {
         using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
@@ -120,37 +120,37 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, DiagMatrix>)
     GEMM<M1, M2>::GEMM(M1&& lhs_, M2&& rhs_) : lhs(std::forward<M1>(lhs_)), rhs(std::forward<M2>(rhs_)) {}
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, DiagMatrix>)
     void GEMM<M1, M2>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < getRow(); ++i)
             target.row(i) = lhs.diag()[i] * rhs.row(i);
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, DiagMatrix>)
     auto GEMM<M1, M2>::calc(size_t row, size_t col) const -> T {
         return lhs.diag()[row] * rhs.calc(row, col);
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, DiagMatrix>)
     auto GEMM<M1, M2>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         return std::forward<Self>(self).getLHS() * std::forward<Self>(self).getRHS();
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, DiagMatrix>)
     auto&& GEMM<M1, M2>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M1>(self.lhs);
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, DiagMatrix>)
     auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M2>(self.rhs);
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, DiagMatrix>)
     __host__ __device__ consteval int GEMM<M1, M2>::getMajor() noexcept {
         return MatrixMajor::getMajor<M2>();
     }

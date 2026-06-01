@@ -23,7 +23,7 @@
 namespace Physica {
     template<Scalar T, size_t Order> class DiagMatrix;
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1> && instanceof_tx<DiagMatrix, M2>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> && instanceof_tx<M2, DiagMatrix>)
     class GEMM<M1, M2> : public RValueMatrix<GEMM<M1, M2>> {
         using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
@@ -49,10 +49,10 @@ namespace Physica {
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1> && instanceof_tx<DiagMatrix, M2>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> && instanceof_tx<M2, DiagMatrix>)
     GEMM<M1, M2>::GEMM(M1&& trig, M2&& diag) : trig(std::forward<M1>(trig)), diag(std::forward<M2>(diag)) {}
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1> && instanceof_tx<DiagMatrix, M2>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> && instanceof_tx<M2, DiagMatrix>)
     void GEMM<M1, M2>::assign(Matrix auto& target) const {
         constexpr bool Upper = Traits<M1>::Upper;
         target.zeros();
@@ -64,12 +64,12 @@ namespace Physica {
         }
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1> && instanceof_tx<DiagMatrix, M2>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> && instanceof_tx<M2, DiagMatrix>)
     auto&& GEMM<M1, M2>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M1>(self.trig);
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1> && instanceof_tx<DiagMatrix, M2>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> && instanceof_tx<M2, DiagMatrix>)
     auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M2>(self.diag);
     }

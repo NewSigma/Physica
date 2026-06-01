@@ -105,7 +105,7 @@ namespace Physica {
 
     template<class T>
     struct is_codiff {
-        constexpr static bool value = instanceof<DiffCoro, T>;
+        constexpr static bool value = instanceof<T, DiffCoro>;
     };
 
     template<class T>

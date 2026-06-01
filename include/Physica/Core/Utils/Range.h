@@ -26,7 +26,7 @@ namespace Physica {
     namespace Internal {
         template<class Tuple, std::ranges::view... Vs>
         class common_zip_iterator {
-            static_assert(instanceof<std::tuple, Tuple>, "[Error]: Unexpected type");
+            static_assert(instanceof<Tuple, std::tuple>, "[Error]: Unexpected type");
             using This = common_zip_iterator<Tuple, Vs...>;
             using StdIterator = std::ranges::iterator_t<std::ranges::zip_view<Vs...>>;
         public:

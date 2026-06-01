@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/MatrixExpr.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<M, MatrixExpr>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
@@ -59,12 +59,12 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
     };
 
-    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<M, MatrixExpr>)
     GEMV<M, V>::GEMV(M expr_, V vec_) : expr(std::forward<M>(expr_)), vec(std::forward<V>(vec_)) {
         assert(expr.getCol() == vec.getLength());
     }
 
-    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<M, MatrixExpr>)
     auto GEMV<M, V>::operator-() const noexcept {
         if constexpr (M1::isFastAssign())
             return (-getLHS()) * getRHS();
@@ -72,7 +72,7 @@ namespace Physica {
             return getLHS() * (-getRHS());
     }
 
-    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<M, MatrixExpr>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
         if constexpr (isFastAssign()) {
@@ -98,7 +98,7 @@ namespace Physica {
             Base::assign(target);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<M, MatrixExpr>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign_add(Vector auto& target) const {
         if constexpr (isFastAssign()) {
@@ -130,28 +130,28 @@ namespace Physica {
             Base::assign_add(target);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<M, MatrixExpr>)
     auto GEMV<M, V>::calc(size_t index) const -> T {
         return expr.row(index) * vec;
     }
 
-    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<M, MatrixExpr>)
     auto GEMV<M, V>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
-    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<M, MatrixExpr>)
     auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.expr);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<M, MatrixExpr>)
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<M, MatrixExpr>)
     __host__ __device__ consteval bool GEMV<M, V>::isFastAssign() noexcept {
         using U = Traits<M1>::RHS;
         constexpr bool isScalarU = Scalar<U>;
@@ -175,7 +175,7 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<M, MatrixExpr>)
     class Traits<GEMV<M, V>> {
         using M1 = std::remove_cvref_t<M>;
         using V1 = std::remove_cvref_t<V>;

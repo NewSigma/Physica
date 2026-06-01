@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_tx<DenseSymmMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, DenseSymmMatrix>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
@@ -57,12 +57,12 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
-    template<Matrix M, Vector V> requires(instanceof_tx<DenseSymmMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, DenseSymmMatrix>)
     GEMV<M, V>::GEMV(M&& m_, V&& v_) : m(m_), v(v_) {
         assert(m.getCol() == v.getLength());
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<DenseSymmMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, DenseSymmMatrix>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
         const size_t length = getLength();
@@ -83,28 +83,28 @@ namespace Physica {
             Base::assign(target);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<DenseSymmMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, DenseSymmMatrix>)
     auto GEMV<M, V>::calc(size_t index) const -> CoDiff<ScalarType> {
         return m.row(index) * v;
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<DenseSymmMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, DenseSymmMatrix>)
     auto GEMV<M, V>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<DenseSymmMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, DenseSymmMatrix>)
     auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.m);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<DenseSymmMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, DenseSymmMatrix>)
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<DenseSymmMatrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, DenseSymmMatrix>)
     __host__ __device__ consteval size_t GEMV<M, V>::getSizeAtCompile() noexcept {
         using M1 = std::remove_cvref<M>::type;
         using V1 = std::remove_cvref<V>::type;

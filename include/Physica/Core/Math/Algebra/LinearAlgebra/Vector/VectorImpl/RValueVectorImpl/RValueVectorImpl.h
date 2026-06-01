@@ -45,7 +45,7 @@ namespace Physica {
     template<class Derived>
     auto RValueVector<Derived>::operator-(this auto&& self) noexcept {
         using Self = decltype(self);
-        if constexpr (instanceof<GEMV, Derived>)
+        if constexpr (instanceof<Derived, GEMV>)
             return std::forward<Self>(self).getLHS() * (-std::forward<Self>(self).getRHS());
         else
             return VectorExpr<ExprID::Minus, Self>(std::forward<Self>(self));

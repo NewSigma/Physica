@@ -21,7 +21,7 @@
 #include "Inverse.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, DenseLU>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
@@ -54,10 +54,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, DenseLU>)
     GEMV<M, V>::GEMV(M&& m, V&& v) : m(std::forward<M>(m)), v(std::forward<V>(v)) {}
 
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, DenseLU>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
         if constexpr (HasMKL() && Internal::EnableLAPACK<V, decltype(target)>::value)
@@ -66,7 +66,7 @@ namespace Physica {
             assign_base(target);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, DenseLU>)
     void GEMV<M, V>::assign_base(Vector auto& target) const {
         const auto& lu = getLHS().getDenseLU();
         if constexpr (lu.isPivot()) {
@@ -80,23 +80,23 @@ namespace Physica {
         }
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, DenseLU>)
     auto GEMV<M, V>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         return std::forward<Self>(self).getLHS().values() + std::forward<Self>(self).getRHS().values();
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, DenseLU>)
     auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.m);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, DenseLU>)
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, DenseLU>)
     __host__ __device__ consteval size_t GEMV<M, V>::getSizeAtCompile() noexcept {
         return std::max(std::remove_cvref_t<M>::getRowAtCompile(), std::remove_cvref_t<V>::getSizeAtCompile());
     }

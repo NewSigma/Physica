@@ -25,9 +25,9 @@ namespace Physica {
     void GEMV<M, V>::assign_mkl(Vector auto&& target) const noexcept {
         using Tm = decltype(std::declval<T>().toMKL());
         constexpr auto Layout = MatrixMajor::getMajor<M>() == MatrixMajor::Row ? CblasRowMajor : CblasColMajor;
-        constexpr auto Trans = instanceof<Transpose, M> ? CblasTrans : CblasNoTrans;
+        constexpr auto Trans = instanceof<M, Transpose> ? CblasTrans : CblasNoTrans;
         auto getData = [](const auto& mat) static {
-            if constexpr (instanceof<Transpose, M>)
+            if constexpr (instanceof<M, Transpose>)
                 return mat.transpose().data();
             else
                 return mat.data();

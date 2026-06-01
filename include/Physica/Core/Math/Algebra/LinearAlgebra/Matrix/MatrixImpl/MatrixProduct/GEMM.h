@@ -351,7 +351,7 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     template<Matrix Target, Matrix MaybeTrans>
     consteval bool GEMM<M1, M2>::MatOrTransUseMKL() noexcept {
-        if constexpr (instanceof<Transpose, MaybeTrans>)
+        if constexpr (instanceof<MaybeTrans, Transpose>)
             return HasMKL() && Internal::EnableLAPACK<Target, decltype(std::declval<MaybeTrans>().transpose())>::value;
         else
             return HasMKL() && Internal::EnableLAPACK<Target, MaybeTrans>::value;

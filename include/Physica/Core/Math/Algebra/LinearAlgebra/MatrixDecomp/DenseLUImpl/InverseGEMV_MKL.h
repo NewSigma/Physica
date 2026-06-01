@@ -21,7 +21,7 @@
 #include "InverseGEMV.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, DenseLU>)
     void GEMV<M, V>::assign_mkl(Vector auto& target) const {
         using Tm = decltype(std::declval<T>().toMKL());
         v.assign(target);

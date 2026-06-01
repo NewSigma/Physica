@@ -21,7 +21,7 @@
 #include "MatrixTrig.cuh"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig>)
     class device_obj<GEMM<M1, M2>> : public device_obj<RValueMatrix<GEMM<M1, M2>>> {
         using host_obj = GEMM<M1, M2>;
         using This = device_obj<host_obj>;
@@ -51,10 +51,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto&& getRHS(this auto&&) noexcept;
     };
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig>)
     device_obj<GEMM<M1, M2>>::device_obj(Ref1 trig, Ref2 rhs) : trig(asStruct(trig)), rhs(asStruct(rhs)) {}
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig>)
     void device_obj<GEMM<M1, M2>>::assign(Matrix auto& target) const {
         using M = std::remove_cvref_t<decltype(target)>;
         using Tm = decltype(std::declval<T>().toMKL());
@@ -89,12 +89,12 @@ namespace Physica {
         }
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig>)
     __host__ __device__ auto&& device_obj<GEMM<M1, M2>>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref1>(self.trig.getDerived());
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig>)
     __host__ __device__ auto&& device_obj<GEMM<M1, M2>>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref2>(self.rhs.getDerived());
     }

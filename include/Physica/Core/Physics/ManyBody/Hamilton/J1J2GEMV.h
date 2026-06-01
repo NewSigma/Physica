@@ -22,7 +22,7 @@
 #include "J1J2Matrix.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_tx<J1J2Matrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, J1J2Matrix>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
@@ -61,12 +61,12 @@ namespace Physica {
         [[nodiscard]] auto getCouplingJ2() const noexcept { return mat.getCouplingJ2(); }
     };
 
-    template<Matrix M, Vector V> requires(instanceof_tx<J1J2Matrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, J1J2Matrix>)
     GEMV<M, V>::GEMV(M&& mat_, V&& vec_) : mat(std::forward<M>(mat_)), vec(std::forward<V>(vec_)) {
         assert(mat.getCol() == vec.getLength());
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<J1J2Matrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, J1J2Matrix>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
         target.assert_assign(*this);
@@ -110,19 +110,19 @@ namespace Physica {
         }
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<J1J2Matrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, J1J2Matrix>)
     auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<J1J2Matrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, J1J2Matrix>)
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
 }
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_tx<J1J2Matrix, M>)
+    template<Matrix M, Vector V> requires(instanceof_tx<M, J1J2Matrix>)
     class Traits<GEMV<M, V>> {
         using T1 = std::remove_cvref_t<M>::ScalarType;
         using T2 = std::remove_cvref_t<V>::ScalarType;

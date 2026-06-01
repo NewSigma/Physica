@@ -63,9 +63,9 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     void device_obj<Kronecker<M1, M2>>::assign(Matrix auto&& target) const {
-        if constexpr (instanceof_tx<IdentityMatrix, M1>)
+        if constexpr (instanceof_tx<M1, IdentityMatrix>)
             assign_identity(target);
-        else if constexpr (instanceof_tx<DiagMatrix, M1>)
+        else if constexpr (instanceof_tx<M1, DiagMatrix>)
             assign_diagonal(target);
         else {
             target.zeros();
@@ -91,9 +91,9 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     void device_obj<Kronecker<M1, M2>>::assign_add(Matrix auto&& target) const {
-        if constexpr (instanceof_tx<IdentityMatrix, M1>)
+        if constexpr (instanceof_tx<M1, IdentityMatrix>)
             assign_add_identity(target);
-        else if constexpr (instanceof_tx<DiagMatrix, M1>)
+        else if constexpr (instanceof_tx<M1, DiagMatrix>)
             assign_add_diagonal(target);
         else {
             auto assign_add_general = [lhs_ = m1, rhs_ = m2, target_ = asStruct(target)] __device__() mutable {

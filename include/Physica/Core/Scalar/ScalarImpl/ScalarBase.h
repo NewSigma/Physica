@@ -133,7 +133,7 @@ namespace Physica {
         This& operator=(This&& obj) noexcept = default;
     private:
         static_assert(isDiffable() == (Order > 0), "[Error]: DiffMode is not self consistent");
-        static_assert(std::is_same<Derived, ScalarType>::value || instanceof<ScalarRef, Derived>, "[Error]: Inconsistent type between traits and inherit class");
+        static_assert(std::is_same<Derived, ScalarType>::value || instanceof<Derived, ScalarRef>, "[Error]: Inconsistent type between traits and inherit class");
     };
 
     template<class Derived>

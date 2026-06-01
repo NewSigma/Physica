@@ -24,7 +24,7 @@ namespace Physica {
     /**
      * \class ScalarPtr is an iterator for traversing a differentiable vector
      */
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     class ScalarPtr<T> {
         using This = ScalarPtr<T>;
         using RefTy = ScalarRef<T>;
@@ -94,23 +94,23 @@ namespace Physica {
         friend constexpr This operator+(difference_type n, const This& ite) noexcept { return ite + n; }
     };
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr ScalarPtr<T>::ScalarPtr(ValuePtrTy pValue, GradPtrTy pGrad) noexcept : pValue(pValue), pGrad(pGrad) {}
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ ScalarPtr<T>::ScalarPtr(T& x) noexcept : ScalarPtr(&x.value(), &x.grad()) {}
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ ScalarPtr<T>::ScalarPtr(RefTy& x) noexcept : ScalarPtr(&x.value(), &x.grad()) {}
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ ScalarPtr<T>::operator ScalarPtr<const T>() const noexcept requires(!IsConst) {
         return ScalarPtr<const T>(pValue, pGrad);
     }
     /**
      * Counter part of reinterpret_cast. Use it e.g. float64 <-> cfloat64
      */
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     template<Scalar U>
     __host__ __device__ ScalarPtr<T>::operator ScalarPtr<Diff<U, Mode, Order>>() const noexcept requires(!IsConst) {
         using RetTy = ScalarPtr<Diff<U, Mode, Order>>;
@@ -119,7 +119,7 @@ namespace Physica {
         return RetTy(reinterpret_cast<RetPtrV>(value_ptr()), RetPtrG(grad_ptr()));
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     template<Scalar U>
     __host__ __device__ ScalarPtr<T>::operator ScalarPtr<const Diff<U, Mode, Order>>() const noexcept requires(IsConst) {
         using RetTy = ScalarPtr<const Diff<U, Mode, Order>>;
@@ -128,89 +128,89 @@ namespace Physica {
         return RetTy(reinterpret_cast<RetPtrV>(value_ptr()), RetPtrG(grad_ptr()));
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr auto ScalarPtr<T>::operator++() noexcept -> This& {
         ++pValue;
         ++pGrad;
         return *this;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr auto ScalarPtr<T>::operator--() noexcept -> This& {
         --pValue;
         --pGrad;
         return *this;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr auto ScalarPtr<T>::operator+=(difference_type n) noexcept -> This& {
         pValue += n;
         pGrad += n;
         return *this;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr auto ScalarPtr<T>::operator-=(difference_type n) noexcept -> This& {
         pValue -= n;
         pGrad -= n;
         return *this;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr auto ScalarPtr<T>::operator++(int) noexcept -> This {
         return This(pValue++, pGrad++);
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr auto ScalarPtr<T>::operator--(int) noexcept -> This {
         return This(pValue--, pGrad--);
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr auto ScalarPtr<T>::operator*() const noexcept -> RefTy {
         return RefTy(*this);
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr auto ScalarPtr<T>::operator->() const noexcept -> RefTy {
         return operator*();
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr auto ScalarPtr<T>::operator[](difference_type n) const noexcept -> RefTy {
         return *(*this + n);
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr bool ScalarPtr<T>::operator==(const This& other) const noexcept {
         bool flag = pValue == other.pValue;
         assert(flag == (pGrad == other.pGrad) && "[Error]: Bad ScalarPtr");
         return flag;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr auto ScalarPtr<T>::operator<=>(const This& other) const noexcept {
         auto order = pValue <=> other.pValue;
         assert(order == (pGrad <=> other.pGrad) && "[Error]: Bad ScalarPtr");
         return order;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr auto ScalarPtr<T>::operator+(difference_type n) const noexcept -> This {
         return ScalarPtr(value_ptr() + n, grad_ptr() + n);
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr auto ScalarPtr<T>::operator-(difference_type n) const noexcept -> This {
         return ScalarPtr(value_ptr() - n, grad_ptr() - n);
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr auto ScalarPtr<T>::operator-(const This& other) const noexcept -> difference_type {
         return pValue - other.pValue;
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ void ScalarPtr<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         using std::swap;
@@ -218,7 +218,7 @@ namespace Physica {
         swap(pGrad, obj.pGrad);
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     template<int GradOrder>
     __host__ __device__ auto ScalarPtr<T>::grad_ptr() const noexcept {
         static_assert(GradOrder > 0, "[Error]: Invalid order");
@@ -228,7 +228,7 @@ namespace Physica {
             return pGrad.template grad_ptr<GradOrder - 1>();
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     template<int MaskOrder>
     __host__ __device__ auto ScalarPtr<T>::grad_mask() const noexcept {
         static_assert(MaskOrder >= 0, "[Error]: Invalid order");
@@ -243,7 +243,7 @@ namespace Physica {
         }
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     template<size_t Index>
     __host__ __device__ constexpr auto ScalarPtr<T>::get() const noexcept -> ValuePtrTy {
         if constexpr (Index == 0)
@@ -258,7 +258,7 @@ namespace Physica {
         }
     }
 
-    template<Scalar T> requires(instanceof_tx<Diff, T>)
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr auto ScalarPtr<T>::get(int index) const noexcept -> ValuePtrTy {
         if (index == 0)
             return pValue;

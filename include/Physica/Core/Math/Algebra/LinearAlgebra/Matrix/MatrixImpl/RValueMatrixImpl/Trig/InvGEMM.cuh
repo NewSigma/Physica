@@ -21,7 +21,7 @@
 #include "MatrixTrig.cuh"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<MatrixTrig, typename Traits<M1>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
     class device_obj<GEMM<M1, M2>> : public device_obj<RValueMatrix<GEMM<M1, M2>>> {
         using host_obj = GEMM<M1, M2>;
         using This = device_obj<host_obj>;
@@ -52,10 +52,10 @@ namespace Physica {
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<MatrixTrig, typename Traits<M1>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
     device_obj<GEMM<M1, M2>>::device_obj(Ref1 inv, Ref2 rhs) : inv(asStruct(inv)), rhs(asStruct(rhs)) {}
 
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<MatrixTrig, typename Traits<M1>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
     void device_obj<GEMM<M1, M2>>::assign(Matrix auto& target) const {
         using Tm = decltype(std::declval<T>().toCUDA());
         getRHS().assign(target);
@@ -87,12 +87,12 @@ namespace Physica {
         }
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<MatrixTrig, typename Traits<M1>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
     auto&& device_obj<GEMM<M1, M2>>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref1>(self.inv.getDerived());
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<MatrixTrig, typename Traits<M1>::ExprType>)
+    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
     auto&& device_obj<GEMM<M1, M2>>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref2>(self.rhs.getDerived());
     }

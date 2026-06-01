@@ -21,7 +21,7 @@
 #include "MatrixTrig.h"
 
 namespace Physica {
-    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     class Inverse<M> : public RValueMatrix<Inverse<M>> {
         using This = Inverse<M>;
         using Base = RValueMatrix<This>;
@@ -51,10 +51,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
-    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     Inverse<M>::Inverse(M&& trig) : trig(std::forward<M>(trig)) {}
 
-    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     void Inverse<M>::assign(Matrix auto& target) const {
         using Expr = Traits<M>::ExprType;
         if constexpr (HasMKL() && Internal::EnableLAPACK<Expr, decltype(target)>::value)
@@ -63,7 +63,7 @@ namespace Physica {
             assign_base(target);
     }
 
-    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     void Inverse<M>::assign_base(Matrix auto& target) const noexcept {
         target.assert_assign(*this);
         if constexpr (!Traits<M>::Upper && Traits<M>::Unit) {
@@ -80,12 +80,12 @@ namespace Physica {
             noImpl();
     }
 
-    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     auto&& Inverse<M>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.trig);
     }
 
-    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     __host__ __device__ consteval int Inverse<M>::getMajor() noexcept {
         return std::remove_cvref_t<M>::getMajor();
     }
