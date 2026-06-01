@@ -24,11 +24,19 @@ using RandomSource = Random<>;
 
 namespace {
     void simd() {
-        auto x = SIMD<float64, 2>::random_uniform<Random<>>();
-        auto y = SIMD<cfloat64, 2>::random_uniform<Random<>>();
-        auto z = (x / y) * y;
-        for (int i = 0; i < x.size(); ++i)
-            expect<RandomSource>(scalarNear(x[i], z[i].real(), 2UL));
+        /* Div */ {
+            auto x = SIMD<float64, 2>::random_uniform<Random<>>();
+            auto y = SIMD<cfloat64, 2>::random_uniform<Random<>>();
+            auto z = (x / y) * y;
+            for (int i = 0; i < x.size(); ++i)
+                expect<RandomSource>(scalarNear(x[i], z[i].real(), 2UL));
+        }
+        /* Tanh */ {
+            auto x = SIMD<cfloat64, 2>::random_uniform<Random<>>();
+            auto y = tanh(x);
+            for (int i = 0; i < x.size(); ++i)
+                expect<RandomSource>(tanh(x[i]) == y[i]);
+        }
     }
 }
 

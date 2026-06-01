@@ -179,7 +179,7 @@ namespace Physica {
         for (int i = 0; i < Size; ++i)
             arr[i] = tanh(x[i]);
         ResultType result{};
-        result.load(arr);
+        result.load(arr.data());
         return result;
     }
 
