@@ -60,14 +60,41 @@ namespace Physica {
         }
 
         if constexpr (IsDevice())
-            assign_impl(target);
+            Base::getDerived().assign(target, ThreadBlock<1>{});
     }
 
     template<class Derived>
-    __device__ void device_obj<RValueVector<Derived>>::assign(Vector auto&& target, const ThreadBlock& block) const {
-        for (int i = block.rank(); i < getLength(); i += block.getLength())
-            target[i] = calc(i);
-        block.sync();
+    __device__ void device_obj<RValueVector<Derived>>::assign(Vector auto&& target, instanceof_xt<ThreadBlock> auto block) const {
+        target.assert_assign(Base::getDerived());
+        const auto& v0 = Base::getDerived();
+        if constexpr (Internal::EnableSIMD<device_obj<Derived>, decltype(target)>::value) {
+            constexpr size_t Length = getSizeAtCompile(target);
+            constexpr int Size = device_obj<BestPacket<T, Length>>::Size;
+            if constexpr (Length != Dynamic) {
+                constexpr size_t to = Length / Size * Size;
+                for (size_t i = 0; i < to; i += Size)
+                    target.writePacket(v0.template packet<Size>(i), i);
+
+                for (size_t i = Length - Length % Size; i < Length; ++i)
+                    target[i] = v0.calc(i);
+            }
+            else {
+                const size_t length = getLength();
+                const size_t to = length / Size * Size;
+                size_t i = 0;
+                for (; i < to; i += Size)
+                    target.writePacket(v0.template packet<Size>(i), i);
+
+                for (; i < length; ++i)
+                    target[i] = v0.calc(i);
+            }
+        }
+        else {
+            const size_t length = getLength();
+            for (size_t i = block.rank(); i < length; i += block.getNumThread())
+                target[i] = calc(i);
+            block.sync();
+        }
     }
 
     template<class Derived>
@@ -86,7 +113,7 @@ namespace Physica {
         }
 
         if constexpr (IsDevice())
-            noImpl();
+            Base::getDerived().assign_add(target, ThreadBlock{});
     }
 
     template<class Derived>
@@ -510,38 +537,5 @@ namespace Physica {
     __host__ __device__ consteval void device_obj<RValueVector<Derived>>::static_assert_assign(const Vector auto& source) noexcept {
         static_assert(getSizeAtCompile() != Dynamic || DeviceObj<decltype(source)>, "[Error]: Host object cannot be assigned to dynamic device object");
         host_obj::static_assert_assign(source);
-    }
-
-    template<class Derived>
-    template<Vector V>
-    __device__ void device_obj<RValueVector<Derived>>::assign_impl(V& target) const {
-        const auto& v0 = Base::getDerived();
-        if constexpr (Internal::EnableSIMD<device_obj<Derived>, V>::value) {
-            constexpr size_t Length = getSizeAtCompile(target);
-            constexpr int Size = device_obj<BestPacket<T, Length>>::Size;
-            if constexpr (Length != Dynamic) {
-                constexpr size_t to = Length / Size * Size;
-                for (size_t i = 0; i < to; i += Size)
-                    target.writePacket(v0.template packet<Size>(i), i);
-
-                for (size_t i = Length - Length % Size; i < Length; ++i)
-                    target[i] = v0.calc(i);
-            }
-            else {
-                const size_t length = getLength();
-                const size_t to = length / Size * Size;
-                size_t i = 0;
-                for (; i < to; i += Size)
-                    target.writePacket(v0.template packet<Size>(i), i);
-
-                for (; i < length; ++i)
-                    target[i] = v0.calc(i);
-            }
-        }
-        else {
-            using OtherScalar = V::ScalarType;
-            for (size_t i = 0; i < getLength(); ++i)
-                target[i] = OtherScalar(calc(i));
-        }
     }
 }

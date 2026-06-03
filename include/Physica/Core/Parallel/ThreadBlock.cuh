@@ -19,32 +19,59 @@
 #pragma once
 
 #include <cooperative_groups.h>
+#include "Physica/Macro.h"
 
 namespace Physica {
     /**
-     * \class ThreadBlock dedicates to
-     * 1. Changes logical layout of cuda thread block
-     * 2. Wrap cuda cooperative groups
+     * \class ThreadBlock is a logical view of cuda thread block. Based on cooperative groups
      */
-    class ThreadBlock {
-        using This = ThreadBlock;
-        using Base = cooperative_groups::thread_block;
+    template<int NumThread = Dynamic>
+    class ThreadBlock final {
+        using This = ThreadBlock<NumThread>;
+        using Impl = cooperative_groups::thread_block;
 
-        Base block;
+        Impl block;
     public:
         __device__ ThreadBlock();
-        ThreadBlock(const This&) = delete;
-        ThreadBlock(This&&) noexcept = delete;
+        ThreadBlock(const This&) = default;
+        ThreadBlock(This&&) noexcept = default;
         ~ThreadBlock() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        __device__ void sync() const noexcept { block.sync(); }
-        /* Getters */
-        [[nodiscard]] __device__ static unsigned int rank() noexcept { return Base::thread_rank(); }
-        [[nodiscard]] __device__ static unsigned int getLength() noexcept { return Base::num_threads(); }
+        __device__ void sync() const noexcept;
+        /* Static members */
+        [[nodiscard]] __device__ constexpr static int rank() noexcept;
+        [[nodiscard]] __device__ constexpr static int getNumThread() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static int getNumThreadAtCompile() noexcept;
     };
 
-    __device__ inline ThreadBlock::ThreadBlock() : block(cooperative_groups::this_thread_block()) {}
+    template<int NumThread>
+    __device__ inline ThreadBlock<NumThread>::ThreadBlock() : block(cooperative_groups::this_thread_block()) {}
+
+    template<int NumThread>
+    __device__ void ThreadBlock<NumThread>::sync() const noexcept {
+        if constexpr (NumThread != 1)
+            block.sync();
+    }
+
+    template<int NumThread>
+    __device__ constexpr int ThreadBlock<NumThread>::rank() noexcept {
+        if constexpr (NumThread != 1)
+            return static_cast<int>(Impl::thread_rank());
+        return 0;
+    }
+
+    template<int NumThread>
+    __device__ constexpr int ThreadBlock<NumThread>::getNumThread() noexcept {
+        if constexpr (NumThread == Dynamic)
+            return static_cast<int>(Impl::num_threads());
+        return NumThread;
+    }
+
+    template<int NumThread>
+    __host__ __device__ consteval int ThreadBlock<NumThread>::getNumThreadAtCompile() noexcept {
+        return NumThread;
+    }
 }

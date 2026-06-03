@@ -77,30 +77,8 @@ namespace Physica {
             CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(func, target.makeKernelConfig());
         }
 
-        if constexpr (IsDevice()) {
-            const size_t maxMajor = target.getMaxMajor();
-            const size_t maxMinor = target.getMaxMinor();
-            for (size_t major = 0; major < maxMajor; ++major) {
-                for (size_t minor = 0; minor < maxMinor; ++minor) {
-                    const size_t r = target.rowFromMajorMinor(major, minor);
-                    const size_t c = target.colFromMajorMinor(major, minor);
-                    target[r, c] = Base::getDerived().calc(r, c);
-                }
-            }
-        }
-    }
-
-    template<class Derived>
-    __device__ void device_obj<RValueMatrix<Derived>>::assign(Matrix auto&& target, const ThreadBlock& block) const {
-        const size_t maxMinor = target.getMaxMinor();
-        for (unsigned int i = block.rank(); i < target.getSize(); i += block.getLength()) {
-            size_t major = i / maxMinor;
-            size_t minor = i % maxMinor;
-            const size_t r = target.rowFromMajorMinor(major, minor);
-            const size_t c = target.colFromMajorMinor(major, minor);
-            target[r, c] = calc(r, c);
-        }
-        block.sync();
+        if constexpr (IsDevice())
+            Base::getDerived().assign(target, ThreadBlock<1>{});
     }
 
     template<class Derived>
@@ -108,19 +86,6 @@ namespace Physica {
         const auto& x = Base::getDerived();
         target.assert_assign(x);
         target = target + x;
-    }
-
-    template<class Derived>
-    __device__ void device_obj<RValueMatrix<Derived>>::assign_add(Matrix auto&& target, const ThreadBlock& block) const {
-        const size_t maxMinor = target.getMaxMinor();
-        for (unsigned int i = block.rank(); i < target.getSize(); i += block.getLength()) {
-            size_t major = i / maxMinor;
-            size_t minor = i % maxMinor;
-            const size_t r = target.rowFromMajorMinor(major, minor);
-            const size_t c = target.colFromMajorMinor(major, minor);
-            target[r, c] += calc(r, c);
-        }
-        block.sync();
     }
 
     template<class Derived>
@@ -143,6 +108,32 @@ namespace Physica {
         constexpr size_t Size2 = source.getSizeAtCompile();
         if constexpr (Size1 == Dynamic || Size2 == Dynamic)
             assert(getSize() > 0);
+    }
+
+    template<class Derived>
+    __device__ void device_obj<RValueMatrix<Derived>>::assign(Matrix auto&& target, instanceof_xt<ThreadBlock> auto block) const {
+        const size_t maxMinor = target.getMaxMinor();
+        for (unsigned int i = block.rank(); i < target.getSize(); i += block.getNumThread()) {
+            size_t major = i / maxMinor;
+            size_t minor = i % maxMinor;
+            const size_t r = target.rowFromMajorMinor(major, minor);
+            const size_t c = target.colFromMajorMinor(major, minor);
+            target[r, c] = calc(r, c);
+        }
+        block.sync();
+    }
+
+    template<class Derived>
+    __device__ void device_obj<RValueMatrix<Derived>>::assign_add(Matrix auto&& target, instanceof_xt<ThreadBlock> auto block) const {
+        const size_t maxMinor = target.getMaxMinor();
+        for (unsigned int i = block.rank(); i < target.getSize(); i += block.getNumThread()) {
+            size_t major = i / maxMinor;
+            size_t minor = i % maxMinor;
+            const size_t r = target.rowFromMajorMinor(major, minor);
+            const size_t c = target.colFromMajorMinor(major, minor);
+            target[r, c] += calc(r, c);
+        }
+        block.sync();
     }
 
     template<class Derived>
