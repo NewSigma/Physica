@@ -96,6 +96,8 @@ namespace Physica {
     template<class Derived>
     void RValueVector<Derived>::assert_assign(const Vector auto& source) const noexcept {
         static_assert_assign(source);
+        if constexpr (std::same_as<Derived, std::remove_cvref_t<decltype(source)>>)
+            assert(this != &source && "[Error]: Self assign is likely a bug");
         if constexpr (getSizeAtCompile() == Dynamic && source.getSizeAtCompile() == Dynamic) {
             assert(getLength() == source.getLength() && "[Error]: Size mismatch between two vector");
             assert(getLength() > 0);

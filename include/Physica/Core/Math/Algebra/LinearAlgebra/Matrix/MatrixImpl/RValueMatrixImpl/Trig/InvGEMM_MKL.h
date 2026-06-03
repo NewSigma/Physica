@@ -31,7 +31,12 @@ namespace Physica {
         constexpr auto TransA = CblasNoTrans;
         constexpr auto Diag = Traits<M1>::Unit ? CblasUnit : CblasNonUnit;
         const M buffer = inv.getExpr();
-        rhs.assign(target);
+        if constexpr (std::same_as<std::remove_cvref_t<M2>, M>) {
+            if (&rhs != &target)
+                rhs.assign(target);
+        }
+        else
+            rhs.assign(target);
 
         const size_t m = getRow();
         const size_t n = getCol();

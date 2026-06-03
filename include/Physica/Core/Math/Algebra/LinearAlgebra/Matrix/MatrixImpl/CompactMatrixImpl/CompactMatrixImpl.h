@@ -32,6 +32,7 @@ namespace Physica {
     void CompactMatrix<Derived>::assign_base(Matrix auto&& __restrict target) const __restrict noexcept {
         using M = decltype(target);
         const auto& self = Base::getDerived();
+        target.assert_assign(self);
         if constexpr (MatrixMajor::isSameMajor<Derived, decltype(target)>()) {
             if constexpr (std::remove_cvref_t<M>::isCompact())
                 self.flatten().template assign<P>(target.flatten());

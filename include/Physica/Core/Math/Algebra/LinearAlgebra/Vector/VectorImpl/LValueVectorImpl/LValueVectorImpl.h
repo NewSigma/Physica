@@ -60,8 +60,6 @@ namespace Physica {
     template<class Derived>
     template<ExecutePolicy P>
     Derived& LValueVector<Derived>::operator=(const Vector auto& v) {
-        if constexpr (std::is_same<const Derived&, decltype(v)>::value)
-            assert(this != &v && "[Error]: Self assign is likely a bug");
         Derived& x = Base::getDerived();
         x.resize(v);
         x.assert_assign(v);

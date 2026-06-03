@@ -24,6 +24,7 @@
 namespace Physica {
     template<class Derived>
     void RValueTensor<Derived>::assign(Tensor auto& x) const {
+        x.assert_assign(Base::getDerived());
         if constexpr (!isDiffable() && x.isDiffable()) {
             Base::getDerived().assign(x.values());
             x.zero_grad();
@@ -35,6 +36,12 @@ namespace Physica {
                 x[indices] = calc(indices);
             }
         }
+    }
+
+    template<class Derived>
+    void RValueTensor<Derived>::assert_assign(const Tensor auto& source) const noexcept {
+        if constexpr (std::is_same<Derived, std::remove_cvref_t<decltype(source)>>::value)
+            assert(this != &source && "[Error]: Self assign is likely a bug");
     }
 
     template<class Derived>

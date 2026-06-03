@@ -80,9 +80,6 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const Vector auto& v) {
-        using V = std::remove_cvref_t<decltype(v)>;
-        if constexpr (std::is_same<Derived, V>::value)
-            assert(this != &v && "[Error]: Self assign is likely a bug");
         Base::assert_assign(v);
 
         auto& x = Base::getDerived();

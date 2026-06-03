@@ -105,6 +105,8 @@ namespace Physica {
     template<class Derived>
     void RValueMatrix<Derived>::assert_assign(const Matrix auto& source) const noexcept {
         static_assert_assign(source);
+        if constexpr (std::is_same<Derived, std::remove_cvref_t<decltype(source)>>::value)
+            assert(this != &source && "[Error]: Self assign is likely a bug");
 
         constexpr size_t Row1 = Derived::getRowAtCompile();
         constexpr size_t Row2 = source.getRowAtCompile();

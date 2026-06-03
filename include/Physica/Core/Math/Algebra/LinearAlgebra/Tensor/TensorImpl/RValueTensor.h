@@ -51,6 +51,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         void assign(Tensor auto& x) const;
+        void assert_assign(const Tensor auto& source) const noexcept;
 
         [[nodiscard]] decltype(auto) calc(std::integral auto... dims) const;
         [[nodiscard]] decltype(auto) calc(IndexType index) const;
