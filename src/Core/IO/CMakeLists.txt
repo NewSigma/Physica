@@ -1,7 +1,11 @@
 if (${PHYSICA_HDF5})
-    file(GLOB_RECURSE SOURCES HDF5/*.cpp)
-    target_sources(PhysicaCore PRIVATE ${SOURCES})
+    add_subdirectory(HDF5)
 endif()
+add_subdirectory(QE)
+add_subdirectory(VASP)
 
-file(GLOB_RECURSE SOURCES QE/*.cpp VASP/*.cpp)
-target_sources(PhysicaCore PRIVATE ${SOURCES} CsvFile.cpp Gnuplot.cpp Mnist.cpp)
+target_sources(PhysicaCore PRIVATE
+    CsvFile.cpp
+    Gnuplot.cpp
+    Mnist.cpp
+)

@@ -1,7 +1,7 @@
 add_library(PhysicaGui)
 
-file(GLOB_RECURSE SOURCES_GUI *.cpp)
-target_sources(PhysicaGui PRIVATE ${SOURCES_GUI})
+add_subdirectory(Plot)
+
 target_link_libraries(PhysicaGui PUBLIC Physica::Gui)
 
 set_target_properties(PhysicaGui PROPERTIES INSTALL_RPATH \${ORIGIN})

@@ -2,15 +2,11 @@ add_library(PhysicaCore)
 
 add_subdirectory(Exception)
 add_subdirectory(IO)
+add_subdirectory(Math)
+add_subdirectory(Parallel)
+add_subdirectory(Physics)
 add_subdirectory(Scalar)
-
-file(GLOB_RECURSE SOURCES_CORE Math/*.cpp Parallel/*.cpp Physics/*.cpp Utils/*.cpp)
-target_sources(PhysicaCore PRIVATE ${SOURCES_CORE})
-
-if(${PHYSICA_CUDA})
-    file(GLOB_RECURSE SOURCES_CUDA Math/*.cu Parallel/*.cu Physics/*.cu Utils/*.cu)
-    target_sources(PhysicaCore PRIVATE ${SOURCES_CUDA})
-endif()
+add_subdirectory(Utils)
 
 target_sources(PhysicaCore PRIVATE Version.cpp)
 target_sources(PhysicaCore PUBLIC Malloc.cpp) # Declared as PUBLIC, other targets will automatically overload operator new/delete

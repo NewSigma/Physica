@@ -1,7 +1,12 @@
 add_library(PhysicaLogger)
 
-file(GLOB_RECURSE SOURCES_LOGGER *.cpp)
-target_sources(PhysicaLogger PRIVATE ${SOURCES_LOGGER})
+add_subdirectory(Logger)
+
+target_sources(PhysicaLogger PRIVATE
+    LogBuffer.cpp
+    LoggerRuntime.cpp
+    LoggerTimer.cpp
+)
 
 if(${PHYSICA_MIMALLOC})
     target_link_libraries(PhysicaLogger PRIVATE mimalloc)

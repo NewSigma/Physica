@@ -1,15 +1,9 @@
 if (${PHYSICA_CUDA})
-    target_sources(PhysicaCore PRIVATE CUDA/cuBLAS.cu)
-    target_sources(PhysicaCore PRIVATE CUDA/CUDA.cu)
-    target_sources(PhysicaCore PRIVATE CUDA/cuDSS.cu)
-    target_sources(PhysicaCore PRIVATE CUDA/cuRAND.cu)
-    target_sources(PhysicaCore PRIVATE CUDA/cuSolver.cu)
+    add_subdirectory(CUDA)
 endif()
 
 if (${PHYSICA_MKL})
-    target_sources(PhysicaCore PRIVATE MKL/Lapack.cpp)
-    target_sources(PhysicaCore PRIVATE MKL/Pardiso.cpp)
-    target_sources(PhysicaCore PRIVATE MKL/VSL.cpp)
+    add_subdirectory(MKL)
 endif()
 
 if (${PHYSICA_MPI})
