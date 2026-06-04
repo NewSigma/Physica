@@ -43,19 +43,19 @@ namespace Physica {
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
 
-        constexpr static double angstormInBohr = PhyConst<AU>::angstormToBohr(1);
-        constexpr static double angstormInBohr2 = angstormInBohr * angstormInBohr;
-        constexpr static double angstormInBohr4 = angstormInBohr2 * angstormInBohr2;
-        constexpr static double angstormInBohr6 = angstormInBohr4 * angstormInBohr2;
+        constexpr static double angstromInBohr = PhyConst<AU>::angstromToBohr(1);
+        constexpr static double angstromInBohr2 = angstromInBohr * angstromInBohr;
+        constexpr static double angstromInBohr4 = angstromInBohr2 * angstromInBohr2;
+        constexpr static double angstromInBohr6 = angstromInBohr4 * angstromInBohr2;
         constexpr static double A_OO = PhyConst<AU>::eVToHartree(1388.773);
         constexpr static double b_OO = 2.76 * PhyConst<AU>::bohrToAngstorm(1);
-        constexpr static double c_OO = PhyConst<AU>::eVToHartree(175) * angstormInBohr6;
+        constexpr static double c_OO = PhyConst<AU>::eVToHartree(175) * angstromInBohr6;
         constexpr static double r0_OO = 2.8414313142730038;
         constexpr static double chargeO = -1.2;
 
         constexpr static double A_SiO = PhyConst<AU>::eVToHartree(18003.7572);
         constexpr static double b_SiO = 4.87318 * PhyConst<AU>::bohrToAngstorm(1);
-        constexpr static double c_SiO = PhyConst<AU>::eVToHartree(133.5381) * angstormInBohr6;
+        constexpr static double c_SiO = PhyConst<AU>::eVToHartree(133.5381) * angstromInBohr6;
         constexpr static double r0_SiO = 2.075401485810223;
         constexpr static double chargeSi = -2 * chargeO;
     private:

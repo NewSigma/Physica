@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -35,7 +35,7 @@ using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using BarostatType = Berendsen<ScalarType, 1, BaroType::XY>;
 using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType, RSpaceEwald<ScalarType, true>>>;
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
-constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
+constexpr double pair_cutoff = PhyConst<AU>::angstromToBohr(9);
 
 MDCell<ScalarType> makeSystem() {
     using CrystalCellType = CrystalCell<ScalarType>;
@@ -62,7 +62,7 @@ MDCell<ScalarType> makeSystem() {
     };
     
     CrystalCellType cell({lattice, pos, CrystalCellType::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
-    cell.scale(PhyConst<AU>::angstormToBohr(1));
+    cell.scale(PhyConst<AU>::angstromToBohr(1));
     MDCell<ScalarType> cell1(std::move(cell));
     ForceModel::sortPosition(cell1);
     for (size_t i = 1; i < cell1.getNumParticle(); ++i)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -35,7 +35,7 @@ using ForceModel = Q_TIP4P<ScalarType, EwaldType>;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.25;
-constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
+constexpr double pair_cutoff = PhyConst<AU>::angstromToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 
 Vector3D<ScalarType> randomVector() {
@@ -122,7 +122,7 @@ RDF<ScalarType> calcRDF(size_t numReplica) {
             isFromParticle[i] = isHydrogen;
             isToParticle[i] = isHydrogen;
         }
-        rdf = RDF<ScalarType>(std::move(isFromParticle), std::move(isToParticle), rpmd.getVolume(), PhyConst<AU>::angstormToBohr(0.01), 700);
+        rdf = RDF<ScalarType>(std::move(isFromParticle), std::move(isToParticle), rpmd.getVolume(), PhyConst<AU>::angstromToBohr(0.01), 700);
     }
 
     ThreadPool::numThreadRequired = 4;

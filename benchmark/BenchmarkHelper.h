@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Scalar/Real.h"
-#include "Physica/Core/Math/Calculus/SpetialFunctions.h"
+#include "Physica/Core/Math/Calculus/SpecialFunctions.h"
 #include "Physica/Core/Utils/Cycler.h"
 
 namespace Physica {

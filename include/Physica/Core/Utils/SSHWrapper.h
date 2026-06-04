@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,18 +22,18 @@
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 
 namespace Physica {
-    class PHYSICA_API SSHWarpper {
-        using This = SSHWarpper;
+    class PHYSICA_API SSHWrapper {
+        using This = SSHWrapper;
 
         std::string hostname;
         std::string command;
         mutable ProcessFuture future;
     public:
-        SSHWarpper() = default;
-        SSHWarpper(std::string hostname_, std::string command_);
-        SSHWarpper(const This&) = default;
-        SSHWarpper(This&&) noexcept = default;
-        ~SSHWarpper() = default;
+        SSHWrapper() = default;
+        SSHWrapper(std::string hostname_, std::string command_);
+        SSHWrapper(const This&) = default;
+        SSHWrapper(This&&) noexcept = default;
+        ~SSHWrapper() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */

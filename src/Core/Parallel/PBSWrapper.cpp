@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,24 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Parallel/PBSWarpper.h"
+#include "Physica/Core/Parallel/PBSWrapper.h"
 #include <cerrno>
 #include <fstream>
 #include "Physica/Core/Exception/BadFileFormatException.h"
 
 using namespace Physica;
 
-const PBSWarpper& PBSWarpper::getInstance() noexcept {
-    static PBSWarpper pbs{};
+const PBSWrapper& PBSWrapper::getInstance() noexcept {
+    static PBSWrapper pbs{};
     return pbs;
 }
 
-PBSWarpper::PBSWarpper() : jobCore(0) {
+PBSWrapper::PBSWrapper() : jobCore(0) {
     readJobCore();
     readHostList();
 }
 
-void PBSWarpper::readJobCore() {
+void PBSWrapper::readJobCore() {
     char* jobCoreStr = getenv("PBS_NP");
     if (jobCoreStr == nullptr)
         return;
@@ -45,7 +45,7 @@ void PBSWarpper::readJobCore() {
         jobCore = 0;
 }
 
-void PBSWarpper::readHostList() {
+void PBSWrapper::readHostList() {
     char* path_nodefile = getenv("PBS_NODEFILE");
     if (path_nodefile == nullptr)
         return;

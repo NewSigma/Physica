@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,19 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Utils/SSHWarpper.h"
+#include "Physica/Core/Utils/SSHWrapper.h"
 #include <utility>
 #include "Physica/Core/Utils/NoImpl.h"
 #include "Physica/Core/Exception/SystemException.h"
 
 using namespace Physica;
 
-SSHWarpper::SSHWarpper(std::string hostname_, std::string command_)
+SSHWrapper::SSHWrapper(std::string hostname_, std::string command_)
         : hostname(std::move(hostname_)), command(std::move(command_)) {
     execute();
 }
 
-void SSHWarpper::execute() {
+void SSHWrapper::execute() {
 #ifdef __linux__
     int fd[2];
     if (pipe(fd) == -1)
@@ -59,7 +59,7 @@ void SSHWarpper::execute() {
 #endif
 }
 
-void SSHWarpper::swap(SSHWarpper& __restrict ssh) noexcept {
+void SSHWrapper::swap(SSHWrapper& __restrict ssh) noexcept {
     assert(this != &ssh && "[Error]: Self swap is likely a bug");
     hostname.swap(ssh.hostname);
     command.swap(ssh.command);

@@ -31,8 +31,8 @@ namespace Physica {
         using MeshType = std::pair<MatrixType, MatrixType>;
 
         BucketType bucket;
-        VectorType seperatesX;
-        VectorType seperatesY;
+        VectorType separatesX;
+        VectorType separatesY;
         T repDeltaX;
         T repDeltaY;
     public:
@@ -54,10 +54,10 @@ namespace Physica {
         [[nodiscard]] const BucketType& getBucket() const noexcept { return bucket; }
         [[nodiscard]] size_t getNumBinX() const noexcept { return bucket.dim(0); }
         [[nodiscard]] size_t getNumBinY() const noexcept { return bucket.dim(1); }
-        [[nodiscard]] T getFromPointX() const noexcept { return seperatesX[0]; }
-        [[nodiscard]] T getFromPointY() const noexcept { return seperatesY[0]; }
-        [[nodiscard]] T getToPointX() const noexcept { return seperatesX.back(); }
-        [[nodiscard]] T getToPointY() const noexcept { return seperatesY.back(); }
+        [[nodiscard]] T getFromPointX() const noexcept { return separatesX[0]; }
+        [[nodiscard]] T getFromPointY() const noexcept { return separatesY[0]; }
+        [[nodiscard]] T getToPointX() const noexcept { return separatesX.back(); }
+        [[nodiscard]] T getToPointY() const noexcept { return separatesY.back(); }
     private:
         [[nodiscard]] size_t calcNumSample() const;
     };
@@ -66,8 +66,8 @@ namespace Physica {
     ProbDistribution2D<T>::ProbDistribution2D(
             T fromX, T toX, T fromY, T toY, size_t numBinX, size_t numBinY)
             : bucket({numBinX, numBinY, 1}, 0)
-            , seperatesX(VectorType::linspace(fromX, toX, numBinX + 1))
-            , seperatesY(VectorType::linspace(fromY, toY, numBinY + 1))
+            , separatesX(VectorType::linspace(fromX, toX, numBinX + 1))
+            , separatesY(VectorType::linspace(fromY, toY, numBinY + 1))
             , repDeltaX(T(numBinX) / (toX - fromX))
             , repDeltaY(T(numBinY) / (toY - fromY)) {
         assert(fromX < toX);
@@ -110,8 +110,8 @@ namespace Physica {
     auto ProbDistribution2D<T>::makePosition() const -> MeshType {
         const T deltaX = (getToPointX() - getFromPointX()) / T(getNumBinX());
         const T deltaY = (getToPointY() - getFromPointY()) / T(getNumBinY());
-        VectorType translateX = seperatesX.head(getNumBinX()) + (deltaX * 0.5);
-        VectorType translateY = seperatesY.head(getNumBinY()) + (deltaY * 0.5);
+        VectorType translateX = separatesX.head(getNumBinX()) + (deltaX * 0.5);
+        VectorType translateY = separatesY.head(getNumBinY()) + (deltaY * 0.5);
         return MatrixType::meshgrid(translateX, translateY);
     }
 
@@ -131,8 +131,8 @@ namespace Physica {
     void ProbDistribution2D<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         bucket.swap(obj.bucket);
-        seperatesX.swap(obj.seperatesX);
-        seperatesY.swap(obj.seperatesY);
+        separatesX.swap(obj.separatesX);
+        separatesY.swap(obj.separatesY);
         repDeltaX.swap(obj.repDeltaX);
         repDeltaY.swap(obj.repDeltaY);
     }

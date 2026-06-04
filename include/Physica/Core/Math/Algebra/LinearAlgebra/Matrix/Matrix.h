@@ -42,7 +42,7 @@ namespace Physica {
 
             RightMajor = Col,
             LeftMajor = Row,
-            FMajor = Col, // Fortran convension
+            FMajor = Col, // Fortran convention
             CMajor = Row, // C conversion
         };
     public:

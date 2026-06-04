@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -11,11 +11,11 @@ with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 You should have received a copy of the GNU Free Documentation License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
-# Rotation of spherical hamonic function
+# Rotation of spherical harmonic function
 
-## Real spherical hamonic function
+## Real spherical harmonic function
 
-The spherical hamonic function in the code is defined as following:
+The spherical harmonic function in the code is defined as following:
 
 $$Y_{lm}(\theta, \phi) = \sqrt{\frac{2l + 1}{2 \pi \delta_m} \frac{(l - |m|)!}{(l + |m)!|}} P^{|m|}_l(\cos{\theta}) \Phi(\phi)$$
 
@@ -49,4 +49,4 @@ Relation between the defination and defination of complex function is
 
 $$Y^C_{lm} = \sqrt{\frac{\delta_m}{2}} Y^R_{l,|m|} + i\sqrt{\frac{\delta_m}{2}} Y^R_{l,-|m|}$$
 
-where $Y^C_{lm}$ is complex spherical hamonic function and $Y^R_{lm}$ is real spherical hamonic function.
+where $Y^C_{lm}$ is complex spherical harmonic function and $Y^R_{lm}$ is real spherical harmonic function.

@@ -44,7 +44,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         __host__ __device__ void assign(Vector auto& target) const;
-        __device__ void assign(Vector auto& target, instanceof_xt<ThreadBlock> auto block) const;
+        __device__ void assign(Vector auto& target, instanceof_x<ThreadBlock> auto block) const;
 
         [[nodiscard]] __device__ T calc(size_t index) const;
         void reverse(const Vector auto& grad) const noexcept;
@@ -67,7 +67,7 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V>
-    __device__ void device_obj<GEMV<M, V>>::assign(Vector auto& target, instanceof_xt<ThreadBlock> auto block) const {
+    __device__ void device_obj<GEMV<M, V>>::assign(Vector auto& target, instanceof_x<ThreadBlock> auto block) const {
         if constexpr (MatrixMajor::isColMatrix<M>()) {
             target.assert_assign(*this);
             const auto& m = getLHS();

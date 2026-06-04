@@ -64,7 +64,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ void device_obj<RValueVector<Derived>>::assign(Vector auto&& target, instanceof_xt<ThreadBlock> auto block) const {
+    __device__ void device_obj<RValueVector<Derived>>::assign(Vector auto&& target, instanceof_x<ThreadBlock> auto block) const {
         target.assert_assign(Base::getDerived());
         const auto& v0 = Base::getDerived();
         if constexpr (Internal::EnableSIMD<device_obj<Derived>, decltype(target)>::value) {

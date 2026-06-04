@@ -49,7 +49,7 @@ namespace Physica {
         [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator-(this auto&&) noexcept;
         /* Operations */
         __host__ __device__ void assign(Vector auto&& target) const;
-        __device__ void assign(Vector auto&& target, instanceof_xt<ThreadBlock> auto block) const;
+        __device__ void assign(Vector auto&& target, instanceof_x<ThreadBlock> auto block) const;
         __host__ __device__ void assign_add(Vector auto& target) const;
         __host__ __device__ void assign_add_base(Vector auto& target) const;
         __host__ __device__ void assert_assign(const Vector auto& source) const noexcept;

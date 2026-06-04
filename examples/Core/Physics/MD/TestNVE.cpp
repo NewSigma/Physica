@@ -31,7 +31,7 @@ using MDType = RPMD<T, 3, 1>;
 using KineticModel = FreeModel<T, 3, 1, RPMDIntegrator::Exact>;
 using ForceModel = BKSModel<T, Ewald<T, RSpaceEwald<T, true>>, false>;
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15);
-constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(10);
+constexpr double pair_cutoff = PhyConst<AU>::angstromToBohr(10);
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(100);
 
 namespace {
@@ -64,7 +64,7 @@ namespace {
         };
         
         CrystalCellType cell({lattice, pos, CrystalCellType::Type::Direct}, {8, 8, 8, 8, 8, 8, 14, 14, 14});
-        cell.scale(PhyConst<AU>::angstormToBohr(1));
+        cell.scale(PhyConst<AU>::angstromToBohr(1));
         MDCell<T> cell1(std::move(cell));
         cell1.toSuperCell<ExtendCellOption::AtomMajor>(4, 6, 3);
         /* To orthogonal */ {

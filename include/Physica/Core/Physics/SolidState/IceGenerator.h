@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,7 +31,7 @@ namespace Physica {
         using This = IceGenerator<T>;
         using PositionMatrix = PeriodicCell<T, 3>::PositionMatrix;
         using CrystalCellType = CrystalCell<T>;
-        constexpr static double BondLengthOH = PhyConst<AU>::angstormToBohr(1);
+        constexpr static double BondLengthOH = PhyConst<AU>::angstromToBohr(1);
 
         CrystalCellType initialCell;
         T maxDistOO;

@@ -134,7 +134,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     consteval bool VectorExpr<ExprID::Add, V, U>::lowerToFMA() noexcept {
-        if constexpr (instanceof_xt<V, VectorExpr>) {
+        if constexpr (instanceof_x<V, VectorExpr>) {
             using V1 = std::remove_cvref_t<V>;
             using T1 = V1::ScalarType;
             using T2 = std::remove_cvref_t<U>;
@@ -303,7 +303,7 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     consteval bool VectorExpr<ExprID::Add, V1, V2>::lowerToFMA() noexcept {
-        if constexpr (instanceof_xt<V1, VectorExpr>) {
+        if constexpr (instanceof_x<V1, VectorExpr>) {
             using T1 = std::remove_cvref_t<V1>::ScalarType;
             using T2 = std::remove_cvref_t<V2>::ScalarType;
             return (std::remove_cvref_t<V1>::getExprID() == ExprID::Mul) && std::same_as<T1, T2>;

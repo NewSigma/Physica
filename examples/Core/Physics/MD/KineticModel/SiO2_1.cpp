@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -33,7 +33,7 @@ using VectorType = VectorND<ScalarType>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using ForceModel = BKSModel<ScalarType, Ewald<ScalarType, RSpaceEwald<ScalarType, true>>, true>;
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15);
-constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(10);
+constexpr double pair_cutoff = PhyConst<AU>::angstromToBohr(10);
 
 MDCell<ScalarType> makeSystem() {
     std::ifstream fin("SiO2.vasp");
@@ -43,7 +43,7 @@ MDCell<ScalarType> makeSystem() {
     }
     Poscar<ScalarType> poscar{};
     fin >> poscar;
-    poscar.scale(PhyConst<AU>::angstormToBohr(1));
+    poscar.scale(PhyConst<AU>::angstromToBohr(1));
     return MDCell<ScalarType>(poscar);
 }
 

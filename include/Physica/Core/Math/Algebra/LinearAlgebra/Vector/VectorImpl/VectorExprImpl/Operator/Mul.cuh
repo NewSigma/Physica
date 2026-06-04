@@ -40,8 +40,8 @@ namespace Physica {
         __host__ __device__ void assign_add(Vector auto&& v) const;
         __host__ __device__ void assign_add_base(Vector auto&& v) const;
         void assign_add_cublas(Vector auto&& v) const noexcept;
-        __device__ void assign_add(Vector auto&& v,  instanceof_xt<ThreadBlock> auto block) const;
-        __device__ void assign_add_base(Vector auto&& v, instanceof_xt<ThreadBlock> auto block) const;
+        __device__ void assign_add(Vector auto&& v,  instanceof_x<ThreadBlock> auto block) const;
+        __device__ void assign_add_base(Vector auto&& v, instanceof_x<ThreadBlock> auto block) const;
 
         [[nodiscard]] __device__ T calc(size_t index) const;
 
@@ -58,7 +58,7 @@ namespace Physica {
         using Base::getRHS;
     private:
         void assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept;
-        __device__ void assign_fma_for(Vector auto&  __restrict v, instanceof_xt<ThreadBlock> auto block) const  __restrict noexcept;
+        __device__ void assign_fma_for(Vector auto&  __restrict v, instanceof_x<ThreadBlock> auto block) const  __restrict noexcept;
     };
 
     template<Vector V, Scalar U>
@@ -124,12 +124,12 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    __device__ void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_add(Vector auto&& v, instanceof_xt<ThreadBlock> auto block) const {
+    __device__ void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_add(Vector auto&& v, instanceof_x<ThreadBlock> auto block) const {
         assign_add_base(v, block);
     }
 
     template<Vector V, Scalar U>
-    __device__ void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_add_base(Vector auto&& v, instanceof_xt<ThreadBlock> auto block) const {
+    __device__ void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_add_base(Vector auto&& v, instanceof_x<ThreadBlock> auto block) const {
         using Source = std::remove_cvref<V>::type;
         using Target = std::remove_cvref<decltype(v)>::type;
         using T1 = Source::ScalarType;
@@ -187,7 +187,7 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    __device__ void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_fma_for(Vector auto&  __restrict v, instanceof_xt<ThreadBlock> auto block) const  __restrict noexcept {
+    __device__ void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_fma_for(Vector auto&  __restrict v, instanceof_x<ThreadBlock> auto block) const  __restrict noexcept {
         size_t length = Base::getLength();
         int delta = block.getNumThread();
         for (size_t i = block.rank(); i < length; i += delta) {

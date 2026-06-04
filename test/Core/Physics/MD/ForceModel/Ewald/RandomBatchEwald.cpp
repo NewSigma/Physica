@@ -35,7 +35,7 @@ constexpr size_t numContract = 8;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.25;
-constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
+constexpr double pair_cutoff = PhyConst<AU>::angstromToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 
 namespace {
@@ -112,7 +112,7 @@ int main() {
     RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
     rpmd.initMomentum<KineticModel, RandomSource>();
 
-    constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);
+    constexpr double answer = PhyConst<AU>::angstromToBohr(0.978);
     ScalarType bond = 0;
 
     {

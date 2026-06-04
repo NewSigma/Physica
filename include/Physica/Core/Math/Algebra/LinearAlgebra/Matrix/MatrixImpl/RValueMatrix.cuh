@@ -52,8 +52,8 @@ namespace Physica {
         __host__ __device__ void assign(Matrix auto&& target) const;
         __host__ __device__ void assign_add(Matrix auto&& target) const;
         __host__ __device__ void assert_assign(const Matrix auto& source) const noexcept;
-        __device__ void assign(Matrix auto&& target, instanceof_xt<ThreadBlock> auto block) const;
-        __device__ void assign_add(Matrix auto&& target, instanceof_xt<ThreadBlock> auto block) const;
+        __device__ void assign(Matrix auto&& target, instanceof_x<ThreadBlock> auto block) const;
+        __device__ void assign_add(Matrix auto&& target, instanceof_x<ThreadBlock> auto block) const;
 
         [[nodiscard]] __device__ auto calc(size_t row, size_t col) const;
         [[nodiscard]] __device__ auto calc_value(size_t row, size_t col) const;

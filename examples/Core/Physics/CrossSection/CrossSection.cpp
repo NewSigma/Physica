@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,7 @@
 #include <memory>
 #include <QtWidgets/QApplication>
 #include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
-#include "Physica/Core/Math/Calculus/SpetialFunctions.h"
+#include "Physica/Core/Math/Calculus/SpecialFunctions.h"
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Gui/Plot/Plot.h"
 

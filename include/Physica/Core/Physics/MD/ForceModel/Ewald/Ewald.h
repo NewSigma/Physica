@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -115,7 +115,7 @@ namespace Physica {
         return *this;
     }
     /**
-     * \param pos must be in cartesian convension
+     * \param pos must be in cartesian convention
      */
     template<Scalar T, class REwaldType>
     T Ewald<T, REwaldType>::potentialV(const PositionMatrix& pos) const {

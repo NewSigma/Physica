@@ -28,7 +28,7 @@ namespace {
         constexpr static bool isFloat32 = T::Prec == Float32;
         constexpr double prec = isFloat32 ? 2E-5 : 1E-5;
 
-        const double lengthInBohr = PhyConst<AU>::angstormToBohr(3);
+        const double lengthInBohr = PhyConst<AU>::angstromToBohr(3);
         CrystalCell<T> cell({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, CrystalCell<T>::Type::Direct}, {14});
         Ewald<T> ewald(cell.getLattice(), {4});
         const auto energy = ewald.potentialV(cell.getPos());
@@ -43,7 +43,7 @@ namespace {
         constexpr static bool isFloat32 = T::Prec == Float32;
         using EwaldType = Ewald<T>;
         {
-            const double lengthInBohr = PhyConst<AU>::angstormToBohr(5.6903014761756712);
+            const double lengthInBohr = PhyConst<AU>::angstromToBohr(5.6903014761756712);
             CrystalCell<T> NaCl({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
                                 0.0, 0.0, 0.0,
                                 0.0, 0.5, 0.5,

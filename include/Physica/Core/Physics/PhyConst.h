@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -122,7 +122,7 @@ namespace Physica {
         [[nodiscard]] constexpr static double hartreeToEv(double hartree) { return hartree * hartreeInEv; }
         [[nodiscard]] constexpr static double eVToHartree(double ev) { return ev * (1.0 / hartreeInEv); }
         [[nodiscard]] constexpr static double bohrToAngstorm(double bohr) { return bohr * bohrInAngstorm; }
-        [[nodiscard]] constexpr static double angstormToBohr(double angstorm) { return angstorm * (1.0 / bohrInAngstorm); }
+        [[nodiscard]] constexpr static double angstromToBohr(double angstrom) { return angstrom * (1.0 / bohrInAngstorm); }
         [[nodiscard]] constexpr static double timeToSecond(double atomic_time) { return atomic_time * timeInSecond; }
         [[nodiscard]] constexpr static double secondToTime(double second) { return second / timeInSecond; }
         [[nodiscard]] constexpr static double temperatureToK(double atomic_tem) { return atomic_tem * temperatureInK; }
@@ -140,7 +140,7 @@ namespace Physica {
     public:
         constexpr static double unitCharge = PhyConst<SI>::unitCharge / esuToCoulombFactor;
     private:
-        constexpr static double debyeToDipoleAUFactor = (1E-10 / unitCharge) * PhyConst<AU>::angstormToBohr(1);
+        constexpr static double debyeToDipoleAUFactor = (1E-10 / unitCharge) * PhyConst<AU>::angstromToBohr(1);
     public:
         [[nodiscard]] constexpr static double esuToCoulomb(double esu) { return esu * esuToCoulombFactor; }
         [[nodiscard]] constexpr static double debyeToDipoleAU(double debye) { return debye * debyeToDipoleAUFactor; }

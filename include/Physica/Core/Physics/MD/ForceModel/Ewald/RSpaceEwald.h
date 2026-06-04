@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Calculus/Interpolation.h"
-#include "Physica/Core/Math/Calculus/SpetialFunctions.h"
+#include "Physica/Core/Math/Calculus/SpecialFunctions.h"
 #include "Physica/Core/Physics/MD/ForceModel/PairModel.h"
 #include "Physica/Core/Parallel/Parallel.h"
 
@@ -125,7 +125,7 @@ namespace Physica {
         setLattice(std::move(lattice_));
     }
     /**
-     * \param pos must be in cartesian convension
+     * \param pos must be in cartesian convention
      */
     template<Scalar T, bool IsSmallCell>
     T RSpaceEwald<T, IsSmallCell>::potentialV(const PositionMatrix& pos) const {

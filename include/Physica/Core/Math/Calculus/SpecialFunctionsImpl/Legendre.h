@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -81,7 +81,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    HamonicRotator<M>::HamonicRotator(const M& axisRotation) : initialMat(3, 3), hamonicRotation() {
+    HarmonicRotator<M>::HarmonicRotator(const M& axisRotation) : initialMat(3, 3), harmonicRotation() {
         assert(axisRotation.getRow() == 3 && axisRotation.getCol() == 3);
         initialMat[0, 0] = axisRotation[1, 1];
         initialMat[0, 1] = -axisRotation[1, 2];
@@ -92,11 +92,11 @@ namespace Physica {
         initialMat[2, 0] = axisRotation[0, 1];
         initialMat[2, 1] = -axisRotation[0, 2];
         initialMat[2, 2] = axisRotation[0, 0];
-        hamonicRotation = initialMat;
+        harmonicRotation = initialMat;
     }
 
     template<Matrix M>
-    bool HamonicRotator<M>::nearByMargin(double actual, double expected) {
+    bool HarmonicRotator<M>::nearByMargin(double actual, double expected) {
         double diff = actual - expected;
         if (diff < 0.0)
             diff = -diff;
@@ -105,9 +105,9 @@ namespace Physica {
     }
 
     template<Matrix M>
-    void HamonicRotator<M>::nextHamonicRotation() {
+    void HarmonicRotator<M>::nextHarmonicRotation() {
         using T = M::ScalarType;
-        const int l = static_cast<int>((hamonicRotation.getRow() >> 1U) + 1U);
+        const int l = static_cast<int>((harmonicRotation.getRow() >> 1U) + 1U);
         M result(2 * l + 1, 2 * l + 1);
         for (int m = -l; m <= l; ++m) {
             for (int n = -l; n <= l; ++n) {
@@ -135,19 +135,19 @@ namespace Physica {
                 result[m + l, n + l] = T(u + v + w);
             }
         }
-        hamonicRotation = std::move(result);
+        harmonicRotation = std::move(result);
     }
 
     template<Matrix M>
-    M::ScalarType HamonicRotator<M>::getCenteredElement(size_t row, size_t col) {
-        const size_t matRow = hamonicRotation.getRow();
+    M::ScalarType HarmonicRotator<M>::getCenteredElement(size_t row, size_t col) {
+        const size_t matRow = harmonicRotation.getRow();
         assert(matRow % 2U == 1U);
         const size_t offset = matRow >> 1U;
-        return hamonicRotation[row + offset, col + offset];
+        return harmonicRotation[row + offset, col + offset];
     }
 
     template<Matrix M>
-    M::ScalarType HamonicRotator<M>::P(int i, int a, int b, int l) {
+    M::ScalarType HarmonicRotator<M>::P(int i, int a, int b, int l) {
         const int i_1 = i + 1;
         if (b == l)
             return initialMat[i_1, 2] * getCenteredElement(a, l - 1) - initialMat[i_1, 0] * getCenteredElement(a, -l + 1);
@@ -157,12 +157,12 @@ namespace Physica {
     }
 
     template<Matrix M>
-    M::ScalarType HamonicRotator<M>::U(int m, int n, int l) {
+    M::ScalarType HarmonicRotator<M>::U(int m, int n, int l) {
         return P(0, m, n, l);
     }
 
     template<Matrix M>
-    M::ScalarType HamonicRotator<M>::V(int m, int n, int l) {
+    M::ScalarType HarmonicRotator<M>::V(int m, int n, int l) {
         if (m == 0)
             return P(1, 1, n, l) + P(-1, -1, n, l);
         if (m > 0) {
@@ -179,7 +179,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    M::ScalarType HamonicRotator<M>::W(int m, int n, int l) {
+    M::ScalarType HarmonicRotator<M>::W(int m, int n, int l) {
         // whenever this happens, w is also 0 so W can be anything
         if (m == 0)
             return 0.0;

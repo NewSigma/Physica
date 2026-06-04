@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Scalar T, unsigned int Dim>
-    class Hamonic : private EmptyForceModel<T, Dim> {
+    class Harmonic : private EmptyForceModel<T, Dim> {
         using Base = EmptyForceModel<T, Dim>;
-        using This = Hamonic<T, Dim>;
+        using This = Harmonic<T, Dim>;
     public:
         using typename Base::MDCellType;
         using typename Base::LatticeMatrix;
@@ -34,10 +34,10 @@ namespace Physica {
         PositionMatrix sites;
         VectorND<T> springCoeffs;
     public:
-        Hamonic(PositionMatrix sites_, VectorND<T> springCoeffs_);
-        Hamonic(const This&) = default;
-        Hamonic(This&&) noexcept = default;
-        ~Hamonic() = default;
+        Harmonic(PositionMatrix sites_, VectorND<T> springCoeffs_);
+        Harmonic(const This&) = default;
+        Harmonic(This&&) noexcept = default;
+        ~Harmonic() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
@@ -64,14 +64,14 @@ namespace Physica {
     };
 
     template<Scalar T, unsigned int Dim>
-    Hamonic<T, Dim>::Hamonic(PositionMatrix sites_, VectorND<T> springCoeffs_)
+    Harmonic<T, Dim>::Harmonic(PositionMatrix sites_, VectorND<T> springCoeffs_)
             : sites(std::move(sites_))
             , springCoeffs(std::move(springCoeffs_)) {
         assert(springCoeffs.getLength() == getNumParticle() && "[Error]: Number of particles is not consistent");
     }
 
     template<Scalar T, unsigned int Dim>
-    T Hamonic<T, Dim>::potentialV(const MDCellType& cell) const {
+    T Harmonic<T, Dim>::potentialV(const MDCellType& cell) const {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
         T result = 0;
         for (size_t i = 0; i < getNumParticle(); ++i)
@@ -81,7 +81,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim>
     template<ExecutePolicy P>
-    VectorND<T> Hamonic<T, Dim>::force(const MDCellType& cell) const {
+    VectorND<T> Harmonic<T, Dim>::force(const MDCellType& cell) const {
         VectorND<T> result(cell.getDOF());
         forceAsync<P>(cell, result);
         return result;
@@ -89,7 +89,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim>
     template<ExecutePolicy P>
-    void Hamonic<T, Dim>::forceAsync(const MDCellType& cell, Vector auto& result) const {
+    void Harmonic<T, Dim>::forceAsync(const MDCellType& cell, Vector auto& result) const {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
         result = T(0);
         for (size_t i = 0; i < getNumParticle(); ++i) {
@@ -99,7 +99,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    T Hamonic<T, Dim>::forceConst([[maybe_unused]] const MDCellType& cell, size_t dof1, size_t dof2) const {
+    T Harmonic<T, Dim>::forceConst([[maybe_unused]] const MDCellType& cell, size_t dof1, size_t dof2) const {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
         assert(dof1 < cell.getDOF() && dof2 < cell.getDOF() && "[Error]: Index overflow");
         if (dof1 == dof2) {
@@ -110,7 +110,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    auto Hamonic<T, Dim>::forceConst(const MDCellType& cell) const -> ForceConstMatrix {
+    auto Harmonic<T, Dim>::forceConst(const MDCellType& cell) const -> ForceConstMatrix {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
         const size_t dof = cell.getDOF();
         ForceConstMatrix result(dof, T(0));
@@ -120,7 +120,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    auto Hamonic<T, Dim>::virial(const MDCellType& cell) const -> LatticeMatrix {
+    auto Harmonic<T, Dim>::virial(const MDCellType& cell) const -> LatticeMatrix {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
         LatticeMatrix result(Dim, Dim, 0);
         for (size_t i = 0; i < getNumParticle(); ++i) {
@@ -133,7 +133,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    void Hamonic<T, Dim>::swap(This& __restrict obj) noexcept {
+    void Harmonic<T, Dim>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         sites.swap(obj.sites);
         springCoeffs.swap(obj.springCoeffs);
@@ -142,7 +142,7 @@ namespace Physica {
 
 namespace Physica {
     template<Scalar T, unsigned int Dim>
-    class Traits<Hamonic<T, Dim>> {
+    class Traits<Harmonic<T, Dim>> {
     public:
         constexpr static bool IsContractable = false;
     };

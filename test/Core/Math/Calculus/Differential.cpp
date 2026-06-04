@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Calculus/Differential.h"
 #include "Physica/Core/Scalar/Real.h"
-#include "Physica/Core/Math/Calculus/SpetialFunctions.h"
+#include "Physica/Core/Math/Calculus/SpecialFunctions.h"
 #include "Test.h"
 
 int main() {

@@ -56,7 +56,7 @@ namespace {
         };
 
         CrystalCell<ScalarType> cell({lattice, pos, CrystalCell<ScalarType>::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
-        cell.scale(PhyConst<AU>::angstormToBohr(1));
+        cell.scale(PhyConst<AU>::angstromToBohr(1));
         cell.toCartesian();
         return cell;
     }

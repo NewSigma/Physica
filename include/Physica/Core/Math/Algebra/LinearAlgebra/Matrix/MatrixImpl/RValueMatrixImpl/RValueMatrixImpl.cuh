@@ -111,7 +111,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ void device_obj<RValueMatrix<Derived>>::assign(Matrix auto&& target, instanceof_xt<ThreadBlock> auto block) const {
+    __device__ void device_obj<RValueMatrix<Derived>>::assign(Matrix auto&& target, instanceof_x<ThreadBlock> auto block) const {
         const size_t maxMinor = target.getMaxMinor();
         for (unsigned int i = block.rank(); i < target.getSize(); i += block.getNumThread()) {
             size_t major = i / maxMinor;
@@ -124,7 +124,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ void device_obj<RValueMatrix<Derived>>::assign_add(Matrix auto&& target, instanceof_xt<ThreadBlock> auto block) const {
+    __device__ void device_obj<RValueMatrix<Derived>>::assign_add(Matrix auto&& target, instanceof_x<ThreadBlock> auto block) const {
         const size_t maxMinor = target.getMaxMinor();
         for (unsigned int i = block.rank(); i < target.getSize(); i += block.getNumThread()) {
             size_t major = i / maxMinor;

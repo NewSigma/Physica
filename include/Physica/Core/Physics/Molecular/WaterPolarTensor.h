@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,9 +31,9 @@ namespace Physica {
     template<Scalar T, bool UseDynamicPolar>
     class WaterPolarTensor {
         /* Make curve pos */
-        constexpr static double refBondLength = PhyConst<AU>::angstormToBohr(0.95843);
+        constexpr static double refBondLength = PhyConst<AU>::angstromToBohr(0.95843);
         constexpr static double refBondAngle = PhyConst<SI>::degreeToRadian(104.44);
-        constexpr static double normalLength = PhyConst<AU>::angstormToBohr(1);
+        constexpr static double normalLength = PhyConst<AU>::angstromToBohr(1);
         /* Convert factors */
         constexpr static double UnitChargeSI = PhyConst<SI>::unitCharge;
         constexpr static double BohrSI = PhyConst<SI>::bohrRadius;

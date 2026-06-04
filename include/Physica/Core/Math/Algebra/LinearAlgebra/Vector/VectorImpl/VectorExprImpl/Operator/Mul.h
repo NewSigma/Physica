@@ -441,11 +441,11 @@ namespace Physica {
         using RtnTy = VectorExpr<ExprID::Mul, V1&&, V2&&>;
         if constexpr (!canonicalized(v1, v2))
             return hadamard(std::forward<V2>(v2), std::forward<V1>(v1));
-        else if constexpr (instanceof_xt<V1, VectorExpr>) {
+        else if constexpr (instanceof_x<V1, VectorExpr>) {
             using RHS1 = Traits<V1>::RHS;
             if constexpr (v1.getExprID() == ExprID::Mul && Scalar<RHS1>) // if we can lower V1
                 return hadamard(v2, v1.getLHS()) * v1.getRHS();
-            else if constexpr (instanceof_xt<V2, VectorExpr>) { // if not, see if we can lower V2
+            else if constexpr (instanceof_x<V2, VectorExpr>) { // if not, see if we can lower V2
                 using RHS2 = Traits<V2>::RHS;
                 if constexpr (v2.getExprID() == ExprID::Mul && Scalar<RHS2>)
                     return hadamard(v1, v2.getLHS()) * v2.getRHS();
@@ -456,7 +456,7 @@ namespace Physica {
                 return RtnTy(std::forward<V1>(v1), std::forward<V2>(v2));
         }
         else {
-            static_assert(!instanceof_xt<V2, VectorExpr>, "[Error]: Canonicalization failed");
+            static_assert(!instanceof_x<V2, VectorExpr>, "[Error]: Canonicalization failed");
             return RtnTy(std::forward<V1>(v1), std::forward<V2>(v2));
         }
     }

@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
-#include "Physica/Core/Math/Calculus/SpetialFunctions.h"
+#include "Physica/Core/Math/Calculus/SpecialFunctions.h"
 #include "Physica/Core/Scalar/Real.h"
 
 namespace Physica {

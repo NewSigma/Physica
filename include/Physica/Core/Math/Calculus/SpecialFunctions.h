@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -93,29 +93,29 @@ namespace Physica {
     template<Scalar T>
     Complex<T> sphericalHarmomicY(unsigned int l, int m, const T& theta, const T& phi);
     /**
-     * This class generates rotation matrix for spherical hamonic functions
+     * This class generates rotation matrix for spherical harmonic functions
      * 
      * Reference:
      * [1] https://github.com/google/spherical-harmonics.git
      */
     template<Matrix M>
-    class HamonicRotator final {
+    class HarmonicRotator final {
         using ScalarType = M::ScalarType;
     private:
         M initialMat; //Optimize: initialMat may be fixed matrix
-        M hamonicRotation; //Current hamonic rotation matrix
+        M harmonicRotation; //Current harmonic rotation matrix
     public:
-        HamonicRotator(const M& axisRotation);
-        HamonicRotator(const HamonicRotator&) = delete;
-        HamonicRotator(HamonicRotator&&) = delete;
-        ~HamonicRotator() = default;
+        HarmonicRotator(const M& axisRotation);
+        HarmonicRotator(const HarmonicRotator&) = delete;
+        HarmonicRotator(HarmonicRotator&&) = delete;
+        ~HarmonicRotator() = default;
         /* Operators */
-        HamonicRotator& operator=(const HamonicRotator&) = delete;
-        HamonicRotator&& operator==(HamonicRotator&&) = delete;
+        HarmonicRotator& operator=(const HarmonicRotator&) = delete;
+        HarmonicRotator&& operator==(HarmonicRotator&&) = delete;
         /* Operations */
-        void nextHamonicRotation();
+        void nextHarmonicRotation();
         /* Getters */
-        M getCurrentRotation() const { return hamonicRotation; }
+        M getCurrentRotation() const { return harmonicRotation; }
     private:
         ScalarType getCenteredElement(size_t row, size_t col);
         bool nearByMargin(double actual, double expected);
@@ -137,8 +137,8 @@ namespace Physica {
     Real<Prec> distributionF(const Real<Prec>& v1, const Real<Prec>& v2, const Real<Prec>& x);
 }
 
-#include "SpetialFunctionsImpl/Bessel.h"
-#include "SpetialFunctionsImpl/Gamma.h"
-#include "SpetialFunctionsImpl/Legendre.h"
-#include "SpetialFunctionsImpl/Hermite.h"
-#include "SpetialFunctionsImpl/IncompBeta.h"
+#include "SpecialFunctionsImpl/Bessel.h"
+#include "SpecialFunctionsImpl/Gamma.h"
+#include "SpecialFunctionsImpl/Legendre.h"
+#include "SpecialFunctionsImpl/Hermite.h"
+#include "SpecialFunctionsImpl/IncompBeta.h"

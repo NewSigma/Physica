@@ -22,7 +22,7 @@
 
 namespace Physica {
     /**
-     * \class device_obj: Provide non-invasive implementation for device, which is determined by the nature of CUDA seperate compiling.
+     * \class device_obj: Provide non-invasive implementation for device, which is determined by the nature of CUDA separate compiling.
      * 
      * Resource is maintained by host and can be used on device.
      * 

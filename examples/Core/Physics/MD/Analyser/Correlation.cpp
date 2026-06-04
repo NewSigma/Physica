@@ -34,7 +34,7 @@ using MDType = RPMD<ScalarType, 3, 1>;
 using RandomSource = Random<>;
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(0.1 * 1E-12);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-14);
-constexpr double latticeConst = PhyConst<AU>::angstormToBohr(5.67);
+constexpr double latticeConst = PhyConst<AU>::angstromToBohr(5.67);
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(186);
 constexpr size_t cellSize = 3;
 constexpr size_t numReplica = 1;
@@ -44,7 +44,7 @@ constexpr size_t numSystem = 8;
 
 namespace Physica {
     class ForceModel : public LJModel1<ScalarType> {
-        constexpr static double lj_sigma = PhyConst<AU>::angstormToBohr(4.13);
+        constexpr static double lj_sigma = PhyConst<AU>::angstromToBohr(4.13);
         constexpr static double lj_epsilon = PhyConst<AU>::kToTemperature(165.9);
         constexpr static double pair_cutoff = 15;
 

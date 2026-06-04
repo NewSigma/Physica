@@ -26,7 +26,7 @@ namespace Physica {
         using This = ProbDistribution<T>;
 
         Array<size_t> bucket;
-        VectorND<T> seperates;
+        VectorND<T> separates;
         T repDelta;
     public:
         ProbDistribution(T from, T to, size_t numBin);
@@ -46,8 +46,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] const auto& getBucket() const noexcept { return bucket; }
         [[nodiscard]] size_t getNumBin() const noexcept { return bucket.getLength(); }
-        [[nodiscard]] T getFromPoint() const noexcept { return seperates[0]; }
-        [[nodiscard]] T getToPoint() const noexcept { return seperates.back(); }
+        [[nodiscard]] T getFromPoint() const noexcept { return separates[0]; }
+        [[nodiscard]] T getToPoint() const noexcept { return separates.back(); }
     private:
         size_t calcNumSample() const;
     };
@@ -55,7 +55,7 @@ namespace Physica {
     template<Scalar T>
     ProbDistribution<T>::ProbDistribution(T from, T to, size_t numBin)
             : bucket(numBin, 0)
-            , seperates(VectorND<T>::linspace(from, to, numBin + 1))
+            , separates(VectorND<T>::linspace(from, to, numBin + 1))
             , repDelta(T(numBin) / (to - from)) {
         assert(from < to);
     }
@@ -82,7 +82,7 @@ namespace Physica {
     template<Scalar T>
     auto ProbDistribution<T>::makePosition() const -> VectorND<T> {
         const T delta = (getToPoint() - getFromPoint()) / T(getNumBin());
-        return seperates.head(getNumBin()) + (delta * 0.5);
+        return separates.head(getNumBin()) + (delta * 0.5);
     }
 
     template<Scalar T>
@@ -104,7 +104,7 @@ namespace Physica {
     void ProbDistribution<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         bucket.swap(obj.bucket);
-        seperates.swap(obj.seperates);
+        separates.swap(obj.separates);
         repDelta.swap(obj.repDelta);
     }
 

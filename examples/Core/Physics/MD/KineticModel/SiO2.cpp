@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -36,7 +36,7 @@ using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using ForceModel = BKSModel<ScalarType, Ewald<ScalarType, RSpaceEwald<ScalarType, true>>, false>;
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
-constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(10);
+constexpr double pair_cutoff = PhyConst<AU>::angstromToBohr(10);
 constexpr size_t numStep = 1000;
 
 namespace {
@@ -69,7 +69,7 @@ namespace {
         };
         
         CrystalCellType cell({lattice, pos, CrystalCellType::Type::Direct}, {8, 8, 8, 8, 8, 8, 14, 14, 14});
-        cell.scale(PhyConst<AU>::angstormToBohr(1));
+        cell.scale(PhyConst<AU>::angstromToBohr(1));
         MDCell<ScalarType> cell1(std::move(cell));
         cell1.toSuperCell<ExtendCellOption::AtomMajor>(4, 6, 3);
         /* To orthogonal */ {

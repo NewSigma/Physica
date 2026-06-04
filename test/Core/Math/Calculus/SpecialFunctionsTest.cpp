@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Calculus/SpetialFunctions.h"
+#include "Physica/Core/Math/Calculus/SpecialFunctions.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Test.h"
 
@@ -139,13 +139,13 @@ namespace {
     * Reference:
     * [1] https://github.com/google/spherical-harmonics.git
     */
-    void testHamonicRotator() noexcept {
+    void testHarmonicRotator() noexcept {
         constexpr double epsilon = 1E-9;
         using T = float64;
         using MatrixType = DenseMatrix<T, MatrixMajor::Row>;
         using Matrix3D = DenseMatrix<T, MatrixMajor::Row, 3, 3>;
         const Matrix3D rotation({0.707106781, -0.707106781, 0, 0.707106781, 0.707106781, 0, 0, 0, 1});
-        HamonicRotator<MatrixType> rotator(rotation);
+        HarmonicRotator<MatrixType> rotator(rotation);
 
         constexpr double alpha = M_PI / 4.0;
         /* order 1 */ {
@@ -156,7 +156,7 @@ namespace {
         }
         /* order 2 */ {
             using Matrix5D = DenseMatrix<T, MatrixMajor::Row, 5, 5>;
-            rotator.nextHamonicRotation();
+            rotator.nextHarmonicRotation();
             const Matrix5D answer({cos(2 * alpha), 0, 0, 0, sin(2 * alpha),
                                 0, cos(alpha), 0, sin(alpha), 0,
                                 0, 0, 1, 0, 0,
@@ -166,7 +166,7 @@ namespace {
         }
         /* order 3 */ {
             using Matrix7D = DenseMatrix<T, MatrixMajor::Row, 7, 7>;
-            rotator.nextHamonicRotation();
+            rotator.nextHarmonicRotation();
             const Matrix7D answer({cos(3 * alpha), 0, 0, 0, 0, 0, sin(3 * alpha),
                                 0, cos(2 * alpha), 0, 0, 0, sin(2 * alpha), 0,
                                 0, 0, cos(alpha), 0, sin(alpha), 0, 0,
@@ -210,7 +210,7 @@ int main() {
     testBesselJn_Yn_dJn_dYn();
     testLegendreP();
     testSphericalHarmomicY();
-    testHamonicRotator();
+    testHarmonicRotator();
     testHermiteH();
     testIncompBeta();
     return 0;

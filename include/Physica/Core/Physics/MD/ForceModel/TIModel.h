@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Physics/PhyConst.h"
-#include "Hamonic.h"
+#include "Harmonic.h"
 
 namespace Physica {
     /**
@@ -32,12 +32,12 @@ namespace Physica {
     class TIModel {
         using This = TIModel<ForceModel>;
         using ScalarType = Traits<ForceModel>::ScalarType;
-        using HamonicType = Hamonic<ScalarType, 3>;
-        using MDCellType = HamonicType::MDCellType;
-        using PositionMatrix = HamonicType::PositionMatrix;
+        using HarmonicType = Harmonic<ScalarType, 3>;
+        using MDCellType = HarmonicType::MDCellType;
+        using PositionMatrix = HarmonicType::PositionMatrix;
 
         ForceModel original;
-        HamonicType hamonic;
+        HarmonicType harmonic;
         VectorND<ScalarType> mass;
         ScalarType temperatureT;
         ScalarType refPotentialV;
@@ -75,7 +75,7 @@ namespace Physica {
     template<class ForceModel>
     TIModel<ForceModel>::TIModel(ForceModel original_, const MDCellType& refCell, VectorND<ScalarType> springCoeffs, ScalarType temperatureT_)
             : original(std::move(original_))
-            , hamonic(refCell.getPos(), std::move(springCoeffs))
+            , harmonic(refCell.getPos(), std::move(springCoeffs))
             , mass(refCell.getMassVec())
             , temperatureT(temperatureT_)
             , refPotentialV(original.potentialV(refCell))
@@ -85,24 +85,24 @@ namespace Physica {
     
     template<class ForceModel>
     TIModel<ForceModel>::ScalarType TIModel<ForceModel>::potentialV(const MDCellType& cell) const {
-        const ScalarType hamonicV = hamonic.potentialV(cell);
+        const ScalarType harmonicV = harmonic.potentialV(cell);
         if (lambda.isZero())
-            return hamonicV;
-        return lambda * original.potentialV(cell) + (ScalarType(1) - lambda) * hamonicV;
+            return harmonicV;
+        return lambda * original.potentialV(cell) + (ScalarType(1) - lambda) * harmonicV;
     }
 
     template<class ForceModel>
     TIModel<ForceModel>::ScalarType TIModel<ForceModel>::deltaPotentialV(const MDCellType& cell) const {
-        return (original.potentialV(cell) - refPotentialV) - hamonic.potentialV(cell);
+        return (original.potentialV(cell) - refPotentialV) - harmonic.potentialV(cell);
     }
 
     template<class ForceModel>
     template<ExecutePolicy P>
     VectorND<typename TIModel<ForceModel>::ScalarType> TIModel<ForceModel>::force(const MDCellType& cell) const {
-        const VectorND<ScalarType> hamonicF = hamonic.force(cell);
+        const VectorND<ScalarType> harmonicF = harmonic.force(cell);
         if (lambda.isZero())
-            return hamonicF;
-        return lambda * original.template force<P>(cell) + (ScalarType(1) - lambda) * hamonicF;
+            return harmonicF;
+        return lambda * original.template force<P>(cell) + (ScalarType(1) - lambda) * harmonicF;
     }
 
     template<class ForceModel>
@@ -110,17 +110,17 @@ namespace Physica {
     void TIModel<ForceModel>::forceAsync(const MDCellType& cell, Vector auto& result) {
         if (!lambda.isZero())
             original.template forceAsync<P>(cell, result);
-        const VectorND<ScalarType> hamonicF = hamonic.template force<P>(cell);
+        const VectorND<ScalarType> harmonicF = harmonic.template force<P>(cell);
         if constexpr (P == GPU)
             Task<GPU>::wait();
-        result = lambda * result.getDerived() + (ScalarType(1) - lambda) * hamonicF;
+        result = lambda * result.getDerived() + (ScalarType(1) - lambda) * harmonicF;
     }
 
     template<class ForceModel>
     void TIModel<ForceModel>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         original.swap(obj.original);
-        hamonic.swap(obj.hamonic);
+        harmonic.swap(obj.harmonic);
         mass.swap(obj.mass);
         temperatureT.swap(obj.temperatureT);
         refPotentialV.swap(obj.refPotentialV);
@@ -149,7 +149,7 @@ namespace Physica {
     template<class ForceModel>
     void TIModel<ForceModel>::updateRef() {
         const ScalarType factor = ScalarType(PhyConst<AU>::reducedPlanck / PhyConst<AU>::boltzmannK) / temperatureT;
-        const VectorND<ScalarType> omegas = sqrt(divide(hamonic.getSpringCoeffs(), mass));
+        const VectorND<ScalarType> omegas = sqrt(divide(harmonic.getSpringCoeffs(), mass));
         refHelmholtzF = ScalarType(3 * PhyConst<AU>::boltzmannK) * temperatureT * ln(omegas * factor).sum();
     }
 }

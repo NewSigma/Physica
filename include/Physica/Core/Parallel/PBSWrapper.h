@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,25 +25,25 @@ namespace Physica {
     /**
      * Target on OpenPBS(https://github.com/openpbs/openpbs)
      */
-    class PHYSICA_API PBSWarpper {
+    class PHYSICA_API PBSWrapper {
         constexpr static size_t hostLength = 64; //64 is enough to hold ipv6
 
         unsigned int jobCore;
         Array<std::string> hostList;
     public:
-        PBSWarpper(const PBSWarpper&) = delete;
-        PBSWarpper(PBSWarpper&&) noexcept = delete;
-        ~PBSWarpper() = default;
+        PBSWrapper(const PBSWrapper&) = delete;
+        PBSWrapper(PBSWrapper&&) noexcept = delete;
+        ~PBSWrapper() = default;
         /* Operators */
-        PBSWarpper& operator=(const PBSWarpper&) = delete;
-        PBSWarpper& operator=(PBSWarpper&&) noexcept = delete;
+        PBSWrapper& operator=(const PBSWrapper&) = delete;
+        PBSWrapper& operator=(PBSWrapper&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] unsigned int getJobCore() const noexcept { return jobCore; }
         [[nodiscard]] const Array<std::string>& getHostList() const noexcept { return hostList; }
         /* Static members */
-        static const PBSWarpper& getInstance() noexcept; // No [[nodiscard]] for initialization in multi-thread mode
+        static const PBSWrapper& getInstance() noexcept; // No [[nodiscard]] for initialization in multi-thread mode
     private:
-        PBSWarpper();
+        PBSWrapper();
 
         void readJobCore();
         void readHostList();
