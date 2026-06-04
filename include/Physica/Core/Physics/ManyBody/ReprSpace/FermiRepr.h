@@ -34,9 +34,9 @@ namespace Physica {
     private:
         using Spin = SpinState<Dim, NumSite>;
         using StateArray = Array<Spin>;
-        using DownStateArray = std::conditional<UseInversionSymm, PlainStruct<void>, StateArray>::type;
+        using DownStateArray = std::conditional<UseInversionSymm, Empty, StateArray>::type;
         using StateIndexMap = std::unordered_map<Spin, size_t>;
-        using DownStateIndexMap = std::conditional<UseInversionSymm, PlainStruct<void>, StateIndexMap>::type;
+        using DownStateIndexMap = std::conditional<UseInversionSymm, Empty, StateIndexMap>::type;
         using PairType = std::pair<StateArray, StateIndexMap>;
 
         int numSpinUp{};

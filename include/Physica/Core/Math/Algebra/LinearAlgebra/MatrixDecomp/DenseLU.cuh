@@ -27,7 +27,7 @@ namespace Physica {
     class device_obj<DenseLU<T, Pivot>> {
         using host_obj = DenseLU<T, Pivot>;
         using This = device_obj<host_obj>;
-        using PermType = std::conditional<Pivot, device_obj<Array<int64_t>>, PlainStruct<void>>::type;
+        using PermType = std::conditional<Pivot, device_obj<Array<int64_t>>, Empty>::type;
 
         using Tr = T::RealType;
         constexpr static cudaDataType DataType = CUDAContext::getDataType<T>();

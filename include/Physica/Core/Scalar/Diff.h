@@ -29,7 +29,7 @@ namespace Physica {
      */
     template<Scalar T, DiffMode Mode, int Order>
     class Diff<T, Mode, Order> : public ScalarBase<Diff<T, Mode, Order>>
-                               , public std::conditional<Mode == DiffMode::Forward, CRCoro<Diff<T, Mode, Order>>, PlainStruct<void>>::type {
+                               , public std::conditional<Mode == DiffMode::Forward, CRCoro<Diff<T, Mode, Order>>, Empty>::type {
         using This = Diff<T, Mode, Order>;
         using Base = ScalarBase<This>;
     public:

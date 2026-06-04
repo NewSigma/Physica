@@ -23,7 +23,7 @@ namespace Physica {
     class BoolSIMD : private Traits<BoolSIMD<T, Size>>::Pack {
         using This = BoolSIMD<T, Size>;
         using Base = Traits<This>::Pack;
-        using HalfType = std::conditional<sizeof(Base) * CHAR_BIT != 128, BoolSIMD<T, Size / 2>, PlainStruct<void>>::type;
+        using HalfType = std::conditional<sizeof(Base) * CHAR_BIT != 128, BoolSIMD<T, Size / 2>, Empty>::type;
     public:
         BoolSIMD() = default;
         explicit BoolSIMD(Base value) : Base(value) {}

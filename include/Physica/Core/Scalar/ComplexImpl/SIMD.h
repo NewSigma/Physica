@@ -49,7 +49,7 @@ namespace Physica {
         using typename Base::BoolSIMDType;
         using Base::isSeparatable;
     private:
-        using HalfType = std::conditional<sizeof(FullRealType) * CHAR_BIT != 128, SIMD<Complex<T>, Size / 2>, PlainStruct<void>>::type;
+        using HalfType = std::conditional<sizeof(FullRealType) * CHAR_BIT != 128, SIMD<Complex<T>, Size / 2>, Empty>::type;
         using FullRealPair = std::pair<FullRealType, FullRealType>;
 
         FullRealType storage;

@@ -25,7 +25,7 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     class device_obj<DenseVector<Diff<T, Mode, Order>>>
             : public device_obj<CompactVector<DenseVector<Diff<T, Mode, Order>>>>
-            , public std::conditional<Mode == DiffMode::Forward, CRCoro<device_obj<DenseVector<Diff<T, Mode, Order>>>>, PlainStruct<void>>::type {
+            , public std::conditional<Mode == DiffMode::Forward, CRCoro<device_obj<DenseVector<Diff<T, Mode, Order>>>>, Empty>::type {
         using host_obj = DenseVector<Diff<T, Mode, Order>>;
         using This = device_obj<host_obj>;
         using Base = device_obj<CompactVector<host_obj>>;

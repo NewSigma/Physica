@@ -43,7 +43,7 @@ namespace Physica {
 
         using IndexType = Array<size_t, NDim>;
         using ArrayType = Helper<T>::Type;
-        using ShapeType = std::conditional<StaticShape, PlainStruct<void>, IndexType>::type;
+        using ShapeType = std::conditional<StaticShape, Empty, IndexType>::type;
 
         ArrayType arr;
         [[no_unique_address]] ShapeType shape;

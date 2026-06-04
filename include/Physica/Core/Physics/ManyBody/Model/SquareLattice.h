@@ -31,7 +31,7 @@ namespace Physica {
     public:
         using typename Base::DimArray;
         using typename Base::IndexType;
-        using ArgVector = std::conditional<BC == BoundaryCond::TBC, DenseVector<float64, Dim>, PlainStruct<void>>::type;
+        using ArgVector = std::conditional<BC == BoundaryCond::TBC, DenseVector<float64, Dim>, Empty>::type;
     private:
         struct Hasher {
             std::size_t operator()(const std::pair<int32_t, int32_t>& pair) const noexcept {
@@ -39,10 +39,10 @@ namespace Physica {
             }
         };
 
-        using NeighborArray = std::conditional<(Dim > 1), Array<Array<size_t>>, PlainStruct<void>>::type;
+        using NeighborArray = std::conditional<(Dim > 1), Array<Array<size_t>>, Empty>::type;
         using SiteBoundaryMap = std::conditional<BC != BoundaryCond::PBC,
                                                  std::unordered_map<std::pair<int, int>, int, Hasher>,
-                                                 PlainStruct<void>>::type;
+                                                 Empty>::type;
 
         [[no_unique_address]] NeighborArray neighbors;
         [[no_unique_address]] NeighborArray nNeighbors;

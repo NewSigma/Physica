@@ -43,7 +43,7 @@ namespace Physica {
         using typename Base::PositionMatrix;
         using ComplexType = Complex<T>;
         using LatticeReturnType = std::conditional<IsDeviceREwald, LatticeMatrix, const LatticeMatrix&>::type;
-        using HostChargeVector = std::conditional<IsDeviceREwald, VectorND<T>, PlainStruct<void>>::type;
+        using HostChargeVector = std::conditional<IsDeviceREwald, VectorND<T>, Empty>::type;
     public:
         using typename Base::BornChargeArray;
     private:

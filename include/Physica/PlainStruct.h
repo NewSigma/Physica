@@ -25,21 +25,12 @@ namespace Physica {
     /**
      * \class PlainStruct pass objects to cuda kernel ignoring constructors and destructors because resource control is cpu's duty.
      */
-    template<class T> class PlainStruct;
-
-    template<>
-    class PlainStruct<void> {
-        using This = PlainStruct<void>;
+    template<class T>
+    class alignas(T) PlainStruct : public PlainStruct<const T> {
+        using Base = PlainStruct<const T>;
     public:
-        constexpr PlainStruct() = default;
-        constexpr PlainStruct(auto&&...) {}
-        constexpr PlainStruct(const This&) = default;
-        constexpr PlainStruct(This&&) noexcept = default;
-        constexpr ~PlainStruct() = default;
-        /* Operators */
-        constexpr This& operator=(auto&&) { return *this; }
-        /* Operations */
-        constexpr void swap(This&) noexcept {}
+        using Base::getDerived;
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ constexpr T& getDerived() noexcept { return *reinterpret_cast<T*>(this); }
     };
 
     template<class T>
@@ -52,14 +43,6 @@ namespace Physica {
     public:
         [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ constexpr const T& getDerived() const noexcept { return *reinterpret_cast<const T*>(this); }
         [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ constexpr T& getConstCastDerived() const noexcept { return *reinterpret_cast<T*>(const_cast<PlainStruct*>(this)); }
-    };
-
-    template<class T>
-    class alignas(T) PlainStruct : public PlainStruct<const T> {
-        using Base = PlainStruct<const T>;
-    public:
-        using Base::getDerived;
-        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ constexpr T& getDerived() noexcept { return *reinterpret_cast<T*>(this); }
     };
 
     template<class T>

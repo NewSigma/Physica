@@ -48,7 +48,7 @@ namespace Physica {
         };
     private:
         using ArrayType = Helper<T>::ArrayType;
-        using IndexType = std::conditional<isDynamicArray, size_t, PlainStruct<void>>::type;
+        using IndexType = std::conditional<isDynamicArray, size_t, Empty>::type;
 
         ArrayType arr;
         [[no_unique_address]] IndexType r = 0;

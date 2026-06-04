@@ -31,7 +31,7 @@ namespace Physica {
         using RealType = ValueType;
         using FullRealType = RealType;
         using MachineType = __half2;
-        using BoolSIMDType = PlainStruct<void>;
+        using BoolSIMDType = Empty;
     };
 }
 

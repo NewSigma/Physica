@@ -25,7 +25,7 @@ namespace Physica {
     class IdentityMatrix : public RValueMatrix<IdentityMatrix<T, Order>> {
         using This = IdentityMatrix<T, Order>;
         using Base = RValueMatrix<This>;
-        using IndexType = std::conditional<Order == Dynamic, size_t, PlainStruct<void>>::type;
+        using IndexType = std::conditional<Order == Dynamic, size_t, Empty>::type;
     protected:
         using typename Base::Tv;
     private:

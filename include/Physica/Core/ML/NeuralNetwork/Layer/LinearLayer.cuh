@@ -29,7 +29,7 @@ namespace Physica {
         using host_obj = LinearLayer<T, WithBias>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LayerBase<host_obj>>;
-        using BiasType = std::conditional<WithBias, device_obj<VectorND<T>>, PlainStruct<void>>::type;
+        using BiasType = std::conditional<WithBias, device_obj<VectorND<T>>, Empty>::type;
     public:
         template<Scalar U>
         using MatrixND = host_obj::template MatrixND<U>;

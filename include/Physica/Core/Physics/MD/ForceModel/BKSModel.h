@@ -36,7 +36,7 @@ namespace Physica {
         using Base = PairModel<This>;
         using AABModelType = AABModel<T>;
         using REwaldType = Traits<EwaldType>::REwaldType;
-        using DoublePotType = std::conditional<AvoidTooNear, T, PlainStruct<void>>::type;
+        using DoublePotType = std::conditional<AvoidTooNear, T, Empty>::type;
     public:
         using typename Base::Tv;
         using typename Base::MDCellType;

@@ -29,7 +29,7 @@ namespace Physica {
         using Base = LayerBase<This>;
 
         using Tv = T::ValueType;
-        using BiasType = std::conditional<WithBias, VectorND<T>, PlainStruct<void>>::type;
+        using BiasType = std::conditional<WithBias, VectorND<T>, Empty>::type;
     public:
         template<Scalar U>
         using MatrixND = Base::template MatrixND<U>;

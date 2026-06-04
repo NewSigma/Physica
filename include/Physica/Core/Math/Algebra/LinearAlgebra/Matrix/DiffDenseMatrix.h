@@ -29,7 +29,7 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, int Major, size_t Row, size_t Col>
     class DenseMatrix<Diff<T, Mode, Order>, Major, Row, Col>
             : public CompactMatrix<DenseMatrix<Diff<T, Mode, Order> , Major, Row, Col>>
-            , public std::conditional<Mode == DiffMode::Forward, CRCoro<DenseMatrix<Diff<T, Mode, Order>, Major, Row, Col>>, PlainStruct<void>>::type {
+            , public std::conditional<Mode == DiffMode::Forward, CRCoro<DenseMatrix<Diff<T, Mode, Order>, Major, Row, Col>>, Empty>::type {
         using This = DenseMatrix<Diff<T, Mode, Order>, Major, Row, Col>;
         using Base = CompactMatrix<This>;
     public:

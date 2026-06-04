@@ -28,7 +28,7 @@
 #pragma GCC diagnostic pop
 #include "Physica/Core/Scalar/Scalar.h"
 #include "Physica/Core/Scalar/ScalarImpl/SIMDBase.h"
-#include "Physica/PlainStruct.h"
+#include "Physica/Core/Utils/Empty.h"
 
 namespace Physica {
     template<Scalar T, int Size> class BoolSIMD;
@@ -40,7 +40,7 @@ namespace Physica {
         using This = SIMD<T, Size>;
         using Base = SIMDBase<This>;
         using Pack = Traits<This>::Pack;
-        using HalfType = std::conditional<sizeof(Pack) * CHAR_BIT != 128, SIMD<T, Size / 2>, PlainStruct<void>>::type;
+        using HalfType = std::conditional<sizeof(Pack) * CHAR_BIT != 128, SIMD<T, Size / 2>, Empty>::type;
     public:
         using typename Base::MachineType;
         using Base::isSeparatable;

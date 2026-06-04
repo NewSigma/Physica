@@ -26,7 +26,7 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, int Major>
     class device_obj<DenseMatrix<Diff<T, Mode, Order>, Major>>
             : public device_obj<CompactMatrix<DenseMatrix<Diff<T, Mode, Order>, Major>>>
-            , public std::conditional<Mode == DiffMode::Forward, CRCoro<device_obj<DenseMatrix<Diff<T, Mode, Order>, Major>>>, PlainStruct<void>>::type {
+            , public std::conditional<Mode == DiffMode::Forward, CRCoro<device_obj<DenseMatrix<Diff<T, Mode, Order>, Major>>>, Empty>::type {
         static_assert(!T::isDiffable(), "[Error]: Nested Diff<> is not allowed");
         using host_obj = DenseMatrix<Diff<T, Mode, Order>, Major>;
         using This = device_obj<host_obj>;

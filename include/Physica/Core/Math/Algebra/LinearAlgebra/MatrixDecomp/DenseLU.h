@@ -30,7 +30,7 @@ namespace Physica {
         using This = DenseLU;
         using Tr = T::RealType;
         using Tc = T::ComplexType;
-        using PermType = std::conditional<Pivot, PermMatrix<Tr>, PlainStruct<void>>::type;
+        using PermType = std::conditional<Pivot, PermMatrix<Tr>, Empty>::type;
     public:
         using WorkingMatrix = DenseMatrix<T>;
     private:

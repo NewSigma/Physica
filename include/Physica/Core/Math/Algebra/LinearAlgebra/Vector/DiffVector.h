@@ -25,7 +25,7 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     class DenseVector<Diff<T, Mode, Order>, Length, Allocator>
             : public CompactVector<DenseVector<Diff<T, Mode, Order>, Length, Allocator>>
-            , public std::conditional<Mode == DiffMode::Forward, CRCoro<DenseVector<Diff<T, Mode, Order>, Length, Allocator>>, PlainStruct<void>>::type {
+            , public std::conditional<Mode == DiffMode::Forward, CRCoro<DenseVector<Diff<T, Mode, Order>, Length, Allocator>>, Empty>::type {
         using This = DenseVector<Diff<T, Mode, Order>, Length, Allocator>;
         using Base = CompactVector<This>;
     public:

@@ -49,9 +49,9 @@ namespace Physica {
         using LatticeMatrix = MDCellType::LatticeMatrix;
         using PositionMatrix = MDCellType::PositionMatrix;
     private:
-        using ContractFFT1D = std::conditional<IsClassical, PlainStruct<void>, FFT<T, 1>>::type;
-        using ContractPhaseMatrix = std::conditional<IsClassical, PlainStruct<void>, PhaseMatrix>::type;
-        using ContractForceMatrix = std::conditional<IsClassical, PlainStruct<void>, ForceMatrix>::type;
+        using ContractFFT1D = std::conditional<IsClassical, Empty, FFT<T, 1>>::type;
+        using ContractPhaseMatrix = std::conditional<IsClassical, Empty, PhaseMatrix>::type;
+        using ContractForceMatrix = std::conditional<IsClassical, Empty, ForceMatrix>::type;
     private:
         MDCellType cell;
         RingPolymerType ringPolymer;

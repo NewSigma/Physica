@@ -39,7 +39,7 @@ namespace Physica {
         using Trv = Tr::ValueType;
         using Tc = T::ComplexType;
         using Tv = T::ValueType;
-        using PermType = std::conditional<Pivot, PermMatrix<Tr>, PlainStruct<void>>::type;
+        using PermType = std::conditional<Pivot, PermMatrix<Tr>, Empty>::type;
     private:
         MatrixND<T> working;
         VectorND<T> taus;

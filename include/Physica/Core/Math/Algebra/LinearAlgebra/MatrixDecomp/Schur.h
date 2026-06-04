@@ -36,7 +36,7 @@ namespace Physica {
         constexpr static const char* BadConvergenceMessage = "Exceed max iteration of Schur";
         using HessenbergType = Hessenberg<T, Order>;
         using This = Schur<T, Order>;
-        using Shift = std::conditional<T::isComplex(), PlainStruct<void>, T>::type;
+        using Shift = std::conditional<T::isComplex(), Empty, T>::type;
     public:
         using Tr = T::RealType;
         using Tc = Complex<Tr>;
