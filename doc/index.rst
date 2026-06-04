@@ -1,5 +1,5 @@
 ..
-    Copyright 2024 Weibo He.
+    Copyright 2024-2026 Weibo He.
 
     This file is part of Physica.
 
@@ -18,8 +18,10 @@ Welcome to Physica's documentation!
    :maxdepth: 1
    :caption: Contents:
 
+   README
    Core/index.rst
    Logger/index.rst
+   CRCoro
    StyleGuide
    Install
 

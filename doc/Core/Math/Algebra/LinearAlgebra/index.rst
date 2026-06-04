@@ -17,6 +17,7 @@ LinearAlgebra
 .. toctree::
    :maxdepth: 1
 
+   Matrix/MatExpVecProd
    EigenSolver
    HouseHolder
    JacobiDavidson

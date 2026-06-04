@@ -17,5 +17,6 @@ Physics
 .. toctree::
    :maxdepth: 1
 
+   ManyBody/index.rst
    MD/index.rst
    RHFSolver

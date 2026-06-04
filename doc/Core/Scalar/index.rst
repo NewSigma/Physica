@@ -1,5 +1,5 @@
 ..
-    Copyright 2024-2026 Weibo He.
+    Copyright 2026 Weibo He.
 
     This file is part of Physica.
 
@@ -11,15 +11,11 @@
     You should have received a copy of the GNU Free Documentation License
     along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
-Core
+Scalar
 ===================================
 
 .. toctree::
    :maxdepth: 1
 
-   Math/index.rst
-   Physics/index.rst
-   Scalar/index.rst
-   Utils/index.rst
-   CUDA
-   Exception
+   Diff
+   Scalar

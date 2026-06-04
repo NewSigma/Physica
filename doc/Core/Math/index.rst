@@ -19,4 +19,3 @@ Math
 
    Algebra/index.rst
    Calculus/index.rst
-   NextCombination

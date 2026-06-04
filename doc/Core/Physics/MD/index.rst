@@ -17,5 +17,6 @@ MD
 .. toctree::
    :maxdepth: 1
 
+   ForceModel/BKSModel
    ForceModel/TIModel
    RPMD
