@@ -190,7 +190,7 @@ namespace Physica {
     __device__ void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_fma_for(Vector auto&  __restrict v, instanceof_x<ThreadBlock> auto block) const  __restrict noexcept {
         size_t length = Base::getLength();
         int delta = block.getNumThread();
-        for (size_t i = block.rank(); i < length; i += delta) {
+        for (size_t i = block.tid(); i < length; i += delta) {
             if constexpr (isReverseDiff())
                 v[i] = fma(getLHS().calc_value(i), getRHS().value(), v[i]);
             else

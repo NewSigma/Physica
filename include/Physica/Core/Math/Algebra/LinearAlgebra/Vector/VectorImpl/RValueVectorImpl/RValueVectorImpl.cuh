@@ -91,7 +91,7 @@ namespace Physica {
         }
         else {
             const size_t length = getLength();
-            for (size_t i = block.rank(); i < length; i += block.getNumThread())
+            for (size_t i = block.tid(); i < length; i += block.getNumThread())
                 target[i] = calc(i);
             block.sync();
         }

@@ -26,7 +26,7 @@ using T = float32;
 namespace {
     __device__ void add1D(device_obj<VectorND<T>>& x) {
         ThreadBlock block{};
-        x[block.rank()] += T(block.rank());
+        x[block.tid()] += T(block.tid());
     }
     // Test that ThreadBlock changes logical threads layout
     void mapping1D() {

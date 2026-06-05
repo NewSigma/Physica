@@ -42,7 +42,7 @@ namespace Physica {
         /* Operations */
         __device__ void sync() const noexcept;
         /* Static members */
-        [[nodiscard]] __device__ constexpr static int rank() noexcept;
+        [[nodiscard]] __device__ constexpr static int tid() noexcept;
         [[nodiscard]] __device__ constexpr static int getNumThread() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getNumThreadAtCompile() noexcept;
     };
@@ -57,7 +57,7 @@ namespace Physica {
     }
 
     template<int NumThread>
-    __device__ constexpr int ThreadBlock<NumThread>::rank() noexcept {
+    __device__ constexpr int ThreadBlock<NumThread>::tid() noexcept {
         if constexpr (NumThread != 1)
             return static_cast<int>(Impl::thread_rank());
         return 0;
