@@ -54,6 +54,7 @@ namespace Physica {
         __host__ __device__ void assert_assign(const Matrix auto& source) const noexcept;
         __device__ void assign(Matrix auto&& target, instanceof_x<ThreadBlock> auto block) const;
         __device__ void assign_add(Matrix auto&& target, instanceof_x<ThreadBlock> auto block) const;
+        [[nodiscard]] __host__ __device__ constexpr KernelConfig makeKernelConfig() const noexcept;
 
         [[nodiscard]] __device__ auto calc(size_t row, size_t col) const;
         [[nodiscard]] __device__ auto calc_value(size_t row, size_t col) const;
@@ -100,8 +101,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ auto grads(this auto&&) noexcept;
-
-        [[nodiscard]] __host__ __device__ KernelConfig makeKernelConfig() const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getCol(); }
@@ -131,7 +130,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
         [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept;
-        [[nodiscard]] __host__ __device__ static KernelConfig makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr static KernelConfig makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Scalar auto& source) noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Matrix auto& source) noexcept;
     protected:

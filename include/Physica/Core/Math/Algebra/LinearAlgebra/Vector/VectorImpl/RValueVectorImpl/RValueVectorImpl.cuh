@@ -131,6 +131,14 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ constexpr KernelConfig device_obj<RValueVector<Derived>>::makeKernelConfig() const noexcept {
+        const size_t length = getLength();
+        const uint32_t numThread = std::min<uint32_t>(length, CUDADevAttr::DefaultThreadsPerBlock);
+        const uint32_t numBlock = (length + numThread - 1) / numThread;
+        return KernelConfig (numBlock, numThread);
+    }
+
+    template<class Derived>
     __device__ auto device_obj<RValueVector<Derived>>::calc(size_t index) const -> T {
         return Base::getDerived().calc(index);
     }
@@ -514,20 +522,7 @@ namespace Physica {
     __host__ __device__ consteval size_t device_obj<RValueVector<Derived>>::getSizeAtCompile(const Vector auto& hint) noexcept {
         return host_obj::getSizeAtCompile(hint);
     }
-
-    template<class Derived>
-    __host__ __device__ KernelConfig device_obj<RValueVector<Derived>>::makeKernelConfig() const noexcept {
-        return makeKernelConfig(getLength());
-    }
-
-    template<class Derived>
-    __host__ __device__ KernelConfig device_obj<RValueVector<Derived>>::makeKernelConfig(size_t length) noexcept {
-        assert(length > 0 && "[Error]: Do not schedule empty work");
-        const uint32_t numThread = std::min<uint32_t>(length, CUDADevAttr::DefaultThreadsPerBlock);
-        const uint32_t numBlock = (length + numThread - 1) / numThread;
-        return KernelConfig(numBlock, numThread);
-    }
-    // Redeclare to expose it to base classes
+    // Redeclare to expose it to the derived class
     template<class Derived>
     __host__ __device__ consteval void device_obj<RValueVector<Derived>>::static_assert_assign(const Scalar auto& source) noexcept {
         host_obj::static_assert_assign(source);

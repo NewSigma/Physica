@@ -137,6 +137,15 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ constexpr KernelConfig  device_obj<RValueMatrix<Derived>>::makeKernelConfig() const noexcept {
+        constexpr size_t MaxThread = CUDADevAttr::DefaultThreadsPerBlock;
+        const uint32_t numThread = std::min<uint32_t>(getMaxMinor(), MaxThread);
+        const uint32_t numBlockX = (getMaxMinor() + numThread - 1) / numThread;
+        const uint32_t numBlockY = getMaxMajor();
+        return KernelConfig ({numBlockX, numBlockY}, numThread);
+    }
+
+    template<class Derived>
     __device__ auto device_obj<RValueMatrix<Derived>>::calc(size_t row, size_t col) const {
         return Base::getDerived().calc(row, col);
     }
@@ -403,11 +412,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ KernelConfig device_obj<RValueMatrix<Derived>>::makeKernelConfig() const noexcept {
-        return makeKernelConfig(getMaxMajor(), getMaxMinor());
-    }
-
-    template<class Derived>
     __host__ __device__ bool device_obj<RValueMatrix<Derived>>::isSquare() const noexcept {
         return getRow() == getCol();
     }
@@ -505,16 +509,6 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ size_t device_obj<RValueMatrix<Derived>>::colFromMajorMinor(size_t major, size_t minor) noexcept {
         return MatrixMajor::colFromMajorMinor<device_obj<Derived>>(major, minor);
-    }
-
-    template<class Derived>
-    __host__ __device__ KernelConfig device_obj<RValueMatrix<Derived>>::makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept {
-        assert(maxMajor > 0 && maxMinor > 0 && "[Error]: Do not schedule empty work");
-        constexpr size_t MaxThread = CUDADevAttr::DefaultThreadsPerBlock;
-        const uint32_t numThread = std::min<uint32_t>(maxMinor, MaxThread);
-        const uint32_t numBlockX = (maxMinor + numThread - 1) / numThread;
-        const uint32_t numBlockY = maxMajor;
-        return KernelConfig({numBlockX, numBlockY}, numThread);
     }
     // Redeclare to expose it to base classes
     template<class Derived>

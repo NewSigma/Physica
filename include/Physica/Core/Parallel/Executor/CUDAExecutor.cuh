@@ -18,10 +18,10 @@
  */
 #pragma once
 
-#include <format>
 #include "Physica/Core/Utils/NoImpl.h"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "Physica/Core/Parallel/CUDAContext.cuh"
+#include "Physica/Core/Parallel/KernelConfig.cuh"
 
 namespace Physica {
     namespace Internal {
@@ -30,14 +30,6 @@ namespace Physica {
             return fn();
         }
     }
-
-    struct KernelConfig {
-        dim3 blocks;
-        dim3 threads;
-
-        __host__ __device__ KernelConfig(dim3 blocks_, dim3 threads_) : blocks(blocks_), threads(threads_) {}
-        PHYSICA_API void dump();
-    };
     /**
      * Single thread with cuda support
      */
@@ -75,12 +67,4 @@ namespace Physica {
         if constexpr (IsHost())
             CUDAContext::getInstance().wait();
     }
-}
-
-namespace std {
-    template<>
-    struct PHYSICA_API formatter<Physica::KernelConfig, char> {
-        constexpr static auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
-        static auto format(const Physica::KernelConfig& obj, std::format_context& ctx) -> std::format_context::iterator;
-    };
 }

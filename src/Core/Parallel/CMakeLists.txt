@@ -13,5 +13,6 @@ if(${PHYSICA_CUDA})
         CUDAContext.cu
         CUDAEvent.cu
         CUDAStream.cu
+        KernelConfig.cu
     )
 endif()

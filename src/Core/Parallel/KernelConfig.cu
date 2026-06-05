@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <print>
-#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
+#include "Physica/Core/Parallel/KernelConfig.cuh"
 
 using namespace Physica;
 

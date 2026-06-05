@@ -53,6 +53,7 @@ namespace Physica {
         __host__ __device__ void assign_add(Vector auto& target) const;
         __host__ __device__ void assign_add_base(Vector auto& target) const;
         __host__ __device__ void assert_assign(const Vector auto& source) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr KernelConfig makeKernelConfig() const noexcept;
 
         [[nodiscard]] __device__ T calc(size_t index) const;
         [[nodiscard]] __device__ Tv calc_value(size_t index) const;
@@ -98,8 +99,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ decltype(auto) grads(this auto&&) noexcept;
-
-        [[nodiscard]] __host__ __device__ KernelConfig makeKernelConfig() const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         /* Static members */
@@ -114,7 +113,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isFastPacket() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile(const Vector auto& hint) noexcept;
-        [[nodiscard]] __host__ __device__ static KernelConfig makeKernelConfig(size_t length) noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Scalar auto& source) noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Vector auto& source) noexcept;
     protected:
