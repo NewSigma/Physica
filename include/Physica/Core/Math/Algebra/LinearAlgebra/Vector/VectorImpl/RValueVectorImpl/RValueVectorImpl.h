@@ -673,12 +673,6 @@ namespace Physica {
             co_return std::move(result);
         }
     }
-
-    template<class Derived>
-    auto RValueVector<Derived>::cross(const Vector auto& v) const noexcept {
-        using V = std::remove_cvref_t<decltype(v)>;
-        return CrossProduct<Derived, V>(Base::getDerived(), v);
-    }
     /**
      * The first element of \param target will be the factor to construct houseHolder matrix.
      * The other parts of \param target will be essential HouseHolder vector.

@@ -67,11 +67,11 @@ namespace {
         expect((x.getLength() == 4) && (x.getCapacity() == 8));
     }
 
-    void crossProductTest() {
+    void crossTest() {
         using T = float32;
         VectorND<T> v1{3.845971, 0.000000, 0.000000};
         VectorND<T> v2{-0.007733, 3.835502, 0.000000};
-        VectorND<T> v3(v1.cross(v2));
+        VectorND<T> v3 = cross(v1, v2);
         expect(scalarNear(v3.norm() / T(2), T(7.375614), 1E-7));
     }
 
@@ -222,7 +222,7 @@ int main() {
     formatTest();
 
     reserveTest();
-    crossProductTest();
+    crossTest();
     dotTest();
     hdfTest();
     lnSumExpTest();

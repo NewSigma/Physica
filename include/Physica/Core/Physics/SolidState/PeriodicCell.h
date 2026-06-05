@@ -583,9 +583,9 @@ namespace Physica {
         using RtnTy = LatticeMatrix::template rebind_scalar<Tv>;
         const auto& latt = lattice.values();
         RtnTy result{};
-        result.row(0) = latt.row(1).cross(latt.row(2));
-        result.row(1) = latt.row(2).cross(latt.row(0));
-        result.row(2) = latt.row(0).cross(latt.row(1));
+        result.row(0) = cross(latt.row(1), latt.row(2));
+        result.row(1) = cross(latt.row(2), latt.row(0));
+        result.row(2) = cross(latt.row(0), latt.row(1));
         const auto factor = Tv(2 * M_PI) / (latt.row(0) * result.row(0));
         result *= factor;
         return result;

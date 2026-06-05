@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include "CrossProduct.h"
+#include "Cross.h"
 
 namespace Physica {
     template<Vector V1, Vector V2>
-    class device_obj<CrossProduct<V1, V2>> : public device_obj<RValueVector<CrossProduct<V1, V2>>> {
-        using host_obj = CrossProduct<V1, V2>;
+    class device_obj<Cross<V1, V2>> : public device_obj<RValueVector<Cross<V1, V2>>> {
+        using host_obj = Cross<V1, V2>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
     private:
@@ -42,9 +42,13 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return 3; }
     };
+
+    [[nodiscard]] __device__ auto cross(Vector auto&& v1, Vector auto&& v2) noexcept requires(DeviceObj<decltype(v1)> && DeviceObj<decltype(v2)>) {
+        return device_obj<Cross<std::remove_cvref_t<decltype(v1)>, std::remove_cvref_t<decltype(v2)>>>(v1, v2);
+    }
 }
 
 namespace Physica {
     template<Vector V1, Vector V2>
-    class Traits<device_obj<CrossProduct<V1, V2>>> : public Traits<CrossProduct<V1, V2>> {};
+    class Traits<device_obj<Cross<V1, V2>>> : public Traits<Cross<V1, V2>> {};
 }

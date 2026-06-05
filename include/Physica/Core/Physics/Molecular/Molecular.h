@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -79,9 +79,9 @@ namespace Physica {
         using VectorType = PointType::VectorType;
         const VectorType vector_ki = atoms[i].getVector() - atoms[k].getVector();
         const VectorType vector_kj = atoms[j].getVector() - atoms[k].getVector();
-        const VectorType cross = cross(vector_ki, vector_kj);
         const VectorType vector_kl = atoms[l].getVector() - atoms[k].getVector();
-        return cross * vector_kl / (cross.norm() * vector_kl.norm());
+        const VectorType ki_kj = cross(vector_ki, vector_kj);
+        return ki_kj * vector_kl / (ki_kj.norm() * vector_kl.norm());
     }
     /**
      * \returns Dihedral angle between plain ijk and plain jkl
@@ -91,8 +91,8 @@ namespace Physica {
         using VectorType = PointType::VectorType;
         const VectorType vector_ki = atoms[i].getVector() - atoms[k].getVector();
         const VectorType vector_kj = atoms[j].getVector() - atoms[k].getVector();
-        const VectorType cross1 = cross(vector_ki, vector_kj);
         const VectorType vector_kl = atoms[l].getVector() - atoms[k].getVector();
+        const VectorType cross1 = cross(vector_ki, vector_kj);
         const VectorType cross2 = cross(vector_kl, vector_kj);
         return cross1 * cross2 / (cross1.norm() * cross2.norm());
     }

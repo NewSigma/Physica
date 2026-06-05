@@ -365,12 +365,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::cross(const Vector auto& v) const noexcept {
-        static_assert(is_device_obj_v<decltype(v)>, "[Error]: host-device mismatch");
-        return device_obj<CrossProduct<Derived, decltype(v)>>(*this, v);
-    }
-
-    template<class Derived>
     __device__ auto device_obj<RValueVector<Derived>>::max(int tid, int numThread, T* __restrict shared) const -> T {
         T local = std::numeric_limits<T>::lowest();
         for (int i = tid; i < getLength(); i += numThread)

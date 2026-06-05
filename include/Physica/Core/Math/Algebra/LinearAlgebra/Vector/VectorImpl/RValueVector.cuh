@@ -85,7 +85,6 @@ namespace Physica {
         [[nodiscard]] __device__ T lnSoftmax(size_t index) const;
         [[nodiscard]] __device__ T softmax(size_t index) const;
         [[nodiscard]] __host__ __device__ T prod() const noexcept;
-        [[nodiscard]] __device__ auto cross(const Vector auto& v) const noexcept;
 
         [[nodiscard]] __device__ T max(int tid, int numThread, T* __restrict shared) const;
         [[nodiscard]] __device__ T sum(int tid, int numThread, T* __restrict shared) const;
@@ -132,7 +131,7 @@ namespace Physica {
 
 #include "RValueVectorImpl/RValueVectorImpl.cuh"
 #include "RValueVectorImpl/Conjugate.cuh"
-#include "RValueVectorImpl/CrossProduct.cuh"
+#include "RValueVectorImpl/Cross.cuh"
 #include "RValueVectorImpl/Dot.cuh"
 #include "RValueVectorImpl/VectorConvert/RealVector.cuh"
 #include "RValueVectorImpl/VectorConvert/VectorConvert.cuh"

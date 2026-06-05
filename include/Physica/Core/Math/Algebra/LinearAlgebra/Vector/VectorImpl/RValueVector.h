@@ -34,7 +34,7 @@ namespace Physica {
     template<class> class Transpose;
     template<class> class Conjugate;
     template<class> class Hermite;
-    template<Vector, Vector> class CrossProduct;
+    template<Vector, Vector> class Cross;
     template<class T> class RealVectorR;
     template<class T> class ImagVector;
     template<class T> class SquaredNormVector;
@@ -182,7 +182,6 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> lnSoftmax(size_t index) const noexcept;
         [[nodiscard]] CoDiff<T> softmax(size_t index) const noexcept;
         [[nodiscard]] CoDiff<T> prod() const noexcept;
-        [[nodiscard]] auto cross(const Vector auto& v) const noexcept;
         Tr householder(Vector auto& __restrict target) const __restrict;
 
         [[nodiscard]] decltype(auto) reals(this auto&&) noexcept;
@@ -281,7 +280,7 @@ namespace Physica {
 #include "RValueVectorImpl/View.h"
 #include "RValueVectorImpl/ReversalVector.h"
 #include "RValueVectorImpl/Conjugate.h"
-#include "RValueVectorImpl/CrossProduct.h"
+#include "RValueVectorImpl/Cross.h"
 #include "RValueVectorImpl/Dot.h"
 #include "RValueVectorImpl/VectorConvert/RealVector.h"
 #include "RValueVectorImpl/VectorConvert/SquaredNormVector.h"

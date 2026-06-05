@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<Vector V1, Vector V2>
-    class CrossProduct : public RValueVector<CrossProduct<V1, V2>> {
-        using This = CrossProduct<V1, V2>;
+    class Cross : public RValueVector<Cross<V1, V2>> {
+        using This = Cross<V1, V2>;
         using Base = RValueVector<This>;
         using Base::isReverseDiff;
     protected:
@@ -32,7 +32,7 @@ namespace Physica {
         const V1& v1;
         const V2& v2;
     public:
-        CrossProduct(const V1& v1_, const V2& v2_);
+        Cross(const V1& v1_, const V2& v2_);
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const noexcept;
@@ -45,24 +45,24 @@ namespace Physica {
     };
 
     template<Vector V1, Vector V2>
-    CrossProduct<V1, V2>::CrossProduct(const V1& v1_, const V2& v2_) : v1(v1_), v2(v2_) {
+    Cross<V1, V2>::Cross(const V1& v1_, const V2& v2_) : v1(v1_), v2(v2_) {
         constexpr size_t Size1 = std::remove_cvref_t<V1>::getSizeAtCompile();
         constexpr size_t Size2 = std::remove_cvref_t<V2>::getSizeAtCompile();
-        static_assert((Size1 == 3 || Size1 == Dynamic) && (Size2 == 3 || Size2 == Dynamic), "[Error]: CrossProduct can apply on 3-dim vectors only");
+        static_assert((Size1 == 3 || Size1 == Dynamic) && (Size2 == 3 || Size2 == Dynamic), "[Error]: Cross can apply on 3-dim vectors only");
         assert(v1.getLength() == 3);
         assert(v2.getLength() == 3);
     }
         
     template<Vector V1, Vector V2>
     template<ExecutePolicy>
-    void CrossProduct<V1, V2>::assign(Vector auto&& v) const noexcept {
+    void Cross<V1, V2>::assign(Vector auto&& v) const noexcept {
         v[0] = v1[1] * v2[2] - v1[2] * v2[1];
         v[1] = v1[2] * v2[0] - v1[0] * v2[2];
         v[2] = v1[0] * v2[1] - v1[1] * v2[0];
     }
 
     template<Vector V1, Vector V2>
-    auto CrossProduct<V1, V2>::calc(size_t index) const -> T {
+    auto Cross<V1, V2>::calc(size_t index) const -> T {
         assert(index < getLength());
         switch (index) {
         case 0:
@@ -75,11 +75,15 @@ namespace Physica {
             unreachable();
         }
     }
+
+    [[nodiscard]] auto cross(Vector auto&& v1, Vector auto&& v2) noexcept {
+        return Cross<std::remove_cvref_t<decltype(v1)>, std::remove_cvref_t<decltype(v2)>>(v1, v2);
+    }
 }
 
 namespace Physica {
     template<Vector V1, Vector V2>
-    class Traits<CrossProduct<V1, V2>> {
+    class Traits<Cross<V1, V2>> {
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename V1::ScalarType, typename V2::ScalarType>::Type;
     };
