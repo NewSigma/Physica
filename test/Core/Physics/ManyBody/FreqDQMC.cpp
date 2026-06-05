@@ -31,24 +31,32 @@ constexpr int Dim = 1;
 constexpr T StepSize = 1E-3;
 constexpr T Duration = 10;
 
+namespace {
+    void conserve() {
+        const size_t numSite = Array<int, 2>{2, 3}.select<RandomSource>();
+        const int freqDensity = Array<int, 2>{0, 1}.select<RandomSource>();
+
+        const SquareLattice<Dim> lattice({numSite}, 1);
+        const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, 1);
+        auto dqmc = FreqDQMC<Tc>(params, freqDensity);
+        dqmc.step_for<RandomSource>(1);
+
+        auto& engine = dqmc.getHMC().getRoot();
+        engine.setTimeStep(StepSize);
+
+        using Kinetic = OpenModel<T, 1, 1>;
+        auto kinetic = Kinetic(1, 1);
+        engine.template initMomentum<Kinetic, RandomSource>();
+
+        const T prevE = engine.calcClassicalInternalEnergy(dqmc);
+        engine.nve_step_for(Duration, kinetic, dqmc);
+        const T curE = engine.calcClassicalInternalEnergy(dqmc);
+
+        expect<RandomSource>(scalarNear(prevE, curE, 1E-4)); // Energe conserves
+    }
+}
+
 int main() {
-    const size_t numSite = Array<int, 2>{2, 3}.select<RandomSource>();
-    const int freqDensity = Array<int, 2>{0, 1}.select<RandomSource>();
-
-    const SquareLattice<Dim> lattice({numSite}, 1);
-    const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, 1);
-    auto dqmc = FreqDQMC<Tc>(params, freqDensity);
-    auto& engine = dqmc.getHMC().getRoot();
-    engine.setTimeStep(StepSize);
-
-    using Kinetic = OpenModel<T, 1, 1>;
-    auto kinetic = Kinetic(1, 1);
-    engine.template initMomentum<Kinetic, RandomSource>();
-
-    const T prevE = engine.calcClassicalInternalEnergy(dqmc);
-    engine.nve_step_for(Duration, kinetic, dqmc);
-    const T curE = engine.calcClassicalInternalEnergy(dqmc);
-
-    expect<RandomSource>(scalarNear(prevE, curE, 1E-4)); // Energe conserves
+    conserve();
     return 0;
 }

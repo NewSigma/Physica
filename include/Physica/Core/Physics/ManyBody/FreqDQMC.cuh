@@ -62,6 +62,8 @@ namespace Physica {
         void step_random();
         template<RNG R, ExecutePolicy P = Sequential>
         Trv step();
+        template<RNG R, ExecutePolicy P = Sequential>
+        void step_for(int numStep);
 
         template<ExecutePolicy P = Sequential>
         [[nodiscard]] Trv potentialV(const Vector auto& pos);
@@ -143,6 +145,13 @@ namespace Physica {
         sign = sgnD;
         calcGreen();
         return acceptR;
+    }
+
+    template<Scalar T>
+    template<RNG R, ExecutePolicy P>
+    void device_obj<FreqDQMC<T>>::step_for(int numStep) {
+        for (int _ = 0; _ < numStep; ++_)
+            step<R, P>();
     }
 
     template<Scalar T>

@@ -66,6 +66,8 @@ namespace {
         const SquareLattice<Dim> lattice({numSite}, 1);
         const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, 1);
         auto dqmc = device_obj<FreqDQMC<Tc>>(params, freqDensity);
+        dqmc.step_for<RandomSource>(1);
+
         auto& engine = dqmc.getHMC().getRoot();
         engine.setTimeStep(StepSize);
 
