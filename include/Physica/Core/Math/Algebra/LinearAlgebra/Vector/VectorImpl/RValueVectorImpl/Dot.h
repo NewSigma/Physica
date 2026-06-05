@@ -24,8 +24,8 @@
 
 namespace Physica {
     template<Vector V1, Vector V2>
-    class InnerDot {
-        using This = InnerDot<V1, V2>;
+    class Dot {
+        using This = Dot<V1, V2>;
         using T1 = V1::ScalarType;
         using T2 = V2::ScalarType;
         using T = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
@@ -34,10 +34,10 @@ namespace Physica {
         const V1& v1;
         const V2& v2;
     public:
-        InnerDot(const V1& v1_, const V2& v2_);
-        InnerDot(const This&) = delete;
-        InnerDot(This&&) noexcept = delete;
-        ~InnerDot() = default;
+        Dot(const V1& v1_, const V2& v2_);
+        Dot(const This&) = delete;
+        Dot(This&&) noexcept = delete;
+        ~Dot() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -56,12 +56,12 @@ namespace Physica {
     };
 
     template<Vector V1, Vector V2>
-    InnerDot<V1, V2>::InnerDot(const V1& v1_, const V2& v2_) : v1(v1_), v2(v2_) {
+    Dot<V1, V2>::Dot(const V1& v1_, const V2& v2_) : v1(v1_), v2(v2_) {
         assert(v1.getLength() == v2.getLength());
     }
 
     template<Vector V1, Vector V2>
-    auto InnerDot<V1, V2>::calc() const noexcept {
+    auto Dot<V1, V2>::calc() const noexcept {
         if constexpr (T::isForwardDiff()) {
             if constexpr (!V1::isForwardDiff())
                 return T(v2.values() * v1, v2.grads() * v1);
@@ -79,7 +79,7 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    auto InnerDot<V1, V2>::calc_base() const noexcept -> CoDiff<T> {
+    auto Dot<V1, V2>::calc_base() const noexcept -> CoDiff<T> {
         if constexpr (T::isReverseDiff()) {
             auto& result = co_yield v1.values() * v2.values();
             if constexpr (ReverseDiff<V1>)
@@ -100,12 +100,12 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    __host__ __device__ consteval size_t InnerDot<V1, V2>::getSizeAtCompile() noexcept {
+    __host__ __device__ consteval size_t Dot<V1, V2>::getSizeAtCompile() noexcept {
         return std::max(std::remove_cvref_t<V1>::getSizeAtCompile(), std::remove_cvref_t<V2>::getSizeAtCompile());
     }
 
     template<Vector V1, Vector V2>
-    auto InnerDot<V1, V2>::calc_base_simd() const noexcept -> T {
+    auto Dot<V1, V2>::calc_base_simd() const noexcept -> T {
         using Pack = Internal::EnableSIMD<V1, V2>::PacketType;
         constexpr int Size = Pack::size();
         const size_t length = v1.getLength();
@@ -127,7 +127,7 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    auto InnerDot<V1, V2>::calc_base_simd_complex_real() const noexcept -> T {
+    auto Dot<V1, V2>::calc_base_simd_complex_real() const noexcept -> T {
         using Pack = BestPacket<T1, getSizeAtCompile()>::Type;
         using FullRealPack = Pack::FullRealType;
         const size_t length = v1.getLength();
@@ -152,10 +152,10 @@ namespace Physica {
         return result1 + result2;
     }
     /**
-     * Fallback if we do not know how to lower the inner dot
+     * Fallback if we do not know how to lower the dot
      */
     template<Vector V1, Vector V2>
-    auto InnerDot<V1, V2>::calc_base_fallback() const noexcept -> T {
+    auto Dot<V1, V2>::calc_base_fallback() const noexcept -> T {
         auto result = T(0);
         for(size_t i = 0; i < v1.getLength(); ++i)
             result += v1.calc(i) * v2.calc(i);
@@ -163,23 +163,29 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    constexpr bool InnerDot<V1, V2>::useMKL() const noexcept {
-        constexpr int Threshold = HostDevAttr::ThresholdInnerDot_MKL;
+    constexpr bool Dot<V1, V2>::useMKL() const noexcept {
+        constexpr int Threshold = HostDevAttr::ThresholdDot_MKL;
         if constexpr (getSizeAtCompile() == Dynamic)
             return Threshold < v1.getLength();
         else
             return Threshold < getSizeAtCompile();
     }
-
+    /**
+     * \returns a Dot object with proper canonicalization, while operator* is syntactic suger for it
+     */
     template<Vector V1, Vector V2>
-    [[nodiscard]] auto operator*(const V1& v1, const V2& v2) noexcept requires(!DeviceObj<V1> && !DeviceObj<V2>) {
+    [[nodiscard]] auto dot(const V1& v1, const V2& v2) noexcept requires(!DeviceObj<V1> && !DeviceObj<V2>) {
         if constexpr (!canonicalized(v1, v2))
-            return InnerDot<V2, V1>(v2, v1).calc();
+            return Dot<V2, V1>(v2, v1);
         else
-            return InnerDot<V1, V2>(v1, v2).calc();
+            return Dot<V1, V2>(v1, v2);
+    }
+
+    [[nodiscard]] __host__ __device__ auto operator*(const Vector auto& v1, const Vector auto& v2) noexcept {
+        return dot(v1, v2).calc();
     }
 }
 
 #ifdef PHYSICA_MKL
-    #include "InnerDot_MKL.h"
+    #include "Dot_MKL.h"
 #endif

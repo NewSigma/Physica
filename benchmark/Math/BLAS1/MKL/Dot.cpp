@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2026 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,44 +16,44 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <benchmark/benchmark.h>
 #include "Physica/Core/Scalar/Complex.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
-#include "Benchmark.h"
 
 using namespace Physica;
 using RandomSource = Random<MCG>;
 
 namespace {
     template<Scalar T>
-    void innerDot(benchmark::State& state) {
+    void dot_mkl(benchmark::State& state) {
         const int64_t size = state.range(0);
         const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(size);
-        auto dot = InnerDot(v1, v2);
+        auto expr = dot(v1, v2);
         for (auto _ : state) {
-            T y = dot.calc();
+            auto y = expr.calc_mkl();
             benchmark::DoNotOptimize(y);
-            benchmark::DoNotOptimize(dot);
+            benchmark::DoNotOptimize(expr);
         }
     }
 }
 
-BENCHMARK(innerDot<float32>)->Name("innerDot dispatch float32")
+BENCHMARK(dot_mkl<float32>)->Name("dot mkl float32")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
 
-BENCHMARK(innerDot<float64>)->Name("innerDot dispatch float64")
+BENCHMARK(dot_mkl<float64>)->Name("dot mkl float64")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
 
-BENCHMARK(innerDot<cfloat32>)->Name("innerDot dispatch cfloat32")
+BENCHMARK(dot_mkl<cfloat32>)->Name("dot mkl cfloat32")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
 
-BENCHMARK(innerDot<cfloat64>)->Name("innerDot dispatch cfloat64")
+BENCHMARK(dot_mkl<cfloat64>)->Name("dot mkl cfloat64")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);

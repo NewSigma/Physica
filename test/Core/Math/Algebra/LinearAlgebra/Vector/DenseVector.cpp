@@ -75,7 +75,7 @@ namespace {
         expect(scalarNear(v3.norm() / T(2), T(7.375614), 1E-7));
     }
 
-    void innerDotTest() {
+    void dotTest() {
         using T = float32;
         const auto v1 = VectorND<Complex<T>>::random_uniform<RandomSource>(16);
         const auto v2 = VectorND<T>::random_uniform<RandomSource>(16);
@@ -223,7 +223,7 @@ int main() {
 
     reserveTest();
     crossProductTest();
-    innerDotTest();
+    dotTest();
     hdfTest();
     lnSumExpTest();
     crossEntropyTest();

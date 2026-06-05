@@ -113,7 +113,7 @@ namespace Physica {
         }
 
         if constexpr (IsDevice())
-            Base::getDerived().assign_add(target, ThreadBlock{});
+            Base::getDerived().assign_add(target, ThreadBlock<1>{});
     }
 
     template<class Derived>

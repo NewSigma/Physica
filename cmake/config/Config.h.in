@@ -38,7 +38,7 @@ namespace Physica {
         /* Tunable */
         constexpr static int NumUnrollDefault = 8;
         constexpr static int NumUnrollGEMV = 2;
-        constexpr static int ThresholdInnerDot_MKL = 128;
+        constexpr static int ThresholdDot_MKL = 128;
     };
 
     class CUDADevAttr final {

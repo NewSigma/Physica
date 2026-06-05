@@ -25,50 +25,35 @@ using RandomSource = Random<MCG>;
 
 namespace {
     template<Scalar T>
-    void innerDot(benchmark::State& state) {
+    void dot(benchmark::State& state) {
         const int64_t size = state.range(0);
         const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(size);
-        auto dot = InnerDot(v1, v2);
+        auto expr = dot(v1, v2);
         for (auto _ : state) {
-            T y{};
-            PHYSICA_BENCH(y = dot.calc_base());
+            T y = expr.calc();
             benchmark::DoNotOptimize(y);
-            benchmark::DoNotOptimize(dot);
-        }
-    }
-    // Benchmark that we correct lower complex-real vector inner dot
-    void innerDot_complex_real(benchmark::State& state) {
-        const VectorND<cfloat64> v1 = VectorND<cfloat64>::template random_uniform<RandomSource>(1024);
-        const VectorND<float64> v2 = VectorND<float64>::template random_uniform<RandomSource>(1024);
-        auto dot = InnerDot(v1, v2);
-        for (auto _ : state) {
-            cfloat64 y{};
-            PHYSICA_BENCH(y = dot.calc_base());
-            benchmark::DoNotOptimize(y);
-            benchmark::DoNotOptimize(dot);
+            benchmark::DoNotOptimize(expr);
         }
     }
 }
 
-BENCHMARK(innerDot<float32>)->Name("innerDot base float32")
+BENCHMARK(dot<float32>)->Name("dot dispatch float32")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
 
-BENCHMARK(innerDot<float64>)->Name("innerDot base float64")
+BENCHMARK(dot<float64>)->Name("dot dispatch float64")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
 
-BENCHMARK(innerDot<cfloat32>)->Name("innerDot base cfloat32")
+BENCHMARK(dot<cfloat32>)->Name("dot dispatch cfloat32")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
 
-BENCHMARK(innerDot<cfloat64>)->Name("innerDot base cfloat64")
+BENCHMARK(dot<cfloat64>)->Name("dot dispatch cfloat64")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
-
-BENCHMARK(innerDot_complex_real)->Name("innerDot complex-real");

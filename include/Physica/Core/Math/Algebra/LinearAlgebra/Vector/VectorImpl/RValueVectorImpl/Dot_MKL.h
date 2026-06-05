@@ -19,11 +19,11 @@
 #pragma once
 
 #include <mkl_cblas.h>
-#include "InnerDot.h"
+#include "Dot.h"
 
 namespace Physica {
     template<Vector V1, Vector V2>
-    auto InnerDot<V1, V2>::calc_mkl() const noexcept -> T {
+    auto Dot<V1, V2>::calc_mkl() const noexcept -> T {
         using Tm = decltype(std::declval<T>().toMKL());
         const auto* p1 = reinterpret_cast<const Tm*>(v1.data());
         const auto* p2 = reinterpret_cast<const Tm*>(v2.data());
