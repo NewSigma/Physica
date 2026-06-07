@@ -30,10 +30,16 @@ namespace Physica {
         struct is_instance_of<Template, Template<Args...>> : std::true_type {};
 
         template<template<auto, class...> class, class>
-        struct is_instance_of_xt : std::false_type {};
+        struct is_instance_of_x : std::false_type {};
 
         template<template<auto, class...> class Template, auto Arg0, class... Args>
-        struct is_instance_of_xt<Template, Template<Arg0, Args...>> : std::true_type {};
+        struct is_instance_of_x<Template, Template<Arg0, Args...>> : std::true_type {};
+
+        template<template<auto, auto, class...> class, class>
+        struct is_instance_of_xx : std::false_type {};
+
+        template<template<auto, auto, class...> class Template, auto Arg0, auto Arg1, class... Args>
+        struct is_instance_of_xx<Template, Template<Arg0, Arg1, Args...>> : std::true_type {};
 
         template<template<class, auto...> class, class>
         struct is_instance_of_tx : std::false_type {};
@@ -48,10 +54,10 @@ namespace Physica {
         struct is_instance_of_ttx<Template, Template<Arg0, Arg1, Args...>> : std::true_type {};
 
         template<template<class, auto, auto, auto, class...> class, class>
-        struct is_instance_of_txxxt : std::false_type {};
+        struct is_instance_of_txxx : std::false_type {};
 
         template<template<class, auto, auto, auto, class...> class Template, class Arg0, auto Arg1, auto Arg2, auto Arg3, class... Args>
-        struct is_instance_of_txxxt<Template, Template<Arg0, Arg1, Arg2, Arg3, Args...>> : std::true_type {};
+        struct is_instance_of_txxx<Template, Template<Arg0, Arg1, Arg2, Arg3, Args...>> : std::true_type {};
     }
 
     template<class T, template<class...> class Template>
@@ -63,7 +69,10 @@ namespace Physica {
      * It is unfortunate that we cannot implement instanceof in an elegant way.
      */
     template<class T, template<auto, class...> class Template>
-    concept instanceof_x = Internal::is_instance_of_xt<Template, std::remove_cvref_t<T>>::value;
+    concept instanceof_x = Internal::is_instance_of_x<Template, std::remove_cvref_t<T>>::value;
+
+    template<class T, template<auto, auto, class...> class Template>
+    concept instanceof_xx = Internal::is_instance_of_xx<Template, std::remove_cvref_t<T>>::value;
 
     template<class T, template<class, auto...> class Template>
     concept instanceof_tx = Internal::is_instance_of_tx<Template, std::remove_cvref_t<T>>::value;
@@ -72,7 +81,7 @@ namespace Physica {
     concept instanceof_ttx = Internal::is_instance_of_ttx<Template, std::remove_cvref_t<T>>::value;
 
     template<class T, template<class, auto, auto, auto, class...> class Template>
-    concept instanceof_txxx = Internal::is_instance_of_txxxt<Template, std::remove_cvref_t<T>>::value;
+    concept instanceof_txxx = Internal::is_instance_of_txxx<Template, std::remove_cvref_t<T>>::value;
     /**
      * Reject const&& to avoid potential bad pattern
      */

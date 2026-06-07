@@ -23,14 +23,11 @@
 
 namespace Physica {
     template<class Derived> class RValueVector;
-    template<class Derived> class RSparseVector;
-
-    namespace Internal {
-        template<class T>
-        concept VectorObj = std::derived_from<T, RValueVector<T>>
-                         || std::derived_from<T, device_obj<RValueVector<typename remove_device_obj<T>::type>>>;
-    }
 
     template<class T>
-    concept Vector = Internal::VectorObj<remove_codiff_t<std::remove_cvref_t<T>>>;
+    concept Vector = []() consteval {
+        using U = remove_codiff_t<std::remove_cvref_t<T>>;
+        return std::derived_from<U, RValueVector<U>>
+            || std::derived_from<U, device_obj<RValueVector<typename remove_device_obj<U>::type>>>;
+    }();
 }

@@ -24,12 +24,10 @@
 namespace Physica {
     template<class Derived> class RValueTensor;
 
-    namespace Internal {
-        template<class T>
-        concept TensorObj = std::derived_from<T, RValueTensor<T>>
-                         || std::derived_from<T, device_obj<RValueTensor<typename remove_device_obj<T>::type>>>;
-    }
-
     template<class T>
-    concept Tensor = Internal::TensorObj<remove_codiff_t<std::remove_cvref_t<T>>>;
+    concept Tensor = []() consteval {
+        using U = remove_codiff_t<std::remove_cvref_t<T>>;
+        return std::derived_from<U, RValueTensor<U>>
+            || std::derived_from<U, device_obj<RValueTensor<typename remove_device_obj<U>::type>>>;
+    }();
 }

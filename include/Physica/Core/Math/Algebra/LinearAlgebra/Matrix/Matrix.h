@@ -24,14 +24,12 @@
 namespace Physica {
     template<class Derived> class RValueMatrix;
 
-    namespace Internal {
-        template<class T>
-        concept MatrixObj = std::derived_from<T, RValueMatrix<T>>
-                         || std::derived_from<T, device_obj<RValueMatrix<typename remove_device_obj<T>::type>>>;
-    }
-
     template<class T>
-    concept Matrix = Internal::MatrixObj<remove_codiff_t<std::remove_cvref_t<T>>>;
+    concept Matrix = []() consteval {
+        using U = remove_codiff_t<std::remove_cvref_t<T>>;
+        return std::derived_from<U, RValueMatrix<U>>
+            || std::derived_from<U, device_obj<RValueMatrix<typename remove_device_obj<U>::type>>>;
+    }();
 
     class MatrixMajor {
     public:

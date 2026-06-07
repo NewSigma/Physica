@@ -54,8 +54,6 @@ namespace Physica {
             void reseed(RandomOption option);
             void reseed(uint64_t seed_, RandomOption option);
         };
-
-        class QRandomBase {};
     }
 
     constexpr int rngID_MKL(RandomOption option) noexcept {
@@ -86,16 +84,6 @@ namespace Physica {
         return 0;
     #endif
     }
-    /**
-     * Random Number Generator
-     */
-    template<class T>
-    concept RNG = std::derived_from<T, Internal::RandomBase>;
-    /**
-     * Quasi Random Number Generator
-     */
-    template<class T>
-    concept QRNG = std::derived_from<T, Internal::QRandomBase>;
     /**
      * \class Random provides a general, per-thread, reusable random generator implementation.
      * We use the same random number generator as NumPy [1].
@@ -227,6 +215,9 @@ namespace Physica {
                 i = dist(getInstance());
         }
     }
+
+    template<class T>
+    concept RNG = instanceof_xx<T, Random>;
 }
 
 namespace Physica {
