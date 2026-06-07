@@ -51,10 +51,9 @@ namespace Physica {
             auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
                 const auto& source = source_.getDerived();
                 auto& target = target_.getDerived();
-                size_t length = source.getLength();
-                uint32_t index = blockIdx.x * blockDim.x + threadIdx.x;
-                if (index < length)
-                    target[index] = source.calc(index);
+                size_t i = blockIdx.x * blockDim.x + threadIdx.x;
+                if (i < source.getLength())
+                    target[i] = source.calc(i);
             };
             CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(func, makeKernelConfig());
         }
@@ -64,35 +63,34 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ void device_obj<RValueVector<Derived>>::assign(Vector auto&& target, instanceof_x<ThreadBlock> auto block) const {
-        target.assert_assign(Base::getDerived());
-        const auto& v0 = Base::getDerived();
+    __device__ void device_obj<RValueVector<Derived>>::assign(this const auto& self, Vector auto&& target, instanceof_x<ThreadBlock> auto block) {
+        target.assert_assign(self);
         if constexpr (Internal::EnableSIMD<device_obj<Derived>, decltype(target)>::value) {
             constexpr size_t Length = getSizeAtCompile(target);
             constexpr int Size = device_obj<BestPacket<T, Length>>::Size;
             if constexpr (Length != Dynamic) {
                 constexpr size_t to = Length / Size * Size;
                 for (size_t i = 0; i < to; i += Size)
-                    target.writePacket(v0.template packet<Size>(i), i);
+                    target.writePacket(self.template packet<Size>(i), i);
 
                 for (size_t i = Length - Length % Size; i < Length; ++i)
-                    target[i] = v0.calc(i);
+                    target[i] = self.calc(i);
             }
             else {
-                const size_t length = getLength();
+                const size_t length = self.getLength();
                 const size_t to = length / Size * Size;
                 size_t i = 0;
                 for (; i < to; i += Size)
-                    target.writePacket(v0.template packet<Size>(i), i);
+                    target.writePacket(self.template packet<Size>(i), i);
 
                 for (; i < length; ++i)
-                    target[i] = v0.calc(i);
+                    target[i] = self.calc(i);
             }
         }
         else {
-            const size_t length = getLength();
+            const size_t length = self.getLength();
             for (size_t i = block.tid(); i < length; i += block.getNumThread())
-                target[i] = calc(i);
+                target[i] = self.calc(i);
             block.sync();
         }
     }
@@ -140,27 +138,37 @@ namespace Physica {
 
     template<class Derived>
     __device__ auto device_obj<RValueVector<Derived>>::calc(size_t index) const -> T {
-        return Base::getDerived().calc(index);
+        return calc(index, ThreadBlock<1>{});
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
+        return Base::getDerived().calc(index, block);
     }
 
     template<class Derived>
     __device__ auto device_obj<RValueVector<Derived>>::calc_value(size_t index) const -> Tv {
-        return Base::getDerived().values().calc(index);
+        return calc_value(index, ThreadBlock<1>{});
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::calc_value(size_t index, instanceof_x<ThreadBlock> auto block) const -> Tv {
+        return Base::getDerived().values().calc(index, block);
     }
 
     template<class Derived>
     template<int Size>
-    __device__ auto device_obj<RValueVector<Derived>>::packet(size_t index) const noexcept -> SIMD<T, Size> {
-        assert(index + Size <= getLength());
-        return SIMD<T, Size>(calc(index).value(), calc(index + 1).value());
+    __device__ auto device_obj<RValueVector<Derived>>::packet(this const auto& self, size_t index) noexcept -> SIMD<T, Size> {
+        assert(index + Size <= self.getLength());
+        return SIMD<T, Size>(self.calc(index).value(), self.calc(index + 1).value());
     }
 
     template<class Derived>
     template<int Size>
-    __device__ auto device_obj<RValueVector<Derived>>::packet(size_t index, [[maybe_unused]] size_t count) const noexcept -> SIMD<T, Size> {
-        assert(index + Size <= getLength());
+    __device__ auto device_obj<RValueVector<Derived>>::packet(this const auto& self, size_t index, [[maybe_unused]] size_t count) noexcept -> SIMD<T, Size> {
+        assert(index + Size <= self.getLength());
         assert(count == 1 && "[Error]: No need to call partial version");
-        return SIMD<T, Size>(calc(index).value(), 0_HF);
+        return SIMD<T, Size>(self.calc(index).value(), 0_HF);
     }
 
     template<class Derived>
@@ -193,10 +201,10 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::squaredNorm() const -> Tr {
+    __device__ auto device_obj<RValueVector<Derived>>::squaredNorm(this const auto& self) -> Tr {
         auto result = Tr(0);
-        for (size_t i = 0; i < getLength(); ++i)
-            result += calc(i).squaredNorm();
+        for (size_t i = 0; i < self.getLength(); ++i)
+            result += self.calc(i).squaredNorm();
         return result;
     }
 
@@ -287,10 +295,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::crossEntropy(size_t index) const -> T {
-        assert(index < getLength() && "[Error]: Index overflow");
-        const auto& v = Base::getDerived();
-        return (v - calc(index)).lnSumExp();
+    __device__ auto device_obj<RValueVector<Derived>>::crossEntropy(this const auto& self, size_t index) -> T {
+        assert(index < self.getLength() && "[Error]: Index overflow");
+        return (self - self.calc(index)).lnSumExp();
     }
 
     template<class Derived>
@@ -306,13 +313,13 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<RValueVector<Derived>>::prod() const noexcept -> T {
-        assert(getLength() != 0);
+    __host__ __device__ auto device_obj<RValueVector<Derived>>::prod(this const auto& self) noexcept -> T {
+        assert(self.getLength() != 0);
         if (IsHost()) {
             using U = std::conditional<isReverseDiff(), Tv, T>::type;
-            auto numThreads = std::min<size_t>(getLength(), CUDADevAttr::DefaultThreadsPerBlock);
+            auto numThreads = std::min<size_t>(self.getLength(), CUDADevAttr::DefaultThreadsPerBlock);
             auto buffer = device_obj<VectorND<U>>(numThreads);
-            auto func = [v_ = asStruct(Base::getDerived()), buffer_ = asStruct(buffer)] __device__() mutable {
+            auto func = [v_ = asStruct(self), buffer_ = asStruct(buffer)] __device__() mutable {
                 const auto& v = v_.getDerived();
                 auto& buffer = buffer_.getDerived();
                 U local = 1;
@@ -335,40 +342,40 @@ namespace Physica {
         }
 
         if constexpr (IsDevice()) {
-            T result = calc(0);
-            for(size_t i = 1; i < getLength(); ++i)
-                result *= calc(i);
+            T result = self.calc(0);
+            for(size_t i = 1; i < self.getLength(); ++i)
+                result *= self.calc(i);
             return result;
         }
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::max(instanceof_x<ThreadBlock> auto block) const -> T {
-        assert(getLength() != 0);
+    __device__ auto device_obj<RValueVector<Derived>>::max(this const auto& self, instanceof_x<ThreadBlock> auto block) -> T {
+        assert(self.getLength() != 0);
         const int numThread = block.getNumThread();
         T local = std::numeric_limits<T>::lowest();
-        for (int i = block.tid(); i < getLength(); i += numThread)
-            local = std::max(local, calc(i));
+        for (int i = block.tid(); i < self.getLength(); i += numThread)
+            local = std::max(local, self.calc(i));
         return block.max(local);
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::min(instanceof_x<ThreadBlock> auto block) const -> T {
-        assert(getLength() != 0);
+    __device__ auto device_obj<RValueVector<Derived>>::min(this const auto& self, instanceof_x<ThreadBlock> auto block) -> T {
+        assert(self.getLength() != 0);
         const int numThread = block.getNumThread();
         T local = std::numeric_limits<T>::max();
-        for (int i = block.tid(); i < getLength(); i += numThread)
-            local = std::min(local, calc(i));
+        for (int i = block.tid(); i < self.getLength(); i += numThread)
+            local = std::min(local, self.calc(i));
         return block.min(local);
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::sum(instanceof_x<ThreadBlock> auto block) const -> T {
-        assert(getLength() != 0);
+    __device__ auto device_obj<RValueVector<Derived>>::sum(this const auto& self, instanceof_x<ThreadBlock> auto block) -> T {
+        assert(self.getLength() != 0);
         const int numThread = block.getNumThread();
         T local = 0;
-        for (int i = block.tid(); i < getLength(); i += numThread)
-            local += calc(i);
+        for (int i = block.tid(); i < self.getLength(); i += numThread)
+            local += self.calc(i);
         return block.sum(local);
     }
 

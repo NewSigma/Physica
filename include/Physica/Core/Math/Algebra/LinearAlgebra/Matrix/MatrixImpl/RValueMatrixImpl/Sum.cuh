@@ -40,7 +40,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t index) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
@@ -52,11 +53,11 @@ namespace Physica {
     };
 
     template<class M, bool ReduceCol>
-    __device__ auto device_obj<MatrixSum<M, ReduceCol>>::calc(size_t index) const -> T {
+    __device__ auto device_obj<MatrixSum<M, ReduceCol>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
         if constexpr (ReduceCol)
-            return mat.getDerived().row(index).sum();
+            return mat.getDerived().row(index).sum(block);
         else
-            return mat.getDerived().col(index).sum();
+            return mat.getDerived().col(index).sum(block);
     }
 
     template<class M, bool ReduceCol>

@@ -45,7 +45,8 @@ namespace Physica {
         void assign(Matrix auto&& target) const;
         void assign_add(Matrix auto&& target) const;
 
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
@@ -117,12 +118,12 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    __device__ auto device_obj<Kronecker<M1, M2>>::calc(size_t row, size_t col) const -> T {
+    __device__ auto device_obj<Kronecker<M1, M2>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> T {
         size_t row1 = row / getRHS().getRow();
         size_t row2 = row % getRHS().getRow();
         size_t col1 = col / getRHS().getCol();
         size_t col2 = col % getRHS().getCol();
-        return getLHS().calc(row1, col1) * getRHS().calc(row2, col2);
+        return getLHS().calc(row1, col1, block) * getRHS().calc(row2, col2, block);
     }
 
     template<Matrix M1, Matrix M2>

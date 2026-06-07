@@ -41,13 +41,19 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t index) const { return conjugate().calc(index).conjugate(); }
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         [[nodiscard]] __host__ __device__ decltype(auto) conjugate(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return conjugate().getLength(); }
     };
+
+    template<Vector V>
+    __device__ auto device_obj<Conjugate<V>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
+        return conjugate().calc(index, block).conjugate();
+    }
 
     template<Vector V>
     __host__ __device__ decltype(auto) device_obj<Conjugate<V>>::conjugate(this auto&& self) noexcept {

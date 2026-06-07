@@ -41,7 +41,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).real(); }
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const { return mat.getDerived().calc(row, col, block).real(); }
 
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
@@ -74,7 +75,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).imag(); }
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const { return mat.getDerived().calc(row, col, block).imag(); }
 
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
@@ -109,7 +111,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).squaredNorm(); }
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const { return mat.getDerived().calc(row, col, block).squaredNorm(); }
 
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
@@ -142,7 +145,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).norm(); }
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const { return mat.getDerived().calc(row, col, block).norm(); }
 
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
@@ -174,7 +178,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).value(); }
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const { return mat.getDerived().calc(row, col, block).value(); }
         [[nodiscard]] __device__ T calc_value(size_t row, size_t col) const { return calc(row, col); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
@@ -201,7 +206,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).template grad<GradOrder>(); }
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const { return mat.getDerived().calc(row, col, block).template grad<GradOrder>(); }
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }

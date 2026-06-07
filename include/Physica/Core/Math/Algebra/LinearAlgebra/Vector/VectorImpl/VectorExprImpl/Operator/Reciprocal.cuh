@@ -30,15 +30,19 @@ namespace Physica {
     public:
         using Base::Base;
         /* Getters */
-        [[nodiscard]] __device__ T calc(size_t index) const {
-            return reciprocal(Base::getExpr().calc(index));
-        }
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         template<int Size>
         [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
         template<int Size>
         [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
     };
+
+    template<Vector V>
+    __device__ auto device_obj<VectorExpr<ExprID::Reciprocal, V>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
+        return reciprocal(Base::getExpr().calc(index, block));
+    }
 
     template<Vector V>
     template<int Size>

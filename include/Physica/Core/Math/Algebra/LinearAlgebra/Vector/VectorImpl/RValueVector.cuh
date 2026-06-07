@@ -49,18 +49,20 @@ namespace Physica {
         [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator-(this auto&&) noexcept;
         /* Operations */
         __host__ __device__ void assign(Vector auto&& target) const;
-        __device__ void assign(Vector auto&& target, instanceof_x<ThreadBlock> auto block) const;
+        __device__ void assign(this const auto&, Vector auto&& target, instanceof_x<ThreadBlock> auto block);
         __host__ __device__ void assign_add(Vector auto& target) const;
         __host__ __device__ void assign_add_base(Vector auto& target) const;
         __host__ __device__ void assert_assign(const Vector auto& source) const noexcept;
         [[nodiscard]] __host__ __device__ constexpr KernelConfig makeKernelConfig() const noexcept;
 
         [[nodiscard]] __device__ T calc(size_t index) const;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
         [[nodiscard]] __device__ Tv calc_value(size_t index) const;
+        [[nodiscard]] __device__ Tv calc_value(size_t index, instanceof_x<ThreadBlock> auto block) const;
         template<int Size>
-        [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
+        [[nodiscard]] __device__ SIMD<T, Size> packet(this const auto&, size_t index) noexcept;
         template<int Size>
-        [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
+        [[nodiscard]] __device__ SIMD<T, Size> packet(this const auto&, size_t index, size_t count) noexcept;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
 
         __host__ __device__ void resize(const Vector auto& x) { resize(x.getLength()); }
@@ -70,7 +72,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto transpose(this auto&&) noexcept;
 
         [[nodiscard]] __device__ Tr norm() const;
-        [[nodiscard]] __device__ Tr squaredNorm() const;
+        [[nodiscard]] __device__ Tr squaredNorm(this const auto&);
         [[nodiscard]] __device__ T max() const;
         [[nodiscard]] __device__ T min() const;
         [[nodiscard]] __host__ __device__ T sum() const;
@@ -80,14 +82,14 @@ namespace Physica {
         [[nodiscard]] __device__ T deviation() const;
         [[nodiscard]] __device__ T deviation(const T& prior_mean) const;
         [[nodiscard]] __device__ T lnSumExp() const;
-        [[nodiscard]] __device__ T crossEntropy(size_t index) const;
+        [[nodiscard]] __device__ T crossEntropy(this const auto&, size_t index);
         [[nodiscard]] __device__ T lnSoftmax(size_t index) const;
         [[nodiscard]] __device__ T softmax(size_t index) const;
-        [[nodiscard]] __host__ __device__ T prod() const noexcept;
+        [[nodiscard]] __host__ __device__ T prod(this const auto&) noexcept;
 
-        [[nodiscard]] __device__ T max(instanceof_x<ThreadBlock> auto block) const;
-        [[nodiscard]] __device__ T min(instanceof_x<ThreadBlock> auto block) const;
-        [[nodiscard]] __device__ T sum(instanceof_x<ThreadBlock> auto block) const;
+        [[nodiscard]] __device__ T max(this const auto&, instanceof_x<ThreadBlock> auto block);
+        [[nodiscard]] __device__ T min(this const auto&, instanceof_x<ThreadBlock> auto block);
+        [[nodiscard]] __device__ T sum(this const auto&, instanceof_x<ThreadBlock> auto block);
         [[nodiscard]] __device__ T mean(instanceof_x<ThreadBlock> auto block) const;
         [[nodiscard]] __device__ T lnSumExp(instanceof_x<ThreadBlock> auto block) const;
 

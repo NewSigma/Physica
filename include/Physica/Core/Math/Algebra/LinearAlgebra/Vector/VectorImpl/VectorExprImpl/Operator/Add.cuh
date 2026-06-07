@@ -34,7 +34,8 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t index) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         template<int Size>
         [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
@@ -51,21 +52,21 @@ namespace Physica {
     };
 
     template<Vector V, Scalar U>
-    [[nodiscard]] __device__ auto device_obj<VectorExpr<ExprID::Add, V, U>>::calc(size_t index) const -> T {
+    [[nodiscard]] __device__ auto device_obj<VectorExpr<ExprID::Add, V, U>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
         if constexpr (isReverseDiff())
-            return Base::getDerived().calc_value(index);
+            return Base::getDerived().calc_value(index, block);
         else if constexpr (host_obj::lowerToFMA()) {
-            T a = getLHS().getLHS().calc(index);
+            T a = getLHS().getLHS().calc(index, block);
             T b;
             if constexpr (Scalar<decltype(getLHS().getRHS())>)
                 b = getLHS().getRHS();
             else
-                b = getLHS().getRHS().calc(index);
+                b = getLHS().getRHS().calc(index, block);
             T c = getRHS();
             return fma(a, b, c);
         }
         else
-            return Base::getLHS().calc(index) + Base::getRHS();
+            return Base::getLHS().calc(index, block) + Base::getRHS();
     }
 
     template<Vector V, Scalar U>
@@ -109,7 +110,8 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t index) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         template<int Size>
         [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
@@ -125,21 +127,21 @@ namespace Physica {
     };
 
     template<Vector V1, Vector V2>
-    __device__ auto device_obj<VectorExpr<ExprID::Add, V1, V2>>::calc(size_t index) const -> T {
+    __device__ auto device_obj<VectorExpr<ExprID::Add, V1, V2>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
         if constexpr (isReverseDiff())
-            return Base::calc_value(index);
+            return Base::calc_value(index, block);
         else if constexpr (host_obj::lowerToFMA()) {
-            T a = getLHS().getLHS().calc(index);
+            T a = getLHS().getLHS().calc(index, block);
             T b;
             if constexpr (Scalar<decltype(getLHS().getRHS())>)
                 b = getLHS().getRHS();
             else
-                b = getLHS().getRHS().calc(index);
-            T c = getRHS().calc(index);
+                b = getLHS().getRHS().calc(index, block);
+            T c = getRHS().calc(index, block);
             return fma(a, b, c);
         }
         else
-            return Base::getLHS().calc(index) + Base::getRHS().calc(index);
+            return Base::getLHS().calc(index, block) + Base::getRHS().calc(index, block);
     }
 
     template<Vector V1, Vector V2>

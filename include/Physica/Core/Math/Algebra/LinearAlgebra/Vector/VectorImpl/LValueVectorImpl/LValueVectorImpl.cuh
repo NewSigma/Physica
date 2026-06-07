@@ -105,6 +105,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    __device__ auto device_obj<LValueVector<Derived>>::calc(size_t index) const -> T {
+        return operator[](index);
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<LValueVector<Derived>>::calc(size_t index, instanceof_x<ThreadBlock> auto) const -> T {
+        return calc(index);
+    }
+
+    template<class Derived>
     __host__ __device__ void device_obj<LValueVector<Derived>>::reverse(const auto& grad) const noexcept {
         static_assert(isReverseDiff());
         using U = std::remove_cvref_t<decltype(grad)>;

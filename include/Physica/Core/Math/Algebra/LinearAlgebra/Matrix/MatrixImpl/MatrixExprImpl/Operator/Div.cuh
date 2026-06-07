@@ -24,7 +24,7 @@ namespace Physica {
     template<class T, class U> requires(Scalar<T> || Scalar<U>)
     class device_obj<MatrixExpr<ExprID::Div, T, U>>
             : public device_obj<BinaryMatrixExpr<ExprID::Div, T, U>> {
-        using Base = BinaryMatrixExpr<ExprID::Div, T, U>;
+        using Base = device_obj<BinaryMatrixExpr<ExprID::Div, T, U>>;
     public:
         using typename Base::ScalarType;
     protected:
@@ -35,15 +35,19 @@ namespace Physica {
                 assert(!Base::getRHS().isSubNormal() && "[Error]: Division overflow");
         }
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
-            if constexpr (Matrix<T>)
-                return Base::getLHS().calc(row, col) / Base::getRHS();
-            else
-                return Base::getLHS() / Base::getRHS().calc(row, col);
-        }
+        using Base::calc;
+        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto) const;
 
         [[nodiscard]] auto values(this auto&& self) noexcept;
     };
+
+    template<class T, class U> requires(Scalar<T> || Scalar<U>)
+    __device__ auto device_obj<MatrixExpr<ExprID::Div, T, U>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto) const -> ScalarType {
+        if constexpr (Matrix<T>)
+            return Base::getLHS().calc(row, col) / Base::getRHS();
+        else
+            return Base::getLHS() / Base::getRHS().calc(row, col);
+    }
 
     template<class T, class U> requires(Scalar<T> || Scalar<U>)
     auto device_obj<MatrixExpr<ExprID::Div, T, U>>::values(this auto&& self) noexcept {
@@ -65,15 +69,19 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
-            if constexpr (Matrix<T>)
-                return Base::getLHS().calc(row, col) / Base::getRHS().calc(row);
-            else
-                return Base::getLHS().calc(row) / Base::getRHS().calc(row, col);
-        }
+        using Base::calc;
+        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
 
         [[nodiscard]] auto values(this auto&& self) noexcept;
     };
+
+    template<class T, class U> requires(Vector<T> || Vector<U>)
+    __device__ auto device_obj<MatrixExpr<ExprID::Div, T, U>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> ScalarType {
+        if constexpr (Matrix<T>)
+            return Base::getLHS().calc(row, col, block) / Base::getRHS().calc(row, block);
+        else
+            return Base::getLHS().calc(row, block) / Base::getRHS().calc(row, col, block);
+    }
 
     template<class T, class U> requires(Vector<T> || Vector<U>)
     auto device_obj<MatrixExpr<ExprID::Div, T, U>>::values(this auto&& self) noexcept {
@@ -92,13 +100,17 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
-            assert(!Base::getRHS().calc(row, col).isSubNormal() && "[Error]: Division overflow");
-            return Base::getLHS().calc(row, col) / Base::getRHS().calc(row, col);
-        }
+        using Base::calc;
+        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
 
         [[nodiscard]] auto values(this auto&& self) noexcept;
     };
+
+    template<Matrix M, Matrix U>
+    __device__ auto device_obj<MatrixExpr<ExprID::Div, M, U>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> ScalarType {
+        assert(!Base::getRHS().calc(row, col, block).isSubNormal() && "[Error]: Division overflow");
+        return Base::getLHS().calc(row, col, block) / Base::getRHS().calc(row, col, block);
+    }
 
     template<Matrix M, Matrix U>
     auto device_obj<MatrixExpr<ExprID::Div, M, U>>::values(this auto&& self) noexcept {

@@ -33,7 +33,8 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t index) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         void reverse(const Vector auto& grad) const noexcept;
 
@@ -41,11 +42,11 @@ namespace Physica {
     };
 
     template<Vector V>
-    __device__ auto device_obj<VectorExpr<ExprID::Square, V>>::calc(size_t index) const -> T {
+    __device__ auto device_obj<VectorExpr<ExprID::Square, V>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
         if constexpr (Base::isReverseDiff())
-            return Base::calc_value(index);
+            return Base::calc_value(index, block);
         else
-            return square(Base::getExpr().calc(index));
+            return square(Base::getExpr().calc(index, block));
     }
 
     template<Vector V>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Parallel/ThreadBlock.cuh"
 #include "Physica/PlainStruct.h"
 #include "GEVM.h"
 
@@ -40,8 +41,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
         /* Getters */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
         [[nodiscard]] __host__ __device__ size_t getRow() const { return vec.getDerived().getLength(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
     };
@@ -50,8 +53,8 @@ namespace Physica {
     __host__ __device__ device_obj<GEVM<V, M>>::device_obj(V vec_, M mat_) : vec(asStruct(vec_)), mat(asStruct(mat_)) {}
 
     template<Vector V, Matrix M>
-    __device__ auto device_obj<GEVM<V, M>>::calc(size_t row, size_t col) const -> T {
-        return vec.getDerived().calc(row) * mat.getDerived().calc(0, col);
+    __device__ auto device_obj<GEVM<V, M>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> T {
+        return vec.getDerived().calc(row, block) * mat.getDerived().calc(0, col, block);
     }
 }
 

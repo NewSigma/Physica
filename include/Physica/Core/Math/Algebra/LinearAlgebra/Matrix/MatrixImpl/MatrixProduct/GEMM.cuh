@@ -51,8 +51,9 @@ namespace Physica {
         __host__ __device__ void assign(Matrix auto& target) const;
         __host__ __device__ void assign_add(Matrix auto& target) const;
 
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t, size_t, instanceof_x<ThreadBlock> auto) const { noImpl("GEMM.calc() is low performance and should be avoided"); }
         [[nodiscard]] auto compute() const;
-        [[nodiscard]] __device__ T calc(size_t, size_t) const { noImpl("GEMM.calc() is low performance and should be avoided"); }
 
         void reverse(const Matrix auto& grad) const noexcept;
 

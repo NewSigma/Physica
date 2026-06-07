@@ -19,17 +19,18 @@
 #pragma once
 
 #include "Flatten.h"
+#include "Physica/Core/Parallel/ThreadBlock.cuh"
 
 namespace Physica {
     template<Matrix M>
     class device_obj<FlattenR<M>> : public device_obj<RValueVector<FlattenR<M>>> {
+        using host_obj = FlattenR<M>;
         using This = device_obj<FlattenR<M>>;
+        using Base = device_obj<RValueVector<host_obj>>;
 
         const device_obj<M>& mat;
-    public:
-        using host_obj = FlattenR<M>;
-        using Base = device_obj<RValueVector<host_obj>>;
-        using typename Base::ScalarType;
+    protected:
+        using typename Base::T;
     public:
         __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(mat_) {}
         device_obj(const This&) = default;
@@ -38,16 +39,18 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
     };
 
     template<Matrix M>
-    __device__ auto device_obj<FlattenR<M>>::calc(size_t index) const -> ScalarType {
+    __device__ auto device_obj<FlattenR<M>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
-        return mat.calcFromMajorMinor(major, minor);
+        return mat.calcFromMajorMinor(major, minor, block);
     }
 }
 

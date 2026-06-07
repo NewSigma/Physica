@@ -44,7 +44,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t index) const { return vec.calc(index + from); }
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         template<size_t Length_ = Dynamic>
         [[nodiscard]] __host__ __device__ auto head(this auto&&, size_t to = Length_) noexcept;
@@ -66,6 +67,11 @@ namespace Physica {
 
     template<Vector V, size_t Length>
     __host__ __device__ device_obj<RVectorBlock<V, Length>>::device_obj(Ref vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
+
+    template<Vector V, size_t Length>
+    __device__ auto device_obj<RVectorBlock<V, Length>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
+        return vec.getDerived().calc(index + from, block);
+    }
 
     template<Vector V, size_t Length>
     template<size_t Length_>

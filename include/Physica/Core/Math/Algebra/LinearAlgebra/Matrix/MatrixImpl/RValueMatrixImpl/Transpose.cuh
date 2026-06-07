@@ -47,7 +47,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return getExpr().calc(col, row); }
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
 
         void reverse(const Vector auto& grad) const noexcept;
 
@@ -57,6 +58,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getExpr().getCol(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getExpr().getRow(); }
     };
+
+    template<Matrix M>
+    __device__ auto device_obj<Transpose<M>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> T {
+        return getExpr().calc(col, row, block);
+    }
 
     template<Matrix M>
     void device_obj<Transpose<M>>::reverse(const Vector auto& grad) const noexcept {
@@ -95,7 +101,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ T calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.getDerived().calc(col); }
+        using Base::calc;
+        [[nodiscard]] __device__ T calc([[maybe_unused]] size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
 
         void reverse(const Vector auto& grad) const noexcept;
 
@@ -105,6 +112,12 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return vec.getDerived().getLength(); }
     };
+
+    template<Vector V>
+    __device__ auto device_obj<Transpose<V>>::calc([[maybe_unused]] size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> T {
+        assert(row == 0);
+        return vec.getDerived().calc(col, block);
+    }
 
     template<Vector V>
     void device_obj<Transpose<V>>::reverse(const Vector auto& grad) const noexcept {

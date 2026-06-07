@@ -30,12 +30,16 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            return Base::getLHS().calc(row, col) + Base::getRHS();
-        }
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto) const;
 
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
     };
+
+    template<Matrix M, Scalar U>
+    __device__ auto device_obj<MatrixExpr<ExprID::Add, M, U>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto) const -> T {
+        return Base::getLHS().calc(row, col) + Base::getRHS();
+    }
 
     template<Matrix M, Scalar U>
     __host__ __device__ auto device_obj<MatrixExpr<ExprID::Add, M, U>>::values(this auto&& self) noexcept {
@@ -55,6 +59,7 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
+        using Base::calc;
         __host__ __device__ void assign(Matrix auto& target) const {
             if constexpr (std::remove_cvref_t<M>::isFastAssign()) {
                 Base::getLHS().assign(target);
@@ -64,12 +69,7 @@ namespace Physica {
                 Base::assign(target);
         }
 
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            if constexpr (isReverseDiff())
-                return Base::calc_value(row, col);
-            else
-                return Base::getLHS().calc(row, col) + Base::getRHS().calc(row);
-        }
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
 
 
         using Base::reverse;
@@ -83,6 +83,14 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
     };
+
+    template<Matrix M, Vector U>
+    __device__ auto device_obj<MatrixExpr<ExprID::Add, M, U>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> T {
+        if constexpr (isReverseDiff())
+            return Base::calc_value(row, col, block);
+        else
+            return Base::getLHS().calc(row, col, block) + Base::getRHS().calc(row, block);
+    }
 
     template<Matrix M, Vector U>
     __host__ __device__ auto device_obj<MatrixExpr<ExprID::Add, M, U>>::values(this auto&& self) noexcept {
@@ -102,17 +110,18 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
 
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
     };
 
     template<Matrix M1, Matrix M2>
-    __device__ auto device_obj<MatrixExpr<ExprID::Add, M1, M2>>::calc(size_t row, size_t col) const -> T {
+    __device__ auto device_obj<MatrixExpr<ExprID::Add, M1, M2>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> T {
         if constexpr (isReverseDiff())
-            return Base::calc_value(row, col);
+            return Base::calc_value(row, col, block);
         else
-            return Base::getLHS().calc(row, col) + Base::getRHS().calc(row, col);
+            return Base::getLHS().calc(row, col, block) + Base::getRHS().calc(row, col, block);
     }
 
     template<Matrix M1, Matrix M2>

@@ -32,7 +32,8 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
 
         void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
@@ -41,11 +42,11 @@ namespace Physica {
     };
 
     template<Matrix M>
-    __device__ auto device_obj<MatrixExpr<ExprID::Sinh, M>>::calc(size_t row, size_t col) const -> T {
+    __device__ auto device_obj<MatrixExpr<ExprID::Sinh, M>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> T {
         if constexpr (isReverseDiff())
-            return Base::calc_value(row, col);
+            return Base::calc_value(row, col, block);
         else
-            return sinh(Base::getExpr().calc(row, col));
+            return sinh(Base::getExpr().calc(row, col, block));
     }
 
     template<Matrix M>

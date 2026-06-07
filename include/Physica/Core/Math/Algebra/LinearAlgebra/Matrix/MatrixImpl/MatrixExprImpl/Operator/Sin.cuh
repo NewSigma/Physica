@@ -33,16 +33,17 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
         [[nodiscard]] auto values(this auto&& self) noexcept;
     };
 
     template<Matrix M>
-    __device__ auto device_obj<MatrixExpr<ExprID::Sin, M>>::calc(size_t row, size_t col) const -> T {
+    __device__ auto device_obj<MatrixExpr<ExprID::Sin, M>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> T {
         if constexpr (isReverseDiff())
-            return Base::calc_value(row, col);
+            return Base::calc_value(row, col, block);
         else
-            return sin(Base::getExpr().calc(row, col));
+            return sin(Base::getExpr().calc(row, col, block));
     }
 
     template<Matrix M>

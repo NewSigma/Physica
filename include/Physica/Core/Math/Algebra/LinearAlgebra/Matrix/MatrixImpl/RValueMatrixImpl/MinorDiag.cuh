@@ -36,7 +36,8 @@ namespace Physica {
         device_obj(This&&) = default;
         ~device_obj() = default;
         /* Operations */
-        [[nodiscard]] __device__ decltype(auto) calc(size_t index) const noexcept;
+        using Base::calc;
+        [[nodiscard]] __device__ decltype(auto) calc(size_t index, instanceof_x<ThreadBlock> auto block) const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getRow() - std::abs(shift); }
@@ -49,10 +50,10 @@ namespace Physica {
     }
 
     template<Matrix M>
-    __device__ decltype(auto) device_obj<MinorDiagR<M>>::calc(size_t index) const noexcept {
+    __device__ decltype(auto) device_obj<MinorDiagR<M>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const noexcept {
         size_t r = shift < 0 ? -shift : 0;
         size_t c = shift > 0 ? shift : 0;
-        return getExpr().calc(r + index, c + index);
+        return getExpr().calc(r + index, c + index, block);
     }
 
     template<Matrix M>

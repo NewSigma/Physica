@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Hermite.h"
+#include "Physica/Core/Parallel/ThreadBlock.cuh"
 
 namespace Physica {
     template<class T>
@@ -30,14 +31,16 @@ namespace Physica {
     class device_obj<Hermite<M>> : public device_obj<RValueMatrix<Hermite<M>>> {
         using host_obj = Hermite<M>;
         using Base = device_obj<RValueMatrix<host_obj>>;
-    public:
-        using typename Base::ScalarType;
+    protected:
+        using typename Base::T;
     private:
         const device_obj<M>& matrix;
     public:
         explicit device_obj(const device_obj<M>& matrix_);
+        /* Operations */
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return matrix.calc(col, row).conjugate(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getCol(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return matrix.getRow(); }
     };
@@ -47,20 +50,27 @@ namespace Physica {
         static_assert(M::isComplex(), "[Error]: Do not call hermite on real matrix");
     }
 
+    template<Matrix M>
+    __device__ auto device_obj<Hermite<M>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> T {
+        return matrix.calc(col, row, block).conjugate();
+    }
+
     template<Vector V>
     class device_obj<Hermite<V>> : public device_obj<RValueMatrix<Hermite<V>>> {
         using host_obj = Hermite<V>;
         using Base = device_obj<RValueMatrix<host_obj>>;
-    public:
-        using typename Base::ScalarType;
+    protected:
+        using typename Base::T;
     private:
         const device_obj<V>& vec;
     public:
         explicit device_obj(const device_obj<V>& vec_);
         /* Operations */
         __device__ void assign(Matrix auto& target) const;
+
+        using Base::calc;
+        [[nodiscard]] __device__ T calc([[maybe_unused]] size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col).conjugate(); }
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return vec.getLength(); }
     };
@@ -74,6 +84,12 @@ namespace Physica {
     __device__ void device_obj<Hermite<V>>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < vec.getLength(); ++i)
             target.refFromMajorMinor(0, i) = calc(target.rowFromMajorMinor(0, i), target.colFromMajorMinor(0, i));
+    }
+
+    template<Vector V>
+    __device__ auto device_obj<Hermite<V>>::calc([[maybe_unused]] size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> T {
+        assert(row == 0);
+        return vec.calc(col, block).conjugate();
     }
 }
 

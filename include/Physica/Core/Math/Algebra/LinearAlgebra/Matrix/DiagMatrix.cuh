@@ -49,7 +49,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto operator*(Vector auto&& v) const noexcept;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const;
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
 
         [[nodiscard]] This inv() const;
         [[nodiscard]] __host__ __device__ const This& transpose() const noexcept { return *this; }
@@ -88,8 +90,18 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
+    __device__ T device_obj<DiagMatrix<T, Order>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto) const {
+        return calc(row, col);
+    }
+
+    template<Scalar T, size_t Order>
     __device__ auto device_obj<DiagMatrix<T, Order>>::calc_value(size_t row, size_t col) const -> Tv {
         return calc(row, col).value();
+    }
+
+    template<Scalar T, size_t Order>
+    __device__ auto device_obj<DiagMatrix<T, Order>>::calc_value(size_t row, size_t col, instanceof_x<ThreadBlock> auto) const -> Tv {
+        return calc_value(row, col);
     }
 
     template<Scalar T, size_t Order>

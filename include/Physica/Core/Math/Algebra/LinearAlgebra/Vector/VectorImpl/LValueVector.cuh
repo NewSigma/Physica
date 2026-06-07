@@ -49,7 +49,8 @@ namespace Physica {
 
         [[nodiscard]] __device__ decltype(auto) operator[](this auto&&, size_t index);
         /* Operations */
-        [[nodiscard]] __device__ decltype(auto) calc(size_t index) const { return operator[](index); }
+        [[nodiscard]] __device__ T calc(size_t index) const;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto) const;
 
         __host__ __device__ void reverse(const auto& grad) const noexcept;
 

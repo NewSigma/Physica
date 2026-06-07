@@ -32,14 +32,18 @@ namespace Physica {
             if constexpr (Vector<V>)
                 assert(!Base::getRHS().isSubNormal() && "[Error]: Division overflow");
         }
-        /* Getters */
-        [[nodiscard]] __device__ T calc(size_t index) const {
-            if constexpr (Vector<V>)
-                return Base::getLHS().calc(index) / Base::getRHS();
-            else
-                return Base::getLHS() / Base::getRHS().calc(index);
-        }
+        /* Operations */
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
     };
+
+    template<class V, class U>
+    __device__ auto device_obj<VectorExpr<ExprID::Div, V, U>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
+        if constexpr (Vector<V>)
+            return Base::getLHS().calc(index, block) / Base::getRHS();
+        else
+            return Base::getLHS() / Base::getRHS().calc(index, block);
+    }
 
     template<Vector V1, Vector V2>
     class device_obj<VectorExpr<ExprID::Div, V1, V2>>
@@ -50,11 +54,15 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t index) const {
-            assert(!Base::getRHS().calc(index).isSubNormal() && "[Error]: Division overflow");
-            return Base::getLHS().calc(index) / Base::getRHS().calc(index);
-        }
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
     };
+
+    template<Vector V1, Vector V2>
+    __device__ auto device_obj<VectorExpr<ExprID::Div, V1, V2>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
+        assert(!Base::getRHS().calc(index, block).isSubNormal() && "[Error]: Division overflow");
+        return Base::getLHS().calc(index, block) / Base::getRHS().calc(index, block);
+    }
 
     template<Vector V, Scalar U>
     [[nodiscard, gnu::always_inline]] __host__ __device__ auto operator/(V&& v, U&& x) noexcept requires(DeviceObj<V>) {

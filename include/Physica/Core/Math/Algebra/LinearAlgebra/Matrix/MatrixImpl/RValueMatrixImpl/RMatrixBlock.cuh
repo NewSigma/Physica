@@ -41,7 +41,8 @@ namespace Physica {
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Getters */
-        [[nodiscard]] __device__ T calc(size_t index) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
@@ -56,9 +57,9 @@ namespace Physica {
     }
 
     template<Matrix M>
-    __device__ auto device_obj<RMatrixBlock<M, 1, Dynamic>>::calc(size_t index) const -> T {
+    __device__ auto device_obj<RMatrixBlock<M, 1, Dynamic>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
         assert(index < colCount);
-        return mat.getDerived().calc(fromRow, fromCol + index);
+        return mat.getDerived().calc(fromRow, fromCol + index, block);
     }
 
     template<Matrix M>
@@ -87,7 +88,8 @@ namespace Physica {
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Getters */
-        [[nodiscard]] __device__ T calc(size_t index) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
@@ -102,9 +104,9 @@ namespace Physica {
     }
 
     template<Matrix M>
-    __device__ auto device_obj<RMatrixBlock<M, Dynamic, 1>>::calc(size_t index) const -> T {
+    __device__ auto device_obj<RMatrixBlock<M, Dynamic, 1>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
         assert(index < rowCount);
-        return mat.getDerived().calc(fromRow + index, fromCol);
+        return mat.getDerived().calc(fromRow + index, fromCol, block);
     }
 
     template<Matrix M>
@@ -134,7 +136,8 @@ namespace Physica {
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
 
         [[nodiscard]] __host__ __device__ auto row(this auto&&, size_t r) noexcept;
         [[nodiscard]] __host__ __device__ auto col(this auto&&, size_t c) noexcept;
@@ -171,10 +174,10 @@ namespace Physica {
     }
 
     template<Matrix M>
-    __device__ auto device_obj<RMatrixBlock<M, Dynamic, Dynamic>>::calc(size_t row, size_t col) const -> T {
+    __device__ auto device_obj<RMatrixBlock<M, Dynamic, Dynamic>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> T {
         assert(row < rowCount);
         assert(col < colCount);
-        return mat.getDerived().calc(row + fromRow, col + fromCol);
+        return mat.getDerived().calc(row + fromRow, col + fromCol, block);
     }
 
     template<Matrix M>

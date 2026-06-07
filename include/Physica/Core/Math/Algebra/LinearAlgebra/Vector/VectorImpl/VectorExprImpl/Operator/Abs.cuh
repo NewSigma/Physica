@@ -33,17 +33,18 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t index) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         [[nodiscard]] auto values(this auto&& self) noexcept;
     };
 
     template<Vector V>
-    __device__ auto device_obj<VectorExpr<ExprID::Abs, V>>::calc(size_t index) const -> T {
+    __device__ auto device_obj<VectorExpr<ExprID::Abs, V>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
         if constexpr (isReverseDiff())
-            return Base::calc_value(index);
+            return Base::calc_value(index, block);
         else
-            return abs(Base::getExpr().calc(index));
+            return abs(Base::getExpr().calc(index, block));
     }
 
     template<Vector V>

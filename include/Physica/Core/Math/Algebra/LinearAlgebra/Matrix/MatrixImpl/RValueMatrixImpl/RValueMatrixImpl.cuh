@@ -111,27 +111,27 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ void device_obj<RValueMatrix<Derived>>::assign(Matrix auto&& target, instanceof_x<ThreadBlock> auto block) const {
+    __device__ void device_obj<RValueMatrix<Derived>>::assign(this const auto& self, Matrix auto&& target, instanceof_x<ThreadBlock> auto block) {
         const size_t maxMinor = target.getMaxMinor();
         for (unsigned int i = block.tid(); i < target.getSize(); i += block.getNumThread()) {
             size_t major = i / maxMinor;
             size_t minor = i % maxMinor;
             const size_t r = target.rowFromMajorMinor(major, minor);
             const size_t c = target.colFromMajorMinor(major, minor);
-            target[r, c] = calc(r, c);
+            target[r, c] = self.calc(r, c);
         }
         block.sync();
     }
 
     template<class Derived>
-    __device__ void device_obj<RValueMatrix<Derived>>::assign_add(Matrix auto&& target, instanceof_x<ThreadBlock> auto block) const {
+    __device__ void device_obj<RValueMatrix<Derived>>::assign_add(this const auto& self, Matrix auto&& target, instanceof_x<ThreadBlock> auto block) {
         const size_t maxMinor = target.getMaxMinor();
         for (unsigned int i = block.tid(); i < target.getSize(); i += block.getNumThread()) {
             size_t major = i / maxMinor;
             size_t minor = i % maxMinor;
             const size_t r = target.rowFromMajorMinor(major, minor);
             const size_t c = target.colFromMajorMinor(major, minor);
-            target[r, c] += calc(r, c);
+            target[r, c] += self.calc(r, c);
         }
         block.sync();
     }
@@ -147,17 +147,27 @@ namespace Physica {
 
     template<class Derived>
     __device__ auto device_obj<RValueMatrix<Derived>>::calc(size_t row, size_t col) const {
-        return Base::getDerived().calc(row, col);
+        return calc(row, col, ThreadBlock<1>{});
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueMatrix<Derived>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const {
+        return Base::getDerived().calc(row, col, block);
     }
 
     template<class Derived>
     __device__ auto device_obj<RValueMatrix<Derived>>::calc_value(size_t row, size_t col) const {
-        return Base::getDerived().values().calc(row, col);
+        return calc_value(row, col, ThreadBlock<1>{});
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(size_t major, size_t minor) const -> T {
-        return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
+    __device__ auto device_obj<RValueMatrix<Derived>>::calc_value(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const {
+        return Base::getDerived().values().calc_value(row, col, block);
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(this const auto& self, size_t major, size_t minor) -> T {
+        return self.calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
     }
 
     template<class Derived>

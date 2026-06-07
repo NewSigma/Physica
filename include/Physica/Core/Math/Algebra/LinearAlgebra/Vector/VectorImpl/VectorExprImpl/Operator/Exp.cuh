@@ -25,15 +25,19 @@ namespace Physica {
     class device_obj<VectorExpr<ExprID::Exp, V>>
             : public device_obj<UnitaryVectorExpr<ExprID::Exp, V>> {
         using Base = device_obj<UnitaryVectorExpr<ExprID::Exp, V>>;
-    public:
-        using typename Base::ScalarType;
+    protected:
+        using typename Base::T;
     public:
         using Base::Base;
-        /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const {
-            return exp(Base::getExpr().calc(index));
-        }
+        /* Operations */
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
     };
+
+    template<Vector V>
+    __device__ auto device_obj<VectorExpr<ExprID::Exp, V>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
+        return exp(Base::getExpr().calc(index, block));
+    }
 
     template<Vector V>
     [[nodiscard, gnu::always_inline]] __host__ __device__ auto exp(V&& v) noexcept requires(DeviceObj<V>) {

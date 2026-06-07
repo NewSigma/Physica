@@ -43,7 +43,8 @@ namespace Physica {
         __device__ void assign_add(Vector auto&& v,  instanceof_x<ThreadBlock> auto block) const;
         __device__ void assign_add_base(Vector auto&& v, instanceof_x<ThreadBlock> auto block) const;
 
-        [[nodiscard]] __device__ T calc(size_t index) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         template<int Size>
         [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
@@ -144,11 +145,11 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::calc(size_t index) const -> T {
+    __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
         if constexpr (isReverseDiff())
-            return Base::calc_value(index);
+            return Base::calc_value(index, block);
         else
-            return getLHS().calc(index) * getRHS();
+            return getLHS().calc(index, block) * getRHS();
     }
 
     template<Vector V, Scalar U>
@@ -211,7 +212,8 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void assign_add(Vector auto&& v) const;
 
-        [[nodiscard]] __device__ T calc(size_t index) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         template<int Size>
         [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
@@ -240,8 +242,8 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    __device__ auto device_obj<VectorExpr<ExprID::Mul, V1, V2>>::calc(size_t index) const -> T {
-        return Base::getLHS().calc(index) * Base::getRHS().calc(index);
+    __device__ auto device_obj<VectorExpr<ExprID::Mul, V1, V2>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
+        return Base::getLHS().calc(index, block) * Base::getRHS().calc(index, block);
     }
 
     template<Vector V1, Vector V2>

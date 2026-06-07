@@ -44,7 +44,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
 
         [[nodiscard]] auto lnAbsDet() const;
 
@@ -59,7 +60,7 @@ namespace Physica {
     __host__ __device__ device_obj<MatrixTrig<M, Upper, Unit>>::device_obj(Ref mat) : mat(asStruct(mat)) {}
 
     template<Matrix M, bool Upper, bool Unit>
-    __device__ auto device_obj<MatrixTrig<M, Upper, Unit>>::calc(size_t row, size_t col) const -> T {
+    __device__ auto device_obj<MatrixTrig<M, Upper, Unit>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> T {
         if constexpr (Upper) {
             if (row > col)
                 return Trv(0);
@@ -72,7 +73,7 @@ namespace Physica {
         if constexpr (Unit)
             if (row == col)
                 return Trv(1);
-        return getExpr().calc(row, col);
+        return getExpr().calc(row, col, block);
     }
 
     template<Matrix M, bool Upper, bool Unit>

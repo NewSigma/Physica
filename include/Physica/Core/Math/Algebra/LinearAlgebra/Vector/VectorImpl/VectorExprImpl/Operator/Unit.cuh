@@ -31,8 +31,14 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t i) const { return unit(Base::getExpr().calc(i)); }
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t i, instanceof_x<ThreadBlock> auto block) const;
     };
+
+    template<Vector V>
+    __device__ auto device_obj<VectorExpr<ExprID::Unit, V>>::calc(size_t i, instanceof_x<ThreadBlock> auto block) const -> T {
+        return unit(Base::getExpr().calc(i, block));
+    }
 
     template<Vector V>
     [[nodiscard, gnu::always_inline]] __host__ __device__ auto unit(V&& v) noexcept requires(DeviceObj<V>) {

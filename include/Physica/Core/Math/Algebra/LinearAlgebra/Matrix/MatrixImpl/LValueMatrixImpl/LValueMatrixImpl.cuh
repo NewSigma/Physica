@@ -91,6 +91,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    __device__ auto device_obj<LValueMatrix<Derived>>::calc(size_t row, size_t col) const -> T {
+        return operator[](row, col);
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<LValueMatrix<Derived>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto) const -> T {
+        return calc(row, col);
+    }
+
+    template<class Derived>
     void device_obj<LValueMatrix<Derived>>::reverse(const Matrix auto& grad) const noexcept {
         using M = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename ScalarType::GradType, typename M::ScalarType>, "[Error]: Inconsistent ScalarType");

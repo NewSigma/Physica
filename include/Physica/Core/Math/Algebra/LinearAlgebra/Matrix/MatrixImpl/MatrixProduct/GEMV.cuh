@@ -46,7 +46,9 @@ namespace Physica {
         __host__ __device__ void assign(Vector auto& target) const;
         __device__ void assign(Vector auto& target, instanceof_x<ThreadBlock> auto block) const;
 
-        [[nodiscard]] __device__ T calc(size_t index) const;
+        using Base::calc;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
+
         void reverse(const Vector auto& grad) const noexcept;
 
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
@@ -81,7 +83,7 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V>
-    __device__ auto device_obj<GEMV<M, V>>::calc(size_t index) const -> T {
+    __device__ auto device_obj<GEMV<M, V>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
         return getLHS().row(index) * getRHS();
     }
 
