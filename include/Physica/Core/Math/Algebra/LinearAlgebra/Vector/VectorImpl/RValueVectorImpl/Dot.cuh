@@ -64,8 +64,7 @@ namespace Physica {
             else
                 dot += v1.calc(i) * v2.calc(i);
         }
-        static_assert(block.getNumThreadAtCompile() == 1, "NoImpl");
-        return dot;
+        return block.sum(dot);
     }
 
     template<Vector V1, Vector V2>
