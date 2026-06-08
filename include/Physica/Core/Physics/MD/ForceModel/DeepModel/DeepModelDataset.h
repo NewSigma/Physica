@@ -71,7 +71,7 @@ namespace Physica {
         auto forceGroup = group.openGroup("Forces");
         std::array<char, 32> buffer{}; //32 should be enough to hold size_t
         for (size_t i = 0; i < numSample; ++i) {
-            sprintf(buffer.data(), "%zu", i);
+            [[maybe_unused]] const auto count = std::format_to_n(buffer.data(), buffer.size(), "%zu", i).size;
             cells[i].read(cellGroup, buffer);
             forces[i].read(forceGroup, buffer);
         }
@@ -87,7 +87,7 @@ namespace Physica {
         auto forceGroup = group.openGroup("Forces");
         std::array<char, 32> buffer{}; //32 should be enough to hold size_t
         for (size_t i = 0; i < getNumSample(); ++i) {
-            sprintf(buffer.data(), "%zu", i);
+            [[maybe_unused]] const auto count = std::format_to_n(buffer.data(), buffer.size(), "%zu", i).size;
             cells[i].write(cellGroup, buffer);
             forces[i].write(forceGroup, buffer);
         }

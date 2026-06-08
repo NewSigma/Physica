@@ -152,7 +152,7 @@ namespace Physica {
             /* Execute */ {
                 constexpr int BufferSize = 16; // 16 is enough for unsigned int
                 std::array<char, BufferSize> numProcess{};
-                [[maybe_unused]] const int count = sprintf(numProcess.data(), "%d", getNumMPIProcess());
+                [[maybe_unused]] const auto count = std::format_to_n(numProcess.data(), numProcess.size(), "%d", getNumMPIProcess()).size;
                 assert(0 <= count && count < BufferSize && "[Error]: Unexpected bad printf");
                 execlp("mpirun", "mpirun", "-n", numProcess, pathToPW.c_str(), "-n", numProcess, "-nk", numProcess, nullptr);
             }

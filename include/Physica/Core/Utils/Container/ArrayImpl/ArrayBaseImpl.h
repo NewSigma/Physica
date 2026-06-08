@@ -68,7 +68,7 @@ namespace Physica {
         const auto group = loc.openGroup(name);
         std::array<char, 32> buffer{}; // 32 is enough for uint64_t
         for (size_t i = 0; i < getLength(); ++i) {
-            std::sprintf(buffer.data(), "%zu", i);
+            [[maybe_unused]] const auto count = std::format_to_n(buffer.data(), buffer.size(), "%zu", i).size;
             Base::getDerived()[i].read(group, buffer.data());
         }
     }
@@ -78,7 +78,7 @@ namespace Physica {
         auto group = loc.openGroup(name);
         std::array<char, 32> buffer{}; // 32 is enough for uint64_t
         for (size_t i = 0; i < getLength(); ++i) {
-            std::sprintf(buffer.data(), "%zu", i);
+            [[maybe_unused]] const auto count = std::format_to_n(buffer.data(), buffer.size(), "%zu", i).size;
             Base::getDerived()[i].write(group, buffer.data());
         }
     }

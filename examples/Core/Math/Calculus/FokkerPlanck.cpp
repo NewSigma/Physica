@@ -75,7 +75,7 @@ int main() {
     std::array<char, 16> buffer{}; //16 is enough
     for (int i = 0; i < 10000; ++i) {
         if (i % 250 == 0) {
-            sprintf(buffer.data(), "FP_%d.vtk", i / 250);
+            std::format_to_n(buffer.data(), buffer.size(), "FP_%d.vtk", i / 250);
             std::ofstream fout(buffer.data());
             fout << VTKFile<ElementType>(model.getMesh(), "FokkerPlanck");
         }

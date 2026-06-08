@@ -48,7 +48,5 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] pid_t getPID() const noexcept { return pid; }
         [[nodiscard]] bool valid() const noexcept { return isValid; }
-        /* Friends */
-        friend class Test;
     };
 }

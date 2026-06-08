@@ -38,7 +38,7 @@ namespace Physica {
         size_t n;
     public:
         GaussBase() = default;
-        GaussBase(const Vector3D<T> center_, const T& alpha_, size_t l_, size_t m_, size_t n_);
+        GaussBase(Vector3D<T> center_, const T& alpha_, size_t l_, size_t m_, size_t n_);
         GaussBase(const GaussBase& base) = default;
         GaussBase(GaussBase&& base) noexcept = default;
         ~GaussBase() = default;

@@ -67,7 +67,6 @@ namespace Physica {
         [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return true; }
     private:
         ProcessFuture run_vasp() const;
-        friend class Test;
     };
 
     template<Scalar T>
@@ -158,7 +157,7 @@ namespace Physica {
             /* Execute */ {
                 constexpr int BufferSize = 16; // 16 is enough for unsigned int
                 std::array<char, BufferSize> numProcess{};
-                [[maybe_unused]] int count = sprintf(numProcess, "%d", numMPIProcess);
+                [[maybe_unused]] const auto count = std::format_to_n(numProcess.data(), numProcess.size(), "%d", numMPIProcess).size;
                 assert(0 <= count && count < BufferSize && "[Error]: Unexpected bad printf");
                 execlp("mpirun", "mpirun", "-n", numProcess, pathToVasp.c_str(), nullptr);
             }
