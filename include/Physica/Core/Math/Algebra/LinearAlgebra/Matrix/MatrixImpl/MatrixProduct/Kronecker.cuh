@@ -76,7 +76,7 @@ namespace Physica {
                 unsigned int c = blockIdx.z;
                 unsigned int offsetR = r * rhs.getRow();
                 unsigned int offsetC = c * rhs.getCol();
-                (lhs.calc(r, c) * rhs).assign(target_.getDerived().block(offsetR, rhs.getRow(), offsetC, rhs.getCol()), ThreadBlock{});
+                (lhs.calc(r, c) * rhs).assign(target_.getDerived().block(offsetR, rhs.getRow(), offsetC, rhs.getCol()), ThreadBlock<Dynamic>{});
             };
 
             const auto& lhs = getLHS();
@@ -103,7 +103,7 @@ namespace Physica {
                 unsigned int c = blockIdx.z;
                 unsigned int offsetR = r * rhs.getRow();
                 unsigned int offsetC = c * rhs.getCol();
-                (lhs.calc(r, c) * rhs).assign_add(target_.getDerived().block(offsetR, rhs.getRow(), offsetC, rhs.getCol()), ThreadBlock{});
+                (lhs.calc(r, c) * rhs).assign_add(target_.getDerived().block(offsetR, rhs.getRow(), offsetC, rhs.getCol()), ThreadBlock<Dynamic>{});
             };
 
             const auto& lhs = getLHS();

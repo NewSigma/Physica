@@ -71,7 +71,6 @@ namespace Physica {
 
         [[nodiscard]] __device__ Tr norm() const;
         [[nodiscard]] __device__ Tr squaredNorm() const;
-
         [[nodiscard]] __device__ T max() const;
         [[nodiscard]] __device__ T min() const;
         [[nodiscard]] __host__ __device__ T sum() const;
@@ -86,10 +85,11 @@ namespace Physica {
         [[nodiscard]] __device__ T softmax(size_t index) const;
         [[nodiscard]] __host__ __device__ T prod() const noexcept;
 
-        [[nodiscard]] __device__ T max(int tid, int numThread, T* __restrict shared) const;
-        [[nodiscard]] __device__ T sum(int tid, int numThread, T* __restrict shared) const;
-        [[nodiscard]] __device__ T mean(int tid, int numThread, T* __restrict shared) const;
-        [[nodiscard]] __device__ T lnSumExp(int tid, int numThread, T* __restrict shared) const;
+        [[nodiscard]] __device__ T max(instanceof_x<ThreadBlock> auto block) const;
+        [[nodiscard]] __device__ T min(instanceof_x<ThreadBlock> auto block) const;
+        [[nodiscard]] __device__ T sum(instanceof_x<ThreadBlock> auto block) const;
+        [[nodiscard]] __device__ T mean(instanceof_x<ThreadBlock> auto block) const;
+        [[nodiscard]] __device__ T lnSumExp(instanceof_x<ThreadBlock> auto block) const;
 
         [[nodiscard]] __host__ __device__ decltype(auto) reals(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto imags(this auto&&) noexcept;

@@ -202,26 +202,12 @@ namespace Physica {
 
     template<class Derived>
     __device__ auto device_obj<RValueVector<Derived>>::max() const -> T {
-        assert(getLength() != 0);
-        T result = calc(0);
-        for (size_t i = 1; i < getLength(); ++i) {
-            T temp = calc(i);
-            if (result < temp)
-                result = temp;
-        }
-        return result;
+        return max(ThreadBlock<1>{});
     }
 
     template<class Derived>
     __device__ auto device_obj<RValueVector<Derived>>::min() const -> T {
-        assert(getLength() != 0);
-        T result = calc(0);
-        for (size_t i = 1; i < getLength(); ++i) {
-            T temp = calc(i);
-            if (result > temp)
-                result = temp;
-        }
-        return result;
+        return min(ThreadBlock<1>{});
     }
 
     template<class Derived>
@@ -253,16 +239,8 @@ namespace Physica {
                 unreachable();
         }
 
-        if constexpr (IsDevice()) {
-            auto result = T(0);
-            for (size_t i = 0; i < getLength(); ++i) {
-                if constexpr (isReverseDiff())
-                    result += calc_value(i);
-                else
-                    result += calc(i);
-            }
-            return result;
-        }
+        if constexpr (IsDevice())
+            return sum(ThreadBlock<1>{});
     }
 
     template<class Derived>
@@ -365,52 +343,48 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::max(int tid, int numThread, T* __restrict shared) const -> T {
+    __device__ auto device_obj<RValueVector<Derived>>::max(instanceof_x<ThreadBlock> auto block) const -> T {
+        assert(getLength() != 0);
+        const int numThread = block.getNumThread();
         T local = std::numeric_limits<T>::lowest();
-        for (int i = tid; i < getLength(); i += numThread)
+        for (int i = block.tid(); i < getLength(); i += numThread)
             local = std::max(local, calc(i));
-        shared[tid] = local;
-        __syncthreads();
-
-        for (int i = (numThread + 1) / 2; i > 0; i /= 2) {
-            if ((tid < i) && (tid + i < numThread))
-                shared[tid] = std::max(shared[tid], shared[tid + i]);
-            __syncthreads();
-        }
-        return shared[0];
+        return block.max(local);
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::sum(int tid, int numThread, T* __restrict shared) const -> T {
+    __device__ auto device_obj<RValueVector<Derived>>::min(instanceof_x<ThreadBlock> auto block) const -> T {
+        assert(getLength() != 0);
+        const int numThread = block.getNumThread();
+        T local = std::numeric_limits<T>::max();
+        for (int i = block.tid(); i < getLength(); i += numThread)
+            local = std::min(local, calc(i));
+        return block.min(local);
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::sum(instanceof_x<ThreadBlock> auto block) const -> T {
+        assert(getLength() != 0);
+        const int numThread = block.getNumThread();
         T local = 0;
-        for (int i = tid; i < getLength(); i += numThread)
+        for (int i = block.tid(); i < getLength(); i += numThread)
             local += calc(i);
-        shared[tid] = local;
-        __syncthreads();
-
-        for (int i = (numThread + 1) / 2; i > 0; i /= 2) {
-            if ((tid < i) && (tid + i < numThread))
-                shared[tid] += shared[tid + i];
-            __syncthreads();
-        }
-        return shared[0];
+        return block.sum(local);
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::mean(int tid, int numThread, T* __restrict shared) const -> T {
-        return sum(tid, numThread, shared) / Trv(getLength());
+    __device__ auto device_obj<RValueVector<Derived>>::mean(instanceof_x<ThreadBlock> auto block) const -> T {
+        return sum(block) / Trv(getLength());
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::lnSumExp(int tid, int numThread, T* __restrict shared) const -> T {
-        assert(tid < numThread);
-        const auto& v = Base::getDerived();
+    __device__ auto device_obj<RValueVector<Derived>>::lnSumExp(instanceof_x<ThreadBlock> auto block) const -> T {
         Tv m;
         if constexpr (isComplex())
-            m = values().reals().max(tid, numThread, shared);
+            m = values().reals().max(block);
         else
-            m = values().max(tid, numThread, shared);
-        return ln(exp(v - m).sum(tid, numThread, shared) + Trv(std::numeric_limits<Trv>::min())) + m; // Add min() to avoid ln(0)
+            m = values().max(block);
+        return ln(exp(Base::getDerived() - m).sum(block) + Trv(std::numeric_limits<Trv>::min())) + m; // Add min() to avoid ln(0)
     }
 
     template<class Derived>

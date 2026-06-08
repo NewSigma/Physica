@@ -25,7 +25,7 @@ using T = float32;
 
 namespace {
     __device__ void add1D(device_obj<VectorND<T>>& x) {
-        ThreadBlock block{};
+        ThreadBlock<Dynamic> block{};
         x[block.tid()] += T(block.tid());
     }
     // Test that ThreadBlock changes logical threads layout
