@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "GreenSampler/SiteSampler.h"
+#include "GreenSampler/ScalarSampler.h"
 
 namespace Physica {
     /**
@@ -28,8 +28,8 @@ namespace Physica {
     void fastDoping(int iteration, int windowSize, T targetRho, T stepsize, HubbardParams<T>& params, auto& dqmc, auto&&... args) {
         assert(windowSize % 2 == 1 && "[Error]: Required to avoid divide by zero");
         assert(T(0) <= targetRho && targetRho <= T(2) && "[Error]: Invalid target");
-        SiteSampler<T> sampler1(params, windowSize, SiteSampler<T>::Density);
-        SiteSampler<T> sampler2(params, windowSize, SiteSampler<T>::Density2);
+        ScalarSampler<T> sampler1(params, windowSize, ScalarSampler<T>::Density);
+        ScalarSampler<T> sampler2(params, windowSize, ScalarSampler<T>::Density2);
         for (int i = 0; i < windowSize + iteration; ++i) {
             bool initialized = i >= windowSize;
             if (initialized) {

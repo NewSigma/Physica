@@ -23,8 +23,8 @@
 
 namespace Physica {
     template<Scalar T>
-    class SiteSampler : public GreenSampler<T> {
-        using This = SiteSampler<T>;
+    class ScalarSampler : public GreenSampler<T> {
+        using This = ScalarSampler<T>;
         using Base = GreenSampler<T>;
         using GreenPair = ImagKinetic<T>::GreenPair;
 
@@ -42,17 +42,17 @@ namespace Physica {
         };
     private:
         VectorND<T> observes;
-        Observable type;
     public:
-        SiteSampler(const HubbardParams<T>& params, size_t numSample, Observable type);
-        SiteSampler(const This&) = delete;
-        SiteSampler(This&&) noexcept = delete;
-        ~SiteSampler() = default;
+        ScalarSampler(const HubbardParams<T>& params, size_t numSample);
+        ScalarSampler(const This&) = delete;
+        ScalarSampler(This&&) noexcept = delete;
+        ~ScalarSampler() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        void sample(const GreenPair& greens, T rsign);
+        void sample(T observe, T rsign);
+        void sample(const GreenPair& greens, T rsign, Observable type);
 
         [[nodiscard]] T calcMean() const;
         /* Getters */
@@ -63,24 +63,28 @@ namespace Physica {
     };
 
     template<Scalar T>
-    SiteSampler<T>::SiteSampler(const HubbardParams<T>& params, size_t numSample, Observable type)
+    ScalarSampler<T>::ScalarSampler(const HubbardParams<T>& params, size_t numSample)
             : Base(params, numSample)
-            , observes(numSample)
-            , type(type) {}
+            , observes(numSample) {}
 
     template<Scalar T>
-    void SiteSampler<T>::sample(const GreenPair& greens, T rsign) {
-        observes[Base::getCursor()] = calcObservable(greens[0], greens[1], type) * rsign;
+    void ScalarSampler<T>::sample(T observe, T rsign) {
+        observes[Base::getCursor()] = observe * rsign;
         Base::sample(rsign);
     }
 
     template<Scalar T>
-    T SiteSampler<T>::calcMean() const {
+    void ScalarSampler<T>::sample(const GreenPair& greens, T rsign, Observable type) {
+        sample(calcObservable(greens[0], greens[1], type), rsign);
+    }
+
+    template<Scalar T>
+    T ScalarSampler<T>::calcMean() const {
         return observes.mean() / Base::calcSign();
     }
 
     template<Scalar T>
-    T SiteSampler<T>::calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD, Observable typeX) const noexcept {
+    T ScalarSampler<T>::calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD, Observable typeX) const noexcept {
         switch (typeX) {
         case Density:
             return T(2) - greenU.diag().reals().mean() - greenD.diag().reals().mean();

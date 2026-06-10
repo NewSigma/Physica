@@ -31,8 +31,8 @@ namespace Physica {
      * [1] Phys. Rev. Lett. 62, 591; https://doi.org/10.1103/PhysRevLett.62.591
      */
     template<Scalar T>
-    class SystemSampler : public GreenSampler<T> {
-        using This = SystemSampler<T>;
+    class MatrixSampler : public GreenSampler<T> {
+        using This = MatrixSampler<T>;
         using Base = GreenSampler<T>;
         using GreenPair = ImagKinetic<T>::GreenPair;
         constexpr static int Dim = 2;
@@ -49,10 +49,10 @@ namespace Physica {
         DenseTensor<T, 3> observes;
         Observable type;
     public:
-        SystemSampler(const HubbardParams<T>& params, const LatticeModel<Dim>& lattice, size_t numSample, Observable type);
-        SystemSampler(const This&) = delete;
-        SystemSampler(This&&) noexcept = delete;
-        ~SystemSampler() = default;
+        MatrixSampler(const HubbardParams<T>& params, const LatticeModel<Dim>& lattice, size_t numSample, Observable type);
+        MatrixSampler(const This&) = delete;
+        MatrixSampler(This&&) noexcept = delete;
+        ~MatrixSampler() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -75,20 +75,20 @@ namespace Physica {
     };
 
     template<Scalar T>
-    SystemSampler<T>::SystemSampler(const HubbardParams<T>& params, const LatticeModel<Dim>& lattice, size_t numSample, Observable type)
+    MatrixSampler<T>::MatrixSampler(const HubbardParams<T>& params, const LatticeModel<Dim>& lattice, size_t numSample, Observable type)
             : Base(params, numSample)
             , lattice(lattice)
             , observes({numSample, getNumSiteX(), getNumSiteY()})
             , type(type) {}
 
     template<Scalar T>
-    void SystemSampler<T>::sample(const GreenPair& greens, T rsign) {
+    void MatrixSampler<T>::sample(const GreenPair& greens, T rsign) {
         observes.slice(1, 2, {Base::getCursor(), undef(), undef()}) = calcCorrelation(greens[0], greens[1]) * rsign;
         Base::sample(rsign);
     }
 
     template<Scalar T>
-    auto SystemSampler<T>::calcMean() const -> MatrixND<T> {
+    auto MatrixSampler<T>::calcMean() const -> MatrixND<T> {
         MatrixND<T> result(getNumSiteX(), getNumSiteY());
         for (size_t i = 0; i < observes.dim(0); ++i)
             result.toNextMean(i, observes.slice(1, 2, {Base::getCursor(), undef(), undef()}));
@@ -97,7 +97,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    MatrixND<T> SystemSampler<T>::calcStructFactor() const {
+    MatrixND<T> MatrixSampler<T>::calcStructFactor() const {
         FFT<T, Dim> fft(lattice.getSuperSize(), PlanFlag::Estimate);
         fft.getRSpace() = calcMean();
         fft.transform();
@@ -120,7 +120,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto SystemSampler<T>::calcCorrelation(const MatrixND<T>& greenU, const MatrixND<T>& greenD) const noexcept -> MatrixND<T> {
+    auto MatrixSampler<T>::calcCorrelation(const MatrixND<T>& greenU, const MatrixND<T>& greenD) const noexcept -> MatrixND<T> {
         MatrixND<T> result(getNumSiteX(), getNumSiteY());
         for (int siteA = 0; siteA < getNumSite(); ++siteA) {
             const auto indexA = lattice.toIndexND(siteA);
@@ -136,7 +136,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T SystemSampler<T>::calcCorrelation(const MatrixND<T>& greenU, int siteA, const MatrixND<T>& greenD, int siteB) const noexcept {
+    T MatrixSampler<T>::calcCorrelation(const MatrixND<T>& greenU, int siteA, const MatrixND<T>& greenD, int siteB) const noexcept {
         switch (type) {
         case Spin:
             return calcDensityCorr(greenU, siteA, siteB) + calcDensityCorr(greenD, siteA, siteB)
