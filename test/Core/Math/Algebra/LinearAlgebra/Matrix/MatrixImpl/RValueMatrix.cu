@@ -39,6 +39,8 @@ namespace {
     }
 }
 
+static_assert(std::same_as<decltype(device_obj<MatrixND<float32>>{}.transpose().transpose()), device_obj<MatrixND<float32>>&&>, "[Error]: transpose-transpose should yield it self");
+
 int main() {
     sum();
     minorDiag();

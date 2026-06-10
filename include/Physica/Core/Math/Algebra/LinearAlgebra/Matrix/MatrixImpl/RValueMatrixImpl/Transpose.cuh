@@ -52,32 +52,32 @@ namespace Physica {
 
         void reverse(const Vector auto& grad) const noexcept;
 
+        [[nodiscard]] __host__ __device__ auto&& transpose(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getExpr().getCol(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getExpr().getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return transpose().getCol(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return transpose().getRow(); }
     };
 
     template<Matrix M>
     __device__ auto device_obj<Transpose<M>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> T {
-        return getExpr().calc(col, row, block);
+        return transpose().calc(col, row, block);
     }
 
     template<Matrix M>
     void device_obj<Transpose<M>>::reverse(const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff());
-        getExpr().reverse(grad.transpose());
+        transpose().reverse(grad.transpose());
+    }
+
+    template<Matrix M>
+    __host__ __device__ auto&& device_obj<Transpose<M>>::transpose(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived());
     }
 
     template<Matrix M>
     __host__ __device__ auto device_obj<Transpose<M>>::values(this auto&& self) noexcept {
-        return std::forward<decltype(self)>(self).getExpr().values();
-    }
-
-    template<Matrix M>
-    __host__ __device__ auto&& device_obj<Transpose<M>>::getExpr(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived());
+        return std::forward<decltype(self)>(self).transpose().values();
     }
 
     template<Vector V>
@@ -106,9 +106,9 @@ namespace Physica {
 
         void reverse(const Vector auto& grad) const noexcept;
 
+        [[nodiscard]] __host__ __device__ auto&& transpose(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return vec.getDerived().getLength(); }
     };
@@ -126,13 +126,13 @@ namespace Physica {
     }
 
     template<Vector V>
-    __host__ __device__ auto device_obj<Transpose<V>>::values(this auto&& self) noexcept {
-        return std::forward<decltype(self)>(self).getExpr().values();
+    __host__ __device__ auto&& device_obj<Transpose<V>>::transpose(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), Ref>(self.vec.getDerived());
     }
 
     template<Vector V>
-    __host__ __device__ auto&& device_obj<Transpose<V>>::getExpr(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), Ref>(self.vec.getDerived());
+    __host__ __device__ auto device_obj<Transpose<V>>::values(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).transpose().values();
     }
 }
 

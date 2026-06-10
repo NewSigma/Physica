@@ -50,6 +50,8 @@ namespace {
     }
 }
 
+static_assert(std::same_as<decltype(MatrixND<float32>{}.transpose().transpose()), MatrixND<float32>&&>, "[Error]: transpose-transpose should yield it self");
+
 int main() {
     argmin();
     minorDiag();
