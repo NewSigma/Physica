@@ -19,6 +19,7 @@
 #pragma once
 
 #include "RMatrixBlock.h"
+#include "Physica/PlainStruct.h"
 
 namespace Physica {
     template<Matrix M>

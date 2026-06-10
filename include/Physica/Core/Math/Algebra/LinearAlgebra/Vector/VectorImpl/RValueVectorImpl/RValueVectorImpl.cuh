@@ -45,21 +45,21 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<RValueVector<Derived>>::assign(Vector auto&& target) const {
-        target.assert_assign(Base::getDerived());
+    __host__ __device__ void device_obj<RValueVector<Derived>>::assign(this const auto& self, Vector auto&& target) {
+        target.assert_assign(self);
         if (IsHost()) {
-            auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
+            auto func = [source_ = asStruct(self), target_ = asStruct(target)] __device__() mutable {
                 const auto& source = source_.getDerived();
                 auto& target = target_.getDerived();
                 size_t i = blockIdx.x * blockDim.x + threadIdx.x;
                 if (i < source.getLength())
                     target[i] = source.calc(i);
             };
-            CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(func, makeKernelConfig());
+            CUDAExecutor::launch<CUDADevAttr::DefaultThreadsPerBlock>(func, self.makeKernelConfig());
         }
 
         if constexpr (IsDevice())
-            Base::getDerived().assign(target, ThreadBlock<1>{});
+            self.assign(target, ThreadBlock<1>{});
     }
 
     template<class Derived>
@@ -470,42 +470,42 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ consteval bool device_obj<RValueVector<Derived>>::isCompact() noexcept {
-        return host_obj::isCompact();
+        return Derived::isCompact();
     }
 
     template<class Derived>
     __host__ __device__ consteval bool device_obj<RValueVector<Derived>>::isSparse() noexcept {
-        return host_obj::isSparse();
+        return Derived::isSparse();
     }
 
     template<class Derived>
     __host__ __device__ consteval bool device_obj<RValueVector<Derived>>::isFastAssign() noexcept {
-        return host_obj::isFastAssign();
+        return Derived::isFastAssign();
     }
 
     template<class Derived>
     __host__ __device__ consteval bool device_obj<RValueVector<Derived>>::isFastPacket() noexcept {
-        return host_obj::isFastPacket();
+        return Derived::isFastPacket();
     }
 
     template<class Derived>
     __host__ __device__ consteval size_t device_obj<RValueVector<Derived>>::getSizeAtCompile() noexcept {
-        return host_obj::getSizeAtCompile();
+        return Derived::getSizeAtCompile();
     }
 
     template<class Derived>
     __host__ __device__ consteval size_t device_obj<RValueVector<Derived>>::getSizeAtCompile(const Vector auto& hint) noexcept {
-        return host_obj::getSizeAtCompile(hint);
+        return Derived::getSizeAtCompile(hint);
     }
     // Redeclare to expose it to the derived class
     template<class Derived>
     __host__ __device__ consteval void device_obj<RValueVector<Derived>>::static_assert_assign(const Scalar auto& source) noexcept {
-        host_obj::static_assert_assign(source);
+        Derived::static_assert_assign(source);
     }
 
     template<class Derived>
     __host__ __device__ consteval void device_obj<RValueVector<Derived>>::static_assert_assign(const Vector auto& source) noexcept {
         static_assert(getSizeAtCompile() != Dynamic || DeviceObj<decltype(source)>, "[Error]: Host object cannot be assigned to dynamic device object");
-        host_obj::static_assert_assign(source);
+        Derived::static_assert_assign(source);
     }
 }

@@ -453,37 +453,37 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isCompact() noexcept {
-        return host_obj::isCompact();
+        return Derived::isCompact();
     }
 
     template<class Derived>
     __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isSparse() noexcept {
-        return host_obj::isSparse();
+        return Derived::isSparse();
     }
 
     template<class Derived>
     __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isStaticSymm() noexcept {
-        return host_obj::isStaticSymm();
+        return Derived::isStaticSymm();
     }
 
     template<class Derived>
     __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isStaticHermite() noexcept {
-        return host_obj::isStaticHermite();
+        return Derived::isStaticHermite();
     }
 
     template<class Derived>
     __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isColMatrix() noexcept {
-        return host_obj::isColMatrix();
+        return Derived::isColMatrix();
     }
 
     template<class Derived>
     __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isRowMatrix() noexcept {
-        return host_obj::isRowMatrix();
+        return Derived::isRowMatrix();
     }
 
     template<class Derived>
     __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isBothMajor() noexcept {
-        return host_obj::isBothMajor();
+        return Derived::isBothMajor();
     }
 
     template<class Derived>
@@ -523,13 +523,13 @@ namespace Physica {
     // Redeclare to expose it to base classes
     template<class Derived>
     __host__ __device__ consteval void device_obj<RValueMatrix<Derived>>::static_assert_assign(const Scalar auto& source) noexcept {
-        host_obj::static_assert_assign(source);
+        Derived::static_assert_assign(source);
     }
 
     template<class Derived>
     __host__ __device__ consteval void device_obj<RValueMatrix<Derived>>::static_assert_assign(const Matrix auto& source) noexcept {
         static_assert(getSizeAtCompile() != Dynamic || DeviceObj<decltype(source)>, "[Error]: Host object cannot be assigned to dynamic device object");
-        host_obj::static_assert_assign(source);
+        Derived::static_assert_assign(source);
     }
 }
 

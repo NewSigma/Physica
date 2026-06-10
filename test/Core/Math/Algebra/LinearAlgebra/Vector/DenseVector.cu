@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Test.h"
@@ -26,6 +26,8 @@ using ScalarType = float32;
 using VectorType = VectorND<ScalarType>;
 using DeviceVector = device_obj<VectorType>;
 using RandomSource = Random<MT19937, std::mt19937::default_seed>;
+
+static_assert(device_obj<VectorND<float32>>{}.transpose().isCompact(), "Transpose of a compact vector is a compact vector");
 
 int main() {
     const VectorType a{1, 2, 3, 4};
@@ -56,7 +58,7 @@ int main() {
         VectorType result(len);
         DeviceVector d_result(len);
         CUDAExecutor::launch([a = asStruct(d_a), b = asStruct(d_b), result = asStruct(d_result), factor] __device__() mutable {
-            int i = threadIdx.x;
+            int i = static_cast<int>(threadIdx.x);
             result.getDerived()[i] = a.getDerived()[i] + b.getDerived()[i] * factor;
         }, KernelConfig(1, len)).wait();
 

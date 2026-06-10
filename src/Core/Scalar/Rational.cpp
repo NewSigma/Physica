@@ -89,7 +89,7 @@ void Rational::simplify() {
         denominator = 1;
         return;
     }
-    Integer i = gcd<Integer, true>(numerator, denominator);
+    auto i = gcd<Integer, true>(numerator, denominator);
     numerator /= i;
     denominator /= i;
 }

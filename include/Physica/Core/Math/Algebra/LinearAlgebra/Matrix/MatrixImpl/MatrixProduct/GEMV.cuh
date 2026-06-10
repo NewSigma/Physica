@@ -84,7 +84,7 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     __device__ auto device_obj<GEMV<M, V>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
-        return getLHS().row(index) * getRHS();
+        return dot(getLHS().row(index), getRHS()).calc(block);
     }
 
     template<Matrix M, Vector V>
