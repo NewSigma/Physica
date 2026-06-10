@@ -57,7 +57,7 @@ namespace {
             expect<RandomSource>(x[1].norm() < Prec);
 
             applyRowGivens(x, rotator.conjugate(), 0, 1);
-            expect<RandomSource>(vectorNear(x, v, 15UL));
+            expect<RandomSource>(vectorNear(x, v, Prec.toMachine()));
         }
         /* Row major */ {
             auto x = DenseMatrix<Tc, MatrixMajor::Row>::template random_normal<RandomSource>(2, 16);

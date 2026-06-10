@@ -36,9 +36,22 @@ namespace {
         dy = device_obj<VectorND<T>>(A.toDevice().transpose() * exp(x.toDevice())).toHost();
         expect<RandomSource>(vectorNear(y, dy, 1E-6));
     }
+
+    void cublas() {
+        constexpr int N = 128;
+        using T = float32;
+        const auto A = DenseMatrix<T, MatrixMajor::Row>::random_uniform<RandomSource>(N, N);
+        const auto x = VectorND<T>::random_uniform<RandomSource>(N);
+        const VectorND<T> answer = A * x;
+        device_obj<VectorND<T>> dy(N);
+        (A.toDevice() * x.toDevice()).assign_cublas(dy);
+        auto result = dy.toHost();
+        expect<RandomSource>(vectorNear(result, answer, 3UL));
+    }
 }
 
 int main() {
     rvalue_host_device();
+    cublas();
     return 0;
 }

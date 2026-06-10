@@ -5,3 +5,7 @@ if(${PHYSICA_MKL})
 
     target_sources(Benchmark PRIVATE GEMV_MKL.cpp)
 endif()
+
+if(${PHYSICA_CUDA})
+    target_sources(Benchmark PRIVATE GEMV.cu)
+endif()

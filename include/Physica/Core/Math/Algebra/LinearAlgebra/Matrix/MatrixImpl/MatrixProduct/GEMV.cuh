@@ -45,6 +45,8 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void assign(Vector auto& target) const;
         __device__ void assign(Vector auto& target, instanceof_x<ThreadBlock> auto block) const;
+        __host__ __device__ void assign_base(Vector auto& target) const;
+        void assign_cublas(Vector auto& target) const;
 
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
@@ -65,7 +67,18 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     __host__ __device__ void device_obj<GEMV<M, V>>::assign(Vector auto& target) const {
-        Base::assign(target);
+        if constexpr (IsHost()) {
+            using M1 = std::remove_cvref_t<M>;
+            using V1 = std::remove_cvref_t<V>;
+            using T1 = M1::ScalarType;
+            using T2 = V1::ScalarType;
+            if constexpr (std::same_as<T1, T2> && M1::isCompact() && Internal::EnableLAPACK<V1, decltype(target)>::value)
+                assign_cublas(target);
+            else
+                assign_base(target);
+        }
+        else
+            assign_base(target);
     }
 
     template<Matrix M, Vector V>
@@ -80,6 +93,44 @@ namespace Physica {
         }
         else
             Base::assign(target, block);
+    }
+
+    template<Matrix M, Vector V>
+    __host__ __device__ void device_obj<GEMV<M, V>>::assign_base(Vector auto& target) const {
+        Base::assign(target);
+    }
+
+    template<Matrix M, Vector V>
+    void device_obj<GEMV<M, V>>::assign_cublas(Vector auto& target) const {
+        using Tm = decltype(std::declval<T>().toCUDA());
+        auto& ctx = CUDAContext::getInstance();
+        ctx.setPointerMode(false);
+        constexpr auto Trans = (instanceof<M, Transpose> ^ MatrixMajor::isRowMatrix<M>()) ? CUBLAS_OP_T : CUBLAS_OP_N;
+        const size_t m = getLHS().getRow();
+        const size_t n = getLHS().getCol();
+        const size_t lda = getLHS().getMaxMinor();
+        const Tm alpha = T(1).toCUDA();
+        const Tm beta = T(0).toCUDA();
+        const auto* a = reinterpret_cast<const Tm*>([this]() {
+            if constexpr (instanceof<M, Transpose>)
+                return getLHS().transpose().data();
+            else
+                return getLHS().data();
+        }());
+        const auto* x = reinterpret_cast<const Tm*>(getRHS().data());
+        auto* y = reinterpret_cast<Tm*>(target.data());
+        if constexpr (Base::isComplex()) {
+            if constexpr (T::Prec == Float32)
+                cublasCgemv_64(ctx, Trans, m, n, &alpha, a, lda, x, 1, &beta, y, 1);
+            else
+                cublasZgemv_64(ctx, Trans, m, n, &alpha, a, lda, x, 1, &beta, y, 1);
+        }
+        else {
+            if constexpr (T::Prec == Float32)
+                cublasSgemv_64(ctx, Trans, m, n, &alpha, a, lda, x, 1, &beta, y, 1);
+            else
+                cublasDgemv_64(ctx, Trans, m, n, &alpha, a, lda, x, 1, &beta, y, 1);
+        }
     }
 
     template<Matrix M, Vector V>
