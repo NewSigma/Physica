@@ -33,6 +33,7 @@ namespace Physica {
         using Cell = MDCell<Tr, 1>;
         using GreenPair = ImagKinetic<Tr>::GreenPair;
     private:
+        HubbardParams<Tr> params;
         Array<DenseLU<T, false>, 2> lu;
         ActionMatrix<T> action;
         HamiltonMC<Tr> hmc;
@@ -42,8 +43,8 @@ namespace Physica {
         Trv lnWeight = Trv::nan();
         Trv sign = 1;
     public:
-        FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity, int maxBoson);
-        FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity);
+        FreqDQMC(HubbardParams<Tr> params_, Trv freqDensity, int maxBoson);
+        FreqDQMC(HubbardParams<Tr> params_, Trv freqDensity);
         FreqDQMC(const This&) = default;
         FreqDQMC(This&&) noexcept = default;
         ~FreqDQMC() = default;
@@ -66,6 +67,8 @@ namespace Physica {
         void forceAsync(const Vector auto& pos, Vector auto& result);
         template<ExecutePolicy P = Sequential>
         void forceAsync(const Cell& cell, Vector auto& result);
+
+        Tr calcBerry();
         /* Getters */
         [[nodiscard]] const auto& getParams() const noexcept { return action.getParams(); }
         [[nodiscard]] auto&& getAuxField(this auto&& self) noexcept { return self.action.getAuxField(); }
@@ -94,8 +97,9 @@ namespace Physica {
     };
 
     template<Scalar T>
-    FreqDQMC<T>::FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity, int maxBoson)
-            : action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity), maxBoson)
+    FreqDQMC<T>::FreqDQMC(HubbardParams<Tr> params_, Trv freqDensity, int maxBoson)
+            : params(std::move(params_))
+            , action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity), maxBoson)
             , hmc(makeDefaultMass(getAuxField()))
             , correction(ElasticDQMC<Trv>::calcLocalCorrection(params.getBeta(), params.getRepelU(), params.getChemMu(), getNumFreq()))
             , greens(2, params.getNumSite()) {
@@ -105,8 +109,9 @@ namespace Physica {
     }
 
     template<Scalar T>
-    FreqDQMC<T>::FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity)
-            : action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity))
+    FreqDQMC<T>::FreqDQMC(HubbardParams<Tr> params_, Trv freqDensity)
+            : params(std::move(params_))
+            , action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity))
             , hmc(makeDefaultMass(getAuxField()))
             , correction(ElasticDQMC<Trv>::calcLocalCorrection(params.getBeta(), params.getRepelU(), params.getChemMu(), getNumFreq()))
             , greens(2, params.getNumSite()) {
@@ -219,6 +224,25 @@ namespace Physica {
     template<ExecutePolicy P>
     void FreqDQMC<T>::forceAsync(const Cell& cell, Vector auto& result) {
         forceAsync<P>(cell.getPos().flatten(), result);
+    }
+
+    template<Scalar T>
+    auto FreqDQMC<T>::calcBerry() -> Tr {
+        const int numSite = getNumSite();
+        const int numFreq2 = 2 * getNumFreq();
+        MatrixND<T> inv(numSite * numFreq2);
+        MatrixND<Tr> ptrace(numFreq2);
+        Tr result = 0;
+        for (auto& spinLU : lu) {
+            inv = spinLU.inv();
+
+            for (int r = 0; r < numFreq2; ++r)
+                for (int c = 0; c < numFreq2; ++c)
+                    ptrace[r, c] = inv.block(r * numSite, numSite, c * numSite, numSite).imags().sum();
+            result += (ptrace * action.getMatsubara()).trace();
+        }
+        const Tr betaMu = getParams().calcBetaMu();
+        return fma(betaMu, tanh(betaMu * 0.5), -Trv(numSite * numFreq2)) + getParams().getBeta() * result;
     }
 
     template<Scalar T>

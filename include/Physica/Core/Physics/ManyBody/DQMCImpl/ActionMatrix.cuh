@@ -63,6 +63,7 @@ namespace Physica {
         template<RNG R>
         void random_normal();
         /* Getters */
+        [[nodiscard]] const auto& getMatsubara() const noexcept { return matsubara; }
         [[nodiscard]] size_t getOrder() const noexcept { return matsubara.getOrder() * getNumSite(); }
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }

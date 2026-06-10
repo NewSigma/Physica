@@ -37,6 +37,7 @@ namespace Physica {
 
         static_assert(T::Prec == Float32, "[Info]: Suggest FP32");
     private:
+        HubbardParams<Tr> params;
         Array<device_obj<DenseLU<T, false>>, 2> lu;
         device_obj<ActionMatrix<T>> action;
         device_obj<MatrixND<T>> forceBuffer;
@@ -49,8 +50,8 @@ namespace Physica {
         Trv lnWeight = Trv::nan();
         Trv sign = 1;
     public:
-        device_obj(const HubbardParams<Tr>& params, Trv freqDensity, int maxBoson);
-        device_obj(const HubbardParams<Tr>& params, Trv freqDensity);
+        device_obj(HubbardParams<Tr> params_, Trv freqDensity, int maxBoson);
+        device_obj(HubbardParams<Tr> params_, Trv freqDensity);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -73,6 +74,8 @@ namespace Physica {
         void forceAsync(const Vector auto& pos, Vector auto& result);
         template<ExecutePolicy P = Sequential>
         void forceAsync(const Cell& cell, Vector auto& result);
+
+        Tr calcBerry();
         /* Getters */
         [[nodiscard]] auto&& getAuxField(this auto&& self) noexcept { return self.action.getAuxField(); }
         [[nodiscard]] int getNumSite() const noexcept { return action.getNumSite(); }
@@ -90,14 +93,14 @@ namespace Physica {
         [[nodiscard]] Vector2D<Trv> calcDet();
         [[nodiscard]] Vector2D<Trv> calcLnWeight();
         void calcGreen();
-        void traceGreen(int spin);
         /* Getters */
         [[nodiscard]] Trv getBetaU() const noexcept;
     };
 
     template<Scalar T>
-    device_obj<FreqDQMC<T>>::device_obj(const HubbardParams<Tr>& params, Trv freqDensity, int maxBoson)
-            : action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity), maxBoson)
+    device_obj<FreqDQMC<T>>::device_obj(HubbardParams<Tr> params_, Trv freqDensity, int maxBoson)
+            : params(std::move(params_))
+            , action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity), maxBoson)
             , hmc(host_obj::makeDefaultMass(getAuxField()))
             , correction(ElasticDQMC<Trv>::calcLocalCorrection(params.getBeta(), params.getRepelU(), params.getChemMu(), getNumFreq()))
             , greensD(2, params.getNumSite())
@@ -110,8 +113,9 @@ namespace Physica {
     }
 
     template<Scalar T>
-    device_obj<FreqDQMC<T>>::device_obj(const HubbardParams<Tr>& params, Trv freqDensity)
-            : action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity))
+    device_obj<FreqDQMC<T>>::device_obj(HubbardParams<Tr> params_, Trv freqDensity)
+            : params(std::move(params_))
+            , action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity))
             , hmc(host_obj::makeDefaultMass(getAuxField()))
             , correction(ElasticDQMC<Trv>::calcLocalCorrection(params.getBeta(), params.getRepelU(), params.getChemMu(), getNumFreq()))
             , greensD(2, params.getNumSite())
@@ -234,6 +238,33 @@ namespace Physica {
     }
 
     template<Scalar T>
+    auto device_obj<FreqDQMC<T>>::calcBerry() -> Tr {
+        const int numSite = getNumSite();
+        const int numFreq2 = 2 * getNumFreq();
+        device_obj<MatrixND<Tr>> ptrace(numFreq2);
+        Tr result = 0;
+        for (auto& spinLU : lu) {
+            solBuffer = spinLU.inv();
+            auto kernel = [inv_ = asStruct(solBuffer), ptrace_ = asStruct(ptrace), numSite] __device__() mutable {
+                const auto& inv = inv_.getDerived();
+                auto& ptrace = ptrace_.getDerived();
+
+                int r = blockIdx.x;
+                int c = blockIdx.y;
+                ThreadBlock<Dynamic> block{};
+                Tr sum = inv.block(r * numSite, numSite, c * numSite, numSite).imags().sum(block);
+                if (block.tid() == 0)
+                    ptrace[r, c] = sum;
+            };
+            uint32_t numThread = std::min<uint32_t>(numSite, CUDADevAttr::MaxThreadsPerBlock);
+            CUDAExecutor::launch(kernel, KernelConfig({numFreq2, numFreq2}, numThread));
+            result += (ptrace * action.getMatsubara()).trace();
+        }
+        const Tr betaMu = params.calcBetaMu();
+        return fma(betaMu, tanh(betaMu * 0.5), -Trv(numSite * numFreq2)) + getBeta() * result;
+    }
+
+    template<Scalar T>
     auto device_obj<FreqDQMC<T>>::calcDet() -> Vector2D<Trv> {
         lu[0].compute(action);
 
@@ -264,44 +295,39 @@ namespace Physica {
     void device_obj<FreqDQMC<T>>::calcGreen() {
         for (int spin : {0, 1}) {
             solBuffer = lu[spin].inv();
-            traceGreen(spin);
+            auto kernel = [solBuffer_ = asStruct(solBuffer),
+                        green_ = asStruct(greensD[spin]),
+                        numSite = getNumSite(),
+                        size = 2 * getNumFreq(),
+                        correction = correction] __device__() mutable {
+                const auto& solBuffer = solBuffer_.getDerived();
+                auto& green = green_.getDerived();
+                unsigned int row = blockIdx.x * blockDim.x + threadIdx.x;
+                unsigned int col = blockIdx.y;
+                if (row >= green.getRow())
+                    return;
+
+                Tr elem = 0;
+                for (int i = 0, offset = 0; i < size; ++i) {
+                    elem += solBuffer[offset + row, offset + col].real();
+                    offset += numSite;
+                }
+
+                if (row == col)
+                    elem += Tr(0.5) + correction;
+
+                green[row, col] = elem;
+            };
+
+            int numSite = getNumSite();
+            uint32_t numThread = std::min<uint32_t>(numSite, CUDADevAttr::WarpSize);
+            uint32_t numBlockX = (numSite + numThread - 1) / numThread;
+            uint32_t numBlockY = numSite;
+            CUDAExecutor::launch(kernel, KernelConfig({numBlockX, numBlockY}, numThread));
+
+            greensD[spin].toHostAsync(greensH[spin]);
         }
         CUDAExecutor::wait();
-    }
-
-    template<Scalar T>
-    void device_obj<FreqDQMC<T>>::traceGreen(int spin) {
-        auto kernel = [solBuffer_ = asStruct(solBuffer),
-                       green_ = asStruct(greensD[spin]),
-                       numSite = getNumSite(),
-                       size = 2 * getNumFreq(),
-                       correction = correction] __device__() mutable {
-            const auto& solBuffer = solBuffer_.getDerived();
-            auto& green = green_.getDerived();
-            unsigned int row = blockIdx.x * blockDim.x + threadIdx.x;
-            unsigned int col = blockIdx.y;
-            if (row >= green.getRow())
-                return;
-
-            Tr elem = 0;
-            for (int i = 0, offset = 0; i < size; ++i) {
-                elem += solBuffer[offset + row, offset + col].real();
-                offset += numSite;
-            }
-
-            if (row == col)
-                elem += Tr(0.5) + correction;
-
-            green[row, col] = elem;
-        };
-
-        int numSite = getNumSite();
-        uint32_t numThread = std::min<uint32_t>(numSite, CUDADevAttr::WarpSize);
-        uint32_t numBlockX = (numSite + numThread - 1) / numThread;
-        uint32_t numBlockY = numSite;
-        CUDAExecutor::launch(kernel, KernelConfig({numBlockX, numBlockY}, numThread));
-
-        greensD[spin].toHostAsync(greensH[spin]);
     }
 
     template<Scalar T>
