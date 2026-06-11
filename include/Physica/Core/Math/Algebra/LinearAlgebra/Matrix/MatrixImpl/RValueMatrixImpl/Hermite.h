@@ -40,7 +40,7 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<M> m;
+        decay_rvalue_t<M> m;
     public:
         explicit Hermite(M&& m);
         Hermite(const This&) = default;
@@ -94,7 +94,7 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<V> v;
+        decay_rvalue_t<V> v;
     public:
         explicit Hermite(V&& v);
         Hermite(const This&) = default;

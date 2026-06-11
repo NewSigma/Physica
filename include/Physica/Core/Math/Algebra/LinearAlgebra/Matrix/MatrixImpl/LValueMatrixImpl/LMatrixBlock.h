@@ -29,7 +29,7 @@ namespace Physica {
         using This = LMatrixBlock<M, 1, Col>;
         using Base = LValueVector<This>;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
@@ -79,7 +79,7 @@ namespace Physica {
         using This = LMatrixBlock<M, Row, 1>;
         using Base = LValueVector<This>;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
@@ -129,7 +129,7 @@ namespace Physica {
         using This = LMatrixBlock<M, 1, 1>;
         using Base = LValueVector<This>;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
         size_t fromRow;
         size_t fromCol;
     public:
@@ -178,7 +178,7 @@ namespace Physica {
         using This = LMatrixBlock<M, Dynamic, Dynamic>;
         using Base = LValueMatrix<This>;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;

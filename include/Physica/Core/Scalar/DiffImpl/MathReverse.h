@@ -23,7 +23,7 @@
 namespace Physica {
     template<Scalar T>
     [[nodiscard]] CoDiff<T> abs(T&& x) noexcept requires(ReverseDiff<T>) {
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield abs(x_.value());
         auto& g = y.grad();
         x_.reverse(x_.isPositive() ? g : -g);
@@ -32,7 +32,7 @@ namespace Physica {
     template<Scalar T>
     [[nodiscard]] CoDiff<T> relu(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield relu(x_.value());
         x_.reverse(x_.isPositive() ? y.grad() : Tv(0));
     }
@@ -40,14 +40,14 @@ namespace Physica {
     template<Scalar T>
     [[nodiscard]] CoDiff<T> square(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield square(x_.value());
         x_.reverse(Tv(2) * x_.value() * y.grad());
     }
 
     template<Scalar T>
     [[nodiscard]] CoDiff<T> reciprocal(T&& x) noexcept requires(ReverseDiff<T>) {
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield reciprocal(x_.value());
         x_.reverse(-square(y.value()) * y.grad());
     }
@@ -55,7 +55,7 @@ namespace Physica {
     template<Scalar T>
     [[nodiscard]] CoDiff<T> sqrt(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield sqrt(x_.value());
         x_.reverse(y.grad() / y.value() * Tv(0.5));
     }
@@ -63,7 +63,7 @@ namespace Physica {
     template<Scalar T>
     [[nodiscard]] CoDiff<T> cbrt(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield cbrt(x_.value());
         const auto x2_3 = y.value() / x_.value();
         x_.reverse((Tv(1.0 / 3) * y.grad()) * x2_3);
@@ -74,7 +74,7 @@ namespace Physica {
         if constexpr (!T::isComplex())
             assert(x.isPositive() && "[Error]: Invalid param");
 
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield ln(x_.value());
         x_.reverse(y.grad() / x_.value());
     }
@@ -90,15 +90,15 @@ namespace Physica {
     
     template<Scalar T>
     [[nodiscard]] CoDiff<T> exp(T&& x) noexcept requires(ReverseDiff<T>) {
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield exp(x_.value());
         x_.reverse(y.value() * y.grad());
     }
 
     template<Scalar T, Scalar U>
     [[nodiscard]] CoDiff<T> pow(T&& x, U&& a) noexcept requires(ReverseDiff<T> && !Diffable<U>) {
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
-        LazyDestroy<U&&> a_ = std::forward<U>(a);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        decltype(auto) a_ = decay_rvalue(std::forward<U>(a));
         auto& y = co_yield pow(x_.value(), a_);
         x_.reverse(y.value() * y.grad() * a_ / x_.value());
     }
@@ -109,7 +109,7 @@ namespace Physica {
     template<Scalar T>
     [[nodiscard]] CoDiff<T> cos(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         Tv c, s;
         sincos(x_.value(), s, c);
         auto& y = co_yield c;
@@ -118,7 +118,7 @@ namespace Physica {
 
     template<Scalar T>
     [[nodiscard]] CoDiff<T> sin(T&& x) noexcept requires(ReverseDiff<T>) {
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto [s, c] = sincos(x_.value());
         auto& y = co_yield s;
         x_.reverse(c * y.grad());
@@ -129,8 +129,8 @@ namespace Physica {
         using Tv = T::ValueType;
         Tv s, c;
         sincos(x.value(), s, c);
-        LazyDestroy<U&&> sin_ = std::forward<U>(sin_result);
-        LazyDestroy<U&&> cos_ = std::forward<U>(cos_result);
+        decltype(auto) sin_ = decay_rvalue(std::forward<U>(sin_result));
+        decltype(auto) cos_ = decay_rvalue(std::forward<U>(cos_result));
         sin_ = s;
         cos_ = c;
         co_await suspend_always{};
@@ -169,14 +169,14 @@ namespace Physica {
 
     template<Scalar T>
     [[nodiscard]] CoDiff<T> cosh(T&& x) noexcept requires(ReverseDiff<T>) {
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield cosh(x_.value());
         x_.reverse(sinh(x_.value()) * y.grad());
     }
 
     template<Scalar T>
     [[nodiscard]] CoDiff<T> sinh(T&& x) noexcept requires(ReverseDiff<T>) {
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield sinh(x_.value());
         x_.reverse(cosh(x_.value()) * y.grad());
     }
@@ -184,7 +184,7 @@ namespace Physica {
     template<Scalar T>
     [[nodiscard]] CoDiff<T> tanh(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield tanh(x_.value());
         x_.reverse((Tv(1) - square(y.value())) * y.grad());
     }
@@ -218,7 +218,7 @@ namespace Physica {
 
     template<Scalar T>
     [[nodiscard]] CoDiff<T> lncosh(T&& x) noexcept requires(ReverseDiff<T>) {
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield lncosh(x_.value());
         x_.reverse(tanh(x_.value()) * y.grad());
     }

@@ -26,7 +26,7 @@ namespace Physica {
     class FlattenL<T> : public LValueVector<FlattenL<T>> {
         using This = FlattenL<T>;
 
-        LazyDestroy<T> tensor;
+        decay_rvalue_t<T> tensor;
     public:
         using Base = LValueVector<FlattenL<T>>;
         using typename Base::ScalarType;

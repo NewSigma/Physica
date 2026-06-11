@@ -185,8 +185,8 @@ namespace Physica {
     template<Scalar T, Scalar U>
     [[nodiscard]] auto operator+(T&& x, U&& y) noexcept -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
             requires(ReverseDiff<T>) {
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
-        LazyDestroy<U&&> y_ = std::forward<U>(y);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        decltype(auto) y_ = decay_rvalue(std::forward<U>(y));
         auto& result = co_yield x_.value() + y_.value();
         auto& g = result.grad();
         x_.reverse(g);
@@ -206,8 +206,8 @@ namespace Physica {
     template<Scalar T, Scalar U>
     [[nodiscard]] auto operator-(T&& x, U&& y) noexcept -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
             requires(ReverseDiff<T>) {
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
-        LazyDestroy<U&&> y_ = std::forward<U>(y);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        decltype(auto) y_ = decay_rvalue(std::forward<U>(y));
         auto& result = co_yield x_.value() - y_.value();
         auto& g = result.grad();
         x_.reverse(g);
@@ -230,8 +230,8 @@ namespace Physica {
     template<Scalar T, Scalar U>
     [[nodiscard]] auto operator*(T&& x, U&& y) noexcept -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
             requires(ReverseDiff<T>) {
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
-        LazyDestroy<U&&> y_ = std::forward<U>(y);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        decltype(auto) y_ = decay_rvalue(std::forward<U>(y));
         auto& result = co_yield x_.value() * y_.value();
         auto& g = result.grad();
         x_.reverse(y_.value() * g);
@@ -257,8 +257,8 @@ namespace Physica {
     template<Scalar T, Scalar U>
     [[nodiscard]] auto operator/(T&& x, U&& y) noexcept -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
             requires(ReverseDiff<T>) {
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
-        LazyDestroy<U&&> y_ = std::forward<U>(y);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        decltype(auto) y_ = decay_rvalue(std::forward<U>(y));
         auto& result = co_yield x_.value() / y_.value();
         const auto factor = reciprocal(y_.value()) * result.grad();
         x_.reverse(factor);
@@ -291,7 +291,7 @@ namespace Physica {
     template<Scalar T, Scalar U>
     [[nodiscard]] auto operator/(U&& x, T&& y) noexcept -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
             requires(ReverseDiff<T> && !Diffable<U>) {
-        LazyDestroy<U&&> x_ = std::forward<U>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<U>(x));
         auto rep = reciprocal(std::forward<T>(y));
         auto& result = co_yield x_ * rep.value();
         rep.reverse(x_ * result.grad());
@@ -305,7 +305,7 @@ namespace Physica {
 
     template<Scalar T>
     [[nodiscard]] CoDiff<T> operator-(T&& x) noexcept requires(ReverseDiff<T>) {
-        LazyDestroy<T&&> x_ = std::forward<T>(x);
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield -x_.value();
         x_.reverse(-y.grad());
     }

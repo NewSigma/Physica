@@ -26,7 +26,7 @@ namespace Physica {
         using This = FlattenL<M>;
         using Base = LValueVector<This>;
 
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
     public:
         FlattenL(M&& mat_) : mat(std::forward<M>(mat_)) {}
         FlattenL(const This&) = default;

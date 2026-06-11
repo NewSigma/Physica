@@ -30,7 +30,7 @@ namespace Physica {
         using typename Base::Trv;
         using typename Base::Tc;
     private:
-        LazyDestroy<M> trig;
+        decay_rvalue_t<M> trig;
     public:
         explicit Inverse(M&& trig);
         Inverse(const This&) = default;

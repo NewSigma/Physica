@@ -32,7 +32,7 @@ namespace Physica {
         using typename Base::Tv;
         using typename Base::Trv;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
     public:
         MatrixTrig(M&& mat_);
         MatrixTrig(const This&) = default;

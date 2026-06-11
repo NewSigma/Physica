@@ -29,7 +29,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<V> v;
+        decay_rvalue_t<V> v;
     public:
         explicit ImagVectorR(V&& v_) : v(std::forward<V>(v_)) {}
         ImagVectorR(const This&) = default;
@@ -61,7 +61,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<V> v;
+        decay_rvalue_t<V> v;
     public:
         explicit NormVector(V&& v_) : v(std::forward<V>(v_)) {}
         NormVector(const This&) = default;
@@ -92,7 +92,7 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<V> v;
+        decay_rvalue_t<V> v;
     public:
         explicit ValueVector(V&& v_) : v(std::forward<V>(v_)) {}
         ValueVector(const This&) = default;
@@ -118,7 +118,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<V> v;
+        decay_rvalue_t<V> v;
     public:
         explicit GradVector(V&& v_) : v(std::forward<V>(v_)) {}
         GradVector(const This&) = default;
@@ -146,7 +146,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<V> v;
+        decay_rvalue_t<V> v;
     public:
         GradMaskVector(V&& v_) : v(std::forward<V>(v_)) {}
         GradMaskVector(const This&) = default;

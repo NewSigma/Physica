@@ -25,7 +25,7 @@ namespace Physica {
     class FlattenC<M> : public CompactVector<FlattenC<M>> {
         using This = FlattenC<M>;
 
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
     public:
         using Base = CompactVector<This>;
     public:

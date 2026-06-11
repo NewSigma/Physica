@@ -33,7 +33,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
@@ -80,7 +80,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
@@ -127,7 +127,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;

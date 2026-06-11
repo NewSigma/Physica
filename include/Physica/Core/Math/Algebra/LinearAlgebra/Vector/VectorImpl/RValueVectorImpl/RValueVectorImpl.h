@@ -483,7 +483,7 @@ namespace Physica {
         assert(self.getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
         if constexpr (isReverseDiff()) {
             using Self = decltype(self);
-            LazyDestroy<Self> v = std::forward<Self>(self);
+            decltype(auto) v = decay_rvalue(std::forward<Self>(self));
             auto& result = co_yield v.values().sum();
             v.reverse(result.grad());
         }

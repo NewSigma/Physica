@@ -31,8 +31,8 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tc;
     private:
-        LazyDestroy<M1> inv;
-        LazyDestroy<M2> rhs;
+        decay_rvalue_t<M1> inv;
+        decay_rvalue_t<M2> rhs;
     public:
         GEMM(M1&& inv, M2&& rhs);
         GEMM(const This&) = default;

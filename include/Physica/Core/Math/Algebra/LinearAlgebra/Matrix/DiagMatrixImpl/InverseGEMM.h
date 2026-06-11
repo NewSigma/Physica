@@ -28,8 +28,8 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<M1> mat1;
-        LazyDestroy<M2> mat2;
+        decay_rvalue_t<M1> mat1;
+        decay_rvalue_t<M2> mat2;
     public:
         GEMM(M1&& mat1_, M2&& mat2_);
         GEMM(const This&) = default;
@@ -73,8 +73,8 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<M1> mat1;
-        LazyDestroy<M2> mat2;
+        decay_rvalue_t<M1> mat1;
+        decay_rvalue_t<M2> mat2;
     public:
         GEMM(M1&& mat1_, M2&& mat2_);
         GEMM(const This&) = default;

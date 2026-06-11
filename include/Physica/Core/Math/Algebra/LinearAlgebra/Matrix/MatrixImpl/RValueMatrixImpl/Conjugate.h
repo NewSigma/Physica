@@ -28,7 +28,7 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<M> m;
+        decay_rvalue_t<M> m;
     public:
         Conjugate(M&& m);
         Conjugate(const This&) = default;

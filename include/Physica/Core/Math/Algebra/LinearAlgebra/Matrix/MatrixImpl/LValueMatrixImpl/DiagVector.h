@@ -26,7 +26,7 @@ namespace Physica {
         using This = DiagVectorL<M>;
         using Base = LValueVector<This>;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
     public:
         explicit DiagVectorL(M&& mat) : mat(std::forward<M>(mat)) {}
         DiagVectorL(const This&) = default;

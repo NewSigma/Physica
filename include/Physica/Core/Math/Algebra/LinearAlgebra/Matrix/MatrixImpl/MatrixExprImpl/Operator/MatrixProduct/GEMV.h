@@ -30,8 +30,8 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<M> expr;
-        LazyDestroy<V> vec;
+        decay_rvalue_t<M> expr;
+        decay_rvalue_t<V> vec;
     public:
         GEMV(M expr_, V vec_);
         GEMV(const This&) = default;

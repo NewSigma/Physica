@@ -32,7 +32,7 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<M> m;
+        decay_rvalue_t<M> m;
         int power;
     public:
         MatrixPow(M m_, int power_);

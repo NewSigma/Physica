@@ -82,11 +82,19 @@ namespace Physica {
 
     template<class T, template<class, auto, auto, auto, class...> class Template>
     concept instanceof_txxx = Internal::is_instance_of_txxx<Template, std::remove_cvref_t<T>>::value;
-    /**
-     * Reject const&& to avoid potential bad pattern
-     */
-    template<class Ref> requires(std::is_lvalue_reference_v<Ref> || (std::is_rvalue_reference_v<Ref> && !std::is_const_v<std::remove_reference_t<Ref>>))
-    using LazyDestroy = std::conditional<std::is_rvalue_reference<Ref>::value, std::remove_reference_t<Ref>, Ref>::type;
+
+    [[nodiscard]] constexpr decltype(auto) decay_rvalue(auto&& x) noexcept {
+        using T = decltype(x);
+        if constexpr (std::is_rvalue_reference_v<T>) {
+            static_assert(!std::is_const_v<std::remove_reference_t<T>>, "[Error]: Reject const&& to avoid potential bad pattern");
+            return std::decay_t<T>(std::forward<T>(x));
+        }
+        else
+            return x;
+    }
+
+    template<class T>
+    using decay_rvalue_t = decltype(decay_rvalue(std::declval<T>()));
     /**
      * std::forward_like does not work if we use GCC 14.2.
      * FIXME: Simply remove it in the future

@@ -90,7 +90,7 @@ namespace Physica {
         static_assert(!std::same_as<T, std::remove_cvref_t<Expr>>, "[Error]: Not a expression");
         static_assert(Vector<Expr> || Matrix<Expr>, "[Error]: Not a expression");
 
-        LazyDestroy<Expr> expr_ = std::forward<Expr>(expr);
+        decltype(auto) expr_ = decay_rvalue(std::forward<Expr>(expr));
         auto& result = co_yield expr_.values();
         expr_.reverse(result.values(), result.grads());
     }

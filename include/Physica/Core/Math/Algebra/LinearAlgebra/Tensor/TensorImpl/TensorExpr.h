@@ -31,8 +31,8 @@ namespace Physica {
     public:
         using Base::isReverseDiff;
     private:
-        LazyDestroy<LHS> lhs;
-        LazyDestroy<RHS> rhs;
+        decay_rvalue_t<LHS> lhs;
+        decay_rvalue_t<RHS> rhs;
     public:
         BinaryTensorExpr(LHS&& lhs_, RHS&& rhs_) noexcept;
         BinaryTensorExpr(const This&) = delete;

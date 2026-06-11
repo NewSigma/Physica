@@ -31,8 +31,8 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<M> mpow;
-        LazyDestroy<V> v;
+        decay_rvalue_t<M> mpow;
+        decay_rvalue_t<V> v;
     public:
         MatPowVecProd(M mpow_, V v_);
         MatPowVecProd(const This&) = default;

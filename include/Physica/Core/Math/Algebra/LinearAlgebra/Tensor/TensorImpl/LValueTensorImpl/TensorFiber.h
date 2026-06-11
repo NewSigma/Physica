@@ -27,7 +27,7 @@ namespace Physica {
         using Base = LValueVector<TensorFiber<X>>;
         using IndexType = std::remove_cvref_t<X>::IndexType;
     private:
-        LazyDestroy<X> tensor;
+        decay_rvalue_t<X> tensor;
         IndexType index;
         int dim;
     public:

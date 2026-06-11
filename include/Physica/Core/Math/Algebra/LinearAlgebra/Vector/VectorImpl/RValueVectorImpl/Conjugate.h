@@ -29,7 +29,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<V> vec;
+        decay_rvalue_t<V> vec;
     public:
         explicit Conjugate(V&& vec_) : vec(std::forward<V>(vec_)) {}
         Conjugate(const This&) = default;

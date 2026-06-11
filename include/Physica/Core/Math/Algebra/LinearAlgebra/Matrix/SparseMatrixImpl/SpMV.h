@@ -27,8 +27,8 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<M> mat;
-        LazyDestroy<V> vec;
+        decay_rvalue_t<M> mat;
+        decay_rvalue_t<V> vec;
     public:
         GEMV(M&& mat_, V&& vec_);
         /* Operations */

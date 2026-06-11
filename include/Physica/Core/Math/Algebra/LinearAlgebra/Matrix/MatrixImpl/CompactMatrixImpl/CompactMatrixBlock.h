@@ -29,7 +29,7 @@ namespace Physica {
         using This = CompactMatrixBlock<M, 1, Col>;
         using Base = CompactVector<This>;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
@@ -107,7 +107,7 @@ namespace Physica {
         using This = CompactMatrixBlock<M, Row, 1>;
         using Base = CompactVector<This>;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
@@ -184,7 +184,7 @@ namespace Physica {
         using This = CompactMatrixBlock<M, 1, 1>;
         using Base = CompactVector<This>;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
         size_t fromRow;
         size_t fromCol;
     public:
@@ -259,7 +259,7 @@ namespace Physica {
         using This = CompactMatrixBlock<M, Row, Col>;
         using Base = LValueMatrix<This>;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;

@@ -33,7 +33,7 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<V> expr;
+        decay_rvalue_t<V> expr;
     public:
         UnitaryVectorExpr(V expr_) noexcept : expr(std::forward<V>(expr_)) {}
         UnitaryVectorExpr(const This&) = default;
@@ -108,8 +108,8 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<LHS> lhs;
-        LazyDestroy<RHS> rhs;
+        decay_rvalue_t<LHS> lhs;
+        decay_rvalue_t<RHS> rhs;
     public:
         BinaryVectorExpr(LHS lhs_, RHS rhs_) noexcept;
         BinaryVectorExpr(const This&) = default;

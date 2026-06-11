@@ -30,7 +30,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<V> v;
+        decay_rvalue_t<V> v;
     public:
         explicit RealVectorR(V&& v_) : v(std::forward<V>(v_)) {}
         RealVectorR(const This&) = default;

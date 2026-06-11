@@ -29,7 +29,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
     public:
         explicit RealMatrix(M&& mat_) : mat(std::forward<M>(mat_)) {}
         RealMatrix(const This&) = default;
@@ -64,7 +64,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
     public:
         explicit ImagMatrix(M&& mat_) : mat(std::forward<M>(mat_)) {}
         ImagMatrix(const This&) = default;
@@ -100,7 +100,7 @@ namespace Physica {
         using typename Base::Tv;
         using typename Base::Trv;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
     public:
         explicit SquaredNormMatrix(M&& mat_) : mat(std::forward<M>(mat_)) {}
         SquaredNormMatrix(const This&) = default;
@@ -149,7 +149,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
     public:
         explicit NormMatrix(M&& mat_) : mat(std::forward<M>(mat_)) {}
         NormMatrix(const This&) = default;
@@ -183,7 +183,7 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
     public:
         explicit ValueMatrix(M&& mat_) : mat(std::forward<M>(mat_)) {}
         ValueMatrix(const This&) = default;
@@ -212,7 +212,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
     public:
         explicit GradMatrix(M&& mat_) : mat(std::forward<M>(mat_)) {}
         GradMatrix(const This&) = default;

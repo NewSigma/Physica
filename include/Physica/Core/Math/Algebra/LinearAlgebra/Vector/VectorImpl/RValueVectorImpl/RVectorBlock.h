@@ -31,7 +31,7 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<V> vec;
+        decay_rvalue_t<V> vec;
         size_t from;
         size_t to;
     public:

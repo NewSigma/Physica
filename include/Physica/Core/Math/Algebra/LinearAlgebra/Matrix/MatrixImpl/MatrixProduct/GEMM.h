@@ -38,8 +38,8 @@ namespace Physica {
         using typename Base::Tv;
         using typename Base::Trv;
     private:
-        LazyDestroy<M1> mat1;
-        LazyDestroy<M2> mat2;
+        decay_rvalue_t<M1> mat1;
+        decay_rvalue_t<M2> mat2;
     public:
         GEMM(M1&& mat1_, M2&& mat2_);
         GEMM(const This&) = default;

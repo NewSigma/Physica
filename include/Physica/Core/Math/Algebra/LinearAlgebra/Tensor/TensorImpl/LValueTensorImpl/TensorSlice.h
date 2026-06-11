@@ -28,7 +28,7 @@ namespace Physica {
         using Base = LValueMatrix<TensorSlice<X>>;
         using IndexType = std::remove_cvref_t<X>::IndexType;
     private:
-        LazyDestroy<X> tensor;
+        decay_rvalue_t<X> tensor;
         IndexType index;
         int dimRow;
         int dimCol;

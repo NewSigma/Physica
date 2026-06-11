@@ -29,7 +29,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
     public:
         Transpose(M&& mat_) : mat(std::forward<M>(mat_)) {}
         Transpose(const This&) = default;
@@ -109,7 +109,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<V> vec;
+        decay_rvalue_t<V> vec;
     public:
         explicit Transpose(V&& vec_) : vec(std::forward<V>(vec_)) {}
         Transpose(const This&) = default;

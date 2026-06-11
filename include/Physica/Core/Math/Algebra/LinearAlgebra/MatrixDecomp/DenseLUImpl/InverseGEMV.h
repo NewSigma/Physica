@@ -27,8 +27,8 @@ namespace Physica {
         using Base = RValueVector<This>;
         using typename Base::T;
 
-        LazyDestroy<M> m;
-        LazyDestroy<V> v;
+        decay_rvalue_t<M> m;
+        decay_rvalue_t<V> v;
     public:
         GEMV(M&& m, V&& v);
         GEMV(const This&) = default;

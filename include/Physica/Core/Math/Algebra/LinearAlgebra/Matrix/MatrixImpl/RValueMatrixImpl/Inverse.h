@@ -29,7 +29,7 @@ namespace Physica {
         using Base = RValueMatrix<This>;
         using typename Base::T;
 
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
     public:
         explicit Inverse(M&& mat_);
         Inverse(const This&) = default;

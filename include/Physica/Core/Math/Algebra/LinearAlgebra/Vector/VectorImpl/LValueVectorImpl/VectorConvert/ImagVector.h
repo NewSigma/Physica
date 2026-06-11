@@ -28,7 +28,7 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<V> v;
+        decay_rvalue_t<V> v;
     public:
         explicit ImagVectorL(V&& v_) : v(std::forward<V>(v_)) {}
         ImagVectorL(const This&) = default;

@@ -32,7 +32,7 @@ namespace Physica {
     public:
         using ScalarType = Base::ScalarType;
     private:
-        LazyDestroy<V> vec;
+        decay_rvalue_t<V> vec;
         size_t from;
         size_t to;
     public:

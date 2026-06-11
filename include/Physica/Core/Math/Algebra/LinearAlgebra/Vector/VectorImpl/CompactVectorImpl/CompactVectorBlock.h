@@ -28,7 +28,7 @@ namespace Physica {
         using This = CompactVectorBlock<V, Length>;
         using Base = CompactVector<This>;
     private:
-        LazyDestroy<V> vec;
+        decay_rvalue_t<V> vec;
         size_t from;
         size_t to;
     public:

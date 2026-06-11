@@ -26,7 +26,7 @@ namespace Physica {
         using This = FlattenR<M>;
         using Base = RValueVector<FlattenR<M>>;
 
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
     protected:
         using typename Base::T;
         using typename Base::Tv;

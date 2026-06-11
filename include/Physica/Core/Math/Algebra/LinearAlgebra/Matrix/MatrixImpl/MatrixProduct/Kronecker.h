@@ -30,8 +30,8 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<M1> m1;
-        LazyDestroy<M2> m2;
+        decay_rvalue_t<M1> m1;
+        decay_rvalue_t<M2> m2;
     public:
         Kronecker(M1&& m1, M2&& m2);
         Kronecker(const This&) = default;

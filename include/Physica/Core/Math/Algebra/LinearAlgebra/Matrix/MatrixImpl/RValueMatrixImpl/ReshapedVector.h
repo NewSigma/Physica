@@ -29,7 +29,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<V> v;
+        decay_rvalue_t<V> v;
         size_t r;
         size_t c;
     public:

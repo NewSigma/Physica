@@ -35,7 +35,7 @@ namespace Physica {
     private:
         constexpr static bool isComplexV = std::remove_cvref_t<V>::isComplex();
 
-        LazyDestroy<V> v;
+        decay_rvalue_t<V> v;
     public:
         explicit SquaredNormVector(V&& v_) : v(std::forward<V>(v_)) {}
         SquaredNormVector(const This&) = default;

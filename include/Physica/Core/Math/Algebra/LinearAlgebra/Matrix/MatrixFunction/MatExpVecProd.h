@@ -48,8 +48,8 @@ namespace Physica {
         constexpr static std::array<float, BufferSize> ThetaFloat32{1.3E-1, 1, 2.2, 3.6, 4.9, 6.3, 7.7, 9.1, 11, 12, 13};
         constexpr static std::array<double, BufferSize> ThetaFloat64{2.4E-3, 1.4E-1, 6.4E-1, 1.4, 2.4, 3.5, 4.7, 6.0, 7.2, 8.5, 9.9};
 
-        LazyDestroy<M> mexp;
-        LazyDestroy<V> v;
+        decay_rvalue_t<M> mexp;
+        decay_rvalue_t<V> v;
     public:
         MatExpVecProd(M mexp_, V v_);
         MatExpVecProd(const This&) = default;

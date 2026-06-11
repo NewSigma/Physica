@@ -32,7 +32,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tr;
     private:
-        LazyDestroy<M> m;
+        decay_rvalue_t<M> m;
     public:
         MatrixExp(M m_);
         MatrixExp(const This&) = default;

@@ -28,7 +28,7 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
     public:
         explicit DiagVectorR(M&& mat) : mat(std::forward<M>(mat)) {}
         DiagVectorR(const This&) = default;

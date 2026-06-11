@@ -26,7 +26,7 @@ namespace Physica {
         using This = MinorDiagR<M>;
         using Base = RValueVector<This>;
     private:
-        LazyDestroy<M> mat;
+        decay_rvalue_t<M> mat;
         ssize_t shift;
     public:
         MinorDiagR(M mat, ssize_t shift);

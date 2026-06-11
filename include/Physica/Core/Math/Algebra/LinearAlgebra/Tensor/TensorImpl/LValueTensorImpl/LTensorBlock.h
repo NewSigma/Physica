@@ -31,7 +31,7 @@ namespace Physica {
     public:
         using typename Base::ScalarType;
     private:
-        LazyDestroy<X> grid;
+        decay_rvalue_t<X> grid;
         Index3D from;
         Index3D count;
     public:

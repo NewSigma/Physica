@@ -29,8 +29,8 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tc;
     private:
-        LazyDestroy<M1> trig;
-        LazyDestroy<M2> rhs;
+        decay_rvalue_t<M1> trig;
+        decay_rvalue_t<M2> rhs;
     public:
         GEMM(M1&& trig, M2&& rhs);
         GEMM(const This&) = default;

@@ -30,7 +30,7 @@ namespace Physica {
     public:
         using Base::isReverseDiff;
     private:
-        LazyDestroy<M> expr;
+        decay_rvalue_t<M> expr;
     public:
         UnitaryMatrixExpr(M expr_) noexcept : expr(std::forward<M>(expr_)) {}
         UnitaryMatrixExpr(const This&) = default;
@@ -98,8 +98,8 @@ namespace Physica {
         using Base::isReverseDiff;
         using Base::getRowAtCompile;
     private:
-        LazyDestroy<LHS> lhs;
-        LazyDestroy<RHS> rhs;
+        decay_rvalue_t<LHS> lhs;
+        decay_rvalue_t<RHS> rhs;
     public:
         BinaryMatrixExpr(LHS lhs_, RHS rhs_) noexcept;
         BinaryMatrixExpr(const This&) = default;
