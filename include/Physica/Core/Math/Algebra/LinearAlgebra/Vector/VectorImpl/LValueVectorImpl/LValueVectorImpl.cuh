@@ -221,7 +221,8 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ auto device_obj<LValueVector<Derived>>::imags(this auto&& self) noexcept {
         using Self = decltype(self);
-        return device_obj<ImagVectorL<Self>>(std::forward<Self>(self));
+        using V = remove_device_obj<Self>::type;
+        return device_obj<ImagVectorL<V>>(std::forward<Self>(self));
     }
 
     template<class Derived>

@@ -133,7 +133,7 @@ namespace Physica {
 
     template<Scalar T>
     auto HubbardParams<T>::calcBetaMu(Tr beta, Tr repelU, Tr chemMu) noexcept -> Tr {
-        return beta * (chemMu - repelU * Tr(0.5));
+        return beta * fma(repelU, Tr(-0.5), chemMu);
     }
 
     template<Scalar T>

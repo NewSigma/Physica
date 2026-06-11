@@ -91,7 +91,6 @@ namespace Physica {
         [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return host_obj::isPeriodBoundary(); }
     private:
         [[nodiscard]] Vector2D<Trv> calcDet();
-        [[nodiscard]] Vector2D<Trv> calcLnWeight();
         void calcGreen();
         /* Getters */
         [[nodiscard]] Trv getBetaU() const noexcept;
@@ -142,7 +141,11 @@ namespace Physica {
     template<RNG R, ExecutePolicy P>
     auto device_obj<FreqDQMC<T>>::step() -> Trv {
         Trv acceptR = hmc.template step<R, P>(*this);
-        check(cudaMemcpyAsync(getAuxField().data(), hmc.getSample().data(), sizeof(Tr) * hmc.getDOF(), cudaMemcpyHostToDevice, CUDAContext::getInstance()));
+        bool hasAuxField = !getBetaU().isSubNormal();
+        if (hasAuxField)
+            check(cudaMemcpyAsync(getAuxField().data(), hmc.getSample().data(), sizeof(Tr) * hmc.getDOF(), cudaMemcpyHostToDevice, CUDAContext::getInstance()));
+        else
+            getAuxField().zeros();
 
         auto [lnAD, sgnD] = calcDet();
         lnWeight = lnAD;
@@ -241,27 +244,28 @@ namespace Physica {
     auto device_obj<FreqDQMC<T>>::calcBerry() -> Tr {
         const int numSite = getNumSite();
         const int numFreq2 = 2 * getNumFreq();
-        device_obj<MatrixND<Tr>> ptrace(numFreq2);
+        device_obj<VectorND<Tr>> ptrace(numFreq2);
         Tr result = 0;
         for (auto& spinLU : lu) {
             solBuffer = spinLU.inv();
+
+            ptrace.zeros();
             auto kernel = [inv_ = asStruct(solBuffer), ptrace_ = asStruct(ptrace), numSite] __device__() mutable {
                 const auto& inv = inv_.getDerived();
                 auto& ptrace = ptrace_.getDerived();
 
-                int r = blockIdx.x;
-                int c = blockIdx.y;
-                ThreadBlock<Dynamic> block{};
-                Tr sum = inv.block(r * numSite, numSite, c * numSite, numSite).imags().sum(block);
-                if (block.tid() == 0)
-                    ptrace[r, c] = sum;
+                int numFreq2 = ptrace.getLength();
+                int i = blockIdx.x * blockDim.x + threadIdx.x;
+                if (i < numFreq2) {
+                    for (int site = 0; site < numSite; ++site)
+                        ptrace[i] += inv.block(site * numFreq2, numFreq2, site * numFreq2, numFreq2).diag().imags().calc(i);
+                }
             };
-            uint32_t numThread = std::min<uint32_t>(numSite, CUDADevAttr::MaxThreadsPerBlock);
-            CUDAExecutor::launch(kernel, KernelConfig({numFreq2, numFreq2}, numThread));
-            result += (ptrace * action.getMatsubara()).trace();
+            CUDAExecutor::launch(kernel, ptrace.makeKernelConfig());
+            result -= ptrace * action.getMatsubara().diag();
         }
         const Tr betaMu = params.calcBetaMu();
-        return fma(betaMu, tanh(betaMu * 0.5), -Trv(numSite * numFreq2)) + getBeta() * result;
+        return fma(betaMu, tanh(betaMu * 0.5), -Trv(2 * numSite * numFreq2)) + getBeta() * result;
     }
 
     template<Scalar T>
@@ -275,18 +279,6 @@ namespace Physica {
         for (auto& spinLU : lu) {
             lnAD += spinLU.lnAbsDet();
             sgnD *= spinLU.sgndet().real();
-        }
-        return {lnAD, sgnD};
-    }
-
-    template<Scalar T>
-    auto device_obj<FreqDQMC<T>>::calcLnWeight() -> Vector2D<Trv> {
-        Trv betaU = getBetaU();
-        auto [lnAD, sgnD] = calcDet();
-        lnAD = lnAD - ln1pexp(lncosh(getAuxField().row(0).reals()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum();
-        if (getMaxBoson() > 1) {
-            lnAD -= ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().reals()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum()
-                  + ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().imags()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum();
         }
         return {lnAD, sgnD};
     }

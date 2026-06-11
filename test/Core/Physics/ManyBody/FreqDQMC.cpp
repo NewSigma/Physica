@@ -24,18 +24,17 @@ using namespace Physica;
 using T = float64;
 using Tc = cfloat64;
 using RandomSource = Random<>;
-constexpr T HoppingT = 1;
-constexpr T RepelU = MathConst<T>::pi;
-constexpr T Beta = MathConst<T>::e;
 constexpr int Dim = 1;
 constexpr T StepSize = 1E-3;
 constexpr T Duration = 10;
 
 namespace {
     void conserve() {
+        constexpr T HoppingT = 1;
+        constexpr T RepelU = MathConst<T>::pi;
+        constexpr T Beta = MathConst<T>::e;
         const size_t numSite = Array<int, 2>{2, 3}.select<RandomSource>();
         const int freqDensity = Array<int, 2>{0, 1}.select<RandomSource>();
-
         const SquareLattice<Dim> lattice({numSite}, 1);
         const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, 1);
         auto dqmc = FreqDQMC<Tc>(params, freqDensity);
@@ -54,9 +53,22 @@ namespace {
 
         expect<RandomSource>(scalarNear(prevE, curE, 1E-4)); // Energe conserves
     }
+
+    void berry() {
+        constexpr T HoppingT = 0;
+        constexpr T RepelU = 0;
+        constexpr T Beta = 1;
+        const SquareLattice<Dim> lattice({2}, 1);
+        const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, 1);
+        auto dqmc = FreqDQMC<Tc>(params, 1);
+        dqmc.step_random<RandomSource>();
+        dqmc.step<RandomSource>();
+        expect<RandomSource>(dqmc.calcBerry().isZero()); // Berry is trivially zero if t = U = \mu = 0
+    }
 }
 
 int main() {
     conserve();
+    berry();
     return 0;
 }

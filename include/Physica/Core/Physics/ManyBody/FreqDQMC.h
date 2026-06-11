@@ -85,8 +85,6 @@ namespace Physica {
         template<ExecutePolicy P>
         [[nodiscard]] Vector2D<Trv> calcDet();
         template<ExecutePolicy P>
-        [[nodiscard]] Vector2D<Trv> calcLnWeight();
-        template<ExecutePolicy P>
         auto calcGreen();
         /* Getters */
         [[nodiscard]] Trv getBetaU() const noexcept;
@@ -134,7 +132,11 @@ namespace Physica {
     template<RNG R, ExecutePolicy P>
     auto FreqDQMC<T>::step() -> Trv {
         Trv acceptR = hmc.template step<R, P>(*this);
-        getAuxField().read(hmc.getSample());
+        bool hasAuxField = !getBetaU().isSubNormal();
+        if (hasAuxField)
+            getAuxField().read(hmc.getSample());
+        else
+            getAuxField().zeros();
 
         auto [lnAD, sgnD] = calcDet<P>();
         lnWeight = lnAD;
@@ -198,7 +200,7 @@ namespace Physica {
                 const auto block = inv.transpose().block(site * numFreq2, numFreq2, site * numFreq2, numFreq2);
                 for (int freq = 0; freq < getMaxBoson(); ++freq) {
                     if (freq == 0)
-                        spinF[0, site] = block.diag().sum().real() * factor;
+                        spinF[freq, site] = block.diag().sum().real() * factor;
                     else
                         spinF[freq, site] = (block.diag(freq).sum() + block.diag(-freq).conjugate().sum()) * factor;
                 }
@@ -231,18 +233,18 @@ namespace Physica {
         const int numSite = getNumSite();
         const int numFreq2 = 2 * getNumFreq();
         MatrixND<T> inv(numSite * numFreq2);
-        MatrixND<Tr> ptrace(numFreq2);
+        VectorND<Tr> ptrace(numFreq2);
         Tr result = 0;
         for (auto& spinLU : lu) {
             inv = spinLU.inv();
 
-            for (int r = 0; r < numFreq2; ++r)
-                for (int c = 0; c < numFreq2; ++c)
-                    ptrace[r, c] = inv.block(r * numSite, numSite, c * numSite, numSite).imags().sum();
-            result += (ptrace * action.getMatsubara()).trace();
+            ptrace.zeros();
+            for (int site = 0; site < numSite; ++site)
+                ptrace += inv.block(site * numFreq2, numFreq2, site * numFreq2, numFreq2).diag().imags();
+            result -= ptrace * action.getMatsubara().diag();
         }
         const Tr betaMu = getParams().calcBetaMu();
-        return fma(betaMu, tanh(betaMu * 0.5), -Trv(numSite * numFreq2)) + getParams().getBeta() * result;
+        return fma(betaMu, tanh(betaMu * 0.5), -Trv(2 * numSite * numFreq2)) + getParams().getBeta() * result;
     }
 
     template<Scalar T>
@@ -259,21 +261,8 @@ namespace Physica {
 
         Trv lnAD = 0, sgnD = 1;
         for (auto& spinLU : lu) {
-            lnAD += ln(abs(spinLU.getMatrixLU().diag())).sum();
-            sgnD *= unit(spinLU.getMatrixLU().diag()).prod().real();
-        }
-        return {lnAD, sgnD};
-    }
-
-    template<Scalar T>
-    template<ExecutePolicy P>
-    auto FreqDQMC<T>::calcLnWeight() -> Vector2D<Trv> {
-        Trv betaU = getBetaU();
-        auto [lnAD, sgnD] = calcDet<P>();
-        lnAD = lnAD - ln1pexp(lncosh(getAuxField().row(0).reals()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum();
-        if (getMaxBoson() > 1) {
-            lnAD -= ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().reals()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum()
-                  + ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().imags()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum();
+            lnAD += spinLU.lnAbsDet();
+            sgnD *= spinLU.sgndet().real();
         }
         return {lnAD, sgnD};
     }

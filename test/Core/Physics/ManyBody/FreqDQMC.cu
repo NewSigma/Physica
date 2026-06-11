@@ -80,10 +80,23 @@ namespace {
         const T curE = engine.calcClassicalInternalEnergy(dqmc);
         expect(scalarNear(prevE, curE, 1E-4)); // Energe conserves
     }
+
+    void berry() {
+        constexpr T HoppingT = 0;
+        constexpr T RepelU = 0;
+        constexpr T Beta = 1;
+        const SquareLattice<2> lattice({2, 2}, 1);
+        const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, 1);
+        auto dqmc = device_obj<FreqDQMC<Tc>>(params, 1);
+        dqmc.step_random<RandomSource>();
+        dqmc.step<RandomSource>();
+        expect<RandomSource>(dqmc.calcBerry().isZero());
+    }
 }
 
 int main() {
     hostDeviceCross();
     conserve();
+    berry();
     return 0;
 }

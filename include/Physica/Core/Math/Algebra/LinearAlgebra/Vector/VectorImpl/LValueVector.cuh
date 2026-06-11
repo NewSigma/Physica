@@ -93,4 +93,5 @@ namespace Physica {
 
 #include "LValueVectorImpl/LValueVectorImpl.cuh"
 #include "LValueVectorImpl/VectorConvert/RealVector.cuh"
+#include "LValueVectorImpl/VectorConvert/ImagVector.cuh"
 #include "LValueVectorImpl/LVectorBlock.cuh"

@@ -152,7 +152,7 @@ namespace Physica {
             Tr re = 0, im = 0;
             re = params.getHoppingMatrix()[rowSite, colSite] * params.getBeta();
             if (diagSite) {
-                const Tr shift = params.getBeta() * fma(params.getRepelU(), Tr(-0.5), params.getChemMu());
+                const Tr shift = params.calcBetaMu();
                 re += auxField[0, rowSite].real() - shift;
                 im = matsubara.diag()[rowFreq];
             }
