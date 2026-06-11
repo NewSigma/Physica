@@ -64,6 +64,8 @@ namespace Physica {
 
         void reverse(const Matrix auto& grad) const noexcept;
 
+        [[nodiscard]] T trace() const noexcept;
+
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
@@ -168,6 +170,15 @@ namespace Physica {
             mat1.reverse(grad * mat2.transpose());
         if constexpr (ReverseDiff<M2>)
             mat2.reverse(mat1.transpose() * grad);
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto GEMM<M1, M2>::trace() const noexcept -> T {
+        assert(Base::isSquare());
+        if constexpr (canonicalized<M1, M2>()) // Heuristic
+            return hadamard(getLHS(), getRHS().transpose()).sum();
+        else
+            return (getRHS() * getLHS()).trace();
     }
 
     template<Matrix M1, Matrix M2>

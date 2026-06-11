@@ -43,6 +43,8 @@ namespace Physica {
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
 
+        [[nodiscard]] T trace() const noexcept;
+
         [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return lhs.getRow(); }
@@ -65,6 +67,11 @@ namespace Physica {
     template<Matrix M1, Matrix M2> requires(instanceof_tx<M2, DiagMatrix>)
     auto GEMM<M1, M2>::calc(size_t row, size_t col) const -> T {
         return lhs.calc(row, col) * rhs.diag()[col];
+    }
+
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M2, DiagMatrix>)
+    auto GEMM<M1, M2>::trace() const noexcept -> T {
+        return getLHS().diag() * getRHS().diag();
     }
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<M2, DiagMatrix>)
