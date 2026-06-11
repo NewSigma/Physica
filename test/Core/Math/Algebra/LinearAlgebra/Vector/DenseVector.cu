@@ -60,7 +60,8 @@ int main() {
         CUDAExecutor::launch([a = asStruct(d_a), b = asStruct(d_b), result = asStruct(d_result), factor] __device__() mutable {
             int i = static_cast<int>(threadIdx.x);
             result.getDerived()[i] = a.getDerived()[i] + b.getDerived()[i] * factor;
-        }, KernelConfig(1, len)).wait();
+        }, KernelConfig(1, len));
+        CUDAExecutor::wait();
 
         d_result.toHost(result);
         expect(vectorNear(result, answer, 1E-6));

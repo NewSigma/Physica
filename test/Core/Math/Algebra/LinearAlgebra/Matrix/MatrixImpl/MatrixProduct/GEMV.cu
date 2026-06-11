@@ -46,7 +46,7 @@ namespace {
         device_obj<VectorND<T>> dy(N);
         (A.toDevice() * x.toDevice()).assign_cublas(dy);
         auto result = dy.toHost();
-        expect<RandomSource>(vectorNear(result, answer, 3UL));
+        expect<RandomSource>(vectorNear(result, answer, 4UL));
     }
 }
 

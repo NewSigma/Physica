@@ -24,6 +24,14 @@ using namespace Physica;
 using RandomSource = Random<>;
 
 namespace {
+    void host_dev_dot() {
+        constexpr int NumThread = 32;
+        using T = float32;
+        const auto v = VectorND<T>::random_uniform<RandomSource>(NumThread);
+        const auto dv = v.toDevice();
+        expect<RandomSource>(scalarNear(v * v, dv * dv, 2UL));
+    }
+
     void cooperative_dot() {
         constexpr int NumThread = 32;
         using T = float32;
@@ -34,11 +42,12 @@ namespace {
             T v2 = dot(v, v).calc(ThreadBlock<NumThread>{});
             v[threadIdx.x] = v2;
         }, {1, NumThread});
-        expect(scalarNear(v * v, d_v.toHost()[0], 1E-6));
+        expect<RandomSource>(scalarNear(v * v, d_v.toHost()[0], 2UL));
     }
 }
 
 int main() {
+    host_dev_dot();
     cooperative_dot();
     return 0;
 }
