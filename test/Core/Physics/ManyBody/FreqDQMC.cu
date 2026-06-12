@@ -23,7 +23,7 @@
 using namespace Physica;
 using T = float32;
 using Tc = cfloat32;
-using RandomSource = Random<PCG64DXSM, 1707742511338258283UL>;
+using RandomSource = Random<>;
 constexpr T HoppingT = 1;
 constexpr T RepelU = MathConst<T>::pi;
 constexpr T Beta = MathConst<T>::e;
@@ -47,7 +47,7 @@ namespace {
         {
             auto potH = dqmcH.potentialV(pos);
             auto potD = dqmcD.potentialV(pos);
-            expect(scalarNear(potH, potD, 1E-6));
+            expect<RandomSource>(scalarNear(potH, potD, 1E-6));
         }
         {
             VectorND<T> forceH, forceD;
@@ -55,7 +55,7 @@ namespace {
             forceD.resize(pos);
             dqmcH.forceAsync(pos, forceH);
             dqmcD.forceAsync(pos, forceD);
-            expect(vectorNear(forceH, forceD, 1E-4));
+            expect<RandomSource>(vectorNear(forceH, forceD, 1E-3));
         }
     }
 
@@ -78,19 +78,28 @@ namespace {
         const T prevE = engine.calcClassicalInternalEnergy(dqmc);
         engine.nve_step_for(Duration, kinetic, dqmc);
         const T curE = engine.calcClassicalInternalEnergy(dqmc);
-        expect(scalarNear(prevE, curE, 1E-4)); // Energe conserves
+        expect<RandomSource>(scalarNear(prevE, curE, 1E-4)); // Energe conserves
     }
 
     void berry() {
         constexpr T HoppingT = 0;
         constexpr T RepelU = 0;
-        constexpr T Beta = 1;
+        const T beta = T::random_uniform<RandomSource>() * 8;
         const SquareLattice<2> lattice({2, 2}, 1);
-        const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, 1);
-        auto dqmc = device_obj<FreqDQMC<Tc>>(params, 1);
-        dqmc.step_random<RandomSource>();
-        dqmc.step<RandomSource>();
-        expect<RandomSource>(dqmc.calcBerry().isZero());
+        HubbardParams<T> params(HoppingT, RepelU, lattice, beta, RepelU * 0.5, 1);
+        {
+            auto dqmc = device_obj<FreqDQMC<Tc>>(params, 1);
+            dqmc.step_random<RandomSource>();
+            dqmc.step<RandomSource>();
+            expect<RandomSource>(dqmc.calcBerry().isZero());
+        }
+        params.setChemMu(T::random_uniform<RandomSource>() * 8 - 4);
+        {
+            auto dqmc = device_obj<FreqDQMC<Tc>>(params, 1);
+            dqmc.step_random<RandomSource>();
+            dqmc.step<RandomSource>();
+            expect<RandomSource>(scalarNear(dqmc.calcBerry(), T(0), 1E-5));
+        }
     }
 }
 

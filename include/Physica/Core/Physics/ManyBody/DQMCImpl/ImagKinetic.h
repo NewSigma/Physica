@@ -109,6 +109,21 @@ namespace Physica {
         flipGreens(site, divide(deltas, ratios));
         rsign *= unit(ratios.prod());
     }
+
+    template<Scalar T>
+    template<RNG R>
+    void ImagKinetic<T>::random_uniform() {
+        aux.template random_uniform<R>();
+        aux = unit_elem(aux - Tr(0.5));
+    }
+
+    template<Scalar T>
+    void ImagKinetic<T>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        aux.swap(obj.aux);
+        greens.swap(obj.greens);
+        rsign.swap(obj.rsign);
+    }
     /**
      * Note that observable is <A> = <As>/<s> and signs may differ a factor. We are interested in relative sign only.
      */
@@ -129,20 +144,5 @@ namespace Physica {
             vr = green.row(site);
             green += deltaRatios[spin] * (vc * vr.transpose());
         }
-    }
-
-    template<Scalar T>
-    template<RNG R>
-    void ImagKinetic<T>::random_uniform() {
-        aux.template random_uniform<R>();
-        aux = unit_elem(aux - Tr(0.5));
-    }
-
-    template<Scalar T>
-    void ImagKinetic<T>::swap(This& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        aux.swap(obj.aux);
-        greens.swap(obj.greens);
-        rsign.swap(obj.rsign);
     }
 }

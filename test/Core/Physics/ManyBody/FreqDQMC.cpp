@@ -57,13 +57,22 @@ namespace {
     void berry() {
         constexpr T HoppingT = 0;
         constexpr T RepelU = 0;
-        constexpr T Beta = 1;
+        const T beta = T::random_uniform<RandomSource>() * 8;
         const SquareLattice<Dim> lattice({2}, 1);
-        const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, 1);
-        auto dqmc = FreqDQMC<Tc>(params, 1);
-        dqmc.step_random<RandomSource>();
-        dqmc.step<RandomSource>();
-        expect<RandomSource>(dqmc.calcBerry().isZero()); // Berry is trivially zero if t = U = \mu = 0
+        HubbardParams<T> params(HoppingT, RepelU, lattice, beta, RepelU * 0.5, 1);
+        {
+            auto dqmc = FreqDQMC<Tc>(params, 1);
+            dqmc.step_random<RandomSource>();
+            dqmc.step<RandomSource>();
+            expect<RandomSource>(dqmc.calcBerry().isZero()); // Berry is trivially zero if t = U = \mu = 0
+        }
+        params.setChemMu(T::random_uniform<RandomSource>() * 8 - 4);
+        {
+            auto dqmc = FreqDQMC<Tc>(params, 1);
+            dqmc.step_random<RandomSource>();
+            dqmc.step<RandomSource>();
+            expect<RandomSource>(scalarNear(dqmc.calcBerry(), T(0), 1E-15));
+        }
     }
 }
 

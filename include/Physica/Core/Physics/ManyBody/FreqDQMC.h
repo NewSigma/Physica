@@ -70,9 +70,8 @@ namespace Physica {
 
         Tr calcBerry();
         /* Getters */
-        [[nodiscard]] const auto& getParams() const noexcept { return action.getParams(); }
         [[nodiscard]] auto&& getAuxField(this auto&& self) noexcept { return self.action.getAuxField(); }
-        [[nodiscard]] int getNumSite() const noexcept { return getParams().getNumSite(); }
+        [[nodiscard]] int getNumSite() const noexcept { return params.getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
         [[nodiscard]] int getMaxBoson() const noexcept { return action.getMaxBoson(); }
         [[nodiscard]] auto&& getHMC(this auto&& self) noexcept { return self.hmc; }
@@ -243,8 +242,8 @@ namespace Physica {
                 ptrace += inv.block(site * numFreq2, numFreq2, site * numFreq2, numFreq2).diag().imags();
             result -= ptrace * action.getMatsubara().diag();
         }
-        const Tr betaMu = getParams().calcBetaMu();
-        return fma(betaMu, tanh(betaMu * 0.5), -Trv(2 * numSite * numFreq2)) + getParams().getBeta() * result;
+        const Tr background = reciprocal(Trv(1) + square(divide(params.calcBetaMu(), action.getMatsubara().diag().head(getNumFreq())))).sum() * (4 * numSite);
+        return result - background;
     }
 
     template<Scalar T>
@@ -287,7 +286,7 @@ namespace Physica {
 
     template<Scalar T>
     auto FreqDQMC<T>::getBetaU() const noexcept -> Trv {
-        return getParams().getBeta() * getParams().getRepelU();
+        return params.getBeta() * params.getRepelU();
     }
 
     template<Scalar T>

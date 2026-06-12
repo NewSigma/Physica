@@ -50,6 +50,12 @@ namespace Physica {
     };
 
     template<class U, class V>
+    VectorExpr<ExprID::Div, U, V>::VectorExpr(U lhs, V rhs) : Base(std::forward<U>(lhs), std::forward<V>(rhs)) {
+        if constexpr (Vector<U>)
+            assert(!Base::getRHS().isSubNormal() && "[Error]: Division overflow");
+    }
+
+    template<class U, class V>
     auto VectorExpr<ExprID::Div, U, V>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> CoDiff<T> {
         return *lhs / rhs;
     }
@@ -87,12 +93,6 @@ namespace Physica {
         for (size_t i = 0; i < count; ++i)
             assert(!div[i].isSubNormal() && "[Error]: Division overflow");
         return (SIMD<T, Size>(lhs) / div).cutoff(count);
-    }
-
-    template<class U, class V>
-    VectorExpr<ExprID::Div, U, V>::VectorExpr(U lhs, V rhs) : Base(std::forward<U>(lhs), std::forward<V>(rhs)) {
-        if constexpr (Vector<U>)
-            assert(!Base::getRHS().isSubNormal() && "[Error]: Division overflow");
     }
 
     template<class U, class V>

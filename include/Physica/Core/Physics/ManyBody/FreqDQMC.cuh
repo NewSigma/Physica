@@ -264,8 +264,8 @@ namespace Physica {
             CUDAExecutor::launch(kernel, ptrace.makeKernelConfig());
             result -= ptrace * action.getMatsubara().diag();
         }
-        const Tr betaMu = params.calcBetaMu();
-        return fma(betaMu, tanh(betaMu * 0.5), -Trv(2 * numSite * numFreq2)) + getBeta() * result;
+        const Tr background = reciprocal(Trv(1) + square(divide(params.calcBetaMu(), action.getMatsubara().diag().head(getNumFreq())))).sum() * (4 * numSite);
+        return result - background;
     }
 
     template<Scalar T>
