@@ -100,7 +100,7 @@ namespace Physica {
             assert(this != &source && "[Error]: Self assign is likely a bug");
         if constexpr (getSizeAtCompile() == Dynamic && source.getSizeAtCompile() == Dynamic) {
             assert(getLength() == source.getLength() && "[Error]: Size mismatch between two vector");
-            assert(getLength() > 0);
+            assert(!empty());
         }
     }
 

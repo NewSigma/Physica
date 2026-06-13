@@ -73,7 +73,7 @@ namespace Physica {
 
     template<Vector V, Matrix M>
     GEVM<V, M>::GEVM(V vec_, M mat_) : vec(std::forward<V>(vec_)), mat(std::forward<M>(mat_)) {
-        assert(vec.getLength() > 0 && mat.getCol() > 0 && "[Error]: Empty vector or matrix");
+        assert(!vec.empty() && mat.getCol() > 0 && "[Error]: Empty vector or matrix");
     }
 
     template<Vector V, Matrix M>

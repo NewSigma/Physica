@@ -133,15 +133,24 @@ std::println("{}", c);
 
 **FastAssign**:
 
-Consider the assignment of linear algebra objects, such as assigning vector:
+`false`: `assign()` falls back to for-loops on `calc()`/`packet()`
+`true`: `assign()` uses optimized algorithm
+
+Motivation: Consider the assignment of linear algebra objects, such as assigning vector:
 
 $$\mathbf{y = x}$$
 
-For dense vectors, element-wise assignment can be done using a for loop, or SIMD can be used with packet as the smallest unit to improve instruction throughput. It can be asserted that for any correct implementation, its overhead is no greater than that of a for loop or a SIMD implementation.
+For dense vectors, element-wise assignment can be done using a for loop, or SIMD can be used with packet as the smallest unit to improve instruction throughput. It is reasonable to assume that a generic implementation using for-loops or SIMD packets provides a predictable performance baseline, bounded by the cost of straightforward element-wise traversal.
 
 There are special cases, including but not limited to sparse structures, symmetry, etc., where template specializations can achieve higher performance than for loops or SIMD implementations. Template specializations are implemented using the `assign` function. `FastAssign = true` indicates that the assign implementation will outperform the for loop or SIMD implementation. `assign` is holistic, and therefore `FastAssign` is propagative.
 
 This option is used to implement heuristic expression transformations.
+
+Example 1 (`assign` outperforms `calc`)
+Assigning a sparse vector to a dense vector: a clever implementation uses memset to zero out the dense vector and then fills in the nonzero elements afterward. A trivial implementation does not leverage memset and therefore lacks this optimization.
+
+Example 2 (`calc` is unavailable):
+Some calc functions are not implemented for operations that are unlikely to require them. For instance, $\mathbf A^{-1}\mathbf x$ is a vector expression, and one seldom needs just a single element of it. Here, `FastAssign` is true.
 
 **FastPacket**:
 

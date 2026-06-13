@@ -204,7 +204,7 @@ namespace Physica {
 
     template<class T, class Allocator>
     auto device_obj<Array<T, Dynamic, Allocator>>::toPlainHost() const {
-        assert(getLength() > 0 && "[Error]: Unnecessary memcpy a empty array");
+        assert(!empty() && "[Error]: Unnecessary memcpy a empty array");
         using U = std::conditional<IsTrivial, ElemType, Physica::PlainStruct<ElemType>>::type;
         using AllocatorU = std::allocator_traits<Allocator>::template rebind_alloc<U>;
         using RtnTy = Array<U, Dynamic, AllocatorU>;

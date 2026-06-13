@@ -30,6 +30,9 @@ namespace Physica {
      * Reference:
      * [1] J. Comput. Phys. 439, 110386 (2021); https://doi.org/10.1016/j.jcp.2021.110386
      * [2] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. Numerical Recipes(3rd edition)[M]. London: Cambridge University Press, 2007:414-416
+     *
+     * Publication:
+     * [3] APL Comput. Phys. 2, 026108 (2026); https://doi.org/10.1063/5.0320242
      */
     template<Scalar T, bool TakeLn = false>
     class Vegas : public AdaptiveBase<T, TakeLn> {
