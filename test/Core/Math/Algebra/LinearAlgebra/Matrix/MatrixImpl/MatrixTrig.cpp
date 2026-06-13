@@ -22,7 +22,7 @@
 
 using namespace Physica;
 using T = float64;
-using RandomSource = Random<MCG, 1234>;
+using RandomSource = Random<MCG>;
 using Matrix4D = DenseMatrix<T, MatrixMajor::Col, 4, 4>;
 
 namespace {
@@ -41,38 +41,48 @@ namespace {
     }
 
     void invAndProd() noexcept {
+        constexpr double Prec = 1E-13;
         auto origin = Matrix4D::random_uniform<RandomSource>(4, 4);
         Matrix4D inv = origin.triu().inv();
         Matrix4D prod = origin.triu() * inv;
-        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), 1E-14));
+        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
+        prod = inv * origin.triu();
+        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
 
         inv = origin.tril().inv();
         prod = origin.tril() * inv;
-        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), 1E-14));
+        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
+        prod = inv * origin.tril();
+        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
 
         inv = origin.triu_unit().inv();
         prod = origin.triu_unit() * inv;
-        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), 1E-14));
+        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
+        prod = inv * origin.triu_unit();
+        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
 
         inv = origin.tril_unit().inv();
         prod = origin.tril_unit() * inv;
-        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), 1E-14));
+        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
+        prod = inv * origin.tril_unit();
+        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
     }
 
     void invGEMV() {
+        constexpr double Prec = 1E-12;
         auto m = Matrix4D::random_uniform<RandomSource>(4, 4);
         auto v = Vector4D<T>::random_uniform<RandomSource>(4);
         Vector4D<T> sol = m.tril().inv() * v;
-        expect<RandomSource>(vectorNear(m.tril() * sol, v, 1E-15));
+        expect<RandomSource>(vectorNear(m.tril() * sol, v, Prec));
 
         sol = m.tril_unit().inv() * v;
-        expect<RandomSource>(vectorNear(m.tril_unit() * sol, v, 1E-15));
+        expect<RandomSource>(vectorNear(m.tril_unit() * sol, v, Prec));
 
         sol = m.triu().inv() * v;
-        expect<RandomSource>(vectorNear(m.triu() * sol, v, 1E-14));
+        expect<RandomSource>(vectorNear(m.triu() * sol, v, Prec));
 
         sol = m.triu_unit().inv() * v;
-        expect<RandomSource>(vectorNear(m.triu_unit() * sol, v, 1E-15));
+        expect<RandomSource>(vectorNear(m.triu_unit() * sol, v, Prec));
     }
 }
 

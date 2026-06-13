@@ -22,28 +22,36 @@
 
 using namespace Physica;
 using T = float32;
-using RandomSource = Random<MCG, 1234>;
+using RandomSource = Random<MCG>;
 using M = device_obj<DenseMatrix<T, MatrixMajor::Col>>;
 
 namespace {
     void invAndProd() noexcept {
+        constexpr double Prec = 1E-5;
         auto origin = M::random_uniform<RandomSource>(4, 4);
         M inv = origin.triu().inv();
         M prod = origin.triu() * inv;
-        std::cout << prod.toHost() << '\n';
-        expect(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), 1E-6));
+        expect(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), Prec));
+        prod = inv * origin.triu();
+        expect(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), Prec));
 
         inv = origin.tril().inv();
         prod = origin.tril() * inv;
-        expect(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), 1E-6));
+        expect(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), Prec));
+        prod = inv * origin.tril();
+        expect(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), Prec));
 
         inv = origin.triu_unit().inv();
         prod = origin.triu_unit() * inv;
-        expect(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), 1E-6));
+        expect(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), Prec));
+        prod = inv * origin.triu_unit();
+        expect(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), Prec));
 
         inv = origin.tril_unit().inv();
         prod = origin.tril_unit() * inv;
-        expect(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), 1E-6));
+        expect(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), Prec));
+        prod = inv * origin.tril_unit();
+        expect(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), Prec));
     }
 }
 

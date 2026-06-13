@@ -21,7 +21,7 @@
 #include "MatrixTrig.cuh"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> || instanceof_tx<M2, MatrixTrig>)
     class device_obj<GEMM<M1, M2>> : public device_obj<RValueMatrix<GEMM<M1, M2>>> {
         using host_obj = GEMM<M1, M2>;
         using This = device_obj<host_obj>;
@@ -32,10 +32,10 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tc;
     private:
-        PlainStruct<add_device_obj_t<std::remove_reference_t<M1>>> trig;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M1>>> lhs;
         PlainStruct<add_device_obj_t<std::remove_reference_t<M2>>> rhs;
     public:
-        device_obj(Ref1 trig, Ref2 rhs);
+        device_obj(Ref1 lhs, Ref2 rhs);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -51,19 +51,33 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto&& getRHS(this auto&&) noexcept;
     };
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig>)
-    device_obj<GEMM<M1, M2>>::device_obj(Ref1 trig, Ref2 rhs) : trig(asStruct(trig)), rhs(asStruct(rhs)) {}
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> || instanceof_tx<M2, MatrixTrig>)
+    device_obj<GEMM<M1, M2>>::device_obj(Ref1 lhs, Ref2 rhs) : lhs(asStruct(lhs)), rhs(asStruct(rhs)) {}
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> || instanceof_tx<M2, MatrixTrig>)
     void device_obj<GEMM<M1, M2>>::assign(Matrix auto& target) const {
         using M = std::remove_cvref_t<decltype(target)>;
         using Tm = decltype(std::declval<T>().toMKL());
-        constexpr auto Side = CUBLAS_SIDE_LEFT;
-        constexpr auto Uplo = Traits<M1>::Upper ? CUBLAS_FILL_MODE_UPPER : CUBLAS_FILL_MODE_LOWER;
+        constexpr bool TrigLHS = instanceof_tx<M1, MatrixTrig>;
+        using Trig = std::conditional_t<TrigLHS, M1, M2>;
+        constexpr auto Side = TrigLHS ? CUBLAS_SIDE_LEFT : CUBLAS_SIDE_RIGHT;
+        constexpr auto Uplo = Traits<Trig>::Upper ? CUBLAS_FILL_MODE_UPPER : CUBLAS_FILL_MODE_LOWER;
         constexpr auto TransA = CUBLAS_OP_N;
-        constexpr auto Diag = Traits<M1>::Unit ? CUBLAS_DIAG_UNIT : CUBLAS_DIAG_NON_UNIT;
-        const M buffer = getLHS();
-        getRHS().assign(target);
+        constexpr auto Diag = Traits<Trig>::Unit ? CUBLAS_DIAG_UNIT : CUBLAS_DIAG_NON_UNIT;
+
+        const M buffer = [this]() -> auto& {
+            if constexpr (TrigLHS)
+                return getLHS();
+            else
+                return getRHS();
+        }();
+
+        [this]() -> auto& {
+            if constexpr (TrigLHS)
+                return getRHS();
+            else
+                return getLHS();
+        }().assign(target);
 
         const size_t m = getRow();
         const size_t n = getCol();
@@ -89,12 +103,12 @@ namespace Physica {
         }
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> || instanceof_tx<M2, MatrixTrig>)
     __host__ __device__ auto&& device_obj<GEMM<M1, M2>>::getLHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), Ref1>(self.trig.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref1>(self.lhs.getDerived());
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> || instanceof_tx<M2, MatrixTrig>)
     __host__ __device__ auto&& device_obj<GEMM<M1, M2>>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref2>(self.rhs.getDerived());
     }

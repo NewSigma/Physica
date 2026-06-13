@@ -21,18 +21,19 @@
 #include "MatrixTrig.h"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> || instanceof_tx<M2, MatrixTrig>)
     class GEMM<M1, M2> : public RValueMatrix<GEMM<M1, M2>> {
+        static_assert(!instanceof_tx<M1, MatrixTrig> || !instanceof_tx<M2, MatrixTrig>, "[Error]: NoImpl");
         using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
     protected:
         using typename Base::T;
         using typename Base::Tc;
     private:
-        decay_rvalue_t<M1> trig;
+        decay_rvalue_t<M1> lhs;
         decay_rvalue_t<M2> rhs;
     public:
-        GEMM(M1&& trig, M2&& rhs);
+        GEMM(M1&& lhs, M2&& rhs);
         GEMM(const This&) = default;
         GEMM(This&&) noexcept = default;
         ~GEMM() = default;
@@ -43,16 +44,16 @@ namespace Physica {
         void assign(Matrix auto& target) const;
         void assign_mkl(Matrix auto& target) const noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return trig.getRow(); }
+        [[nodiscard]] size_t getRow() const { return lhs.getRow(); }
         [[nodiscard]] size_t getCol() const { return rhs.getCol(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig>)
-    GEMM<M1, M2>::GEMM(M1&& trig, M2&& rhs) : trig(std::forward<M1>(trig)), rhs(std::forward<M2>(rhs)) {}
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> || instanceof_tx<M2, MatrixTrig>)
+    GEMM<M1, M2>::GEMM(M1&& lhs, M2&& rhs) : lhs(std::forward<M1>(lhs)), rhs(std::forward<M2>(rhs)) {}
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> || instanceof_tx<M2, MatrixTrig>)
     void GEMM<M1, M2>::assign(Matrix auto& target) const {
         if constexpr (HasMKL())
             assign_mkl(target);
@@ -60,12 +61,12 @@ namespace Physica {
             noImpl();
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> || instanceof_tx<M2, MatrixTrig>)
     auto&& GEMM<M1, M2>::getLHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), M1>(self.trig);
+        return propagate_rvalue_reference<decltype(self), M1>(self.lhs);
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> || instanceof_tx<M2, MatrixTrig>)
     auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M2>(self.rhs);
     }
