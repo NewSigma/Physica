@@ -6,5 +6,4 @@ target_sources(PhysicaCore PRIVATE
     Cycler.cpp
     NoImpl.cpp
     RingBuffer.cpp
-    SSHWrapper.cpp
 )
