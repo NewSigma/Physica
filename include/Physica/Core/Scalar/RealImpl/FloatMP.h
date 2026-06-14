@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -43,13 +43,13 @@ namespace Physica {
 }
 
 namespace Physica {
-    constexpr int GlobalPrecision = 4;
-    static_assert(GlobalPrecision > 1, "GlobalPrecision must be larger than 1.");
-
     template<>
     class PHYSICA_API Real<FloatMP> : public ScalarBase<Real<FloatMP>>, public CRCoro<Real<FloatMP>> {
         using This = Real<FloatMP>;
         using Base = ScalarBase<This>;
+    public:
+        constexpr static int GlobalPrecision = 4;
+        static_assert(GlobalPrecision > 1, "GlobalPrecision must be larger than 1.");
     private:
         //Store effective digits using little endian standard.
         MPUnit* __restrict byte;

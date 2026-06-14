@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 Weibo He.
+ * Copyright 2019-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,10 +25,10 @@ BasicConst::BasicConst()
         , ln_10(std::log(10))
         , ln_2_10(std::log(2) / std::log(10))
         , plotPoints(static_cast<SignedMPUnit>(20)) {
-    expectedRelativeError = T(1, 1 - GlobalPrecision);
+    expectedRelativeError = T(1, 1 - Real<FloatMP>::GlobalPrecision);
     expectedRelativeError.setByte(0, 1);
 
-    stepSize = T(1, -GlobalPrecision / 2); //( - GlobalPrecision / 2) is selected based on experience
+    stepSize = T(1, -Real<FloatMP>::GlobalPrecision / 2); //( - GlobalPrecision / 2) is selected based on experience
     stepSize.setByte(0, 1);
 
     R_MAX = 2147483647;

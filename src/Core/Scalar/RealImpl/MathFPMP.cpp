@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/EquationSolver/ElementaryEquation.h"
+#include "Physica/Core/Math/Calculus/ElementaryEquation.h"
 
 namespace Physica {
     template<>
@@ -45,7 +45,7 @@ namespace Physica {
         }
 
         Real result = Real<FloatMP>(static_cast<SignedMPUnit>(1));
-        for(unsigned int i = 0; i < MPUnitWidth * GlobalPrecision; ++i)
+        for(unsigned int i = 0; i < MPUnitWidth * Real<FloatMP>::GlobalPrecision; ++i)
             result = (result + Real<FloatMP>::div(copy_s, result)) >> 1U;
         result.power += add_power;
         return result;
@@ -72,7 +72,7 @@ namespace Physica {
             rank += BasicConst::getInstance()._1;
             Real criteria = temp_1 / rank;
             //Break if result meets the precision goal.
-            if(result.getPower() - criteria.getPower() >= GlobalPrecision)
+            if(result.getPower() - criteria.getPower() >= Real<FloatMP>::GlobalPrecision)
                 break;
             //Prepare for next calculate.
             temp_1 *= copy_temp_1;
@@ -139,7 +139,7 @@ namespace Physica {
             rank += BasicConst::getInstance()._1;
             temp /= rank;
             //Break if result meets the precision goal.
-            if(result.getPower() - temp.getPower() >= GlobalPrecision)
+            if(result.getPower() - temp.getPower() >= Real<FloatMP>::GlobalPrecision)
                 break;
             //Prepare for next calculate.
             temp_1 *= square_n;
@@ -173,7 +173,7 @@ namespace Physica {
             rank += BasicConst::getInstance()._1;
             temp /= rank;
             //Break if result meets the precision goal.
-            if(result.getPower() - temp.getPower() >= GlobalPrecision)
+            if(result.getPower() - temp.getPower() >= Real<FloatMP>::GlobalPrecision)
                 break;
             //Prepare for next calculate.
             temp_1 *= square_s;

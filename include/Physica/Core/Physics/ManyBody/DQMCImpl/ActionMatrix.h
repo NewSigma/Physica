@@ -83,7 +83,7 @@ namespace Physica {
             : matsubara(numFreq * 2)
             , auxField(maxBoson, params.getNumSite())
             , params(params) {
-        assert(getNumSite() > 1 && "[Error]: Reject self hopping");
+        assert((getNumSite() > 1 || params.getHoppingMatrix().norm1().isZero()) && "[Error]: Reject self hopping");
         assert(numFreq > 0);
         assert((1 <= maxBoson) && (maxBoson <= 2 * numFreq) && "[Error]: maxBoson out of range");
         auto& diag = matsubara.diag();

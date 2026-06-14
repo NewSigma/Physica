@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,8 +25,7 @@ using namespace Physica;
  */
 MathConst<Real<FloatMP>>::MathConst() {
     // 0.31 is the big approximation of ln(2) / ln(10)
-    PI = T(calcPI(
-            static_cast<int>(static_cast<double>(MPUnitWidth) * GlobalPrecision * 0.31) + 1));
+    PI = T(calcPI(static_cast<int>(static_cast<double>(MPUnitWidth) * Real<FloatMP>::GlobalPrecision * 0.31) + 1));
     E = T(exp(BasicConst::getInstance()._1));
 
     PI_2 = T(PI >> 1);
