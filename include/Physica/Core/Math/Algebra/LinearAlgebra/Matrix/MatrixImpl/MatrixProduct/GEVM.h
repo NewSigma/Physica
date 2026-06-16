@@ -53,9 +53,10 @@ namespace Physica {
         void assign_add(Matrix auto& target) const;
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
-
         void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
+
+        [[nodiscard]] CoDiff<T> sum() const;
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
@@ -91,7 +92,7 @@ namespace Physica {
         check_prod();
         if constexpr (MatrixMajor::isColMatrix<decltype(target)>()) {
             for (size_t c = 0; c < getCol(); ++c)
-                target.col(c) = vec * mat(0, c);
+                target.col(c) = vec * mat.calc(0, c);
         }
         else {
             for (size_t r = 0; r < getRow(); ++r)
@@ -128,8 +129,14 @@ namespace Physica {
     }
 
     template<Vector V, Matrix M>
+    auto GEVM<V, M>::sum() const -> CoDiff<T> {
+        return getLHS().sum() * getRHS().sum();
+    }
+
+    template<Vector V, Matrix M>
     auto GEVM<V, M>::values(this auto&& self) noexcept {
-        return std::forward<This>(self).getLHS().values() * std::forward<This>(self).getRHS().values();
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
     template<Vector V, Matrix M>
