@@ -54,6 +54,7 @@ namespace Physica {
         void sample(T observe, T rsign);
         void sample(const GreenPair& greens, T rsign, Observable type);
 
+        [[nodiscard]] T calcRawMean() const;
         [[nodiscard]] T calcMean() const;
         /* Getters */
         using Base::getNumSite;
@@ -79,8 +80,13 @@ namespace Physica {
     }
 
     template<Scalar T>
+    T ScalarSampler<T>::calcRawMean() const {
+        return observes.mean();
+    }
+
+    template<Scalar T>
     T ScalarSampler<T>::calcMean() const {
-        return observes.mean() / Base::calcSign();
+        return calcRawMean() / Base::calcSign();
     }
 
     template<Scalar T>

@@ -59,6 +59,7 @@ namespace Physica {
         /* Operations */
         void sample(const GreenPair& greens, T rsign);
 
+        [[nodiscard]] MatrixND<T> calcRawMean() const;
         [[nodiscard]] MatrixND<T> calcMean() const;
         [[nodiscard]] MatrixND<T> calcStructFactor() const;
         /* Getters */
@@ -88,12 +89,16 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto MatrixSampler<T>::calcMean() const -> MatrixND<T> {
+    auto MatrixSampler<T>::calcRawMean() const -> MatrixND<T> {
         MatrixND<T> result(getNumSiteX(), getNumSiteY());
         for (size_t i = 0; i < observes.dim(0); ++i)
             result.toNextMean(i, observes.slice(1, 2, {Base::getCursor(), undef(), undef()}));
-        result *= reciprocal(Base::calcSign());
         return result;
+    }
+
+    template<Scalar T>
+    auto MatrixSampler<T>::calcMean() const -> MatrixND<T> {
+        return calcRawMean() * reciprocal(Base::calcSign());
     }
 
     template<Scalar T>

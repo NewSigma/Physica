@@ -130,17 +130,16 @@ namespace Physica {
             computeRealMatEigenvalues(matrixT);
 
         if (getNeedEigenvectors()) {
-            if constexpr (isComplex)
-                computeComplexMatEigenvectors(matrixT);
-            else
-                computeRealMatEigenvectors(matrixT);
-
             const auto& matrixU = schur.getMatrixU();
-            for (size_t i = 0; i < order; ++i) {
-                auto col = rawEigenvectors.col(i);
-                col = matrixU.leftCols(i + 1) * matrixT.col(i).head(i + 1);
-                if constexpr (isComplex)
-                    col.toUnit();
+            if constexpr (isComplex) {
+                computeComplexMatEigenvectors(matrixT);
+                rawEigenvectors = matrixU * matrixT.triu_unit();
+                for (size_t i = 0; i < order; ++i)
+                    rawEigenvectors.col(i).toUnit();
+            }
+            else {
+                computeRealMatEigenvectors(matrixT);
+                rawEigenvectors = matrixU * matrixT.triu();
             }
         }
     }

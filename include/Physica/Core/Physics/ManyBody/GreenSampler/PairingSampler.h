@@ -52,7 +52,8 @@ namespace Physica {
         /* Operations */
         void sample(const GreenPair& greens, T rsign);
 
-        MatrixND<T> calcMean() const;
+        [[nodiscard]] MatrixND<T> calcRawMean() const;
+        [[nodiscard]] MatrixND<T> calcMean() const;
         /* Getters */
         [[nodiscard]] size_t getNumSite() const noexcept { return lattice.getNumSuperCellSite(); }
     private:
@@ -81,6 +82,11 @@ namespace Physica {
         }
         corr.toNextMean(Base::getCursor(), buffer);
         Base::sample(rsign);
+    }
+
+    template<Scalar T>
+    MatrixND<T> PairingSampler<T>::calcRawMean() const {
+        return corr;
     }
 
     template<Scalar T>

@@ -28,20 +28,21 @@ namespace Physica {
     void fastDoping(int iteration, int windowSize, T targetRho, T stepsize, HubbardParams<T>& params, auto& dqmc, auto&&... args) {
         assert(windowSize % 2 == 1 && "[Error]: Required to avoid divide by zero");
         assert(T(0) <= targetRho && targetRho <= T(2) && "[Error]: Invalid target");
-        ScalarSampler<T> sampler1(params, windowSize, ScalarSampler<T>::Density);
-        ScalarSampler<T> sampler2(params, windowSize, ScalarSampler<T>::Density2);
+        ScalarSampler<T> sampler1(params, windowSize);
+        ScalarSampler<T> sampler2(params, windowSize);
         for (int i = 0; i < windowSize + iteration; ++i) {
             bool initialized = i >= windowSize;
             if (initialized) {
                 T rho = sampler1.calcMean();
+                assert(rho.isPositive());
                 T compressibility = T(params.getBeta() * params.getNumSite()) * (sampler2.calcMean() - square(rho));
                 T mu = params.getChemMu() + (T(targetRho) - rho) / compressibility * stepsize;
                 params.setChemMu(mu);
             }
 
             dqmc.template step<R>(std::forward<decltype(args)>(args)...);
-            sampler1.sample(dqmc.getGreens(), dqmc.getRSign());
-            sampler2.sample(dqmc.getGreens(), dqmc.getRSign());
+            sampler1.sample(dqmc.getGreens(), dqmc.getRSign(), ScalarSampler<T>::Density);
+            sampler2.sample(dqmc.getGreens(), dqmc.getRSign(), ScalarSampler<T>::Density2);
         }
     }
 }
