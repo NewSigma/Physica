@@ -36,24 +36,26 @@ namespace Physica {
         using Tr = T::RealType;
         using Trv = Tr::ValueType;
         struct Proposal {
-            VectorND<T> curX;
+            VectorND<T> sample;
+            Trv acceptR; // Averaged acceptance rate during visit
             int numAccept;
-            bool converge;
-            Trv acceptR; // Averaged acceptance rate during traverse
             int numVisited;
+            bool stop; // If trajectory is not good
         };
 
         Node root;
         Node nodeF;
         Node nodeR;
+        std::stack<Node> nodes;
         KineticModel kinetic;
         Trv targetR;
         Trv maxDelta;
+        int maxTreeDepth;
 
         VectorND<T> sample;
         Trv upperE;
     public:
-        HamiltonMC(VectorND<T> mass, Trv targetAcceptRate = 0.65, Trv maxDelta = 1000); // Default value from [1]
+        HamiltonMC(VectorND<T> mass, Trv targetAcceptRate = 0.65, Trv maxDelta = 1000, int maxTreeDepth = 10); // Default value from [1]
         HamiltonMC(const This&) = default;
         HamiltonMC(This&&) noexcept = default;
         ~HamiltonMC() = default;
@@ -75,23 +77,28 @@ namespace Physica {
         void setTimeStep(Trv timestep) noexcept;
     private:
         template<RNG R, ExecutePolicy P = Sequential>
-        void initTimeStep(auto&& forceModel);
+        void initTimeStep(auto& forceModel);
         template<RNG R, ExecutePolicy P>
-        Proposal traverse(bool forward, int height, auto&& forceModel);
+        [[nodiscard]] Proposal visit(int height, auto& forceModel);
 
-        bool canProgress(const Node& forward, const Node& reverse) const noexcept;
+        template<ExecutePolicy P>
+        [[nodiscard]] Proposal visitLeaf(bool forward, auto& forceModel);
         /* Static members */
-        static MDCell<T, 1> makeDummyCell(VectorND<T> mass);
+        [[nodiscard]] static MDCell<T, 1> makeDummyCell(VectorND<T> mass);
+        template<RNG R>
+        static void metropolis(Proposal& lhs, const Proposal& rhs, bool process) noexcept;
+        static bool canProgress(const Node& forward, const Node& reverse) noexcept;
     };
 
     template<Scalar T>
-    HamiltonMC<T>::HamiltonMC(VectorND<T> mass, Trv targetAcceptRate, Trv maxDelta)
+    HamiltonMC<T>::HamiltonMC(VectorND<T> mass, Trv targetAcceptRate, Trv maxDelta, int maxTreeDepth)
             : root(makeDummyCell(std::move(mass)), 1, 1, 1, 1)
             , nodeF(root)
             , nodeR(root)
             , kinetic(1, 1)
             , targetR(targetAcceptRate)
             , maxDelta(maxDelta)
+            , maxTreeDepth(maxTreeDepth)
             , sample(getDOF(), 0) {
         assert(maxDelta.isPositive());
         assert(targetAcceptRate.isPositive() && targetAcceptRate <= Trv(1));
@@ -145,16 +152,15 @@ namespace Physica {
         int iteration = 0;
         int numAccept = 1;
         while (true) {
-            bool forward = R::coin();
-            auto [curX, numAccept_, converge, acceptR, _] = traverse<R, P>(forward, iteration, forceModel);
-            if (!converge && (numAccept_ > 0)) {
+            auto [sample_, acceptR, numAccept_, _, stop] = visit<R, P>(iteration, forceModel);
+            if (!stop && (numAccept_ > 0)) {
                 Trv prob = Trv(numAccept_) / Trv(numAccept);
                 bool accept = Trv::template random_uniform<R>() < prob;
                 if (accept)
-                    sample = std::move(curX);
+                    sample = std::move(sample_);
             }
 
-            if (converge || !canProgress(nodeF, nodeR))
+            if (stop || !canProgress(nodeF, nodeR))
                 return acceptR;
 
             numAccept += numAccept_;
@@ -177,7 +183,7 @@ namespace Physica {
      */
     template<Scalar T>
     template<RNG R, ExecutePolicy P>
-    void HamiltonMC<T>::initTimeStep(auto&& forceModel) {
+    void HamiltonMC<T>::initTimeStep(auto& forceModel) {
         root.template initMomentum<KineticModel, R>();
         const Trv e0 = root.template calcClassicalInternalEnergy<P>(forceModel);
 
@@ -198,55 +204,49 @@ namespace Physica {
         }
     }
     /**
-     * Traverse the balanced tree starting from \param node at \param height; moving in the \param forward direction.
+     * Visit the balanced tree of height \param height; moving in the \param forward direction.
      *
      * \returns a proposed sample with metadata; one may accept or reject it
      */
     template<Scalar T>
     template<RNG R, ExecutePolicy P>
-    auto HamiltonMC<T>::traverse(bool forward, int height, auto&& forceModel) -> Proposal {
-        auto& node = forward ? nodeF : nodeR;
-        if (height == 0) { // Leaf node
-            Trv prevE = node.template calcClassicalInternalEnergy<P>(forceModel);
-            if (forward)
-                node.template nve_step<P>(kinetic, forceModel);
-            else
-                node.template nve_step_back<P>(kinetic, forceModel);
-            root = node;
+    auto HamiltonMC<T>::visit(int height, auto& forceModel) -> Proposal {
+        return [this, forward = R::coin(), height, &forceModel](this const auto& self) noexcept -> Proposal {
+            bool isLeaf = height == nodes.size();
+            if (isLeaf)
+                return visitLeaf<P>(forward, forceModel);
 
-            Trv curE = node.template calcClassicalInternalEnergy<P>(forceModel);
-            return {
-                .curX = node.getPhaseMatrix().col(0).tail(getDOF()),
-                .numAccept = curE < upperE,
-                .converge = curE >= upperE + maxDelta,
-                .acceptR = std::min(exp(prevE - curE), Trv(1)),
-                .numVisited = 1
-            };
-        }
-
-        assert(height > 0);
-        auto [curX, numAccept, converge, acceptR, numVisited] = traverse<R, P>(forward, height - 1, forceModel);
-        if (!converge) {
-            auto [curX_, numAccept_, converge_, acceptR_, numVisited_] = traverse<R, P>(forward, height - 1, forceModel);
-            if (numAccept_ > 0) {
-                Trv prob = Trv(numAccept_) / Trv(numAccept + numAccept_);
-                bool accept = Trv::template random_uniform<R>() < prob;
-                if (accept)
-                    curX = std::move(curX_);
+            assert(height > 0);
+            nodes.emplace(forward ? nodeF : nodeR);
+            auto lhs = self();
+            if (!lhs.stop) {
+                const auto rhs = self();
+                const auto& saved = nodes.top();
+                bool process = forward ? canProgress(nodeF, saved) : canProgress(saved, nodeR);
+                metropolis<R>(lhs, rhs, process);
             }
+            nodes.pop();
+            return lhs;
+        }();
+    }
 
-            bool process = forward ? canProgress(node, root) : canProgress(root, node);
-            numAccept += numAccept_;
-            converge = converge_ || !process;
-            acceptR = [=]() -> Trv {
-                Trv total = numVisited + numVisited_;
-                Trv factor1 = Trv(numVisited) / total;
-                Trv factor2 = Trv(numVisited_) / total;
-                return fma(acceptR, factor1, acceptR_ * factor2);
-            }();
-            numVisited += numVisited_;
-        }
-        return {std::move(curX), numAccept, converge, acceptR, numVisited};
+    template<Scalar T>
+    template<ExecutePolicy P>
+    auto HamiltonMC<T>::visitLeaf(bool forward, auto& forceModel) -> Proposal {
+        auto& node = forward ? nodeF : nodeR;
+        Trv prevE = node.template calcClassicalInternalEnergy<P>(forceModel);
+        if (forward)
+            node.template nve_step<P>(kinetic, forceModel);
+        else
+            node.template nve_step_back<P>(kinetic, forceModel);
+
+        Trv curE = node.template calcClassicalInternalEnergy<P>(forceModel);
+        return Proposal{
+            .sample = node.getPhaseMatrix().col(0).tail(getDOF()),
+            .acceptR = std::min(exp(prevE - curE), Trv(1)),
+            .numAccept = curE < upperE,
+            .numVisited = 1,
+            .stop = (curE >= upperE + maxDelta) || (nodes.size() == maxTreeDepth)};
     }
 
     template<Scalar T>
@@ -256,12 +256,31 @@ namespace Physica {
     }
 
     template<Scalar T>
-    bool HamiltonMC<T>::canProgress(const Node& forward, const Node& reverse) const noexcept {
+    template<RNG R>
+    void HamiltonMC<T>::metropolis(Proposal& lhs, const Proposal& rhs, bool process) noexcept {
+        auto& [sample1, acceptR1, numAccept1, numVisited1, stop1] = lhs;
+        const auto& [sample2, acceptR2, numAccept2, numVisited2, stop2] = rhs;
+        if (numAccept2 > 0) {
+            Trv prob = Trv(numAccept2) / Trv(numAccept1 + numAccept2);
+            bool accept = Trv::template random_uniform<R>() < prob;
+            if (accept)
+                sample1 = std::move(sample2);
+        }
+        numAccept1 += numAccept2;
+        stop1 = stop2 || !process;
+        acceptR1 = fma(acceptR1, Trv(numVisited1), acceptR2 * Trv(numVisited2)) / Trv(numVisited1 + numVisited2);
+        numVisited1 += numVisited2;
+    }
+
+    template<Scalar T>
+    bool HamiltonMC<T>::canProgress(const Node& forward, const Node& reverse) noexcept {
+        assert(forward.getDOF() == reverse.getDOF());
+        size_t dof = forward.getDOF();
         auto phaseF = forward.getPhaseMatrix().col(0);
         auto phaseR = reverse.getPhaseMatrix().col(0);
-        auto momentF = phaseF.head(getDOF());
-        auto momentR = phaseR.head(getDOF());
-        VectorND<T> delta = phaseF.tail(getDOF()) - phaseR.tail(getDOF());
+        auto momentF = phaseF.head(dof);
+        auto momentR = phaseR.head(dof);
+        VectorND<T> delta = phaseF.tail(dof) - phaseR.tail(dof);
         return (delta * momentF).isPositive() && (delta * momentR).isPositive();
     }
 }

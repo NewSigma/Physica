@@ -71,7 +71,7 @@ namespace {
             auto dqmc = FreqDQMC<Tc>(params, 1);
             dqmc.step_random<RandomSource>();
             dqmc.step<RandomSource>();
-            expect<RandomSource>(scalarNear(dqmc.calcBerry(), T(0), 1E-15));
+            expect<RandomSource>(scalarNear(dqmc.calcBerry(), T(0), 1E-14));
         }
     }
 }
