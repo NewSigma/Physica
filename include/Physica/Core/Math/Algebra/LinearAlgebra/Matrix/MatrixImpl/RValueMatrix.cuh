@@ -24,15 +24,15 @@
 #include "RValueMatrix.h"
 
 namespace Physica {
-    template<class Derived>
-    class device_obj<RValueMatrix<Derived>> : public CRTPBase<device_obj<RValueMatrix<Derived>>> {
+    template<class Derived, Scalar ScalarT>
+    class device_obj<RValueMatrix<Derived, ScalarT>> : public CRTPBase<device_obj<RValueMatrix<Derived, ScalarT>>> {
         static_assert(!is_device_obj<Derived>::value, "[Error]: Nested device_obj is unnecessary");
-        using host_obj = RValueMatrix<Derived>;
+        using host_obj = RValueMatrix<Derived, ScalarT>;
         using This = device_obj<host_obj>;
         using Base = CRTPBase<This>;
         using TraitsType = Traits<device_obj<Derived>>;
     public:
-        using ScalarType = TraitsType::ScalarType;
+        using ScalarType = ScalarT;
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
@@ -143,8 +143,8 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<class T>
-    class Traits<device_obj<RValueMatrix<T>>> {
+    template<class T, Scalar S>
+    class Traits<device_obj<RValueMatrix<T, S>>> {
     public:
         using Derived = device_obj<T>;
     };

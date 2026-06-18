@@ -22,8 +22,8 @@
 #include "Physica/Core/Utils/Container/ArrayND.h"
 
 namespace Physica {
-    template<class Derived>
-    void RValueTensor<Derived>::assign(Tensor auto& x) const {
+    template<class Derived, Scalar ScalarT>
+    void RValueTensor<Derived, ScalarT>::assign(Tensor auto& x) const {
         x.assert_assign(Base::getDerived());
         if constexpr (!isDiffable() && x.isDiffable()) {
             Base::getDerived().assign(x.values());
@@ -38,61 +38,61 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
-    void RValueTensor<Derived>::assert_assign(const Tensor auto& source) const noexcept {
+    template<class Derived, Scalar ScalarT>
+    void RValueTensor<Derived, ScalarT>::assert_assign(const Tensor auto& source) const noexcept {
         if constexpr (std::is_same<Derived, std::remove_cvref_t<decltype(source)>>::value)
             assert(this != &source && "[Error]: Self assign is likely a bug");
     }
 
-    template<class Derived>
-    decltype(auto) RValueTensor<Derived>::calc(std::integral auto... dims) const {
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueTensor<Derived, ScalarT>::calc(std::integral auto... dims) const {
         return Base::getDerived().calc(dims...);
     }
 
-    template<class Derived>
-    decltype(auto) RValueTensor<Derived>::calc(IndexType index) const {
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueTensor<Derived, ScalarT>::calc(IndexType index) const {
         return Base::getDerived().calc(index);
     }
 
-    template<class Derived>
-    size_t RValueTensor<Derived>::toIndex1D(const IndexType& indices) const noexcept {
+    template<class Derived, Scalar ScalarT>
+    size_t RValueTensor<Derived, ScalarT>::toIndex1D(const IndexType& indices) const noexcept {
         return IndexType::toIndex1D(getShape(), indices);
     }
 
-    template<class Derived>
-    auto RValueTensor<Derived>::toIndexND(size_t index) const noexcept -> IndexType {
+    template<class Derived, Scalar ScalarT>
+    auto RValueTensor<Derived, ScalarT>::toIndexND(size_t index) const noexcept -> IndexType {
         return IndexType::toIndexND(getShape(), index);
     }
 
-    template<class Derived>
-    void RValueTensor<Derived>::forND(std::invocable<T, IndexType> auto fn) const {
+    template<class Derived, Scalar ScalarT>
+    void RValueTensor<Derived, ScalarT>::forND(std::invocable<T, IndexType> auto fn) const {
         Physica::forND(getShape(), [this, fn](const IndexType& index) {
             fn(calc(index), index);
         });
     }
 
-    template<class Derived>
-    auto RValueTensor<Derived>::reals() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueTensor<Derived, ScalarT>::reals() const noexcept {
         return RealTensor<Derived>(Base::getDerived());
     }
 
-    template<class Derived>
-    auto RValueTensor<Derived>::imags() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueTensor<Derived, ScalarT>::imags() const noexcept {
         return ImagTensor<Derived>(Base::getDerived());
     }
 
-    template<class Derived>
-    auto RValueTensor<Derived>::squaredNorms() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueTensor<Derived, ScalarT>::squaredNorms() const noexcept {
         return SquaredNormTensor<Derived>(Base::getDerived());
     }
 
-    template<class Derived>
-    auto RValueTensor<Derived>::norms() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueTensor<Derived, ScalarT>::norms() const noexcept {
         return NormTensor<Derived>(Base::getDerived());
     }
 
-    template<class Derived>
-    decltype(auto) RValueTensor<Derived>::values(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueTensor<Derived, ScalarT>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (isDiffable())
             return ValueVector<Self>(std::forward<Self>(self));
@@ -100,71 +100,71 @@ namespace Physica {
             return std::forward<Self>(self);
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<int GradOrder>
-    auto RValueTensor<Derived>::grads() const noexcept {
+    auto RValueTensor<Derived, ScalarT>::grads() const noexcept {
         if constexpr (isReverseDiff())
             return Base::getDerived().template grads<GradOrder>();
         else
             return grads_impl<GradOrder>();
     }
 
-    template<class Derived>
-    size_t RValueTensor<Derived>::dim(int index) const noexcept {
+    template<class Derived, Scalar ScalarT>
+    size_t RValueTensor<Derived, ScalarT>::dim(int index) const noexcept {
         return Base::getDerived().dim(index);
     }
 
-    template<class Derived>
-    auto RValueTensor<Derived>::getShape() const noexcept -> IndexType {
+    template<class Derived, Scalar ScalarT>
+    auto RValueTensor<Derived, ScalarT>::getShape() const noexcept -> IndexType {
         return Base::getDerived().getShape();
     }
 
-    template<class Derived>
-    size_t RValueTensor<Derived>::getSize() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    size_t RValueTensor<Derived, ScalarT>::getSize() const noexcept {
         size_t size = dim(0);
         for (int i = 1; i < NDim; ++i)
             size *= dim(i);
         return size;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueTensor<Derived>::isForwardDiff() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueTensor<Derived, ScalarT>::isForwardDiff() noexcept {
         return ScalarType::isForwardDiff();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueTensor<Derived>::isReverseDiff() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueTensor<Derived, ScalarT>::isReverseDiff() noexcept {
         return ScalarType::isReverseDiff();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueTensor<Derived>::isDiffable() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueTensor<Derived, ScalarT>::isDiffable() noexcept {
         return Diffable<T>;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueTensor<Derived>::isComplex() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueTensor<Derived, ScalarT>::isComplex() noexcept {
         return ScalarType::isComplex();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueTensor<Derived>::isLValueTensor() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueTensor<Derived, ScalarT>::isLValueTensor() noexcept {
         return false;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueTensor<Derived>::isCompact() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueTensor<Derived, ScalarT>::isCompact() noexcept {
         return requires{ std::declval<Derived>().data(); };
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueTensor<Derived>::isSparse() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueTensor<Derived, ScalarT>::isSparse() noexcept {
         return requires{ std::declval<Derived>().getNumNonzero(); };
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<int GradOrder>
-    auto RValueTensor<Derived>::grads_impl() const noexcept {
+    auto RValueTensor<Derived, ScalarT>::grads_impl() const noexcept {
         return GradTensor<Derived, GradOrder>(Base::getDerived());
     }
 }

@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
 namespace Physica {
-    template<class Derived> class RValueMatrix;
+    template<class Derived, Scalar> class RValueMatrix;
     template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class RMatrixBlock;
 
     template<Matrix M>

@@ -61,13 +61,13 @@ namespace Physica {
     /**
      * \class RValueMatrix: The base class of all matrixes
      */
-    template<class Derived>
-    class RValueMatrix : public CRTPBase<RValueMatrix<Derived>> {
+    template<class Derived, Scalar ScalarT>
+    class RValueMatrix : public CRTPBase<RValueMatrix<Derived, ScalarT>> {
         static_assert(!DeviceObj<Derived>, "[Error]: device_obj<> must be outside RValueMatrix<>");
-        using This = RValueMatrix<Derived>;
+        using This = RValueMatrix<Derived, ScalarT>;
         using Base = CRTPBase<This>;
     public:
-        using ScalarType = Traits<Derived>::ScalarType;
+        using ScalarType = ScalarT;
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
@@ -253,8 +253,8 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<class T>
-    class Traits<RValueMatrix<T>> {
+    template<class T, Scalar S>
+    class Traits<RValueMatrix<T, S>> {
     public:
         using Derived = T;
     };

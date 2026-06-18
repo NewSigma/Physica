@@ -23,8 +23,8 @@
 #include "FormatedMatrix.h"
 
 namespace Physica {
-    template<class Derived>
-    auto RValueMatrix<Derived>::operator*(this auto&& self, Vector auto&& v) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::operator*(this auto&& self, Vector auto&& v) noexcept {
         assert(self.getCol() == v.getLength());
         using Self = decltype(self);
         using V = decltype(v);
@@ -35,8 +35,8 @@ namespace Physica {
             return GEMV<Self, V&&>(std::forward<Self>(self), std::forward<V>(v));
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::operator*(this auto&& self, Matrix auto&& m) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::operator*(this auto&& self, Matrix auto&& m) noexcept {
         using Self = decltype(self);
         using M = decltype(m);
         static_assert(!is_device_obj<M>::value, "[Error]: host-device mismatch");
@@ -56,15 +56,15 @@ namespace Physica {
             return GEMM<Self, M>(std::forward<Self>(self), std::forward<M>(m));
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::operator-(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::operator-(this auto&& self) noexcept {
         using Self = decltype(self);
         return MatrixExpr<ExprID::Minus, Self>(std::forward<Self>(self));
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<ExecutePolicy P>
-    void RValueMatrix<Derived>::assign(Matrix auto&& target) const noexcept {
+    void RValueMatrix<Derived, ScalarT>::assign(Matrix auto&& target) const noexcept {
         if constexpr (!isDiffable() && target.isDiffable()) {
             Base::getDerived().assign(target.values());
             target.zero_grad();
@@ -80,15 +80,15 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<ExecutePolicy P>
-    void RValueMatrix<Derived>::assign_base(Matrix auto&& target) const noexcept {
+    void RValueMatrix<Derived, ScalarT>::assign_base(Matrix auto&& target) const noexcept {
         assign<P>(target);
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<ExecutePolicy P>
-    void RValueMatrix<Derived>::assign_add(Matrix auto&& target) const noexcept {
+    void RValueMatrix<Derived, ScalarT>::assign_add(Matrix auto&& target) const noexcept {
         if constexpr (!isDiffable() && target.isDiffable())
             Base::getDerived().template assign_add<P>(target.values());
         else {
@@ -102,8 +102,8 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
-    void RValueMatrix<Derived>::assert_assign(const Matrix auto& source) const noexcept {
+    template<class Derived, Scalar ScalarT>
+    void RValueMatrix<Derived, ScalarT>::assert_assign(const Matrix auto& source) const noexcept {
         static_assert_assign(source);
         if constexpr (std::is_same<Derived, std::remove_cvref_t<decltype(source)>>::value)
             assert(this != &source && "[Error]: Self assign is likely a bug");
@@ -124,172 +124,172 @@ namespace Physica {
             assert(getSize() > 0 && "[Error]: Assign a empty matrix is not allowed");
     }
 
-    template<class Derived>
-    void RValueMatrix<Derived>::assert_assign_lapack(const Matrix auto& source) const noexcept {
+    template<class Derived, Scalar ScalarT>
+    void RValueMatrix<Derived, ScalarT>::assert_assign_lapack(const Matrix auto& source) const noexcept {
         static_assert(Internal::EnableLAPACK<Derived, decltype(source)>::value, "[Error]: Invalid expr for LAPACK");
         assert_assign(source);
     }
 
-    template<class Derived>
-    decltype(auto) RValueMatrix<Derived>::calc(size_t row, size_t col) const {
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueMatrix<Derived, ScalarT>::calc(size_t row, size_t col) const {
         return Base::getDerived().calc(row, col);
     }
 
-    template<class Derived>
-    decltype(auto) RValueMatrix<Derived>::calc_value(size_t row, size_t col) const {
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueMatrix<Derived, ScalarT>::calc_value(size_t row, size_t col) const {
         return Base::getDerived().values().calc(row, col);
     }
 
-    template<class Derived>
-    decltype(auto) RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueMatrix<Derived, ScalarT>::calcFromMajorMinor(size_t major, size_t minor) const {
         return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
     }
 
-    template<class Derived>
-    void RValueMatrix<Derived>::reverse(const Matrix auto&, const Matrix auto& grad) const noexcept {
+    template<class Derived, Scalar ScalarT>
+    void RValueMatrix<Derived, ScalarT>::reverse(const Matrix auto&, const Matrix auto& grad) const noexcept {
         static_assert(isReverseDiff());
         Base::getDerived().reverse(grad);
     }
 
-    template<class Derived>
-    void RValueMatrix<Derived>::resize(const Matrix auto& m, auto&&... args) {
+    template<class Derived, Scalar ScalarT>
+    void RValueMatrix<Derived, ScalarT>::resize(const Matrix auto& m, auto&&... args) {
         resize(m.getRow(), m.getCol(), std::forward<decltype(args)>(args)...);
     }
 
-    template<class Derived>
-    decltype(auto) RValueMatrix<Derived>::resize(size_t r, size_t c, auto&&... args) {
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueMatrix<Derived, ScalarT>::resize(size_t r, size_t c, auto&&... args) {
         return Base::getDerived().resize(r, c, std::forward<decltype(args)>(args)...);
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::row(this auto&& self, size_t r) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::row(this auto&& self, size_t r) noexcept {
         using Self = decltype(self);
         return RMatrixBlock<Self, 1, Dynamic>(std::forward<Self>(self), r, 0, self.getCol());
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::col(this auto&& self, size_t c) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::col(this auto&& self, size_t c) noexcept {
         using Self = decltype(self);
         return RMatrixBlock<Self, Dynamic, 1>(std::forward<Self>(self), 0, self.getRow(), c);
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
         using Self = decltype(self);
         return RMatrixBlock<Self>(std::forward<Self>(self), fromRow, rowCount, 0, self.getCol());
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::topRows(this auto&& self, size_t to) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::topRows(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         return RMatrixBlock<Self>(std::forward<Self>(self), 0, to, 0, self.getCol());
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::bottomRows(this auto&& self, size_t from) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::bottomRows(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         return RMatrixBlock<Self>(std::forward<Self>(self), from, self.getRow() - from, 0, self.getCol());
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
         using Self = decltype(self);
         return RMatrixBlock<Self>(std::forward<Self>(self), 0, self.getRow(), fromCol, colCount);
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::leftCols(this auto&& self, size_t to) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::leftCols(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         return RMatrixBlock<Self>(std::forward<Self>(self), 0, self.getRow(), 0, to);
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::rightCols(this auto&& self, size_t from) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::rightCols(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         return RMatrixBlock<Self>(std::forward<Self>(self), 0, self.getRow(), from, self.getCol() - from);
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
         using Self = decltype(self);
         return RMatrixBlock<Self>(std::forward<Self>(self), 0, toRow, 0, toCol);
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::topLeftCorner(this auto&& self, size_t to) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::topLeftCorner(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         return RMatrixBlock<Self>(std::forward<Self>(self), 0, to, 0, to);
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
         using Self = decltype(self);
         return RMatrixBlock<Self>(std::forward<Self>(self), 0, toRow, fromCol, self.getRow() - fromCol);
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
         using Self = decltype(self);
         return RMatrixBlock<Self>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, 0, toCol);
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
         using Self = decltype(self);
         return RMatrixBlock<Self>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::bottomRightCorner(this auto&& self, size_t from) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::bottomRightCorner(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         return RMatrixBlock<Self>(std::forward<Self>(self), from, self.getRow() - from, from, self.getCol() - from);
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
         using Self = decltype(self);
         return RMatrixBlock<Self>(std::forward<Self>(self), fromRow, rowCount, fromCol, colCount);
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::diag(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::diag(this auto&& self) noexcept {
         assert(self.isSquare());
         using Self = decltype(self);
         return DiagVectorR<Self>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::diag(this auto&& self, ssize_t shift) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::diag(this auto&& self, ssize_t shift) noexcept {
         using Self = decltype(self);
         return MinorDiagR<Self>(std::forward<Self>(self), shift);
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::triu(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::triu(this auto&& self) noexcept {
         using Self = decltype(self);
         return MatrixTrig<Self, true, false>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::triu_unit(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::triu_unit(this auto&& self) noexcept {
         using Self = decltype(self);
         return MatrixTrig<Self, true, true>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::tril(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::tril(this auto&& self) noexcept {
         using Self = decltype(self);
         return MatrixTrig<Self, false, false>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::tril_unit(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::tril_unit(this auto&& self) noexcept {
         using Self = decltype(self);
         return MatrixTrig<Self, false, true>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    Index2D RValueMatrix<Derived>::argmax() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    Index2D RValueMatrix<Derived, ScalarT>::argmax() const noexcept {
         Trv x = std::numeric_limits<Trv>::lowest();
         Index2D result{0, 0};
         for (size_t r = 0; r < getRow(); ++r) {
@@ -304,8 +304,8 @@ namespace Physica {
         return result;
     }
 
-    template<class Derived>
-    Index2D RValueMatrix<Derived>::argmin() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    Index2D RValueMatrix<Derived, ScalarT>::argmin() const noexcept {
         Trv x = std::numeric_limits<Trv>::max();
         Index2D result{0, 0};
         for (size_t r = 0; r < getRow(); ++r) {
@@ -320,8 +320,8 @@ namespace Physica {
         return result;
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::max() const -> T {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::max() const -> T {
         T result;
         if constexpr (Derived::isColMatrix()) {
             result = Base::getDerived().col(0).max();
@@ -342,8 +342,8 @@ namespace Physica {
         return result;
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::min() const -> T {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::min() const -> T {
         T result;
         if constexpr (Derived::isColMatrix()) {
             result = Base::getDerived().col(0).min();
@@ -364,8 +364,8 @@ namespace Physica {
         return result;
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::sum() const -> CoDiff<T> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::sum() const -> CoDiff<T> {
         const auto& x = Base::getDerived();
         if constexpr (isReverseDiff()) {
             auto& result = co_yield x.values().sum();
@@ -379,23 +379,23 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::sum_rows() const {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::sum_rows() const {
         return MatrixSum<Derived, false>(Base::getDerived());
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::sum_cols() const {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::sum_cols() const {
         return MatrixSum<Derived, true>(Base::getDerived());
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::mean() const -> CoDiff<T> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::mean() const -> CoDiff<T> {
         return sum() / Trv(getSize());
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::trace() const -> T {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::trace() const -> T {
         assert(isSquare());
         T result = T(0);
         for (size_t i = 0; i < getRow(); ++i)
@@ -403,13 +403,13 @@ namespace Physica {
         return result;
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::lnSumExp() const -> CoDiff<T> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::lnSumExp() const -> CoDiff<T> {
         return Base::getDerived().flatten().lnSumExp();
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::det() const -> CoDiff<T> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::det() const -> CoDiff<T> {
         assert(isSquare() && "[Error]: Determinate requires square matrix");
         constexpr size_t Order = std::max(Derived::getRowAtCompile(), Derived::getColAtCompile());
         if constexpr (Order == 1)
@@ -422,8 +422,8 @@ namespace Physica {
             return DenseLU<T, false>(Base::getDerived()).det();
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::lnAbsDet() const -> Tr {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::lnAbsDet() const -> Tr {
         constexpr size_t Order = std::max(Derived::getRowAtCompile(), Derived::getColAtCompile());
         if constexpr (Order <= 3)
             return ln(abs(Base::getDerived().det()));
@@ -433,36 +433,36 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::sgndet() const {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::sgndet() const {
         DenseLU<T, false> lu(Base::getDerived());
         return unit(lu.getMatrixLU().diag()).prod();
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::format() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::format() const noexcept {
         return FormatedMatrix<Derived>(Base::getDerived());
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::inv(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::inv(this auto&& self) noexcept {
         using Self = decltype(self);
         return Inverse<Self>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::pinv() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::pinv() const noexcept {
         return PseudoInverse<Derived>(Base::getDerived());
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::transpose(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::transpose(this auto&& self) noexcept {
         using Self = decltype(self);
         return Transpose<Self>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    decltype(auto) RValueMatrix<Derived>::conjugate(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueMatrix<Derived, ScalarT>::conjugate(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (isComplex())
             return Conjugate<Self>(std::forward<Self>(self));
@@ -470,8 +470,8 @@ namespace Physica {
             return std::forward<Self>(self);
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::hermite(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::hermite(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (isComplex())
             return Hermite<Self>(std::forward<Self>(self));
@@ -479,14 +479,14 @@ namespace Physica {
             return std::forward<Self>(self).transpose();
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::flatten(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::flatten(this auto&& self) noexcept {
         using Self = decltype(self);
         return FlattenR<Self>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    decltype(auto) RValueMatrix<Derived>::reals(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueMatrix<Derived, ScalarT>::reals(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (isComplex())
             return RealMatrix<Self>(std::forward<Self>(self));
@@ -494,26 +494,26 @@ namespace Physica {
             return std::forward<Self>(self);
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::imags(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::imags(this auto&& self) noexcept {
         using Self = decltype(self);
         return ImagMatrix<Self>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::squaredNorms(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::squaredNorms(this auto&& self) noexcept {
         using Self = decltype(self);
         return SquaredNormMatrix<Self>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::norms(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::norms(this auto&& self) noexcept {
         using Self = decltype(self);
         return NormMatrix<Self>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    decltype(auto) RValueMatrix<Derived>::values(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueMatrix<Derived, ScalarT>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (isDiffable())
             return ValueMatrix<Self>(std::forward<Self>(self));
@@ -521,36 +521,36 @@ namespace Physica {
             return std::forward<Self>(self);
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<int GradOrder>
-    decltype(auto) RValueMatrix<Derived>::grads(this auto&& self) noexcept {
+    decltype(auto) RValueMatrix<Derived, ScalarT>::grads(this auto&& self) noexcept {
         using Self = decltype(self);
         return GradMatrix<Self, GradOrder>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    size_t RValueMatrix<Derived>::getOrder() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    size_t RValueMatrix<Derived, ScalarT>::getOrder() const noexcept {
         assert(isSquare() && "[Error]: getOrder() assumes square matrix");
         return getRow();
     }
 
-    template<class Derived>
-    bool RValueMatrix<Derived>::isOverdetermined() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    bool RValueMatrix<Derived, ScalarT>::isOverdetermined() const noexcept {
         return getRow() > getCol();
     }
 
-    template<class Derived>
-    bool RValueMatrix<Derived>::isUnderdetermined() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    bool RValueMatrix<Derived, ScalarT>::isUnderdetermined() const noexcept {
         return getRow() < getCol();
     }
 
-    template<class Derived>
-    bool RValueMatrix<Derived>::isSquare() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    bool RValueMatrix<Derived, ScalarT>::isSquare() const noexcept {
         return getRow() == getCol();
     }
 
-    template<class Derived>
-    bool RValueMatrix<Derived>::isSymm() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    bool RValueMatrix<Derived, ScalarT>::isSymm() const noexcept {
         if constexpr (isStaticSymm())
             return true;
         else {
@@ -566,8 +566,8 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
-    bool RValueMatrix<Derived>::isHermite() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    bool RValueMatrix<Derived, ScalarT>::isHermite() const noexcept {
         if constexpr (isStaticHermite())
             return true;
         else {
@@ -587,8 +587,8 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
-    bool RValueMatrix<Derived>::isFinite() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    bool RValueMatrix<Derived, ScalarT>::isFinite() const noexcept {
         for (size_t r = 0; r < getRow(); ++r)
             for (size_t c = 0; c < getCol(); ++c)
                 if (!calc(r, c).isFinite())
@@ -596,101 +596,101 @@ namespace Physica {
         return true;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueMatrix<Derived>::isComplex() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isComplex() noexcept {
         return ScalarType::isComplex();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueMatrix<Derived>::isDiffable() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isDiffable() noexcept {
         return ScalarType::isDiffable();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueMatrix<Derived>::isForwardDiff() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isForwardDiff() noexcept {
         return ScalarType::isForwardDiff();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueMatrix<Derived>::isReverseDiff() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isReverseDiff() noexcept {
         return ScalarType::isReverseDiff();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueMatrix<Derived>::isLValueMatrix() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isLValueMatrix() noexcept {
         return false;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueMatrix<Derived>::isCompact() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isCompact() noexcept {
         return requires { std::declval<Derived>().data(); };
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueMatrix<Derived>::isSparse() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isSparse() noexcept {
         return requires { std::declval<Derived>().getNumNonzero(); };
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueMatrix<Derived>::isStaticSymm() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isStaticSymm() noexcept {
         using TransposeTy = std::remove_cvref_t<decltype(std::declval<Derived>().transpose())>;
         return std::same_as<TransposeTy, Derived>;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueMatrix<Derived>::isStaticHermite() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isStaticHermite() noexcept {
         using HermiteTy = std::remove_cvref_t<decltype(std::declval<Derived>().hermite())>;
         return std::same_as<HermiteTy, Derived>;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueMatrix<Derived>::isColMatrix() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isColMatrix() noexcept {
         return (Derived::getMajor() & MatrixMajor::Col) != 0;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueMatrix<Derived>::isRowMatrix() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isRowMatrix() noexcept {
         return (Derived::getMajor() & MatrixMajor::Row) != 0;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueMatrix<Derived>::isBothMajor() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isBothMajor() noexcept {
         return Derived::getMajor() == MatrixMajor::BothMajor;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueMatrix<Derived>::isFastAssign() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isFastAssign() noexcept {
         return false;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval size_t RValueMatrix<Derived>::getRowAtCompile() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval size_t RValueMatrix<Derived, ScalarT>::getRowAtCompile() noexcept {
         return Dynamic;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval size_t RValueMatrix<Derived>::getColAtCompile() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval size_t RValueMatrix<Derived, ScalarT>::getColAtCompile() noexcept {
         return Dynamic;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval size_t RValueMatrix<Derived>::getSizeAtCompile() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval size_t RValueMatrix<Derived, ScalarT>::getSizeAtCompile() noexcept {
         return Derived::getRowAtCompile() * Derived::getColAtCompile();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval auto RValueMatrix<Derived>::getMajor() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval auto RValueMatrix<Derived, ScalarT>::getMajor() noexcept {
         return Derived::getMajor();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval void RValueMatrix<Derived>::static_assert_assign(const Scalar auto& source) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval void RValueMatrix<Derived, ScalarT>::static_assert_assign(const Scalar auto& source) noexcept {
         using U = std::remove_cvref<decltype(source)>::type;
         T::template static_assert_assign<U>();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval void RValueMatrix<Derived>::static_assert_assign(const Matrix auto& source) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval void RValueMatrix<Derived, ScalarT>::static_assert_assign(const Matrix auto& source) noexcept {
         constexpr size_t R1 = Derived::getRowAtCompile();
         constexpr size_t C1 = Derived::getColAtCompile();
         constexpr size_t R2 = source.getRowAtCompile();
@@ -702,8 +702,8 @@ namespace Physica {
         T::template static_assert_assign<U>();
     }
 
-    template<class Derived>
-    consteval int RValueMatrix<Derived>::calcBlockingSize(int CacheSize) noexcept {
+    template<class Derived, Scalar ScalarT>
+    consteval int RValueMatrix<Derived, ScalarT>::calcBlockingSize(int CacheSize) noexcept {
         int result = 1;
         while (result * result * int(sizeof(Trv)) < CacheSize)
             result *= 2;
@@ -712,8 +712,8 @@ namespace Physica {
     /**
      * See if the block range is legal to the matrix
      */
-    template<class Derived>
-    __host__ __device__ void RValueMatrix<Derived>::checkBlock(
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ void RValueMatrix<Derived, ScalarT>::checkBlock(
             [[maybe_unused]] const Matrix auto& m,
             [[maybe_unused]] size_t fromRow,
             [[maybe_unused]] size_t rowCount,

@@ -42,13 +42,13 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };
 
-    template<class Derived>
-    auto RValueVector<Derived>::reversal() noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::reversal() noexcept {
         return ReversalVector<Derived>(Base::getDerived());
     }
 
-    template<class Derived>
-    const auto RValueVector<Derived>::reversal() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    const auto RValueVector<Derived, ScalarT>::reversal() const noexcept {
         return ReversalVector<Derived>(Base::getDerived());
     }
 }

@@ -22,12 +22,13 @@
 #include "Physica/Core/Utils/CUDA/device_obj.h"
 
 namespace Physica {
-    template<class Derived> class RValueTensor;
+    template<class Derived, Scalar = Traits<Derived>::ScalarType> class RValueTensor;
 
     template<class T>
-    concept Tensor = []() consteval {
+    concept Tensor = requires { typename std::remove_cvref_t<T>::ScalarType; } && []() consteval {
         using U = remove_codiff_t<std::remove_cvref_t<T>>;
-        return std::derived_from<U, RValueTensor<U>>
-            || std::derived_from<U, device_obj<RValueTensor<typename remove_device_obj<U>::type>>>;
+        using S = U::ScalarType;
+        return std::derived_from<U, RValueTensor<U, S>>
+            || std::derived_from<U, device_obj<RValueTensor<typename remove_device_obj<U>::type, S>>>;
     }();
 }

@@ -24,14 +24,14 @@
 #include "RValueVector.h"
 
 namespace Physica {
-    template<class Derived>
-    class device_obj<RValueVector<Derived>> : public CRTPBase<device_obj<RValueVector<Derived>>> {
+    template<class Derived, Scalar ScalarT>
+    class device_obj<RValueVector<Derived, ScalarT>> : public CRTPBase<device_obj<RValueVector<Derived, ScalarT>>> {
         static_assert(!is_device_obj<Derived>::value, "[Error]: Nested device_obj is not allowed");
-        using host_obj = RValueVector<Derived>;
+        using host_obj = RValueVector<Derived, ScalarT>;
         using This = device_obj<host_obj>;
         using Base = CRTPBase<This>;
     public:
-        using ScalarType = Traits<device_obj<Derived>>::ScalarType;
+        using ScalarType = ScalarT;
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
@@ -124,8 +124,8 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<class T>
-    class Traits<device_obj<RValueVector<T>>> {
+    template<class T, Scalar S>
+    class Traits<device_obj<RValueVector<T, S>>> {
     public:
         using Derived = device_obj<T>;
     };

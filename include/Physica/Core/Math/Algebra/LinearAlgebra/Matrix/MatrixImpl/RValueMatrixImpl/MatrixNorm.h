@@ -27,8 +27,8 @@ namespace Physica {
     template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
     class SVD;
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::norm1() const -> Tr {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::norm1() const -> Tr {
         Tr maxNorm1 = 0;
         for (size_t c = 0; c < getCol(); ++c) {
             const auto v = Base::getDerived().col(c);
@@ -44,9 +44,9 @@ namespace Physica {
      * Reference:
      * [1] SIAM J. Sci. Stat. Comput. 11, 804–809 (1990); https://doi.org/10.1137/0911047
      */
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<ExecutePolicy P>
-    auto RValueMatrix<Derived>::norm1_power(unsigned int maxIteration) const -> Tr {
+    auto RValueMatrix<Derived, ScalarT>::norm1_power(unsigned int maxIteration) const -> Tr {
         assert(isSquare() && "[Error]: norm1_power only applies to square matrix");
         assert(maxIteration > 0 && "[Error]: Invalid max iteration");
         const size_t length = getRow();
@@ -106,21 +106,21 @@ namespace Physica {
         throw BadConvergenceException("[Error]: norm1_power failed to converge");
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::normF() const -> CoDiff<Tr> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::normF() const -> CoDiff<Tr> {
         return sqrt(squaredNorms().sum());
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::normInf() const -> Tr {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::normInf() const -> Tr {
         Trv result = std::numeric_limits<T>::lowest();
         for (size_t i = 0; i < getRow(); ++i)
             result = std::max(abs(Base::getDerived().row(i)).sum(), result);
         return result;
     }
 
-    template<class Derived>
-    auto RValueMatrix<Derived>::cond2() const -> T {
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::cond2() const -> T {
         SVD<T, Derived::getRowAtCompile(), Derived::getColAtCompile()> svd(getRow(), getCol());
         svd.compute(Base::getDerived());
         const auto& s = svd.getSingulars();

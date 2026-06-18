@@ -22,28 +22,28 @@
 #include "Physica/Core/Utils/Range.h"
 
 namespace Physica {
-    template<class Derived>
-    bool RValueVector<Derived>::operator!=(const Vector auto& other) const noexcept {
+    template<class Derived, Scalar ScalarT>
+    bool RValueVector<Derived, ScalarT>::operator!=(const Vector auto& other) const noexcept {
         return !(Base::getDerived() == other);
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::operator*(this auto&& self, Scalar auto&& x) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::operator*(this auto&& self, Scalar auto&& x) noexcept {
         using V = decltype(self);
         using U = decltype(x);
         return VectorExpr<ExprID::Mul, V, U>(std::forward<V>(self), std::forward<U>(x));
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::operator*(this auto&& self, Matrix auto&& m) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::operator*(this auto&& self, Matrix auto&& m) noexcept {
         using Self = decltype(self);
         using M = decltype(m);
         static_assert(!is_device_obj<M>::value, "[Error]: host-device mismatch");
         return GEVM<Self&&, M&&>(std::forward<Self>(self), std::forward<M>(m));
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::operator-(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::operator-(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (instanceof<Derived, GEMV>)
             return std::forward<Self>(self).getLHS() * (-std::forward<Self>(self).getRHS());
@@ -51,9 +51,9 @@ namespace Physica {
             return VectorExpr<ExprID::Minus, Self>(std::forward<Self>(self));
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<ExecutePolicy P>
-    void RValueVector<Derived>::assign(Vector auto&& v) const noexcept {
+    void RValueVector<Derived, ScalarT>::assign(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
         if constexpr (!isDiffable() && v.isDiffable()) {
             Base::getDerived().assign(v.values());
@@ -70,15 +70,15 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<ExecutePolicy P>
-    void RValueVector<Derived>::assign_base(Vector auto&& v) const noexcept {
+    void RValueVector<Derived, ScalarT>::assign_base(Vector auto&& v) const noexcept {
         assign<P>(v);
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<ExecutePolicy P>
-    void RValueVector<Derived>::assign_add(Vector auto&& v) const noexcept {
+    void RValueVector<Derived, ScalarT>::assign_add(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
         if constexpr (!isDiffable() && v.isDiffable())
             Base::getDerived().assign_add(v.values());
@@ -93,8 +93,8 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
-    void RValueVector<Derived>::assert_assign(const Vector auto& source) const noexcept {
+    template<class Derived, Scalar ScalarT>
+    void RValueVector<Derived, ScalarT>::assert_assign(const Vector auto& source) const noexcept {
         static_assert_assign(source);
         if constexpr (std::same_as<Derived, std::remove_cvref_t<decltype(source)>>)
             assert(this != &source && "[Error]: Self assign is likely a bug");
@@ -104,25 +104,25 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
-    void RValueVector<Derived>::assert_assign_lapack(const Vector auto& source) const noexcept {
+    template<class Derived, Scalar ScalarT>
+    void RValueVector<Derived, ScalarT>::assert_assign_lapack(const Vector auto& source) const noexcept {
         static_assert(Internal::EnableLAPACK<Derived, decltype(source)>::value, "[Error]: Invalid expr for LAPACK");
         assert_assign(source);
     }
 
-    template<class Derived>
-    decltype(auto) RValueVector<Derived>::calc(size_t index) const noexcept {
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueVector<Derived, ScalarT>::calc(size_t index) const noexcept {
         return Base::getDerived().calc(index);
     }
 
-    template<class Derived>
-    decltype(auto) RValueVector<Derived>::calc_value(size_t index) const noexcept {
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueVector<Derived, ScalarT>::calc_value(size_t index) const noexcept {
         return Base::getDerived().values().calc(index);
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<int Size>
-    auto RValueVector<Derived>::packet(size_t index) const noexcept -> SIMD<T, Size> {
+    auto RValueVector<Derived, ScalarT>::packet(size_t index) const noexcept -> SIMD<T, Size> {
         using U = typename Derived::ScalarType;
         assert(index + Size <= getLength() && "[Error]: Index out of range");
         if constexpr (Diffable<U>) {
@@ -152,9 +152,9 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<int Size>
-    auto RValueVector<Derived>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
+    auto RValueVector<Derived, ScalarT>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
         using U = typename Derived::ScalarType;
         assert(index + count <= getLength() && "[Error]: Index out of range");
         if constexpr (Diffable<U>) {
@@ -184,68 +184,68 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
-    constexpr auto RValueVector<Derived>::view(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    constexpr auto RValueVector<Derived, ScalarT>::view(this auto&& self) noexcept {
         return View<std::remove_reference_t<decltype(self)>>(self);
     }
 
-    template<class Derived>
-    void RValueVector<Derived>::reverse(const Vector auto&, const Vector auto& grad) const noexcept {
+    template<class Derived, Scalar ScalarT>
+    void RValueVector<Derived, ScalarT>::reverse(const Vector auto&, const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff());
         Base::getDerived().reverse(grad);
     }
 
-    template<class Derived>
-    void RValueVector<Derived>::resize(const Vector auto& x) {
+    template<class Derived, Scalar ScalarT>
+    void RValueVector<Derived, ScalarT>::resize(const Vector auto& x) {
         resize(x.getLength());
     }
 
-    template<class Derived>
-    void RValueVector<Derived>::resize(size_t length) {
+    template<class Derived, Scalar ScalarT>
+    void RValueVector<Derived, ScalarT>::resize(size_t length) {
         Base::getDerived().resize(length);
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<size_t Length>
-    auto RValueVector<Derived>::head(this auto&& self, size_t to) noexcept {
+    auto RValueVector<Derived, ScalarT>::head(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         return RVectorBlock<Self, Length>(std::forward<Self>(self), 0, to);
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<size_t Length>
-    auto RValueVector<Derived>::tail(this auto&& self, size_t from) noexcept {
+    auto RValueVector<Derived, ScalarT>::tail(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         return RVectorBlock<Self, Length>(std::forward<Self>(self), from);
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<size_t Length>
-    auto RValueVector<Derived>::segment(this auto&& self, size_t from, size_t to) noexcept {
+    auto RValueVector<Derived, ScalarT>::segment(this auto&& self, size_t from, size_t to) noexcept {
         using Self = decltype(self);
         return RVectorBlock<Self, Length>(std::forward<Self>(self), from, to);
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<int Major, size_t Row, size_t Col>
-    auto RValueVector<Derived>::reshape(size_t row, size_t col) const noexcept {
+    auto RValueVector<Derived, ScalarT>::reshape(size_t row, size_t col) const noexcept {
         return RValueReshapedVector<const Derived&, Major, Row, Col>(Base::getDerived(), row, col);
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<size_t Row, size_t Col>
-    auto RValueVector<Derived>::reshape_row(size_t row, size_t col) const noexcept {
+    auto RValueVector<Derived, ScalarT>::reshape_row(size_t row, size_t col) const noexcept {
         return reshape<MatrixMajor::Row, Row, Col>(row, col);
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<size_t Row, size_t Col>
-    auto RValueVector<Derived>::reshape_col(size_t row, size_t col) const noexcept {
+    auto RValueVector<Derived, ScalarT>::reshape_col(size_t row, size_t col) const noexcept {
         return reshape<MatrixMajor::Col, Row, Col>(row, col);
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::reshape_like(const Matrix auto& mat) const noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::reshape_like(const Matrix auto& mat) const noexcept {
         using M = std::remove_cvref_t<decltype(mat)>;
         constexpr auto Major = MatrixMajor::getMajor<M>();
         if constexpr (Major == MatrixMajor::BothMajor)
@@ -254,14 +254,14 @@ namespace Physica {
             return reshape<Major, M::getRowAtCompile(), M::getColAtCompile()>(mat.getRow(), mat.getCol());
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::transpose(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::transpose(this auto&& self) noexcept {
         using Self = decltype(self);
         return Transpose<Self>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    decltype(auto) RValueVector<Derived>::conjugate(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueVector<Derived, ScalarT>::conjugate(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (isComplex())
             return Conjugate<Self>(std::forward<Self>(self));
@@ -269,8 +269,8 @@ namespace Physica {
             return std::forward<Self>(self);
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::hermite(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::hermite(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (isComplex())
             return Hermite<Self>(std::forward<Self>(self));
@@ -278,33 +278,33 @@ namespace Physica {
             return std::forward<Self>(self).transpose();
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::format() const {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::format() const {
         return FormatedVector<Derived>(Base::getDerived());
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::norm1() const noexcept -> CoDiff<Tr> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::norm1() const noexcept -> CoDiff<Tr> {
         return abs(Base::getDerived()).sum();
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::norm2() const noexcept -> CoDiff<Tr> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::norm2() const noexcept -> CoDiff<Tr> {
         return sqrt(squaredNorm());
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::norm() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::norm() const noexcept {
         return Base::getDerived().norm2();
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::squaredNorm() const noexcept -> CoDiff<Tr> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::squaredNorm() const noexcept -> CoDiff<Tr> {
         return Base::getDerived().squaredNorms().sum();
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::lnSquaredNorm() const -> Tr {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::lnSquaredNorm() const -> Tr {
         const auto& derived = Base::getDerived();
         const Tr maxabs = abs(derived).max();
         // We require a small threshold to avoid latter ill-conditioned reciprocal.
@@ -313,13 +313,13 @@ namespace Physica {
         return ln((derived * factor).squaredNorm()) + Tr(2) * ln(maxabs);
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::normInf() const -> Tr {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::normInf() const -> Tr {
         return abs(Base::getDerived()).max();
     }
 
-    template<class Derived>
-    size_t RValueVector<Derived>::argmax() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    size_t RValueVector<Derived, ScalarT>::argmax() const noexcept {
         Trv x = std::numeric_limits<Trv>::lowest();
         size_t result = 0;
         for (size_t i = 0; i < getLength(); ++i) {
@@ -332,8 +332,8 @@ namespace Physica {
         return result;
     }
 
-    template<class Derived>
-    size_t RValueVector<Derived>::argmin() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    size_t RValueVector<Derived, ScalarT>::argmin() const noexcept {
         Trv x = std::numeric_limits<Trv>::max();
         size_t result = 0;
         for (size_t i = 0; i < getLength(); ++i) {
@@ -346,8 +346,8 @@ namespace Physica {
         return result;
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::max() const noexcept -> CoDiff<T> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::max() const noexcept -> CoDiff<T> {
         static_assert(!T::isComplex(), "[Error]: Compare between complex number is ill defined");
         assert(getLength() != 0);
 
@@ -412,8 +412,8 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::min() const noexcept -> CoDiff<T> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::min() const noexcept -> CoDiff<T> {
         static_assert(!T::isComplex(), "[Error]: Compare between complex number is ill defined");
         assert(getLength() != 0);
 
@@ -478,8 +478,8 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::sum(this auto&& self) noexcept -> CoDiff<T> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::sum(this auto&& self) noexcept -> CoDiff<T> {
         assert(self.getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
         if constexpr (isReverseDiff()) {
             using Self = decltype(self);
@@ -525,13 +525,13 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::mean() const noexcept -> CoDiff<T> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::mean() const noexcept -> CoDiff<T> {
         return Base::getDerived().sum() / Trv(getLength());
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::mean_stable() const noexcept -> CoDiff<T> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::mean_stable() const noexcept -> CoDiff<T> {
         auto result = T(0);
         const auto& v = Base::getDerived();
         for (size_t i = 0; i < getLength(); ++i)
@@ -545,8 +545,8 @@ namespace Physica {
             co_return std::move(result);
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::variance() const noexcept -> CoDiff<T> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::variance() const noexcept -> CoDiff<T> {
         const auto& x = Base::getDerived();
         const size_t length = getLength();
         const auto x_mean = mean();
@@ -561,8 +561,8 @@ namespace Physica {
             co_return std::move(result);
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::variance(const T& prior_mean) const -> T {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::variance(const T& prior_mean) const -> T {
         const auto& x = Base::getDerived();
         const size_t length = getLength();
         return (x - prior_mean).squaredNorm() / Trv(length - 1);
@@ -570,8 +570,8 @@ namespace Physica {
     /**
      * More stable for large dataset. Prior version is not provided because they behave similarly at large dataset.
      */
-    template<class Derived>
-    auto RValueVector<Derived>::variance_stable() const -> T {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::variance_stable() const -> T {
         using ScalarType = T::ScalarType;
         ScalarType result = 0;
         ScalarType mean = 0;
@@ -580,23 +580,23 @@ namespace Physica {
         return result;
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::deviation() const -> T {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::deviation() const -> T {
         return sqrt(variance());
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::deviation(const T& prior_mean) const -> T {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::deviation(const T& prior_mean) const -> T {
         return sqrt(variance(prior_mean));
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::deviation_stable() const -> T {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::deviation_stable() const -> T {
         return sqrt(variance_stable());
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::lnSumExp(this const auto& self) noexcept -> CoDiff<T> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::lnSumExp(this const auto& self) noexcept -> CoDiff<T> {
         if constexpr (self.isLValueVector()) {
             Tv m;
             if constexpr (isComplex())
@@ -616,8 +616,8 @@ namespace Physica {
             co_return DenseVector<T, getSizeAtCompile(), HostAllocator<T>>(self).lnSumExp();
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::crossEntropy(size_t index) const noexcept -> CoDiff<T> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::crossEntropy(size_t index) const noexcept -> CoDiff<T> {
         assert(index < getLength() && "[Error]: Index overflow");
         auto y = Base::getDerived().lnSumExp() - calc_value(index);
         if constexpr (isReverseDiff()) {
@@ -630,8 +630,8 @@ namespace Physica {
             co_return std::move(y);
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::lnSoftmax(size_t index) const noexcept -> CoDiff<T> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::lnSoftmax(size_t index) const noexcept -> CoDiff<T> {
         assert(index < getLength() && "[Error]: Index overflow");
         auto y = -crossEntropy(index);
         if constexpr (isReverseDiff()) {
@@ -642,8 +642,8 @@ namespace Physica {
             co_return std::move(y);
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::softmax(size_t index) const noexcept -> CoDiff<T> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::softmax(size_t index) const noexcept -> CoDiff<T> {
         assert(index < getLength() && "[Error]: Index overflow");
         auto y = exp(lnSoftmax(index));
         if constexpr (isReverseDiff()) {
@@ -654,8 +654,8 @@ namespace Physica {
             co_return std::move(y);
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::prod() const noexcept -> CoDiff<T> {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::prod() const noexcept -> CoDiff<T> {
         assert(getLength() != 0);
         if constexpr (isReverseDiff()) {
             Tv result = calc_value(0);
@@ -683,8 +683,8 @@ namespace Physica {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:236-244
      * [2] Eigen; https://eigen.tuxfamily.org
      */
-    template<class Derived>
-    auto RValueVector<Derived>::householder(Vector auto& __restrict target) const __restrict -> Tr {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::householder(Vector auto& __restrict target) const __restrict -> Tr {
         constexpr size_t Size = std::max(getSizeAtCompile(), target.getSizeAtCompile());
         constexpr size_t TailLength = Size > 0 ? (Size - 1) : Dynamic;
         assert(getLength() == target.getLength());
@@ -710,8 +710,8 @@ namespace Physica {
         return sqrt(sourceNorm0);
     }
 
-    template<class Derived>
-    decltype(auto) RValueVector<Derived>::reals(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueVector<Derived, ScalarT>::reals(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (isComplex())
             return RealVectorR<Self>(std::forward<Self>(self));
@@ -719,26 +719,26 @@ namespace Physica {
             return std::forward<Self>(self);
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::imags(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::imags(this auto&& self) noexcept {
         using Self = decltype(self);
         return ImagVectorR<Self>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::squaredNorms(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::squaredNorms(this auto&& self) noexcept {
         using Self = decltype(self);
         return SquaredNormVector<Self>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    auto RValueVector<Derived>::norms(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    auto RValueVector<Derived, ScalarT>::norms(this auto&& self) noexcept {
         using Self = decltype(self);
         return NormVector<Self>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    decltype(auto) RValueVector<Derived>::values(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueVector<Derived, ScalarT>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (isDiffable())
             return ValueVector<Self>(std::forward<Self>(self));
@@ -746,16 +746,16 @@ namespace Physica {
             return std::forward<Self>(self);
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<int GradOrder>
-    auto RValueVector<Derived>::grads(this auto&& self) noexcept {
+    auto RValueVector<Derived, ScalarT>::grads(this auto&& self) noexcept {
         using Self = decltype(self);
         return GradVector<Self, GradOrder>(std::forward<Self>(self));
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<int MaskOrder>
-    decltype(auto) RValueVector<Derived>::grads_mask(this auto&& self) noexcept {
+    decltype(auto) RValueVector<Derived, ScalarT>::grads_mask(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (MaskOrder < T::Order)
             return GradMaskVector<Self, MaskOrder>(std::forward<Self>(self));
@@ -763,88 +763,88 @@ namespace Physica {
             return std::forward<Self>(self);
     }
 
-    template<class Derived>
-    bool RValueVector<Derived>::isZero() const {
+    template<class Derived, Scalar ScalarT>
+    bool RValueVector<Derived, ScalarT>::isZero() const {
         for (size_t i = 0; i < getLength(); ++i)
             if (!calc(i).isZero())
                 return false;
         return true;
     }
 
-    template<class Derived>
-    bool RValueVector<Derived>::isFinite() const {
+    template<class Derived, Scalar ScalarT>
+    bool RValueVector<Derived, ScalarT>::isFinite() const {
         for (size_t i = 0; i < getLength(); ++i)
             if (!calc(i).isFinite())
                 return false;
         return true;
     }
 
-    template<class Derived>
-    bool RValueVector<Derived>::isSubNormal() const {
+    template<class Derived, Scalar ScalarT>
+    bool RValueVector<Derived, ScalarT>::isSubNormal() const {
         for (size_t i = 0; i < getLength(); ++i)
             if (!calc(i).isSubNormal())
                 return false;
         return true;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueVector<Derived>::isComplex() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueVector<Derived, ScalarT>::isComplex() noexcept {
         return ScalarType::isComplex();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueVector<Derived>::isDiffable() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueVector<Derived, ScalarT>::isDiffable() noexcept {
         return ScalarType::isDiffable();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueVector<Derived>::isForwardDiff() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueVector<Derived, ScalarT>::isForwardDiff() noexcept {
         return ScalarType::isForwardDiff();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueVector<Derived>::isReverseDiff() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueVector<Derived, ScalarT>::isReverseDiff() noexcept {
         return ScalarType::isReverseDiff();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueVector<Derived>::isLValueVector() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueVector<Derived, ScalarT>::isLValueVector() noexcept {
         return false;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueVector<Derived>::isCompact() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueVector<Derived, ScalarT>::isCompact() noexcept {
         return requires{ std::declval<Derived>().data(); };
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueVector<Derived>::isSparse() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueVector<Derived, ScalarT>::isSparse() noexcept {
         return requires{ std::declval<Derived>().getNumNonzero(); };
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueVector<Derived>::isFastAssign() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueVector<Derived, ScalarT>::isFastAssign() noexcept {
         return false;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool RValueVector<Derived>::isFastPacket() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueVector<Derived, ScalarT>::isFastPacket() noexcept {
         return false;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval auto RValueVector<Derived>::getSizeAtCompile() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval auto RValueVector<Derived, ScalarT>::getSizeAtCompile() noexcept {
         return Derived::getSizeAtCompile();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval void RValueVector<Derived>::static_assert_assign(const Scalar auto& source) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval void RValueVector<Derived, ScalarT>::static_assert_assign(const Scalar auto& source) noexcept {
         using U = std::remove_cvref<decltype(source)>::type;
         T::template static_assert_assign<U>();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval void RValueVector<Derived>::static_assert_assign(const Vector auto& source) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval void RValueVector<Derived, ScalarT>::static_assert_assign(const Vector auto& source) noexcept {
         using Src = std::remove_cvref<decltype(source)>::type;
         constexpr size_t Size1 = getSizeAtCompile();
         constexpr size_t Size2 = source.getSizeAtCompile();
@@ -854,17 +854,17 @@ namespace Physica {
         T::template static_assert_assign<U>();
     }
 
-    template<class Derived>
-    consteval int RValueVector<Derived>::calcBlockingSize(int CacheSize) noexcept {
+    template<class Derived, Scalar ScalarT>
+    consteval int RValueVector<Derived, ScalarT>::calcBlockingSize(int CacheSize) noexcept {
         int result = 1;
         while (result * int(sizeof(Trv)) < CacheSize)
             result *= 2;
         return result / 2;
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<ExecutePolicy P>
-    void RValueVector<Derived>::assign_for(Vector auto& v) const noexcept {
+    void RValueVector<Derived, ScalarT>::assign_for(Vector auto& v) const noexcept {
         auto it = zip(v.view(), Base::getDerived().view()).begin();
         parallel_for<P>([it](size_t i) noexcept {
             auto [lhs, rhs] = it + i;
@@ -872,9 +872,9 @@ namespace Physica {
         }, getLength(), 0).wait();
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<Vector V, ExecutePolicy P, size_t Length>
-    void RValueVector<Derived>::assign_simd(V& v) const noexcept {
+    void RValueVector<Derived, ScalarT>::assign_simd(V& v) const noexcept {
         constexpr int Size = BestPacket<typename V::ScalarType, Length>::Size;
         auto it = zip(v.view(), Base::getDerived().view()).begin();
         if constexpr (Length != Dynamic) {
@@ -919,9 +919,9 @@ namespace Physica {
         }
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<ExecutePolicy P>
-    void RValueVector<Derived>::assign_add_for(Vector auto& v) const noexcept {
+    void RValueVector<Derived, ScalarT>::assign_add_for(Vector auto& v) const noexcept {
         auto it = zip(v.view(), Base::getDerived().view()).begin();
         parallel_for<P>([it](size_t i) noexcept {
             auto [lhs, rhs] = it + i;
@@ -929,9 +929,9 @@ namespace Physica {
         }, getLength(), 0).wait();
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<Vector V, size_t Length>
-    void RValueVector<Derived>::assign_add_simd(V& v) const noexcept {
+    void RValueVector<Derived, ScalarT>::assign_add_simd(V& v) const noexcept {
         constexpr int Size = BestPacket<typename V::ScalarType, Length>::Size;
         auto it = zip(v.view(), Base::getDerived().view()).begin();
         if constexpr (Length != Dynamic) {

@@ -22,13 +22,14 @@
 #include "Physica/Core/Utils/CUDA/device_obj.h"
 
 namespace Physica {
-    template<class Derived> class RValueMatrix;
+    template<class Derived, Scalar = Traits<Derived>::ScalarType> class RValueMatrix;
 
     template<class T>
-    concept Matrix = []() consteval {
+    concept Matrix = requires { typename std::remove_cvref_t<T>::ScalarType; } && []() consteval {
         using U = remove_codiff_t<std::remove_cvref_t<T>>;
-        return std::derived_from<U, RValueMatrix<U>>
-            || std::derived_from<U, device_obj<RValueMatrix<typename remove_device_obj<U>::type>>>;
+        using S = U::ScalarType;
+        return std::derived_from<U, RValueMatrix<U, S>>
+            || std::derived_from<U, device_obj<RValueMatrix<typename remove_device_obj<U>::type, S>>>;
     }();
 
     class MatrixMajor {

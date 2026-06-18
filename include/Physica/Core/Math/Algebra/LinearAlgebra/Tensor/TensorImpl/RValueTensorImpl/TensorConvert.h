@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,8 +18,10 @@
  */
 #pragma once
 
+#include "../RValueTensor.h"
+
 namespace Physica {
-    template<class TensorType> class RValueTensor;
+    template<class TensorType, Scalar> class RValueTensor;
 
     template<class T>
     class RealTensor : public RValueTensor<RealTensor<T>> {

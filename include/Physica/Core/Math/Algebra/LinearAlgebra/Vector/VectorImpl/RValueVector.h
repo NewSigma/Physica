@@ -27,7 +27,7 @@
 namespace Physica {
     template<class Derived> class LValueVector;
     template<class Derived> class CompactVector;
-    template<class Derived> class RValueMatrix;
+    template<class Derived, Scalar> class RValueMatrix;
     template<class Derived> class CompactMatrix;
     template<Scalar, size_t Length, class Allocator> class DenseVector;
     template<Vector, int MatrixMajor, size_t Row, size_t Col> class RValueReshapedVector;
@@ -92,15 +92,15 @@ namespace Physica {
     /**
      * \class RValueVector: The base class for all vectors.
      */
-    template<class Derived>
-    class RValueVector : public CRTPBase<RValueVector<Derived>> {
+    template<class Derived, Scalar ScalarT>
+    class RValueVector : public CRTPBase<RValueVector<Derived, ScalarT>> {
         static_assert(!DeviceObj<Derived>, "[Error]: device_obj<> must be outside RValueVector<>");
-        using This = RValueVector<Derived>;
+        using This = RValueVector<Derived, ScalarT>;
         using Base = CRTPBase<This>;
 
         template<Vector> class View;
     public:
-        using ScalarType = Traits<Derived>::ScalarType;
+        using ScalarType = ScalarT;
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
@@ -269,8 +269,8 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<class T>
-    class Traits<RValueVector<T>> {
+    template<class T, Scalar S>
+    class Traits<RValueVector<T, S>> {
     public:
         using Derived = T;
     };

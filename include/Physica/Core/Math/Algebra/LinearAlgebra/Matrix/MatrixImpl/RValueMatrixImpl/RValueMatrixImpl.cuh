@@ -23,16 +23,16 @@
 #include "Flatten.cuh" // IWYU pragma: export
 
 namespace Physica {
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::operator*(this auto&& self, Vector auto&& v) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::operator*(this auto&& self, Vector auto&& v) noexcept {
         using Self = decltype(self);
         using V = decltype(v);
         static_assert(is_device_obj<V>::value, "[Error]: host-device mismatch");
         return device_obj<GEMV<remove_device_obj_t<Self>, remove_device_obj_t<V>>>(std::forward<Self>(self), std::forward<V>(v));
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::operator*(this auto&& self, Matrix auto&& m) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::operator*(this auto&& self, Matrix auto&& m) noexcept {
         using Self = decltype(self);
         using M = decltype(m);
         static_assert(is_device_obj<M>::value, "[Error]: host-device mismatch");
@@ -52,14 +52,14 @@ namespace Physica {
             return device_obj<GEMM<remove_device_obj_t<Self>, remove_device_obj_t<M>>>(std::forward<Self>(self), std::forward<M>(m));
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::operator-(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::operator-(this auto&& self) noexcept {
         using Self = decltype(self);
         return device_obj<MatrixExpr<ExprID::Minus, remove_device_obj_t<Self>>>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign(Matrix auto&& target) const {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ void device_obj<RValueMatrix<Derived, ScalarT>>::assign(Matrix auto&& target) const {
         target.assert_assign(Base::getDerived());
         if (IsHost()) {
             auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
@@ -81,15 +81,15 @@ namespace Physica {
             Base::getDerived().assign(target, ThreadBlock<1>{});
     }
 
-    template<class Derived>
-    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign_add(Matrix auto&& target) const {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ void device_obj<RValueMatrix<Derived, ScalarT>>::assign_add(Matrix auto&& target) const {
         const auto& x = Base::getDerived();
         target.assert_assign(x);
         target = target + x;
     }
 
-    template<class Derived>
-    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assert_assign(const Matrix auto& source) const noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ void device_obj<RValueMatrix<Derived, ScalarT>>::assert_assign(const Matrix auto& source) const noexcept {
         static_assert_assign(source);
         if constexpr (std::same_as<device_obj<Derived>, std::remove_cvref_t<decltype(source)>>)
             assert(this != &source && "[Error]: Self assign is likely a bug");
@@ -110,8 +110,8 @@ namespace Physica {
             assert(getSize() > 0);
     }
 
-    template<class Derived>
-    __device__ void device_obj<RValueMatrix<Derived>>::assign(this const auto& self, Matrix auto&& target, instanceof_x<ThreadBlock> auto block) {
+    template<class Derived, Scalar ScalarT>
+    __device__ void device_obj<RValueMatrix<Derived, ScalarT>>::assign(this const auto& self, Matrix auto&& target, instanceof_x<ThreadBlock> auto block) {
         const size_t maxMinor = target.getMaxMinor();
         for (unsigned int i = block.tid(); i < target.getSize(); i += block.getNumThread()) {
             size_t major = i / maxMinor;
@@ -123,8 +123,8 @@ namespace Physica {
         block.sync();
     }
 
-    template<class Derived>
-    __device__ void device_obj<RValueMatrix<Derived>>::assign_add(this const auto& self, Matrix auto&& target, instanceof_x<ThreadBlock> auto block) {
+    template<class Derived, Scalar ScalarT>
+    __device__ void device_obj<RValueMatrix<Derived, ScalarT>>::assign_add(this const auto& self, Matrix auto&& target, instanceof_x<ThreadBlock> auto block) {
         const size_t maxMinor = target.getMaxMinor();
         for (unsigned int i = block.tid(); i < target.getSize(); i += block.getNumThread()) {
             size_t major = i / maxMinor;
@@ -136,8 +136,8 @@ namespace Physica {
         block.sync();
     }
 
-    template<class Derived>
-    __host__ __device__ constexpr KernelConfig  device_obj<RValueMatrix<Derived>>::makeKernelConfig() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ constexpr KernelConfig  device_obj<RValueMatrix<Derived, ScalarT>>::makeKernelConfig() const noexcept {
         constexpr size_t MaxThread = CUDADevAttr::DefaultThreadsPerBlock;
         const uint32_t numThread = std::min<uint32_t>(getMaxMinor(), MaxThread);
         const uint32_t numBlockX = (getMaxMinor() + numThread - 1) / numThread;
@@ -145,235 +145,235 @@ namespace Physica {
         return KernelConfig ({numBlockX, numBlockY}, numThread);
     }
 
-    template<class Derived>
-    __device__ auto device_obj<RValueMatrix<Derived>>::calc(size_t row, size_t col) const {
+    template<class Derived, Scalar ScalarT>
+    __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::calc(size_t row, size_t col) const {
         return calc(row, col, ThreadBlock<1>{});
     }
 
-    template<class Derived>
-    __device__ auto device_obj<RValueMatrix<Derived>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const {
+    template<class Derived, Scalar ScalarT>
+    __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const {
         return Base::getDerived().calc(row, col, block);
     }
 
-    template<class Derived>
-    __device__ auto device_obj<RValueMatrix<Derived>>::calc_value(size_t row, size_t col) const {
+    template<class Derived, Scalar ScalarT>
+    __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::calc_value(size_t row, size_t col) const {
         return calc_value(row, col, ThreadBlock<1>{});
     }
 
-    template<class Derived>
-    __device__ auto device_obj<RValueMatrix<Derived>>::calc_value(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const {
+    template<class Derived, Scalar ScalarT>
+    __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::calc_value(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const {
         return Base::getDerived().values().calc_value(row, col, block);
     }
 
-    template<class Derived>
-    __device__ auto device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(this const auto& self, size_t major, size_t minor) -> T {
+    template<class Derived, Scalar ScalarT>
+    __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::calcFromMajorMinor(this const auto& self, size_t major, size_t minor) -> T {
         return self.calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
     }
 
-    template<class Derived>
-    void device_obj<RValueMatrix<Derived>>::reverse(const Matrix auto&, const Matrix auto& grad) const noexcept {
+    template<class Derived, Scalar ScalarT>
+    void device_obj<RValueMatrix<Derived, ScalarT>>::reverse(const Matrix auto&, const Matrix auto& grad) const noexcept {
         static_assert(isReverseDiff());
         Base::getDerived().reverse(grad);
     }
 
-    template<class Derived>
-    __host__ __device__ void device_obj<RValueMatrix<Derived>>::resize(const Matrix auto& m, auto&&... args) {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ void device_obj<RValueMatrix<Derived, ScalarT>>::resize(const Matrix auto& m, auto&&... args) {
         resize(m.getRow(), m.getCol(), std::forward<decltype(args)>(args)...);
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::resize(size_t r, size_t c, auto&&... args) {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::resize(size_t r, size_t c, auto&&... args) {
         return Base::getDerived().resize(r, c, std::forward<decltype(args)>(args)...);
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::row(this auto&& self, size_t r) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::row(this auto&& self, size_t r) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<RMatrixBlock<M, 1, Dynamic>>(std::forward<Self>(self), r, 0, self.getCol());
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::col(this auto&& self, size_t c) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::col(this auto&& self, size_t c) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<RMatrixBlock<M, Dynamic, 1>>(std::forward<Self>(self), 0, self.getRow(), c);
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), fromRow, rowCount, 0, self.getCol());
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::topRows(this auto&& self, size_t to) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::topRows(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), 0, to, 0, self.getCol());
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::bottomRows(this auto&& self, size_t from) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::bottomRows(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), from, self.getRow() - from, 0, self.getCol());
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), 0, self.getRow(), fromCol, colCount);
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::leftCols(this auto&& self, size_t to) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::leftCols(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), 0, self.getRow(), 0, to);
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::rightCols(this auto&& self, size_t from) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::rightCols(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), 0, self.getRow(), from, self.getCol() - from);
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), 0, toRow, 0, toCol);
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::topLeftCorner(this auto&& self, size_t to) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::topLeftCorner(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), 0, to, 0, to);
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), 0, toRow, fromCol, self.getRow() - fromCol);
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, 0, toCol);
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::bottomRightCorner(this auto&& self, size_t from) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::bottomRightCorner(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), from, self.getRow() - from, from, self.getCol() - from);
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), fromRow, rowCount, fromCol, colCount);
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::diag(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::diag(this auto&& self) noexcept {
         assert(self.isSquare());
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<DiagVectorR<M>>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::diag(this auto&& self, ssize_t shift) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::diag(this auto&& self, ssize_t shift) noexcept {
         assert(self.isSquare());
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<MinorDiagR<M>>(std::forward<Self>(self), shift);
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::triu(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::triu(this auto&& self) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<MatrixTrig<M, true, false>>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::triu_unit(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::triu_unit(this auto&& self) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<MatrixTrig<M, true, true>>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::tril(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::tril(this auto&& self) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<MatrixTrig<M, false, false>>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::tril_unit(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::tril_unit(this auto&& self) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<MatrixTrig<M, false, true>>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::sum_rows() const {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::sum_rows() const {
         return device_obj<MatrixSum<Derived, false>>(Base::getDerived());
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::sum_cols() const {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::sum_cols() const {
         return device_obj<MatrixSum<Derived, true>>(Base::getDerived());
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::inv(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::inv(this auto&& self) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<Inverse<M>>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::transpose(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::transpose(this auto&& self) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<Transpose<M>>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::hermite() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::hermite() const noexcept {
         if constexpr (isComplex())
             return device_obj<Hermite<Derived>>(Base::getDerived());
         else
             return transpose();
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::flatten() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::flatten() const noexcept {
         return device_obj<FlattenR<Derived>>(Base::getDerived());
     }
 
-    template<class Derived>
-    __host__ __device__ decltype(auto) device_obj<RValueMatrix<Derived>>::reals(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ decltype(auto) device_obj<RValueMatrix<Derived, ScalarT>>::reals(this auto&& self) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         if constexpr (isComplex())
@@ -382,29 +382,29 @@ namespace Physica {
             return std::forward<Self>(self);
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::imags(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::imags(this auto&& self) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<ImagMatrix<M>>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::squaredNorms(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::squaredNorms(this auto&& self) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<SquaredNormMatrix<M>>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::norms(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::norms(this auto&& self) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<NormMatrix<M>>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    __host__ __device__ decltype(auto) device_obj<RValueMatrix<Derived>>::values(this auto&& self) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ decltype(auto) device_obj<RValueMatrix<Derived, ScalarT>>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         if constexpr (isDiffable())
@@ -413,121 +413,121 @@ namespace Physica {
             return std::forward<Self>(self);
     }
 
-    template<class Derived>
+    template<class Derived, Scalar ScalarT>
     template<int GradOrder>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::grads(this auto&& self) noexcept {
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::grads(this auto&& self) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<GradMatrix<M, GradOrder>>(std::forward<Self>(self));
     }
 
-    template<class Derived>
-    __host__ __device__ bool device_obj<RValueMatrix<Derived>>::isSquare() const noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ bool device_obj<RValueMatrix<Derived, ScalarT>>::isSquare() const noexcept {
         return getRow() == getCol();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isComplex() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isComplex() noexcept {
         return ScalarType::isComplex();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isDiffable() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isDiffable() noexcept {
         return ScalarType::isDiffable();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isForwardDiff() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isForwardDiff() noexcept {
         return ScalarType::isForwardDiff();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isReverseDiff() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isReverseDiff() noexcept {
         return ScalarType::isReverseDiff();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isLValueMatrix() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isLValueMatrix() noexcept {
         return false;
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isCompact() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isCompact() noexcept {
         return Derived::isCompact();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isSparse() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isSparse() noexcept {
         return Derived::isSparse();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isStaticSymm() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isStaticSymm() noexcept {
         return Derived::isStaticSymm();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isStaticHermite() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isStaticHermite() noexcept {
         return Derived::isStaticHermite();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isColMatrix() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isColMatrix() noexcept {
         return Derived::isColMatrix();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isRowMatrix() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isRowMatrix() noexcept {
         return Derived::isRowMatrix();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isBothMajor() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isBothMajor() noexcept {
         return Derived::isBothMajor();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived>>::isFastAssign() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isFastAssign() noexcept {
         return Derived::isFastAssign();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval size_t device_obj<RValueMatrix<Derived>>::getRowAtCompile() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval size_t device_obj<RValueMatrix<Derived, ScalarT>>::getRowAtCompile() noexcept {
         return Derived::getRowAtCompile();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval size_t device_obj<RValueMatrix<Derived>>::getColAtCompile() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval size_t device_obj<RValueMatrix<Derived, ScalarT>>::getColAtCompile() noexcept {
         return Derived::getColAtCompile();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval size_t device_obj<RValueMatrix<Derived>>::getSizeAtCompile() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval size_t device_obj<RValueMatrix<Derived, ScalarT>>::getSizeAtCompile() noexcept {
         return Derived::getSizeAtCompile();
     }
 
-    template<class Derived>
-    __host__ __device__ consteval int device_obj<RValueMatrix<Derived>>::getMajor() noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval int device_obj<RValueMatrix<Derived, ScalarT>>::getMajor() noexcept {
         return Derived::getMajor();
     }
 
-    template<class Derived>
-    __host__ __device__ size_t device_obj<RValueMatrix<Derived>>::rowFromMajorMinor(size_t major, size_t minor) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ size_t device_obj<RValueMatrix<Derived, ScalarT>>::rowFromMajorMinor(size_t major, size_t minor) noexcept {
         return MatrixMajor::rowFromMajorMinor<device_obj<Derived>>(major, minor);
     }
 
-    template<class Derived>
-    __host__ __device__ size_t device_obj<RValueMatrix<Derived>>::colFromMajorMinor(size_t major, size_t minor) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ size_t device_obj<RValueMatrix<Derived, ScalarT>>::colFromMajorMinor(size_t major, size_t minor) noexcept {
         return MatrixMajor::colFromMajorMinor<device_obj<Derived>>(major, minor);
     }
     // Redeclare to expose it to base classes
-    template<class Derived>
-    __host__ __device__ consteval void device_obj<RValueMatrix<Derived>>::static_assert_assign(const Scalar auto& source) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval void device_obj<RValueMatrix<Derived, ScalarT>>::static_assert_assign(const Scalar auto& source) noexcept {
         Derived::static_assert_assign(source);
     }
 
-    template<class Derived>
-    __host__ __device__ consteval void device_obj<RValueMatrix<Derived>>::static_assert_assign(const Matrix auto& source) noexcept {
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval void device_obj<RValueMatrix<Derived, ScalarT>>::static_assert_assign(const Matrix auto& source) noexcept {
         static_assert(getSizeAtCompile() != Dynamic || DeviceObj<decltype(source)>, "[Error]: Host object cannot be assigned to dynamic device object");
         Derived::static_assert_assign(source);
     }

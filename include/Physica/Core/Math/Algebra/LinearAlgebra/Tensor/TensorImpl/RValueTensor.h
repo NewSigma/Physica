@@ -32,13 +32,13 @@ namespace Physica {
     template<class T> class ValueTensor;    
     template<class T, int GradOrder> class GradTensor;
 
-    template<class Derived>
-    class RValueTensor : public CRTPBase<RValueTensor<Derived>> {
+    template<class Derived, Scalar ScalarT>
+    class RValueTensor : public CRTPBase<RValueTensor<Derived, ScalarT>> {
         static_assert(!DeviceObj<Derived>, "[Error]: device_obj<> must be outside RValueTensor<>");
-        using This = RValueTensor<Derived>;
+        using This = RValueTensor<Derived, ScalarT>;
         using Base = CRTPBase<This>;
     public:
-        using ScalarType = Traits<Derived>::ScalarType;
+        using ScalarType = ScalarT;
         constexpr static int NDim = Traits<Derived>::NDim;
 
         using IndexType = Array<size_t, NDim>;
@@ -94,8 +94,8 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<class T>
-    class Traits<RValueTensor<T>> {
+    template<class T, Scalar S>
+    class Traits<RValueTensor<T, S>> {
     public:
         using Derived = T;
     };
