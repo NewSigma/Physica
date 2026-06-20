@@ -31,15 +31,20 @@ namespace Physica {
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ bool ArrayBase<Derived, Allocator>::operator==(const ArrayBase& array) const {
-        if (getLength() != array.getLength())
+    __host__ __device__ bool ArrayBase<Derived, Allocator>::operator==(this const This& lhs, const This& rhs) {
+        if (lhs.getLength() != rhs.getLength())
             return false;
-        if (getCapacity() != array.getCapacity())
+        if (lhs.getCapacity() != rhs.getCapacity())
             return false;
-        for (size_t i = 0; i < getLength(); ++i)
-            if (Base::getDerived()[i] != array.getDerived()[i])
+        for (size_t i = 0; i < lhs.getLength(); ++i)
+            if (lhs[i] != rhs[i])
                 return false;
         return true;
+    }
+
+    template<class Derived, class Allocator>
+    __host__ __device__ bool ArrayBase<Derived, Allocator>::operator!=(this const This& lhs, const This& rhs) {
+        return !(lhs == rhs);
     }
 
     template<class Derived, class Allocator>
@@ -85,7 +90,7 @@ namespace Physica {
 
     template<class Derived, class Allocator>
     __host__ __device__ auto* ArrayBase<Derived, Allocator>::data(this auto&& self) noexcept {
-        return self.data();
+        return self.getDerived().data();
     }
 
     template<class Derived, class Allocator>

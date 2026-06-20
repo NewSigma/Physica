@@ -72,6 +72,11 @@ namespace Physica {
         using ComplexType = TraitsType::ComplexType;
         using MachineType = TraitsType::MachineType;
         using device_obj_type = Derived;
+
+        template<int GradOrder>
+        using GradWithOrder = Internal::GradTypeHelper<ScalarType, Order == 0 ? 0 : GradOrder>::Type;
+        template<int MaskOrder>
+        using GradMaskType = std::conditional<MaskOrder == 0, ValueType, Diff<ValueType, Mode, MaskOrder>>::type;
     public:
         constexpr ~ScalarBase() = default;
         /* Operators */

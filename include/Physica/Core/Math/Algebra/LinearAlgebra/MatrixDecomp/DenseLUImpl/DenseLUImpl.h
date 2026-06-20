@@ -72,13 +72,13 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     void DenseLU<T, Pivot>::compute(const Matrix auto& source) {
-        setWorking(source);
+        source.assign(working);
         compute();
     }
 
     template<Scalar T, bool Pivot>
     void DenseLU<T, Pivot>::compute_base(const Matrix auto& source) {
-        setWorking(source);
+        source.assign(working);
         compute_base();
     }
 
@@ -121,14 +121,13 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    const auto& DenseLU<T, Pivot>::getPerm() const noexcept {
-        static_assert(Pivot, "[Error]: Perm is available to PLU decomp only");
-        return perm;
+    auto& DenseLU<T, Pivot>::getMatrixLU(this auto&& self) noexcept {
+        return self.working;
     }
 
     template<Scalar T, bool Pivot>
-    void DenseLU<T, Pivot>::setWorking(const Matrix auto& source) {
-        working.assert_assign(source);
-        source.assign(working);
+    const auto& DenseLU<T, Pivot>::getPerm() const noexcept {
+        static_assert(Pivot, "[Error]: Perm is available to PLU decomp only");
+        return perm;
     }
 }

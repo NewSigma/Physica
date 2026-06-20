@@ -122,9 +122,9 @@ namespace Physica {
 
     template<class T, int GradOrder>
     class Traits<GradTensor<T, GradOrder>> {
-        static_assert(T::ScalarType::isDiffable(), "[Error]: Redundant GradTensor");
+        static_assert(T::isDiffable(), "[Error]: Redundant GradTensor");
     public:
-        using ScalarType = Internal::GradTypeHelper<typename T::ScalarType, GradOrder>::Type;
+        using ScalarType = T::ScalarType::template GradWithOrder<GradOrder>;
         constexpr static int Dim = T::Dim;
     };
 }

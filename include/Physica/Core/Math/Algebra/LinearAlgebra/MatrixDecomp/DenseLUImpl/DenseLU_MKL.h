@@ -69,7 +69,7 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     void DenseLU<T, Pivot>::compute_mkl(const Matrix auto& source) {
-        setWorking(source);
+        source.assign(working);
         compute_mkl();
     }
 }

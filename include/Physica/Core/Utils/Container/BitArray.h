@@ -26,6 +26,7 @@ namespace Physica {
      * BitArray is similar to bool[] but it has a better use of space.
      */
     class PHYSICA_API BitArray {
+        using This = BitArray;
         //Every bit of arr stands for a bool.
         unsigned char* __restrict__ arr = nullptr;
         size_t bitCount = 0;
@@ -45,6 +46,7 @@ namespace Physica {
         BitArray operator~() const;
         /* Operations */
         void setBit(size_t s, bool b);
+        void swap(This& obj) noexcept;
         /* Getters */
         [[nodiscard]] inline size_t getLength() const noexcept;
     private:

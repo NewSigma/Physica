@@ -65,13 +65,11 @@ namespace Physica {
         [[nodiscard]] size_t getOrder() const noexcept { return working.getRow(); }
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
-        [[nodiscard]] const auto& getMatrixLU() const noexcept { return working; }
+        [[nodiscard]] auto& getMatrixLU(this auto&& self) noexcept;
         [[nodiscard]] auto getMatrixL() const noexcept { return working.tril_unit(); }
         [[nodiscard]] auto getMatrixU() const noexcept { return working.triu(); }
         [[nodiscard]] const auto& getPerm() const noexcept;
         [[nodiscard]] consteval static bool isPivot() noexcept { return Pivot; }
-        /* Setters */
-        void setWorking(const Matrix auto& source);
     private:
         void decomp_col(size_t index);
     };

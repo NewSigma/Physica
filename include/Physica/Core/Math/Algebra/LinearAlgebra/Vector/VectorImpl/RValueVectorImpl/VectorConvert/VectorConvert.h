@@ -182,18 +182,16 @@ namespace Physica {
     template<class V, int GradOrder>
     class Traits<GradVector<V, GradOrder>> {
         using V1 = std::remove_cvref_t<V>;
-        static_assert(V1::ScalarType::isDiffable(), "[Error]: Redundant GradVector");
+        static_assert(V1::isDiffable(), "[Error]: Redundant GradVector");
     public:
-        using ScalarType = Internal::GradTypeHelper<typename V1::ScalarType, GradOrder>::Type;
+        using ScalarType = V1::ScalarType::template GradWithOrder<GradOrder>;
     };
 
     template<class V, int MaskOrder>
     class Traits<GradMaskVector<V, MaskOrder>> {
         using V1 = std::remove_cvref_t<V>;
-        using U = V1::ScalarType;
-        using ValueType = typename U::ValueType;
-        static_assert(U::isDiffable(), "[Error]: Redundant GradMaskVector");
+        static_assert(V1::isDiffable(), "[Error]: Redundant GradMaskVector");
     public:
-        using ScalarType = std::conditional<MaskOrder == 0, ValueType, Diff<ValueType, U::Mode, MaskOrder>>::type;
+        using ScalarType = V1::ScalarType::template GradMaskType<MaskOrder>;
     };
 }

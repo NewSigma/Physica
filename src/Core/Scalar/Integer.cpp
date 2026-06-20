@@ -31,38 +31,24 @@ Integer::Integer(int i)
     byte[0] = i >= 0 ? i : -i;
 }
 
-Integer::Integer(const Integer& toCopy)
-        : byte(reinterpret_cast<MPUnit*>(HostAllocator<MPUnit>{}.allocate(toCopy.getSize())))
-        , length(toCopy.length) {
-    memcpy(byte, toCopy.byte, getSize() * sizeof(MPUnit));
+Integer::Integer(const This& obj)
+        : byte(reinterpret_cast<MPUnit*>(HostAllocator<MPUnit>{}.allocate(obj.getSize())))
+        , length(obj.length) {
+    memcpy(byte, obj.byte, getSize() * sizeof(MPUnit));
 }
 
-Integer::Integer(Integer&& toMove) noexcept
-        : byte(toMove.byte)
-        , length(toMove.length) {
-    toMove.byte = nullptr;
+Integer::Integer(This&& obj) noexcept
+        : byte(obj.byte)
+        , length(obj.length) {
+    obj.byte = nullptr;
 }
 
 Integer::~Integer() {
     delete[] byte;
 }
 
-Integer& Integer::operator=(const Integer& toCopy) {
-    if (this != &toCopy) {
-        this->~Integer();
-        length = toCopy.length;
-        int size = getSize();
-        byte = HostAllocator<MPUnit>{}.allocate(size);
-        memcpy(byte, toCopy.byte, size * sizeof(MPUnit));
-    }
-    return *this;
-}
-
-Integer& Integer::operator=(Integer&& toMove) noexcept {
-    this->~Integer();
-    byte = toMove.byte;
-    toMove.byte = nullptr;
-    length = toMove.length;
+Integer& Integer::operator=(Integer obj) noexcept {
+    swap(obj);
     return *this;
 }
 

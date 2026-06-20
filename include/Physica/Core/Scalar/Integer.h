@@ -27,6 +27,7 @@ namespace Physica {
     template<FloatPrec Prec> class Real;
 
     class PHYSICA_API Integer {
+        using This = Integer;
         //Store effective digits using little endian standard.
         MPUnit* __restrict byte = nullptr;
         /*
@@ -43,12 +44,11 @@ namespace Physica {
         Integer(int i); //NOLINT Conversion is always available.
         template<FloatPrec Prec>
         explicit Integer(const Real<Prec>& s);
-        Integer(const Integer& toCopy);
-        Integer(Integer&& toMove) noexcept;
+        Integer(const This& obj);
+        Integer(This&& obj) noexcept;
         ~Integer();
         /* Operators */
-        Integer& operator=(const Integer& toCopy);
-        Integer& operator=(Integer&& toMove) noexcept;
+        Integer& operator=(Integer obj) noexcept;
         Integer operator+(const Integer& i) const;
         Integer operator-(const Integer& i) const;
         Integer operator*(const Integer& i) const;

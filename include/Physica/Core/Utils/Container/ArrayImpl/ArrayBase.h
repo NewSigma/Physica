@@ -50,8 +50,8 @@ namespace Physica {
         ~ArrayBase() = default;
         /* Operators */
         [[nodiscard]] __host__ __device__ constexpr auto& operator[](this auto&&, size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ bool operator==(const ArrayBase& array) const;
-        [[nodiscard]] __host__ __device__ bool operator!=(const ArrayBase& array) const { return !(*this == array); }
+        [[nodiscard]] __host__ __device__ bool operator==(this const This& lhs, const This& rhs);
+        [[nodiscard]] __host__ __device__ bool operator!=(this const This& lhs, const This& rhs);
         /* Operations */
         [[nodiscard]] __host__ __device__ constexpr auto begin(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ constexpr auto end(this auto&&) noexcept;
@@ -66,10 +66,10 @@ namespace Physica {
         void read(const auto& loc, const char* name);
         void write(auto& loc, const char* name) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t size() const noexcept { return Base::getDerived().size(); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
-        [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return Base::getDerived().getCapacity(); }
-        [[nodiscard]] __host__ __device__ bool empty() const { return getLength() == 0; }
+        [[nodiscard]] __host__ __device__ auto size() const noexcept { return Base::getDerived().size(); }
+        [[nodiscard]] __host__ __device__ auto getLength() const noexcept { return Base::getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ auto getCapacity() const noexcept { return Base::getDerived().getCapacity(); }
+        [[nodiscard]] __host__ __device__ bool empty() const noexcept { return getLength() == 0; }
         [[nodiscard]] __host__ __device__ bool full() const noexcept { return getLength() == getCapacity(); }
         [[nodiscard]] __host__ __device__ auto* data(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto* data_ptr(this auto&&, size_t index) noexcept;

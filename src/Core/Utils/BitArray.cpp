@@ -130,6 +130,12 @@ void BitArray::setBit(size_t s, bool b) {
             arr[quotient - 1] &= ~(1U << (CHAR_BIT - 1U));
     }
 }
+
+void BitArray::swap(This& obj) noexcept {
+    assert(this != &obj && "[Error]: Self swap is likely a bug");
+    std::swap(arr, obj.arr);
+    std::swap(bitCount, obj.bitCount);
+}
 /*!
  * Construct a BitArray directly from its members. Declared private to avoid incorrect uses.
  * Length of arr must be @param length.

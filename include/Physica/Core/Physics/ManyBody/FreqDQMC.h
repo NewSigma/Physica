@@ -179,7 +179,7 @@ namespace Physica {
         assert(result.getLength() == getAuxField().getSize() * 2);
         getAuxField().read(pos);
         for (auto& spinLU : lu) {
-            spinLU.setWorking(action);
+            action.assign(spinLU.getMatrixLU());
             action.flip();
         }
 
@@ -250,7 +250,7 @@ namespace Physica {
     template<ExecutePolicy P>
     auto FreqDQMC<T>::calcDet() -> Vector2D<Trv> {
         for (auto& spinLU : lu) {
-            spinLU.setWorking(action);
+            action.assign(spinLU.getMatrixLU());
             action.flip();
         }
 
