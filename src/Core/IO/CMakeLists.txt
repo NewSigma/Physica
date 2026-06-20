@@ -5,7 +5,6 @@ add_subdirectory(QE)
 add_subdirectory(VASP)
 
 target_sources(PhysicaCore PRIVATE
-    CsvFile.cpp
     Gnuplot.cpp
     Mnist.cpp
 )
