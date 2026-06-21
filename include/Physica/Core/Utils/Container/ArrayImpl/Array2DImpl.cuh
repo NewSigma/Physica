@@ -71,8 +71,8 @@ namespace Physica {
     }
 
     template<tparams>
-    void device_obj<Array2D>::zeros() {
-        check(cudaMemsetAsync(asArray().data(), 0, getRow() * getCol() * sizeof(T), CUDAContext::getInstance()));
+    void device_obj<Array2D>::reserve(size_t size) {
+        arr.reserve(size);
     }
 
     template<tparams>
@@ -95,6 +95,11 @@ namespace Physica {
     void device_obj<Array2D>::toHostAsync(host_obj& obj) const {
         arr.toHostAsync(obj.arr);
         obj.r = r;
+    }
+
+    template<tparams>
+    void device_obj<Array2D>::zeros() {
+        check(cudaMemsetAsync(asArray().data(), 0, getRow() * getCol() * sizeof(T), CUDAContext::getInstance()));
     }
 
     template<tparams>

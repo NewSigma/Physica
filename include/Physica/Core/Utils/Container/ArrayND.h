@@ -61,7 +61,7 @@ namespace Physica {
         /* Operations */
         void resize(IndexType shape_, auto&&... args);
         void resize(std::integral auto... dims);
-        void zeros() noexcept;
+        void reserve(size_t size) noexcept;
 
         [[nodiscard]] size_t toIndex1D(const IndexType& indices) const noexcept;
         [[nodiscard]] IndexType toIndexND(size_t index) const noexcept;
@@ -69,6 +69,7 @@ namespace Physica {
         void forND(std::invocable<T&, IndexType> auto func);
         void forND(std::invocable<const T&, IndexType> auto func) const;
 
+        void zeros() noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr int ndim() const noexcept { return NDim; }

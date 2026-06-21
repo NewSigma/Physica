@@ -35,6 +35,11 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
+    void DenseTensor<T, Dims...>::reserve(size_t size) noexcept {
+        storage.reserve(size);
+    }
+
+    template<Scalar T, int... Dims>
     void DenseTensor<T, Dims...>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         storage.swap(obj.storage);

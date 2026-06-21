@@ -56,8 +56,8 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
-    void ArrayND<T, Dims...>::zeros() noexcept {
-        arr.zeros();
+    void ArrayND<T, Dims...>::reserve(size_t size) noexcept {
+        arr.reserve(size);
     }
 
     template<class T, int... Dims>
@@ -81,6 +81,11 @@ namespace Physica {
     void ArrayND<T, Dims...>::forND(std::invocable<const T&, IndexType> auto func) const {
         for (size_t i = 0; i < getSize(); ++i)
             func(arr[i], toIndexND(i));
+    }
+
+    template<class T, int... Dims>
+    void ArrayND<T, Dims...>::zeros() noexcept {
+        arr.zeros();
     }
 
     template<class T, int... Dims>

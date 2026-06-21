@@ -50,13 +50,14 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void resize(size_t row, size_t col, auto&&... args);
         __host__ __device__ void resize(size_t order);
-        void zeros();
+        void reserve(size_t size);
 
         [[nodiscard]] host_obj toHost() const;
         [[nodiscard]] host_obj toHostAsync() const;
         void toHost(host_obj& obj) const;
         void toHostAsync(host_obj& obj) const;
 
+        void zeros();
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto&& asArray(this auto&& self) noexcept { return self.arr; }

@@ -81,6 +81,11 @@ namespace Physica {
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    void DenseMatrix<T, Major, Row, Col, Allocator>::reserve(size_t size) noexcept {
+        storage.reserve(size);
+    }
+
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     auto&& DenseMatrix<T, Major, Row, Col, Allocator>::flatten(this auto&& self) noexcept {
         return forward_like<decltype(self)>(self.storage).asArray();
     }

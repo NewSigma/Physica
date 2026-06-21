@@ -62,6 +62,7 @@ namespace Physica {
         void resize(size_t order);
         void resize(const Matrix auto& m, auto&&... args);
         void resize(size_t row, size_t col, auto&&... args);
+        void reserve(size_t size) noexcept;
 
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;

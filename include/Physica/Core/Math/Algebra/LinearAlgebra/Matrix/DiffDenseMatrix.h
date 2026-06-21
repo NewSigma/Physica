@@ -72,6 +72,7 @@ namespace Physica {
 
         using Base::resize;
         void resize(size_t row, size_t col);
+        void reserve(size_t size) noexcept;
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;

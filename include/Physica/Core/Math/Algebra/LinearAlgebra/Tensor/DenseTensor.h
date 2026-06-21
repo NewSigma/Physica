@@ -43,6 +43,7 @@ namespace Physica {
         /* Operations */
         using Base::resize;
         void resize(IndexType shape);
+        void reserve(size_t size) noexcept;
 
         using Base::random_normal;
         void swap(This& __restrict obj) noexcept;

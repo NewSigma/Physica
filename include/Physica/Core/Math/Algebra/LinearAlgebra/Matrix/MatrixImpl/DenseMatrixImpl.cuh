@@ -74,6 +74,11 @@ namespace Physica {
     }
 
     template<tparams>
+    void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::reserve(size_t size) {
+        storage.reserve(size);
+    }
+
+    template<tparams>
     auto device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::toHost() const -> host_obj {
         return host_obj(storage.toHost());
     }

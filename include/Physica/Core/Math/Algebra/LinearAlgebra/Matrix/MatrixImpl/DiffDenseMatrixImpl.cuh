@@ -70,6 +70,12 @@ namespace Physica {
     }
 
     template<tparams>
+    void device_obj<DenseMatrix>::reserve(size_t size) {
+        v.reserve(size);
+        g.reserve(size);
+    }
+
+    template<tparams>
     void device_obj<DenseMatrix>::zeros() {
         v.zeros();
         g.zeros();

@@ -91,6 +91,13 @@ namespace Physica {
     }
 
     template<tparams>
+    void DiffDenseMatrix::reserve(size_t size) noexcept {
+        v.reserve(size);
+        if constexpr (isForwardDiff())
+            g.reserve(size);
+    }
+
+    template<tparams>
     template<RNG R>
     void DiffDenseMatrix::random_uniform() {
         v.template random_uniform<R>();
