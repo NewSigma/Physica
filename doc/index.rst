@@ -20,7 +20,6 @@ Welcome to Physica's documentation!
 
    README
    Core/index.rst
-   Logger/index.rst
    CRCoro
    StyleGuide
    Install

@@ -34,6 +34,16 @@ namespace Physica {
     class Complex<T> : public ScalarBase<Complex<T>>, public CRCoro<Complex<T>> {
         using This = Complex<T>;
         using Base = ScalarBase<This>;
+    #ifndef PHYSICA_MKL
+        struct MKL_Complex8 {};
+        struct MKL_Complex16 {};
+    #endif
+
+    #ifndef PHYSICA_CUDA
+        struct cuComplex {};
+        struct cuDoubleComplex {};
+    #endif
+
     public:
         using typename Base::ScalarType;
         using typename Base::MachineType;

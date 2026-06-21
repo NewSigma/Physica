@@ -25,35 +25,15 @@
 /**
  * \file Macro.h: Non-Proliferation of Macros
  */
-#ifdef PHYSICA_MKL
-    #include <mkl_types.h>
-#else
-    struct MKL_Complex8 {};
-    struct MKL_Complex16 {};
-
-    using VSLStreamStatePtr = void*;
-    using MKL_INT64 = long long int;
-#endif
-
 #ifdef PHYSICA_CUDA
     #include <cuda_runtime.h>
 #else
     #define __host__
     #define __device__
-
-    struct cuComplex {};
-    struct cuDoubleComplex {};
-
-    struct curandGenerator;
-    using curandGenerator_t = curandGenerator*; // Do not conflict with other pointers 
-    using curandRngType_t = int;
 #endif
 
 #ifdef __GNUC__
     #define PHYSICA_API __attribute__((visibility("default")))
-    #ifndef __forceinline
-        #define __forceinline inline __attribute__((always_inline))
-    #endif
 #else
     #define PHYSICA_API __declspec(dllexport)
     #define __restrict__ __restrict
@@ -63,6 +43,10 @@
 #endif
 
 namespace Physica {
+    #ifndef PHYSICA_MKL
+        using MKL_INT64 = long long int;
+    #endif
+
     template<class T>
     class Traits;
 

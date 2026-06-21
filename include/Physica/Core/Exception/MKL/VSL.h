@@ -33,14 +33,12 @@ namespace Physica {
         [[nodiscard]] int code() const noexcept { return Base::code().value(); }
     };
 
-    inline void check_vsl_impl(int err) {
+#ifdef PHYSICA_MKL
+    inline void check_vsl(int err) {
         if (err != 0) [[unlikely]]
             throw VSLException(err);
     }
-}
-
-#ifdef PHYSICA_MKL
-    #define check_vsl(err) check_vsl_impl(err)
 #else
     #define check_vsl(err)
 #endif
+}

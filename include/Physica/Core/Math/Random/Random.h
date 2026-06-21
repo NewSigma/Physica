@@ -37,10 +37,23 @@ namespace Physica {
 
     namespace Internal {
         class PHYSICA_API RandomBase {
+            struct Private; // Do not conflict with other pointers 
         protected:
+        #ifdef PHYSICA_MKL
+            using mkl_handle = VSLStreamStatePtr;
+        #else
+            using mkl_handle = void*;
+        #endif
+
+        #ifdef PHYSICA_CUDA
+            using curand_handle = curandGenerator_t;
+        #else
+            using curand_handle = Private*;
+        #endif
+
             SeedSequence<> seq;
             VSLStreamStatePtr pStream = nullptr;
-            [[no_unique_address]] curandGenerator_t curand = nullptr;
+            [[no_unique_address]] curand_handle curand = nullptr;
         private:
             uint64_t seed{};
         public:
@@ -71,7 +84,7 @@ namespace Physica {
     #endif
     }
 
-    constexpr curandRngType_t rngID_cuRAND([[maybe_unused]] RandomOption option) noexcept {
+    constexpr auto rngID_cuRAND([[maybe_unused]] RandomOption option) noexcept {
     #ifdef PHYSICA_CUDA
         switch (option) {
         case MT19937:
@@ -102,6 +115,8 @@ namespace Physica {
     class PHYSICA_API Random : public Internal::RandomBase {
         using This = Random<Option, FixedSeed>;
         using Base = Internal::RandomBase;
+        using typename Base::mkl_handle;
+        using typename Base::curand_handle;
 
         template<RandomOption> struct GeneratorImpl;
         template<> struct GeneratorImpl<PCG32DXSM> { using Type = Internal::setseq_base<uint32_t, uint64_t, Internal::DXSM>; };
@@ -121,8 +136,8 @@ namespace Physica {
         ~Random() = default;
         /* Operators */
         [[nodiscard]] result_type operator()() { return gen(); }
-        [[nodiscard]] operator VSLStreamStatePtr() noexcept requires(MKL_Ready);
-        [[nodiscard]] operator curandGenerator_t() noexcept requires(cuRAND_Ready);
+        [[nodiscard]] operator mkl_handle() noexcept requires(MKL_Ready);
+        [[nodiscard]] operator curand_handle() noexcept requires(cuRAND_Ready);
         /* Operations */
         void reseed();
         void reseed(uint64_t seed_) requires(!IsSeedFixed);
@@ -152,13 +167,13 @@ namespace Physica {
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
-    Random<Option, FixedSeed>::operator VSLStreamStatePtr() noexcept requires(MKL_Ready){
+    Random<Option, FixedSeed>::operator mkl_handle() noexcept requires(MKL_Ready){
         static_assert(MKL_Ready, "[Error]: MKL does not support this RNG");
         return Base::pStream;
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
-    Random<Option, FixedSeed>::operator curandGenerator_t() noexcept requires(cuRAND_Ready) {
+    Random<Option, FixedSeed>::operator curand_handle() noexcept requires(cuRAND_Ready) {
         static_assert(cuRAND_Ready, "[Error]: cuRAND does not support this RNG");
         return Base::curand;
     }

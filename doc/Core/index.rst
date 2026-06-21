@@ -20,6 +20,5 @@ Core
    Math/index.rst
    Physics/index.rst
    Scalar/index.rst
-   Utils/index.rst
    CUDA
    Exception

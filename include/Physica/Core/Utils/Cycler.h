@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -51,7 +51,7 @@ namespace Physica {
          * Because of out of order execution, the result may be less  or more than several cycles.
          * Use tic() and toc() to avoid this problem.
          */
-        [[nodiscard]] static __forceinline uint64_t now() noexcept {
+        [[nodiscard, gnu::always_inline]] static uint64_t now() noexcept {
             return __rdtsc();
         }
         /**
@@ -60,7 +60,7 @@ namespace Physica {
          *
          * This function is slower than now().
          */
-        [[nodiscard]] static __forceinline uint64_t tic() noexcept {
+        [[nodiscard, gnu::always_inline]] static uint64_t tic() noexcept {
             uint32_t lo{};
             uint32_t hi{};
         #ifdef __GNUC__
@@ -81,7 +81,7 @@ namespace Physica {
          *
          * This function is slower than now().
          */
-        [[nodiscard]] static __forceinline uint64_t toc() noexcept {
+        [[nodiscard, gnu::always_inline]] static uint64_t toc() noexcept {
             uint32_t lo{};
             uint32_t hi{};
         #ifdef __GNUC__
@@ -102,10 +102,7 @@ namespace Physica {
          * Returns the conversion factor between cycles in seconds, using
          * a mock value for testing when appropriate.
          */
-        [[nodiscard]] static __forceinline double getCyclesPerSec() {
-            static const double localCyclesPerSec = makeCyclesPerSec();
-            return localCyclesPerSec;
-        }
+        [[nodiscard]] static double getCyclesPerSec();
 
         static uint64_t toNanoseconds(uint64_t cycles, double cyclesPerSec = getCyclesPerSec());
         static uint64_t toMicroseconds(uint64_t cycles, double cyclesPerSec = getCyclesPerSec());
@@ -115,6 +112,5 @@ namespace Physica {
         static uint64_t fromSeconds(double seconds, double cyclesPerSec = getCyclesPerSec());
     private:
         Cycler() = default;
-        static double makeCyclesPerSec();
     };
 }

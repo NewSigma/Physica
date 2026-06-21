@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,6 +24,52 @@
 #include "Physica/Core/Exception/SystemException.h"
 
 using namespace Physica;
+
+namespace {
+    double makeCyclesPerSec() {
+    #ifdef __linux__
+        struct timeval startTime, stopTime; /* NOLINT no initializing is intended */
+        // There is one tricky aspect, which is that we could get interrupted
+        // between calling gettimeofday and reading the cycle counter, in which
+        // case we won't have corresponding readings.  To handle this (unlikely)
+        // case, compute the overall result repeatedly, and wait until we get
+        // two successive calculations that are within 0.001% of each other (or
+        // in other words, a drift of up to 10µs per second).
+        double oldCycles = 0;
+        double result = 0;
+        while (true) {
+            oldCycles = result;
+            if (gettimeofday(&startTime, nullptr) != 0) [[unlikely]]
+                throw SystemException();
+
+            const uint64_t startCycles = Cycler::now();
+            while (true) {
+                if (gettimeofday(&stopTime, nullptr) != 0) [[unlikely]]
+                    throw SystemException();
+
+                const uint64_t stopCycles = Cycler::now();
+                const uint64_t micros = (stopTime.tv_usec - startTime.tv_usec) + (stopTime.tv_sec - startTime.tv_sec) * 1000000;
+                if (micros > 10000) {
+                    result = static_cast<double>(stopCycles - startCycles);
+                    result = 1000000.0 * result / static_cast<double>(micros);
+                    break;
+                }
+            }
+            const double delta = result / 100000.0;
+            if (((result - delta) < oldCycles) && (oldCycles < (result + delta)))
+                break;
+        }
+        return result;
+    #else
+        noImpl();
+    #endif
+    }
+}
+
+double Cycler::getCyclesPerSec() {
+    static const double localCyclesPerSec = makeCyclesPerSec();
+    return localCyclesPerSec;
+}
 /*!
  * Given an elapsed time measured in cycles, return an integer
  * giving the corresponding time in nanoseconds. Note: toSeconds()
@@ -138,43 +184,4 @@ uint64_t Cycler::fromSeconds(double seconds, double cyclesPerSec) {
      * Avoid using library function lround() for performance.
      */
     return (uint64_t)(seconds * cyclesPerSec + 0.5); // NOLINT second > 0, cyclesPerSec > 0, rounding is safe
-}
-
-double Cycler::makeCyclesPerSec() {
-#ifdef __linux__
-    struct timeval startTime, stopTime; /* NOLINT no initializing is intended */
-    // There is one tricky aspect, which is that we could get interrupted
-    // between calling gettimeofday and reading the cycle counter, in which
-    // case we won't have corresponding readings.  To handle this (unlikely)
-    // case, compute the overall result repeatedly, and wait until we get
-    // two successive calculations that are within 0.001% of each other (or
-    // in other words, a drift of up to 10µs per second).
-    double oldCycles = 0;
-    double result = 0;
-    while (true) {
-        oldCycles = result;
-        if (gettimeofday(&startTime, nullptr) != 0) [[unlikely]]
-            throw SystemException();
-
-        const uint64_t startCycles = now();
-        while (true) {
-            if (gettimeofday(&stopTime, nullptr) != 0) [[unlikely]]
-                throw SystemException();
-
-            const uint64_t stopCycles = now();
-            const uint64_t micros = (stopTime.tv_usec - startTime.tv_usec) + (stopTime.tv_sec - startTime.tv_sec) * 1000000;
-            if (micros > 10000) {
-                result = static_cast<double>(stopCycles - startCycles);
-                result = 1000000.0 * result / static_cast<double>(micros);
-                break;
-            }
-        }
-        const double delta = result / 100000.0;
-        if (((result - delta) < oldCycles) && (oldCycles < (result + delta)))
-            break;
-    }
-    return result;
-#else
-    noImpl();
-#endif
 }
