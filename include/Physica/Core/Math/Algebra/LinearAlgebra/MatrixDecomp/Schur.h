@@ -133,7 +133,7 @@ namespace Physica {
         if constexpr (T::isComplex()) {
             size_t iter = 0;
             while (activeWindowDownDiag(matrixT, 1) != 1) {
-                if (iter == Decouplable::maxItePerCol) [[unlikely]]
+                if (iter == Decouplable::MaxIterationPerCol) [[unlikely]]
                     throw BadConvergenceException(BadConvergenceMessage);
                 const auto shift = complexShift(1, iter);
                 complexQR(0, 1, shift);
@@ -155,7 +155,7 @@ namespace Physica {
         size_t order = normalized.getRow();
         size_t upper = order - 1;
         size_t total_iter = 0;
-        const size_t max_iter = Decouplable::maxItePerCol * order;
+        const size_t max_iter = Decouplable::MaxIterationPerCol * order;
         while (1 <= upper && upper < order) {
             const size_t lower = activeWindowDownDiag(matrixT, upper);
             if (lower == upper) {

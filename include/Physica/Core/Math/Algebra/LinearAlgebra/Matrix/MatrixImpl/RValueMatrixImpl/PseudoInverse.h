@@ -61,7 +61,7 @@ namespace Physica {
         const auto& singular = svd.getSingulars();
         const T tol = singular.max() * std::numeric_limits<T>::epsilon();
         for (size_t i = 0; i < singular.getLength(); ++i)
-            diagD.diag()[i] = (abs(singular[i]) < tol) ? T(0) : reciprocal(singular[i]);
+            diagD.diag()[i] = (singular.calc(i) < tol) ? T(0) : reciprocal(singular.calc(i));
         target = svd.getMatrixV() * diagD * svd.getMatrixU().hermite();
     }
 }

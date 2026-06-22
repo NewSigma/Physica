@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,16 +21,15 @@
 #include "Test.h"
 
 using namespace Physica;
-using ScalarType = float64;
-using MatrixType = DenseMatrix<ScalarType, MatrixMajor::Col>;
+using T = float64;
 
 namespace {
     template<Matrix M>
     void decomp(const M& source, double tolerance) {
-        SVD<ScalarType> svd(source);
+        SVD<T> svd(source);
         const auto& U = svd.getMatrixU();
         const auto& V = svd.getMatrixV();
-        const auto& v = svd.getSingulars();
+        const auto& v = svd.getSignSingulars();
 
         M A(source.getRow(), source.getCol(), 0);
         for (size_t i = 0; i < v.getLength(); ++i)
@@ -41,11 +40,15 @@ namespace {
 
 int main() {
     {
-        const MatrixType mat{{1, 2, 3}, {2, 1, 1}, {-2, 0, 1}};
+        MatrixND<T> mat{{1, 2, 3}, {2, 1, 1}, {-2, 0, 1}};
         decomp(mat, 1E-14);
     }
     {
-        const MatrixType mat{{1, 2, 3, 4, 5}, {5, 6, 7, 8, 9}, {9, 10, 11, 12, 13}, {7, 6, -8, -9, 5}};
+        const MatrixND<T> mat{{1, 2, 3, 4, 5}, {5, 6, 7, 8, 9}, {9, 10, 11, 12, 13}, {7, 6, -8, -9, 5}};
+        decomp(mat, 1E-14);
+    }
+    {
+        const MatrixND<T> mat{{1, 0, 0}, {0, -1, 0}, {0, 0, 1}};
         decomp(mat, 1E-14);
     }
     return 0;

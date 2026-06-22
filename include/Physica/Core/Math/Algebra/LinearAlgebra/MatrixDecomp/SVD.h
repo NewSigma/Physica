@@ -27,7 +27,7 @@
 namespace Physica {
     /**
      * Decomposite matrix A like A = UDV^T
-     * 
+     *
      * References:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:488-492
      */
@@ -35,14 +35,14 @@ namespace Physica {
     class SVD : public Decouplable {
         static_assert(!T::isComplex(), "[Error]: SVD class do not support complex data");
         using Base = Decouplable;
-        using RealType = T::RealType;
+        using Tr = T::RealType;
         constexpr static int Major = MatrixMajor::Col;
     public:
         constexpr static size_t NumSingularValue = RowAtCompile > ColAtCompile ? ColAtCompile : RowAtCompile;
-        using SingularValueVector = DenseVector<RealType, NumSingularValue>;
-        using WorkingMatrix = DenseMatrix<RealType, Major, RowAtCompile, ColAtCompile>;
-        using LSingularMatrix = DenseMatrix<RealType, Major, RowAtCompile, RowAtCompile>;
-        using RSingularMatrix = DenseMatrix<RealType, Major, ColAtCompile, ColAtCompile>;
+        using SingularValueVector = DenseVector<Tr, NumSingularValue>;
+        using WorkingMatrix = DenseMatrix<Tr, Major, RowAtCompile, ColAtCompile>;
+        using LSingularMatrix = DenseMatrix<Tr, Major, RowAtCompile, RowAtCompile>;
+        using RSingularMatrix = DenseMatrix<Tr, Major, ColAtCompile, ColAtCompile>;
     private:
         WorkingMatrix working;
         SingularValueVector singulars;
@@ -56,7 +56,7 @@ namespace Physica {
         SVD(SVD&&) noexcept = default;
         ~SVD() = default;
         /* Operators */
-        SVD& operator=(SVD obj) noexcept { swap(obj); return *this; }
+        SVD& operator=(SVD obj) noexcept;
         /* Operations */
         void compute(const Matrix auto& source);
         void sort();
@@ -64,9 +64,10 @@ namespace Physica {
         void resize(size_t order);
         void swap(SVD& __restrict svd) noexcept;
         /* Getters */
-        [[nodiscard]] const SingularValueVector& getSingulars() const noexcept { return singulars; }
-        [[nodiscard]] const LSingularMatrix& getMatrixU() const noexcept { return lSingularMat; }
-        [[nodiscard]] const RSingularMatrix& getMatrixV() const noexcept { return rSingularMat; }
+        [[nodiscard]] const auto& getSignSingulars() const noexcept { return singulars; }
+        [[nodiscard]] const auto& getMatrixU() const noexcept { return lSingularMat; }
+        [[nodiscard]] const auto& getMatrixV() const noexcept { return rSingularMat; }
+        [[nodiscard]] auto getSingulars() const noexcept { return abs(singulars); }
         [[nodiscard]] size_t getNumSingular() const noexcept { return singulars.getLength(); }
     private:
         void stepSVD(size_t lower, size_t sub_order);
@@ -84,6 +85,12 @@ namespace Physica {
     SVD<T, RowAtCompile, ColAtCompile>::SVD(const Matrix auto& source)
             : SVD(source.getRow(), source.getCol()) {
         compute(source);
+    }
+
+    template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
+    auto SVD<T, RowAtCompile, ColAtCompile>::operator=(SVD obj) noexcept -> SVD& {
+        swap(obj);
+        return *this;
     }
 
     template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
@@ -109,11 +116,12 @@ namespace Physica {
         const size_t order = working.getCol();
         size_t upper = order - 1;
         size_t total_iter = 0;
-        const size_t max_iter = Decouplable::maxItePerCol * order;
+        const size_t max_iter = Decouplable::MaxIterationPerCol * order;
+        const T factor = working.diag().normInf();
         while (1 <= upper && upper < order) {
             size_t lower = Base::activeWindowUpDiag(working, upper);
             for (size_t i = lower; i <= upper; ++i) {
-                if (abs(working[i, i]) <= T(std::numeric_limits<T>::epsilon() * 10)) { //TODO: absolute criteria is unreliable, use relative criteria instead 
+                if (abs(working[i, i]) <= factor * T(std::numeric_limits<T>::epsilon())) {
                     working[i, i] = T(0);
                     working[i, i + (i + 1 < order)] = T(0);
                     if (i < upper - 1) {
@@ -127,9 +135,8 @@ namespace Physica {
                 }
             }
 
-            if (lower == upper) {
+            if (lower == upper)
                 upper -= 1;
-            }
             else {
                 const size_t sub_order = upper - lower + 1;
                 stepSVD(lower, sub_order);
@@ -143,6 +150,7 @@ namespace Physica {
 
         for (size_t i = 0; i < order; ++i)
             singulars[i] = working[i, i];
+
         if (row < col)
             lSingularMat.swap(rSingularMat);
     }
@@ -223,18 +231,15 @@ namespace Physica {
         const T a1 = square(d1) + square(f1);
         const T a2 = square(d2) + square(f2);
         const T b = d1 * f2;
-        const RealType factor = (a1 - a2) * 0.5;
-        const RealType factor2 = square(b);
-        const RealType factor3 = sqrt(square(factor) + factor2);
+        const Tr factor = (a1 - a2) * 0.5;
+        const Tr factor2 = square(b);
+        const Tr factor3 = sqrt(fma(factor, factor, factor2));
         const T shift = a2 - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3));
         return shift;
     }
 
     template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
-    void SVD<T, RowAtCompile, ColAtCompile>::leftGivens(
-            Matrix auto& mat,
-            Vector2D<T>& buffer,
-            size_t i) {
+    void SVD<T, RowAtCompile, ColAtCompile>::leftGivens(Matrix auto& mat, Vector2D<T>& buffer, size_t i) {
         buffer[0] = mat[i, i];
         buffer[1] = mat[i + 1, i];
         buffer = givens(buffer, 0, 1);
@@ -245,10 +250,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
-    void SVD<T, RowAtCompile, ColAtCompile>::rightGivens(
-            Matrix auto& mat,
-            Vector2D<T>& buffer,
-            size_t i) {
+    void SVD<T, RowAtCompile, ColAtCompile>::rightGivens(Matrix auto& mat, Vector2D<T>& buffer, size_t i) {
         buffer = givens(buffer, 0, 1);
         buffer[1] = -buffer[1];
         applyGivens(mat, buffer, i, i + 1);
