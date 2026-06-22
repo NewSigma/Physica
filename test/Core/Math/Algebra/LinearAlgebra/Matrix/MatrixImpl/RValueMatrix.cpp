@@ -22,6 +22,17 @@
 using namespace Physica;
 
 namespace {
+    void diag() {
+        // Test that diag() works for rectangular matrix
+        using T = float32;
+        using Matrix4x3 = DenseMatrix<T, MatrixMajor::Col, 4, 3>;
+        auto compact = Matrix4x3::random_uniform<Random<>>(4, 3);
+        auto corner = compact.topLeftCorner(3);
+        expect(abs_elem(compact).diag().getLength() == 3);
+        for (int i = 0; i < 3; ++i)
+            expect(abs_elem(corner).diag().calc(i) == abs_elem(compact).diag().calc(i));
+    }
+
     void minorDiag() {
         // Test that 0 sub-diagonal is diagonal
         using T = float32;
@@ -53,8 +64,9 @@ namespace {
 static_assert(std::same_as<decltype(MatrixND<float32>{}.transpose().transpose()), MatrixND<float32>&&>, "[Error]: transpose-transpose should yield it self");
 
 int main() {
-    argmin();
+    diag();
     minorDiag();
+    argmin();
     sumRowCol();
     return 0;
 }

@@ -293,7 +293,6 @@ namespace Physica {
 
     template<class Derived, Scalar ScalarT>
     __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::diag(this auto&& self) noexcept {
-        assert(self.isSquare());
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<DiagVectorR<M>>(std::forward<Self>(self));
@@ -301,7 +300,6 @@ namespace Physica {
 
     template<class Derived, Scalar ScalarT>
     __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::diag(this auto&& self, ssize_t shift) noexcept {
-        assert(self.isSquare());
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<MinorDiagR<M>>(std::forward<Self>(self), shift);

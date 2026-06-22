@@ -41,13 +41,18 @@ namespace Physica {
         void resize([[maybe_unused]] size_t size) { assert(getLength() == size); }
         /* Getters */
         [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept { return self.getExpr().data_ptr(index, index); }
     };
 
     template<Matrix M>
     __host__ __device__ auto&& device_obj<DiagVectorL<M>>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived());
+    }
+
+    template<Matrix M>
+    __host__ __device__ size_t device_obj<DiagVectorL<M>>::getLength() const noexcept {
+        return std::min(getExpr().getCol(), getExpr().getRow());
     }
 }
 

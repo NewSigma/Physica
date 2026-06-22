@@ -23,10 +23,11 @@ using namespace Physica;
 using MatrixType = MatrixND<float32>;
 
 namespace {
-    void sum() {
-        const MatrixType A = MatrixType::random_uniform<Random<>>(16, 16);
+    void diag() {
+        const MatrixType A = MatrixType::random_uniform<Random<>>(4, 3);
         const auto d_A = A.toDeviceAsync();
-        expect(scalarNear(d_A.diag().sum(), A.diag().sum(), 1E-6));
+        device_obj<VectorND<float32>> result = (-d_A).diag();
+        expect((-A).diag() == result.toHost());
     }
 
     void minorDiag() {
@@ -37,12 +38,19 @@ namespace {
         device_obj<VectorND<float32>> result = (-d_A).diag(shift);
         expect((-A).diag(shift) == result.toHost());
     }
+
+    void sum() {
+        const MatrixType A = MatrixType::random_uniform<Random<>>(16, 16);
+        const auto d_A = A.toDeviceAsync();
+        expect(scalarNear(d_A.diag().sum(), A.diag().sum(), 1E-6));
+    }
 }
 
 static_assert(std::same_as<decltype(device_obj<MatrixND<float32>>{}.transpose().transpose()), device_obj<MatrixND<float32>>&&>, "[Error]: transpose-transpose should yield it self");
 
 int main() {
-    sum();
+    diag();
     minorDiag();
+    sum();
     return 0;
 }

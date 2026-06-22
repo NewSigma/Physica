@@ -39,7 +39,7 @@ namespace Physica {
         void resize([[maybe_unused]] size_t size) { assert(getLength() == size); }
         /* Getters */
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
-        [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
+        [[nodiscard]] size_t getLength() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&& self, size_t index) noexcept { return self.mat.data_ptr(index, index); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
@@ -48,6 +48,11 @@ namespace Physica {
     template<Matrix M>
     auto&& DiagVectorL<M>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
+    }
+
+    template<Matrix M>
+    size_t DiagVectorL<M>::getLength() const noexcept {
+        return std::min(mat.getCol(), mat.getRow());
     }
 
     template<Matrix M>

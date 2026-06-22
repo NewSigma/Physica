@@ -41,7 +41,7 @@ namespace Physica {
         [[nodiscard]] T calc(size_t index) const { return mat.calc(index, index); }
         /* Getters */
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
-        [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
+        [[nodiscard]] size_t getLength() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
@@ -49,6 +49,11 @@ namespace Physica {
     template<Matrix M>
     auto&& DiagVectorR<M>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
+    }
+
+    template<Matrix M>
+    size_t DiagVectorR<M>::getLength() const noexcept {
+        return std::min(mat.getCol(), mat.getRow());
     }
 
     template<Matrix M>

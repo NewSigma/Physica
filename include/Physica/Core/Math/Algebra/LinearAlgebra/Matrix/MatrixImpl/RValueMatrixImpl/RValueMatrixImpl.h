@@ -253,7 +253,6 @@ namespace Physica {
 
     template<class Derived, Scalar ScalarT>
     auto RValueMatrix<Derived, ScalarT>::diag(this auto&& self) noexcept {
-        assert(self.isSquare());
         using Self = decltype(self);
         return DiagVectorR<Self>(std::forward<Self>(self));
     }

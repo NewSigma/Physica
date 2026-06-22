@@ -235,7 +235,6 @@ namespace Physica {
 
     template<class Derived>
     auto LValueMatrix<Derived>::diag(this auto&& self) noexcept {
-        assert(self.isSquare());
         using Self = decltype(self);
         return DiagVectorL<Self>(std::forward<Self>(self));
     }

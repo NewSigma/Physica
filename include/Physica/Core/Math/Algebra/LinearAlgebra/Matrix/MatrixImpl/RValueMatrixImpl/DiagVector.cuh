@@ -44,12 +44,17 @@ namespace Physica {
         [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
     };
 
     template<Matrix M>
     __device__ auto device_obj<DiagVectorR<M>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
         return getExpr().calc(index, index, block);
+    }
+
+    template<Matrix M>
+    __host__ __device__ size_t device_obj<DiagVectorR<M>>::getLength() const noexcept {
+        return std::min(getExpr().getCol(), getExpr().getRow());
     }
 
     template<Matrix M>

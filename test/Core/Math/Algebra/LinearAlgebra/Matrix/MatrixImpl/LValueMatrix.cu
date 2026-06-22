@@ -23,6 +23,13 @@ using namespace Physica;
 using MatrixType = MatrixND<float32>;
 
 namespace {
+    void diag() {
+        const MatrixType A = MatrixType::random_uniform<Random<>>(4, 3);
+        const auto d_A = A.toDeviceAsync();
+        device_obj<VectorND<float32>> result = d_A.diag();
+        expect(A.diag() == result.toHost());
+    }
+
     void minorDiag() {
         const MatrixType A = MatrixType::random_uniform<Random<>>(4, 4);
         const auto d_A = A.toDeviceAsync();
@@ -34,6 +41,7 @@ namespace {
 }
 
 int main() {
+    diag();
     minorDiag();
     return 0;
 }
