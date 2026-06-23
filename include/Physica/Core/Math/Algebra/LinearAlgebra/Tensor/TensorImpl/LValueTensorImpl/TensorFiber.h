@@ -21,17 +21,18 @@
 #include "../LValueTensor.h"
 
 namespace Physica {
-    template<Tensor X>
-    class TensorFiber : public LValueVector<TensorFiber<X>> {
-        using This = TensorFiber<X>;
-        using Base = LValueVector<TensorFiber<X>>;
+    template<Tensor X, int Dim>
+    class TensorFiber : public LValueVector<TensorFiber<X, Dim>> {
+        using This = TensorFiber<X, Dim>;
+        using Base = LValueVector<TensorFiber<X, Dim>>;
         using IndexType = std::remove_cvref_t<X>::IndexType;
+
+        static_assert(Dim < std::remove_cvref_t<X>::ndim());
     private:
         decay_rvalue_t<X> tensor;
         IndexType index;
-        int dim;
     public:
-        TensorFiber(X&& tensor, int dim, IndexType index);
+        TensorFiber(X&& tensor, IndexVar auto... indices);
         TensorFiber(const This&) = default;
         TensorFiber(This&&) noexcept = default;
         ~TensorFiber() = default;
@@ -41,40 +42,40 @@ namespace Physica {
         using Base::resize;
         void resize(size_t length);
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return tensor.dim(dim); }
+        [[nodiscard]] size_t getLength() const noexcept { return tensor.dim(Dim); }
         [[nodiscard]] auto data_ptr(this auto&& self, size_t i) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
-    template<Tensor X>
-    TensorFiber<X>::TensorFiber(X&& tensor, int dim, IndexType index)
-            : tensor(std::forward<X>(tensor)), index(index), dim(dim) {
-        constexpr int NDim = tensor.ndim();
-        assert(dim < NDim);
-        for (int i = 0; i < NDim; ++i) {
-            if (i == dim)
-                continue;
-            assert(index[i] < tensor.dim(i));
-        }
+    template<Tensor X, int Dim>
+    TensorFiber<X, Dim>::TensorFiber(X&& tensor, IndexVar auto... indices) : tensor(std::forward<X>(tensor)) {
+        size_t i = 0;
+        ([&]() {
+            if constexpr (std::integral<decltype(indices)>) {
+                assert(indices < tensor.dim(i));
+                index[i] = indices;
+            }
+            i += 1;
+        }(), ...);
     }
 
-    template<Tensor X>
-    void TensorFiber<X>::resize([[maybe_unused]] size_t length) {
+    template<Tensor X, int Dim>
+    void TensorFiber<X, Dim>::resize([[maybe_unused]] size_t length) {
         assert(length == getLength());
     }
 
-    template<Tensor X>
-    auto TensorFiber<X>::data_ptr(this auto&& self, size_t i) noexcept {
+    template<Tensor X, int Dim>
+    auto TensorFiber<X, Dim>::data_ptr(this auto&& self, size_t i) noexcept {
         auto idx = self.index;
-        idx[self.dim] = i;
+        idx[Dim] = i;
         return self.tensor.data_ptr(idx);
     }
 }
 
 namespace Physica {
-    template<Tensor X>
-    class Traits<TensorFiber<X>> {
+    template<Tensor X, int Dim>
+    class Traits<TensorFiber<X, Dim>> {
     public:
         using ScalarType = std::remove_cvref_t<X>::ScalarType;
     };

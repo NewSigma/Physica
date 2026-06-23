@@ -84,7 +84,7 @@ namespace Physica {
 
     template<Scalar T>
     void MatrixSampler<T>::sample(const GreenPair& greens, T rsign) {
-        observes.slice(1, 2, {Base::getCursor(), undef(), undef()}) = calcCorrelation(greens[0], greens[1]) * rsign;
+        observes.slice(Base::getCursor(), var(), var()) = calcCorrelation(greens[0], greens[1]) * rsign;
         Base::sample(rsign);
     }
 
@@ -92,7 +92,7 @@ namespace Physica {
     auto MatrixSampler<T>::calcRawMean() const -> MatrixND<T> {
         MatrixND<T> result(getNumSiteX(), getNumSiteY());
         for (size_t i = 0; i < observes.dim(0); ++i)
-            result.toNextMean(i, observes.slice(1, 2, {Base::getCursor(), undef(), undef()}));
+            result.toNextMean(i, observes.slice(Base::getCursor(), var(), var()));
         return result;
     }
 

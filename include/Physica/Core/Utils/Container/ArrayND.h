@@ -27,7 +27,10 @@ namespace Physica {
         constexpr static bool StaticShape = sizeof...(Dims) != 1;
         static_assert(sizeof...(Dims) > 0, "[Error]: Dims is not specified");
     public:
-        constexpr static int NDim = [](int x, auto...) consteval static noexcept -> int { return StaticShape ? sizeof...(Dims) : x; }(Dims...);
+        constexpr static int NDim = [](int x, auto...) consteval static noexcept -> int {
+            return StaticShape ? sizeof...(Dims) : x;
+        }(Dims...);
+
         constexpr static size_t SizeAtCompile = StaticShape ? (Dims * ...) : Dynamic;
         static_assert(NDim > 2, "[Error]: Invalid Dim");
     private:
@@ -72,7 +75,6 @@ namespace Physica {
         void zeros() noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] constexpr int ndim() const noexcept { return NDim; }
         [[nodiscard]] constexpr size_t dim(int index) const noexcept;
         [[nodiscard]] IndexType getShape() const noexcept;
         [[nodiscard, gnu::returns_nonnull]] auto* data(this auto&&) noexcept;
@@ -82,6 +84,7 @@ namespace Physica {
         [[nodiscard]] size_t getSize() const noexcept { return arr.getLength(); }
         [[nodiscard]] bool empty() const noexcept { return arr.empty(); }
         /* Static members */
+        [[nodiscard]] constexpr static int ndim() noexcept { return NDim; }
         [[nodiscard]] static size_t toSize(const IndexType& shape) noexcept;
     };
 

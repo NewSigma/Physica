@@ -102,11 +102,9 @@ namespace Physica {
 
     template<class Derived, Scalar ScalarT>
     template<int GradOrder>
-    auto RValueTensor<Derived, ScalarT>::grads() const noexcept {
-        if constexpr (isReverseDiff())
-            return Base::getDerived().template grads<GradOrder>();
-        else
-            return grads_impl<GradOrder>();
+    auto RValueTensor<Derived, ScalarT>::grads(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return GradTensor<Derived, GradOrder>(std::forward<Self>(self));
     }
 
     template<class Derived, Scalar ScalarT>
@@ -163,8 +161,24 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    template<int GradOrder>
-    auto RValueTensor<Derived, ScalarT>::grads_impl() const noexcept {
-        return GradTensor<Derived, GradOrder>(Base::getDerived());
+    template<IndexVar... Ts>
+    __host__ __device__ consteval int RValueTensor<Derived, ScalarT>::calcFiberDim() noexcept {
+        constexpr IndexVarInfo<Ts...> info{};
+        static_assert(info.getNumAnonymous() == 1, "[Error]: Fiber requires 1 anonymous var");
+        return std::ranges::distance(info.isAnonymous.begin(), std::ranges::find(info.isAnonymous, true));
+    }
+
+    template<class Derived, Scalar ScalarT>
+    template<IndexVar... Ts>
+    __host__ __device__ consteval Array<int, 2> RValueTensor<Derived, ScalarT>::calcSliceDim() noexcept {
+        constexpr IndexVarInfo<Ts...> info{};
+        static_assert(info.getNumAnonymous() == 2, "[Error]: Slice requires 2 anonymous var");
+        Array<int, 2> result{};
+        int count = 0;
+        for (int i = 0; i < info.size() && count < 2; ++i) {
+            if (info.isAnonymous[i])
+                result[count++] = i;
+        }
+        return result;
     }
 }

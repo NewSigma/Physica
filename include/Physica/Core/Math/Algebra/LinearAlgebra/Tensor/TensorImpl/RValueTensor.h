@@ -20,6 +20,7 @@
 
 #include "Physica/CRTPBase.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar.h"
 #include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica {
@@ -69,13 +70,13 @@ namespace Physica {
         [[nodiscard]] auto norms() const noexcept;
         [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         template<int GradOrder = 1>
-        [[nodiscard]] auto grads() const noexcept;
+        [[nodiscard]] auto grads(this auto&& self) noexcept;
         /* Getters */
-        [[nodiscard]] constexpr int ndim() const noexcept { return NDim; }
         [[nodiscard]] size_t dim(int index) const noexcept;
         [[nodiscard]] IndexType getShape() const noexcept;
         [[nodiscard]] size_t getSize() const noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static int ndim() noexcept { return NDim; }
         [[nodiscard]] __host__ __device__ consteval static bool isForwardDiff() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isReverseDiff() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isDiffable() noexcept;
@@ -87,9 +88,11 @@ namespace Physica {
         RValueTensor() = default;
         RValueTensor(const This&) = default;
         RValueTensor(This&&) noexcept = default;
-
-        template<int GradOrder>
-        auto grads_impl() const noexcept;
+        /* Static members */
+        template<IndexVar... Ts>
+        __host__ __device__ consteval static int calcFiberDim() noexcept;
+        template<IndexVar... Ts>
+        __host__ __device__ consteval static Array<int, 2> calcSliceDim() noexcept;
     };
 }
 

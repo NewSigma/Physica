@@ -55,8 +55,8 @@ namespace Physica {
         void forND(std::invocable<T&, IndexType> auto fn);
         void forND(std::invocable<const T&, IndexType> auto fn) const;
 
-        [[nodiscard]] auto fiber(this auto&&, int dim, IndexType index) noexcept;
-        [[nodiscard]] auto slice(this auto&&, int dimRow, int dimCol, IndexType index) noexcept;
+        [[nodiscard]] auto fiber(this auto&&, IndexVar auto...) noexcept;
+        [[nodiscard]] auto slice(this auto&&, IndexVar auto...) noexcept;
         [[nodiscard]] auto block(this auto&&, Index3D from, Index3D count) noexcept;
 
         [[nodiscard]] auto flatten(this auto&&);

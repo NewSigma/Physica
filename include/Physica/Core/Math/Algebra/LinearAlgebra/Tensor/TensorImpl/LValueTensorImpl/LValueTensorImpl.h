@@ -96,15 +96,17 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueTensor<Derived>::fiber(this auto&& self, int dim, IndexType index) noexcept {
+    auto LValueTensor<Derived>::fiber(this auto&& self, IndexVar auto... indices) noexcept {
         using Self = decltype(self);
-        return TensorFiber<Self>(std::forward<Self>(self), dim, index);
+        constexpr int Dim = Base::template calcFiberDim<decltype(indices)...>();
+        return TensorFiber<Self, Dim>(std::forward<Self>(self), indices...);
     }
 
     template<class Derived>
-    auto LValueTensor<Derived>::slice(this auto&& self, int dimRow, int dimCol, IndexType index) noexcept {
+    auto LValueTensor<Derived>::slice(this auto&& self, IndexVar auto... indices) noexcept {
         using Self = decltype(self);
-        return TensorSlice<Self>(std::forward<Self>(self), dimRow, dimCol, index);
+        constexpr auto Dim = Base::template calcSliceDim<decltype(indices)...>();
+        return TensorSlice<Self, Dim[0], Dim[1]>(std::forward<Self>(self), indices...);
     }
 
     template<class Derived>

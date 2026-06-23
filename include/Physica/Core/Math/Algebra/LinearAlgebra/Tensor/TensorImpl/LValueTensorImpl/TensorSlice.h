@@ -22,18 +22,20 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 
 namespace Physica {
-    template<Tensor X>
-    class TensorSlice : public LValueMatrix<TensorSlice<X>> {
-        using This = TensorSlice<X>;
-        using Base = LValueMatrix<TensorSlice<X>>;
+    template<Tensor X, int DimR, int DimC>
+    class TensorSlice : public LValueMatrix<TensorSlice<X, DimR, DimC>> {
+        using This = TensorSlice<X, DimR, DimC>;
+        using Base = LValueMatrix<TensorSlice<X, DimR, DimC>>;
         using IndexType = std::remove_cvref_t<X>::IndexType;
+
+        static_assert(DimR != DimC, "[Error]: DimR and DimC must be different");
+        static_assert(DimR < std::remove_cvref_t<X>::ndim());
+        static_assert(DimC < std::remove_cvref_t<X>::ndim());
     private:
         decay_rvalue_t<X> tensor;
         IndexType index;
-        int dimRow;
-        int dimCol;
     public:
-        TensorSlice(X&& tensor, int dimRow, int dimCol, IndexType index);
+        TensorSlice(X&& tensor, IndexVar auto... indices);
         TensorSlice(const This&) = default;
         TensorSlice(This&&) noexcept = default;
         ~TensorSlice() = default;
@@ -43,45 +45,43 @@ namespace Physica {
         using Base::resize;
         void resize(size_t row, size_t col);
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return tensor.dim(dimRow); }
-        [[nodiscard]] size_t getCol() const noexcept { return tensor.dim(dimCol); }
+        [[nodiscard]] size_t getRow() const noexcept { return tensor.dim(DimR); }
+        [[nodiscard]] size_t getCol() const noexcept { return tensor.dim(DimC); }
         [[nodiscard]] auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
 
-    template<Tensor X>
-    TensorSlice<X>::TensorSlice(X&& tensor, int dimRow, int dimCol, IndexType index)
-            : tensor(std::forward<X>(tensor)), index(index), dimRow(dimRow), dimCol(dimCol) {
-        constexpr int NDim = tensor.ndim();
-        assert(dimRow < NDim && dimCol < NDim);
-        assert(dimRow != dimCol);
-        for (int i = 0; i < NDim; ++i) {
-            if (i == dimRow)
-                continue;
-            if (i == dimCol)
-                continue;
-            assert(index[i] < tensor.dim(i));
-        }
+    template<Tensor X, int DimR, int DimC>
+    TensorSlice<X, DimR, DimC>::TensorSlice(X&& tensor, IndexVar auto... indices)
+            : tensor(std::forward<X>(tensor)) {
+        size_t i = 0;
+        ([&]() {
+            if constexpr (std::integral<decltype(indices)>) {
+                assert(indices < tensor.dim(i));
+                index[i] = indices;
+            }
+            i += 1;
+        }(), ...);
     }
 
-    template<Tensor X>
-    void TensorSlice<X>::resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
+    template<Tensor X, int DimR, int DimC>
+    void TensorSlice<X, DimR, DimC>::resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
         assert(row == getRow() && col == getCol());
     }
 
-    template<Tensor X>
-    auto TensorSlice<X>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+    template<Tensor X, int DimR, int DimC>
+    auto TensorSlice<X, DimR, DimC>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
         auto idx = self.index;
-        idx[self.dimRow] = row;
-        idx[self.dimCol] = col;
+        idx[DimR] = row;
+        idx[DimC] = col;
         return self.tensor.data_ptr(idx);
     }
 }
 
 namespace Physica {
-    template<Tensor X>
-    class Traits<TensorSlice<X>> {
+    template<Tensor X, int DimR, int DimC>
+    class Traits<TensorSlice<X, DimR, DimC>> {
     public:
         using ScalarType = std::remove_cvref_t<X>::ScalarType;
     };
