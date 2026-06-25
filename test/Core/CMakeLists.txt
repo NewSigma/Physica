@@ -3,6 +3,7 @@ add_subdirectory(Math)
 add_subdirectory(Scalar)
 ## ML
 physica_add_test(AP ML/AP.cpp)
+physica_add_test(GPModel ML/GPModel.cpp)
 
 add_subdirectory(Parallel)
 ## Utils
