@@ -56,7 +56,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return m.getCol(); }
         [[nodiscard]] size_t getCol() const noexcept { return m.getRow(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return m.getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
@@ -70,6 +72,11 @@ namespace Physica {
     template<Matrix M>
     auto&& Hermite<M>::hermite(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.m);
+    }
+
+    template<Matrix M>
+    __host__ __device__ consteval bool Hermite<M>::isStaticSquare() noexcept {
+        return std::remove_cvref_t<M>::isStaticSquare();
     }
 
     template<Matrix M>

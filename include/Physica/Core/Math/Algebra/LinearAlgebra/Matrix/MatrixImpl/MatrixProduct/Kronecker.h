@@ -50,9 +50,11 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
+        [[nodiscard]] size_t getOrder() const noexcept;
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
@@ -144,6 +146,11 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
+    size_t Kronecker<M1, M2>::getOrder() const noexcept {
+        return getRow();
+    }
+
+    template<Matrix M1, Matrix M2>
     auto&& Kronecker<M1, M2>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M1>(self.m1);
     }
@@ -151,6 +158,11 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     auto&& Kronecker<M1, M2>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M2>(self.m2);
+    }
+
+    template<Matrix M1, Matrix M2>
+    __host__ __device__ consteval bool Kronecker<M1, M2>::isStaticSquare() noexcept {
+        return Base::isStaticSquare() || (std::remove_cvref_t<M1>::isStaticSquare() && std::remove_cvref_t<M2>::isStaticSquare());
     }
 
     template<Matrix M1, Matrix M2>

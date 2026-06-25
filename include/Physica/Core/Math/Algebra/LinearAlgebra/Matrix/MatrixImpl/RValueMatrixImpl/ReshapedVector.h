@@ -47,6 +47,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
+        [[nodiscard]] size_t getOrder() const noexcept;
         [[nodiscard]] T sum() const { return v.sum(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return Row; }
@@ -88,6 +89,12 @@ namespace Physica {
         if constexpr (Col != Dynamic)
             return Col;
         return c;
+    }
+
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    size_t RValueReshapedVector<V, MatrixMajor, Row, Col>::getOrder() const noexcept {
+        assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
+        return getRow();
     }
 }
 

@@ -55,9 +55,9 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] auto&& getIndices(this auto&&) noexcept;
-        [[nodiscard]] size_t getRow() const noexcept { return indices.getLength(); }
-        [[nodiscard]] size_t getCol() const noexcept { return indices.getLength(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return indices.getLength(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
         [[nodiscard]] static This fromMKL(Array<MKL_INT64> ipiv);
     };
@@ -88,8 +88,8 @@ namespace Physica {
     template<Scalar T>
     T PermMatrix<T>::det() const {
         int count = 0;
-        for (size_t i = 0; i < getRow(); ++i) {
-            for (size_t j = i + 1; j < getRow(); ++j) {
+        for (size_t i = 0; i < getOrder(); ++i) {
+            for (size_t j = i + 1; j < getOrder(); ++j) {
                 count += indices[j] < indices[i];
             }
         }

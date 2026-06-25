@@ -52,9 +52,9 @@ namespace Physica {
         [[nodiscard]] const auto& getModel() const noexcept { return Base::getDerived().getModel(); }
         [[nodiscard]] const auto& getRepr() const noexcept { return Base::getDerived().getRepr(); }
         [[nodiscard]] size_t getNumState() const noexcept { return getRepr().getNumState(); }
-        [[nodiscard]] size_t getRow() const noexcept { return getNumState(); }
-        [[nodiscard]] size_t getCol() const noexcept { return getNumState(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return getNumState(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     protected:
         HamiltonMatrix() = default;

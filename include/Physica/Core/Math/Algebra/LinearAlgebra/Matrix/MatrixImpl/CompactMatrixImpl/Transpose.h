@@ -48,8 +48,10 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return mat.getCol(); }
         [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return mat.getOrder(); }
         [[nodiscard]] auto data(this auto&& self) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
@@ -99,6 +101,11 @@ namespace Physica {
     __host__ __device__ consteval int Transpose<M>::getMajor() noexcept {
         constexpr static int OtherMajor = MatrixMajor::isColMatrix<M>() ? MatrixMajor::Row : MatrixMajor::Col;
         return MatrixMajor::isBothMajor<M>() ? MatrixMajor::BothMajor : OtherMajor;
+    }
+
+    template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
+    __host__ __device__ consteval bool Transpose<M>::isStaticSquare() noexcept {
+        return std::remove_cvref_t<M>::isStaticSquare();
     }
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())

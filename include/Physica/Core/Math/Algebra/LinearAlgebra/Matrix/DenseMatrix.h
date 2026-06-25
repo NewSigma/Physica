@@ -85,6 +85,7 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept { return storage.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return storage.getCol(); }
         [[nodiscard]] size_t getSize() const noexcept { return storage.getSize(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return storage.getOrder(); }
         [[nodiscard]] auto&& asArray(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;

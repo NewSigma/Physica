@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -49,6 +49,9 @@ namespace Physica {
         [[nodiscard]] const M& getExpr() const noexcept { return mat; }
         [[nodiscard]] size_t getRow() const noexcept { return mat.getCol(); }
         [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return mat.getOrder(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
     };
 
     template<Matrix M>
@@ -63,6 +66,11 @@ namespace Physica {
         for (size_t i = 0; i < singular.getLength(); ++i)
             diagD.diag()[i] = (singular.calc(i) < tol) ? T(0) : reciprocal(singular.calc(i));
         target = svd.getMatrixV() * diagD * svd.getMatrixU().hermite();
+    }
+
+    template<Matrix M>
+    __host__ __device__ consteval bool PseudoInverse<M>::isStaticSquare() noexcept {
+        return std::remove_cvref_t<M>::isStaticSquare();
     }
 }
 

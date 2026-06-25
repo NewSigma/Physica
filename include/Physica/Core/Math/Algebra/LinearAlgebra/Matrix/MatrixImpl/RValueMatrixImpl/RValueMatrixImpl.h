@@ -528,29 +528,54 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    size_t RValueMatrix<Derived, ScalarT>::getOrder() const noexcept {
+    auto RValueMatrix<Derived, ScalarT>::getRow() const noexcept {
+        if constexpr (Derived::isStaticSquare())
+            return getOrder();
+        else
+            return Base::getDerived().getRow();
+    }
+
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::getCol() const noexcept {
+        if constexpr (Derived::isStaticSquare())
+            return getOrder();
+        else
+            return Base::getDerived().getCol();
+    }
+
+    template<class Derived, Scalar ScalarT>
+    auto RValueMatrix<Derived, ScalarT>::getOrder() const noexcept {
         assert(isSquare() && "[Error]: getOrder() assumes square matrix");
-        return getRow();
+        return Base::getDerived().getOrder();
     }
 
     template<class Derived, Scalar ScalarT>
-    bool RValueMatrix<Derived, ScalarT>::isOverdetermined() const noexcept {
-        return getRow() > getCol();
+    constexpr bool RValueMatrix<Derived, ScalarT>::isOverdetermined() const noexcept {
+        if constexpr (Derived::isStaticSquare())
+            return false;
+        else
+            return getRow() > getCol();
     }
 
     template<class Derived, Scalar ScalarT>
-    bool RValueMatrix<Derived, ScalarT>::isUnderdetermined() const noexcept {
-        return getRow() < getCol();
+    constexpr bool RValueMatrix<Derived, ScalarT>::isUnderdetermined() const noexcept {
+        if constexpr (Derived::isStaticSquare())
+            return false;
+        else
+            return getRow() < getCol();
     }
 
     template<class Derived, Scalar ScalarT>
-    bool RValueMatrix<Derived, ScalarT>::isSquare() const noexcept {
-        return getRow() == getCol();
+    constexpr bool RValueMatrix<Derived, ScalarT>::isSquare() const noexcept {
+        if constexpr (Derived::isStaticSquare())
+            return true;
+        else
+            return getRow() == getCol();
     }
 
     template<class Derived, Scalar ScalarT>
-    bool RValueMatrix<Derived, ScalarT>::isSymm() const noexcept {
-        if constexpr (isStaticSymm())
+    constexpr bool RValueMatrix<Derived, ScalarT>::isSymm() const noexcept {
+        if constexpr (Derived::isStaticSymm())
             return true;
         else {
             if (!isSquare())
@@ -566,8 +591,8 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    bool RValueMatrix<Derived, ScalarT>::isHermite() const noexcept {
-        if constexpr (isStaticHermite())
+    constexpr bool RValueMatrix<Derived, ScalarT>::isHermite() const noexcept {
+        if constexpr (Derived::isStaticHermite())
             return true;
         else {
             if (!isSquare())
@@ -640,6 +665,11 @@ namespace Physica {
     __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isStaticHermite() noexcept {
         using HermiteTy = std::remove_cvref_t<decltype(std::declval<Derived>().hermite())>;
         return std::same_as<HermiteTy, Derived>;
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isStaticSquare() noexcept {
+        return Derived::getRowAtCompile() != Dynamic && Derived::getRowAtCompile() == Derived::getColAtCompile();
     }
 
     template<class Derived, Scalar ScalarT>

@@ -61,10 +61,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto&& diag(this auto&& self) noexcept;
         [[nodiscard]] size_t getOrder() const noexcept;
-        [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
-        [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }

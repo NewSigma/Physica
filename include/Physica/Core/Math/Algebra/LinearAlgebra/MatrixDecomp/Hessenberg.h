@@ -56,7 +56,7 @@ namespace Physica {
         void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getOrder() const noexcept { return working.getRow(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return working.getOrder(); }
         [[nodiscard]] MatrixH getMatrixH() const noexcept { return MatrixH(*this); }
         [[nodiscard]] HouseholderSequence<WorkingMatrix> getMatrixQ() const noexcept;
     private:
@@ -137,9 +137,9 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return hess.getOrder(); }
-        [[nodiscard]] size_t getCol() const noexcept { return hess.getOrder(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return hess.getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return Order; }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return Order; }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::Col; }
@@ -148,7 +148,7 @@ namespace Physica {
     template<Scalar T, size_t Order>
     void HessenbergMatrixH<T, Order>::assign(Matrix auto& target) const {
         using RealType = T::RealType;
-        const size_t order = getRow();
+        const size_t order = getOrder();
         size_t i = 0;
         for (; i < order - 2; ++i) {
             auto fromCol = hess.working.col(i);

@@ -45,11 +45,13 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return getExpr().getRow(); }
         [[nodiscard]] size_t getCol() const { return getExpr().getCol(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return getExpr().getOrder(); }
         [[nodiscard]] constexpr auto&& getExpr(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return std::remove_cvref_t<M>::isStaticSquare(); }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
@@ -117,12 +119,14 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const;
         [[nodiscard]] size_t getCol() const;
+        [[nodiscard]] size_t getOrder() const;
         [[nodiscard]] constexpr auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] constexpr auto&& getRHS(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
         [[nodiscard]] consteval static bool isStaticSymm() noexcept;
         [[nodiscard]] consteval static bool isStaticHermite() noexcept;
+        [[nodiscard]] consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
@@ -191,6 +195,14 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
+    size_t BinaryMatrixExpr<ID, LHS, RHS>::getOrder() const {
+        if constexpr (Matrix<LHS>)
+            return getLHS().getOrder();
+        else
+            return getRHS().getOrder();
+    }
+
+    template<ExprID ID, class LHS, class RHS>
     constexpr auto&& BinaryMatrixExpr<ID, LHS, RHS>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), LHS>(self.lhs);
     }
@@ -230,6 +242,18 @@ namespace Physica {
             static_assert(Scalar<RHS>, "[Error]: Unexpected type");
             return LHS1::isStaticHermite() && !RHS1::isComplex();
         }
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    consteval bool BinaryMatrixExpr<ID, LHS, RHS>::isStaticSquare() noexcept {
+        using LHS1 = std::remove_cvref_t<LHS>;
+        using RHS1 = std::remove_cvref_t<RHS>;
+        if constexpr (Scalar<LHS>)
+            return RHS1::isStaticSquare();
+        else if constexpr (Scalar<RHS>)
+            return LHS1::isStaticSquare();
+        else
+            return LHS1::isStaticSquare() || RHS1::isStaticSquare();
     }
 
     template<ExprID ID, class LHS, class RHS>

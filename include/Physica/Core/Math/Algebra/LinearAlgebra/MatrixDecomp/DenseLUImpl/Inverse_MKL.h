@@ -28,7 +28,7 @@ namespace Physica {
         target.assert_assign(*this);
         lu.getMatrixLU().assign(target);
 
-        const size_t n = getRow();
+        const size_t n = getOrder();
         auto* a = reinterpret_cast<Tm*>(target.data());
         if constexpr (Pivot) {
             auto buffer = lu.getPerm().toMKL();

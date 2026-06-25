@@ -52,10 +52,10 @@ namespace Physica {
         [[nodiscard]] auto&& hermite(this auto&&) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept;
-        [[nodiscard]] size_t getCol() const noexcept;
+        [[nodiscard]] size_t getOrder() const noexcept;
         /* Static members*/
         [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
@@ -69,28 +69,26 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    IdentityMatrix<T, Order>::IdentityMatrix(const Matrix auto& m) : IdentityMatrix(m.getRow()) {
-        assert(m.isSquare());
-    }
+    IdentityMatrix<T, Order>::IdentityMatrix(const Matrix auto& m) : IdentityMatrix(m.getOrder()) {}
 
     template<Scalar T, size_t Order>
     auto&& IdentityMatrix<T, Order>::operator*(Vector auto&& v) const noexcept {
         using RHS = decltype(v);
-        assert(getCol() == v.getLength());
+        assert(getOrder() == v.getLength());
         return std::forward<RHS>(v);
     }
 
     template<Scalar T, size_t Order>
     auto&& IdentityMatrix<T, Order>::operator*(Matrix auto&& m) const noexcept {
         using RHS = decltype(m);
-        assert(getCol() == m.getRow());
+        assert(getOrder() == m.getRow());
         return std::forward<RHS>(m);
     }
 
     template<Scalar T, size_t Order>
     void IdentityMatrix<T, Order>::assign(Matrix auto&& target) const {
         target.zeros();
-        for (size_t i = 0; i < getRow(); ++i)
+        for (size_t i = 0; i < getOrder(); ++i)
             target[i, i] = T(1);
     }
 
@@ -126,15 +124,10 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    size_t IdentityMatrix<T, Order>::getRow() const noexcept {
+    size_t IdentityMatrix<T, Order>::getOrder() const noexcept {
         if constexpr (Order == Dynamic)
             return order;
         return Order;
-    }
-
-    template<Scalar T, size_t Order>
-    size_t IdentityMatrix<T, Order>::getCol() const noexcept {
-        return getRow();
     }
 
     template<Scalar T, size_t Order>

@@ -420,8 +420,33 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    __host__ __device__ bool device_obj<RValueMatrix<Derived, ScalarT>>::isSquare() const noexcept {
-        return getRow() == getCol();
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::getRow() const noexcept {
+        if constexpr (isStaticSquare())
+            return getOrder();
+        else
+            return Base::getDerived().getRow();
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::getCol() const noexcept {
+        if constexpr (isStaticSquare())
+            return getOrder();
+        else
+            return Base::getDerived().getCol();
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::getOrder() const noexcept {
+        assert(isSquare() && "[Error]: getOrder() assumes square matrix");
+        return Base::getDerived().getOrder();
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ constexpr bool device_obj<RValueMatrix<Derived, ScalarT>>::isSquare() const noexcept {
+        if constexpr (isStaticSquare())
+            return true;
+        else
+            return getRow() == getCol();
     }
 
     template<class Derived, Scalar ScalarT>
@@ -467,6 +492,11 @@ namespace Physica {
     template<class Derived, Scalar ScalarT>
     __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isStaticHermite() noexcept {
         return Derived::isStaticHermite();
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isStaticSquare() noexcept {
+        return Derived::isStaticSquare();
     }
 
     template<class Derived, Scalar ScalarT>

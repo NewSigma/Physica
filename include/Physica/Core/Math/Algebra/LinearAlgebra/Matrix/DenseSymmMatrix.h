@@ -70,12 +70,11 @@ namespace Physica {
         H5DataSet<1> write(H5Loc& loc, const char* name) const { return storage.write(loc, name); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return storage.getOrder(); }
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getOrder(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getOrder(); }
         [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const noexcept { return storage.toIndex1D(r, c); }
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
         [[nodiscard]] auto&& asVector(this auto&&) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }

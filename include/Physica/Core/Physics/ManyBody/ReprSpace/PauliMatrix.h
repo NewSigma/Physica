@@ -57,6 +57,7 @@ namespace Physica {
         constexpr static size_t getRow() noexcept { return 2; }
         constexpr static size_t getCol() noexcept { return 2; }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return 2; }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return 2; }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }

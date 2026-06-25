@@ -30,7 +30,7 @@ namespace Physica {
         constexpr auto Layout = MatrixMajor::isRowMatrix<decltype(target)>() ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR;
         constexpr char Uplo = Traits<M>::Upper ? 'U' : 'L';
         constexpr char Diag = Traits<M>::Unit ? 'U' : 'N';
-        size_t n = getRow();
+        size_t n = getOrder();
         auto* a = reinterpret_cast<Tm*>(target.data());
         if constexpr (Base::isComplex()) {
             if constexpr (T::Prec == Float32)

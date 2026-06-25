@@ -66,6 +66,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
+        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept;
     private:
         [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const;
     };

@@ -62,6 +62,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return vec.getLength(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+        [[nodiscard]] size_t getOrder() const { return getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */

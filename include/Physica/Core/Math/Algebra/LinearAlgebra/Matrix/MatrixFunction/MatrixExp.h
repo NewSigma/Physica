@@ -53,16 +53,16 @@ namespace Physica {
         [[nodiscard]] Tr calcTraceMu() const;
         /* Getters */
         [[nodiscard]] const auto& getMatrix() const noexcept { return m; }
-        [[nodiscard]] size_t getRow() const noexcept { return m.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return m.getCol(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return m.getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
 
     template<Matrix M>
     MatrixExp<M>::MatrixExp(M m_) : m(std::forward<M>(m_)) {
         static_assert(std::is_reference_v<M>);
-        assert(m.getRow() == m.getCol());
+        assert(m.isSquare());
     }
 
     template<Matrix M>
@@ -80,10 +80,10 @@ namespace Physica {
     template<Matrix M>
     void MatrixExp<M>::assign(Matrix auto& target) const {
         const Tr traceMu = calcTraceMu();
-        const auto params = ((*this) * UnitVector<T>(0, getRow())).template calcParam<Sequential>(traceMu);
-        for (size_t i = 0; i < getCol(); ++i) {
+        const auto params = ((*this) * UnitVector<T>(0, getOrder())).template calcParam<Sequential>(traceMu);
+        for (size_t i = 0; i < getOrder(); ++i) {
             auto col = target.col(i);
-            ((*this) * UnitVector<T>(i, getRow())).assign(col, traceMu, params);
+            ((*this) * UnitVector<T>(i, getOrder())).assign(col, traceMu, params);
         }
     }
 
@@ -91,7 +91,7 @@ namespace Physica {
     auto MatrixExp<M>::calcTraceMu() const -> Tr {
         const T trace = m.trace();
         assert(trace.imag().isZero() && "[Error]: Not implemented");
-        return trace.real() / Tr(getRow());
+        return trace.real() / Tr(getOrder());
     }
 
     template<Matrix M>

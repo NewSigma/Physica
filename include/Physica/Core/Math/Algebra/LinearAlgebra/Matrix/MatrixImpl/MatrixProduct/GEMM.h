@@ -70,9 +70,11 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
+        [[nodiscard]] size_t getOrder() const { return getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
@@ -195,6 +197,13 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M2>(self.mat2);
+    }
+
+    template<Matrix M1, Matrix M2>
+    __host__ __device__ consteval bool GEMM<M1, M2>::isStaticSquare() noexcept {
+        using LHS = std::remove_cvref_t<M1>;
+        using RHS = std::remove_cvref_t<M2>;
+        return Base::isStaticSquare() || (LHS::isStaticSquare() && RHS::isStaticSquare());
     }
 
     template<Matrix M1, Matrix M2>

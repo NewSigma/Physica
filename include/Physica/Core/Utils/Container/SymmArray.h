@@ -52,9 +52,9 @@ namespace Physica {
         H5DataSet<1> write(H5Loc& loc, const char* name) const;
         /* Getters */
         [[nodiscard]] auto&& asArray(this auto&& self) noexcept { return self.arr; }
-        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return order; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getOrder(); }
+        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return order; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return arr.getLength(); }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return arr.getCapacity(); }
         [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;

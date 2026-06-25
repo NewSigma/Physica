@@ -45,7 +45,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+        [[nodiscard]] size_t getOrder() const { return mat.getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return std::remove_cvref_t<M>::isStaticSquare(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return std::remove_cvref_t<M>::getMajor(); }
@@ -80,7 +82,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+        [[nodiscard]] size_t getOrder() const { return mat.getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return std::remove_cvref_t<M>::isStaticSquare(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return std::remove_cvref_t<M>::getMajor(); }
@@ -119,7 +123,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+        [[nodiscard]] size_t getOrder() const { return mat.getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return std::remove_cvref_t<M>::isStaticSquare(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return std::remove_cvref_t<M>::getMajor(); }
@@ -165,7 +171,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+        [[nodiscard]] size_t getOrder() const { return mat.getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return std::remove_cvref_t<M>::isStaticSquare(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return std::remove_cvref_t<M>::getMajor(); }
@@ -198,7 +206,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+        [[nodiscard]] size_t getOrder() const { return mat.getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return std::remove_cvref_t<M>::isStaticSquare(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return std::remove_cvref_t<M>::getMajor(); }
@@ -227,7 +237,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+        [[nodiscard]] size_t getOrder() const { return mat.getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return std::remove_cvref_t<M>::isStaticSquare(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<M>::getColAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return std::remove_cvref_t<M>::getMajor(); }

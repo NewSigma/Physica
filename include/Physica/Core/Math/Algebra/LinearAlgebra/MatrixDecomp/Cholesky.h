@@ -33,9 +33,9 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return source.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return source.getRow(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return source.getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
@@ -43,7 +43,7 @@ namespace Physica {
 
     template<Matrix M>
     Cholesky<M>::Cholesky(const M& source_) : source(source_) {
-        assert(source.getRow() == source.getCol());
+        assert(source.isSquare());
     }
     /**
      * Implemented the square method

@@ -48,6 +48,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
+        [[nodiscard]] __host__ __device__ size_t getOrder() const { return mat.getDerived().getOrder(); }
     };
 
     template<class M>
@@ -82,6 +83,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
+        [[nodiscard]] __host__ __device__ size_t getOrder() const { return mat.getDerived().getOrder(); }
     };
 
     template<class M>
@@ -118,6 +120,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
+        [[nodiscard]] __host__ __device__ size_t getOrder() const { return mat.getDerived().getOrder(); }
     };
 
     template<class M>
@@ -152,6 +155,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
+        [[nodiscard]] __host__ __device__ size_t getOrder() const { return mat.getDerived().getOrder(); }
     };
 
     template<class M>
@@ -184,6 +188,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
+        [[nodiscard]] __host__ __device__ size_t getOrder() const { return mat.getDerived().getOrder(); }
     };
 
     template<class M, int GradOrder>
@@ -212,6 +217,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
+        [[nodiscard]] __host__ __device__ size_t getOrder() const { return mat.getDerived().getOrder(); }
     };
 }
 

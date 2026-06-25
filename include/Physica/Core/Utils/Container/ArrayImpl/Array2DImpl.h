@@ -207,6 +207,15 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
+    __host__ __device__ size_t Array2D<T, Major, Row, Col, Allocator>::getOrder() const noexcept {
+        assert(getRow() == getCol() && "[Error]: getOrder() assumes square array");
+        if constexpr (Row != Dynamic)
+            return Row;
+        else
+            return r;
+    }
+
+    template<class T, int Major, size_t Row, size_t Col, class Allocator>
     __host__ __device__ size_t Array2D<T, Major, Row, Col, Allocator>::getMaxMajor() const noexcept {
         return isColMajor ? getCol() : getRow();
     }

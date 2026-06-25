@@ -58,7 +58,9 @@ namespace Physica {
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
+        [[nodiscard]] size_t getOrder() const noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
@@ -141,6 +143,24 @@ namespace Physica {
             return mat.getCol();
         else
             return std::min(mat.getRow(), mat.getCol());
+    }
+
+    template<Matrix M, bool Upper, bool Unit>
+    size_t MatrixTrig<M, Upper, Unit>::getOrder() const noexcept {
+        assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
+        if constexpr (Upper)
+            return mat.getCol();
+        else
+            return mat.getRow();
+    }
+
+    template<Matrix M, bool Upper, bool Unit>
+    __host__ __device__ consteval bool MatrixTrig<M, Upper, Unit>::isStaticSquare() noexcept {
+        if constexpr (Base::isStaticSquare() || std::remove_cvref_t<M>::isStaticSquare())
+            return true;
+        if constexpr (getRowAtCompile() != Dynamic && getColAtCompile() != Dynamic)
+            return Upper == (getRowAtCompile() > getColAtCompile());
+        return false;
     }
 
     template<Matrix M, bool Upper, bool Unit>

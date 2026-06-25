@@ -47,6 +47,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
+        [[nodiscard]] size_t getOrder() const noexcept;
         [[nodiscard]] auto data(this auto&&) noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
         /* Static members */
@@ -93,6 +94,12 @@ namespace Physica {
             return self.data() + col * self.getRow() + row;
         else
             return self.data() + row * self.getCol() + col;
+    }
+
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    size_t CompactReshapedVector<V, MatrixMajor, Row, Col>::getOrder() const noexcept {
+        assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
+        return getRow();
     }
 }
 

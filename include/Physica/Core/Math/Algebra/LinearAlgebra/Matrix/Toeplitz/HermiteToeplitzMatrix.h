@@ -44,9 +44,9 @@ namespace Physica {
         void swap(This& obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getFirstCol() const noexcept { return firstCol; }
-        [[nodiscard]] size_t getRow() const noexcept { return firstCol.getLength(); }
-        [[nodiscard]] size_t getCol() const noexcept { return firstCol.getLength(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return firstCol.getLength(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
 

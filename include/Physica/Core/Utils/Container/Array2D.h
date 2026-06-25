@@ -92,6 +92,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
+        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getMaxMajor() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept;
         [[nodiscard]] __host__ __device__ bool empty() const noexcept;

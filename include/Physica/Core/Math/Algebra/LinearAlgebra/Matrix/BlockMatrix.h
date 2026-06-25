@@ -43,11 +43,12 @@ namespace Physica {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const BlockArray& getBlocks() const noexcept { return blocks; }
+        [[nodiscard]] const auto& getBlocks() const noexcept { return blocks; }
         [[nodiscard]] size_t getNumBlock() const noexcept { return blocks.getLength(); }
-        [[nodiscard]] const Array<size_t>& getIndexEnds() const noexcept { return indexEnds; }
-        [[nodiscard]] size_t getRow() const noexcept { return indexEnds[getNumBlock() - 1]; }
-        [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
+        [[nodiscard]] const auto& getIndexEnds() const noexcept { return indexEnds; }
+        [[nodiscard]] size_t getOrder() const noexcept { return indexEnds[getNumBlock() - 1]; }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
     private:
         void updateEnds();
         [[nodiscard]] size_t findBlock(size_t globalIndex) const;

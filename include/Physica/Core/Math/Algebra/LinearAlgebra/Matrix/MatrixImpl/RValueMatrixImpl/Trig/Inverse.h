@@ -45,14 +45,16 @@ namespace Physica {
         void assign_mkl(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
-        [[nodiscard]] size_t getRow() const noexcept { return trig.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return trig.getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
     template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
-    Inverse<M>::Inverse(M&& trig) : trig(std::forward<M>(trig)) {}
+    Inverse<M>::Inverse(M&& trig) : trig(std::forward<M>(trig)) {
+        assert(trig.isSquare() && "[Error]: inv() requires square matrix");
+    }
 
     template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     void Inverse<M>::assign(Matrix auto& target) const {
@@ -69,7 +71,7 @@ namespace Physica {
         if constexpr (!Traits<M>::Upper && Traits<M>::Unit) {
             (-trig).assign(target);
             target.diag() = Trv(1);
-            for (size_t i = 1; i < getCol() - 1; ++i) {
+            for (size_t i = 1; i < getOrder() - 1; ++i) {
                 auto corner = target.bottomLeftCorner(i + 1, i);
                 auto head = target.row(i).head(i);
                 auto tail = target.col(i).tail(i + 1);

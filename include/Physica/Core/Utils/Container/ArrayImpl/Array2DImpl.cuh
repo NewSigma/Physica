@@ -157,6 +157,15 @@ namespace Physica {
     }
 
     template<tparams>
+    __host__ __device__ size_t device_obj<Array2D>::getOrder() const noexcept {
+        assert(getRow() == getCol() && "[Error]: getOrder() assumes square array");
+        if constexpr (Row != Dynamic)
+            return Row;
+        else
+            return r;
+    }
+
+    template<tparams>
     __host__ __device__ size_t device_obj<Array2D>::toIndex1D(size_t r, size_t c) const {
         assert(r < getRow());
         assert(c < getCol());

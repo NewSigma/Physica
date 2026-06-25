@@ -44,6 +44,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return m.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return m.getCol(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return m.getOrder(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
     };
 
     template<Matrix M>
@@ -54,6 +57,11 @@ namespace Physica {
     template<Matrix M>
     auto&& Conjugate<M>::conjugate(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.m);
+    }
+
+    template<Matrix M>
+    __host__ __device__ consteval bool Conjugate<M>::isStaticSquare() noexcept {
+        return std::remove_cvref_t<M>::isStaticSquare();
     }
 }
 

@@ -104,14 +104,15 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ auto grads(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getCol(); }
+        [[nodiscard]] __host__ __device__ auto getRow() const noexcept;
+        [[nodiscard]] __host__ __device__ auto getCol() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getRow() * getCol(); }
+        [[nodiscard]] __host__ __device__ auto getOrder() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getMaxMajor() const noexcept { return MatrixMajor::getMaxMajor<device_obj<Derived>>(Base::getDerived()); }
         [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept { return MatrixMajor::getMaxMinor<device_obj<Derived>>(Base::getDerived()); }
         [[nodiscard]] __host__ __device__ bool empty() const noexcept { return Base::getDerived().getSize() == 0; }
 
-        [[nodiscard]] __host__ __device__ bool isSquare() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr bool isSquare() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isComplex() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isDiffable() noexcept;
@@ -122,6 +123,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSymm() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isStaticHermite() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isColMatrix() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isRowMatrix() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isBothMajor() noexcept;

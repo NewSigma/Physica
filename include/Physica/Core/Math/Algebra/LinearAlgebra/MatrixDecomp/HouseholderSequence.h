@@ -55,14 +55,14 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return ColWiseRead ? source.getRow() : source.getCol(); }
-        [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return ColWiseRead ? source.getRow() : source.getCol(); }
         [[nodiscard]] size_t getSize() const noexcept { return size; }
         [[nodiscard]] size_t getShift() const noexcept { return shift; }
         /* Setters */
         void setSize(size_t size_);
         void setShift(size_t shift_);
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
 

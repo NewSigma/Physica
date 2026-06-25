@@ -59,9 +59,7 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getMatrixLU() const noexcept { return working; }
-        [[nodiscard]] size_t getOrder() const noexcept { return working.getRow(); }
-        [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
-        [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return working.getOrder(); }
         [[nodiscard]] consteval static bool isPivot() noexcept { return Pivot; }
     };
 

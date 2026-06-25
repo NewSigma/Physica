@@ -52,15 +52,17 @@ namespace Physica {
         [[nodiscard]] auto hermite() const noexcept;
         /* Getters */
         [[nodiscard]] const auto& getMatrix() const noexcept { return m; }
-        [[nodiscard]] size_t getRow() const noexcept { return m.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return m.getCol(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return m.getOrder(); }
         [[nodiscard]] int getPower() const noexcept { return power; }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
 
     template<Matrix M>
-    MatrixPow<M>::MatrixPow(M m_, int power_) : m(std::forward<M>(m_)), power(power_) {}
+    MatrixPow<M>::MatrixPow(M m_, int power_) : m(std::forward<M>(m_)), power(power_) {
+        assert(m.isSquare());
+    }
 
     template<Matrix M>
     auto MatrixPow<M>::transpose() const noexcept {

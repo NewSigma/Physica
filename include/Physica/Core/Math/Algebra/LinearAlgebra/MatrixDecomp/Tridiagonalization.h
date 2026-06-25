@@ -150,9 +150,9 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return tri.working.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return tri.working.getCol(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return tri.working.getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
@@ -163,7 +163,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     void TridiagonalMatrixT<T, Order>::assign(Matrix auto& target) const {
-        const size_t order = getRow();
+        const size_t order = getOrder();
         target = RealType(0);
         target[0, 0] = tri.working.calc(0, 0);
         target[1, 0] = tri.normBuffer[0];

@@ -61,8 +61,6 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] const auto& getMatsubara() const noexcept { return matsubara; }
         [[nodiscard]] size_t getOrder() const noexcept { return matsubara.getOrder() * getNumSite(); }
-        [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
-        [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
         [[nodiscard]] auto&& getAuxField(this auto&&) noexcept;
         [[nodiscard]] int getNumFreq() const noexcept { return matsubara.getOrder() / 2; }
         [[nodiscard]] int getNumSite() const noexcept { return auxField.getCol(); }
@@ -71,6 +69,7 @@ namespace Physica {
         [[nodiscard]] Tr getBeta() const noexcept { return params.getBeta(); }
         [[nodiscard]] const auto& getParams() const noexcept { return params; }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
         /* Friends */
         template<Matrix, Vector> friend class GEMV;
@@ -139,8 +138,8 @@ namespace Physica {
 
     template<Scalar T>
     T ActionMatrix<T>::calc(size_t row, size_t col) const {
-        assert(row < getRow());
-        assert(col < getCol());
+        assert(row < getOrder());
+        assert(col < getOrder());
         const int numFreq2 = getNumFreq() * 2;
         const size_t rowSite = row / numFreq2;
         const size_t rowFreq = row % numFreq2;

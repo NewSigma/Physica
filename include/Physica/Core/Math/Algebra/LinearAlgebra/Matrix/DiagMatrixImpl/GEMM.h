@@ -52,6 +52,7 @@ namespace Physica {
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
@@ -95,6 +96,13 @@ namespace Physica {
         return MatrixMajor::getMajor<M1>();
     }
 
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M2, DiagMatrix>)
+    __host__ __device__ consteval bool GEMM<M1, M2>::isStaticSquare() noexcept {
+        using LHS = std::remove_cvref_t<M1>;
+        using RHS = std::remove_cvref_t<M2>;
+        return Base::isStaticSquare() || (LHS::isStaticSquare() && RHS::isStaticSquare());
+    }
+
     template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, DiagMatrix>)
     class GEMM<M1, M2> : public RValueMatrix<GEMM<M1, M2>> {
         using This = GEMM<M1, M2>;
@@ -124,6 +132,7 @@ namespace Physica {
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
@@ -160,5 +169,12 @@ namespace Physica {
     template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, DiagMatrix>)
     __host__ __device__ consteval int GEMM<M1, M2>::getMajor() noexcept {
         return MatrixMajor::getMajor<M2>();
+    }
+
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, DiagMatrix>)
+    __host__ __device__ consteval bool GEMM<M1, M2>::isStaticSquare() noexcept {
+        using LHS = std::remove_cvref_t<M1>;
+        using RHS = std::remove_cvref_t<M2>;
+        return Base::isStaticSquare() || (LHS::isStaticSquare() && RHS::isStaticSquare());
     }
 }

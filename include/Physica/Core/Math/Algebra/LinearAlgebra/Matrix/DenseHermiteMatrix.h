@@ -66,10 +66,9 @@ namespace Physica {
         /* Getters */
         using Base::getDerived;
         [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return storage.getOrder(); }
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getOrder(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getOrder(); }
         [[nodiscard]] auto&& asVector(this auto&& self) noexcept { return self.storage.asArray(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
@@ -134,7 +133,7 @@ namespace Physica {
     template<RNG R>
     void DenseHermiteMatrix<T, Order>::random_uniform() {
         asVector().template random_uniform<R>();
-        for (size_t i = 0; i < getRow(); ++i)
+        for (size_t i = 0; i < getOrder(); ++i)
             (*this)[i, i].imag() = Tr(0);
     }
 
@@ -142,7 +141,7 @@ namespace Physica {
     template<RNG R>
     void DenseHermiteMatrix<T, Order>::random_normal() {
         asVector().template random_normal<R>();
-        for (size_t i = 0; i < getRow(); ++i)
+        for (size_t i = 0; i < getOrder(); ++i)
             (*this)[i, i].imag() = Tr(0);
     }
 
@@ -150,7 +149,7 @@ namespace Physica {
     template<RNG R>
     void DenseHermiteMatrix<T, Order>::random_any(auto& distribution) {
         asVector().template random_any<R>(distribution);
-        for (size_t i = 0; i < getRow(); ++i)
+        for (size_t i = 0; i < getOrder(); ++i)
             (*this)[i, i].imag() = Tr(0);
     }
 

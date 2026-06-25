@@ -46,8 +46,7 @@ namespace Physica {
         void assign(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] const LU& getDenseLU() const noexcept { return lu; }
-        [[nodiscard]] size_t getRow() const noexcept { return lu.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return lu.getOrder(); }
     };
 
     template<Scalar T, bool Pivot>

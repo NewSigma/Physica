@@ -299,6 +299,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] size_t getCol() const noexcept { return Col == Dynamic ? colCount : Col; }
+        [[nodiscard]] size_t getOrder() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
@@ -457,6 +458,12 @@ namespace Physica {
         auto&& g = propagate_rvalue_reference<decltype(self), M>(self.mat.template grads<GradOrder>());
         using M1 = decltype(g);
         return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(g), self.fromRow, self.getRow(), self.fromCol, self.getCol());
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    size_t CompactMatrixBlock<M, Row, Col>::getOrder() const noexcept {
+        assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
+        return getRow();
     }
 
     template<Matrix M, size_t Row, size_t Col>

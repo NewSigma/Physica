@@ -57,6 +57,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return transpose().getCol(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return transpose().getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return transpose().getOrder(); }
     };
 
     template<Matrix M>

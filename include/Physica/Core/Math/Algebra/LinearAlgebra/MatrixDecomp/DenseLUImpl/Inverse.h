@@ -46,10 +46,10 @@ namespace Physica {
         void assign_mkl(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] const LU& getDenseLU() const noexcept { return lu; }
-        [[nodiscard]] size_t getRow() const noexcept { return lu.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return lu.getOrder(); }
         /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::Col; }
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
     template<Scalar T, bool Pivot>

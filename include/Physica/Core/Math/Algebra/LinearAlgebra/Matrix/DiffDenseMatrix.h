@@ -92,6 +92,7 @@ namespace Physica {
         [[nodiscard]] auto data(this auto&&) noexcept;
         [[nodiscard]] size_t getCol() const noexcept { return v.getCol(); }
         [[nodiscard]] size_t getRow() const noexcept { return v.getRow(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return v.getOrder(); }
         [[nodiscard]] bool empty() const noexcept { return v.empty(); }
 
         [[nodiscard]] auto&& values(this auto&&) noexcept;

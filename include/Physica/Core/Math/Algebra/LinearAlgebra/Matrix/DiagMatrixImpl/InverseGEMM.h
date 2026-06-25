@@ -45,6 +45,8 @@ namespace Physica {
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
     };
 
     template<Matrix M1, Matrix M2> requires(instanceof<M2, Inverse> && instanceof_tx<typename Traits<M2>::ExprType, DiagMatrix>)
@@ -64,6 +66,13 @@ namespace Physica {
     template<Matrix M1, Matrix M2> requires(instanceof<M2, Inverse> && instanceof_tx<typename Traits<M2>::ExprType, DiagMatrix>)
     auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M2>(self.mat2);
+    }
+
+    template<Matrix M1, Matrix M2> requires(instanceof<M2, Inverse> && instanceof_tx<typename Traits<M2>::ExprType, DiagMatrix>)
+    __host__ __device__ consteval bool GEMM<M1, M2>::isStaticSquare() noexcept {
+        using LHS = std::remove_cvref_t<M1>;
+        using RHS = std::remove_cvref_t<M2>;
+        return Base::isStaticSquare() || (LHS::isStaticSquare() && RHS::isStaticSquare());
     }
 
     template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, DiagMatrix>)
@@ -90,6 +99,8 @@ namespace Physica {
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
     };
 
     template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, DiagMatrix>)
@@ -109,5 +120,12 @@ namespace Physica {
     template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, DiagMatrix>)
     auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M2>(self.mat2);
+    }
+
+    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, DiagMatrix>)
+    __host__ __device__ consteval bool GEMM<M1, M2>::isStaticSquare() noexcept {
+        using LHS = std::remove_cvref_t<M1>;
+        using RHS = std::remove_cvref_t<M2>;
+        return Base::isStaticSquare() || (LHS::isStaticSquare() && RHS::isStaticSquare());
     }
 }

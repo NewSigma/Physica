@@ -61,8 +61,6 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ auto&& diag(this auto&& self) noexcept;
         [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getOrder(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getOrder(); }
         /* Static members */
         [[nodiscard]] static This identity(size_t order);
     };
@@ -80,7 +78,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     __host__ __device__ auto device_obj<DiagMatrix<T, Order>>::operator*(Vector auto&& v) const noexcept {
-        assert(getCol() == v.getLength());
+        assert(getOrder() == v.getLength());
         return hadamard(diags, std::forward<decltype(v)>(v));
     }
 

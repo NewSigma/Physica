@@ -78,6 +78,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return storage.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return storage.getCol(); }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return storage.getSize(); }
+        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return storage.getOrder(); }
         [[nodiscard]] __host__ __device__ auto&& asArray(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] static device_obj identity(size_t order);

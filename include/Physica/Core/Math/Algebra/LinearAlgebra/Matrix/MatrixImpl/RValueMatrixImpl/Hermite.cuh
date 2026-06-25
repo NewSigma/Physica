@@ -43,6 +43,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getCol(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return matrix.getOrder(); }
     };
 
     template<Matrix M>

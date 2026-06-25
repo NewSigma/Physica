@@ -160,19 +160,19 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] decltype(auto) grads(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return Base::getDerived().getCol(); }
-        [[nodiscard]] size_t getOrder() const noexcept;
+        [[nodiscard]] auto getRow() const noexcept;
+        [[nodiscard]] auto getCol() const noexcept;
         [[nodiscard]] size_t getSize() const noexcept { return getRow() * getCol(); }
+        [[nodiscard]] auto getOrder() const noexcept;
         [[nodiscard]] size_t getMaxMajor() const noexcept { return MatrixMajor::getMaxMajor<Derived>(Base::getDerived()); }
         [[nodiscard]] size_t getMaxMinor() const noexcept { return MatrixMajor::getMaxMinor<Derived>(Base::getDerived()); }
         [[nodiscard]] bool empty() const noexcept { return Base::getDerived().getSize() == 0; }
 
-        [[nodiscard]] bool isOverdetermined() const noexcept;
-        [[nodiscard]] bool isUnderdetermined() const noexcept;
-        [[nodiscard]] bool isSquare() const noexcept;
-        [[nodiscard]] bool isSymm() const noexcept;
-        [[nodiscard]] bool isHermite() const noexcept;
+        [[nodiscard]] constexpr bool isOverdetermined() const noexcept;
+        [[nodiscard]] constexpr bool isUnderdetermined() const noexcept;
+        [[nodiscard]] constexpr bool isSquare() const noexcept;
+        [[nodiscard]] constexpr bool isSymm() const noexcept;
+        [[nodiscard]] constexpr bool isHermite() const noexcept;
         [[nodiscard]] bool isFinite() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isComplex() noexcept;
@@ -184,6 +184,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSymm() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isStaticHermite() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isColMatrix() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isRowMatrix() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isBothMajor() noexcept;
