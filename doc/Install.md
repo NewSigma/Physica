@@ -24,7 +24,7 @@
 
 We recommend incrementally installing them according to your specific requirements.
 
-4. Compile Physica using the following command:  
+4. Compile *Physica* using the following command:  
 
 ``` Bash
 mkdir -p /path/to/Physica/build
@@ -34,13 +34,13 @@ cmake --build .
 cmake --install .
 ```
 
-5. Test Physica using the following command:  
+5. Test *Physica* using the following command:  
 
 ``` Bash
 cd /path/to/Physica/build/test
 ctest --parallel
 ```
 
-Do not use Physica if any test were failed.  
+Do not use *Physica* if any test were failed.  
 
-To use Physica, examples that under /path/to/install/Physica/examples are ready to use(Note: BUILD_EXAMPLES is OFF by default). Link Physica as a part of your project for production use.
+To use Physica, examples that under /path/to/install/Physica/examples are ready to use(Note: BUILD_EXAMPLES is OFF by default). Link *Physica* as a part of your project for production use.

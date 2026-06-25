@@ -23,7 +23,7 @@ Thermo Pure Quantum (TPQ) states$^{[1]}$ are used to approximately compute vario
 
 ![](./TPQ.png)
 
-**Figure 1** Comparison of Physica and HPhi 3.5.2$^{[2]}$ for computing the relationship between inverse temperature $\beta$ and particle density in the Hubbard model, using both full diagonalization and TPQ methods, with $U/t = 8$, lattice sites $L = 4$. The statistical uncertainty is smaller than the line width. Since HPhi cannot adaptively adjust the expansion order, its results accumulate numerical error more quickly.
+**Figure 1** Comparison of *Physica* and *HPhi* 3.5.2$^{[2]}$ for computing the relationship between inverse temperature $\beta$ and particle density in the Hubbard model, using both full diagonalization and TPQ methods, with $U/t = 8$, lattice sites $L = 4$. The statistical uncertainty is smaller than the line width. Since HPhi cannot adaptively adjust the expansion order, its results accumulate numerical error more quickly.
 
     # HPhi Input (FullDiag)
     model = "Fermion HubbardGC"
@@ -46,7 +46,7 @@ Thermo Pure Quantum (TPQ) states$^{[1]}$ are used to approximately compute vario
     # Increase expansion order to reduce deviation between TPQ and Full-ED
     # ExpandCoef = 10
 
-Benchmarking on an Intel(R) Xeon(R) Platinum 8358 + 256G platform, Physica is 1300x faster than HPhi 3.5.2 for a 4x4 Hubbard model.
+Benchmarking on an Intel(R) Xeon(R) Platinum 8358 + 256G platform, *Physica* is 1300x faster than HPhi 3.5.2 for a 4x4 Hubbard model.
 
 ## Reference
 
