@@ -25,13 +25,15 @@ namespace Physica {
     class RValueReshapedVector : public RValueMatrix<RValueReshapedVector<V, MatrixMajor, Row, Col>> {
         using This = RValueReshapedVector<V, MatrixMajor, Row, Col>;
         using Base = RValueMatrix<This>;
+        using MaybeRow = std::conditional_t<Row == Dynamic, size_t, Empty>;
+        using MaybeCol = std::conditional_t<Col == Dynamic, size_t, Empty>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     private:
         decay_rvalue_t<V> v;
-        size_t r;
-        size_t c;
+        [[no_unique_address]] MaybeRow r;
+        [[no_unique_address]] MaybeCol c;
     public:
         RValueReshapedVector(V v_, size_t r_, size_t c_);
         RValueReshapedVector(const This&) = default;
@@ -81,14 +83,16 @@ namespace Physica {
     size_t RValueReshapedVector<V, MatrixMajor, Row, Col>::getRow() const noexcept {
         if constexpr (Row != Dynamic)
             return Row;
-        return r;
+        else
+            return r;
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
     size_t RValueReshapedVector<V, MatrixMajor, Row, Col>::getCol() const noexcept {
         if constexpr (Col != Dynamic)
             return Col;
-        return c;
+        else
+            return c;
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>

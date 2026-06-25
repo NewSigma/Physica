@@ -33,8 +33,8 @@ namespace Physica {
         using typename Base::ScalarType;
     private:
         PlainStruct<add_device_obj_t<std::remove_reference_t<V>>> v;
-        size_t r;
-        size_t c;
+        [[no_unique_address]] host_obj::MaybeRow r;
+        [[no_unique_address]] host_obj::MaybeCol c;
     public:
     __host__ __device__ device_obj(Ref v_, size_t r_, size_t c_);
         device_obj(const This&) = default;
@@ -71,14 +71,16 @@ namespace Physica {
     __host__ __device__ size_t device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>::getRow() const noexcept {
         if constexpr (Row != Dynamic)
             return Row;
-        return r;
+        else
+            return r;
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
     __host__ __device__ size_t device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>::getCol() const noexcept {
         if constexpr (Col != Dynamic)
             return Col;
-        return c;
+        else
+            return c;
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
