@@ -62,6 +62,12 @@ In function definitions, it is recommended to use trailing return type declarati
 
 Template parameters: Encourage the use of abbreviated function templates to eliminate placeholders.
 
+## Formatting
+
+### Namespace Formatting
+
+Indent namespace contents. Avoid nesting namespaces more than 2 levels unless absolutely necessary.
+
 ## Reference
 
 [1] Google C++ Style Guide; <https://google.github.io/styleguide/cppguide.html>  

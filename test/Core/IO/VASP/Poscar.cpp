@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -87,7 +87,7 @@ int main() {
         PoscarType poscar = readTest1();
 
         PoscarType::LatticeMatrix mat = poscar.getLattice();
-        poscar.standrizeLattice();
+        poscar.standardizeLattice();
         expect(matrixNear(mat, poscar.getLattice(), 1E-15));
     }
     {

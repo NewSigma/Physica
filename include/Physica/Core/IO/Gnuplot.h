@@ -35,13 +35,13 @@ namespace Physica {
         /* Operators */
         Gnuplot& operator=(const Gnuplot&) = default;
         Gnuplot& operator=(Gnuplot&&) noexcept = default;
-        PHYSICA_API friend std::ostream& operator<<(std::ostream& os, const Gnuplot& poscar);
-        PHYSICA_API friend std::istream& operator>>(std::istream& is, Gnuplot& poscar);
+        friend std::ostream& operator<<(std::ostream& os, const Gnuplot& gnuplot);
+        friend std::istream& operator>>(std::istream& is, Gnuplot& gnuplot);
         /* Getters */
         [[nodiscard]] const DataArray& getXDatas() const noexcept { return xDatas; }
         [[nodiscard]] const DataArray& getYDatas() const noexcept { return yDatas; }
-        /* Friends */
-        friend std::ostream& operator<<(std::ostream& os, const Gnuplot& gnuplot);
-        friend std::istream& operator>>(std::istream& is, Gnuplot& gnuplot);
     };
+
+    PHYSICA_API std::ostream& operator<<(std::ostream& os, const Gnuplot& gnuplot);
+    PHYSICA_API std::istream& operator>>(std::istream& is, Gnuplot& gnuplot);
 }

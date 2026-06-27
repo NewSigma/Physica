@@ -102,7 +102,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void Poscar<T>::standrizeLattice() {
+    void Poscar<T>::standardizeLattice() {
         using MatrixType = LatticeMatrix::ColMatrix;
         MatrixType temp = Base::getLattice().transpose();
         Vector3D<T> buffer{};

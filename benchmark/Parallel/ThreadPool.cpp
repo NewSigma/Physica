@@ -26,9 +26,46 @@ using RandomSource = Random<MCG>;
 
 namespace {
     // scheduling latency
-    void bench(benchmark::State& state) {
+    void bench_schedule(benchmark::State& state) {
         // Warmup
-        ThreadPool::numThreadRequired = Dynamic;
+        std::ignore = Cycler::getCyclesPerSec();
+        auto& pool = ThreadPool::getInstance();
+        pool.restart();
+
+        auto x = float64::random_uniform<RandomSource>();
+        for (auto _ : state) {
+            auto from = Cycler::tic();
+            PHYSICA_BENCH(auto task = schedule<Thread>([&x]() noexcept {
+                x = reciprocal(x);
+            }));
+            auto to = Cycler::toc();
+            state.SetIterationTime(Cycler::toSeconds(to - from));
+            task.wait();
+        }
+        pool.shouldExit();
+    }
+
+    void bench_parallel_for1(benchmark::State& state) {
+        // Warmup
+        std::ignore = Cycler::getCyclesPerSec();
+        auto& pool = ThreadPool::getInstance();
+        pool.restart();
+
+        auto x = VectorND<float64>::random_uniform<RandomSource>(pool.getNumThreads());
+        for (auto _ : state) {
+            auto from = Cycler::tic();
+            PHYSICA_BENCH(auto task = parallel_for<Thread>([&x](size_t i) noexcept {
+                x[i] = reciprocal(x[i]);
+            }, x.getLength()));
+            auto to = Cycler::toc();
+            state.SetIterationTime(Cycler::toSeconds(to - from));
+            task.wait();
+        }
+        pool.shouldExit();
+    }
+
+    void bench_parallel_for2(benchmark::State& state) {
+        // Warmup
         std::ignore = Cycler::getCyclesPerSec();
         auto& pool = ThreadPool::getInstance();
         pool.restart();
@@ -47,4 +84,6 @@ namespace {
     }
 }
 
-BENCHMARK(bench)->Name("ThreadPool")->UseManualTime();
+BENCHMARK(bench_schedule)->Name("Thread schecule")->UseManualTime();
+BENCHMARK(bench_parallel_for1)->Name("Thread parallel_for 1")->UseManualTime();
+BENCHMARK(bench_parallel_for2)->Name("Thread parallel_for 2")->UseManualTime();

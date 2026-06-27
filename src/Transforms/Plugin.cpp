@@ -32,7 +32,7 @@ namespace {
 }
 
 extern "C" {
-    __attribute__((visibility("default"))) llvm::PassPluginLibraryInfo llvmGetPassPluginInfo() {
+    [[gnu::visibility("default")]] llvm::PassPluginLibraryInfo llvmGetPassPluginInfo() {
         return llvm::PassPluginLibraryInfo{
             .APIVersion = LLVM_PLUGIN_API_VERSION,
             .PluginName = "PhysicaTransforms",

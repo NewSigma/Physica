@@ -22,6 +22,6 @@
 #include <source_location>
 
 namespace Physica {
-    [[noreturn, gnu::cold, gnu::nodebug]] __host__ __device__ PHYSICA_API void noImpl(const char* msg) noexcept;
-    [[noreturn, gnu::cold, gnu::nodebug]] __host__ __device__ PHYSICA_API void noImpl(std::source_location loc = std::source_location::current()) noexcept;
+    [[noreturn, gnu::cold, gnu::nodebug]] PHYSICA_API __host__ __device__ void noImpl(const char* msg) noexcept;
+    [[noreturn, gnu::cold, gnu::nodebug]] PHYSICA_API __host__ __device__ void noImpl(std::source_location loc = std::source_location::current()) noexcept;
 }

@@ -29,6 +29,7 @@ namespace Physica {
 
         struct Promise {
             Task get_return_object() noexcept { return {}; }
+            static Task get_return_object_on_allocation_failure() noexcept { unreachable("Expect coro frame is small"); }
             auto initial_suspend() noexcept { return suspend_never{}; }
             void await_transform(auto&&) noexcept = delete;
             auto final_suspend() noexcept { return suspend_never{}; }

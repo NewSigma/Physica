@@ -80,7 +80,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ Real operator<<(int i) const { return Real(std::ldexp(f, i)); }
         [[nodiscard]] __host__ __device__ Real operator>>(int i) const { return Real(std::ldexp(f, -i)); }
         [[nodiscard]] __host__ __device__ Real operator-() const noexcept { return Real(-f); }
-        PHYSICA_API friend std::istream& operator>>(std::istream& is, Real& scalar);
+        friend std::istream& operator>>(std::istream& is, Real& scalar);
         /* Operations */
         [[nodiscard]] __host__ __device__ inline Real mod() const noexcept;
         PHYSICA_API void dump() const noexcept;

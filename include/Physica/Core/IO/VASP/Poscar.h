@@ -54,7 +54,7 @@ namespace Physica {
         template<Scalar U>
         friend std::istream& operator>>(std::istream& is, Poscar<U>& poscar);
         /* Operations */
-        void standrizeLattice();
+        void standardizeLattice();
         void extendInZ(T factor);
         void toUnitCell(unsigned int x, unsigned int y, unsigned int z);
         void toQECell(std::ostream& os) const;

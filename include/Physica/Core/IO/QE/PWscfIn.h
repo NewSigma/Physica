@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -55,8 +55,8 @@ namespace Physica {
         ~PWscfIn() = default;
         /* Operators */
         This& operator=(This obj) noexcept;
-        PHYSICA_API friend std::ostream& operator<<(std::ostream& os, const This& input);
-        PHYSICA_API friend std::istream& operator>>(std::istream& is, This& input);
+        friend std::ostream& operator<<(std::ostream& os, const This& input);
+        friend std::istream& operator>>(std::istream& is, This& input);
         /* Operations */
         void swap(This& __restrict obj) noexcept;
         /* Static members */
@@ -68,6 +68,6 @@ namespace Physica {
         bool readBool(std::istream& is, Array<char>& buffer);
     };
 
-    std::ostream& operator<<(std::ostream& os, const PWscfIn& input);
-    std::istream& operator>>(std::istream& is, PWscfIn& input);
+    PHYSICA_API std::ostream& operator<<(std::ostream& os, const PWscfIn& input);
+    PHYSICA_API std::istream& operator>>(std::istream& is, PWscfIn& input);
 }

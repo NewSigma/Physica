@@ -81,12 +81,12 @@ namespace {
 
 int ThreadPool::numThreadRequired = 0;
 
-void ThreadPool::ThreadData::push(Handle handle) noexcept {
+void ThreadPool::ThreadQueue::push(Handle handle) noexcept {
     std::lock_guard locker(mutex);
     queue.push(handle);
 }
 
-auto ThreadPool::ThreadData::pop() noexcept -> Handle {
+auto ThreadPool::ThreadQueue::pop() noexcept -> Handle {
     Handle handle = nullptr;
     std::lock_guard locker(mutex);
     if (!queue.empty()) {
@@ -96,10 +96,10 @@ auto ThreadPool::ThreadData::pop() noexcept -> Handle {
     return handle;
 }
 
-ThreadPool::ThreadPool(int numThreads) : thread_data(numThreads) {
+ThreadPool::ThreadPool(int numThreads) : queues(numThreads) {
     assert(numThreads > 0 && "[Error]: numThreads must be positive");
     for (int i = 0; i < numThreads; ++i)
-        thread_data[i].thread = std::thread(&ThreadPool::workerMainLoop, this, i);
+        queues[i].thread = std::thread(&ThreadPool::workerMainLoop, this, i);
 }
 
 ThreadPool::~ThreadPool() {
@@ -118,7 +118,7 @@ void ThreadPool::schedule(Handle handle) noexcept {
     else
         schedule_to = getThreadInfo().id;
 
-    thread_data[schedule_to].push(handle);
+    queues[schedule_to].push(handle);
     cond.notify_one();
 }
 
@@ -126,17 +126,25 @@ auto ThreadPool::steal() noexcept -> Handle {
     const auto random = toNextState(getThreadInfo().randState);
     const int numThreads = getNumThreads();
     for (int i = 0; i < numThreads; ++i) {
-        Handle handle = thread_data[(random + i) % numThreads].pop();
+        Handle handle = queues[(random + i) % numThreads].pop();
         if (handle)
             return handle;
     }
     return nullptr;
 }
 
+void ThreadPool::shouldExit() noexcept {
+    {
+        auto locker = std::lock_guard(poolMutex);
+        exit = true;
+    }
+    cond.notify_all();
+}
+
 void ThreadPool::waitExit() {
     shouldExit();
-    for (auto& data : thread_data) {
-        auto& thread = data.thread;
+    for (auto& queue : queues) {
+        auto& thread = queue.thread;
         if (thread.joinable())
             thread.join();
     }
@@ -146,17 +154,9 @@ void ThreadPool::restart() {
     waitExit();
     exit = false;
     const int numThread = getNumThreads();
-    thread_data = Array<ThreadData>(numThread);
+    queues = Array<ThreadQueue>(numThread);
     for (int i = 0; i < numThread; ++i)
-        thread_data[i].thread = std::thread(&ThreadPool::workerMainLoop, this, i);
-}
-
-void ThreadPool::shouldExit() noexcept {
-    {
-        auto locker = std::lock_guard(poolMutex);
-        exit = true;
-    }
-    cond.notify_all();
+        queues[i].thread = std::thread(&ThreadPool::workerMainLoop, this, i);
 }
 
 auto ThreadPool::getInstance() noexcept -> This& {
@@ -179,9 +179,9 @@ void ThreadPool::spin() noexcept { __builtin_ia32_pause(); }
 void ThreadPool::workerMainLoop(int thread_id) noexcept {
     setThreadEnv();
     getThreadInfo().id = thread_id;
-    auto& data = thread_data[thread_id];
+    auto& queue = queues[thread_id];
     while (true) {
-        Handle handle = data.pop();
+        Handle handle = queue.pop();
         if (!handle)
             handle = steal();
 

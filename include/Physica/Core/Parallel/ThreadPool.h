@@ -38,14 +38,14 @@ namespace Physica {
     class PHYSICA_API ThreadPool final {
         using This = ThreadPool;
         using Handle = std::coroutine_handle<>;
-        class ThreadData {
+        class ThreadQueue {
         public:
             std::thread thread;
         private:
             std::queue<Handle> queue;
             std::mutex mutex;
         public:
-            ThreadData() = default;
+            ThreadQueue() = default;
             /* Operations */
             void push(Handle handle) noexcept;
             [[nodiscard]] Handle pop() noexcept;
@@ -55,7 +55,7 @@ namespace Physica {
         // Larger than any thread ID, main thread is not maintained by thread pool
         constexpr static int MainThreadID = std::numeric_limits<decltype(numThreadRequired)>::max();
     private:
-        Array<ThreadData> thread_data;
+        Array<ThreadQueue> queues;
         std::mutex poolMutex;
         std::condition_variable cond;
         bool exit = false;
@@ -69,11 +69,12 @@ namespace Physica {
         /* Operations */
         void schedule(Handle handle) noexcept;
         [[nodiscard]] Handle steal() noexcept;
+
         void shouldExit() noexcept;
         void waitExit();
         void restart();
         /* Getters */
-        [[nodiscard]] int getNumThreads() const noexcept { return (int)thread_data.getLength(); }
+        [[nodiscard]] int getNumThreads() const noexcept { return (int)queues.getLength(); }
         /* Static Members */
         [[nodiscard]] static This& getInstance() noexcept;
         [[nodiscard]] static int getThreadID() noexcept;

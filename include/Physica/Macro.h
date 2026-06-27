@@ -33,7 +33,7 @@
 #endif
 
 #ifdef __GNUC__
-    #define PHYSICA_API __attribute__((visibility("default")))
+    #define PHYSICA_API [[gnu::visibility("default")]]
 #else
     #define PHYSICA_API __declspec(dllexport)
     #define __restrict__ __restrict

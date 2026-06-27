@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,7 +28,7 @@ namespace Physica {
     class PHYSICA_API BitArray {
         using This = BitArray;
         //Every bit of arr stands for a bool.
-        unsigned char* __restrict__ arr = nullptr;
+        unsigned char* arr = nullptr;
         size_t bitCount = 0;
     public:
         BitArray() = default;
