@@ -51,6 +51,14 @@ namespace {
         Array<int> copy = arr;
         expect(copy.getCapacity() == 0);
     }
+
+    void array_read() {
+        Array<int, 3> origin{1, 2, 3};
+        auto fixed = Array<int, 3>::read(origin.data());
+        auto dynamic = Array<int>::read(3, origin.data());
+        expect(fixed == origin);
+        expect(dynamic == Array<int>(origin));
+    }
 }
 
 int main() {
@@ -58,5 +66,6 @@ int main() {
     rangeTest<Array<long>>();
     structuredBinding();
     emptyCopy();
+    array_read();
     return 0;
 }

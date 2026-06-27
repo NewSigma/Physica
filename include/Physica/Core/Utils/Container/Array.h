@@ -85,6 +85,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr auto* data(this auto&& self) noexcept { return self.arr.data(); }
         [[nodiscard]] auto get_allocator() const noexcept { return alloc; }
         /* Static members */
+        [[nodiscard]] __host__ __device__ static This read(const T* __restrict p) noexcept;
         [[nodiscard]] __host__ __device__ static This read(size_t length, const T* __restrict p) noexcept;
         [[nodiscard]] static size_t toIndex1D(const IndexType& __restrict shape, const IndexType& __restrict indices) noexcept;
         [[nodiscard]] static IndexType toIndexND(const IndexType& shape, size_t index) noexcept;

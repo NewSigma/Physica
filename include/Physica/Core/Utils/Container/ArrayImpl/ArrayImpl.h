@@ -82,13 +82,20 @@ namespace Physica {
      * Helper function that communicates with C libraries.
      */
     template<class T, size_t Length, class Allocator>
-    __host__ __device__ auto Array<T, Length, Allocator>::read([[maybe_unused]] size_t length, const T* __restrict p) noexcept -> This {
+    __host__ __device__ auto Array<T, Length, Allocator>::read(const T* __restrict p) noexcept -> This {
         static_assert(std::is_trivially_copyable<T>::value, "[Error]: C type must be trivial");
-        assert(length == Length && "[Error]: Length do not match");
         assert(p != nullptr);
         This result(Length);
         std::memcpy(result.arr.data(), p, Length * sizeof(T));
         return result;
+    }
+    /**
+     * A syntactic sugar for unifying dynamic Array API
+     */
+    template<class T, size_t Length, class Allocator>
+    __host__ __device__ auto Array<T, Length, Allocator>::read([[maybe_unused]] size_t length, const T* __restrict p) noexcept -> This {
+        assert(length == Length && "[Error]: Length do not match");
+        return read(p);
     }
 
     template<class T, size_t Length, class Allocator>
@@ -283,7 +290,7 @@ namespace Physica {
         This result{};
         result.arr = result.get_allocator().allocate(length);
         result.length = result.capacity = length;
-        result.read(length, p);
+        result.read(p);
         return result;
     }
     /**
