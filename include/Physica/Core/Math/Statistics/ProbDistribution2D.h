@@ -35,6 +35,10 @@ namespace Physica {
         VectorType separatesY;
         T repDeltaX;
         T repDeltaY;
+        T maxX;
+        T minX;
+        T maxY;
+        T minY;
     public:
         ProbDistribution2D(T fromX, T toX, T fromY, T toY, size_t numBinX, size_t numBinY);
         ProbDistribution2D(const This&) = default;
@@ -47,8 +51,10 @@ namespace Physica {
         /* Operations */
         void sample(T x, T y);
         void clear();
+
         [[nodiscard]] MeshType makePosition() const;
         [[nodiscard]] MatrixType makeDistribution() const;
+        [[nodiscard]] size_t calcNumSample() const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const BucketType& getBucket() const noexcept { return bucket; }
@@ -58,8 +64,10 @@ namespace Physica {
         [[nodiscard]] T getFromPointY() const noexcept { return separatesY[0]; }
         [[nodiscard]] T getToPointX() const noexcept { return separatesX.back(); }
         [[nodiscard]] T getToPointY() const noexcept { return separatesY.back(); }
-    private:
-        [[nodiscard]] size_t calcNumSample() const;
+        [[nodiscard]] T getMaxX() const noexcept { return maxX; }
+        [[nodiscard]] T getMinX() const noexcept { return minX; }
+        [[nodiscard]] T getMaxY() const noexcept { return maxY; }
+        [[nodiscard]] T getMinY() const noexcept { return minY; }
     };
 
     template<Scalar T>
@@ -72,6 +80,7 @@ namespace Physica {
             , repDeltaY(T(numBinY) / (toY - fromY)) {
         assert(fromX < toX);
         assert(fromY < toY);
+        clear();
     }
 
     template<Scalar T>
@@ -98,12 +107,17 @@ namespace Physica {
         if (x > getFromPointX() && 0 <= indexX && size_t(indexX) < getNumBinX())
             if (y > getFromPointY() && 0 <= indexY && size_t(indexY) < getNumBinY())
                 bucket[indexX, indexY, 0] += 1;
+        maxX = std::max(x, maxX);
+        minX = std::min(x, minX);
+        maxY = std::max(y, maxY);
+        minY = std::min(y, minY);
     }
 
     template<Scalar T>
     void ProbDistribution2D<T>::clear() {
-        for (auto& elem : bucket.asArray())
-            elem = 0;
+        bucket.zeros();
+        maxX = maxY = std::numeric_limits<T>::lowest();
+        minX = minY = std::numeric_limits<T>::max();
     }
 
     template<Scalar T>
@@ -128,6 +142,14 @@ namespace Physica {
     }
 
     template<Scalar T>
+    size_t ProbDistribution2D<T>::calcNumSample() const {
+        size_t num = 0;
+        for (size_t elem : bucket.asArray())
+            num += elem;
+        return num;
+    }
+
+    template<Scalar T>
     void ProbDistribution2D<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         bucket.swap(obj.bucket);
@@ -135,13 +157,9 @@ namespace Physica {
         separatesY.swap(obj.separatesY);
         repDeltaX.swap(obj.repDeltaX);
         repDeltaY.swap(obj.repDeltaY);
-    }
-
-    template<Scalar T>
-    size_t ProbDistribution2D<T>::calcNumSample() const {
-        size_t num = 0;
-        for (size_t elem : bucket.asArray())
-            num += elem;
-        return num;
+        maxX.swap(obj.maxX);
+        minX.swap(obj.minX);
+        maxY.swap(obj.maxY);
+        minY.swap(obj.minY);
     }
 }

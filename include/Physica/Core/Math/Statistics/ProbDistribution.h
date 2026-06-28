@@ -28,6 +28,8 @@ namespace Physica {
         Array<size_t> bucket;
         VectorND<T> separates;
         T repDelta;
+        T maximum;
+        T minimum;
     public:
         ProbDistribution(T from, T to, size_t numBin);
         ProbDistribution(const This&) = default;
@@ -40,16 +42,18 @@ namespace Physica {
         void sample(T data);
         void sample(VectorND<T> datas);
         void clear();
+
         [[nodiscard]] VectorND<T> makePosition() const;
         [[nodiscard]] VectorND<T> makeDistribution() const;
+        [[nodiscard]] size_t calcNumSample() const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getBucket() const noexcept { return bucket; }
         [[nodiscard]] size_t getNumBin() const noexcept { return bucket.getLength(); }
         [[nodiscard]] T getFromPoint() const noexcept { return separates[0]; }
         [[nodiscard]] T getToPoint() const noexcept { return separates.back(); }
-    private:
-        size_t calcNumSample() const;
+        [[nodiscard]] T getMaximum() const noexcept { return maximum; }
+        [[nodiscard]] T getMinimum() const noexcept { return minimum; }
     };
 
     template<Scalar T>
@@ -58,6 +62,7 @@ namespace Physica {
             , separates(VectorND<T>::linspace(from, to, numBin + 1))
             , repDelta(T(numBin) / (to - from)) {
         assert(from < to);
+        clear();
     }
 
     template<Scalar T>
@@ -65,6 +70,8 @@ namespace Physica {
         const long index = double((data - getFromPoint()) * repDelta);
         if (data > getFromPoint() && 0 <= index && size_t(index) < getNumBin())
             bucket[index] += 1;
+        maximum = std::max(data, maximum);
+        minimum = std::min(data, minimum);
     }
 
     template<Scalar T>
@@ -75,8 +82,9 @@ namespace Physica {
 
     template<Scalar T>
     void ProbDistribution<T>::clear() {
-        for (auto& elem : bucket)
-            elem = 0;
+        bucket.zeros();
+        maximum = std::numeric_limits<T>::lowest();
+        minimum = std::numeric_limits<T>::max();
     }
 
     template<Scalar T>
@@ -106,6 +114,8 @@ namespace Physica {
         bucket.swap(obj.bucket);
         separates.swap(obj.separates);
         repDelta.swap(obj.repDelta);
+        maximum.swap(obj.maximum);
+        minimum.swap(obj.minimum);
     }
 
     template<Scalar T>
