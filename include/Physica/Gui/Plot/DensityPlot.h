@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Geometry/Point.h"
 
 namespace Physica {
-    /*!
+    /**
      * DensityPlot provide a approach to show 2D data.
      */
     class PHYSICA_API DensityPlot : public QWidget {

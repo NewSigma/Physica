@@ -24,7 +24,7 @@
 #include <limits>
 
 using namespace Physica;
-/*!
+/**
  * bitCount is the number of bool types you need.
  * bitCount is different from BitArray::length.
  */
@@ -73,7 +73,7 @@ BitArray& BitArray::operator=(BitArray&& array) noexcept {
     arr = array.arr;
     return *this;
 }
-/*!
+/**
  * Access the s.th bool, s starts from 0.
  */
 bool BitArray::operator[](size_t s) const {
@@ -136,7 +136,7 @@ void BitArray::swap(This& obj) noexcept {
     std::swap(arr, obj.arr);
     std::swap(bitCount, obj.bitCount);
 }
-/*!
+/**
  * Construct a BitArray directly from its members. Declared private to avoid incorrect uses.
  * Length of arr must be @param length.
  */

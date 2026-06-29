@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-/*!
+/**
  * Check if this machine uses logical left shift. Logical right shift is unsupported.
  */
 int main() {

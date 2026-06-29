@@ -22,11 +22,11 @@
 #include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica {
-    /*!
+    /**
      * \len is the length of \from. Length of \to should not less than \len. length of \result should be \len at least.
      */
     PHYSICA_API MPUnit addArrWithArr(MPUnit* __restrict result, const MPUnit* __restrict from, const MPUnit* __restrict to, size_t len) noexcept;
-    /*!
+    /**
      * \len is the length of \from. Length of \to should not less than \len.
      */
     PHYSICA_API MPUnit addArrWithArrEq(const MPUnit* __restrict from, MPUnit* __restrict to, size_t len) noexcept;
@@ -43,27 +43,27 @@ namespace Physica {
     PHYSICA_API bool subArrByArr(MPUnit* __restrict result, const MPUnit* __restrict arr1, const MPUnit* __restrict arr2, size_t len) noexcept;
     //Another version of subArrByArr(), calculate arr1 -= arr2.
     PHYSICA_API bool subArrByArrEq(MPUnit* __restrict arr1, const MPUnit* __restrict arr2, size_t len) noexcept;
-    /*!
+    /**
      * This is simplified version of mulWordByWord(), which get the high Unit only.
      * It is slightly faster than mulWordByWord() if we are interested in the high Unit only.
      */
     PHYSICA_API MPUnit mulWordByWordHigh(MPUnit n1, MPUnit n2) noexcept;
-    /*!
+    /**
      * On 64 bits machine(similar to 32 bit machine):
      * n1 * n2 = product(16 bytes) = carry(high 8 bytes) + ReturnValue(low bytes)
      */
     PHYSICA_API void mulWordByWord(MPUnit& high, MPUnit& low, MPUnit n1, MPUnit n2) noexcept;
-    /*!
+    /**
      * Multiply the array @param arr with @param n. Write the result to array @param result.
      * Length of result should at least as long as arr.
      */
     PHYSICA_API MPUnit mulArrByWord(MPUnit* __restrict result, const MPUnit* __restrict arr, size_t length, MPUnit n) noexcept;
-    /*!
+    /**
      * Multiply the array @param arr with @param n. Add the result to array @param result.
      * Length of result should at least as long as arr.
      */
     PHYSICA_API MPUnit mulAddArrByWord(MPUnit* __restrict result, const MPUnit* __restrict arr, size_t length, MPUnit n) noexcept;
-    /*!
+    /**
      * Multiply the array @param arr with @param n. Subtract the result from array @param result.
      * Length of result should at least as long as arr.
      */

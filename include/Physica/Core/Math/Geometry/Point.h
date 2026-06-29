@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica {
-    /*!
+    /**
      * By default, point do not need high precision, so @param type is set to float32.
      */
     template<size_t Dim, Scalar T = float32>

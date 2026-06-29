@@ -24,7 +24,7 @@
 #include "LoggerType.h"
 
 namespace Physica {
-    /*!
+    /**
      * \param format
      *      C style format string.
      *
@@ -42,7 +42,7 @@ namespace Physica {
         }
         return argCount;
     }
-    /*!
+    /**
      * Get the arg type at index position.
      *
      * \tparam N
@@ -138,7 +138,7 @@ namespace Physica {
         }
         return ArgType::Invalid;
     }
-    /*!
+    /**
      * Helper to analyzeFormatString. This level of indirection is needed to
      * unpack the index_sequence generated in analyzeFormatString and
      * use the sequence as indices for calling getArgType.
@@ -157,7 +157,7 @@ namespace Physica {
     constexpr auto analyzeFormatStringHelper(const char(&format)[N], std::index_sequence<Indices...>) -> std::array<ArgType, sizeof...(Indices)> {
         return {{ getArgType(format, Indices)... }};
     }
-    /*!
+    /**
      * Spawn a array of all of the args of a format string.
      *
      * \tparam ArgCount

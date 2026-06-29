@@ -105,7 +105,7 @@ namespace Physica {
         if constexpr (Unit)
             return Trv(0);
         else {
-            assert(!Base::diag().prod().isZero() && "[Error]: Singular matrix");
+            assert(std::ranges::none_of(Base::diag().values().view(), [](T x) { return x.isZero(); }) && "[Error]: Singular matrix");
             return ln(abs(Base::diag())).sum();
         }
     }

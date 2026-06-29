@@ -116,7 +116,7 @@ namespace Physica {
             return T(1);
         return x.isZero() ? T(0) : pow(x, a);
     }
-    /*!
+    /**
      * Ignoring error. If x is a float number, use floor() first.
      * \param x must be positive, or 1 will be returned.
      *

@@ -61,7 +61,7 @@ namespace Physica {
         }
         return result;
     }
-    /*!
+    /**
      * Calculate a^n.
      *
      * Reference:

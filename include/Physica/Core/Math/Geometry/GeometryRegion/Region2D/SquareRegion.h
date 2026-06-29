@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Geometry/GeometryRegion/GeometryRegion.h"
 
 namespace Physica {
-    /*!
+    /**
      * Imagine a rectangular coordinate system whose x-axis points to right and y-axis points to up.
      * Then @param p1 is the left bottom point of the square and @param length is the length of sides.
      */

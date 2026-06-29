@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
-/*!
+/**
  * Bug: if the start of integrate domain is much larger than step size, the result will be 0. May be use taylor series
  * and expend the function to the first order.
  */

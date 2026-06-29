@@ -74,7 +74,8 @@ namespace Physica {
                 }
             }
             subchains.squeeze();
-            std::ranges::sort(subchains);
+            if (!subchains.empty())
+                std::ranges::sort(subchains);
         }
     }
     /**

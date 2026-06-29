@@ -23,7 +23,7 @@
 #include <array>
 
 namespace Physica {
-    /*!
+    /**
      * ArgType indicates the conversion specifier, e.g. c in %c, s in %s.
      */
     enum ArgType {

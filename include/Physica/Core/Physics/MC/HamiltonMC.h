@@ -246,7 +246,7 @@ namespace Physica {
             .acceptR = std::min(exp(prevE - curE), Trv(1)),
             .numAccept = curE < upperE,
             .numVisited = 1,
-            .stop = (curE >= upperE + maxDelta) || (nodes.size() == maxTreeDepth)};
+            .stop = (curE >= upperE + maxDelta) || (nodes.size() >= maxTreeDepth)};
     }
 
     template<Scalar T>

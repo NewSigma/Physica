@@ -260,7 +260,7 @@ Real<FloatMP> Real<FloatMP>::operator-() const {
     memcpy(result.byte, byte, getSize() * sizeof(MPUnit));
     return result;
 }
-/*!
+/**
  * Optimize:
  * Is subtract faster than comparing the elements?
  */
@@ -291,7 +291,7 @@ bool Real<FloatMP>::operator>(const This& other) const {
     }
     return result;
 }
-/*!
+/**
  * Optimize:
  * Is subtract faster than comparing the elements?
  */
@@ -680,7 +680,7 @@ bool Real<FloatMP>::cutLength(Real<FloatMP>& s) {
 }
 
 namespace Physica {
-    /*!
+    /**
      * return true if the abstract value of s1 is larger or equal than the abstract value of s2.
      * return false if the abstract value of s1 is smaller to the abstract value of s2.
      *

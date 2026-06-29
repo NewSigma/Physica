@@ -23,7 +23,7 @@
 #include "Physica/Logger/LoggerType.h"
 
 namespace Physica {
-    /*!
+    /**
      * Abstract father class for all loggers.
      */
     class PHYSICA_API AbstractLogger {

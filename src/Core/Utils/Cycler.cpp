@@ -70,7 +70,7 @@ double Cycler::getCyclesPerSec() {
     static const double localCyclesPerSec = makeCyclesPerSec();
     return localCyclesPerSec;
 }
-/*!
+/**
  * Given an elapsed time measured in cycles, return an integer
  * giving the corresponding time in nanoseconds. Note: toSeconds()
  * is faster than this method.
@@ -95,7 +95,7 @@ uint64_t Cycler::toNanoseconds(uint64_t cycles, double cyclesPerSec) {
      */
     return (uint64_t)(1e09 * static_cast<double>(cycles) / cyclesPerSec + 0.5); // NOLINT cycles > 0, cyclesPerSec > 0, rounding is safe
 }
-/*!
+/**
  * Given an elapsed time measured in cycles, return an integer
  * giving the corresponding time in microseconds. Note: toSeconds()
  * is faster than this method.
@@ -118,7 +118,7 @@ uint64_t Cycler::toMillisecond(uint64_t cycles, double cyclesPerSec) {
     assert(cyclesPerSec > 0);
     return toNanoseconds(cycles, cyclesPerSec) / 1000000;
 }
-/*!
+/**
  * Given an elapsed time measured in cycles, return a floating-point number
  * giving the corresponding time in seconds.
  * \param cycles
@@ -137,7 +137,7 @@ double Cycler::toSeconds(uint64_t cycles, double cyclesPerSec) {
         cyclesPerSec = getCyclesPerSec();
     return static_cast<double>(cycles) / cyclesPerSec;
 }
-/*!
+/**
  * Given a number of nanoseconds, return an approximate number of
  * cycles for an equivalent time length.
  * \param ns
@@ -161,7 +161,7 @@ uint64_t Cycler::fromNanoseconds(uint64_t ns, double cyclesPerSec) {
      */
     return (uint64_t)(static_cast<double>(ns) * cyclesPerSec / 1e09 + 0.5); // NOLINT ns > 0, cyclesPerSec > 0, rounding is safe
 }
-/*!
+/**
  * Given a time in seconds, return the number of cycles that it
  * corresponds to.
  * \param seconds

@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Geometry/Point.h"
 
 namespace Physica {
-    /*!
+    /**
      * Describe a region in 2D or 3D. Used tree to implement it.
      */
     template<int Dim>
@@ -50,13 +50,13 @@ namespace Physica {
         GeometryRegion& operator=(GeometryRegion&& g) noexcept = delete;
         /* Getters */
         [[nodiscard]] RegionType getType() const { return type; }
-        /*!
+        /**
          * Return whether this region is a basic region. e.g. a circle, a rectangular etc.
          */
         [[nodiscard]] bool isBasic() const { return type < Xor; }
     protected:
         explicit GeometryRegion(RegionType type);
-        /*!
+        /**
          * New a object and take the ownership of the data in the current object.
          *
          * This function should only be called by \class RegionTree, which assembles regions into its tree.
@@ -84,13 +84,13 @@ namespace Physica {
         GeometryRegion& operator=(GeometryRegion&& g) noexcept = delete;
         /* Getters */
         [[nodiscard]] RegionType getType() const { return type; }
-        /*!
+        /**
          * Return whether this region is a basic region. e.g. a circle, a rectangular etc.
          */
         [[nodiscard]] bool isBasic() const { return type < Xor; }
     protected:
         explicit GeometryRegion(RegionType type);
-        /*!
+        /**
          * New a object and take the ownership of the data in the current object.
          *
          * This function should only be called by \class RegionTree, which assembles regions into its tree.
