@@ -119,17 +119,14 @@ namespace Physica {
         }
         else {
             const size_t numValidRecord = iteration > mixIteration ? (DIISBufferSize - 1) : (mixIteration + 1);
-            auto diisMat = DenseMatrix<T>(numValidRecord + 1, numValidRecord + 1, 1.0);
-            diisMat[0, 0] = T(0);
-            /* Construct equation */ {
-                for (size_t i = 1; i < diisMat.getRow(); ++i) {
-                    for (size_t j = i; j < diisMat.getCol(); ++j) {
-                        T temp = residules[i - 1].getTotalDensity().flatten() * residules[j - 1].getTotalDensity().flatten();
-                        diisMat[i, j] = temp;
-                        diisMat[j, i] = temp;
-                    }
-                }
-            }
+            const auto diisMat = DenseMatrix<T>::generate(numValidRecord + 1, numValidRecord + 1, [&](size_t i, size_t j) -> T {
+                if (i == 0 && j == 0)
+                    return T(0);
+                if (i == 0 || j == 0)
+                    return T(1);
+                return residules[i - 1].getTotalDensity().flatten() * residules[j - 1].getTotalDensity().flatten();
+            });
+
             VectorND<T> x(diisMat.getRow());
             /* Solve */ {
                 auto b = VectorND<T>(diisMat.getRow(), 0);

@@ -196,4 +196,9 @@ namespace Physica {
     auto DenseMatrix<T, Major, Row, Col, Allocator>::read(size_t row, size_t col, const T* __restrict p) noexcept -> This {
         return This(Storage::read(row, col, p));
     }
+
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    auto DenseMatrix<T, Major, Row, Col, Allocator>::generate(size_t row, size_t col, std::invocable<size_t, size_t> auto fn) -> This {
+        return This(Storage::generate(row, col, std::move(fn)));
+    }
 }

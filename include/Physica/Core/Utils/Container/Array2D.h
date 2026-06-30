@@ -99,8 +99,9 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return Major; }
         [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) noexcept;
+        [[nodiscard]] static This generate(size_t row, size_t col, std::invocable<size_t, size_t> auto fn);
     private:
-        Array2D(ArrayType arr_, IndexType r_);
+        Array2D(ArrayType arr_, IndexType r_) noexcept;
 
         [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const noexcept;
         /* Friends */

@@ -51,8 +51,7 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    Array2D<T, Major, Row, Col, Allocator>::Array2D(ArrayType arr_, IndexType r_)
-            : arr(std::move(arr_)), r(r_) {}
+    Array2D<T, Major, Row, Col, Allocator>::Array2D(ArrayType arr_, IndexType r_) noexcept : arr(std::move(arr_)), r(r_) {}
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
     T& Array2D<T, Major, Row, Col, Allocator>::operator[](size_t r, size_t c) {
@@ -238,6 +237,21 @@ namespace Physica {
         new (&result.arr) ArrayType::read(row * col, p);
         result.r = row;
         return result;
+    }
+
+    template<class T, int Major, size_t Row, size_t Col, class Allocator>
+    auto Array2D<T, Major, Row, Col, Allocator>::generate(size_t row, size_t col, std::invocable<size_t, size_t> auto fn) -> This {
+        auto generator = [=](size_t index) {
+            if constexpr (isColMajor)
+                return fn(index % row, index / row);
+            else
+                return fn(index / col, index % col);
+        };
+
+        if constexpr (Row == Dynamic || Col == Dynamic)
+            return This(ArrayType::generate(row * col, std::move(generator)), row);
+        else
+            return This(ArrayType::generate(std::move(generator)), row);
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
