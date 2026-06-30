@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,7 +34,7 @@ namespace Physica {
         void step(std::invocable<T> auto fn);
         void swap(QuadraticSearch& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] int getOptimalIndex() const noexcept;
+        [[nodiscard]] size_t getOptimalIndex() const noexcept { return y.argmax(); }
         [[nodiscard]] T getOptimizedX() const noexcept { return x[getOptimalIndex()]; }
         [[nodiscard]] T getOptimizedY() const noexcept { return y[getOptimalIndex()]; }
     };
@@ -62,18 +62,5 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         x.swap(obj.x);
         y.swap(obj.y);
-    }
-
-    template<Scalar T>
-    int QuadraticSearch<T>::getOptimalIndex() const noexcept {
-        int index = 0;
-        T max = std::numeric_limits<T>::min();
-        for (int i = 0; i < 3; ++i) {
-            if (y[i] > max) {
-                index = i;
-                max = y[i];
-            }
-        }
-        return index;
     }
 }

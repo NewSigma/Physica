@@ -155,12 +155,9 @@ namespace {
             MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
             EigenSolver<T> solver(hamilton_mod, true);
             const auto& eigenvalues = solver.getEigenvalues();
-            size_t groundStateIndex = 0;
-            for (size_t i = 0; i < NumBasis; ++i) {
+            size_t groundStateIndex = eigenvalues.reals().argmin();
+            for (size_t i = 0; i < NumBasis; ++i)
                 std::cout << '\t' << eigenvalues[i] << '\n';
-                if (eigenvalues[i].real() < eigenvalues[groundStateIndex].real())
-                    groundStateIndex = i;
-            }
 
             Plot* plot = new Plot(0, 5, 0, 0.6001, 1, 0.2);
 

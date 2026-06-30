@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -85,20 +85,9 @@ namespace Physica {
                 }
             }
 
-            const size_t nextIndex = [&z, length]() noexcept {
-                size_t result{};
-                Tr zmax = 0;
-                for (size_t i = 0; i < length; ++i) {
-                    const Tr temp = isComplex() ? z[i].squaredNorm() : abs(z[i]);
-                    if (temp > zmax) {
-                        result = i;
-                        zmax = temp;
-                    }
-                }
-                assert(zmax.isPositive() && "[Error]: Unexpected empty vector");
-                return result;
-            }();
-
+            const auto z_abs = abs(z);
+            const size_t nextIndex = z_abs.argmax();
+            assert(z_abs.calc(nextIndex).isPositive() && "[Error]: Unexpected empty vector");
             if (lastIndex != nextIndex)
                 lastIndex = index;
             index = nextIndex;

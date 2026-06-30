@@ -161,12 +161,7 @@ namespace Physica {
         auto& larr = lSingularMat.asArray();
         auto& rarr = rSingularMat.asArray();
         for (size_t i = 0; i < order - 1; ++i) {
-            size_t index_min = i;
-            for (size_t j = i + 1; j < order; ++j) {
-                if (abs(singulars[j].real()) < abs(singulars[index_min].real()))
-                    index_min = j;
-            }
-
+            const size_t index_min = i + abs(singulars.tail(i).reals()).argmin();
             if (index_min != i) {
                 singulars[i].swap(singulars[index_min]);
                 larr[i].swap(larr[index_min]);

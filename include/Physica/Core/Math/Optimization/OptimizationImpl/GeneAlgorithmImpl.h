@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
 
@@ -41,11 +41,7 @@ namespace Physica {
             crossover<R>();
             mutation<R>();
         }
-
-        for (size_t i = 1; i < config.populationSize; ++i) {
-            if (fitness[i] < fitness[minFitnessIndex])
-                minFitnessIndex = i;
-        }
+        minFitnessIndex = fitness.argmin();
     }
 
     template<class Function, Vector V>

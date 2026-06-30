@@ -102,16 +102,7 @@ namespace Physica {
 
         [[nodiscard]] size_t classify(const VectorND<Tv>& input) const {
             static_assert(Base::isInfering(), "[Error]: It is suggested using infer mode to reduce memory use");
-            const auto output = forward(input);
-            Tv max = output[0];
-            size_t index = 0;
-            for (size_t i = 1; i < output.getLength(); ++i) {
-                if (output[i] > max) {
-                    index = i;
-                    max = output[i].value();
-                }
-            }
-            return index;
+            return forward(input).argmax();
         }
 
         Tv calcAccuracy(const auto& dataset) const {

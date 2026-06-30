@@ -46,7 +46,10 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return abs(Base::getExpr().calc(index)); }
         void reverse(const auto& grad) const noexcept;
 
+        [[nodiscard]] size_t argmax() const noexcept;
+        [[nodiscard]] size_t argmin() const noexcept;
         [[nodiscard]] T max() const;
+        [[nodiscard]] T min() const;
 
         [[nodiscard]] auto values(this auto&&) noexcept;
     };
@@ -94,11 +97,35 @@ namespace Physica {
     }
 
     template<Vector V>
+    size_t VectorExpr<ExprID::Abs, V>::argmax() const noexcept {
+        if constexpr (isComplexV)
+            return Base::getExpr().squaredNorms().argmax();
+        else
+            return Base::argmax();
+    }
+
+    template<Vector V>
+    size_t VectorExpr<ExprID::Abs, V>::argmin() const noexcept {
+        if constexpr (isComplexV)
+            return Base::getExpr().squaredNorms().argmin();
+        else
+            return Base::argmin();
+    }
+
+    template<Vector V>
     auto VectorExpr<ExprID::Abs, V>::max() const -> T {
         if constexpr (isComplexV)
             return sqrt(Base::getExpr().squaredNorms().max());
         else
             return Base::max();
+    }
+
+    template<Vector V>
+    auto VectorExpr<ExprID::Abs, V>::min() const -> T {
+        if constexpr (isComplexV)
+            return sqrt(Base::getExpr().squaredNorms().min());
+        else
+            return Base::min();
     }
 
     template<Vector V>
