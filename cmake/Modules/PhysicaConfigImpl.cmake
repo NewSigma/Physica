@@ -145,12 +145,9 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 ##############################################Libs################################################
 # FFTW3
 find_package(FFTW3 REQUIRED)
-include_directories(SYSTEM ${FFTW3_INCLUDE_DIRS})
-link_directories(${FFTW3_LIBRARY_DIRS})
 
 if(${PHYSICA_PROFILE})
     find_package(GPerfTools REQUIRED)
-    include_directories(SYSTEM ${GPerfTools_INCLUDE_DIR})
 endif()
 
 if(${PHYSICA_GUI})
@@ -165,7 +162,6 @@ if(${PHYSICA_MKL})
     set(MKL_INTERFACE_FULL intel_ilp64)
     find_package(MKL REQUIRED)
     add_definitions(-DPHYSICA_MKL)
-    include_directories(SYSTEM ${MKL_INCLUDE})
 endif()
 
 if(${PHYSICA_MPI})
@@ -173,7 +169,6 @@ if(${PHYSICA_MPI})
     set(MPI_CXX_COMPILE_OPTIONS "")
     find_package(MPI REQUIRED)
     add_definitions(-DPHYSICA_MPI)
-    include_directories(SYSTEM ${MPI_CXX_INCLUDE_DIRS})
 endif()
 
 if (${PHYSICA_HDF5})

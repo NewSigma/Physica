@@ -112,16 +112,20 @@ namespace Physica {
 
     template<class T, size_t Length, class Allocator>
     auto Array<T, Length, Allocator>::toIndexND(const IndexType& shape, size_t index) noexcept -> IndexType {
-        constexpr int dim = shape.getLength();
+        constexpr int Dim = shape.getLength();
+        Array<size_t, Dim> strides{};
+        size_t stride = 1;
+        for (int i = Dim - 1; i >= 0; --i) {
+            strides[i] = stride;
+            stride *= shape[i];
+        }
+
         IndexType indices(shape.size());
         size_t remaining = index;
-        for (int i = 0; i < dim; ++i) {
-            size_t stride = 1;
-            for (int j = i + 1; j < dim; ++j)
-                stride *= shape[j];
-            indices[i] = remaining / stride;
+        for (int i = 0; i < Dim; ++i) {
+            indices[i] = remaining / strides[i];
             assert(indices[i] < shape[i] && "[Error]: Index out of range");
-            remaining %= stride;
+            remaining %= strides[i];
         }
         return indices;
     }

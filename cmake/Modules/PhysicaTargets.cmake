@@ -3,10 +3,15 @@ add_library(Physica::Core INTERFACE IMPORTED)
 
 target_link_libraries(Physica::Core INTERFACE ${PhysicaCore_LIBRARIES})
 target_link_libraries(Physica::Core INTERFACE ${FFTW3_LIBRARIES} INTERFACE pthread)
+target_include_directories(Physica::Core SYSTEM INTERFACE ${FFTW3_INCLUDE_DIRS})
 
 if(CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
     target_link_libraries(Physica::Core INTERFACE IntelSYCL::SYCL_CXX)
     target_link_libraries(Physica::Core INTERFACE imf INTERFACE svml INTERFACE irng INTERFACE intlc)
+endif()
+
+if(${PHYSICA_PROFILE})
+    target_include_directories(Physica::Core SYSTEM INTERFACE ${GPerfTools_INCLUDE_DIR})
 endif()
 
 if(${PHYSICA_HDF5})
@@ -19,10 +24,12 @@ endif()
 
 if(${PHYSICA_MKL})
     target_link_libraries(Physica::Core INTERFACE MKL::MKL)
+    target_include_directories(Physica::Core SYSTEM INTERFACE ${MKL_INCLUDE})
 endif()
 
 if(${PHYSICA_MPI})
     target_link_libraries(Physica::Core INTERFACE MPI::MPI_CXX)
+    target_include_directories(Physica::Core SYSTEM INTERFACE ${MPI_CXX_INCLUDE_DIRS})
 endif()
 
 if(${PHYSICA_MIMALLOC})

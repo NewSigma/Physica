@@ -22,7 +22,6 @@
 #include <type_traits>
 #include "Physica/CRTPBase.h"
 #include "Physica/Core/Scalar/Scalar.h"
-#include "Physica/Core/Math/Random/Random.h"
 
 namespace Physica {
     namespace Internal {
@@ -96,9 +95,9 @@ namespace Physica {
 
         __host__ __device__ void toNextMean(size_t lastNumSample, ScalarType sample) noexcept;
         __host__ __device__ void toNextVariance(ScalarType& __restrict mean, size_t lastNumSample, ScalarType sample) noexcept;
-        template<RNG R>
+        template<class R>
         void random_uniform() noexcept;
-        template<RNG R>
+        template<class R>
         void random_normal() noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ decltype(auto) real(this auto&&) noexcept;
@@ -270,13 +269,13 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<RNG R>
+    template<class R>
     void ScalarBase<Derived>::random_uniform() noexcept {
         Base::getDerived() = Derived::template random_uniform<R>();
     }
 
     template<class Derived>
-    template<RNG R>
+    template<class R>
     void ScalarBase<Derived>::random_normal() noexcept {
         Base::getDerived() = Derived::template random_normal<R>();
     }
