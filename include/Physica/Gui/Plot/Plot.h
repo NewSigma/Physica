@@ -162,7 +162,7 @@ namespace Physica {
             auto minimum = data.calc(0);
             auto maximum = data.calc(0);
             for (size_t i = 1; i < length; ++i) {
-                auto temp = data.calc(0);
+                auto temp = data.calc(i);
                 if (temp < minimum)
                     minimum = std::move(temp);
                 else if (temp > maximum)
