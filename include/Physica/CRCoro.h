@@ -37,6 +37,8 @@ namespace Physica {
     public:
         using promise_type = T;
     public:
+        ~CRCoro() = default;
+        /* Operations */
         auto get_return_object() noexcept {
             struct RValueWrapper {
                 This* p;
@@ -48,13 +50,12 @@ namespace Physica {
         auto initial_suspend() noexcept { return suspend_never{}; }
         void await_transform(auto&&) noexcept = delete("[Error]: CRCoro never suspends");
         auto final_suspend() noexcept { return suspend_never{}; }
-        void return_value(T&& x) noexcept { Base::getDerived() = std::move(x); }
+        void return_value(auto&& x) noexcept { Base::getDerived() = std::forward<decltype(x)>(x); }
         [[noreturn]] void unhandled_exception() { throw; }
     protected:
         CRCoro() = default;
         CRCoro(const This&) = default;
         CRCoro(This&&) noexcept = default;
-        ~CRCoro() = default;
         /* Operators */
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;

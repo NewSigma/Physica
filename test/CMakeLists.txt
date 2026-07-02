@@ -18,3 +18,5 @@ add_subdirectory(Core)
 
 physica_add_test(Logger Logger/LoggerTest.cpp)
 target_link_libraries(Test-Logger PhysicaLogger)
+
+physica_add_test(CRCoro CRCoro.cpp)
