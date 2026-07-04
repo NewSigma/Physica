@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 #include "Test.h"
 
 using namespace Physica;
@@ -66,16 +66,27 @@ namespace {
             static_assert(mat.isBothMajor() && re.isColMatrix());
         });
     }
+
+    void dot_reverse() {
+        using T = float64;
+        using dfloat = Diff<T, DiffMode::Reverse>;
+        VectorND<dfloat> x{1, 2, 3};
+        {
+            auto result = (square(x) * VectorND<T>{1, 1, 1});
+            result.reverse();
+        }
+        expect(x.grads() == T(2) * x.values());
+    }
 }
+
+static_assert(DenseVector<float64>{}.transpose().getRowAtCompile() == 1);
+static_assert(DenseVector<cfloat64>{}.hermite().getRowAtCompile() == 1);
 
 int main() {
     viewTest();
     sum();
     argminTest();
     reshapeTest();
-    syntax_only([]() {
-        static_assert(DenseVector<float64>{}.transpose().getRowAtCompile() == 1);
-        static_assert(DenseVector<cfloat64>{}.hermite().getRowAtCompile() == 1);
-    });
+    dot_reverse();
     return 0;
 }

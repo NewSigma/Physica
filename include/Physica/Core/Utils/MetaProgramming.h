@@ -86,6 +86,7 @@ namespace Physica {
     [[nodiscard]] constexpr decltype(auto) decay_rvalue(auto&& x) noexcept {
         using T = decltype(x);
         if constexpr (std::is_rvalue_reference_v<T>) {
+            static_assert(std::is_move_constructible_v<std::remove_cvref_t<T>>, "[Error]: Require move constructable type");
             static_assert(!std::is_const_v<std::remove_reference_t<T>>, "[Error]: Reject const&& to avoid potential bad pattern");
             return std::decay_t<T>(std::forward<T>(x));
         }

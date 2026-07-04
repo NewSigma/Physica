@@ -69,8 +69,8 @@ namespace Physica {
         using Ref1 = std::conditional<Scalar<LHS>, LHS, add_device_obj_t<LHS>>::type;
         using Ref2 = std::conditional<Scalar<RHS>, RHS, add_device_obj_t<RHS>>::type;
     private:
-        Physica::PlainStruct<LHS2> lhs;
-        Physica::PlainStruct<RHS2> rhs;
+        PlainStruct<LHS2> lhs;
+        PlainStruct<RHS2> rhs;
     public:
         __host__ __device__ device_obj(Ref1 lhs_, Ref2 rhs_) noexcept;
         device_obj(const This&) = default;

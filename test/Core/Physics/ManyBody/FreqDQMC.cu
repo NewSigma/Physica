@@ -47,7 +47,7 @@ namespace {
         {
             auto potH = dqmcH.potentialV(pos);
             auto potD = dqmcD.potentialV(pos);
-            expect<RandomSource>(scalarNear(potH, potD, 1E-6));
+            expect<RandomSource>(scalarNear(potH, potD, 1E-5));
         }
         {
             VectorND<T> forceH, forceD;

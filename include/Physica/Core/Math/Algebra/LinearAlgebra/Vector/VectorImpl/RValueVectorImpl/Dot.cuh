@@ -21,18 +21,21 @@
 #include "../RValueVector.cuh"
 
 namespace Physica {
-    template<Vector V1, Vector V2>
-    class device_obj<Dot<V1, V2>> {
-        using This = device_obj<Dot<V1, V2>>;
-        using T1 = V1::ScalarType;
-        using T2 = V2::ScalarType;
+    template<Vector LHS, Vector RHS>
+    class device_obj<Dot<LHS, RHS>> {
+        using This = device_obj<Dot<LHS, RHS>>;
+        using T1 = std::remove_cvref_t<LHS>::ScalarType;
+        using T2 = std::remove_cvref_t<RHS>::ScalarType;
         using T = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
         using Tr = T::RealType;
+    protected:
+        using Ref1 = add_device_obj<LHS>::type;
+        using Ref2 = add_device_obj<RHS>::type;
     private:
-        const V1& v1;
-        const V2& v2;
+        PlainStruct<add_device_obj_t<std::remove_cvref_t<LHS>>> lhs;
+        PlainStruct<add_device_obj_t<std::remove_cvref_t<RHS>>> rhs;
     public:
-        __host__ __device__ device_obj(const V1& v1_, const V2& v2_);
+        __host__ __device__ device_obj(Ref1 lhs_, Ref2 rhs_);
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -42,27 +45,30 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] __host__ __device__ T calc() const noexcept;
         [[nodiscard]] __device__ T calc(instanceof_x<ThreadBlock> auto block) const noexcept;
+        /* Getters */
+        [[nodiscard]] __host__ __device__ constexpr auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr auto&& getRHS(this auto&&) noexcept;
     };
 
-    template<Vector V1, Vector V2>
-    __host__ __device__ device_obj<Dot<V1, V2>>::device_obj(const V1& v1_, const V2& v2_) : v1(v1_), v2(v2_) {
-        assert(v1.getLength() == v2.getLength());
+    template<Vector LHS, Vector RHS>
+    __host__ __device__ device_obj<Dot<LHS, RHS>>::device_obj(Ref1 lhs_, Ref2 rhs_) : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
+        assert(getLHS().getLength() == getRHS().getLength());
     }
 
-    template<Vector V1, Vector V2>
-    __host__ __device__ auto device_obj<Dot<V1, V2>>::calc() const noexcept -> T {
+    template<Vector LHS, Vector RHS>
+    __host__ __device__ auto device_obj<Dot<LHS, RHS>>::calc() const noexcept -> T {
         if (IsHost()) {
-            auto kernel = [v1_ = asStruct(v1), v2_ = asStruct(v2)] __device__() mutable {
-                const auto& v1 = v1_.getDerived();
-                const auto& v2 = v2_.getDerived();
+            auto kernel = [lhs_ = lhs, rhs_ = rhs] __device__() mutable {
+                const auto& lhs = lhs_.getDerived();
+                const auto& rhs = rhs_.getDerived();
 
                 ThreadBlock<CUDADevAttr::DefaultThreadsPerBlock> block{};
                 T local = 0;
-                for (size_t i = block.tid(); i < v1.getLength(); i += block.getNumThread()) {
+                for (size_t i = block.tid(); i < lhs.getLength(); i += block.getNumThread()) {
                     if constexpr (std::same_as<T1, T2>)
-                        local = fma(v1.calc(i), v2.calc(i), local);
+                        local = fma(lhs.calc(i), rhs.calc(i), local);
                     else
-                        local += v1.calc(i) * v2.calc(i);
+                        local += lhs.calc(i) * rhs.calc(i);
                 }
                 return block.sum(local);
             };
@@ -73,24 +79,34 @@ namespace Physica {
             return calc(ThreadBlock<1>{});
     }
 
-    template<Vector V1, Vector V2>
-    __device__ auto device_obj<Dot<V1, V2>>::calc(instanceof_x<ThreadBlock> auto block) const noexcept -> T {
+    template<Vector LHS, Vector RHS>
+    __device__ auto device_obj<Dot<LHS, RHS>>::calc(instanceof_x<ThreadBlock> auto block) const noexcept -> T {
         T dot = 0;
-        const size_t length = v1.getLength();
+        const size_t length = getLHS().getLength();
         for (size_t i = block.tid(); i < length; i += block.getNumThread()) {
             if constexpr (std::same_as<T1, T2>)
-                dot = fma(v1.calc(i), v2.calc(i), dot);
+                dot = fma(getLHS().calc(i), getRHS().calc(i), dot);
             else
-                dot += v1.calc(i) * v2.calc(i);
+                dot += getLHS().calc(i) * getRHS().calc(i);
         }
         return block.sum(dot);
     }
 
-    template<Vector V1, Vector V2>
-    __host__ __device__ auto dot(const V1& v1, const V2& v2) requires(DeviceObj<V1> && DeviceObj<V2>) {
-        if constexpr (!canonicalized(v1, v2))
-            return device_obj<Dot<V2, V1>>(v2, v1);
+    template<Vector LHS, Vector RHS>
+    __host__ __device__ constexpr auto&& device_obj<Dot<LHS, RHS>>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), Ref1>(self.lhs.getDerived());
+    }
+
+    template<Vector LHS, Vector RHS>
+    __host__ __device__ constexpr auto&& device_obj<Dot<LHS, RHS>>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), Ref2>(self.rhs.getDerived());
+    }
+
+    template<Vector LHS, Vector RHS>
+    __host__ __device__ auto dot(LHS&& lhs, RHS&& rhs) noexcept requires(DeviceObj<LHS> && DeviceObj<RHS>) {
+        if constexpr (!canonicalized(lhs, rhs))
+            return device_obj<Dot<remove_device_obj_t<RHS&&>, remove_device_obj_t<LHS&&>>>(std::forward<RHS>(rhs), std::forward<LHS>(lhs));
         else
-            return device_obj<Dot<V1, V2>>(v1, v2);
+            return device_obj<Dot<remove_device_obj_t<LHS&&>, remove_device_obj_t<RHS&&>>>(std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 }

@@ -22,24 +22,24 @@
 #include "Dot.h"
 
 namespace Physica {
-    template<Vector V1, Vector V2>
-    auto Dot<V1, V2>::calc_mkl() const noexcept -> T {
+    template<Vector LHS, Vector RHS>
+    auto Dot<LHS, RHS>::calc_mkl() const noexcept -> T {
         using Tm = decltype(std::declval<T>().toMKL());
-        const auto* p1 = reinterpret_cast<const Tm*>(v1.data());
-        const auto* p2 = reinterpret_cast<const Tm*>(v2.data());
+        const auto* p1 = reinterpret_cast<const Tm*>(lhs.data());
+        const auto* p2 = reinterpret_cast<const Tm*>(rhs.data());
         if constexpr (T::isComplex()) {
             T result;
             if constexpr (T::Prec == Float32)
-                cblas_cdotu_sub_64(v1.getLength(), p1, 1, p2, 1, &result);
+                cblas_cdotu_sub_64(lhs.getLength(), p1, 1, p2, 1, &result);
             else
-                cblas_zdotu_sub_64(v1.getLength(), p1, 1, p2, 1, &result);
+                cblas_zdotu_sub_64(lhs.getLength(), p1, 1, p2, 1, &result);
             return result;
         }
         else {
             if constexpr (T::Prec == Float32)
-                return T(cblas_sdot_64(v1.getLength(), p1, 1, p2, 1));
+                return T(cblas_sdot_64(lhs.getLength(), p1, 1, p2, 1));
             else
-                return T(cblas_ddot_64(v1.getLength(), p1, 1, p2, 1));
+                return T(cblas_ddot_64(lhs.getLength(), p1, 1, p2, 1));
         }
     }
 }
