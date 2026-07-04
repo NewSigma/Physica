@@ -65,9 +65,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    Hermite<M>::Hermite(M&& m) : m(std::forward<M>(m)) {
-        static_assert(m.isComplex(), "[Error]: Do not call hermite on real matrix");
-    }
+    Hermite<M>::Hermite(M&& m) : m(std::forward<M>(m)) {}
 
     template<Matrix M>
     auto&& Hermite<M>::hermite(this auto&& self) noexcept {
@@ -119,6 +117,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] size_t getCol() const noexcept { return v.getLength(); }
+        [[nodiscard]] size_t getOrder() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
@@ -126,9 +125,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    Hermite<V>::Hermite(V&& v) : v(std::forward<V>(v)) {
-        static_assert(v.isComplex(), "[Error]: Do not call hermite on real vector");
-    }
+    Hermite<V>::Hermite(V&& v) : v(std::forward<V>(v)) {}
 
     template<Vector V>
     void Hermite<V>::assign(Matrix auto& target) const {
@@ -139,6 +136,12 @@ namespace Physica {
     template<Vector V>
     auto&& Hermite<V>::hermite(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v);
+    }
+
+    template<Vector V>
+    size_t Hermite<V>::getOrder() const noexcept {
+        assert(isSquare() && "[Error]: getOrder() assumes square matrix");
+        return 1;
     }
 
     template<Vector V>

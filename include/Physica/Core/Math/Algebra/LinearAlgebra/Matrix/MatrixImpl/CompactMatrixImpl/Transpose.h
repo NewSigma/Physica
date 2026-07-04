@@ -131,6 +131,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] size_t getCol() const noexcept { return vec.getLength(); }
+        [[nodiscard]] size_t getOrder() const noexcept;
         [[nodiscard]] auto data(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
@@ -161,6 +162,12 @@ namespace Physica {
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
     __host__ __device__ consteval size_t Transpose<V>::getColAtCompile() noexcept {
         return std::remove_cvref_t<V>::getSizeAtCompile();
+    }
+
+    template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
+    size_t Transpose<V>::getOrder() const noexcept {
+        assert(isSquare() && "[Error]: getOrder() assumes square matrix");
+        return 1;
     }
 }
 

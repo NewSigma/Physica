@@ -211,9 +211,13 @@ namespace {
             static_assert(mat.isBothMajor() && re.isColMatrix());
         });
     }
-}
 
-static_assert(VectorND<float32>{}.transpose().isCompact(), "Transpose of a compact vector is a compact vector");
+    void transpose_hermite() {
+        static_assert(VectorND<float32>{}.transpose().isCompact(), "Transpose of a compact vector is a compact vector");
+        expect(Vector1D<float64>{}.transpose().getOrder() == 1);
+        expect(Vector1D<cfloat64>{}.hermite().getOrder() == 1);
+    }
+}
 
 int main() {
     rangeTest<Vector4D<float32>>();
@@ -230,5 +234,6 @@ int main() {
     softmaxTest();
     testConverts();
     reshapeTest();
+    transpose_hermite();
     return 0;
 }

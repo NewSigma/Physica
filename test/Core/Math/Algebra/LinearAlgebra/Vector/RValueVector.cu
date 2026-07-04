@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Test.h"
 
@@ -44,10 +44,16 @@ namespace {
         }, {1, NumThread});
         expect<RandomSource>(scalarNear(v * v, d_v.toHost()[0], 2UL));
     }
+
+    void transpose_hermite() {
+        expect(device_obj<Vector1D<float32>>{}.transpose().getOrder() == 1);
+        expect(device_obj<Vector1D<cfloat32>>{}.hermite().getOrder() == 1);
+    }
 }
 
 int main() {
     host_dev_dot();
     cooperative_dot();
+    transpose_hermite();
     return 0;
 }

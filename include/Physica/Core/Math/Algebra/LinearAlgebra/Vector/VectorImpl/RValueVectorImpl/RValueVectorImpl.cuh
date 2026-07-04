@@ -196,6 +196,17 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueVector<Derived, ScalarT>>::hermite(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (isComplex()) {
+            using V = remove_device_obj<Self>::type;
+            return device_obj<Hermite<V>>(std::forward<Self>(self));
+        }
+        else
+            return std::forward<Self>(self).transpose();
+    }
+
+    template<class Derived, Scalar ScalarT>
     __device__ auto device_obj<RValueVector<Derived, ScalarT>>::norm() const -> Tr {
         return sqrt(Base::getDerived().squaredNorm());
     }

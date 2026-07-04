@@ -27,6 +27,13 @@ using VectorType = VectorND<ScalarType>;
 using DeviceVector = device_obj<VectorType>;
 using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
+namespace {
+    void transpose_hermite() {
+        expect(device_obj<Vector1D<float32>>{}.transpose().getOrder() == 1);
+        expect(device_obj<Vector1D<cfloat32>>{}.hermite().getOrder() == 1);
+    }
+}
+
 static_assert(device_obj<VectorND<float32>>{}.transpose().isCompact(), "Transpose of a compact vector is a compact vector");
 
 int main() {
@@ -66,5 +73,6 @@ int main() {
         d_result.toHost(result);
         expect(vectorNear(result, answer, 1E-6));
     }
+    transpose_hermite();
     return 0;
 }

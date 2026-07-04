@@ -70,6 +70,7 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ decltype(auto) conjugate(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto transpose(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto hermite(this auto&&) noexcept;
 
         [[nodiscard]] __device__ Tr norm() const;
         [[nodiscard]] __device__ Tr squaredNorm(this const auto&);

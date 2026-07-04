@@ -125,6 +125,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] size_t getCol() const noexcept { return vec.getLength(); }
+        [[nodiscard]] size_t getOrder() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
@@ -145,6 +146,12 @@ namespace Physica {
     template<Vector V>
     auto Transpose<V>::values(this auto&& self) noexcept {
         return std::forward<decltype(self)>(self).transpose().values().transpose();
+    }
+
+    template<Vector V>
+    size_t Transpose<V>::getOrder() const noexcept {
+        assert(isSquare() && "[Error]: getOrder() assumes square matrix");
+        return 1;
     }
 
     template<Vector V>

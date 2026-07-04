@@ -77,10 +77,14 @@ namespace {
         }
         expect(x.grads() == T(2) * x.values());
     }
-}
 
-static_assert(DenseVector<float64>{}.transpose().getRowAtCompile() == 1);
-static_assert(DenseVector<cfloat64>{}.hermite().getRowAtCompile() == 1);
+    void transpose_hermite() {
+        static_assert(DenseVector<float64>{}.transpose().getRowAtCompile() == 1);
+        static_assert(DenseVector<cfloat64>{}.hermite().getRowAtCompile() == 1);
+        expect(abs(Vector1D<float64>{}).transpose().getOrder() == 1);
+        expect(abs(Vector1D<cfloat64>{}).hermite().getOrder() == 1);
+    }
+}
 
 int main() {
     viewTest();
@@ -88,5 +92,6 @@ int main() {
     argminTest();
     reshapeTest();
     dot_reverse();
+    transpose_hermite();
     return 0;
 }
