@@ -28,19 +28,20 @@ namespace Physica {
         static_assert(!Diffable<T>);
     protected:
         template<class Target>
-        using ValueT = decltype([](const auto& target) {
-            using Tv = std::remove_cvref_t<Target>::ScalarType::ValueType;
+        using ValueT = decltype([]() {
+            using U = std::remove_cvref_t<Target>;
+            using Tv = U::ScalarType::ValueType;
             static_assert(std::same_as<T, Tv>, "[Error]: Optimizer-Target ScalarType mismatch");
             if constexpr (Scalar<Target>)
                 return T{};
             else {
                 if constexpr (Vector<Target>)
-                    static_assert(target.isLValueVector(), "[Error]: Cannot optimize a rvalue object");
+                    static_assert(U::isLValueVector(), "[Error]: Cannot optimize a rvalue object");
                 else if constexpr (Matrix<Target>)
-                    static_assert(target.isLValueMatrix(), "[Error]: Cannot optimize a rvalue object");
+                    static_assert(U::isLValueMatrix(), "[Error]: Cannot optimize a rvalue object");
                 else
-                    static_assert(target.isLValueTensor(), "[Error]: Cannot optimize a rvalue object");
-                return typename Target::template rebind_scalar<T>{};
+                    static_assert(U::isLValueTensor(), "[Error]: Cannot optimize a rvalue object");
+                return typename U::template rebind_scalar<T>{};
             }
         }());
     };

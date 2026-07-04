@@ -70,8 +70,12 @@ namespace Physica {
     void Adadelta<T>::step(Diffable auto& target) {
         using Target = decltype(target);
         using NodeT = Node<typename Base::template ValueT<Target>>;
-        if (!decay.isZero())
-            target.grads() += decay * target.values();
+        if (!decay.isZero()) {
+            if constexpr (Scalar<Target>)
+                target.grad() += decay * target.value();
+            else
+                target.grads() += decay * target.values();
+        }
 
         void* pTarget = (void*)(&target);
         const bool exist = targetNodeMap.contains(pTarget);
@@ -79,14 +83,22 @@ namespace Physica {
         if (!exist)
             any = NodeT(target);
 
-        auto& [v, u] = std::any_cast<NodeT>(any);
-        v = rho * v + (T(1) - rho) * target.grads().squaredNorms();
-        if constexpr (Vector<Target>)
-            target.grads() = hadamard(sqrt(divide(u + epsilon, v + epsilon)), target.grads());
-        else
-            target.grads() = hadamard(sqrt_elem(divide_elem(u + epsilon, v + epsilon)), target.grads());
-        u = rho * u + (T(1) - rho) * target.grads().squaredNorms();
-        target.values() -= lr * target.grads();
+        auto& [v, u] = std::any_cast<NodeT&>(any);
+        if constexpr (Scalar<Target>) {
+            v = rho * v + (T(1) - rho) * target.grad().squaredNorm();
+            target.grad() = sqrt((u + epsilon) / (v + epsilon)) * target.grad();
+            u = rho * u + (T(1) - rho) * target.grad().squaredNorm();
+            target.value() -= lr * target.grad();
+        }
+        else {
+            v = rho * v + (T(1) - rho) * target.grads().squaredNorms();
+            if constexpr (Vector<Target>)
+                target.grads() = hadamard(sqrt(divide(u + epsilon, v + epsilon)), target.grads());
+            else
+                target.grads() = hadamard(sqrt_elem(divide_elem(u + epsilon, v + epsilon)), target.grads());
+            u = rho * u + (T(1) - rho) * target.grads().squaredNorms();
+            target.values() -= lr * target.grads();
+        }
     }
 
     template<Scalar T>

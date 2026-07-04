@@ -27,14 +27,14 @@ namespace Physica {
     template<Scalar T>
     class GPModel {
         using This = GPModel;
+        using Tv = T::ValueType;
     public:
         class GaussKernel;
     private:
         GaussKernel kernel;
 
-        DenseLU<T, true> lu;
-        MatrixND<T> sampleX;
-        VectorND<T> coeffs;
+        DenseLU<Tv, true> lu;
+        VectorND<Tv> coeffs;
     public:
         GPModel(size_t numFeature);
         GPModel(const This&) = default;
@@ -44,13 +44,16 @@ namespace Physica {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
         /* Operations */
-        void regression(const MatrixND<T>& sampleX_, const VectorND<T>& sampleY, const auto& uncertainty);
-        [[nodiscard]] Vector2D<T> predict(const VectorND<T>& x) const;
+        CoDiff<T> regression(const MatrixND<Tv>& sampleX, const VectorND<Tv>& sampleY, const auto& uncertainty);
+        void step(auto& opt) noexcept { kernel.step(opt); }
+        void zero_grad() noexcept { kernel.zero_grad(); }
 
+        [[nodiscard]] Vector2D<Tv> predict(const VectorND<Tv>& x) const;
         void swap(This& obj) noexcept;
         /* Getters */
+        [[nodiscard]] const auto& getKernel() const noexcept { return kernel; }
         [[nodiscard]] size_t getNumFeature() const noexcept { return kernel.getNumFeature(); }
-        [[nodiscard]] size_t getNumSamples() const noexcept { return coeffs.getLength(); }
+        [[nodiscard]] size_t getNumSamples() const noexcept { return kernel.getOrder(); }
         [[nodiscard]] const auto& getLU() const noexcept { return lu; }
     };
 
@@ -58,39 +61,49 @@ namespace Physica {
     GPModel<T>::GPModel(size_t numFeature) : kernel(numFeature) {
         assert(numFeature > 0);
     }
-
+    /**
+     * \returns marginal likelihood
+     */
     template<Scalar T>
-    void GPModel<T>::regression(const MatrixND<T>& sampleX_, const VectorND<T>& sampleY, const auto& uncertainty) {
-        assert(sampleX_.getRow() == getNumFeature());
-        assert(sampleX_.getCol() == sampleY.getLength());
-        sampleX = sampleX_;
-        lu.resize(sampleX.getCol());
+    CoDiff<T> GPModel<T>::regression(const MatrixND<Tv>& sampleX, const VectorND<Tv>& sampleY, const auto& uncertainty) {
+        assert(sampleX.getRow() == getNumFeature());
+        assert(sampleX.getCol() == sampleY.getLength());
+        kernel.setSampleX(sampleX);
+        lu.resize(getNumSamples());
 
         auto& covars = lu.getMatrixLU();
+        const Tv var = exp(kernel.getLnVar());
         for (size_t major = 0; major < covars.getMaxMajor(); ++major) {
             for (size_t minor = 0; minor < covars.getMaxMinor(); ++minor) {
                 bool diag = major == minor;
                 if constexpr (Scalar<decltype(uncertainty)>)
-                    covars.refFromMajorMinor(major, minor) = diag ? (kernel.getVar() + uncertainty) : kernel(sampleX.col(major), sampleX.col(minor));
+                    covars.refFromMajorMinor(major, minor) = diag ? (var + uncertainty) : kernel.calc_value(major, minor);
                 else {
                     static_assert(Vector<decltype(uncertainty)>, "[Error]: Unexpected uncertainty type");
-                    covars.refFromMajorMinor(major, minor) = diag ? (kernel.getVar() + uncertainty[major]) : kernel(sampleX.col(major), sampleX.col(minor));
+                    covars.refFromMajorMinor(major, minor) = diag ? (var + uncertainty[major]) : kernel.calc_value(major, minor);
                 }
             }
         }
         lu.compute();
         coeffs = lu.inv() * sampleY;
+        const Tv likelihood = Tv(-0.5) * (sampleY * coeffs + lu.lnAbsDet() + ln(Tv(2) * MathConst<Tv>::pi));
+        if constexpr (T::isDiffable()) {
+            const auto& l = co_yield likelihood;
+            kernel.reverse(Tv(2) * l.grad() * reciprocal_elem(coeffs * coeffs.transpose() - MatrixND<Tv>(lu.inv())));
+        }
+        else
+            co_return likelihood;
     }
 
     template<Scalar T>
-    Vector2D<T> GPModel<T>::predict(const VectorND<T>& x) const {
+    auto GPModel<T>::predict(const VectorND<Tv>& x) const -> Vector2D<Tv> {
         assert(x.getLength() == getNumFeature());
         if (getNumSamples() == 0) [[unlikely]]
             return {0, 1};
-        auto buffer = VectorND<T>::generate(getNumSamples(), [&](size_t i) { return kernel(x, sampleX.col(i)); });
-        auto sol = VectorND<T>(lu.inv() * buffer);
-        T mean = buffer * coeffs;
-        T devia = sqrt(std::max(kernel.getVar() - buffer * sol, T(0)));
+        auto buffer = VectorND<Tv>::generate(getNumSamples(), [&](size_t i) { return kernel.dot(x, i); });
+        auto sol = VectorND<Tv>(lu.inv() * buffer);
+        Tv mean = buffer * coeffs;
+        Tv devia = sqrt(std::max(exp(kernel.getLnVar()) - buffer * sol, Tv(0)));
         return {mean, devia};
     }
 
@@ -104,34 +117,73 @@ namespace Physica {
     }
 
     template<Scalar T>
-    class GPModel<T>::GaussKernel {
+    class GPModel<T>::GaussKernel : public RValueMatrix<GaussKernel, T> {
         using This = GaussKernel;
+        using Base = RValueMatrix<This, T>;
 
+        MatrixND<Tv> sampleX;
         VectorND<T> alpha;
-        T var;
+        T lnVar;
     public:
         explicit GaussKernel(size_t numFeature);
-        GaussKernel(VectorND<T> alpha, T var);
+        GaussKernel(VectorND<Tv> alpha, Tv var);
         GaussKernel(const This&) = default;
         GaussKernel(This&&) noexcept = default;
         ~GaussKernel() = default;
         /* Operators */
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
-        [[nodiscard]] T operator()(const Vector auto& x1, const Vector auto& x2) const;
+        /* Operations */
+        [[nodiscard]] CoDiff<T> calc(size_t r, size_t c) const;
+        [[nodiscard]] Tv calc_value(size_t r, size_t c) const;
+        [[nodiscard]] Tv dot(const VectorND<Tv>& x, size_t i) const;
+
+        void step(auto& opt) noexcept;
+        void zero_grad() noexcept;
+
+        [[nodiscard]] auto&& transpose(this auto&& self) noexcept { return std::forward<decltype(self)>(self); }
         /* Getters */
+        [[nodiscard]] size_t getOrder() const noexcept { return sampleX.getCol(); }
         [[nodiscard]] size_t getNumFeature() const noexcept { return alpha.getLength(); }
-        [[nodiscard]] T getVar() const noexcept { return var; }
+        [[nodiscard]] const auto& getAlpha() const noexcept { return alpha; }
+        [[nodiscard]] Tv getLnVar() const noexcept { return lnVar.value(); }
+        /* Setters */
+        void setSampleX(const MatrixND<Tv>& sample) { sampleX = sample; }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static auto getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
 
     template<Scalar T>
-    GPModel<T>::GaussKernel::GaussKernel(size_t numFeature) : GaussKernel(VectorND<T>(numFeature, 1), 1) {}
+    GPModel<T>::GaussKernel::GaussKernel(size_t numFeature) : GaussKernel(VectorND<Tv>(numFeature, 1), 0) {}
 
     template<Scalar T>
-    GPModel<T>::GaussKernel::GaussKernel(VectorND<T> alpha, T var) : alpha(std::move(alpha)), var(var) {}
+    GPModel<T>::GaussKernel::GaussKernel(VectorND<Tv> alpha, Tv lnVar) : alpha(std::move(alpha)), lnVar(lnVar) {
+        static_assert(Base::isStaticSquare());
+    }
 
     template<Scalar T>
-    T GPModel<T>::GaussKernel::operator()(const Vector auto& x1, const Vector auto& x2) const {
-        return var * exp(-alpha * square(x1 - x2));
+    CoDiff<T> GPModel<T>::GaussKernel::calc(size_t r, size_t c) const {
+        return exp(-square(alpha * (sampleX.col(r) - sampleX.col(c))) + lnVar);
+    }
+
+    template<Scalar T>
+    auto GPModel<T>::GaussKernel::calc_value(size_t r, size_t c) const -> Tv {
+        return exp(-square(alpha.values() * (sampleX.col(r) - sampleX.col(c))) + lnVar.value());
+    }
+
+    template<Scalar T>
+    auto GPModel<T>::GaussKernel::dot(const VectorND<Tv>& x, size_t i) const -> Tv {
+        return exp(-square(alpha.values() * (x - sampleX.col(i))) + lnVar.value());
+    }
+
+    template<Scalar T>
+    void GPModel<T>::GaussKernel::step(auto& opt) noexcept {
+        opt.step(alpha, lnVar);
+    }
+
+    template<Scalar T>
+    void GPModel<T>::GaussKernel::zero_grad() noexcept {
+        alpha.zero_grad();
+        lnVar.zero_grad();
     }
 }

@@ -89,8 +89,12 @@ namespace Physica {
     void Adam<T>::step(Diffable auto& target) {
         using Target = decltype(target);
         using NodeT = Node<typename Base::template ValueT<Target>>;
-        if (!args.decay.isZero())
-            target.grads() += args.decay * target.values();
+        if (!args.decay.isZero()) {
+            if constexpr (Scalar<Target>)
+                target.grad() += args.decay * target.value();
+            else
+                target.grads() += args.decay * target.values();
+        }
 
         void* pTarget = (void*)(&target);
         const bool exist = targetNodeMap.contains(pTarget);
@@ -98,16 +102,23 @@ namespace Physica {
         if (!exist)
             any = NodeT(args, target);
 
+        auto& [m, v, beta1t, beta2t] = std::any_cast<NodeT&>(any);
         const T beta1 = args.beta1;
         const T beta2 = args.beta2;
-        auto& [m, v, beta1t, beta2t] = std::any_cast<NodeT>(any);
-        m = beta1 * m + (T(1) - beta1) * target.grads();
-        v = beta2 * v + (T(1) - beta2) * target.grads().squaredNorms();
         const T alpha = args.lr / (T(1) - beta1t) * sqrt(T(1) - beta2t);
-        if constexpr (Vector<Target>)
-            target.values() -= alpha * divide(m, sqrt(v) + args.epsilon);
-        else
-            target.values() -= alpha * divide(m, sqrt_elem(v) + args.epsilon);
+        if constexpr (Scalar<Target>) {
+            m = beta1 * m + (T(1) - beta1) * target.grad();
+            v = beta2 * v + (T(1) - beta2) * target.grad().squaredNorm();
+            target.value() -= alpha * m / (sqrt(v) + args.epsilon);
+        }
+        else {
+            m = beta1 * m + (T(1) - beta1) * target.grads();
+            v = beta2 * v + (T(1) - beta2) * target.grads().squaredNorms();
+            if constexpr (Vector<Target>)
+                target.values() -= alpha * divide(m, sqrt(v) + args.epsilon);
+            else
+                target.values() -= alpha * divide(m, sqrt_elem(v) + args.epsilon);
+        }
         beta1t *= beta1;
         beta2t *= beta2;
     }
