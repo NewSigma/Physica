@@ -190,9 +190,18 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    void RValueVector<Derived, ScalarT>::reverse(const Vector auto&, const Vector auto& grad) const noexcept {
+    void RValueVector<Derived, ScalarT>::reverse(this const auto& self, const Vector auto& grad) noexcept {
         static_assert(isReverseDiff());
-        Base::getDerived().reverse(grad);
+        self.grads().assert_assign(grad);
+        const size_t length = self.getLength();
+        for (size_t i = 0; i < length; ++i)
+            self.calc(i).reverse(grad.calc(i));
+    }
+
+    template<class Derived, Scalar ScalarT>
+    void RValueVector<Derived, ScalarT>::reverse(this const auto& self, const Vector auto&, const Vector auto& grad) noexcept {
+        static_assert(isReverseDiff());
+        self.reverse(grad);
     }
 
     template<class Derived, Scalar ScalarT>

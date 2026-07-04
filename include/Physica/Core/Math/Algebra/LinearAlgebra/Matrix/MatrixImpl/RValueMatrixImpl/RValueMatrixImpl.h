@@ -146,9 +146,22 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    void RValueMatrix<Derived, ScalarT>::reverse(const Matrix auto&, const Matrix auto& grad) const noexcept {
+    void RValueMatrix<Derived, ScalarT>::reverse(this const auto& self, const Matrix auto& grad) noexcept {
         static_assert(isReverseDiff());
-        Base::getDerived().reverse(grad);
+        self.grads().assert_assign(grad);
+        for (size_t major = 0; major < self.getMaxMajor(); ++major) {
+            for (size_t minor = 0; minor < self.getMaxMinor(); ++minor) {
+                size_t r = rowFromMajorMinor(major, minor);
+                size_t c = colFromMajorMinor(major, minor);
+                self.calc(major, minor).reverse(grad.calc(r, c));
+            }
+        }
+    }
+
+    template<class Derived, Scalar ScalarT>
+    void RValueMatrix<Derived, ScalarT>::reverse(this const auto& self, const Matrix auto&, const Matrix auto& grad) noexcept {
+        static_assert(isReverseDiff());
+        self.reverse(grad);
     }
 
     template<class Derived, Scalar ScalarT>
