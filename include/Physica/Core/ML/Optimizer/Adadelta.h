@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,9 @@
  */
 #pragma once
 
+#include <any>
 #include <unordered_map>
+#include "OptBase.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica {
@@ -28,27 +30,14 @@ namespace Physica {
      * [2] pytorch; https://pytorch.org/docs/stable/generated/torch.optim.Adadelta.html
      */
     template<Scalar T>
-    class Adadelta {
-        static_assert(!Diffable<T>);
+    class Adadelta : public OptBase<T> {
         using This = Adadelta<T>;
+        using Base = OptBase<T>;
+
+        template<class Value>
+        struct Node;
     private:
-        struct VectorBuffer {
-            VectorND<T> v;
-            VectorND<T> u;
-
-            VectorBuffer() = default;
-            VectorBuffer(size_t length) : v(length, 0), u(length, 0){}
-        };
-
-        struct MatrixBuffer {
-            DenseMatrix<T> v;
-            DenseMatrix<T> u;
-
-            MatrixBuffer() = default;
-            MatrixBuffer(size_t row, size_t col) : v(row, col, 0), u(row, col, 0) {}
-        };
-
-        std::unordered_map<void*, std::variant<VectorBuffer, MatrixBuffer>> targetBufferMap;
+        std::unordered_map<void*, std::any> targetNodeMap;
         T lr = 1;
         T rho = 0.9;
         T epsilon = 1E-6;
@@ -60,7 +49,7 @@ namespace Physica {
         Adadelta(This&&) noexcept = default;
         ~Adadelta() = default;
         /* Operators */
-        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept;
         /* Operations */
         void step(Diffable auto& target);
         void step(Diffable auto& target, Diffable auto&... targets);
@@ -72,30 +61,27 @@ namespace Physica {
     };
 
     template<Scalar T>
+    auto Adadelta<T>::operator=(Adadelta obj) noexcept -> Adadelta& {
+        swap(obj);
+        return *this;
+    }
+
+    template<Scalar T>
     void Adadelta<T>::step(Diffable auto& target) {
-        using U = decltype(target);
-        using BufferType = std::conditional<Vector<U>, VectorBuffer, MatrixBuffer>::type;
+        using Target = decltype(target);
+        using NodeT = Node<typename Base::template ValueT<Target>>;
         if (!decay.isZero())
             target.grads() += decay * target.values();
 
         void* pTarget = (void*)(&target);
-        const bool exist = targetBufferMap.count(pTarget) != 0;
-        auto& var = targetBufferMap[pTarget];
-        if (!exist) {
-            if constexpr (Vector<U>)
-                var = BufferType(target.getLength());
-            else {
-                static_assert(Matrix<U>, "[Error]: Unexpected type");
-                var = BufferType(target.getRow(), target.getCol());
-            }
-        }
+        const bool exist = targetNodeMap.contains(pTarget);
+        auto& any = targetNodeMap[pTarget];
+        if (!exist)
+            any = NodeT(target);
 
-        auto& buffer = std::get<BufferType>(var);
-        auto& v = buffer.v;
-        auto& u = buffer.u;
-
+        auto& [v, u] = std::any_cast<NodeT>(any);
         v = rho * v + (T(1) - rho) * target.grads().squaredNorms();
-        if constexpr (Vector<U>)
+        if constexpr (Vector<Target>)
             target.grads() = hadamard(sqrt(divide(u + epsilon, v + epsilon)), target.grads());
         else
             target.grads() = hadamard(sqrt_elem(divide_elem(u + epsilon, v + epsilon)), target.grads());
@@ -111,16 +97,39 @@ namespace Physica {
 
     template<Scalar T>
     void Adadelta<T>::clear() noexcept {
-        targetBufferMap.clear();
+        targetNodeMap.clear();
     }
 
     template<Scalar T>
     void Adadelta<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        targetBufferMap.swap(obj.targetBufferMap);
+        targetNodeMap.swap(obj.targetNodeMap);
         lr.swap(obj.lr);
         rho.swap(obj.rho);
         epsilon.swap(obj.epsilon);
         decay.swap(obj.decay);
+    }
+
+    template<Scalar T>
+    template<class Value>
+    struct Adadelta<T>::Node {
+        Value v;
+        Value u;
+
+        Node() = default;
+        Node(const auto& src);
+    };
+
+    template<Scalar T>
+    template<class Value>
+    Adadelta<T>::Node<Value>::Node(const auto& src) {
+        if constexpr (Scalar<Value>)
+            v = u = 0;
+        else {
+            v.resize(src);
+            u.resize(src);
+            v.zeros();
+            u.zeros();
+        }
     }
 }

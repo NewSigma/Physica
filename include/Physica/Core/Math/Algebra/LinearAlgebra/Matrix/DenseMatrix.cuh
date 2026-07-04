@@ -33,6 +33,9 @@ namespace Physica {
         using Base = device_obj<CompactMatrix<DenseMatrix<T, Major, Row, Col, Allocator>>>;
         using Coro = CRCoro<This>;
         using Storage = device_obj<Array2D<T, Major, Row, Col, Allocator>>;
+    public:
+        template<Scalar U>
+        using rebind_scalar = device_obj<DenseMatrix<U, Major, Row, Col, Allocator>>;
     protected:
         using typename Base::Tv;
     private:

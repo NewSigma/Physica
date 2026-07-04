@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,17 +18,14 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "OptBase.h"
 
 namespace Physica {
     /**
      * Stochastic gradient descent for auto diff
      */
     template<Scalar T>
-    class SGD {
-        static_assert(!Diffable<T>);
-
+    class SGD : public OptBase<T> {
         T lr;
     public:
         SGD(T lr_);
@@ -51,10 +48,10 @@ namespace Physica {
 
     template<Scalar T>
     void SGD<T>::step(Diffable auto& target) const {
-        using U = decltype(target);
-        if constexpr (Scalar<U>)
+        using Target = decltype(target);
+        if constexpr (Scalar<Target>)
             target.value() -= lr * target.grad().value();
-        else if constexpr (Vector<U> || Matrix<U>)
+        else if constexpr (Vector<Target> || Matrix<Target>)
             target.values() -= lr * target.grads().values();
         else
             target.step(*this);

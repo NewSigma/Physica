@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,9 @@
  */
 #pragma once
 
+#include <any>
 #include <unordered_map>
+#include "OptBase.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica {
@@ -28,9 +30,12 @@ namespace Physica {
      * [2] pytorch; https://pytorch.org/docs/stable/generated/torch.optim.Adam.html
      */
     template<Scalar T>
-    class Adam {
-        static_assert(!Diffable<T>);
+    class Adam : public OptBase<T> {
         using This = Adam<T>;
+        using Base = OptBase<T>;
+
+        template<class Value>
+        struct Node;
     public:
         struct Args {
             T lr;
@@ -40,33 +45,7 @@ namespace Physica {
             T decay;
         };
     private:
-        struct VectorBuffer {
-            VectorND<T> m;
-            VectorND<T> v;
-            T beta1t;
-            T beta2t;
-
-            VectorBuffer() = default;
-            VectorBuffer(const Args& args, size_t length) : m(length), v(length), beta1t(args.beta1), beta2t(args.beta2) {
-                m.zeros();
-                v.zeros();
-            }
-        };
-
-        struct MatrixBuffer {
-            DenseMatrix<T> m;
-            DenseMatrix<T> v;
-            T beta1t;
-            T beta2t;
-
-            MatrixBuffer() = default;
-            MatrixBuffer(const Args& args, size_t row, size_t col) : m(row, col), v(row, col), beta1t(args.beta1), beta2t(args.beta2) {
-                m.zeros();
-                v.zeros();
-            }
-        };
-
-        std::unordered_map<void*, std::variant<VectorBuffer, MatrixBuffer>> targetBufferMap;
+        std::unordered_map<void*, std::any> targetNodeMap;
         Args args;
     public:
         Adam(T lr = 1E-3, T beta1 = 0.9, T beta2 = 0.999, T epsilon = 1E-8, T decay = 0);
@@ -75,18 +54,16 @@ namespace Physica {
         Adam(Adam&&) noexcept = default;
         ~Adam() = default;
         /* Operators */
-        Adam& operator=(Adam obj) noexcept { swap(obj); return *this; }
+        Adam& operator=(Adam obj) noexcept;
         /* Operations */
         void step(Diffable auto& target);
         void step(Diffable auto& target, Diffable auto&... targets);
-        void clear() { targetBufferMap.clear(); }
+        void clear() { targetNodeMap.clear(); }
 
         void swap(Adam& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] auto&& getArgs(this auto&& self) noexcept { return self.args; }
         [[nodiscard]] auto&& getLearnRate(this auto&& self) noexcept { return self.lr; }
-        /* Friends */
-        friend class device_obj<This>;
     };
 
     template<Scalar T>
@@ -103,35 +80,31 @@ namespace Physica {
     }
 
     template<Scalar T>
+    auto Adam<T>::operator=(Adam obj) noexcept -> Adam& {
+        swap(obj);
+        return *this;
+    }
+
+    template<Scalar T>
     void Adam<T>::step(Diffable auto& target) {
-        using U = decltype(target);
-        using BufferType = std::conditional<Vector<U>, VectorBuffer, MatrixBuffer>::type;
+        using Target = decltype(target);
+        using NodeT = Node<typename Base::template ValueT<Target>>;
         if (!args.decay.isZero())
             target.grads() += args.decay * target.values();
 
         void* pTarget = (void*)(&target);
-        const bool exist = targetBufferMap.count(pTarget) != 0;
-        auto& var = targetBufferMap[pTarget];
-        if (!exist) {
-            if constexpr (Vector<U>)
-                var = BufferType(args, target.getLength());
-            else {
-                static_assert(Matrix<U>, "[Error]: Unexpected type");
-                var = BufferType(args, target.getRow(), target.getCol());
-            }
-        }
+        const bool exist = targetNodeMap.contains(pTarget);
+        auto& any = targetNodeMap[pTarget];
+        if (!exist)
+            any = NodeT(args, target);
 
         const T beta1 = args.beta1;
         const T beta2 = args.beta2;
-        auto& buffer = std::get<BufferType>(var);
-        auto& m = buffer.m;
-        auto& v = buffer.v;
-        auto& beta1t = buffer.beta1t;
-        auto& beta2t = buffer.beta2t;
+        auto& [m, v, beta1t, beta2t] = std::any_cast<NodeT>(any);
         m = beta1 * m + (T(1) - beta1) * target.grads();
         v = beta2 * v + (T(1) - beta2) * target.grads().squaredNorms();
         const T alpha = args.lr / (T(1) - beta1t) * sqrt(T(1) - beta2t);
-        if constexpr (Vector<U>)
+        if constexpr (Vector<Target>)
             target.values() -= alpha * divide(m, sqrt(v) + args.epsilon);
         else
             target.values() -= alpha * divide(m, sqrt_elem(v) + args.epsilon);
@@ -148,7 +121,32 @@ namespace Physica {
     template<Scalar T>
     void Adam<T>::swap(Adam& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        targetBufferMap.swap(obj.targetBufferMap);
+        targetNodeMap.swap(obj.targetNodeMap);
         std::swap(args, obj.args);
+    }
+
+    template<Scalar T>
+    template<class Value>
+    struct Adam<T>::Node {
+        Value m;
+        Value v;
+        T beta1t;
+        T beta2t;
+
+        Node() = default;
+        Node(const Args& args, const auto& src);
+    };
+
+    template<Scalar T>
+    template<class Value>
+    Adam<T>::Node<Value>::Node(const Args& args, const auto& src) : beta1t(args.beta1), beta2t(args.beta2) {
+        if constexpr (Scalar<Value>)
+            m = v = 0;
+        else {
+            m.resize(src);
+            v.resize(src);
+            m.zeros();
+            v.zeros();
+        }
     }
 }

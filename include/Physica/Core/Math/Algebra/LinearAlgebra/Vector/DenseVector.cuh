@@ -35,6 +35,8 @@ namespace Physica {
         using Storage = device_obj<Array<T, Length, Allocator>>;
     public:
         using typename Base::ScalarType;
+        template<Scalar U>
+        using rebind_scalar = device_obj<DenseVector<U, Length, Allocator>>;
     private:
         Storage storage;
     public:

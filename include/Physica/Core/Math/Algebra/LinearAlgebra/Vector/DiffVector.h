@@ -31,6 +31,8 @@ namespace Physica {
     public:
         using device_obj_type = device_obj<This>;
         using typename Base::ScalarType;
+        template<Scalar U>
+        using rebind_scalar = DenseVector<U, Length>;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     private:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,19 +18,21 @@
  */
 #pragma once
 
+#include <any>
 #include <unordered_map>
+#include "OptBase.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica {
     template<Scalar T>
-    class MomentSGD {
-        static_assert(!Diffable<T>);
-
+    class MomentSGD : public OptBase<T> {
         using This = MomentSGD<T>;
-        using VectorType = VectorND<T>;
-        using MatrixType = DenseMatrix<T>;
+        using Base = OptBase<T>;
+
+        template<class Value>
+        struct Node;
     private:
-        std::unordered_map<void*, std::variant<VectorType, MatrixType>> targetBufferMap;
+        std::unordered_map<void*, std::any> targetNodeMap;
         T lr;
         T moment;
     public:
@@ -39,10 +41,11 @@ namespace Physica {
         MomentSGD(This&&) noexcept = default;
         ~MomentSGD() = default;
         /* Operators */
-        This& operator=(MomentSGD obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept;
         /* Operations */
         void step(Diffable auto& target);
         void step(Diffable auto& target, Diffable auto&... targets);
+
         void swap(This& __restrict obj) noexcept;
     };
 
@@ -54,24 +57,23 @@ namespace Physica {
     }
 
     template<Scalar T>
+    auto MomentSGD<T>::operator=(This obj) noexcept -> This& {
+        swap(obj);
+        return *this;
+    }
+
+    template<Scalar T>
     void MomentSGD<T>::step(Diffable auto& target) {
-        using U = decltype(target);
-        using BufferType = std::conditional<Vector<U>, VectorType, MatrixType>::type;
+        using Target = decltype(target);
+        using NodeT = Node<typename Base::template ValueT<Target>>;
 
         void* pTarget = (void*)(&target);
-        const bool exist = targetBufferMap.count(pTarget) != 0;
-        auto& var = targetBufferMap[pTarget];
-        if (!exist) {
-            if constexpr (Vector<U>)
-                var = BufferType(target.getLength());
-            else {
-                static_assert(Matrix<U>, "[Error]: Unexpected type");
-                var = BufferType(target.getRow(), target.getCol());
-            }
-            std::get<BufferType>(var).zeros();
-        }
+        const bool exist = targetNodeMap.contains(pTarget);
+        auto& any = targetNodeMap[pTarget];
+        if (!exist)
+            any = NodeT(target);
 
-        auto& lastGrad = std::get<BufferType>(var);
+        auto& lastGrad = std::any_cast<NodeT>(any).lastGrad;
         lastGrad = moment * lastGrad + target.grads();
         target.values() -= lr * lastGrad;
     }
@@ -86,7 +88,27 @@ namespace Physica {
     void MomentSGD<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         lr.swap(obj.lr);
-        targetBufferMap.swap(obj.targetBufferMap);
+        targetNodeMap.swap(obj.targetNodeMap);
         moment.swap(obj.moment);
+    }
+
+    template<Scalar T>
+    template<class Value>
+    struct MomentSGD<T>::Node {
+        Value lastGrad;
+
+        Node() = default;
+        Node(const auto& src);
+    };
+
+    template<Scalar T>
+    template<class Value>
+    MomentSGD<T>::Node<Value>::Node(const auto& src) {
+        if constexpr (Scalar<Value>)
+            lastGrad = 0;
+        else {
+            lastGrad.resize(src);
+            lastGrad.zeros();
+        }
     }
 }

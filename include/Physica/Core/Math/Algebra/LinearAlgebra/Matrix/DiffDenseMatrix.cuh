@@ -33,6 +33,8 @@ namespace Physica {
         using Base = device_obj<CompactMatrix<host_obj>>;
     public:
         using ScalarType = Base::ScalarType;
+        template<Scalar U>
+        using rebind_scalar = device_obj<DenseMatrix<U, Major>>;
         using Base::isReverseDiff;
     private:
         using ValueMatrix = device_obj<DenseMatrix<T, Major>>;
