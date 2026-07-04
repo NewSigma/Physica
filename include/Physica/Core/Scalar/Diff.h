@@ -48,7 +48,7 @@ namespace Physica {
         __host__ __device__ Diff(MachineType x) : This(T(x)) {}
         __host__ __device__ Diff(T v_);
         __host__ __device__ Diff(T v_, GradType g_);
-        Diff(DiffCoro<This>) requires(isReverseDiff()) = delete("[Error]: Copy a differential coroutine discards compute graph");
+        Diff(DiffCoro<This>) requires(isReverseDiff()) = delete("[Error]: Copying differential coroutines discards the compute graph");
         template<Scalar U>
         __host__ __device__ explicit(T::Prec < U::Prec) Diff(const U& x);
         Diff(const This&) requires(isForwardDiff()) = default;

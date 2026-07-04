@@ -70,7 +70,7 @@ namespace Physica {
 
     template<Scalar T>
     auto&& HermiteToeplitzMatrix<T>::hermite(this auto&& self) noexcept {
-        return std::forward<This>(self);
+        return std::forward<decltype(self)>(self);
     }
 
     template<Scalar T>

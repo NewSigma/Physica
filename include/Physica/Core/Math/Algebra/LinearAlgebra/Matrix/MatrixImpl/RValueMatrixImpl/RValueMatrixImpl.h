@@ -657,19 +657,26 @@ namespace Physica {
 
     template<class Derived, Scalar ScalarT>
     __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isStaticSymm() noexcept {
-        using TransposeTy = std::remove_cvref_t<decltype(std::declval<Derived>().transpose())>;
+        using TransposeTy = std::remove_cvref_t<decltype(std::declval<const Derived&>().transpose())>;
         return std::same_as<TransposeTy, Derived>;
     }
 
     template<class Derived, Scalar ScalarT>
     __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isStaticHermite() noexcept {
-        using HermiteTy = std::remove_cvref_t<decltype(std::declval<Derived>().hermite())>;
-        return std::same_as<HermiteTy, Derived>;
+        if constexpr (T::isComplex()) {
+            using HermiteTy = std::remove_cvref_t<decltype(std::declval<const Derived&>().hermite())>;
+            return std::same_as<HermiteTy, Derived>;
+        }
+        else
+            return isStaticSymm();
     }
 
     template<class Derived, Scalar ScalarT>
     __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isStaticSquare() noexcept {
-        return Derived::getRowAtCompile() != Dynamic && Derived::getRowAtCompile() == Derived::getColAtCompile();
+        if constexpr (isStaticHermite())
+            return true;
+        else
+            return Derived::getRowAtCompile() != Dynamic && Derived::getRowAtCompile() == Derived::getColAtCompile();
     }
 
     template<class Derived, Scalar ScalarT>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -57,7 +57,7 @@ namespace Physica {
     void ImagMagnon<T>::sample(const MatrixND<T>& aux, Trv rsign) {
         for (size_t site = 0; site < aux.getRow(); ++site) {
             fft.transform(aux.row(site));
-            magnons.fiber(2, {Base::getCursor(), site, Dynamic}) = fft.getKSpace() * reciprocal(sqrt(T(getNumSplit())));
+            magnons.fiber(Base::getCursor(), site, var()) = fft.getKSpace() * reciprocal(sqrt(T(getNumSplit())));
         }
         Base::sample(rsign);
     }
@@ -65,7 +65,7 @@ namespace Physica {
     template<Scalar T>
     auto ImagMagnon<T>::calcMean() const -> MatrixND<T> {
         auto result = MatrixND<T>::generate(getNumSite(), magnons.dim(2), [&](size_t r, size_t c) {
-            return magnons.fiber(0, {Dynamic, r, c}).squaredNorms().mean();
+            return magnons.fiber(var(), r, c).squaredNorms().mean();
         });
         result *= reciprocal(Base::calcSign());
         return result;

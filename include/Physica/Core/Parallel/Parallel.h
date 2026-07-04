@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Macro.h"
+#include "Physica/Core/Utils/Builtin.h"
 
 namespace Physica {
     enum ExecutePolicy : char {

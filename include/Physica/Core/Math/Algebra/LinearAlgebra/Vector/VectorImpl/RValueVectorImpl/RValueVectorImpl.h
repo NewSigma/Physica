@@ -319,31 +319,43 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    size_t RValueVector<Derived, ScalarT>::argmax() const noexcept {
-        Trv x = std::numeric_limits<Trv>::lowest();
-        size_t result = 0;
-        for (size_t i = 0; i < getLength(); ++i) {
-            Trv y = calc_value(i);
-            if (y > x) {
-                x = y;
-                result = i;
+    size_t RValueVector<Derived, ScalarT>::argmax(this const auto& self) noexcept {
+        if constexpr (isDiffable())
+            return self.values().argmax();
+        else {
+            auto it = self.view().begin();
+            Trv x = std::numeric_limits<Trv>::lowest();
+            size_t length = self.getLength();
+            size_t result = 0;
+            for (size_t i = 0; i < length; ++i) {
+                Trv y = *(it + i);
+                if (y > x) {
+                    x = y;
+                    result = i;
+                }
             }
+            return result;
         }
-        return result;
     }
 
     template<class Derived, Scalar ScalarT>
-    size_t RValueVector<Derived, ScalarT>::argmin() const noexcept {
-        Trv x = std::numeric_limits<Trv>::max();
-        size_t result = 0;
-        for (size_t i = 0; i < getLength(); ++i) {
-            Trv y = calc_value(i);
-            if (y < x) {
-                x = y;
-                result = i;
+    size_t RValueVector<Derived, ScalarT>::argmin(this const auto& self) noexcept {
+        if constexpr (isDiffable())
+            return self.values().argmin();
+        else {
+            auto it = self.view().begin();
+            Trv x = std::numeric_limits<Trv>::max();
+            size_t length = self.getLength();
+            size_t result = 0;
+            for (size_t i = 0; i < length; ++i) {
+                Trv y = *(it + i);
+                if (y < x) {
+                    x = y;
+                    result = i;
+                }
             }
+            return result;
         }
-        return result;
     }
 
     template<class Derived, Scalar ScalarT>

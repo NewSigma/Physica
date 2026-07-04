@@ -80,7 +80,8 @@ namespace Physica {
 
     template<Vector V, Matrix M>
     auto GEVM<V, M>::operator*(this auto&& self, Vector auto&& v) noexcept {
-        return std::forward<This>(self).getLHS() * (std::forward<This>(self).getRHS() * std::forward<decltype(v)>(v));
+        using Self = decltype(self);
+        return std::forward<Self>(self).getLHS() * (std::forward<Self>(self).getRHS() * std::forward<decltype(v)>(v));
     }
 
     template<Vector V, Matrix M>

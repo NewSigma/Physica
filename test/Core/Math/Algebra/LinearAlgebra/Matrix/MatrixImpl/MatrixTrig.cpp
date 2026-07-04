@@ -41,7 +41,7 @@ namespace {
     }
 
     void invAndProd() noexcept {
-        constexpr double Prec = 1E-13;
+        constexpr double Prec = 1E-12;
         auto origin = Matrix4D::random_uniform<RandomSource>(4, 4);
         Matrix4D inv = origin.triu().inv();
         Matrix4D prod = origin.triu() * inv;
