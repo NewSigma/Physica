@@ -139,7 +139,7 @@ namespace Physica {
 
     template<Vector V>
     __host__ __device__ size_t device_obj<Transpose<V>>::getOrder() const noexcept {
-        assert(isSquare() && "[Error]: getOrder() assumes square matrix");
+        assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return 1;
     }
 }

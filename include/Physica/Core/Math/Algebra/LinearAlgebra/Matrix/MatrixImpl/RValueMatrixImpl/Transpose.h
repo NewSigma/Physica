@@ -150,7 +150,7 @@ namespace Physica {
 
     template<Vector V>
     size_t Transpose<V>::getOrder() const noexcept {
-        assert(isSquare() && "[Error]: getOrder() assumes square matrix");
+        assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return 1;
     }
 

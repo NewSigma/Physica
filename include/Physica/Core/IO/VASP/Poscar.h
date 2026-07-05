@@ -26,6 +26,8 @@ namespace Physica {
 
     template<Scalar T>
     class Poscar final : public PeriodicCell<T, 3> {
+        using This = Poscar<T>;
+        using Base = PeriodicCell<T, 3>;
     public:
         enum CrystalSystem : char {
             Triclinic,
@@ -37,9 +39,8 @@ namespace Physica {
             Cubic
         };
 
-        using Base = PeriodicCell<T, 3>;
-        using LatticeMatrix = Base::LatticeMatrix;
-        using Type = Base::Type;
+        using typename Base::LatticeMatrix;
+        using typename Base::Type;
         using ElementTypeArray = Array<uint8_t>;
     private:
         ElementTypeArray elementTypes;
@@ -47,22 +48,21 @@ namespace Physica {
     public:
         Poscar() = default;
         Poscar(Base base, ElementTypeArray elementTypes_, Array<size_t> numOfEachType_);
-        Poscar(CrystalCell<T> cell);
+        explicit Poscar(CrystalCell<T> cell);
         /* Operators */
         template<Scalar U>
         friend std::ostream& operator<<(std::ostream& os, const Poscar<U>& poscar);
         template<Scalar U>
         friend std::istream& operator>>(std::istream& is, Poscar<U>& poscar);
         /* Operations */
-        void standardizeLattice();
         void extendInZ(T factor);
         void toUnitCell(unsigned int x, unsigned int y, unsigned int z);
         void toQECell(std::ostream& os) const;
         void swap(Poscar& __restrict poscar) noexcept;
         /* Getters */
-        [[nodiscard]] const Array<uint8_t> getElementTypes() const noexcept { return elementTypes; }
+        [[nodiscard]] const auto& getElementTypes() const noexcept { return elementTypes; }
         [[nodiscard]] bool isElementTypeInitialized() const noexcept { return !elementTypes.empty(); }
-        [[nodiscard]] const Array<size_t>& getNumOfEachType() const noexcept { return numOfEachType; }
+        [[nodiscard]] const auto& getNumOfEachType() const noexcept { return numOfEachType; }
         [[nodiscard]] CrystalSystem getCrystalSystem(double precision) const noexcept;
     private:
         using Base::toUnitCell;

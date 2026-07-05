@@ -166,7 +166,7 @@ namespace Physica {
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
     size_t Transpose<V>::getOrder() const noexcept {
-        assert(isSquare() && "[Error]: getOrder() assumes square matrix");
+        assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return 1;
     }
 }

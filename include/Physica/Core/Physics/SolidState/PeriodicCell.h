@@ -20,6 +20,7 @@
 
 #include "Physica/Core/Exception/BadConvergenceException.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 
 namespace Physica {
     namespace Internal {
@@ -71,6 +72,7 @@ namespace Physica {
         [[nodiscard]] VectorType minDistVector(size_t id_from, size_t id_to) const;
         [[nodiscard]] VectorType minDistVector(VectorType from, size_t id_to) const;
         void normalize();
+        void standardizeLattice();
         void scale(const T& factor);
         void niggliReduce(double precision, unsigned int maxIteration);
         void niggliReduce2D(unsigned int maxIteration);
@@ -294,6 +296,29 @@ namespace Physica {
         }
         else
             normalize_direct();
+    }
+
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::standardizeLattice() {
+        static_assert(Dim == 3, "[Error]: standardizeLattice only implemented for 3D");
+        using MatrixType = LatticeMatrix::ColMatrix;
+        MatrixType temp = getLattice().transpose();
+        Vector3D<T> buffer{};
+        temp.col(0).householder(buffer);
+        applyHouseholder(buffer, temp);
+
+        auto buffer1 = buffer.template head<2>();
+        temp.col(1).tail(1).householder(buffer1);
+        auto corner = temp.bottomRightCorner(1);
+        applyHouseholder(buffer1, corner);
+        for (int i = 0; i < 3; ++i) {
+            if (temp[i, i].isNegative()) {
+                auto row = temp.row(i);
+                row = -row;
+            }
+        }
+        temp[1, 0] = temp[2, 0] = temp[2, 1] = T(0);
+        getLattice() = temp.transpose();
     }
 
     template<Scalar T, unsigned int Dim>

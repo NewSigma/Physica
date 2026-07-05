@@ -20,7 +20,6 @@
 
 #include "Poscar.h"
 #include "Physica/Core/Physics/PhyConst.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 #include "Poscar.h"
 
 namespace Physica {
@@ -101,30 +100,6 @@ namespace Physica {
         return is;
     }
 
-    template<Scalar T>
-    void Poscar<T>::standardizeLattice() {
-        using MatrixType = LatticeMatrix::ColMatrix;
-        MatrixType temp = Base::getLattice().transpose();
-        Vector3D<T> buffer{};
-        temp.col(0).householder(buffer);
-        applyHouseholder(buffer, temp);
-
-        auto buffer1 = buffer.template head<2>();
-        temp.col(1).tail(1).householder(buffer1);
-        auto corner = temp.bottomRightCorner(1);
-        applyHouseholder(buffer1, corner);
-        for (int i = 0; i < 3; ++i) {
-            if (temp[i, i].isNegative()) {
-                auto row = temp.row(i);
-                row = -row;
-            }
-        }
-        temp[1, 0] = temp[2, 0] = temp[2, 1] = T(0); //Clear numeric error
-        Base::getLattice() = temp.transpose();
-    }
-    /**
-     * Extend the cell in z direction, with all distance of atoms in cell not changed. Use for 2D material only
-     */
     template<Scalar T>
     void Poscar<T>::extendInZ(T factor) {
         if (Base::type == Type::Cartesian) {

@@ -27,12 +27,10 @@ namespace Physica {
     template<Scalar T>
     class CrystalCell final : public PeriodicCell<T, 3> {
         using This = CrystalCell<T>;
+        using Base = PeriodicCell<T, 3>;
     public:
-        constexpr static unsigned int Dim = 3;
-        using Base = PeriodicCell<T, Dim>;
-        using ComplexType = Complex<T>;
-        using AtomicArray = Array<uint16_t>;
         using typename Base::Type;
+        using AtomicArray = Array<uint16_t>;
     private:
         AtomicArray atomicNumbers;
     public:
@@ -53,7 +51,7 @@ namespace Physica {
         void swap(This& __restrict cell) noexcept;
         /* Getters */
         using Base::getType;
-        [[nodiscard]] const AtomicArray& getAtomicNumbers() const noexcept { return atomicNumbers; }
+        [[nodiscard]] const auto& getAtomicNumbers() const noexcept { return atomicNumbers; }
         [[nodiscard]] uint16_t getAtomicNumber(size_t ionIndex) const { return atomicNumbers[ionIndex]; }
         [[nodiscard]] std::unordered_set<uint16_t> getSpecies() const noexcept;
         [[nodiscard]] size_t getElectronCount() const;
