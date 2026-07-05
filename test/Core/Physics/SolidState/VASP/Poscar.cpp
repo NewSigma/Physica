@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <fstream>
-#include "Physica/Core/IO/VASP/Poscar.h"
+#include "Physica/Core/Physics/SolidState/VASP/Poscar.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
 #include "Test.h"

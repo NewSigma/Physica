@@ -20,8 +20,8 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/CuboidLinear.h"
-#include "Physica/Core/Physics/SolidState/PeriodicCell.h"
-#include "Physica/Core/Physics/SolidState/PeriodIndex3D.h"
+#include "PeriodicCell.h"
+#include "PeriodIndex3D.h"
 
 namespace Physica {
     /**

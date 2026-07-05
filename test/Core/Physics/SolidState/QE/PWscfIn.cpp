@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include <fstream>
-#include "Physica/Core/IO/QE/PWscfIn.h"
+#include "Physica/Core/Physics/SolidState/QE/PWscfIn.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
 
 using namespace Physica;

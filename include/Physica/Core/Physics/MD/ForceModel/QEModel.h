@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/IO/VASP/Poscar.h"
-#include "Physica/Core/IO/QE/PWscfOut.h"
+#include "Physica/Core/Physics/SolidState/VASP/Poscar.h"
+#include "Physica/Core/Physics/SolidState/QE/PWscfOut.h"
 #include "Physica/Core/Exception/SystemException.h"
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 #include "Physica/Core/Physics/MD/MDCell.h"

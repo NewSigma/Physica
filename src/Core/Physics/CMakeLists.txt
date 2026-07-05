@@ -1,1 +1,2 @@
 add_subdirectory(ElectronicStructure)
+add_subdirectory(SolidState)

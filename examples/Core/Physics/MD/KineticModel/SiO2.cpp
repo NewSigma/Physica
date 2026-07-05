@@ -19,7 +19,7 @@
 #include <filesystem>
 #include <fstream>
 #include <QApplication>
-#include "Physica/Core/IO/VASP/Poscar.h"
+#include "Physica/Core/Physics/SolidState/VASP/Poscar.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/ForceModel/BKSModel.h"
 #include "Physica/Core/Physics/MD/RPMD.h"

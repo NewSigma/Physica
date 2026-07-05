@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <QApplication>
-#include "Physica/Core/IO/QE/PWscfOut.h"
+#include "Physica/Core/Physics/SolidState/QE/PWscfOut.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;

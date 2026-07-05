@@ -19,7 +19,7 @@
 #pragma once
 
 #include <fcntl.h>
-#include "Physica/Core/IO/VASP/Outcar.h"
+#include "Physica/Core/Physics/SolidState/VASP/Outcar.h"
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Utils/Unix/TempDir.h"

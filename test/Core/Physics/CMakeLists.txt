@@ -10,6 +10,9 @@ physica_add_test(FCSwapVector Phonon/FCSwapVector.cpp)
 ### SolidState
 physica_add_test(BrillouInterpolate SolidState/BrillouInterpolate.cpp)
 physica_add_test(CrystalCell SolidState/CrystalCell.cpp)
+physica_add_test(Outcar SolidState/VASP/Outcar.cpp)
+physica_add_test(Poscar SolidState/VASP/Poscar.cpp)
+physica_add_test(PWscfIn SolidState/QE/PWscfIn.cpp)
 
 if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
     include(SlowTests.cmake)

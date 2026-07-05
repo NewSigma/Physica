@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/IO/QE/PWscfIn.h"
+#include "Physica/Core/Physics/SolidState/QE/PWscfIn.h"
 #include "Physica/Core/Exception/BadFileFormatException.h"
 
 using namespace Physica;

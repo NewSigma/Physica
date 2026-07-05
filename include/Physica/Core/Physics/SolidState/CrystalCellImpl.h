@@ -19,8 +19,8 @@
 #pragma once
 
 #include "Physica/Core/Exception/BadFileFormatException.h"
-#include "Physica/Core/Physics/SolidState/CrystalCell.h"
-#include "Physica/Core/IO/VASP/Poscar.h"
+#include "CrystalCell.h"
+#include "VASP/Poscar.h"
 
 namespace Physica {
     template<Scalar T>

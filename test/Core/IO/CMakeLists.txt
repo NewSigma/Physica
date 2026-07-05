@@ -1,7 +1,4 @@
-physica_add_test(Outcar VASP/Outcar.cpp)
-physica_add_test(Poscar VASP/Poscar.cpp)
 physica_add_test(Gnuplot Gnuplot.cpp)
 if(${PHYSICA_HDF5})
     physica_add_test(HDF5 HDF5.cpp)
 endif()
-physica_add_test(PWscfIn PWscfIn.cpp)
