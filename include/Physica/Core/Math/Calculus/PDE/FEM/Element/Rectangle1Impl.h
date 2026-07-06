@@ -154,7 +154,7 @@ namespace Physica {
                 return -0.25;
             case BottomRight:
             case TopRight:
-                return 0.25; 
+                return 0.25;
         }
         throw std::invalid_argument("[Error]: Invalid local node index");
     }
@@ -167,7 +167,7 @@ namespace Physica {
                 return -0.25;
             case TopLeft:
             case TopRight:
-                return 0.25; 
+                return 0.25;
         }
         throw std::invalid_argument("[Error]: Invalid local node index");
     }

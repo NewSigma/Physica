@@ -125,7 +125,7 @@ namespace Physica {
     template<Scalar T>
     void PairingSampler<T>::forWaveNeighbor(IndexType center, std::invocable<int, IndexType> auto fn) {
         switch (type) {
-        case Sxxyy: 
+        case Sxxyy:
         case Dxxyy: {
             Array<int, 4> shiftDims{0, 1, 0, 1};
             Array<int, 4> deltas{1, 1, -1, -1};

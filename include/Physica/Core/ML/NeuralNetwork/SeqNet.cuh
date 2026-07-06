@@ -75,7 +75,7 @@ namespace Physica {
         const size_t size = dataset.getSize();
         ScalarType result = 0;
         for (size_t i = 0; i < size; ++i)
-           result.toNextMean(i, loss(dataset, i));
+            result.toNextMean(i, loss(dataset, i));
         return result;
     }
 }

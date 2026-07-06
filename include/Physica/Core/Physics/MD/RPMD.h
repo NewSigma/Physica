@@ -27,9 +27,9 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, BaroType Type> class CFireModel;
     /**
      * \class RPMD: Uniform engine for any MD-like algorithms
-     * 
+     *
      * Refer to [1] for a general review. Original literature of RPMD is [3]
-     * 
+     *
      * Reference:
      * [1] Annual Review of Physical Chemistry 64, 387-413 (2013); https://doi.org/10.1146/annurev-physchem-040412-110122
      * [2] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:197-211

@@ -142,7 +142,7 @@ namespace Physica {
             const auto factor = reciprocal(std::max(abs(x_re), abs(x_im)));
             const auto lnF = ln(factor);
             x_re *= factor;
-            x_im *= factor;            
+            x_im *= factor;
 
             const auto re = mul_sub(ln(fma(x_re, x_re, square(x_im))), RealType(0.5), RealType(lnF));
             const auto im = arctan2(x_im, x_re);

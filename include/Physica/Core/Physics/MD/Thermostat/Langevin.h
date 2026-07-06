@@ -25,7 +25,7 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica> class RingPolymer;
     /**
      * PILE thermostat as introduced in [1]
-     * 
+     *
      * Reference:
      * [1] J. Chem. Phys. 133, 124104 (2010); https://doi.org/10.1063/1.3489925
      */

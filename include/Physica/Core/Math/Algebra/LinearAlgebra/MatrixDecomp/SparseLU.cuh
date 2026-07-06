@@ -29,11 +29,11 @@ namespace Physica {
         using host_obj = SparseLU<T>;
         using This = device_obj<host_obj>;
         struct ConfigDeleter {
-            void operator()(cudssConfig_t ptr) const { cudssConfigDestroy(ptr); } 
+            void operator()(cudssConfig_t ptr) const { cudssConfigDestroy(ptr); }
         };
 
         struct DataDeleter {
-            void operator()(cudssData_t ptr) const { cudssDataDestroy(CUDAContext::getInstance(), ptr); } 
+            void operator()(cudssData_t ptr) const { cudssDataDestroy(CUDAContext::getInstance(), ptr); }
         };
 
         struct MatrixDeleter {

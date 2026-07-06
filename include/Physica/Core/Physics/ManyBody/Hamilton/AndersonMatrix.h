@@ -26,7 +26,7 @@
 namespace Physica {
     /**
      * Reference:
-     * [1] Gubernatis J, Kawashima N, Werner P. Quantum Monte Carlo Methods: Algorithms for Lattice Models. Cambridge University Press; 2016:214-217  
+     * [1] Gubernatis J, Kawashima N, Werner P. Quantum Monte Carlo Methods: Algorithms for Lattice Models. Cambridge University Press; 2016:214-217
      */
     template<Scalar T, int NumSite, bool UseInversionSymm>
     class AndersonMatrix : public HamiltonMatrix<AndersonMatrix<T, NumSite, UseInversionSymm>> {

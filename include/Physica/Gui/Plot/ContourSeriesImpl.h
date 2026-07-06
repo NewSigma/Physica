@@ -200,7 +200,7 @@ namespace Physica {
                 break;
             edge.moveToNextEdge();
         }
-        
+
         const bool backToStartPoint = initialQuad == edge.quad;
         if (backToStartPoint) {
             const double factor = 1 + std::numeric_limits<double>::epsilon(); //Multiply with a factor because start point and end point cannot be same in Qt
@@ -273,7 +273,7 @@ namespace Physica {
 
         for (size_t i = 0; i < grid.getCol(); ++i)
             tryInterpolate(grid, level, Edge(Quad(grid.getRow() - 1, i), Edge::Bottom));
-        
+
         for (size_t i = 1; i < grid.getCol() - 1; ++i) {
             for (size_t j = 1; j < grid.getRow() - 1; ++j) {
                 const Quad quad = Quad(j, i);

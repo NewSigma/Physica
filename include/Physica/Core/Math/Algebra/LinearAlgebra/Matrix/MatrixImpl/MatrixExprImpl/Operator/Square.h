@@ -37,7 +37,7 @@ namespace Physica {
 
         void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
-        
+
         [[nodiscard]] auto values(this auto&&) noexcept;
     };
 

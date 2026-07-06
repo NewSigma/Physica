@@ -26,7 +26,7 @@
 namespace Physica {
     /**
      * Refer to [1] for applied symmetries
-     * 
+     *
      * Reference:
      * [1] J. Korean Phys. Soc. 76, 670–683 (2020); https://doi.org/10.3938/jkps.76.670
      */

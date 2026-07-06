@@ -35,7 +35,7 @@ namespace Physica {
     class Transpose<M> : public RValueMatrix<Transpose<M>> {
         using This = Transpose<M>;
         using Base = RValueMatrix<This>;
-    public:        
+    public:
         using typename Base::T;
         using typename Base::Tv;
     private:

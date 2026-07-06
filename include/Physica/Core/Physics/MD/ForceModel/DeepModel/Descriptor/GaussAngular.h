@@ -24,7 +24,7 @@
 namespace Physica {
     /**
      * Angular function introduced in [1]
-     * 
+     *
      * Reference:
      * [1] Phys. Rev. Lett. 98, 146401 (2007); https://doi.org/10.1103/PhysRevLett.98.146401
      */

@@ -40,7 +40,7 @@ namespace Physica {
     }
     /**
      * Estimate the norm-1 using power method
-     * 
+     *
      * Reference:
      * [1] SIAM J. Sci. Stat. Comput. 11, 804–809 (1990); https://doi.org/10.1137/0911047
      */

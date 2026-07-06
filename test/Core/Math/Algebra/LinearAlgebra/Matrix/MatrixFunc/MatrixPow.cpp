@@ -37,7 +37,7 @@ namespace {
     }
 
     void gemv(int power) {
-        using T = float64; 
+        using T = float64;
         const T theta = T::random_uniform<Random<PCG64DXSM, 1234>>();
         auto x = rotation(theta);
         Vector2D<T> proj{1, -1};

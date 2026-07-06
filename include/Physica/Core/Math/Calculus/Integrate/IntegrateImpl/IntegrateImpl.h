@@ -2,7 +2,7 @@
  * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
- * 
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -127,7 +127,7 @@ namespace Physica {
         T result = 0;
         for (uint64_t i = 0; i < sampleCount; ++i) {
             VectorType x = VectorType::template random_uniform<R>(Base::from(), Base::to());
-           result.toNextMean(i, fn(x));
+            result.toNextMean(i, fn(x));
         }
 
         T factor = 1;
@@ -158,7 +158,7 @@ namespace Physica {
         T result = 0;
         for (uint64_t i = 0; i < sampleCount; ++i) {
             const VectorType x = VectorType::template random_any<R>(dim, distribution);
-           result.toNextMean(i, fn(x) / importance(x));
+            result.toNextMean(i, fn(x) / importance(x));
         }
         return result;
     }

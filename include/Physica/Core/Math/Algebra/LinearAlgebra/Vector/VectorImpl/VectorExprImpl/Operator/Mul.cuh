@@ -161,7 +161,7 @@ namespace Physica {
     template<Vector V, Scalar U>
     template<int Size>
     __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
-           return getLHS().template packet<Size>(index, count) * SIMD<T, Size>(getRHS());
+            return getLHS().template packet<Size>(index, count) * SIMD<T, Size>(getRHS());
     }
 
     template<Vector V, Scalar U>

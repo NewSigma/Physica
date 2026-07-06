@@ -66,7 +66,7 @@ namespace Physica {
     }
     /**
      * Solve polynomial equation
-     * 
+     *
      * Reference:
      * [1] https://www.mathworks.com/help/matlab/ref/roots.html
      */

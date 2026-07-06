@@ -243,7 +243,7 @@ namespace Physica {
         using ComplexType = T::ComplexType;
         constexpr size_t Dim = 3;
         constexpr bool isComplex = T::isComplex();
-        
+
         auto fft = FFT<T, 3>(data.getShape(), PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();

@@ -47,7 +47,7 @@ namespace Physica {
     }
     /**
      * Fit a even function, the performance is better than chebyshev_fit()
-     * 
+     *
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:143
      */
@@ -74,7 +74,7 @@ namespace Physica {
     }
     /**
      * Fit a odd function, the performance is better than chebyshev_fit()
-     * 
+     *
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:143
      */

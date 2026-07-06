@@ -23,7 +23,7 @@
 namespace Physica {
     /**
      * TODO: Anisotropic condition
-     * 
+     *
      * Reference:
      * [1] SIAM J. Sci. Comput. 43, B937-B960 (2021); https://doi.org/10.1137/20M1371385
      */

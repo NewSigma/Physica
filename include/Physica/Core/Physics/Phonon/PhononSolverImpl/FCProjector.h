@@ -25,7 +25,7 @@
 namespace Physica {
     /**
      * Force constant(FC) projector utilizes the projection method to incorporate symmetry invariance as introduced in [1].
-     * 
+     *
      * References:
      * [1] Mounet, N. Structural, vibrational and thermodynamic properties of carbon allotropes from ﬁrst-principles: diamond, graphite, and nanotubes. Master’s thesis, Massachusetts Institute of Technology (2005); http://hdl.handle.net/1721.1/33400
      */

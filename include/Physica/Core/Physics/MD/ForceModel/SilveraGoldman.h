@@ -23,7 +23,7 @@
 namespace Physica {
     /**
      * Potential that suits para-hydrogen
-     * 
+     *
      * Reference:
      * [1] J. Chem. Phys. 69, 4209 (1978); https://doi.org/10.1063/1.437103
      */

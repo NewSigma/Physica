@@ -216,7 +216,7 @@ namespace Physica {
     }
     /**
      * Contract strategy as [1] used
-     * 
+     *
      * Reference:
      * [1] J. Chem. Phys. 129, 024105 (2008); https://doi.org/10.1063/1.2953308
      */
@@ -482,7 +482,7 @@ namespace Physica {
             f = vecOH1 * (modifiedMorseForce(r1) / r1);
             forceO -= f;
             forceH1 += f;
-                    
+
             f = vecOH2 * (modifiedMorseForce(r2) / r2);
             forceO -= f;
             forceH2 += f;

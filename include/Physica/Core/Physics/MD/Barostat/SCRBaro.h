@@ -24,7 +24,7 @@
 namespace Physica {
     /**
      * Stochastic cell rescaling(SCR) barostat as introduced in [1], its anisotropic version as introduced in [2]
-     * 
+     *
      * Reference:
      * [1] J. Chem. Phys. 153, 114107 (2020); https://doi.org/10.1063/5.0020514
      * [2] arXiv:2111.06402; https://doi.org/10.48550/arXiv.2111.06402

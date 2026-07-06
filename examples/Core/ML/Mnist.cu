@@ -107,16 +107,7 @@ namespace Physica {
 
         size_t classify(const device_obj<VectorND<Tv>>& input) const {
             static_assert(Base::isInfering(), "[Error]: It is suggested using eval mode to reduce memory use");
-            const auto output = forward(input).toHost();
-            Tv max = output[0];
-            size_t index = 0;
-            for (size_t i = 1; i < output.getLength(); ++i) {
-                if (output[i] > max) {
-                    index = i;
-                    max = output[i].value();
-                }
-            }
-            return index;
+            return forward(input).toHost().argmax();
         }
 
         Tv calcAccuracy(const auto& dataset) const {

@@ -87,7 +87,7 @@ namespace Physica {
             std::multiset<T> labels{};
             for (const auto& tree : trees)
                 labels.insert(tree.predict(features));
-            
+
             size_t maxCount = 0;
             T result = 0;
             for (auto ite = labels.begin(); ite != labels.end(); ++ite) {
@@ -198,7 +198,7 @@ namespace Physica {
         std::forward_list<size_t> result{};
         for (size_t i = 0; i < dataset.isFeatureContinuous.getLength(); ++i)
             result.push_front(i);
-        
+
         const size_t numSample = dataset.labels.getLength();
         while (true) {
             const size_t numFeature = std::distance(result.begin(), result.end());
@@ -214,7 +214,7 @@ namespace Physica {
             auto importance = VectorType(numFeature * 2);
             for (size_t i = 0; i < importance.getLength(); ++i)
                 importance[i] = makeFeatureImportance<R>(i, numForest, numTree, {features, dataset.labels, isFeatureContinuous});
-            
+
             const auto shadow_importance = importance.tail(numFeature);
             const T upper_bound = shadow_importance.mean() + deviation(shadow_importance);
             auto ite = result.before_begin();

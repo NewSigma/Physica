@@ -47,7 +47,7 @@ namespace Physica {
         /* Operations */
         void init(VectorType initial, std::invocable<VectorType> auto func, std::invocable<VectorType> auto grad);
         void step(std::invocable<VectorType> auto func, std::invocable<VectorType> auto grad);
-         T solve(T epsilon, VectorType initial, std::invocable<VectorType> auto func, std::invocable<VectorType> auto grad);
+        T solve(T epsilon, VectorType initial, std::invocable<VectorType> auto func, std::invocable<VectorType> auto grad);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getDim() const noexcept;

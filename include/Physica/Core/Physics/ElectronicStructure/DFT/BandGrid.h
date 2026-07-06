@@ -152,7 +152,7 @@ namespace Physica {
     }
     /**
      * \returns Gradient of energy in t-coordinate defined in [1]
-     * 
+     *
      * Reference:
      * [1] phys. stat. sol. (b) 179, 429-439 (2010); https://doi.org/10.1002/pssb.2221790218
      */

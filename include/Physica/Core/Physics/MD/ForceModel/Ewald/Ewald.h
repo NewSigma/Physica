@@ -27,7 +27,7 @@ namespace Physica {
     /**
      * \tparam REwaldType: R(Space)EwaldType.
      * May be device side or host side, small cell version or large cell version, so it cannot be simplified to a single bool.
-     * 
+     *
      * Reference:
      * [1] Martin, Richard M. Electronic structure: basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:499-503
      * [2] Comput. Phys. Commun. 95(2-3), 73-92 (1996); https://doi.org/10.1016/0010-4655(96)00016-1

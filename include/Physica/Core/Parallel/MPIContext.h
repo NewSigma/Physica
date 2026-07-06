@@ -37,7 +37,7 @@ namespace Physica {
         [[nodiscard]] static MPIContext& getInstance() noexcept;
         [[nodiscard]] constexpr static auto getWorld() noexcept;
         [[nodiscard]] static inline int getNumProcess() noexcept;
-        [[nodiscard]] static inline int getProcessID() noexcept; 
+        [[nodiscard]] static inline int getProcessID() noexcept;
         static void wait();
     private:
         MPIContext() noexcept;

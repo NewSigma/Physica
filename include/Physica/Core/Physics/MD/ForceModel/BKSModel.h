@@ -26,7 +26,7 @@
 namespace Physica {
     /**
      * BKS potential for SiO2 or Al-P-O, as introduced in [1]
-     * 
+     *
      * Reference:
      * [1] Phys. Rev. Lett. 64, 1955 (1990); https://doi.org/10.1103/PhysRevLett.64.1955
      */

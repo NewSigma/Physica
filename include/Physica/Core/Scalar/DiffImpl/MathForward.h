@@ -282,7 +282,7 @@ namespace Physica {
         using ResultType = T::ValueType;
         return ResultType(floor(x.value()));
     }
-    
+
     template<Scalar T>
     [[nodiscard]] auto ceil(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ValueType;

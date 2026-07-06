@@ -30,7 +30,7 @@ namespace Physica {
     template<class T> class ImagTensor;
     template<class T> class SquaredNormTensor;
     template<class T> class NormTensor;
-    template<class T> class ValueTensor;    
+    template<class T> class ValueTensor;
     template<class T, int GradOrder> class GradTensor;
 
     template<class Derived, Scalar ScalarT>

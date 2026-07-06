@@ -26,7 +26,7 @@ namespace Physica {
     /**
      * NVE ensemble referenced from [1]
      * NVT ensemble referenced from [2]
-     * 
+     *
      * Reference:
      * [1] Phys. Rev. Lett. 108, 240401 (2012); https://doi.org/10.1103/PhysRevLett.108.240401
      * [2] Phys. Rev. Lett. 111, 010401 (2013); https://doi.org/10.1103/PhysRevLett.111.010401

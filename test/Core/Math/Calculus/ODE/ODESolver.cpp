@@ -93,7 +93,7 @@ int main() {
      * y'' = (x^2 - 3)y
      * y[0] = 0  y'[0] = 1
      * Comes from Check 1 in [1]
-     * 
+     *
      * Reference:
      * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:20
      */

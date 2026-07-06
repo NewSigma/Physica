@@ -39,7 +39,7 @@ namespace Physica {
     /**
      * \tparam IsBigInt
      * Use euclidean algorithm if true, use decreases technique if false.
-     * 
+     *
      * Decreases technique runs faster because subtract is faster than division
      */
     template<class IntType, bool IsBigInt>

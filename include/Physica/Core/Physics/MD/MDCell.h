@@ -158,7 +158,7 @@ namespace Physica {
         /* Extend mass */ {
             const size_t oldNumParticle = Base::getNumParticle();
             const unsigned int numCell = x * y * z;
-            MassVector newMass(oldNumParticle * numCell);        
+            MassVector newMass(oldNumParticle * numCell);
             if constexpr (Option == ExtendCellOption::AtomMajor) {
                 size_t k = 0;
                 for (size_t i = 0; i < oldNumParticle; ++i) {

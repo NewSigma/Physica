@@ -103,7 +103,7 @@ namespace Physica {
         constexpr size_t Col2 = source.getColAtCompile();
         if constexpr (Col1 == Dynamic || Col2 == Dynamic)
             assert(getCol() == source.getCol() && "[Error]: Dimensions do not match");
-        
+
         constexpr size_t Size1 = Derived::getSizeAtCompile();
         constexpr size_t Size2 = source.getSizeAtCompile();
         if constexpr (Size1 == Dynamic || Size2 == Dynamic)

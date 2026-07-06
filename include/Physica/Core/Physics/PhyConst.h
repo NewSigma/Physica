@@ -35,11 +35,11 @@ namespace Physica {
     /**
      * Physical constants are from [1], which updates every 4 years.
      * Relative atom mass are from [2]
-     * 
+     *
      * Note:
      * Relative atom mass are taken to be the average value of isotopes that are common in nature as [2] does. If you are interesed in
      * a particular isotope, modifications are necessary.
-     * 
+     *
      * Reference:
      * [1] Physical constants, SI (NIST 2022); http://physics.nist.gov/constants
      * [2] Standard Atomic Weights 2021; https://www.ciaaw.org/atomic-weights.htm
@@ -76,7 +76,7 @@ namespace Physica {
                 "Li", "Be", "B", "C", "N", "O", "F", "Ne",
                 "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar",
                 "K", "Ca", "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", "As", "Se", "Br", "Kr"};
-    
+
         [[nodiscard]] constexpr static double degreeToRadian(double degree) { return degree / 180 * M_PI; }
         [[nodiscard]] constexpr static double radianToDegree(double radian) { return radian / M_PI * 180; }
         [[nodiscard]] constexpr static double atomMass(int atomicNum) {
@@ -88,7 +88,7 @@ namespace Physica {
     };
     /**
      * Hartree atomic units. \param hartreeInEv referenced from [1]
-     * 
+     *
      * Reference:
      * [1] Physical constants, SI (NIST 2022); http://physics.nist.gov/constants
      */

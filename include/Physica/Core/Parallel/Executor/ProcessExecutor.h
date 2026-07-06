@@ -53,7 +53,7 @@ namespace Physica {
         assert(core > 0);
 
         const unsigned int maxLoopPerCore = (loopCount + core - 1) / core;
-        unsigned int from = 0; 
+        unsigned int from = 0;
         unsigned int to = maxLoopPerCore;
         Array<FutureType> futures(core);
         for (unsigned int _ = 0; _ < core; ++_) {

@@ -130,7 +130,7 @@ namespace Physica {
                 indexH = isBondedH1 ? pair.first : pair.second;
             else
                 return Array<size_t>{};
-            
+
             size_t nextIndexO = getNumMolecule();
             /* Find next oxygen */ {
                 const auto range = CrystalCellType::estimateRange(initialCell.getLattice(), maxDistOO);
@@ -394,7 +394,7 @@ namespace Physica {
     void IceGenerator<T>::fetchHydrogen(PositionMatrix& pos, size_t indexO, size_t indexH) {
         assert(!isHydrogenOccupied[indexH]);
         assert(numHydrogenRequired[indexO] > 0);
-        
+
         const size_t shiftIndexO = getStartIndexO() + indexO;
         Vector3D<T> delta = initialCell.minDistVector(shiftIndexO, indexH);
         delta.toUnit();

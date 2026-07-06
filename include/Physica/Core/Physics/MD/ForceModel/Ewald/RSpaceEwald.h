@@ -133,7 +133,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    template<ExecutePolicy P> 
+    template<ExecutePolicy P>
     VectorND<T> RSpaceEwald<T, IsSmallCell>::force_short(const PositionMatrix& pos) const {
         const VectorND<T> rSpaceSum = Base::template force<Sequential>(lattice, pos);
         return rSpaceSum;
@@ -281,7 +281,7 @@ namespace Physica {
             const auto x = Tv(ErfcTableStep * double(i - 1));
             erfc_table[i] = erfc(x) / x * integralLimit;
         }
-        erfc_table[0] = erfc_table[1] = erfc_table[2]; // Smooth out divergent erfc(0) / 0 
+        erfc_table[0] = erfc_table[1] = erfc_table[2]; // Smooth out divergent erfc(0) / 0
         erfcStep = Tv(ErfcTableStep) / integralLimit;
         repErfcStep = reciprocal(erfcStep);
         repDoubleSquareStep = reciprocal(square(erfcStep) * Tv(2));

@@ -26,7 +26,7 @@ namespace Physica {
     template<Scalar T, size_t Order> class TridiagonalMatrixT;
     /**
      * Decomposite hermite matrix A like A = QTQ^H
-     * 
+     *
      * References:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:458-459
      */

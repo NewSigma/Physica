@@ -224,7 +224,7 @@ namespace Physica {
         auto pos = outer_buffer.row(1);
         pos = outer_fft.getKSpace();
     }
-    
+
     template<Scalar T, unsigned int Dim, size_t NumReplica>
     void RingPolymer<T, Dim, NumReplica>::toBeadRepr(
             size_t posID, PhaseMatrix& outer_phase, const BufferType& outer_buffer, FFTType& outer_fft) const {

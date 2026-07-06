@@ -62,7 +62,7 @@ namespace {
             0.000000000, 0.476305008, 0.666666687,
             0.476305008, 0.000000000, 0.333333343
         };
-        
+
         CrystalCellType cell({lattice, pos, CrystalCellType::Type::Direct}, {8, 8, 8, 8, 8, 8, 14, 14, 14});
         cell.scale(PhyConst<AU>::angstromToBohr(1));
         MDCell<T> cell1(std::move(cell));
@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
     KineticModel kineticModel(temperatureT, 1);
     ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, {});
     const VectorType energy1 = testNVE<Thread>(rpmd, PhyConst<AU>::secondToTime(1E-12), kineticModel, forceModel);
-    
+
     rpmd.setTimeStep(timeStep * 2);
     const VectorType energy2 = testNVE<Thread>(rpmd, PhyConst<AU>::secondToTime(1E-12), kineticModel, forceModel);
 

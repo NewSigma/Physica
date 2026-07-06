@@ -48,7 +48,7 @@ namespace Physica {
     void CrystalCell<T>::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
         const size_t numAtom = Base::getNumParticle();
         Base::template toSuperCell<ExtendCellOption::AtomMajor>(x, y, z);
-        
+
         const size_t newNumAtom = Base::getNumParticle();
         AtomicArray new_atomic(newNumAtom);
         size_t index = 0;

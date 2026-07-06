@@ -26,7 +26,7 @@
 namespace Physica {
     /**
      * Member variable pot_shift is referenced from [1]
-     * 
+     *
      * References:
      * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:205
      */
@@ -241,7 +241,7 @@ namespace Physica {
         using T1 = MatrixType::ScalarType;
         const size_t numParticle = cell.getNumParticle();
         const size_t dof = cell.getDOF();
-        
+
         MatrixType result(dof);
         for (size_t atom_r = 0; atom_r < numParticle; ++atom_r) {
             for (size_t dim_r = 0; dim_r < Dim; ++dim_r) {
@@ -280,7 +280,7 @@ namespace Physica {
      * [1] Chem. Phys. Lett. 421, 138 (2006); https://doi.org/10.1016/J.CPLETT.2006.01.087
      */
     template<class Derived>
-    auto PairModel<Derived>::virial(const LatticeMatrix& lattice, const PositionMatrix& pos) const -> CoDiff<LatticeMatrix> {        
+    auto PairModel<Derived>::virial(const LatticeMatrix& lattice, const PositionMatrix& pos) const -> CoDiff<LatticeMatrix> {
         LatticeMatrix result(Dim, Dim, 0);
         auto kernel = [this, &result](size_t i, size_t j, Vec3D r, const T& norm1, const T& norm2) {
             const T f_norm = force_functor(i, j, norm1, norm2);

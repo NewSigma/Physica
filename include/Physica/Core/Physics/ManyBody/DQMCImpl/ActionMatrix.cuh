@@ -127,7 +127,7 @@ namespace Physica {
 
             int site = threadIdx.x;
             int numFreq2 = gridDim.y;
-            
+
             int offset = site * numFreq2;
             auto block = target_.getDerived().block(offset, numFreq2, offset, numFreq2);
             const auto& auxField = auxField_.getDerived();

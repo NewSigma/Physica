@@ -234,7 +234,7 @@ namespace Physica {
     }
     /**
      * New eigen-pair found; project it out of the current searching space and restart
-     * 
+     *
      * Refer to [1]
      */
     template<Scalar T>

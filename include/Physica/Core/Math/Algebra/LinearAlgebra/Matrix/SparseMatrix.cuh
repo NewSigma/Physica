@@ -52,7 +52,7 @@ namespace Physica {
         [[nodiscard]] host_obj toHostAsync() const;
         void toHost(host_obj& obj) const;
         void toHostAsync(host_obj& obj) const;
-        
+
         void zeros();
         void swap(This& __restrict obj) noexcept;
         /* Getters */

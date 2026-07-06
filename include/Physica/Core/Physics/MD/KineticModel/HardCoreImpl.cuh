@@ -141,7 +141,7 @@ namespace Physica {
         for (size_t step = 0; step < numStep; ++step) {
             buffer[threadId] = pos[threadId];
             T velocity = hadamard(momentum, repMass).calc(threadId);
-            
+
             T lStep = 0;
             T rStep = deltaT;
             T from = 0;

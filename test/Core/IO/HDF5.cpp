@@ -25,7 +25,7 @@ using namespace Physica;
 int main() {
     TempFile temp("/tmp/tmpXXXXXX");
     const char* str = "This is a str\nstr line2";
-    
+
     const auto dataspace = H5DataSpace<1>({strlen(str)});
     {
         auto h5f = H5File::open(temp.getName());

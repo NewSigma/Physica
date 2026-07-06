@@ -27,7 +27,7 @@ namespace Physica {
         static_assert(MatrixMajor::isSameMajor<M, decltype(target)>(), "[Error]: Cannot apply MKL to this expr");
         using Tm = decltype(std::declval<T>().toMKL());
         target.assert_assign_lapack(mat);
-        
+
         constexpr char ordering = MatrixMajor::isRowMatrix<M>() ? 'R' : 'C';
         constexpr char trans = 'T';
         const size_t rows = getRow();

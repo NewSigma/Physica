@@ -52,7 +52,7 @@ namespace Physica {
         assert(v1.getLength() == 3);
         assert(v2.getLength() == 3);
     }
-        
+
     template<Vector V1, Vector V2>
     template<ExecutePolicy>
     void Cross<V1, V2>::assign(Vector auto&& v) const noexcept {

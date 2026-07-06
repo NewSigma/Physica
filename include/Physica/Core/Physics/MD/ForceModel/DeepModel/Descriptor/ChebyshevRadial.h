@@ -25,7 +25,7 @@
 namespace Physica {
     /**
      * Chebyshev descriptor introduced in [1]
-     * 
+     *
      * Reference:
      * [1] J. Chem. Phys. 157, 114801 (2022); https://doi.org/10.1063/5.0106617
      */

@@ -23,7 +23,7 @@
 namespace Physica {
     /**
      * \class LJModel1 is a variation of \class LJModel
-     * 
+     *
      * Reference:
      * [1] Phys. Rev. 188, 1407; https://doi.org/10.1103/PhysRev.188.1407
      */

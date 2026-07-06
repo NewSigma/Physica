@@ -92,7 +92,7 @@ namespace Physica {
             bool isAllLabelSame = true;
             for (size_t index : availableSample)
                 isAllLabelSame &= label == labels[index];
-            
+
             if (isAllLabelSame)
                 return label;
         }
@@ -186,7 +186,7 @@ namespace Physica {
         std::multiset<T> set{};
         for (size_t sample : availableSample)
             set.insert(labels[sample]);
-        
+
         size_t numCount = 0;
         T result = 0;
         for (auto ite = set.begin(); ite != set.end(); ++ite) {
@@ -216,7 +216,7 @@ namespace Physica {
         std::multiset<T> set{};
         for (size_t sample : availableSample)
             set.insert(dataset.labels[sample]);
-        
+
         T result = 1;
         const T numSample = std::distance(availableSample.begin(), availableSample.end());
         for (auto ite = set.begin(); ite != set.end(); ++ite) {

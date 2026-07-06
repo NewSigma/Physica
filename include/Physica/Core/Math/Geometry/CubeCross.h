@@ -24,7 +24,7 @@ namespace Physica {
     /**
      * Calculate cross section area of plain ax + by + cz + d = 0 and cube [-1, 1] * [-1, 1] * [-1, 1]
      * Algorithm introduced in [1] and its erratum [2]
-     * 
+     *
      * Reference:
      * [1] Phys. Rev. 144, 390 (1966); https://doi.org/10.1103/PhysRev.144.390
      * [2] Phys. Rev. 147, 670 (1966); https://doi.org/10.1103/PhysRev.147.670.2

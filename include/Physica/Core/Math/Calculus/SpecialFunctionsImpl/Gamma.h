@@ -73,14 +73,14 @@ namespace Physica {
                     c = floatMin;
                 d = reciprocal(d);
                 temp = c * d;
-                h *= temp; 
+                h *= temp;
             } while (abs(temp - T(1)) >= epsilon);
             return h * exp(T(-x + a * ln(x) - lnGamma(a)));
         }
     }
     /**
      * Return the logarithm of gamma(s). s must be positive.
-     * 
+     *
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:156
      * [2] Lanczos, C. 1964, SIAM Journal on Numerical Analysis, ser. B, vol. 1, pp. 86-96
@@ -92,9 +92,9 @@ namespace Physica {
         if constexpr (Prec == Double) {
             /**
              * Double version is implemented with gamma = 6 and N = 9 [1] to make full use of precision of double
-             * 
+             *
              * TODO: The implementation is less precise than the implementation in STL, try to find out the difference
-             * 
+             *
              * Compare:
              * The implementation use different number of series term for float and double, while STL provided only one implementation,
              * this version should run faster.

@@ -61,7 +61,7 @@ namespace {
      * Generate a sequence of random seed (using the PCG-XSH-RS scheme)
      *
      * Reference:
-     * [1] Eigen; https://eigen.tuxfamily.org  
+     * [1] Eigen; https://eigen.tuxfamily.org
      * [2] https://www.pcg-random.org/
      */
     uint32_t toNextState(uint64_t& state) noexcept {

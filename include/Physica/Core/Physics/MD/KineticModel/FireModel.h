@@ -21,7 +21,7 @@
 namespace Physica {
     /**
      * Fast inertial relaxation engine(FIRE) as introduced in [1, 2]
-     * 
+     *
      * Reference:
      * [1] Phys. Rev. Lett. 97, 170201 (2006); https://doi.org/10.1103/PhysRevLett.97.170201
      * [2] Comput. Mater. Sci. 175, 109584 (2020); https://doi.org/10.1016/j.commatsci.2020.109584

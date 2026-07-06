@@ -51,7 +51,7 @@ namespace Physica {
         [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
-        
+
         [[nodiscard]] T forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const;
         [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
 

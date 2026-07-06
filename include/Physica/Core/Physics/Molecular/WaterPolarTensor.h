@@ -24,7 +24,7 @@
 namespace Physica {
     /**
      * \class WaterPolarTensor provides polarization tensor of water molecular at CCSD/W6 precision as introduced in [1].
-     * 
+     *
      * Reference:
      * [1] J. Chem. Phys. 122, 144310 (2005); https://doi.org/10.1063/1.1867437
      */
@@ -84,7 +84,7 @@ namespace Physica {
         const T curvePos2 = T(normalLength) * (bondAngle - T(refBondAngle));
         const T curvePos3 = (bondLength2 - bondLength1) * T(M_SQRT1_2);
         polarTensor = makePolarTensor(curvePos1, curvePos2, curvePos3);
-        
+
         posOH1 *= reciprocal(bondLength1);
         posOH2 *= reciprocal(bondLength2);
         auto x = labFrame.row(0);

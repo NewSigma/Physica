@@ -23,7 +23,7 @@
 namespace Physica {
     /**
      * Apply to wight noise only
-     * 
+     *
      * Reference:
      * [1] Phys. Rev. A 45, 600 (1992); https://doi.org/10.1103/PhysRevA.45.600
      */

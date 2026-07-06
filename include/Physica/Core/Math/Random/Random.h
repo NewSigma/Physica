@@ -37,7 +37,7 @@ namespace Physica {
 
     namespace Internal {
         class PHYSICA_API RandomBase {
-            struct Private; // Do not conflict with other pointers 
+            struct Private; // Do not conflict with other pointers
         protected:
         #ifdef PHYSICA_MKL
             using mkl_handle = VSLStreamStatePtr;
@@ -102,7 +102,7 @@ namespace Physica {
      * We use the same random number generator as NumPy [1].
      *
      * Note: Even if we fix the random seed, thread stealing may still break reproducibility.
-     * 
+     *
      * \tparam FixedSeed:
      * Multi-threading will break reproducibility and fixing random seed is not enough.
      * Therefore, \tparam FixedSeed is declared as a template param,

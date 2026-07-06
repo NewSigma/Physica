@@ -232,7 +232,7 @@ namespace Physica {
         if constexpr (WithBias)
             bias.template random_normal<R>();
     }
-    
+
     template<Scalar T, bool WithBias>
     template<RNG R>
     void device_obj<LinearLayer<T, WithBias>>::random_xavier_uniform(Tv gain) {
@@ -248,7 +248,7 @@ namespace Physica {
             values = values * (factor * Tv(2)) - factor;
         }
     }
-    
+
     template<Scalar T, bool WithBias>
     template<RNG R>
     void device_obj<LinearLayer<T, WithBias>>::random_xavier_normal(Tv gain) {
@@ -258,7 +258,7 @@ namespace Physica {
         if constexpr (WithBias)
             bias.values() *= deviation;
     }
-    
+
     template<Scalar T, bool WithBias>
     template<RNG R>
     void device_obj<LinearLayer<T, WithBias>>::random_kaiming_uniform(Tv gain) {

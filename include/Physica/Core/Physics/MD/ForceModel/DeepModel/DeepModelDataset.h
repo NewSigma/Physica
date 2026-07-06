@@ -62,7 +62,7 @@ namespace Physica {
     H5Group DeepModelDataset<T>::read(const H5Loc& loc, const char* name) {
         const auto group = loc.openGroup(name);
         energys.read(group, "Energys");
-        
+
         const size_t numSample = energys.getLength();
         cells.resize(numSample);
         forces.resize(numSample);

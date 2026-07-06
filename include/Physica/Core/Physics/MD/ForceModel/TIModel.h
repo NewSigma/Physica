@@ -24,7 +24,7 @@
 namespace Physica {
     /**
      * \class TIModel provides support to thermodynamic integration(TI).
-     * 
+     *
      * Reference:
      * [1] Comput. Mater. Sci. 112, 333-341 (2016); https://doi.org/10.1016/j.commatsci.2015.10.050
      */
@@ -82,7 +82,7 @@ namespace Physica {
             , lambda(0) {
         updateRef();
     }
-    
+
     template<class ForceModel>
     TIModel<ForceModel>::ScalarType TIModel<ForceModel>::potentialV(const MDCellType& cell) const {
         const ScalarType harmonicV = harmonic.potentialV(cell);
@@ -135,7 +135,7 @@ namespace Physica {
     }
     /**
      * Fast method to generate spring coefficients from MSD as [1] does.
-     * 
+     *
      * Reference:
      * [1] Comput. Mater. Sci. 112, 333-341 (2016); https://doi.org/10.1016/j.commatsci.2015.10.050
      */

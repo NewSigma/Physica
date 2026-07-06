@@ -83,12 +83,12 @@ namespace Physica {
     }
     /**
      * Solve the second order ODE that has form: y''(x) = f(x, y(x)).
-     * 
+     *
      * A simple and stable method
-     * 
+     *
      * \param initial1
      * Value of y(h)
-     * 
+     *
      * Reference:
      * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:572
      */
@@ -107,15 +107,15 @@ namespace Physica {
     }
     /**
      * Solve the second order ODE that has form: y''(x) = f(x) * y(x).
-     * 
+     *
      * Less computational effert and better precision rank than Runge-Kutta4.
-     * 
+     *
      * \param func
      * The function object of f(x)
-     * 
+     *
      * \param tangent
      * Tangent value at x[0]
-     * 
+     *
      * Reference:
      * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:573
      */
@@ -144,7 +144,7 @@ namespace Physica {
             const T w_i_plus1 = T(2) * w_i + stepSize_2 * fn(x_i) * solution[0, i] - w_i_minus1;
             w_i_minus1 = w_i;
             w_i = w_i_plus1;
-            
+
             x_i += stepSize;
             const T factor = T(1) - stepSize_2_12 * fn(x_i);
             solution[0, i + 1] = w_i / factor;

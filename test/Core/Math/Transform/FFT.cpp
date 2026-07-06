@@ -122,7 +122,7 @@ int main() {
         const double t_max = 2;
         constexpr double freq1 = 3;
         constexpr double freq2 = 4;
-        
+
         VectorND<T> data(N);
         {
             const VectorND<T> v_x = VectorND<T>::linspace(T(0), T(t_max), N + 1);
@@ -160,7 +160,7 @@ int main() {
         const double t_max = 2;
         constexpr double freq1 = 3;
         constexpr double freq2 = 4;
-        
+
         VectorND<Tc> data(N);
         {
             const VectorND<T> v_x = VectorND<T>::linspace(T(0), T(t_max), N + 1);

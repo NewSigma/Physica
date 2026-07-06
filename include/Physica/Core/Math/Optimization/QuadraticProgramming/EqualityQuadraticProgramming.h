@@ -24,12 +24,12 @@
 namespace Physica {
     /**
      * Solve quadratic programming with equality constraints only, that is
-     * 
+     *
      * min 1/2 x^T G x + c^T x
      * s.t. A x = b
-     * 
+     *
      * constraints is matrix [A b]
-     * 
+     *
      * Reference:
      * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006:448-496
      */

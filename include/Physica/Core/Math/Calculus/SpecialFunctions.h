@@ -94,7 +94,7 @@ namespace Physica {
     Complex<T> sphericalHarmomicY(unsigned int l, int m, const T& theta, const T& phi);
     /**
      * This class generates rotation matrix for spherical harmonic functions
-     * 
+     *
      * Reference:
      * [1] https://github.com/google/spherical-harmonics.git
      */

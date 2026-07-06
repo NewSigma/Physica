@@ -67,7 +67,7 @@ namespace {
             0.000000000, 0.476305008, 0.666666687,
             0.476305008, 0.000000000, 0.333333343
         };
-        
+
         CrystalCellType cell({lattice, pos, CrystalCellType::Type::Direct}, {8, 8, 8, 8, 8, 8, 14, 14, 14});
         cell.scale(PhyConst<AU>::angstromToBohr(1));
         MDCell<ScalarType> cell1(std::move(cell));
@@ -94,7 +94,7 @@ int main() {
     ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, {});
     for (size_t step = 0; step <= numStep; ++step) {
         auto temperatureT = ScalarType(PhyConst<AU>::kToTemperature(step * 10));
-        
+
         KineticModel kineticModel(temperatureT, 1);
         ThermoType thermo(temperatureT, thermostatTime, true);
 

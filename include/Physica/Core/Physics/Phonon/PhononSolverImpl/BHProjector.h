@@ -23,7 +23,7 @@
 namespace Physica {
     /**
      * Bohn-Huang(BH) projector impose Bohn-Huang and Huang invariance to force constant matrix as introduced in [1].
-     * 
+     *
      * Reference:
      * [1] npj Comput. Mater. 8, 236 (2022); https://doi.org/10.1038/s41524-022-00920-6
      */

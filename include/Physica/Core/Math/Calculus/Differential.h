@@ -63,7 +63,7 @@ namespace Physica {
         T step_now = step;
         T error = std::numeric_limits<T>::max();
         T result{};
-        
+
         for (size_t i = 1; i < TableSize; ++i) {
             step_now *= T(RepFactor);
             table[0, i] = doublePoint(fn, x, step_now);

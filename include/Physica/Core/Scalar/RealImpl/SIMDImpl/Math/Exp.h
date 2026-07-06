@@ -27,7 +27,7 @@ namespace Physica {
      *
      * \tparam
      * Base: 0 for exp, 1 for 0.5 * exp, 2 for pow(2, x), 10 for pow(10, x)
-     * 
+     *
      * Reference:
      * [1] vectorclass2; https://github.com/vectorclass/version2/blob/master/vectormath_exp.h
      */

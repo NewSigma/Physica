@@ -87,7 +87,7 @@ namespace Physica {
 
     template<Scalar T>
     [[nodiscard]] auto log(const T& x, const T& a) noexcept requires(ReverseDiff<T>);
-    
+
     template<Scalar T>
     [[nodiscard]] CoDiff<T> exp(T&& x) noexcept requires(ReverseDiff<T>) {
         decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
@@ -225,7 +225,7 @@ namespace Physica {
 
     template<Scalar T>
     [[nodiscard]] T floor(const T& x) noexcept requires(ReverseDiff<T>);
-    
+
     template<Scalar T>
     [[nodiscard]] T ceil(const T& x) noexcept requires(ReverseDiff<T>);
 }

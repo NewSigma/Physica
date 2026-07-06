@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     p.setColor(Qt::black);
     p.setStyle(Qt::DashLine);
     line.setPen(p);
-    
+
     auto& l = plot->label(3, 0.7, "y = tanh(x)");
     auto font = l.pointLabelsFont();
     font.setPointSize(20);

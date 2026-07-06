@@ -217,7 +217,7 @@ namespace Physica {
     template<Matrix M, Vector V>
     constexpr auto MatExpVecProd<M, V>::calcTheta(int numTaylorTerm) -> Trv {
         assert(1 <= numTaylorTerm && numTaylorTerm <= MaxNumTaylorTerm && "[Error]: Invalid param");
-        const int bufferIndex = (numTaylorTerm - 1) / 5; 
+        const int bufferIndex = (numTaylorTerm - 1) / 5;
         return (T::Prec == Float) ? ThetaFloat32[bufferIndex] : ThetaFloat64[bufferIndex];
     }
 }

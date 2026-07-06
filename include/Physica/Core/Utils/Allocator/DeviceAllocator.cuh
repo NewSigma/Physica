@@ -143,11 +143,11 @@ namespace std {
             }
         }
 
-         __host__ __device__ static constexpr size_type max_size([[maybe_unused]] const allocator_type& a) noexcept {
+        __host__ __device__ static constexpr size_type max_size([[maybe_unused]] const allocator_type& a) noexcept {
             return std::numeric_limits<size_type>::max() / sizeof(value_type);
         }
 
-         __host__ __device__ static allocator_type select_on_container_copy_construction(const allocator_type& a) {
+        __host__ __device__ static allocator_type select_on_container_copy_construction(const allocator_type& a) {
             return a;
         }
     };

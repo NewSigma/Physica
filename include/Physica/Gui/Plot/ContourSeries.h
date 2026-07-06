@@ -75,7 +75,7 @@ namespace Physica {
             const M& y;
             const M& z;
             FlagMatrix flags;
-        public:            
+        public:
             Grid(const M& x_,
                  const M& y_,
                  const M& z_);
@@ -97,7 +97,7 @@ namespace Physica {
         private:
             void interpolateEdge(Edge edge, double level, ContourLine& line) const;
         };
-        
+
         Array<ContourLine> contourLines;
         Array<QLineSeries*> splines;
     public:

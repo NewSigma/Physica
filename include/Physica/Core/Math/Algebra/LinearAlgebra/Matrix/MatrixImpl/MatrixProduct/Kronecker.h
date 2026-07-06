@@ -139,7 +139,7 @@ namespace Physica {
     size_t Kronecker<M1, M2>::getRow() const noexcept {
         return getLHS().getRow() * getRHS().getRow();
     }
-    
+
     template<Matrix M1, Matrix M2>
     size_t Kronecker<M1, M2>::getCol() const noexcept {
         return getLHS().getCol() * getRHS().getCol();

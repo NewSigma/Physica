@@ -367,7 +367,6 @@ namespace Physica {
             else
                 fftw_execute_dft_c2r(backward_plan, buffer, reinterpret_cast<double*>(buffer));
         }
-        
     }
 
     template<Scalar T, size_t Dim>
@@ -433,7 +432,7 @@ namespace Physica {
         }
         return plan;
     }
-    
+
     template<Scalar T, size_t Dim>
     FFT<T, Dim>::PlanType FFT<T, Dim>::makeBackwardPlan() {
         PlanType plan;
@@ -523,7 +522,6 @@ namespace Physica {
                 else
                     result *= rSpaceSize[i] / 2 * 2 + 1;
             }
-                
         }
         return result;
     }

@@ -25,7 +25,7 @@
 namespace Physica {
     /**
      * Berendsen barostat as introduced in [1]
-     * 
+     *
      * Reference:
      * [1] J. Chem. Phys. 81, 3684 (1984); https://doi.org/10.1063/1.448118
      */

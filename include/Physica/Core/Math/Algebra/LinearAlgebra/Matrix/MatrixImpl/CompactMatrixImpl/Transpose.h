@@ -25,7 +25,7 @@ namespace Physica {
     class Transpose<M> : public CompactMatrix<Transpose<M>> {
         using This = Transpose<M>;
         using Base = CompactMatrix<This>;
-    public:        
+    public:
         using typename Base::T;
         using typename Base::Tv;
     private:

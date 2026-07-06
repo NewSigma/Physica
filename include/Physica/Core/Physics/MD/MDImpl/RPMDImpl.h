@@ -49,7 +49,7 @@ namespace Physica {
     }
     /**
      * Contract method to improve performance introduced in [1]
-     * 
+     *
      * Reference:
      * [1] J. Chem. Phys. 129, 024105 (2008); https://doi.org/10.1063/1.2953308
      */
@@ -134,7 +134,7 @@ namespace Physica {
     }
     /**
      * BAOAB integrator as introduced in [1]
-     * 
+     *
      * Reference:
      * [1] J. Chem. Phys, 145, 024103 (2016); https://doi.org/10.1063/1.4954990
      */
@@ -231,9 +231,9 @@ namespace Physica {
     }
     /**
      * fire_vstep is fire_v(olume)step
-     * 
+     *
      * Using euler semi-implicit integrator as introduced in [1]
-     * 
+     *
      * Reference:
      * [1] Comput. Mater. Sci. 175, 109584 (2020); https://doi.org/10.1016/j.commatsci.2020.109584
      */
@@ -336,7 +336,7 @@ namespace Physica {
         else {
             /**
              * Kinetic energy using virial estimator referenced from [1]. Generally, we should use this one.
-             * 
+             *
              * Reference:
              * [1] J. Chem. Phys. 76, 5150-5155 (1982); https://doi.org/10.1063/1.442815
              */
@@ -373,7 +373,7 @@ namespace Physica {
      * Note: Prefer this estimator either
      * 1. NumReplica is small -- prim estimator has lower variance
      * 2. force model is \class EmptyForceModel -- virial estimator does not work
-     * 
+     *
      * Reference:
      * [1] J. Chem. Phys. 76, 5150 (1982); https://doi.org/10.1063/1.442815
      */
@@ -660,7 +660,7 @@ namespace Physica {
         getPhaseMatrix().read(group, "phase");
         forceBuffer.read(group, "force");
     }
-    
+
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::write(H5Loc& loc, const char* name) const {
         auto group = loc.openGroup(name);

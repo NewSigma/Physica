@@ -2,7 +2,7 @@
  * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
- * 
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -26,7 +26,7 @@ namespace Physica {
      * Adaptive monte-carlo for high dimensional integration
      *
      * \tparam TakeLn targets divergent integrals and computes logarithmic observations.
-     * 
+     *
      * Reference:
      * [1] J. Comput. Phys. 439, 110386 (2021); https://doi.org/10.1016/j.jcp.2021.110386
      * [2] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. Numerical Recipes(3rd edition)[M]. London: Cambridge University Press, 2007:414-416

@@ -122,7 +122,7 @@ namespace Physica {
                 return step;
             if (!diff_phi.isNegative())
                 return zoom(fn, grad, x, gradient, direction, step, step_lower);
-            
+
             step_lower = step;
             step = (step_lower + step_upper) / T(2);
             if (abs(step_upper - step) < std::numeric_limits<T>::epsilon())

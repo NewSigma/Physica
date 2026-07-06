@@ -23,7 +23,7 @@
 namespace Physica {
     /**
      * Compute correlation using FFT method as introduced in [1]
-     * 
+     *
      * Reference:
      * [1] Computer Simulation of Liquids (2nd edn); https://doi.org/10.1093/oso/9780198803195.001.0001
      */
@@ -70,7 +70,7 @@ namespace Physica {
         auto head = rSpace.head(numStep);
         head[step] = data;
         step += 1;
-        
+
         const bool isDataEnough = step == numStep;
         if (isDataEnough) {
             rSpace.tail(numStep).zeros();

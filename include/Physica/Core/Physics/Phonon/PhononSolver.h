@@ -96,7 +96,7 @@ namespace Physica {
             , superSize(superSize_) {}
     /**
      * Utilizing the iteration method to incorporate translational invariance while keep force constant matrix symmetric as introduced in [1].
-     * 
+     *
      * References:
      * [1] Comput. Phys. Commun., 2009, 180(12), 2622-2633; https://doi.org/10.1016/j.cpc.2009.03.010
      */

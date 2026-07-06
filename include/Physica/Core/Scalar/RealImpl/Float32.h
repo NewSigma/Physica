@@ -182,7 +182,7 @@ namespace Physica {
 
 namespace std {
     template<>
-    struct numeric_limits<Physica::Real<Physica::Float32>> : 
+    struct numeric_limits<Physica::Real<Physica::Float32>> :
     #ifdef PHYSICA_CUDA
         public ::cuda::std::numeric_limits<float>
     #else

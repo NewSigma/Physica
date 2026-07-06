@@ -86,7 +86,7 @@ namespace Physica {
                 /* Make indexH1, indexH2 */ {
                     T dist1, dist2;
                     dist1 = dist2 = std::numeric_limits<T>::max();
-                    
+
                     for (size_t j = 0; j < numH; ++j) {
                         auto posOH = cell.minDistVector(indexO, j);
                         const T dist = posOH.squaredNorm();
@@ -147,7 +147,7 @@ namespace Physica {
         VectorND<T> charges(maxIndexO);
         for (size_t i = 0; i < maxIndexH; ++i)
             charges[i] = atomCharge1;
-        
+
         for (size_t i = minIndexO; i < maxIndexO; ++i)
             charges[i] = atomCharge2;
         return charges;

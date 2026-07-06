@@ -79,7 +79,7 @@ namespace Physica {
 
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
     size_t KFermiRepr<Dim, NumSite, UseInversionSymm>::operator[](StateType psi) const noexcept {
-        size_t left = 0, right = getNumState() - 1;  
+        size_t left = 0, right = getNumState() - 1;
         while (left < right) {
             const size_t mid = left + (right - left) / 2;
             const auto& psi0 = states[mid];

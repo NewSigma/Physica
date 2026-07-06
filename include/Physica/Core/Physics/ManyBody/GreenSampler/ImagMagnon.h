@@ -29,7 +29,7 @@ namespace Physica {
         using Tc = T::ComplexType;
         using Trv = Base::Trv;
     private:
-        DenseTensor<Tc, 3> magnons; 
+        DenseTensor<Tc, 3> magnons;
         FFT<T> fft;
     public:
         ImagMagnon(const HubbardParams<T>& params, size_t numSample);

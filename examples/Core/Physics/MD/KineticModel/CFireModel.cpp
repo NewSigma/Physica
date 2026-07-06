@@ -42,9 +42,9 @@ MDCell<ScalarType> makeSystem() {
     using LatticeMatrix = MDCell<ScalarType>::LatticeMatrix;
     using PositionMatrix = MDCell<ScalarType>::PositionMatrix;
     const LatticeMatrix lattice{
-         4.6635062604325164,    0.2499522611778955,    0.0000000000000000,
-         2.1629745970109657,    4.1943944839773311,    0.0000000000000000,
-         0.0000000000000000,    0.0000000000000000,   18.0000000000000000
+        4.6635062604325164,    0.2499522611778955,    0.0000000000000000,
+        2.1629745970109657,    4.1943944839773311,    0.0000000000000000,
+        0.0000000000000000,    0.0000000000000000,   18.0000000000000000
     };
     PositionMatrix pos {
         0.4553508091084409, 0.3980437584135783, 0.6240303800896787,
@@ -60,7 +60,7 @@ MDCell<ScalarType> makeSystem() {
         0.7021261874138659, 0.9803177844871507, 0.4573706719037773,
         0.3512600170478342, 0.6392493670479714, 0.6141244566914832
     };
-    
+
     CrystalCellType cell({lattice, pos, CrystalCellType::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
     cell.scale(PhyConst<AU>::angstromToBohr(1));
     MDCell<ScalarType> cell1(std::move(cell));
