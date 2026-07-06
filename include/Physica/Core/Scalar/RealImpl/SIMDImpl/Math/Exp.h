@@ -169,11 +169,11 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, int Size>
-    [[nodiscard]] auto exp(SIMD<T, Size> x) noexcept -> SIMD<T, Size> {
-        if constexpr (T::Prec == Float32)
-            return Internal::exp_float32<SIMD<T, Size>, false, 0>(x);
+    template<FloatPrec Prec, int Size>
+    [[nodiscard]] auto exp(SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size> {
+        if constexpr (Prec == Float32)
+            return Internal::exp_float32<SIMD<Real<Prec>, Size>, false, 0>(x);
         else
-            return Internal::exp_float64<SIMD<T, Size>, false, 0>(x);
+            return Internal::exp_float64<SIMD<Real<Prec>, Size>, false, 0>(x);
     }
 }

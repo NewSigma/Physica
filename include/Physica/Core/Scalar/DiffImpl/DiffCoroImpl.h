@@ -107,10 +107,11 @@ namespace Physica {
 
     template<class T>
     auto& DiffCoro<T>::Promise::yield_value(auto&& arg) noexcept {
-        if constexpr (Scalar<decltype(arg)>)
+        using Arg = decltype(arg);
+        if constexpr (Scalar<Arg> || Packet<Arg>)
             *pObj = T(arg.value());
         else
-            *pObj = T(std::forward<decltype(arg)>(arg).values());
+            *pObj = T(std::forward<Arg>(arg).values());
         return *this;
     }
 

@@ -110,10 +110,8 @@ namespace Physica {
         void swap(SIMD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] FullRealType asReal() const noexcept;
-        [[nodiscard]] ValueType& value() noexcept { return values; }
-        [[nodiscard]] const ValueType& value() const noexcept { return values; }
-        [[nodiscard]] GradType& grad() noexcept { return grads; }
-        [[nodiscard]] const GradType& grad() const noexcept { return grads; }
+        [[nodiscard]] auto& value(this auto&& self) noexcept { return self.values; }
+        [[nodiscard]] auto& grad(this auto&& self) noexcept { return self.grads; }
         template<int MaskOrder>
         [[nodiscard]] auto grad_mask() const noexcept;
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType(values.getLow(), grads.getLow()); }
@@ -138,4 +136,5 @@ namespace Physica {
 }
 
 #include "SIMDImpl/SIMDImpl.h"
-#include "SIMDImpl/Math.h"
+#include "SIMDImpl/MathForward.h"
+#include "SIMDImpl/MathReverse.h"
