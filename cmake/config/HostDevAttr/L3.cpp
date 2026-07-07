@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,10 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <sched.h>
 #include <unistd.h>
-#include <cstdio>
+#include <print>
 
 int main() {
-    printf("%d", (int)sysconf(_SC_LEVEL3_CACHE_SIZE));
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    CPU_SET(1, &mask);
+    sched_setaffinity(0, sizeof(mask), &mask);
+
+    std::print("{}", (int)sysconf(_SC_LEVEL3_CACHE_SIZE));
     return 0;
 }
