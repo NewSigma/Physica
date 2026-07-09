@@ -24,8 +24,8 @@ namespace Physica {
     template<class Derived> class LValueMatrix;
     template<class Derived> class CompactMatrix;
     template<class, bool ReduceCol> class MatrixSum;
-    template<Matrix> class DiagVectorR;
-    template<Matrix> class MinorDiagR;
+    template<Matrix> class DiagVector;
+    template<Matrix> class MinorDiag;
     template<class> class Inverse;
     template<Matrix> class PseudoInverse;
     template<class> class Transpose;

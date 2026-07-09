@@ -22,8 +22,6 @@
 #include "LValueMatrixImpl/LMatrixBlock.h"
 
 namespace Physica {
-    template<Matrix> class DiagVectorL;
-    template<Matrix> class MinorDiagL;
     template<class> class FlattenL;
     /**
      * \class LValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix
@@ -87,8 +85,6 @@ namespace Physica {
         [[nodiscard]] auto bottomRightCorner(this auto&&, size_t fromRow, size_t fromCol) noexcept;
         [[nodiscard]] auto bottomRightCorner(this auto&&, size_t from) noexcept;
         [[nodiscard]] auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
-        [[nodiscard]] auto diag(this auto&&) noexcept;
-        [[nodiscard]] auto diag(this auto&&, ssize_t shift) noexcept;
 
         void swap_row(size_t r1, size_t r2);
         void swap_col(size_t c1, size_t c2);

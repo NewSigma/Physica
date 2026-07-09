@@ -22,18 +22,18 @@
 
 namespace Physica {
     template<Matrix M>
-    class DiagVectorR : public RValueVector<DiagVectorR<M>> {
-        using This = DiagVectorR<M>;
+    class DiagVector : public RValueVector<DiagVector<M>> {
+        using This = DiagVector<M>;
         using Base = RValueVector<This>;
     protected:
         using typename Base::T;
     private:
         decay_rvalue_t<M> mat;
     public:
-        explicit DiagVectorR(M&& mat) : mat(std::forward<M>(mat)) {}
-        DiagVectorR(const This&) = default;
-        DiagVectorR(This&&) = default;
-        ~DiagVectorR() = default;
+        explicit DiagVector(M&& mat) : mat(std::forward<M>(mat)) {}
+        DiagVector(const This&) = default;
+        DiagVector(This&&) = default;
+        ~DiagVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
@@ -47,17 +47,17 @@ namespace Physica {
     };
 
     template<Matrix M>
-    auto&& DiagVectorR<M>::getExpr(this auto&& self) noexcept {
+    auto&& DiagVector<M>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 
     template<Matrix M>
-    size_t DiagVectorR<M>::getLength() const noexcept {
+    size_t DiagVector<M>::getLength() const noexcept {
         return std::min(mat.getCol(), mat.getRow());
     }
 
     template<Matrix M>
-    __host__ __device__ consteval size_t DiagVectorR<M>::getSizeAtCompile() noexcept {
+    __host__ __device__ consteval size_t DiagVector<M>::getSizeAtCompile() noexcept {
         using Expr = std::remove_cvref<M>::type;
         return std::max(Expr::getRowAtCompile(), Expr::getColAtCompile());
     }
@@ -65,7 +65,7 @@ namespace Physica {
 
 namespace Physica {
     template<Matrix M>
-    class Traits<DiagVectorR<M>> {
+    class Traits<DiagVector<M>> {
     public:
         using ScalarType = std::remove_cvref<M>::type::ScalarType;
     };

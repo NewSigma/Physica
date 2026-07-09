@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<Matrix M>
-    class device_obj<MinorDiagR<M>> final : public device_obj<RValueVector<MinorDiagR<M>>> {
-        using host_obj = MinorDiagR<M>;
+    class device_obj<MinorDiag<M>> : public device_obj<RValueVector<MinorDiag<M>>> {
+        using host_obj = MinorDiag<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
         using Ref = add_device_obj<M>::type;
@@ -44,25 +44,25 @@ namespace Physica {
     };
 
     template<Matrix M>
-    __host__ __device__ device_obj<MinorDiagR<M>>::device_obj(Ref mat, ssize_t shift) : mat(asStruct(mat)), shift(shift) {
+    __host__ __device__ device_obj<MinorDiag<M>>::device_obj(Ref mat, ssize_t shift) : mat(asStruct(mat)), shift(shift) {
         assert(getExpr().isSquare());
         assert(std::abs(shift) < getExpr().getCol());
     }
 
     template<Matrix M>
-    __device__ decltype(auto) device_obj<MinorDiagR<M>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const noexcept {
+    __device__ decltype(auto) device_obj<MinorDiag<M>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const noexcept {
         size_t r = shift < 0 ? -shift : 0;
         size_t c = shift > 0 ? shift : 0;
         return getExpr().calc(r + index, c + index, block);
     }
 
     template<Matrix M>
-    __host__ __device__ auto&& device_obj<MinorDiagR<M>>::getExpr(this auto&& self) noexcept {
+    __host__ __device__ auto&& device_obj<MinorDiag<M>>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived());
     }
 }
 
 namespace Physica {
     template<Matrix M>
-    class Traits<device_obj<MinorDiagR<M>>> : public Traits<MinorDiagR<M>> {};
+    class Traits<device_obj<MinorDiag<M>>> : public Traits<MinorDiag<M>> {};
 }

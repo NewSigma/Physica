@@ -73,8 +73,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto bottomRightCorner(this auto&&, size_t fromRow, size_t fromCol) noexcept;
         [[nodiscard]] __host__ __device__ auto bottomRightCorner(this auto&&, size_t from) noexcept;
         [[nodiscard]] __host__ __device__ auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
-        [[nodiscard]] __host__ __device__ auto diag(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ auto diag(this auto&&, ssize_t shift) noexcept;
 
         [[nodiscard]] __host__ __device__ auto flatten();
         [[nodiscard]] __host__ __device__ const auto flatten() const;

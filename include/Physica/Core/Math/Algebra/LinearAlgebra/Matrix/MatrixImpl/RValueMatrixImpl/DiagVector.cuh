@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<Matrix M>
-    class device_obj<DiagVectorR<M>> : public device_obj<RValueVector<DiagVectorR<M>>> {
-        using host_obj = DiagVectorR<M>;
+    class device_obj<DiagVector<M>> : public device_obj<RValueVector<DiagVector<M>>> {
+        using host_obj = DiagVector<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
         using Ref = add_device_obj<M>::type;
@@ -48,24 +48,24 @@ namespace Physica {
     };
 
     template<Matrix M>
-    __device__ auto device_obj<DiagVectorR<M>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
+    __device__ auto device_obj<DiagVector<M>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
         return getExpr().calc(index, index, block);
     }
 
     template<Matrix M>
-    __host__ __device__ size_t device_obj<DiagVectorR<M>>::getLength() const noexcept {
+    __host__ __device__ size_t device_obj<DiagVector<M>>::getLength() const noexcept {
         return std::min(getExpr().getCol(), getExpr().getRow());
     }
 
     template<Matrix M>
-    __host__ __device__ auto&& device_obj<DiagVectorR<M>>::getExpr(this auto&& self) noexcept {
+    __host__ __device__ auto&& device_obj<DiagVector<M>>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived());
     }
 }
 
 namespace Physica {
     template<Matrix M>
-    class Traits<device_obj<DiagVectorR<M>>> : public Traits<DiagVectorR<M>> {
+    class Traits<device_obj<DiagVector<M>>> : public Traits<DiagVector<M>> {
         static_assert(std::is_reference<M>::value);
     };
 }

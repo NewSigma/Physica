@@ -21,18 +21,18 @@
 #include "../LValueMatrix.h"
 
 namespace Physica {
-    template<Matrix M>
-    class MinorDiagL final : public LValueVector<MinorDiagL<M>> {
-        using This = MinorDiagL<M>;
+    template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
+    class MinorDiag<M> : public LValueVector<MinorDiag<M>> {
+        using This = MinorDiag<M>;
         using Base = LValueVector<This>;
     private:
         decay_rvalue_t<M> mat;
         ssize_t shift;
     public:
-        MinorDiagL(M mat, ssize_t shift);
-        MinorDiagL(const This&) = default;
-        MinorDiagL(This&&) = default;
-        ~MinorDiagL() = default;
+        MinorDiag(M mat, ssize_t shift);
+        MinorDiag(const This&) = default;
+        MinorDiag(This&&) = default;
+        ~MinorDiag() = default;
         /* Operators */
         using Base::operator=;
         /* Operations */
@@ -46,30 +46,22 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
-    template<Matrix M>
-    MinorDiagL<M>::MinorDiagL(M mat, ssize_t shift) : mat(std::forward<M>(mat)), shift(shift) {
+    template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
+    MinorDiag<M>::MinorDiag(M mat, ssize_t shift) : mat(std::forward<M>(mat)), shift(shift) {
         assert(mat.isSquare());
         assert(std::abs(shift) < mat.getRow());
     }
 
-    template<Matrix M>
-    auto MinorDiagL<M>::data_ptr(this auto&& self, size_t index) noexcept {
+    template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
+    auto MinorDiag<M>::data_ptr(this auto&& self, size_t index) noexcept {
         auto shift = self.shift;
         size_t r = shift < 0 ? -shift : 0;
         size_t c = shift > 0 ? shift : 0;
         return self.mat.data_ptr(r + index, c + index);
     }
 
-    template<Matrix M>
-    auto&& MinorDiagL<M>::getExpr(this auto&& self) noexcept {
+    template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
+    auto&& MinorDiag<M>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
-}
-
-namespace Physica {
-    template<Matrix M>
-    class Traits<MinorDiagL<M>> {
-    public:
-        using ScalarType = std::remove_cvref<M>::type::ScalarType;
-    };
 }

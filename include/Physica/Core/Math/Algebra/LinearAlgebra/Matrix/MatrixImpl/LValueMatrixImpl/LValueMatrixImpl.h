@@ -232,19 +232,6 @@ namespace Physica {
         return LMatrixBlock<Self>(std::forward<Self>(self), fromRow, rowCount, fromCol, colCount);
     }
 
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::diag(this auto&& self) noexcept {
-        using Self = decltype(self);
-        return DiagVectorL<Self>(std::forward<Self>(self));
-    }
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::diag(this auto&& self, ssize_t shift) noexcept {
-        using Self = decltype(self);
-        return MinorDiagL<Self>(std::forward<Self>(self), shift);
-    }
-
     template<class Derived>
     void LValueMatrix<Derived>::swap_row(size_t r1, size_t r2) {
         assert(r1 < Base::getRow() && r2 < Base::getRow());

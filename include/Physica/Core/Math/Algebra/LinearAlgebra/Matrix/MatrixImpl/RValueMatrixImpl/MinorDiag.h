@@ -22,17 +22,17 @@
 
 namespace Physica {
     template<Matrix M>
-    class MinorDiagR final : public RValueVector<MinorDiagR<M>> {
-        using This = MinorDiagR<M>;
+    class MinorDiag : public RValueVector<MinorDiag<M>> {
+        using This = MinorDiag<M>;
         using Base = RValueVector<This>;
     private:
         decay_rvalue_t<M> mat;
         ssize_t shift;
     public:
-        MinorDiagR(M mat, ssize_t shift);
-        MinorDiagR(const This&) = default;
-        MinorDiagR(This&&) = default;
-        ~MinorDiagR() = default;
+        MinorDiag(M mat, ssize_t shift);
+        MinorDiag(const This&) = default;
+        MinorDiag(This&&) = default;
+        ~MinorDiag() = default;
         /* Operations */
         [[nodiscard]] decltype(auto) calc(size_t index) const noexcept;
         /* Getters */
@@ -43,29 +43,28 @@ namespace Physica {
     };
 
     template<Matrix M>
-    MinorDiagR<M>::MinorDiagR(M mat, ssize_t shift) : mat(std::forward<M>(mat)), shift(shift) {
+    MinorDiag<M>::MinorDiag(M mat, ssize_t shift) : mat(std::forward<M>(mat)), shift(shift) {
         assert(mat.isSquare());
         assert(std::abs(shift) < mat.getRow());
     }
 
     template<Matrix M>
-    decltype(auto) MinorDiagR<M>::calc(size_t index) const noexcept {
+    decltype(auto) MinorDiag<M>::calc(size_t index) const noexcept {
         size_t r = shift < 0 ? -shift : 0;
         size_t c = shift > 0 ? shift : 0;
         return mat.calc(r + index, c + index);
     }
 
     template<Matrix M>
-    auto&& MinorDiagR<M>::getExpr(this auto&& self) noexcept {
+    auto&& MinorDiag<M>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 }
 
 namespace Physica {
     template<Matrix M>
-    class Traits<MinorDiagR<M>> {
-        using Expr = std::remove_cvref<M>::type;
+    class Traits<MinorDiag<M>> {
     public:
-        using ScalarType = Expr::ScalarType;
+        using ScalarType = std::remove_cvref<M>::type::ScalarType;
     };
 }

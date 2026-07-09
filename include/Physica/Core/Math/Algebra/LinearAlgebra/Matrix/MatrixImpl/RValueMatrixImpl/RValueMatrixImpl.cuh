@@ -295,14 +295,14 @@ namespace Physica {
     __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::diag(this auto&& self) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<DiagVectorR<M>>(std::forward<Self>(self));
+        return device_obj<DiagVector<M>>(std::forward<Self>(self));
     }
 
     template<class Derived, Scalar ScalarT>
     __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::diag(this auto&& self, ssize_t shift) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<MinorDiagR<M>>(std::forward<Self>(self), shift);
+        return device_obj<MinorDiag<M>>(std::forward<Self>(self), shift);
     }
 
     template<class Derived, Scalar ScalarT>

@@ -216,20 +216,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<LValueMatrix<Derived>>::diag(this auto&& self) noexcept {
-        using Self = decltype(self);
-        using M = remove_device_obj<Self>::type;
-        return device_obj<DiagVectorL<M>>(std::forward<Self>(self));
-    }
-
-    template<class Derived>
-    __host__ __device__ auto device_obj<LValueMatrix<Derived>>::diag(this auto&& self, ssize_t shift) noexcept {
-        using Self = decltype(self);
-        using M = remove_device_obj<Self>::type;
-        return device_obj<MinorDiagL<M>>(std::forward<Self>(self), shift);
-    }
-
-    template<class Derived>
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::flatten() {
         return device_obj<FlattenL<Derived>>(Base::getDerived());
     }

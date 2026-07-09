@@ -21,17 +21,17 @@
 #include "../LValueMatrix.h"
 
 namespace Physica {
-    template<Matrix M>
-    class DiagVectorL : public LValueVector<DiagVectorL<M>> {
-        using This = DiagVectorL<M>;
+    template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
+    class DiagVector<M> : public LValueVector<DiagVector<M>> {
+        using This = DiagVector<M>;
         using Base = LValueVector<This>;
     private:
         decay_rvalue_t<M> mat;
     public:
-        explicit DiagVectorL(M&& mat) : mat(std::forward<M>(mat)) {}
-        DiagVectorL(const This&) = default;
-        DiagVectorL(This&&) = default;
-        ~DiagVectorL() = default;
+        explicit DiagVector(M&& mat) : mat(std::forward<M>(mat)) {}
+        DiagVector(const This&) = default;
+        DiagVector(This&&) = default;
+        ~DiagVector() = default;
         /* Operators */
         using Base::operator=;
         /* Operations */
@@ -45,24 +45,19 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
-    template<Matrix M>
-    auto&& DiagVectorL<M>::getExpr(this auto&& self) noexcept {
+    template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
+    auto&& DiagVector<M>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 
-    template<Matrix M>
-    size_t DiagVectorL<M>::getLength() const noexcept {
+    template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
+    size_t DiagVector<M>::getLength() const noexcept {
         return std::min(mat.getCol(), mat.getRow());
     }
 
-    template<Matrix M>
-    __host__ __device__ consteval size_t DiagVectorL<M>::getSizeAtCompile() noexcept {
+    template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
+    __host__ __device__ consteval size_t DiagVector<M>::getSizeAtCompile() noexcept {
         using Expr = std::remove_cvref<M>::type;
         return std::max(Expr::getRowAtCompile(), Expr::getColAtCompile());
     }
-}
-
-namespace Physica {
-    template<Matrix M>
-    class Traits<DiagVectorL<M>> : public Traits<DiagVectorR<M>> {};
 }
