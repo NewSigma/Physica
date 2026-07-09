@@ -35,7 +35,7 @@ namespace Physica {
     template<class> class Conjugate;
     template<class> class Hermite;
     template<Vector, Vector> class Cross;
-    template<class T> class RealVectorR;
+    template<class T> class RealVector;
     template<class T> class ImagVector;
     template<class T> class SquaredNormVector;
     template<class T> class NormVector;

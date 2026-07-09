@@ -21,19 +21,19 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
 
 namespace Physica {
-    template<class V>
-    class ImagVectorL : public LValueVector<ImagVectorL<V>> {
-        using This = ImagVectorL<V>;
+    template<class V> requires(std::remove_cvref_t<V>::isLValueVector())
+    class ImagVector<V> : public LValueVector<ImagVector<V>> {
+        using This = ImagVector<V>;
         using Base = LValueVector<This>;
     protected:
         using typename Base::T;
     private:
         decay_rvalue_t<V> v;
     public:
-        explicit ImagVectorL(V&& v_) : v(std::forward<V>(v_)) {}
-        ImagVectorL(const This&) = default;
-        ImagVectorL(This&&) noexcept = default;
-        ~ImagVectorL() = default;
+        explicit ImagVector(V&& v_) : v(std::forward<V>(v_)) {}
+        ImagVector(const This&) = default;
+        ImagVector(This&&) noexcept = default;
+        ~ImagVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
@@ -48,14 +48,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
-    template<class V>
-    auto ImagVectorL<V>::data_ptr(this auto&& self, size_t index) noexcept {
+    template<class V> requires(std::remove_cvref_t<V>::isLValueVector())
+    auto ImagVector<V>::data_ptr(this auto&& self, size_t index) noexcept {
         assert(index < self.getLength() && "[Error]: Index out of range");
         return self.v[index].imag_ptr();
     }
-}
-
-namespace Physica {
-    template<class V>
-    class Traits<ImagVectorL<V>> : public Traits<ImagVectorR<V>> {};
 }

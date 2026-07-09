@@ -176,5 +176,5 @@ namespace Physica {
 
 namespace Physica {
     template<class V>
-    class Traits<SquaredNormVector<V>> : public Traits<RealVectorR<V>> {};
+    class Traits<SquaredNormVector<V>> : public Traits<RealVector<V>> {};
 }

@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<class V>
-    class ImagVectorR : public RValueVector<ImagVectorR<V>> {
-        using This = ImagVectorR<V>;
+    class ImagVector : public RValueVector<ImagVector<V>> {
+        using This = ImagVector<V>;
         using Base = RValueVector<This>;
     protected:
         using typename Base::T;
@@ -31,10 +31,10 @@ namespace Physica {
     private:
         decay_rvalue_t<V> v;
     public:
-        explicit ImagVectorR(V&& v_) : v(std::forward<V>(v_)) {}
-        ImagVectorR(const This&) = default;
-        ImagVectorR(This&&) noexcept = default;
-        ~ImagVectorR() = default;
+        explicit ImagVector(V&& v_) : v(std::forward<V>(v_)) {}
+        ImagVector(const This&) = default;
+        ImagVector(This&&) noexcept = default;
+        ~ImagVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
@@ -49,7 +49,7 @@ namespace Physica {
     };
 
     template<class V>
-    auto ImagVectorR<V>::values(this auto&& self) noexcept {
+    auto ImagVector<V>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v).values().imags();
     }
 
@@ -167,10 +167,10 @@ namespace Physica {
 
 namespace Physica {
     template<class V>
-    class Traits<ImagVectorR<V>> : public Traits<RealVectorR<V>> {};
+    class Traits<ImagVector<V>> : public Traits<RealVector<V>> {};
 
     template<class V>
-    class Traits<NormVector<V>> : public Traits<RealVectorR<V>> {};
+    class Traits<NormVector<V>> : public Traits<RealVector<V>> {};
 
     template<class V>
     class Traits<ValueVector<V>> {

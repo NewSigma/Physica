@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<class V>
-    class device_obj<ImagVectorR<V>> : public RValueVector<ImagVectorR<V>> {
-        using host_obj = ImagVectorR<V>;
+    class device_obj<ImagVector<V>> : public RValueVector<ImagVector<V>> {
+        using host_obj = ImagVector<V>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
         using Ref = add_device_obj_t<V>;
@@ -50,7 +50,7 @@ namespace Physica {
     };
 
     template<class V>
-    __host__ __device__ auto device_obj<ImagVectorR<V>>::values(this auto&& self) noexcept {
+    __host__ __device__ auto device_obj<ImagVector<V>>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.v.getDerived()).values().imags();
     }
 
@@ -179,7 +179,7 @@ namespace Physica {
 
 namespace Physica {
     template<class V>
-    class Traits<device_obj<ImagVectorR<V>>> : public Traits<ImagVectorR<V>> {};
+    class Traits<device_obj<ImagVector<V>>> : public Traits<ImagVector<V>> {};
 
     template<class V>
     class Traits<device_obj<SquaredNormVector<V>>> : public Traits<SquaredNormVector<V>> {};

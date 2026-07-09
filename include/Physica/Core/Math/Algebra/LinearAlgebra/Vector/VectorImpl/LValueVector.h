@@ -22,8 +22,6 @@
 #include "LValueVectorImpl/LVectorBlock.h"
 
 namespace Physica {
-    template<class V> class RealVectorL;
-    template<class V> class ImagVectorL;
     template<Vector, int MatrixMajor, size_t Row, size_t Col>
     class LValueReshapedVector;
     /**
@@ -100,9 +98,6 @@ namespace Physica {
         template<RNG R> void random_normal();
         template<RNG R> void random_rademacher(this auto&);
         template<RNG R> void random_any(auto& distribution);
-
-        [[nodiscard]] decltype(auto) reals(this auto&&) noexcept;
-        [[nodiscard]] auto imags(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
         [[nodiscard]] auto& front(this auto&&) noexcept;

@@ -75,9 +75,6 @@ namespace Physica {
         void random_normal();
         template<RNG R>
         void random_any(auto& distribution);
-
-        [[nodiscard]] __host__ __device__ decltype(auto) reals(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ auto imags(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t index) noexcept;
         [[nodiscard]] __host__ __device__ auto& front(this auto&&) noexcept;

@@ -410,7 +410,7 @@ namespace Physica {
         using Self = decltype(self);
         using V = remove_device_obj<Self>::type;
         if constexpr (isComplex())
-            return device_obj<RealVectorR<V>>(std::forward<Self>(self));
+            return device_obj<RealVector<V>>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);
     }
@@ -419,7 +419,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<RValueVector<Derived, ScalarT>>::imags(this auto&& self) noexcept {
         using Self = decltype(self);
         using V = remove_device_obj<Self>::type;
-        return device_obj<ImagVectorR<V>>(std::forward<Self>(self));
+        return device_obj<ImagVector<V>>(std::forward<Self>(self));
     }
 
     template<class Derived, Scalar ScalarT>

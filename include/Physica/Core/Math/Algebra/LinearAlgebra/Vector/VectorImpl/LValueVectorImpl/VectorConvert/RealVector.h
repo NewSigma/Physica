@@ -21,19 +21,19 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
 
 namespace Physica {
-    template<class V>
-    class RealVectorL : public LValueVector<RealVectorL<V>> {
-        using This = RealVectorL<V>;
+    template<class V> requires(std::remove_cvref_t<V>::isLValueVector())
+    class RealVector<V> : public LValueVector<RealVector<V>> {
+        using This = RealVector<V>;
         using Base = LValueVector<This>;
     protected:
         using typename Base::T;
     private:
         decay_rvalue_t<V> v;
     public:
-        explicit RealVectorL(V&& v_) : v(std::forward<V>(v_)) {}
-        RealVectorL(const This&) = default;
-        RealVectorL(This&&) noexcept = default;
-        ~RealVectorL() = default;
+        explicit RealVector(V&& v_) : v(std::forward<V>(v_)) {}
+        RealVector(const This&) = default;
+        RealVector(This&&) noexcept = default;
+        ~RealVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
@@ -48,14 +48,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
-    template<class V>
-    auto RealVectorL<V>::data_ptr(this auto&& self, size_t index) noexcept {
+    template<class V> requires(std::remove_cvref_t<V>::isLValueVector())
+    auto RealVector<V>::data_ptr(this auto&& self, size_t index) noexcept {
         assert(index < self.getLength() && "[Error]: Index out of range");
         return self.v[index].real_ptr();
     }
-}
-
-namespace Physica {
-    template<class V>
-    class Traits<RealVectorL<V>> : public Traits<RealVectorR<V>> {};
 }

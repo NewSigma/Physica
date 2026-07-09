@@ -21,9 +21,9 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.cuh"
 
 namespace Physica {
-    template<class V>
-    class device_obj<RealVectorL<V>> : public device_obj<LValueVector<RealVectorL<V>>> {
-        using host_obj = RealVectorL<V>;
+    template<class V> requires(std::remove_cvref_t<V>::isLValueVector())
+    class device_obj<RealVector<V>> : public device_obj<LValueVector<RealVector<V>>> {
+        using host_obj = RealVector<V>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueVector<host_obj>>;
         using Ref = add_device_obj_t<V>;
@@ -48,14 +48,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
-    template<class V>
-    __host__ __device__ auto device_obj<RealVectorL<V>>::data_ptr(this auto&& self, size_t index) noexcept {
+    template<class V> requires(std::remove_cvref_t<V>::isLValueVector())
+    __host__ __device__ auto device_obj<RealVector<V>>::data_ptr(this auto&& self, size_t index) noexcept {
         assert(index < self.getLength() && "[Error]: Index out of range");
         return self.v.getDerived()[index].real_ptr();
     }
-}
-
-namespace Physica {
-    template<class V>
-    class Traits<device_obj<RealVectorL<V>>> : public Traits<RealVectorL<V>> {};
 }

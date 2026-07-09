@@ -735,7 +735,7 @@ namespace Physica {
     decltype(auto) RValueVector<Derived, ScalarT>::reals(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (isComplex())
-            return RealVectorR<Self>(std::forward<Self>(self));
+            return RealVector<Self>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);
     }
@@ -743,7 +743,7 @@ namespace Physica {
     template<class Derived, Scalar ScalarT>
     auto RValueVector<Derived, ScalarT>::imags(this auto&& self) noexcept {
         using Self = decltype(self);
-        return ImagVectorR<Self>(std::forward<Self>(self));
+        return ImagVector<Self>(std::forward<Self>(self));
     }
 
     template<class Derived, Scalar ScalarT>

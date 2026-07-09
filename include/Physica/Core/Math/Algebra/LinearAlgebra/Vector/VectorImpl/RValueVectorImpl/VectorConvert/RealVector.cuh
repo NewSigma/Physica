@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<class V>
-    class device_obj<RealVectorR<V>> : public device_obj<RValueVector<RealVectorR<V>>> {
-        using host_obj = RealVectorR<V>;
+    class device_obj<RealVector<V>> : public device_obj<RValueVector<RealVector<V>>> {
+        using host_obj = RealVector<V>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
         using Ref = add_device_obj_t<V>;
@@ -50,12 +50,12 @@ namespace Physica {
     };
 
     template<class V>
-    __host__ __device__ auto device_obj<RealVectorR<V>>::values(this auto&& self) noexcept {
+    __host__ __device__ auto device_obj<RealVector<V>>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.v.getDerived()).values().reals();
     }
 }
 
 namespace Physica {
     template<class V>
-    class Traits<device_obj<RealVectorR<V>>> : public Traits<RealVectorR<V>> {};
+    class Traits<device_obj<RealVector<V>>> : public Traits<RealVector<V>> {};
 }

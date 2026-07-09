@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<class V>
-    class RealVectorR : public RValueVector<RealVectorR<V>> {
-        using This = RealVectorR<V>;
+    class RealVector : public RValueVector<RealVector<V>> {
+        using This = RealVector<V>;
         using Base = RValueVector<This>;
         static_assert(std::remove_cvref_t<V>::isComplex(), "[Error]: Unnecessary real() call on real vector");
     protected:
@@ -32,10 +32,10 @@ namespace Physica {
     private:
         decay_rvalue_t<V> v;
     public:
-        explicit RealVectorR(V&& v_) : v(std::forward<V>(v_)) {}
-        RealVectorR(const This&) = default;
-        RealVectorR(This&&) noexcept = default;
-        ~RealVectorR() = default;
+        explicit RealVector(V&& v_) : v(std::forward<V>(v_)) {}
+        RealVector(const This&) = default;
+        RealVector(This&&) noexcept = default;
+        ~RealVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
@@ -50,19 +50,19 @@ namespace Physica {
     };
 
     template<class V>
-    auto RealVectorR<V>::values(this auto&& self) noexcept {
+    auto RealVector<V>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v).values().reals();
     }
 
     template<class V>
-    __host__ __device__ consteval size_t RealVectorR<V>::getSizeAtCompile() noexcept {
+    __host__ __device__ consteval size_t RealVector<V>::getSizeAtCompile() noexcept {
         return std::remove_cvref_t<V>::getSizeAtCompile();
     }
 }
 
 namespace Physica {
     template<class V>
-    class Traits<RealVectorR<V>> {
+    class Traits<RealVector<V>> {
         using V1 = std::remove_cvref_t<V>;
     public:
         using ScalarType = V1::ScalarType::RealType;

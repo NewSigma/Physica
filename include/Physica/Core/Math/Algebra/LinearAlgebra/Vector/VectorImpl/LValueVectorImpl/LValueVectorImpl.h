@@ -304,21 +304,6 @@ namespace Physica {
         for (size_t i = 0; i < this->getLength(); ++i)
             this->operator[](i) = T::template random_any<R>(distribution);
     }
-
-    template<class Derived>
-    decltype(auto) LValueVector<Derived>::reals(this auto&& self) noexcept {
-        using Self = decltype(self);
-        if constexpr (isComplex())
-            return RealVectorL<Self>(std::forward<Self>(self));
-        else
-            return std::forward<Self>(self);
-    }
-
-    template<class Derived>
-    auto LValueVector<Derived>::imags(this auto&& self) noexcept {
-        using Self = decltype(self);
-        return ImagVectorL<Self>(std::forward<Self>(self));
-    }
     /**
      * Add this function because we cannot simply return &(*this)[index], it is invalid to dereference a device pointer on host.
      */
