@@ -21,18 +21,18 @@
 #include "../CompactMatrix.h"
 
 namespace Physica {
-    template<Matrix M>
-    class FlattenC<M> : public CompactVector<FlattenC<M>> {
-        using This = FlattenC<M>;
+    template<Matrix M> requires (std::remove_cvref_t<M>::isCompact())
+    class Flatten<M> : public CompactVector<Flatten<M>> {
+        using This = Flatten<M>;
 
         decay_rvalue_t<M> mat;
     public:
         using Base = CompactVector<This>;
     public:
-        FlattenC(M&& mat_) : mat(std::forward<M>(mat_)) {}
-        FlattenC(const This&) = default;
-        FlattenC(This&&) noexcept = default;
-        ~FlattenC() = default;
+        Flatten(M&& mat_) : mat(std::forward<M>(mat_)) {}
+        Flatten(const This&) = default;
+        Flatten(This&&) noexcept = default;
+        ~Flatten() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -48,31 +48,23 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
-    template<Matrix M>
-    auto FlattenC<M>::values(this auto&& self) noexcept {
+    template<Matrix M> requires (std::remove_cvref_t<M>::isCompact())
+    auto Flatten<M>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat).values().flatten();
     }
 
-    template<Matrix M>
-    auto FlattenC<M>::grads(this auto&& self) noexcept {
+    template<Matrix M> requires (std::remove_cvref_t<M>::isCompact())
+    auto Flatten<M>::grads(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat).grads().flatten();
     }
 
-    template<Matrix M>
-    auto FlattenC<M>::data(this auto&& self) noexcept {
+    template<Matrix M> requires (std::remove_cvref_t<M>::isCompact())
+    auto Flatten<M>::data(this auto&& self) noexcept {
         return self.mat.data();
     }
 
-    template<Matrix M>
-    __host__ __device__ consteval size_t FlattenC<M>::getSizeAtCompile() noexcept {
+    template<Matrix M> requires (std::remove_cvref_t<M>::isCompact())
+    __host__ __device__ consteval size_t Flatten<M>::getSizeAtCompile() noexcept {
         return std::remove_reference_t<M>::getSizeAtCompile();
     }
-}
-
-namespace Physica {
-    template<Matrix M>
-    class Traits<FlattenC<M>> {
-    public:
-        using ScalarType = std::remove_reference_t<M>::ScalarType;
-    };
 }

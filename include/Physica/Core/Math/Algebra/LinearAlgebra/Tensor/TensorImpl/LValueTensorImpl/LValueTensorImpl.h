@@ -118,7 +118,7 @@ namespace Physica {
     template<class Derived>
     auto LValueTensor<Derived>::flatten(this auto&& self) {
         using Self = decltype(self);
-        return FlattenL<Self>(std::forward<Self>(self));
+        return Flatten<Self>(std::forward<Self>(self));
     }
 
     template<class Derived>

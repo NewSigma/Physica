@@ -317,12 +317,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::flatten(this auto&& self) {
-        using Self = decltype(self);
-        return FlattenL<Self>(std::forward<Self>(self));
-    }
-
-    template<class Derived>
     void LValueMatrix<Derived>::zeros() noexcept {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();

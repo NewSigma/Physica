@@ -494,7 +494,7 @@ namespace Physica {
     template<class Derived, Scalar ScalarT>
     auto RValueMatrix<Derived, ScalarT>::flatten(this auto&& self) noexcept {
         using Self = decltype(self);
-        return FlattenR<Self>(std::forward<Self>(self));
+        return Flatten<Self>(std::forward<Self>(self));
     }
 
     template<class Derived, Scalar ScalarT>

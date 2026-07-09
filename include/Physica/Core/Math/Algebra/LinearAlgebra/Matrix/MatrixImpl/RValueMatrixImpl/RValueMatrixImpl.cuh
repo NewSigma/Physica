@@ -367,7 +367,7 @@ namespace Physica {
 
     template<class Derived, Scalar ScalarT>
     __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::flatten() const noexcept {
-        return device_obj<FlattenR<Derived>>(Base::getDerived());
+        return device_obj<Flatten<Derived>>(Base::getDerived());
     }
 
     template<class Derived, Scalar ScalarT>

@@ -74,9 +74,6 @@ namespace Physica {
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] __host__ __device__ auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
 
-        [[nodiscard]] auto flatten();
-        [[nodiscard]] const auto flatten() const;
-
         void zeros();
         template<RNG R>
         void random_uniform();

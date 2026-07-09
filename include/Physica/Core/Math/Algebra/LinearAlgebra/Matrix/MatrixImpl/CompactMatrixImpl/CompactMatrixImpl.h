@@ -175,12 +175,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto CompactMatrix<Derived>::flatten(this auto&& self) noexcept {
-        using Self = decltype(self);
-        return FlattenC<Self>(std::forward<Self>(self));
-    }
-
-    template<class Derived>
     void CompactMatrix<Derived>::zeros() noexcept {
         Base::getDerived().flatten().zeros();
     }

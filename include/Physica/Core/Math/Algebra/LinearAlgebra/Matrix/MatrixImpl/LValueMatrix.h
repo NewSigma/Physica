@@ -22,7 +22,6 @@
 #include "LValueMatrixImpl/LMatrixBlock.h"
 
 namespace Physica {
-    template<class> class FlattenL;
     /**
      * \class LValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix
      * and other matrixes can be assigned to this class.
@@ -94,8 +93,6 @@ namespace Physica {
         void majorReduce(size_t v1, size_t v2, const ScalarType& factor);
         void majorMulScalar(size_t v, const ScalarType& factor);
         void majorSwap(size_t v1, size_t v2);
-
-        [[nodiscard]] auto flatten(this auto&&);
 
         void zeros() noexcept;
         void zero_grad() noexcept;

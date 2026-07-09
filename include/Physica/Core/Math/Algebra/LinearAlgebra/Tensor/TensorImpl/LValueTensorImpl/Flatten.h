@@ -23,18 +23,18 @@
 
 namespace Physica {
     template<Tensor T>
-    class FlattenL<T> : public LValueVector<FlattenL<T>> {
-        using This = FlattenL<T>;
+    class Flatten<T> : public LValueVector<Flatten<T>> {
+        using This = Flatten<T>;
 
         decay_rvalue_t<T> tensor;
     public:
-        using Base = LValueVector<FlattenL<T>>;
+        using Base = LValueVector<Flatten<T>>;
         using typename Base::ScalarType;
     public:
-        FlattenL(T&& tensor_) : tensor(std::forward<T>(tensor_)) {}
-        FlattenL(const This&) = default;
-        FlattenL(This&&) noexcept = default;
-        ~FlattenL() = default;
+        Flatten(T&& tensor_) : tensor(std::forward<T>(tensor_)) {}
+        Flatten(const This&) = default;
+        Flatten(This&&) noexcept = default;
+        ~Flatten() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -50,14 +50,14 @@ namespace Physica {
     };
 
     template<Tensor T>
-    auto FlattenL<T>::data_ptr(this auto&& self, size_t index) noexcept {
+    auto Flatten<T>::data_ptr(this auto&& self, size_t index) noexcept {
         return self.tensor.data_ptr(self.tensor.toIndexND(index));
     }
 }
 
 namespace Physica {
     template<Tensor T>
-    class Traits<FlattenL<T>> {
+    class Traits<Flatten<T>> {
     public:
         using ScalarType = std::remove_cvref_t<T>::ScalarType;
     };

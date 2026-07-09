@@ -23,9 +23,9 @@
 
 namespace Physica {
     template<Matrix M>
-    class device_obj<FlattenR<M>> : public device_obj<RValueVector<FlattenR<M>>> {
-        using host_obj = FlattenR<M>;
-        using This = device_obj<FlattenR<M>>;
+    class device_obj<Flatten<M>> : public device_obj<RValueVector<Flatten<M>>> {
+        using host_obj = Flatten<M>;
+        using This = device_obj<Flatten<M>>;
         using Base = device_obj<RValueVector<host_obj>>;
 
         const device_obj<M>& mat;
@@ -47,7 +47,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    __device__ auto device_obj<FlattenR<M>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
+    __device__ auto device_obj<Flatten<M>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         return mat.calcFromMajorMinor(major, minor, block);
@@ -56,5 +56,5 @@ namespace Physica {
 
 namespace Physica {
     template<Matrix M>
-    class Traits<device_obj<FlattenR<M>>> : public Traits<FlattenR<M>> {};
+    class Traits<device_obj<Flatten<M>>> : public Traits<Flatten<M>> {};
 }

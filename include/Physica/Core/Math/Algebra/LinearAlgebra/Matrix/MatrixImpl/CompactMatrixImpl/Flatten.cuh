@@ -22,9 +22,9 @@
 #include "Flatten.h"
 
 namespace Physica {
-    template<Matrix M>
-    class device_obj<FlattenC<M>> : public device_obj<CompactVector<FlattenC<M>>> {
-        using host_obj = FlattenC<M>;
+    template<Matrix M> requires (std::remove_cvref_t<M>::isCompact())
+    class device_obj<Flatten<M>> : public device_obj<CompactVector<Flatten<M>>> {
+        using host_obj = Flatten<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<CompactVector<host_obj>>;
 
@@ -44,13 +44,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
     };
 
-    template<Matrix M>
-    __host__ __device__ auto device_obj<FlattenC<M>>::data(this auto&& self) noexcept {
+    template<Matrix M> requires (std::remove_cvref_t<M>::isCompact())
+    __host__ __device__ auto device_obj<Flatten<M>>::data(this auto&& self) noexcept {
         return self.mat.data();
     }
-}
-
-namespace Physica {
-    template<Matrix M>
-    class Traits<device_obj<FlattenC<M>>> : public Traits<FlattenC<M>> {};
 }

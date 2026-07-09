@@ -22,19 +22,19 @@
 
 namespace Physica {
     template<Matrix M>
-    class FlattenR<M> : public RValueVector<FlattenR<M>> {
-        using This = FlattenR<M>;
-        using Base = RValueVector<FlattenR<M>>;
+    class Flatten<M> : public RValueVector<Flatten<M>> {
+        using This = Flatten<M>;
+        using Base = RValueVector<Flatten<M>>;
 
         decay_rvalue_t<M> mat;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     public:
-        FlattenR(M&& mat_) : mat(std::forward<M>(mat_)) {}
-        FlattenR(const This&) = default;
-        FlattenR(This&&) noexcept = default;
-        ~FlattenR() = default;
+        Flatten(M&& mat_) : mat(std::forward<M>(mat_)) {}
+        Flatten(const This&) = default;
+        Flatten(This&&) noexcept = default;
+        ~Flatten() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -56,7 +56,7 @@ namespace Physica {
 
     template<Matrix M>
     template<ExecutePolicy P>
-    void FlattenR<M>::assign(Vector auto&& v) const noexcept {
+    void Flatten<M>::assign(Vector auto&& v) const noexcept {
         if constexpr (v.isCompact())
             mat.template assign<P>(v.reshape_like(mat));
         else
@@ -65,7 +65,7 @@ namespace Physica {
 
     template<Matrix M>
     template<ExecutePolicy P>
-    void FlattenR<M>::assign_add(Vector auto&& v) const noexcept {
+    void Flatten<M>::assign_add(Vector auto&& v) const noexcept {
         if constexpr (v.isCompact())
             mat.template assign_add<P>(v.reshape_like(mat));
         else
@@ -73,31 +73,31 @@ namespace Physica {
     }
 
     template<Matrix M>
-    auto FlattenR<M>::values(this auto&& self) noexcept {
+    auto Flatten<M>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat).values().flatten();
     }
 
     template<Matrix M>
-    auto FlattenR<M>::grads(this auto&& self) noexcept {
+    auto Flatten<M>::grads(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat).grads().flatten();
     }
 
     template<Matrix M>
-    auto FlattenR<M>::calc(size_t index) const -> T {
+    auto Flatten<M>::calc(size_t index) const -> T {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         return mat.calcFromMajorMinor(major, minor);
     }
 
     template<Matrix M>
-    __host__ __device__ consteval size_t FlattenR<M>::getSizeAtCompile() noexcept {
+    __host__ __device__ consteval size_t Flatten<M>::getSizeAtCompile() noexcept {
         return std::remove_reference_t<M>::getSizeAtCompile();
     }
 }
 
 namespace Physica {
     template<Matrix M>
-    class Traits<FlattenR<M>> {
+    class Traits<Flatten<M>> {
     public:
         using ScalarType = std::remove_reference_t<M>::ScalarType;
     };

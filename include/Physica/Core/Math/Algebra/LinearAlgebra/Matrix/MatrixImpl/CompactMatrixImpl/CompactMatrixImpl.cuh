@@ -182,16 +182,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto device_obj<CompactMatrix<Derived>>::flatten() {
-        return device_obj<FlattenC<Derived>>(Base::getDerived());
-    }
-
-    template<class Derived>
-    const auto device_obj<CompactMatrix<Derived>>::flatten() const {
-        return device_obj<FlattenC<Derived>>(const_cast<This&>(*this));
-    }
-
-    template<class Derived>
     void device_obj<CompactMatrix<Derived>>::zeros() {
         Base::getDerived().flatten().zeros();
     }

@@ -216,16 +216,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<LValueMatrix<Derived>>::flatten() {
-        return device_obj<FlattenL<Derived>>(Base::getDerived());
-    }
-
-    template<class Derived>
-    __host__ __device__ const auto device_obj<LValueMatrix<Derived>>::flatten() const {
-        return device_obj<FlattenL<Derived>>(Base::getDerived());
-    }
-
-    template<class Derived>
     void device_obj<LValueMatrix<Derived>>::zero_grad() noexcept {
         Base::getDerived().grads().zeros();
     }

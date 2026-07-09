@@ -22,7 +22,6 @@
 #include "CompactMatrixImpl/CompactMatrixBlock.h"
 
 namespace Physica {
-    template<class> class FlattenC;
     /**
      * \class CompactMatrix has its elements on major direction distributed Compactly.
      */
@@ -80,8 +79,6 @@ namespace Physica {
         [[nodiscard]] auto bottomRightCorner(this auto&&, size_t from) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
-
-        [[nodiscard]] auto flatten(this auto&&) noexcept;
 
         void zeros() noexcept;
         void read(const auto& obj) noexcept;

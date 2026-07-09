@@ -25,7 +25,7 @@
 
 namespace Physica {
     template<class Derived> class LValueTensor;
-    template<class> class FlattenL;
+    template<class> class Flatten;
     template<class T> class RealTensor;
     template<class T> class ImagTensor;
     template<class T> class SquaredNormTensor;

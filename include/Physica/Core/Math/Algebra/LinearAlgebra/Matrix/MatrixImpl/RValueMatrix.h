@@ -31,7 +31,7 @@ namespace Physica {
     template<class> class Transpose;
     template<class> class Conjugate;
     template<class> class Hermite;
-    template<class> class FlattenR;
+    template<class> class Flatten;
     template<class, bool Upper, bool Unit> class MatrixTrig;
 
     template<class> class RealMatrix;
