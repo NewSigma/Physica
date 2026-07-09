@@ -7,7 +7,7 @@
 2. A C++ compiler that support C++ 23, the following compilers are tested:
 
 [GCC](https://gcc.gnu.org/) N/A (Bug 104177)  
-[clang](https://clang.llvm.org/) 22.0.0  
+[clang](https://clang.llvm.org/) 23.0.0  
 [IntelLLVM](https://www.intel.cn/content/www/cn/zh/developer/tools/oneapi/dpc-compiler.html) 2025.0  
 
 3. Addtional libraries:

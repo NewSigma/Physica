@@ -26,4 +26,3 @@ The Scalar module serves two primary purposes:
 
 - Wrapping floating-point numbers within classes can prevent the compiler from generating Fused Multiply-Add (FMA) instructions. This may or may not align with your expectations. We prefer to avoid aggressive compiler flags such as `-ffast-math` and instead explicitly use FMA math functions when needed.
 - NaN/infinite/subnormal floating-point values are typically undesired in scientific computing and are strong indications of flawed assumptions. *Physica* is tuned to trigger assertions in practically error-prone operations instead of propagating them.
-- For now, the reverse diff scalar is the only non-copyable scalar.

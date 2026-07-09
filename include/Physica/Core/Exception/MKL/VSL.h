@@ -39,6 +39,6 @@ namespace Physica {
             throw VSLException(err);
     }
 #else
-    #define check_vsl(err)
+    #define check_vsl(expr)
 #endif
 }
