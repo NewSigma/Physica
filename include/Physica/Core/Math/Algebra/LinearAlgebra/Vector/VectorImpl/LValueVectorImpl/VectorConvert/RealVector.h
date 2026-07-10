@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
 
 namespace Physica {
-    template<class V> requires(std::remove_cvref_t<V>::isLValueVector())
+    template<class V> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
     class RealVector<V> : public LValueVector<RealVector<V>> {
         using This = RealVector<V>;
         using Base = LValueVector<This>;
@@ -48,7 +48,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };
 
-    template<class V> requires(std::remove_cvref_t<V>::isLValueVector())
+    template<class V> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
     auto RealVector<V>::data_ptr(this auto&& self, size_t index) noexcept {
         assert(index < self.getLength() && "[Error]: Index out of range");
         return self.v[index].real_ptr();

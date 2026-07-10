@@ -18,14 +18,14 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/CompactVector.cuh"
 
 namespace Physica {
-    template<class V> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
-    class device_obj<ImagVector<V>> : public device_obj<LValueVector<ImagVector<V>>> {
+    template<class V> requires(std::remove_cvref_t<V>::isCompact())
+    class device_obj<ImagVector<V>> : public device_obj<StridedVector<ImagVector<V>>> {
         using host_obj = ImagVector<V>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<LValueVector<host_obj>>;
+        using Base = device_obj<StridedVector<host_obj>>;
         using Ref = add_device_obj_t<V>;
     protected:
         using typename Base::T;
@@ -44,13 +44,12 @@ namespace Physica {
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle(this auto&& self) noexcept;
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
-    template<class V> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
-    __host__ __device__ auto device_obj<ImagVector<V>>::data_ptr(this auto&& self, size_t index) noexcept {
-        assert(index < self.getLength() && "[Error]: Index out of range");
-        return self.v.getDerived()[index].imag_ptr();
+    template<class V> requires(std::remove_cvref_t<V>::isCompact())
+    __host__ __device__ auto device_obj<ImagVector<V>>::data_handle(this auto&& self) noexcept {
+        return self.v.getDerived().data()->imag_ptr();
     }
 }

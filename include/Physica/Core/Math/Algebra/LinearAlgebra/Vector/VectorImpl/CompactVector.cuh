@@ -87,3 +87,5 @@ namespace Physica {
 
 #include "CompactVectorImpl/CompactVectorImpl.cuh"
 #include "CompactVectorImpl/CompactVectorBlock.cuh"
+#include "CompactVectorImpl/VectorConvert/RealVector.cuh"
+#include "CompactVectorImpl/VectorConvert/ImagVector.cuh"

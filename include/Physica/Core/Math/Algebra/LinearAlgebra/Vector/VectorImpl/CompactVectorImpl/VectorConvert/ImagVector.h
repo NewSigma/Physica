@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/CompactVector.h"
 
 namespace Physica {
-    template<class V> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
-    class ImagVector<V> : public LValueVector<ImagVector<V>> {
+    template<class V> requires(std::remove_cvref_t<V>::isCompact())
+    class ImagVector<V> : public StridedVector<ImagVector<V>> {
         using This = ImagVector<V>;
-        using Base = LValueVector<This>;
+        using Base = StridedVector<This>;
     protected:
         using typename Base::T;
     private:
@@ -42,15 +42,15 @@ namespace Physica {
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] auto data_ptr(this auto&& self, size_t index) noexcept;
+        [[nodiscard]] auto data_handle(this auto&& self) noexcept;
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept { return 2; }
     };
 
-    template<class V> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
-    auto ImagVector<V>::data_ptr(this auto&& self, size_t index) noexcept {
-        assert(index < self.getLength() && "[Error]: Index out of range");
-        return self.v[index].imag_ptr();
+    template<class V> requires(std::remove_cvref_t<V>::isCompact())
+    auto ImagVector<V>::data_handle(this auto&& self) noexcept {
+        return self.v.data()->imag_ptr();
     }
 }

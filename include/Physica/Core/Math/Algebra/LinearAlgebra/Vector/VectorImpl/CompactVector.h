@@ -116,6 +116,8 @@ namespace Physica {
 
 #include "CompactVectorImpl/CompactVectorImpl.h"
 #include "CompactVectorImpl/View.h"
+#include "CompactVectorImpl/VectorConvert/RealVector.h"
+#include "CompactVectorImpl/VectorConvert/ImagVector.h"
 #ifdef PHYSICA_MKL
     #include "CompactVectorImpl/CompactVector_MKL.h"
 #endif
