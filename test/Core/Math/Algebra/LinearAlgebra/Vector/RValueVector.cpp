@@ -25,19 +25,6 @@ using namespace Physica;
 using RandomSource = Random<>;
 
 namespace {
-    void viewTest() noexcept {
-        auto a = VectorND<float32>::random_uniform<Random<>>(16);
-        auto b = VectorND<float32>::random_uniform<Random<>>(16);
-        auto v = (a + b).view();
-
-        using R = decltype(v);
-        static_assert(std::ranges::sized_range<R>);
-        static_assert(std::ranges::common_range<R>);
-        static_assert(std::ranges::random_access_range<R>);
-        static_assert(std::ranges::constant_range<R>);
-        static_assert(std::ranges::view<R>);
-    }
-
     void sum() {
         using T = float32;
         const auto x = VectorND<T>::random_uniform<Random<>>(16);
@@ -87,7 +74,16 @@ namespace {
 }
 
 int main() {
-    viewTest();
+    syntax_only([]() {
+        VectorND<float32> a, b;
+        using R = decltype((a + b).view());
+        static_assert(std::ranges::sized_range<R>);
+        static_assert(std::ranges::common_range<R>);
+        static_assert(std::ranges::random_access_range<R>);
+        static_assert(std::ranges::constant_range<R>);
+        static_assert(std::ranges::view<R>);
+    });
+
     sum();
     argminTest();
     reshapeTest();

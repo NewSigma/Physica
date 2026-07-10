@@ -44,7 +44,6 @@ namespace Physica {
         /* Operations */
         [[nodiscard, gnu::always_inline]] constexpr auto begin(this auto&&) noexcept;
         [[nodiscard, gnu::always_inline]] constexpr auto end(this auto&&) noexcept;
-        /* Getters */
         [[nodiscard, gnu::always_inline]] constexpr size_t size() const noexcept { return vec->getLength(); }
     };
 

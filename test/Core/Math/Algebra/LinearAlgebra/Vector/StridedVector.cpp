@@ -16,24 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Physica/Core/Scalar/Complex.h"
+#include "Test.h"
 
-namespace Physica {
-    /**
-     * Typically used in std::conditional_t as the fallback type; everything regresses to no-op
-     */
-    class Empty {
-        using This = Empty;
-    public:
-        constexpr Empty() = default;
-        constexpr Empty(auto&&...) {}
-        constexpr Empty(const This&) = default;
-        constexpr Empty(This&&) noexcept = default;
-        constexpr ~Empty() = default;
-        /* Operators */
-        constexpr This& operator=(const This&) = default;
-        constexpr This& operator=(This&&) noexcept = default;
-        /* Operations */
-        constexpr void swap(This&) noexcept {}
-    };
+using namespace Physica;
+
+int main() {
+    syntax_only([]() {
+        using R = decltype(VectorND<cfloat64>{}.reals().view());
+        static_assert(std::ranges::sized_range<R>);
+        static_assert(std::ranges::common_range<R>);
+        static_assert(std::ranges::random_access_range<R>);
+        static_assert(std::ranges::view<R>);
+    });
+    return 0;
 }
