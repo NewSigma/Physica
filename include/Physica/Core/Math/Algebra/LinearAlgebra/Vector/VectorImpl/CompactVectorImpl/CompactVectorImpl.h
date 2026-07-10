@@ -310,8 +310,13 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto CompactVector<Derived>::data_handle(this auto&& self) noexcept {
+        return self.data();
+    }
+
+    template<class Derived>
     auto CompactVector<Derived>::data_ptr(this auto&& self, size_t index) noexcept {
-        return self.data() + index;
+        return self.data_handle() + index;
     }
 
     template<class Derived>

@@ -271,4 +271,24 @@ namespace Physica {
         else
             return self.data() + c * self.getRow() + r;
     }
+
+    template<class Derived>
+    constexpr size_t CompactMatrix<Derived>::getRowStride() const noexcept {
+        return Derived::isColMatrix() ? 1 : Base::getRow();
+    }
+
+    template<class Derived>
+    constexpr size_t CompactMatrix<Derived>::getColStride() const noexcept {
+        return Derived::isColMatrix() ? 1 : Base::getCol();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval size_t CompactMatrix<Derived>::getRowStrideAtCompile() noexcept {
+        return Derived::isColMatrix() ? 1 : Derived::getRowAtCompile();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval size_t CompactMatrix<Derived>::getColStrideAtCompile() noexcept {
+        return Derived::isRowMatrix() ? 1 : Derived::getColAtCompile();
+    }
 }

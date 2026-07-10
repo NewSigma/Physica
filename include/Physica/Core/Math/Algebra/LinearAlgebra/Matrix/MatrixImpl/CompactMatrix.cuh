@@ -19,15 +19,15 @@
 #pragma once
 
 #include "CompactMatrix.h"
-#include "LValueMatrix.cuh"
+#include "StridedMatrix.cuh"
 #include "CompactMatrixImpl/CompactMatrixBlock.cuh"
 
 namespace Physica {
     template<class Derived>
-    class device_obj<CompactMatrix<Derived>> : public device_obj<LValueMatrix<Derived>> {
+    class device_obj<CompactMatrix<Derived>> : public device_obj<StridedMatrix<Derived>> {
         using host_obj = CompactMatrix<Derived>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<LValueMatrix<Derived>>;
+        using Base = device_obj<StridedMatrix<Derived>>;
     public:
         using typename Base::ScalarType;
     protected:

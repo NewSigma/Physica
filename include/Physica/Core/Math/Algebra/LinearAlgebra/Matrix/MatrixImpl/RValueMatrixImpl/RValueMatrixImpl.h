@@ -659,6 +659,11 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isStrided() noexcept {
+        return false;
+    }
+
+    template<class Derived, Scalar ScalarT>
     __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isCompact() noexcept {
         return requires { std::declval<Derived>().data(); };
     }

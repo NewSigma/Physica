@@ -20,14 +20,14 @@
 
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "CompactVector.h"
-#include "LValueVector.cuh"
+#include "StridedVector.cuh"
 #include "CompactVectorImpl/CompactVectorBlock.cuh"
 
 namespace Physica {
     template<class Derived>
-    class device_obj<CompactVector<Derived>> : public device_obj<LValueVector<Derived>> {
+    class device_obj<CompactVector<Derived>> : public device_obj<StridedVector<Derived>> {
         using host_obj = CompactVector<Derived>;
-        using Base = device_obj<LValueVector<Derived>>;
+        using Base = device_obj<StridedVector<Derived>>;
         using This = device_obj<host_obj>;
     public:
         using Base::isReverseDiff;
@@ -74,6 +74,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ auto data() noexcept;
         [[nodiscard]] __host__ __device__ auto data() const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t index) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isFastPacket() noexcept;

@@ -109,6 +109,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isForwardDiff() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isReverseDiff() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isLValueVector() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isStrided() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept;

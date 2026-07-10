@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "LValueMatrix.h"
+#include "StridedMatrix.h"
 #include "CompactMatrixImpl/CompactMatrixBlock.h"
 
 namespace Physica {
@@ -27,8 +27,8 @@ namespace Physica {
      * \class CompactMatrix has its elements on major direction distributed Compactly.
      */
     template<class Derived>
-    class CompactMatrix : public LValueMatrix<Derived> {
-        using Base = LValueMatrix<Derived>;
+    class CompactMatrix : public StridedMatrix<Derived> {
+        using Base = StridedMatrix<Derived>;
         using This = CompactMatrix<Derived>;
     public:
         using typename Base::ScalarType;
@@ -96,6 +96,11 @@ namespace Physica {
         [[nodiscard]] auto data() noexcept;
         [[nodiscard]] auto data() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t r, size_t c) noexcept;
+        [[nodiscard]] constexpr size_t getRowStride() const noexcept;
+        [[nodiscard]] constexpr size_t getColStride() const noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowStrideAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getColStrideAtCompile() noexcept;
     protected:
         CompactMatrix() = default;
         CompactMatrix(const This&) = default;

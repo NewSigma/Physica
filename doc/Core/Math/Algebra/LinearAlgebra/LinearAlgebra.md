@@ -30,13 +30,14 @@ Historically, the definitions of lvalue and rvalue in the C language were very s
 
 The linear space used for numerical computation is not an abstract linear space; all computations must take place within a specific physical memory. By introducing assignment operations into the linear space, a generalized linear space can be constructed. This design explicitly incorporates expression templates into the type system of *LinearAlgebra*, facilitating the writing of pattern recognition.
 
-The base classes for linear algebra objects generally fall into three categories:
+The base classes for linear algebra objects generally fall into the following categories:
 
-- RValue objects (`RValueVector`, `RValueMatrix`, ...)
-- LValue objects (`LValueVector`, `LValueMatrix`, ...)
-- Compact objects (`CompactVector`, `CompactMatrix`, ...)
+- RValue objects
+- LValue objects
+- Strided objects
+- Compact objects
 
-Taking a dense vector as an example, the inheritance hierarchy is: `DenseVector` → `CompactVector` → `LValueVector` → `RValueVector`.
+Taking a dense vector as an example, the inheritance hierarchy is: `DenseVector` → `CompactVector` → `StridedVector` → `LValueVector` → `RValueVector`.
 
 **RValue object**:
 
@@ -63,6 +64,23 @@ Obviously, LValue objects are calculable, and the operation for calculation is d
 Scalar LValueVector::calc(size_t index) { return *data_ptr(index); }
 ```
 
+**Strided object**:
+
+Two core operations of strided objects:
+
+``` C++
+Scalar* StridedVector::data_handle() { ... }
+size_t StridedVector::getStride() { ... }
+```
+
+Strided objects are LValue objects whose elements are spaced according to the given stride. That is
+
+``` C++
+Scalar* StridedVector::data_ptr(this auto&& self, size_t index) {
+    return self.data_ptr() + index * getStride();
+}
+```
+
 **Compact object**:
 
 The only core operation on compact objects:
@@ -74,7 +92,8 @@ Scalar* CompactVector::data() { ... }
 A compact object is one whose elements are continuously distributed in memory:
 
 ``` C++
-Scalar* CompactVector::data_ptr(size_t index) { return data() + index; }
+Scalar* CompactVector::data_handle() { return data(); }
+size_t CompactVector::getStride() { return 1; }
 ```
 
 ## Concept

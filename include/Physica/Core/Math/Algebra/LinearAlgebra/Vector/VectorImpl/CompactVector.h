@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "StridedVector.h"
 #include "CompactVectorImpl/CompactVectorBlock.h"
 
 namespace Physica {
@@ -25,8 +26,8 @@ namespace Physica {
     class CompactReshapedVector;
 
     template<class Derived>
-    class CompactVector : public LValueVector<Derived> {
-        using Base = LValueVector<Derived>;
+    class CompactVector : public StridedVector<Derived> {
+        using Base = StridedVector<Derived>;
         using This = CompactVector<Derived>;
     public:
         template<Vector> class View;
@@ -99,9 +100,11 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto data() noexcept;
         [[nodiscard]] auto data() const noexcept;
+        [[nodiscard]] auto data_handle(this auto&&) noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isFastPacket() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept { return 1; }
     protected:
         CompactVector() = default;
         CompactVector(const This&) = default;

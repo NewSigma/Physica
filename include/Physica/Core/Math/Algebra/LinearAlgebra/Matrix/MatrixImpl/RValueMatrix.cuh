@@ -121,6 +121,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isLValueMatrix() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isStrided() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSymm() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isStaticHermite() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
