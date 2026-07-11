@@ -74,7 +74,7 @@ namespace Physica {
         auto get_return_object() noexcept;
         static DiffCoro<T> get_return_object_on_allocation_failure() noexcept { unreachable("Expect coro frame is small"); }
         auto initial_suspend() noexcept { return suspend_never{}; }
-        void await_transform(auto&&) noexcept = delete("[Error]: Differential coroutine must suspend by yielding");
+        void await_transform(auto&&) noexcept = delete("[Error]: Differential coroutines that return non-void values are required to suspend by yielding");
         auto final_suspend() noexcept { return suspend_never{}; }
         auto& yield_value(auto&& arg) noexcept;
         void return_void() noexcept {}

@@ -72,13 +72,6 @@ namespace Physica {
     void DiffCoro<T>::reverse_impl() noexcept {
         if (handle) {
             assert(!handle.done() && "[Error]: Unexpected resume, this is a bug");
-            if constexpr (Scalar<T>) {
-                if (Base::grad().isZero()) {
-                    handle.destroy();
-                    handle = nullptr;
-                    return;
-                }
-            }
             handle.resume();
             handle = nullptr;
         }
