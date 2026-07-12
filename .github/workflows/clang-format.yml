@@ -1,0 +1,25 @@
+name: clang-format
+
+on:
+  push:
+    branches: [ "Physica" ]
+  pull_request:
+    branches: [ "Physica" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+
+    - name: Install
+      run: |
+        sudo apt-get install -y clang-format-20 parallel
+
+    - name: Run clang-format
+      run: |
+        git diff --name-only HEAD^ -- '*.h' '*.cpp' '*.cuh' '*.cu' | parallel clang-format-20 -i {}
+        git diff --exit-code
