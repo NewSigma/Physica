@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
-    class device_obj<DiagVector<M>> : public device_obj<LValueVector<DiagVector<M>>> {
-        using host_obj = DiagVector<M>;
+    class device_obj<MainDiag<M>> : public device_obj<LValueVector<MainDiag<M>>> {
+        using host_obj = MainDiag<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueVector<host_obj>>;
         using Ref = add_device_obj<M>::type;
@@ -46,12 +46,12 @@ namespace Physica {
     };
 
     template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
-    __host__ __device__ auto&& device_obj<DiagVector<M>>::getExpr(this auto&& self) noexcept {
+    __host__ __device__ auto&& device_obj<MainDiag<M>>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived());
     }
 
     template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
-    __host__ __device__ size_t device_obj<DiagVector<M>>::getLength() const noexcept {
+    __host__ __device__ size_t device_obj<MainDiag<M>>::getLength() const noexcept {
         return std::min(getExpr().getCol(), getExpr().getRow());
     }
 }

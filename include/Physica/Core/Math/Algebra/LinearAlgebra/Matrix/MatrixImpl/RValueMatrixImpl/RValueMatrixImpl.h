@@ -267,13 +267,13 @@ namespace Physica {
     template<class Derived, Scalar ScalarT>
     auto RValueMatrix<Derived, ScalarT>::diag(this auto&& self) noexcept {
         using Self = decltype(self);
-        return DiagVector<Self>(std::forward<Self>(self));
+        return MainDiag<Self>(std::forward<Self>(self));
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueMatrix<Derived, ScalarT>::diag(this auto&& self, ssize_t shift) noexcept {
+    auto RValueMatrix<Derived, ScalarT>::diag(this auto&& self, ssize_t offset) noexcept {
         using Self = decltype(self);
-        return MinorDiag<Self>(std::forward<Self>(self), shift);
+        return OffsetDiag<Self>(std::forward<Self>(self), offset);
     }
 
     template<class Derived, Scalar ScalarT>

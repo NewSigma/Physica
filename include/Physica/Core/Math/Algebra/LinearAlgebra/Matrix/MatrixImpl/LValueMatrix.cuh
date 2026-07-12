@@ -96,7 +96,7 @@ namespace Physica {
 }
 
 #include "LValueMatrixImpl/LValueMatrixImpl.cuh"
-#include "LValueMatrixImpl/DiagVector.cuh"
-#include "LValueMatrixImpl/MinorDiag.cuh"
+#include "LValueMatrixImpl/MainDiag.cuh"
+#include "LValueMatrixImpl/OffsetDiag.cuh"
 #include "LValueMatrixImpl/Flatten.cuh"
 #include "LValueMatrixImpl/ReshapedVector.cuh"

@@ -22,16 +22,16 @@
 
 namespace Physica {
     template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
-    class DiagVector<M> : public LValueVector<DiagVector<M>> {
-        using This = DiagVector<M>;
+    class MainDiag<M> : public LValueVector<MainDiag<M>> {
+        using This = MainDiag<M>;
         using Base = LValueVector<This>;
     private:
         decay_rvalue_t<M> mat;
     public:
-        explicit DiagVector(M&& mat) : mat(std::forward<M>(mat)) {}
-        DiagVector(const This&) = default;
-        DiagVector(This&&) = default;
-        ~DiagVector() = default;
+        explicit MainDiag(M&& mat) : mat(std::forward<M>(mat)) {}
+        MainDiag(const This&) = default;
+        MainDiag(This&&) = default;
+        ~MainDiag() = default;
         /* Operators */
         using Base::operator=;
         /* Operations */
@@ -46,17 +46,17 @@ namespace Physica {
     };
 
     template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
-    auto&& DiagVector<M>::getExpr(this auto&& self) noexcept {
+    auto&& MainDiag<M>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 
     template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
-    size_t DiagVector<M>::getLength() const noexcept {
+    size_t MainDiag<M>::getLength() const noexcept {
         return std::min(mat.getCol(), mat.getRow());
     }
 
     template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
-    __host__ __device__ consteval size_t DiagVector<M>::getSizeAtCompile() noexcept {
+    __host__ __device__ consteval size_t MainDiag<M>::getSizeAtCompile() noexcept {
         using Expr = std::remove_cvref<M>::type;
         return std::max(Expr::getRowAtCompile(), Expr::getColAtCompile());
     }

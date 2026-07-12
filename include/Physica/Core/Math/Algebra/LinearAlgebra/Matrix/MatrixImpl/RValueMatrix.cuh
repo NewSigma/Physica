@@ -155,8 +155,8 @@ namespace Physica {
 
 #include "RValueMatrixImpl/RValueMatrixImpl.cuh"
 #include "RValueMatrixImpl/Sum.cuh"
-#include "RValueMatrixImpl/DiagVector.cuh"
-#include "RValueMatrixImpl/MinorDiag.cuh"
+#include "RValueMatrixImpl/MainDiag.cuh"
+#include "RValueMatrixImpl/OffsetDiag.cuh"
 #include "RValueMatrixImpl/Transpose.cuh"
 #include "RValueMatrixImpl/Hermite.cuh"
 #include "RValueMatrixImpl/Convert/MatrixConvert.cuh"

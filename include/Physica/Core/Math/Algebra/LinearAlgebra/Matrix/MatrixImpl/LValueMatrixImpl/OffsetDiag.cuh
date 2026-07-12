@@ -22,16 +22,16 @@
 
 namespace Physica {
     template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
-    class device_obj<MinorDiag<M>> : public device_obj<LValueVector<MinorDiag<M>>> {
-        using host_obj = MinorDiag<M>;
+    class device_obj<OffsetDiag<M>> : public device_obj<LValueVector<OffsetDiag<M>>> {
+        using host_obj = OffsetDiag<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueVector<host_obj>>;
         using Ref = add_device_obj<M>::type;
     private:
         PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
-        ssize_t shift;
+        ssize_t offset;
     public:
-        __host__ __device__ device_obj(Ref mat, ssize_t shift);
+        __host__ __device__ device_obj(Ref mat, ssize_t offset);
         device_obj(const This&) = default;
         device_obj(This&&) = default;
         ~device_obj() = default;
@@ -42,26 +42,26 @@ namespace Physica {
         void resize([[maybe_unused]] size_t size) { assert(getLength() == size); }
         /* Getters */
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getRow() - std::abs(shift); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getRow() - std::abs(offset); }
         [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
     };
 
     template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
-    __host__ __device__ device_obj<MinorDiag<M>>::device_obj(Ref mat, ssize_t shift) : mat(asStruct(mat)), shift(shift) {
+    __host__ __device__ device_obj<OffsetDiag<M>>::device_obj(Ref mat, ssize_t offset) : mat(asStruct(mat)), offset(offset) {
         assert(getExpr().isSquare());
-        assert(std::abs(shift) < getExpr().getRow());
+        assert(std::abs(offset) < getExpr().getRow());
     }
 
     template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
-    __host__ __device__ auto device_obj<MinorDiag<M>>::data_ptr(this auto&& self, size_t index) noexcept {
-        auto shift = self.shift;
-        size_t r = shift < 0 ? -shift : 0;
-        size_t c = shift > 0 ? shift : 0;
+    __host__ __device__ auto device_obj<OffsetDiag<M>>::data_ptr(this auto&& self, size_t index) noexcept {
+        auto offset = self.offset;
+        size_t r = offset < 0 ? -offset : 0;
+        size_t c = offset > 0 ? offset : 0;
         return self.getExpr().data_ptr(r + index, c + index);
     }
 
     template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix())
-    __host__ __device__ auto&& device_obj<MinorDiag<M>>::getExpr(this auto&& self) noexcept {
+    __host__ __device__ auto&& device_obj<OffsetDiag<M>>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived());
     }
 }

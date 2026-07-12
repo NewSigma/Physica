@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,47 +22,50 @@
 
 namespace Physica {
     template<Matrix M>
-    class device_obj<MinorDiag<M>> : public device_obj<RValueVector<MinorDiag<M>>> {
-        using host_obj = MinorDiag<M>;
+    class device_obj<MainDiag<M>> : public device_obj<RValueVector<MainDiag<M>>> {
+        using host_obj = MainDiag<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
         using Ref = add_device_obj<M>::type;
+    protected:
+        using typename Base::T;
     private:
         PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
-        ssize_t shift;
     public:
-        __host__ __device__ device_obj(Ref mat, ssize_t shift);
+        __host__ __device__ explicit device_obj(Ref mat) : mat(asStruct(mat)) {}
         device_obj(const This&) = default;
         device_obj(This&&) = default;
         ~device_obj() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) = delete;
         /* Operations */
         using Base::calc;
-        [[nodiscard]] __device__ decltype(auto) calc(size_t index, instanceof_x<ThreadBlock> auto block) const noexcept;
+        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getRow() - std::abs(shift); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
     };
 
     template<Matrix M>
-    __host__ __device__ device_obj<MinorDiag<M>>::device_obj(Ref mat, ssize_t shift) : mat(asStruct(mat)), shift(shift) {
-        assert(getExpr().isSquare());
-        assert(std::abs(shift) < getExpr().getCol());
+    __device__ auto device_obj<MainDiag<M>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
+        return getExpr().calc(index, index, block);
     }
 
     template<Matrix M>
-    __device__ decltype(auto) device_obj<MinorDiag<M>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const noexcept {
-        size_t r = shift < 0 ? -shift : 0;
-        size_t c = shift > 0 ? shift : 0;
-        return getExpr().calc(r + index, c + index, block);
+    __host__ __device__ size_t device_obj<MainDiag<M>>::getLength() const noexcept {
+        return std::min(getExpr().getCol(), getExpr().getRow());
     }
 
     template<Matrix M>
-    __host__ __device__ auto&& device_obj<MinorDiag<M>>::getExpr(this auto&& self) noexcept {
+    __host__ __device__ auto&& device_obj<MainDiag<M>>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived());
     }
 }
 
 namespace Physica {
     template<Matrix M>
-    class Traits<device_obj<MinorDiag<M>>> : public Traits<MinorDiag<M>> {};
+    class Traits<device_obj<MainDiag<M>>> : public Traits<MainDiag<M>> {
+        static_assert(std::is_reference<M>::value);
+    };
 }

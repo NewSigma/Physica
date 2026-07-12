@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,50 +22,47 @@
 
 namespace Physica {
     template<Matrix M>
-    class device_obj<DiagVector<M>> : public device_obj<RValueVector<DiagVector<M>>> {
-        using host_obj = DiagVector<M>;
+    class device_obj<OffsetDiag<M>> : public device_obj<RValueVector<OffsetDiag<M>>> {
+        using host_obj = OffsetDiag<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
         using Ref = add_device_obj<M>::type;
-    protected:
-        using typename Base::T;
     private:
         PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
+        ssize_t offset;
     public:
-        __host__ __device__ explicit device_obj(Ref mat) : mat(asStruct(mat)) {}
+        __host__ __device__ device_obj(Ref mat, ssize_t offset);
         device_obj(const This&) = default;
         device_obj(This&&) = default;
         ~device_obj() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
         /* Operations */
         using Base::calc;
-        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
+        [[nodiscard]] __device__ decltype(auto) calc(size_t index, instanceof_x<ThreadBlock> auto block) const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getRow() - std::abs(offset); }
     };
 
     template<Matrix M>
-    __device__ auto device_obj<DiagVector<M>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
-        return getExpr().calc(index, index, block);
+    __host__ __device__ device_obj<OffsetDiag<M>>::device_obj(Ref mat, ssize_t offset) : mat(asStruct(mat)), offset(offset) {
+        assert(getExpr().isSquare());
+        assert(std::abs(offset) < getExpr().getCol());
     }
 
     template<Matrix M>
-    __host__ __device__ size_t device_obj<DiagVector<M>>::getLength() const noexcept {
-        return std::min(getExpr().getCol(), getExpr().getRow());
+    __device__ decltype(auto) device_obj<OffsetDiag<M>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const noexcept {
+        size_t r = offset < 0 ? -offset : 0;
+        size_t c = offset > 0 ? offset : 0;
+        return getExpr().calc(r + index, c + index, block);
     }
 
     template<Matrix M>
-    __host__ __device__ auto&& device_obj<DiagVector<M>>::getExpr(this auto&& self) noexcept {
+    __host__ __device__ auto&& device_obj<OffsetDiag<M>>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived());
     }
 }
 
 namespace Physica {
     template<Matrix M>
-    class Traits<device_obj<DiagVector<M>>> : public Traits<DiagVector<M>> {
-        static_assert(std::is_reference<M>::value);
-    };
+    class Traits<device_obj<OffsetDiag<M>>> : public Traits<OffsetDiag<M>> {};
 }

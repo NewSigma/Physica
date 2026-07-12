@@ -21,7 +21,7 @@
 #include "Flatten.h"
 
 namespace Physica {
-    template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix() && !std::remove_cvref_t<M>::isCompact())
+    template<Matrix M> requires(std::remove_cvref_t<M>::isLValueMatrix() && !std::remove_cvref_t<M>::isCompact())
     class device_obj<Flatten<M>> : public device_obj<LValueVector<Flatten<M>>> {
         using host_obj = Flatten<M>;
         using This = device_obj<host_obj>;
@@ -45,7 +45,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept;
     };
 
-    template<Matrix M> requires (std::remove_cvref_t<M>::isLValueMatrix() && !std::remove_cvref_t<M>::isCompact())
+    template<Matrix M> requires(std::remove_cvref_t<M>::isLValueMatrix() && !std::remove_cvref_t<M>::isCompact())
     __host__ __device__ auto device_obj<Flatten<M>>::data_ptr(this auto&& self, size_t index) noexcept {
         auto&& mat = std::forward<decltype(self)>(self).mat;
         const size_t major = index / mat.getMaxMinor();

@@ -126,6 +126,6 @@ namespace Physica {
 }
 
 #include "LValueMatrixImpl/LValueMatrixImpl.h"
-#include "LValueMatrixImpl/MinorDiag.h"
+#include "LValueMatrixImpl/MainDiag.h"
+#include "LValueMatrixImpl/OffsetDiag.h"
 #include "LValueMatrixImpl/ReshapedVector.h"
-#include "LValueMatrixImpl/DiagVector.h"
