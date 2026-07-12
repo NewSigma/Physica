@@ -81,3 +81,6 @@ namespace Physica {
         return self.data_handle() + row * self.getRowStride() + col * self.getColStride();
     }
 }
+
+#include "StridedMatrixImpl/MainDiag.cuh"
+#include "StridedMatrixImpl/OffsetDiag.cuh"

@@ -85,3 +85,6 @@ namespace Physica {
         static_assert(Derived::isRowMatrix() || Derived::isColMatrix(), "[Error]: StridedMatrix requires a known major");
     }
 }
+
+#include "StridedMatrixImpl/MainDiag.h"
+#include "StridedMatrixImpl/OffsetDiag.h"
