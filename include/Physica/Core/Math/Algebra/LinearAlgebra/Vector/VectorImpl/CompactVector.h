@@ -101,7 +101,6 @@ namespace Physica {
         [[nodiscard]] auto data() noexcept;
         [[nodiscard]] auto data() const noexcept;
         [[nodiscard]] auto data_handle(this auto&&) noexcept;
-        [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isFastPacket() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept { return 1; }

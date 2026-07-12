@@ -75,6 +75,7 @@ namespace Physica {
 
     template<class Derived>
     auto StridedVector<Derived>::data_ptr(this auto&& self, size_t index) noexcept {
+        assert(index < self.getLength());
         return self.data_handle() + index * self.getStride();
     }
 

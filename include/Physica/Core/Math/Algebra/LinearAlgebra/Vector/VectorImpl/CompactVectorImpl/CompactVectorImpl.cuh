@@ -224,11 +224,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<CompactVector<Derived>>::data_ptr(this auto&& self, size_t index) noexcept {
-        return self.data_handle() + index;
-    }
-
-    template<class Derived>
     __host__ __device__ consteval bool device_obj<CompactVector<Derived>>::isFastPacket() noexcept {
         return true;
     }

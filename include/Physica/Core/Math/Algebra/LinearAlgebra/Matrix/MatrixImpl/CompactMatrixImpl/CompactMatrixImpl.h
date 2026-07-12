@@ -257,32 +257,27 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto CompactMatrix<Derived>::data_ptr(this auto&& self, size_t r, size_t c) noexcept {
-        assert(r < self.getRow());
-        assert(c < self.getCol());
-        if constexpr (Derived::isRowMatrix())
-            return self.data() + r * self.getCol() + c;
-        else
-            return self.data() + c * self.getRow() + r;
+    auto CompactMatrix<Derived>::data_handle(this auto&& self) noexcept {
+        return self.data();
     }
 
     template<class Derived>
     constexpr size_t CompactMatrix<Derived>::getRowStride() const noexcept {
-        return Derived::isColMatrix() ? 1 : Base::getRow();
-    }
-
-    template<class Derived>
-    constexpr size_t CompactMatrix<Derived>::getColStride() const noexcept {
         return Derived::isColMatrix() ? 1 : Base::getCol();
     }
 
     template<class Derived>
+    constexpr size_t CompactMatrix<Derived>::getColStride() const noexcept {
+        return Derived::isRowMatrix() ? 1 : Base::getRow();
+    }
+
+    template<class Derived>
     __host__ __device__ consteval size_t CompactMatrix<Derived>::getRowStrideAtCompile() noexcept {
-        return Derived::isColMatrix() ? 1 : Derived::getRowAtCompile();
+        return Derived::isColMatrix() ? 1 : Derived::getColAtCompile();
     }
 
     template<class Derived>
     __host__ __device__ consteval size_t CompactMatrix<Derived>::getColStrideAtCompile() noexcept {
-        return Derived::isRowMatrix() ? 1 : Derived::getColAtCompile();
+        return Derived::isRowMatrix() ? 1 : Derived::getRowAtCompile();
     }
 }

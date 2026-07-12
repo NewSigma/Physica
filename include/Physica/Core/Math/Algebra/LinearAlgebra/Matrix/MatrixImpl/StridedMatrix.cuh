@@ -76,6 +76,8 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ auto device_obj<StridedMatrix<Derived>>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+        assert(row < self.getRow());
+        assert(col < self.getCol());
         return self.data_handle() + row * self.getRowStride() + col * self.getColStride();
     }
 }

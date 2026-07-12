@@ -92,7 +92,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto data() noexcept;
         [[nodiscard]] auto data() const noexcept;
-        [[nodiscard]] auto data_ptr(this auto&&, size_t r, size_t c) noexcept;
+        [[nodiscard]] auto data_handle(this auto&&) noexcept;
         [[nodiscard]] constexpr size_t getRowStride() const noexcept;
         [[nodiscard]] constexpr size_t getColStride() const noexcept;
         /* Static members */
