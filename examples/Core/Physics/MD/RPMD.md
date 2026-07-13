@@ -34,23 +34,23 @@ PIMD can be seen as a generalization of MD. When the number of replicas $n = 1$ 
 
 MD corresponds to sampling from the Boltzmann distribution. For an N-particle system, the canonical ensemble partition function is:
 
-$$Q_c = \frac{1}{(2\pi\hbar)^N} \int e^{-\beta H(\mathbf{p, q})} \text{d}\mathbf{p}\text{d}\mathbf{q}$$
+$$Q_c = \frac{1}{(2\pi\hbar)^N} \int \text{e}^{-\beta H(\mathbf{p, q})} \text{d}\mathbf{p}\text{d}\mathbf{q}$$
 
 Similarly, PIMD corresponds to sampling from the quantum Boltzmann distribution. Replacing the integral with a trace and the Hamiltonian with the Hamiltonian operator (informally):
 
-$$Q = \text{tr}[e^{-\beta \hat{H}}]$$
+$$Q = \text{tr}\left[ \text{e}^{-\beta \hat{H}} \right]$$
 
 The trace is generally difficult to compute. We use the path integral approximation to compute the partition function by splitting the path into $n$ segments:
 
-$$Q = \text{tr}[e^{-\beta \hat{H}}] = \text{tr}[(e^{-\frac{\beta}{n} \hat{H}})^n]$$
+$$Q = \text{tr}\left[ \text{e}^{-\beta \hat{H}} \right] = \text{tr}\left[ \left( \text{e}^{-\frac{\beta}{n} \hat{H}} \right)^n \right]$$
 
 Using the Trotter decomposition, since kinetic and potential energy operators generally do not commute, simply splitting them introduces a small error:
 
-$$e^{-\frac{\beta}{n} \hat{H}} = e^{-\frac{\beta}{n} \hat{T}} e^{-\frac{\beta}{n} \hat{V}} + o(\frac{1}{n^2})$$
+$$\text{e}^{-\frac{\beta}{n} \hat{H}} = \text{e}^{-\frac{\beta}{n} \hat{T}} \text{e}^{-\frac{\beta}{n} \hat{V}} + o\left( \frac{1}{n^2} \right)$$
 
 Clearly, the larger $n$ is, the more accurate this approximation. Dropping the second-order term, the partition function is approximately:
 
-$$Q \approx \text{tr}[\Lambda_0 e^{-\frac{\beta}{n} \hat{T}} e^{-\frac{\beta}{n} \hat{V}} \lambda_1 e^{-\frac{\beta}{n} \hat{T}} e^{-\frac{\beta}{n} \hat{V}} \Lambda_2 ... \Lambda_{n - 1} e^{-\frac{\beta}{n} \hat{T}} e^{-\frac{\beta}{n} \hat{V}} \Lambda_n]$$
+$$Q \approx \text{tr}[\Lambda_0 \text{e}^{-\frac{\beta}{n} \hat{T}} \text{e}^{-\frac{\beta}{n} \hat{V}} \Lambda_1 \text{e}^{-\frac{\beta}{n} \hat{T}} \text{e}^{-\frac{\beta}{n} \hat{V}} \Lambda_2 ... \Lambda_{n - 1} \text{e}^{-\frac{\beta}{n} \hat{T}} \text{e}^{-\frac{\beta}{n} \hat{V}} \Lambda_n]$$
 
 Inserting a complete set of basis vectors at each $\Lambda_i$:
 
@@ -58,15 +58,15 @@ $$\text{id} = \int \text{d} q_i \text{d} p_i \ket{q_i} \braket{q_i|p_i} \bra{p_i
 
 Carrying out the full derivation from the path integral definition is tedious; interested readers may refer to the relevant literature$^{[3]}$. We only give the simplified result and focus on its physical interpretation:
 
-$$Q \approx \frac{1}{(2\pi\hbar)^{Nn}} \int e^{-\beta_n H_n} \text{d}\mathbf{q} \text{d}\mathbf{p}$$
+$$Q \approx \frac{1}{(2\pi\hbar)^{Nn}} \int \text{e}^{-\beta_n H_n} \text{d}\mathbf{q} \text{d}\mathbf{p}$$
 
 where
 
-$$H_n = \sum^N_{i = 1} \sum^n_{j = 1} [\frac{[p_i^{(j)}]^2}{2m} + \frac{1}{2}m\omega_n^2 (q_i^{(j)} - q_i^{(j + 1)})^2 + V(q_i^{(j)})]; \quad \beta_n = \beta/n \quad \omega_n = (\beta_n \hbar)^{-1}$$
+$$H_n = \sum^N_{i = 1} \sum^n_{j = 1} \left[ \frac{[p_i^{(j)}]^2}{2m} + \frac{1}{2}m\omega_n^2 (q_i^{(j)} - q_i^{(j + 1)})^2 + V(q_i^{(j)}) \right]; \quad \beta_n = \beta/n \quad \omega_n = (\beta_n \hbar)^{-1}$$
 
 When $n = 1$, $H_1$ is the Hamiltonian of the classical system, corresponding to PIMD reducing to MD. When $n \neq 1$, the above formula maps a quantum system with $N$ particles at temperature $\beta$ to a classical system with $nN$ particles at temperature $\beta_n$. To understand the physical meaning of $H_n$, note that the second term is a harmonic potential contribution whose spring constant $k \propto \omega_n^2 = (\beta_n \hbar)^{-2}$ contains the characteristic quantum constant $\hbar$. Therefore, the second term is a purely quantum effect. Without quantum contributions, the partition function separates variables:
 
-$$Q = Q_c^n$$
+$$Q \stackrel{!}{=} Q_c^n$$
 
 This shows that without the coupling term, $H_n$ splits into $n$ completely independent classical systems. Quantum effects couple these $n$ classical systems through effective springs.
 
