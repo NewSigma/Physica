@@ -18,10 +18,10 @@
  */
 #pragma once
 
-#include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "CompactVector.h"
-#include "StridedVector.cuh"
 #include "CompactVectorImpl/CompactVectorBlock.cuh"
+#include "Physica/Core/Exception/CUDA/CUDA.cuh"
+#include "StridedVector.cuh"
 
 namespace Physica {
     template<class Derived>
@@ -41,7 +41,6 @@ namespace Physica {
         /* Operators */
         This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) noexcept = delete;
-        device_obj<Derived>& operator=(Scalar auto x);
         using Base::operator=;
         using Base::operator+=;
         /* Operations */
@@ -63,20 +62,12 @@ namespace Physica {
         template<size_t Length = Dynamic>
         [[nodiscard]] __host__ __device__ auto segment(this auto&&, size_t from, size_t to) noexcept;
 
-        void zeros();
-        template<RNG R>
-        void random_uniform();
-        template<RNG R>
-        void random_normal();
-
         const DataSetType read(const H5Loc& loc, const char* name);
         DataSetType write(H5Loc& loc, const char* name) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto data() noexcept;
         [[nodiscard]] __host__ __device__ auto data() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_handle(this auto&&) noexcept;
-        /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static bool isFastPacket() noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

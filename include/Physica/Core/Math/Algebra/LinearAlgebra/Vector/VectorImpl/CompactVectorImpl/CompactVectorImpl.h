@@ -18,51 +18,9 @@
  */
 #pragma once
 
-#include "Physica/Core/Exception/MKL/VSL.h"
 #include "../CompactVector.h"
 
 namespace Physica {
-    template<class Derived>
-    auto CompactVector<Derived>::operator=(Scalar auto x) noexcept -> Derived& {
-        if constexpr (Base::getSizeAtCompile() == Dynamic) {
-            if (x.isZero())
-                zeros();
-        }
-        return Base::operator=(x);
-    }
-
-    template<class Derived>
-    template<ExecutePolicy P>
-    void CompactVector<Derived>::assign(Vector auto&& v) const noexcept {
-        using V = std::remove_cvref<decltype(v)>::type;
-        constexpr bool SameScalar = std::same_as<T, typename V::ScalarType>;
-        constexpr bool Copyable = std::is_trivially_copyable<T>::value;
-        if constexpr (V::isCompact() && SameScalar && Copyable) {
-            if constexpr (isDiffable()) {
-                auto& x = Base::getDerived();
-                x.values().template assign<P>(v.values());
-                x.grads().template assign<P>(v.grads());
-                return;
-            }
-            else {
-                constexpr size_t Size = std::max(Base::getSizeAtCompile(), v.getSizeAtCompile());
-                if constexpr (Size != Dynamic)
-                    memcpy(v.data(), data(), Size * sizeof(T)); // Static memcpy
-                else {
-                    constexpr size_t Critical = 1024 * sizeof(float64); // Based on benchmark
-                    constexpr bool MaybeBenefit = Size == Dynamic || (Size * sizeof(T) > Critical);
-                    size_t size = Base::getLength() * sizeof(T);
-                    if (MaybeBenefit && (size > Critical))
-                        memcpy(v.data(), data(), size); // Reuse size, because v.read(data()) shows IR regression
-                    else
-                        Base::template assign_base<P>(v);
-                }
-            }
-        }
-        else
-            Base::template assign_base<P>(v);
-    }
-
     template<class Derived>
     template<int Size>
     auto CompactVector<Derived>::packet(size_t index) const noexcept -> SIMD<T, Size> {
@@ -84,7 +42,7 @@ namespace Physica {
 
     template<class Derived>
     void CompactVector<Derived>::writePacket(Packet auto packet, size_t index) noexcept {
-        constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Traits<decltype(packet)>::ScalarType>;
+        constexpr bool isSameScalar = std::is_same_v<T, typename Traits<decltype(packet)>::ScalarType>;
         if constexpr (isSameScalar)
             packet.store(Base::data_ptr(index));
         else
@@ -95,7 +53,7 @@ namespace Physica {
     void CompactVector<Derived>::writePacket(Packet auto packet, size_t index, size_t count) noexcept {
         assert(index + count <= Base::getLength());
         assert(0 < count && count < packet.size() && "[Error]: Invalid size for partial operation");
-        if constexpr (std::same_as<ScalarType, typename Traits<decltype(packet)>::ScalarType>)
+        if constexpr (std::same_as<T, typename Traits<decltype(packet)>::ScalarType>)
             packet.store(Base::data_ptr(index), count);
         else
             Base::writePacket(packet, index, count);
@@ -155,47 +113,6 @@ namespace Physica {
         else
             return std::forward<decltype(self)>(self).template reshape<Major, M::getRowAtCompile(), M::getColAtCompile()>(mat.getRow(), mat.getCol());
     }
-
-    template<class Derived>
-    auto CompactVector<Derived>::norm1() const noexcept -> CoDiff<Tr> {
-        constexpr size_t Size = Base::getSizeAtCompile();
-        constexpr bool SmallVector = 0 < Size && Size <= 128;
-        if constexpr (HasMKL() && Internal::EnableLAPACK<Derived>::value && !SmallVector) {
-            bool isSmallVector = Base::getLength() <= 128;
-            return isSmallVector ? norm1_base() : norm1_mkl();
-        }
-        else
-            return norm1_base();
-    }
-
-    template<class Derived>
-    auto CompactVector<Derived>::norm1_base() const noexcept -> CoDiff<Tr> {
-        return Base::norm1();
-    }
-
-    template<class Derived>
-    auto CompactVector<Derived>::norm2() const noexcept -> CoDiff<Tr> {
-        return norm2_base();
-    }
-
-    template<class Derived>
-    auto CompactVector<Derived>::norm2_base() const noexcept -> CoDiff<Tr> {
-        return Base::norm2();
-    }
-    /**
-     * Prefer zeros() over simply assigning zeros for better performance.
-     */
-    template<class Derived>
-    void CompactVector<Derived>::zeros() noexcept {
-        if constexpr (Diffable<T>) {
-            Base::getDerived().values().zeros();
-            Base::getDerived().zero_grad();
-        }
-        else if constexpr (T::Prec != FloatMP)
-            std::memset(data(), 0, Base::getLength() * sizeof(T));
-        else
-            Base::template operator=<T>(T(0));
-    }
     /**
      * Read any Compact object and fetch enough scalars to fill self
      *
@@ -215,40 +132,6 @@ namespace Physica {
             static_assert(Matrix<O>, "[Error]: Unexpected type");
             read(obj.flatten());
         }
-    }
-
-    template<class Derived>
-    template<RNG R>
-    void CompactVector<Derived>::random_uniform() {
-        if constexpr (R::MKL_Ready) {
-            [[maybe_unused]] auto& gen = R::getInstance();
-            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex() ? 2 : 1) * (Base::isForwardDiff() ? 2 : 1);
-            if constexpr (ScalarType::Prec == Float32)
-                check_vsl(vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD, gen, length, (float*)data(), 0, 1));
-            else if constexpr (ScalarType::Prec == Float64)
-                check_vsl(vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, gen, length, (double*)data(), 0, 1));
-            else
-                Base::template random_uniform<R>();
-        }
-        else
-            Base::template random_uniform<R>();
-    }
-
-    template<class Derived>
-    template<RNG R>
-    void CompactVector<Derived>::random_normal() {
-        if constexpr (R::MKL_Ready && !isForwardDiff()) {
-            [[maybe_unused]] auto& gen = R::getInstance();
-            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex() ? 2 : 1);
-            if constexpr (ScalarType::Prec == Float32)
-                check_vsl(vsRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, gen, length, (float*)data(), 0, 1));
-            else if constexpr (ScalarType::Prec == Float64)
-                check_vsl(vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, gen, length, (double*)data(), 0, 1));
-            else
-                Base::template random_normal<R>();
-        }
-        else
-            Base::template random_normal<R>();
     }
 
 #ifdef PHYSICA_HDF5
@@ -312,10 +195,5 @@ namespace Physica {
     template<class Derived>
     auto CompactVector<Derived>::data_handle(this auto&& self) noexcept {
         return self.data();
-    }
-
-    template<class Derived>
-    __host__ __device__ consteval bool CompactVector<Derived>::isFastPacket() noexcept {
-        return true;
     }
 }

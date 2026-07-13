@@ -22,15 +22,6 @@
 
 namespace Physica {
     template<class Derived>
-    auto device_obj<CompactVector<Derived>>::operator=(Scalar auto x) -> device_obj<Derived>& {
-        if constexpr (Base::getSizeAtCompile() == Dynamic) {
-            if (x.isZero())
-                zeros();
-        }
-        return Base::operator=(x);
-    }
-
-    template<class Derived>
     void device_obj<CompactVector<Derived>>::reverse(const auto& grad) const noexcept {
         using U = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename T::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
@@ -145,52 +136,6 @@ namespace Physica {
         return device_obj<CompactVectorBlock<V, Length>>(std::forward<Self>(self), from, to);
     }
 
-    template<class Derived>
-    void device_obj<CompactVector<Derived>>::zeros() {
-        if constexpr (Diffable<T>) {
-            Base::getDerived().values().zeros();
-            Base::getDerived().zero_grad();
-        }
-        else
-            check(cudaMemsetAsync(data(), 0, Base::getLength() * sizeof(T)));
-    }
-
-    template<class Derived>
-    template<RNG R>
-    void device_obj<CompactVector<Derived>>::random_uniform() {
-        if constexpr (R::cuRAND_Ready) {
-            auto& rng = R::getInstance();
-            check(curandSetStream(rng, CUDAContext::getInstance()));
-            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex() ? 2 : 1);
-            if constexpr (T::Prec == Float32)
-                check(curandGenerateUniform(rng, (float*)data(), length));
-            else if constexpr (T::Prec == Float64)
-                check(curandGenerateUniformDouble(rng, (double*)data(), length));
-            else
-                Base::template random_uniform<R>();
-        }
-        else
-            Base::template random_uniform<R>();
-    }
-
-    template<class Derived>
-    template<RNG R>
-    void device_obj<CompactVector<Derived>>::random_normal() {
-        if constexpr (R::cuRAND_Ready) {
-            auto& rng = R::getInstance();
-            check(curandSetStream(rng, CUDAContext::getInstance()));
-            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex() ? 2 : 1);
-            if constexpr (T::Prec == Float32)
-                check(curandGenerateNormal(rng, (float*)data(), length, 0, 1));
-            else if constexpr (T::Prec == Float64)
-                check(curandGenerateNormalDouble(rng, (double*)data(), length, 0, 1));
-            else
-                Base::template random_normal<R>();
-        }
-        else
-            Base::template random_normal<R>();
-    }
-
 #ifdef PHYSICA_HDF5
     template<class Derived>
     auto device_obj<CompactVector<Derived>>::read(const H5Loc& loc, const char* name) -> const DataSetType {
@@ -224,11 +169,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ consteval bool device_obj<CompactVector<Derived>>::isFastPacket() noexcept {
-        return true;
-    }
-
-    template<class Derived>
     template<Vector V>
     void CompactVector<Derived>::toDevice(device_obj<CompactVector<V>>& obj) const {
         toDeviceAsync(obj);
@@ -240,7 +180,7 @@ namespace Physica {
     template<Vector V>
     void CompactVector<Derived>::toDeviceAsync(device_obj<CompactVector<V>>& obj) const {
         static_assert(std::is_same<T, typename V::ScalarType>::value,
-                "[Error]: Type inconsistent between source and target, please cast instead of memcpy");
+                      "[Error]: Type inconsistent between source and target, please cast instead of memcpy");
         const size_t length = Base::getLength();
         const size_t size = length * sizeof(T);
         obj.resize(length);

@@ -28,7 +28,7 @@ using M = device_obj<DenseMatrix<T, MatrixMajor::Col>>;
 namespace {
     void invAndProd() noexcept {
         constexpr double Prec = 1E-4;
-        auto origin = M::random_uniform<RandomSource>(4, 4);
+        const M origin = device_obj<IdentityMatrix<T, 4>>{} + M::random_uniform<RandomSource>(4, 4);
         M inv = origin.triu().inv();
         M prod = origin.triu() * inv;
         expect<RandomSource>(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), Prec));

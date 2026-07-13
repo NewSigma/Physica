@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "StridedVector.h"
 #include "CompactVectorImpl/CompactVectorBlock.h"
+#include "StridedVector.h"
 
 namespace Physica {
     template<Vector, int MatrixMajor, size_t Row, size_t Col>
@@ -30,34 +30,24 @@ namespace Physica {
         using Base = StridedVector<Derived>;
         using This = CompactVector<Derived>;
     public:
-        template<Vector> class View;
-
-        using typename Base::ScalarType;
-        using Base::isForwardDiff;
-        using Base::isReverseDiff;
         using Base::isDiffable;
     protected:
         using typename Base::T;
-        using typename Base::Tr;
         using typename Base::Tv;
     private:
-        constexpr static int DiffOrder = ScalarType::Order;
+        constexpr static int DiffOrder = T::Order;
         constexpr static int DataDim = 1 + (DiffOrder > 0);
         using DataSetType = H5DataSet<DataDim>;
         using DataSpaceType = H5DataSpace<DataDim>;
+
+        template<Vector> class View;
     public:
         ~CompactVector() = default;
         /* Operators */
         This& operator=(const This& v) = delete;
         This& operator=(This&& v) noexcept = delete;
-        Derived& operator=(Scalar auto x) noexcept;
         using Base::operator=;
-        using Base::operator+=;
         /* Operations */
-        template<ExecutePolicy P = Sequential>
-        void assign(Vector auto&& v) const noexcept;
-        void assign_mkl(Vector auto& v) const noexcept;
-
         template<int Size> [[nodiscard]] SIMD<T, Size> packet(size_t index) const noexcept;
         template<int Size> [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
         void writePacket(Packet auto packet, size_t index) noexcept;
@@ -81,20 +71,7 @@ namespace Physica {
         [[nodiscard]] auto reshape_col(this auto&& self, size_t row, size_t col) noexcept;
         [[nodiscard]] auto reshape_like(this auto&& self, const Matrix auto& mat) noexcept;
 
-        [[nodiscard]] CoDiff<Tr> norm1() const noexcept;
-        [[nodiscard]] CoDiff<Tr> norm1_base() const noexcept;
-        [[nodiscard]] Tr norm1_mkl() const noexcept;
-        [[nodiscard]] CoDiff<Tr> norm2() const noexcept;
-        [[nodiscard]] CoDiff<Tr> norm2_base() const noexcept;
-        [[nodiscard]] Tr norm2_mkl() const noexcept;
-
-        void zeros() noexcept;
         void read(const auto& obj) noexcept;
-        template<RNG R>
-        void random_uniform();
-        template<RNG R>
-        void random_normal();
-
         const DataSetType read(const H5Loc& loc, const char* name);
         DataSetType write(H5Loc& loc, const char* name) const;
         /* Getters */
@@ -102,7 +79,6 @@ namespace Physica {
         [[nodiscard]] auto data() const noexcept;
         [[nodiscard]] auto data_handle(this auto&&) noexcept;
         /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static bool isFastPacket() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept { return 1; }
     protected:
         CompactVector() = default;
@@ -117,6 +93,3 @@ namespace Physica {
 #include "CompactVectorImpl/View.h"
 #include "CompactVectorImpl/VectorConvert/RealVector.h"
 #include "CompactVectorImpl/VectorConvert/ImagVector.h"
-#ifdef PHYSICA_MKL
-    #include "CompactVectorImpl/CompactVector_MKL.h"
-#endif

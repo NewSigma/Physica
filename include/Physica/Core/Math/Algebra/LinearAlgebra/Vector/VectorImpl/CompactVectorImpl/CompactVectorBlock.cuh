@@ -19,6 +19,7 @@
 #pragma once
 
 #include "../CompactVector.cuh"
+#include "Physica/PlainStruct.h"
 
 namespace Physica {
     template<Vector V, size_t Length>

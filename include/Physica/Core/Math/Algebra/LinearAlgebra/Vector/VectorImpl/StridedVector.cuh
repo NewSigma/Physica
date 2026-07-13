@@ -27,19 +27,26 @@ namespace Physica {
         using host_obj = StridedVector<Derived>;
         using Base = device_obj<LValueVector<Derived>>;
         using This = device_obj<host_obj>;
+    protected:
+        using typename Base::T;
     public:
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) noexcept = delete;
+        device_obj<Derived>& operator=(Scalar auto x);
         using Base::operator=;
+        /* Operations */
+        void zeros();
+        template<RNG R>
+        void random_uniform();
+        template<RNG R>
+        void random_normal();
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr size_t getStride() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_handle() noexcept;
         [[nodiscard]] __host__ __device__ auto data_handle() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t index) noexcept;
-        /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept { return host_obj::getStrideAtCompile(); }
     protected:
         device_obj() = default;
         device_obj(const This&) = default;
@@ -70,3 +77,5 @@ namespace Physica {
         return self.data_handle() + index * self.getStride();
     }
 }
+
+#include "StridedVectorImpl/StridedVectorImpl.cuh"

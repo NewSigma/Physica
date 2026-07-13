@@ -27,14 +27,35 @@ namespace Physica {
         using This = StridedVector<Derived>;
 
         template<Vector> class View;
+    protected:
+        using typename Base::T;
+        using typename Base::Tr;
     public:
         ~StridedVector() = default;
         /* Operators */
         This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) noexcept = delete;
+        Derived& operator=(Scalar auto x) noexcept;
         using Base::operator=;
         /* Operations */
+        template<ExecutePolicy P = Sequential>
+        void assign(Vector auto&& v) const noexcept;
+        void assign_mkl(Vector auto& v) const noexcept;
+
         [[nodiscard]] constexpr auto view(this auto&&) noexcept;
+
+        [[nodiscard]] CoDiff<Tr> norm1() const noexcept;
+        [[nodiscard]] CoDiff<Tr> norm1_base() const noexcept;
+        [[nodiscard]] Tr norm1_mkl() const noexcept;
+        [[nodiscard]] CoDiff<Tr> norm2() const noexcept;
+        [[nodiscard]] CoDiff<Tr> norm2_base() const noexcept;
+        [[nodiscard]] Tr norm2_mkl() const noexcept;
+
+        void zeros() noexcept;
+        template<RNG R>
+        void random_uniform();
+        template<RNG R>
+        void random_normal();
         /* Getters */
         [[nodiscard]] constexpr size_t getStride() const noexcept;
         [[nodiscard]] auto data_handle() noexcept;
@@ -91,4 +112,8 @@ namespace Physica {
     }
 }
 
+#include "StridedVectorImpl/StridedVectorImpl.h"
 #include "StridedVectorImpl/View.h"
+#ifdef PHYSICA_MKL
+    #include "StridedVectorImpl/StridedVector_MKL.h"
+#endif
