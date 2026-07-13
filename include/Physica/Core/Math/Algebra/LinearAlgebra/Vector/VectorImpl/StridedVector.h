@@ -42,6 +42,7 @@ namespace Physica {
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStrided() noexcept { return true; }
+        [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isFastPacket() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept { return Dynamic; }
     protected:
@@ -80,8 +81,13 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool StridedVector<Derived>::isCompact() noexcept {
+        return Derived::getStrideAtCompile() == 1;
+    }
+
+    template<class Derived>
     __host__ __device__ consteval bool StridedVector<Derived>::isFastPacket() noexcept {
-        return Derived::getStrideAtCompile() == 1 || Derived::getStrideAtCompile() == 2;
+        return isCompact() || Derived::getStrideAtCompile() == 2;
     }
 }
 

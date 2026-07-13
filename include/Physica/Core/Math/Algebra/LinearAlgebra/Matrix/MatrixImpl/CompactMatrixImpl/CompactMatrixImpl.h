@@ -272,6 +272,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ consteval bool CompactMatrix<Derived>::isCompact() noexcept {
+        return true;
+    }
+
+    template<class Derived>
     __host__ __device__ consteval size_t CompactMatrix<Derived>::getRowStrideAtCompile() noexcept {
         return Derived::isColMatrix() ? 1 : Derived::getColAtCompile();
     }

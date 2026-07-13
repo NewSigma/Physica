@@ -96,6 +96,7 @@ namespace Physica {
         [[nodiscard]] constexpr size_t getRowStride() const noexcept;
         [[nodiscard]] constexpr size_t getColStride() const noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowStrideAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColStrideAtCompile() noexcept;
     protected:
