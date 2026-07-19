@@ -158,20 +158,22 @@ namespace Physica {
      */
     template<Scalar T>
     T ElasticDQMC<T>::calcLocalCorrection(T beta, T repelU, T chemMu, int numFreq) noexcept {
-        T shift = chemMu - repelU * 0.5;
-        if (shift.isZero())
-            return 0;
+        const T shift = chemMu - repelU * 0.5;
+        if (shift.isSubNormal())
+            return 0; // Zero limit
 
-        auto calcF = [=](T omega) noexcept {
-            return T(-2) / beta * (shift / (square(shift) + square(omega)));
+        auto calcBetaFreq = [](int m) static noexcept {
+            return Trv(2 * m + 1) * MathConst<T>::pi;
         };
+        T omega1 = calcBetaFreq(numFreq);
+        T omega2 = calcBetaFreq(numFreq + 1);
 
-        auto calcFreq = [](int m) static noexcept {
-            return T(2 * m + 1) * MathConst<T>::pi;
+        auto calcPlusMinus = [=](T omega) noexcept {
+            T temp = beta * shift;
+            return Trv(-2) * (temp / (square(temp) + square(omega)));
         };
-        T omega1 = calcFreq(numFreq);
-        T omega2 = calcFreq(numFreq + 1);
-        return fma(T(5), calcF(omega2), calcF(omega1)) / T(12) + arctan(omega2 / shift) / MathConst<T>::pi - unit(shift) * 0.5;
+        return fma(T(5), calcPlusMinus(omega2), calcPlusMinus(omega1)) / Trv(12)
+             + fma(arctan(omega2 / shift), MathConst<T>::inv_pi, unit(shift) * -0.5);
     }
 
     template<Scalar T>

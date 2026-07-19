@@ -82,23 +82,33 @@ namespace {
     }
 
     void berry() {
-        constexpr T HoppingT = 0;
-        constexpr T RepelU = 0;
-        const T beta = T::random_uniform<RandomSource>() * 8;
         const SquareLattice<2> lattice({2, 2}, 1);
-        HubbardParams<T> params(HoppingT, RepelU, lattice, beta, RepelU * 0.5, 1);
         {
+            constexpr T HoppingT = 0;
+            constexpr T RepelU = 0;
+            const T beta = T::random_uniform<RandomSource>() * 8;
+            HubbardParams<T> params(HoppingT, RepelU, lattice, beta, RepelU * 0.5, 1);
+
             auto dqmc = device_obj<FreqDQMC<Tc>>(params, 1);
             dqmc.step_random<RandomSource>();
             dqmc.step<RandomSource>();
             expect<RandomSource>(dqmc.calcBerry().isZero());
-        }
-        params.setChemMu(T::random_uniform<RandomSource>() * 8 - 4);
-        {
-            auto dqmc = device_obj<FreqDQMC<Tc>>(params, 1);
+
+            params.setChemMu(T::random_uniform<RandomSource>() * 8 - 4);
             dqmc.step_random<RandomSource>();
             dqmc.step<RandomSource>();
             expect<RandomSource>(scalarNear(dqmc.calcBerry(), T(0), 1E-5));
+        }
+        {
+            constexpr T HoppingT = 1;
+            constexpr T RepelU = 1;
+            const T beta = 0;
+            const T chemMu = T::random_uniform<RandomSource>() * 8 - 4;
+            HubbardParams<T> params(HoppingT, RepelU, lattice, beta, RepelU * 0.5 + chemMu, 1);
+            auto dqmc = device_obj<FreqDQMC<Tc>>(params, 1);
+            dqmc.step_random<RandomSource>();
+            dqmc.step<RandomSource>();
+            expect<RandomSource>(dqmc.calcBerry().isZero()); // Berry is trivially zero if beta is zero
         }
     }
 }
