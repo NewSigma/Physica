@@ -17,9 +17,8 @@ jobs:
 
     - name: Install
       run: |
-        sudo apt-get install -y clang-format-20 parallel
+        sudo apt-get install -y clang-format-20
 
     - name: Run clang-format
       run: |
-        git diff --name-only HEAD^ -- '*.h' '*.cpp' '*.cuh' '*.cu' | parallel clang-format-20 -i {}
-        git diff --exit-code
+        git clang-format-20 HEAD^ --diff --binary=`which clang-format-20`
