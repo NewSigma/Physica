@@ -21,9 +21,9 @@
 #include "../CompactMatrix.h"
 
 namespace Physica {
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    class CompactReshapedVector : public CompactMatrix<CompactReshapedVector<V, MatrixMajor, Row, Col>> {
-        using This = CompactReshapedVector<V, MatrixMajor, Row, Col>;
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isCompact())
+    class ReshapedVector<V, MatrixMajor, Row, Col> : public CompactMatrix<ReshapedVector<V, MatrixMajor, Row, Col>> {
+        using This = ReshapedVector<V, MatrixMajor, Row, Col>;
         using Base = LValueMatrix<This>;
         using MaybeRow = std::conditional_t<Row == Dynamic, size_t, Empty>;
         using MaybeCol = std::conditional_t<Col == Dynamic, size_t, Empty>;
@@ -34,10 +34,10 @@ namespace Physica {
         [[no_unique_address]] MaybeRow r;
         [[no_unique_address]] MaybeCol c;
     public:
-        CompactReshapedVector(V&& v_, size_t r_, size_t c_);
-        CompactReshapedVector(const This&) = default;
-        CompactReshapedVector(This&&) noexcept = default;
-        ~CompactReshapedVector() = default;
+        ReshapedVector(V&& v_, size_t r_, size_t c_);
+        ReshapedVector(const This&) = default;
+        ReshapedVector(This&&) noexcept = default;
+        ~ReshapedVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -58,58 +58,53 @@ namespace Physica {
         friend class device_obj<This>;
     };
 
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    CompactReshapedVector<V, MatrixMajor, Row, Col>::CompactReshapedVector(V&& v_, size_t r_, size_t c_)
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isCompact())
+    ReshapedVector<V, MatrixMajor, Row, Col>::ReshapedVector(V&& v_, size_t r_, size_t c_)
             : v(std::forward<V>(v_)), r(r_), c(c_) {
         assert(r == Row || Row == Dynamic);
         assert(c == Col || Col == Dynamic);
         assert(r * c == v.getLength());
     }
 
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    void CompactReshapedVector<V, MatrixMajor, Row, Col>::resize(
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isCompact())
+    void ReshapedVector<V, MatrixMajor, Row, Col>::resize(
             [[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
         assert(row == getRow());
         assert(col == getCol());
     }
 
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    size_t CompactReshapedVector<V, MatrixMajor, Row, Col>::getRow() const noexcept {
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isCompact())
+    size_t ReshapedVector<V, MatrixMajor, Row, Col>::getRow() const noexcept {
         if constexpr (Row != Dynamic)
             return Row;
         else
             return r;
     }
 
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    size_t CompactReshapedVector<V, MatrixMajor, Row, Col>::getCol() const noexcept {
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isCompact())
+    size_t ReshapedVector<V, MatrixMajor, Row, Col>::getCol() const noexcept {
         if constexpr (Col != Dynamic)
             return Col;
         else
             return c;
     }
 
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    auto CompactReshapedVector<V, MatrixMajor, Row, Col>::data(this auto&& self) noexcept {
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isCompact())
+    auto ReshapedVector<V, MatrixMajor, Row, Col>::data(this auto&& self) noexcept {
         return std::forward<decltype(self)>(self).v.data();
     }
 
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    auto CompactReshapedVector<V, MatrixMajor, Row, Col>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isCompact())
+    auto ReshapedVector<V, MatrixMajor, Row, Col>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
         if constexpr (self.isColMatrix())
             return self.data() + col * self.getRow() + row;
         else
             return self.data() + row * self.getCol() + col;
     }
 
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    size_t CompactReshapedVector<V, MatrixMajor, Row, Col>::getOrder() const noexcept {
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isCompact())
+    size_t ReshapedVector<V, MatrixMajor, Row, Col>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return getRow();
     }
-}
-
-namespace Physica {
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    class Traits<CompactReshapedVector<V, MatrixMajor, Row, Col>> : public Traits<RValueReshapedVector<V, MatrixMajor, Row, Col>> {};
 }

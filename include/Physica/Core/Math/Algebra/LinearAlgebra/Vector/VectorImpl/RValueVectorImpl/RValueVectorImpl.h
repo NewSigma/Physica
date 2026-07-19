@@ -237,30 +237,31 @@ namespace Physica {
 
     template<class Derived, Scalar ScalarT>
     template<int Major, size_t Row, size_t Col>
-    auto RValueVector<Derived, ScalarT>::reshape(size_t row, size_t col) const noexcept {
-        return RValueReshapedVector<const Derived&, Major, Row, Col>(Base::getDerived(), row, col);
+    auto RValueVector<Derived, ScalarT>::reshape(this auto&& self, size_t row, size_t col) noexcept {
+        using Self = decltype(self);
+        return ReshapedVector<Self, Major, Row, Col>(std::forward<Self>(self), row, col);
     }
 
     template<class Derived, Scalar ScalarT>
     template<size_t Row, size_t Col>
-    auto RValueVector<Derived, ScalarT>::reshape_row(size_t row, size_t col) const noexcept {
-        return reshape<MatrixMajor::Row, Row, Col>(row, col);
+    auto RValueVector<Derived, ScalarT>::reshape_row(this auto&& self, size_t row, size_t col) noexcept {
+        return std::forward<decltype(self)>(self).template reshape<MatrixMajor::Row, Row, Col>(row, col);
     }
 
     template<class Derived, Scalar ScalarT>
     template<size_t Row, size_t Col>
-    auto RValueVector<Derived, ScalarT>::reshape_col(size_t row, size_t col) const noexcept {
-        return reshape<MatrixMajor::Col, Row, Col>(row, col);
+    auto RValueVector<Derived, ScalarT>::reshape_col(this auto&& self, size_t row, size_t col) noexcept {
+        return std::forward<decltype(self)>(self).template reshape<MatrixMajor::Col, Row, Col>(row, col);
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueVector<Derived, ScalarT>::reshape_like(const Matrix auto& mat) const noexcept {
+    auto RValueVector<Derived, ScalarT>::reshape_like(this auto&& self, const Matrix auto& mat) noexcept {
         using M = std::remove_cvref_t<decltype(mat)>;
         constexpr auto Major = MatrixMajor::getMajor<M>();
         if constexpr (Major == MatrixMajor::BothMajor)
-            return reshape<MatrixMajor::Col, M::getRowAtCompile(), M::getColAtCompile()>(mat.getRow(), mat.getCol());
+            return std::forward<decltype(self)>(self).template reshape<MatrixMajor::Col, M::getRowAtCompile(), M::getColAtCompile()>(mat.getRow(), mat.getCol());
         else
-            return reshape<Major, M::getRowAtCompile(), M::getColAtCompile()>(mat.getRow(), mat.getCol());
+            return std::forward<decltype(self)>(self).template reshape<Major, M::getRowAtCompile(), M::getColAtCompile()>(mat.getRow(), mat.getCol());
     }
 
     template<class Derived, Scalar ScalarT>
@@ -845,7 +846,7 @@ namespace Physica {
 
     template<class Derived, Scalar ScalarT>
     __host__ __device__ consteval bool RValueVector<Derived, ScalarT>::isSparse() noexcept {
-        return requires{ std::declval<Derived>().getNumNonzero(); };
+        return requires { std::declval<Derived>().getNumNonzero(); };
     }
 
     template<class Derived, Scalar ScalarT>

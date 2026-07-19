@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    class RValueReshapedVector : public RValueMatrix<RValueReshapedVector<V, MatrixMajor, Row, Col>> {
-        using This = RValueReshapedVector<V, MatrixMajor, Row, Col>;
+    class ReshapedVector : public RValueMatrix<ReshapedVector<V, MatrixMajor, Row, Col>> {
+        using This = ReshapedVector<V, MatrixMajor, Row, Col>;
         using Base = RValueMatrix<This>;
         using MaybeRow = std::conditional_t<Row == Dynamic, size_t, Empty>;
         using MaybeCol = std::conditional_t<Col == Dynamic, size_t, Empty>;
@@ -35,10 +35,10 @@ namespace Physica {
         [[no_unique_address]] MaybeRow r;
         [[no_unique_address]] MaybeCol c;
     public:
-        RValueReshapedVector(V v_, size_t r_, size_t c_);
-        RValueReshapedVector(const This&) = default;
-        RValueReshapedVector(This&&) noexcept = default;
-        ~RValueReshapedVector() = default;
+        ReshapedVector(V v_, size_t r_, size_t c_);
+        ReshapedVector(const This&) = default;
+        ReshapedVector(This&&) noexcept = default;
+        ~ReshapedVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -58,7 +58,7 @@ namespace Physica {
     };
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    RValueReshapedVector<V, MatrixMajor, Row, Col>::RValueReshapedVector(V v_, size_t r_, size_t c_)
+    ReshapedVector<V, MatrixMajor, Row, Col>::ReshapedVector(V v_, size_t r_, size_t c_)
             : v(std::forward<V>(v_)), r(r_), c(c_) {
         assert(r == Row || Row == Dynamic);
         assert(c == Col || Col == Dynamic);
@@ -66,7 +66,7 @@ namespace Physica {
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    auto RValueReshapedVector<V, MatrixMajor, Row, Col>::calc(size_t r1, size_t c1) const -> T {
+    auto ReshapedVector<V, MatrixMajor, Row, Col>::calc(size_t r1, size_t c1) const -> T {
         assert(r1 < getRow() && c1 < getCol());
         if constexpr (MatrixMajor::isColMatrix<This>())
             return v.calc(c1 * getRow() + r1);
@@ -75,12 +75,12 @@ namespace Physica {
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    auto RValueReshapedVector<V, MatrixMajor, Row, Col>::values(this auto&& self) noexcept {
+    auto ReshapedVector<V, MatrixMajor, Row, Col>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v).values().template reshape<MatrixMajor, Row, Col>();
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    size_t RValueReshapedVector<V, MatrixMajor, Row, Col>::getRow() const noexcept {
+    size_t ReshapedVector<V, MatrixMajor, Row, Col>::getRow() const noexcept {
         if constexpr (Row != Dynamic)
             return Row;
         else
@@ -88,7 +88,7 @@ namespace Physica {
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    size_t RValueReshapedVector<V, MatrixMajor, Row, Col>::getCol() const noexcept {
+    size_t ReshapedVector<V, MatrixMajor, Row, Col>::getCol() const noexcept {
         if constexpr (Col != Dynamic)
             return Col;
         else
@@ -96,7 +96,7 @@ namespace Physica {
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    size_t RValueReshapedVector<V, MatrixMajor, Row, Col>::getOrder() const noexcept {
+    size_t ReshapedVector<V, MatrixMajor, Row, Col>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return getRow();
     }
@@ -104,7 +104,7 @@ namespace Physica {
 
 namespace Physica {
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    class Traits<RValueReshapedVector<V, MatrixMajor, Row, Col>> {
+    class Traits<ReshapedVector<V, MatrixMajor, Row, Col>> {
         static_assert(MatrixMajor == MatrixMajor::Col || MatrixMajor == MatrixMajor::Row, "[Error]: Invalid major");
     public:
         using ScalarType = std::remove_cvref_t<V>::ScalarType;

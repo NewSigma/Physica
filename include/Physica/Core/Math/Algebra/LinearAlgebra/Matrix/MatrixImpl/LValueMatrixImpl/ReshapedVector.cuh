@@ -22,10 +22,10 @@
 #include "../LValueMatrix.cuh"
 
 namespace Physica {
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    class device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>
-            : public device_obj<LValueMatrix<LValueReshapedVector<V, MatrixMajor, Row, Col>>> {
-        using host_obj = LValueReshapedVector<V, MatrixMajor, Row, Col>;
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
+    class device_obj<ReshapedVector<V, MatrixMajor, Row, Col>>
+            : public device_obj<LValueMatrix<ReshapedVector<V, MatrixMajor, Row, Col>>> {
+        using host_obj = ReshapedVector<V, MatrixMajor, Row, Col>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueMatrix<host_obj>>;
         using Ref = add_device_obj<V>::type;
@@ -36,7 +36,7 @@ namespace Physica {
         [[no_unique_address]] host_obj::MaybeRow r;
         [[no_unique_address]] host_obj::MaybeCol c;
     public:
-    __host__ __device__ device_obj(Ref v_, size_t r_, size_t c_);
+        __host__ __device__ device_obj(Ref v_, size_t r_, size_t c_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -52,49 +52,43 @@ namespace Physica {
         [[nodiscard]] ScalarType sum() const { return v.getDerived().sum(); }
     };
 
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    __host__ __device__ device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>::device_obj(Ref v_, size_t r_, size_t c_)
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
+    __host__ __device__ device_obj<ReshapedVector<V, MatrixMajor, Row, Col>>::device_obj(Ref v_, size_t r_, size_t c_)
             : v(asStruct(v_)), r(r_), c(c_) {
         assert(r == Row || Row == Dynamic);
         assert(c == Col || Col == Dynamic);
         assert(r * c == v.getLength());
     }
 
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    __host__ __device__ void device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>::resize(
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
+    __host__ __device__ void device_obj<ReshapedVector<V, MatrixMajor, Row, Col>>::resize(
             [[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
         assert(row == getRow());
         assert(col == getCol());
     }
 
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    __host__ __device__ size_t device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>::getRow() const noexcept {
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
+    __host__ __device__ size_t device_obj<ReshapedVector<V, MatrixMajor, Row, Col>>::getRow() const noexcept {
         if constexpr (Row != Dynamic)
             return Row;
         else
             return r;
     }
 
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    __host__ __device__ size_t device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>::getCol() const noexcept {
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
+    __host__ __device__ size_t device_obj<ReshapedVector<V, MatrixMajor, Row, Col>>::getCol() const noexcept {
         if constexpr (Col != Dynamic)
             return Col;
         else
             return c;
     }
 
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    __host__ __device__ auto device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
+    __host__ __device__ auto device_obj<ReshapedVector<V, MatrixMajor, Row, Col>>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
         assert(row < self.getRow() && col < self.getCol());
         if constexpr (MatrixMajor::isColMatrix<This>())
             return self.v.getDerived().data_ptr(col * self.getRow() + row);
         else
             return self.v.getDerived().data_ptr(row * self.getCol() + col);
     }
-}
-
-namespace Physica {
-    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    class Traits<device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>>
-            : public Traits<RValueReshapedVector<V, MatrixMajor, Row, Col>> {};
 }

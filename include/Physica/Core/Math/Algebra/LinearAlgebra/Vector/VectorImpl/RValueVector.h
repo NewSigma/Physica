@@ -30,7 +30,7 @@ namespace Physica {
     template<class Derived, Scalar> class RValueMatrix;
     template<class Derived> class CompactMatrix;
     template<Scalar, size_t Length, class Allocator> class DenseVector;
-    template<Vector, int MatrixMajor, size_t Row, size_t Col> class RValueReshapedVector;
+    template<Vector, int MatrixMajor, size_t Row, size_t Col> class ReshapedVector;
     template<class> class Transpose;
     template<class> class Conjugate;
     template<class> class Hermite;
@@ -146,12 +146,12 @@ namespace Physica {
         template<size_t Length = Dynamic>
         [[nodiscard]] auto segment(this auto&&, size_t from, size_t to) noexcept;
         template<int Major, size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] auto reshape(size_t row, size_t col) const noexcept;
+        [[nodiscard]] auto reshape(this auto&&, size_t row, size_t col) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] auto reshape_row(size_t row, size_t col) const noexcept;
+        [[nodiscard]] auto reshape_row(this auto&&, size_t row, size_t col) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] auto reshape_col(size_t row, size_t col) const noexcept;
-        [[nodiscard]] auto reshape_like(const Matrix auto& mat) const noexcept;
+        [[nodiscard]] auto reshape_col(this auto&&, size_t row, size_t col) noexcept;
+        [[nodiscard]] auto reshape_like(this auto&&, const Matrix auto& mat) noexcept;
         [[nodiscard]] auto reversal() noexcept;
         [[nodiscard]] const auto reversal() const noexcept;
         [[nodiscard]] auto transpose(this auto&&) noexcept;

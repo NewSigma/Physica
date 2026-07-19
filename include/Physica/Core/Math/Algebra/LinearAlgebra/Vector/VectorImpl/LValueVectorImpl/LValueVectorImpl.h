@@ -204,35 +204,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<int Major, size_t Row, size_t Col>
-    auto LValueVector<Derived>::reshape(this auto&& self, size_t row, size_t col) noexcept {
-        using Self = decltype(self);
-        return LValueReshapedVector<Self, Major, Row, Col>(std::forward<Self>(self), row, col);
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    auto LValueVector<Derived>::reshape_row(this auto&& self, size_t row, size_t col) noexcept {
-        return std::forward<decltype(self)>(self).template reshape<MatrixMajor::Row, Row, Col>(row, col);
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    auto LValueVector<Derived>::reshape_col(this auto&& self, size_t row, size_t col) noexcept {
-        return std::forward<decltype(self)>(self).template reshape<MatrixMajor::Col, Row, Col>(row, col);
-    }
-
-    template<class Derived>
-    auto LValueVector<Derived>::reshape_like(this auto&& self, const Matrix auto& mat) noexcept {
-        using M = std::remove_cvref_t<decltype(mat)>;
-        constexpr auto Major = MatrixMajor::getMajor<M>();
-        if constexpr (Major == MatrixMajor::BothMajor)
-            return std::forward<decltype(self)>(self).template reshape<MatrixMajor::Col, M::getRowAtCompile(), M::getColAtCompile()>(mat.getRow(), mat.getCol());
-        else
-            return std::forward<decltype(self)>(self).template reshape<Major, M::getRowAtCompile(), M::getColAtCompile()>(mat.getRow(), mat.getCol());
-    }
-
-    template<class Derived>
     void LValueVector<Derived>::zeros() noexcept {
         for (size_t i = 0; i < Base::getLength(); ++i)
             (*this)[i] = Trv(0);
