@@ -142,7 +142,7 @@ namespace Physica {
         [[nodiscard]] auto get_allocator() const noexcept { return alloc; }
         /* Static members */
         [[nodiscard]] static This read(size_t length, const T* __restrict p) noexcept;
-        [[nodiscard]] static This generate(size_t length, std::invocable<size_t> auto fn);
+        [[nodiscard]] static This generate(std::invocable<size_t> auto fn, size_t length);
     private:
         void adjust(size_t size);
         void resizeImpl(size_t size, auto&&... args) noexcept;

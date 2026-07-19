@@ -278,9 +278,9 @@ namespace Physica {
         }
         else if constexpr (!Base::template isTrivialDefaultConstruct<decltype(args)...>()) {
             const size_t delta = size - length;
-            auto buffer = Array<ElemType, Dynamic>::generate(delta, [=](size_t) {
+            auto buffer = Array<ElemType, Dynamic>::generate([=](size_t) {
                 return ElemType(args...);
-            });
+            }, delta);
             check(cudaMemcpyAsync(d_data + length, buffer.data(), delta * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx));
             ctx.wait();
 
@@ -344,9 +344,9 @@ namespace Physica {
             ctx.wait();
         }
         else {
-            auto buffer = Array<ElemType, Dynamic>::generate(length, [this](size_t i) {
+            auto buffer = Array<ElemType, Dynamic>::generate([this](size_t i) {
                 return this->operator[](i).toDevice();
-            });
+            }, length);
             cudaMemcpyAsync(obj.data(), buffer.data(), length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
             ctx.wait();
 

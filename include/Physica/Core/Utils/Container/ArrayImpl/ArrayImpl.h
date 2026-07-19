@@ -301,7 +301,7 @@ namespace Physica {
      * Reads better and works for non-default-constructable elements
      */
     template<class T, class Allocator>
-    auto Array<T, Dynamic, Allocator>::generate(size_t length, std::invocable<size_t> auto fn) -> This {
+    auto Array<T, Dynamic, Allocator>::generate(std::invocable<size_t> auto fn, size_t length) -> This {
         This result{};
         result.arr = result.get_allocator().allocate(length);
         result.capacity = length;

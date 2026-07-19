@@ -50,9 +50,9 @@ namespace {
             s.setMarkerShape(s.MarkerShapeTriangle);
 
             const auto x = VectorND<T>::linspace(-MathConst<T>::pi, MathConst<T>::pi, 100);
-            const auto pairs = Array<Vector2D<T>>::generate(x.getLength(), [&](size_t i) { return gp.predict({x[i]}); });
-            const auto y = VectorND<T>::generate(x.getLength(), [&](size_t i) { return pairs[i][0]; });
-            const auto dy = VectorND<T>::generate(x.getLength(), [&](size_t i) { return pairs[i][1]; });
+            const auto pairs = Array<Vector2D<T>>::generate([&](size_t i) { return gp.predict({x[i]}); }, x.getLength());
+            const auto y = VectorND<T>::generate([&](size_t i) { return pairs[i][0]; }, x.getLength());
+            const auto dy = VectorND<T>::generate([&](size_t i) { return pairs[i][1]; }, x.getLength());
             auto& l = plot.line(x, y);
             l.setColor(QColor(51, 102, 204));
 
@@ -79,12 +79,12 @@ int main(int argc, char** argv) {
     Adadelta<T> opt{};
     const auto x0 = VectorND<T>::linspace(-MathConst<T>::pi, MathConst<T>::pi, 8);
     const auto y0 = VectorND<T>(sin(x0) + VectorND<T>::random_normal<RandomSource>(x0.getLength()) * T(1E-3));
-    const auto likelihoods = VectorND<T>::generate(2000, [&](size_t) {
+    const auto likelihoods = VectorND<T>::generate([&](size_t) {
         T l = gp.regression(x0.transpose(), y0, T(1E-3)).reverse(-1);
         gp.step(opt);
         gp.zero_grad();
         return l;
-    });
+    }, 2000);
 
     QApplication app(argc, argv);
     MultiPlot plots(1, 2);

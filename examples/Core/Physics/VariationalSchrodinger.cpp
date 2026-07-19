@@ -34,7 +34,7 @@ namespace {
     public:
         static void run() {
             MatrixType overlap = getOverlapMatrix();
-            //Workaround for generalised eigenvalue problem
+            // Workaround for generalised eigenvalue problem
             MatrixType cholesky = Cholesky(overlap);
             MatrixType inv_cholesky = cholesky.inv();
             MatrixType hamilton = getHamiltonMatrix();
@@ -69,7 +69,7 @@ namespace {
         }
     private:
         static MatrixType getHamiltonMatrix() {
-            return MatrixType::generate(NumBasis, NumBasis, [](size_t i, size_t j) -> T {
+            return MatrixType::generate([](size_t i, size_t j) -> T {
                 if (j % 2 != i % 2)
                     return 0;
                 const T sum = T(i + j);
@@ -77,18 +77,18 @@ namespace {
                 const T numerator = T(1) - sum - T(2) * pro;
                 const T denominator = (sum + T(3)) * (sum + T(1)) * (sum - T(1));
                 return T(-8) * numerator / denominator;
-            });
+            }, NumBasis, NumBasis);
         }
 
         static MatrixType getOverlapMatrix() {
-            return MatrixType::generate(NumBasis, NumBasis, [](size_t i, size_t j) -> T {
+            return MatrixType::generate([](size_t i, size_t j) -> T {
                 if (j % 2 != i % 2)
                     return 0;
                 const T sum = T(i + j);
                 const T term1 = T(2) * (reciprocal(sum + T(1)) + reciprocal(sum + T(5)));
                 const T term2 = T(4) * reciprocal(sum + T(3));
                 return term1 - term2;
-            });
+            }, NumBasis, NumBasis);
         }
 
         static T baseFunction(const T& s, size_t n) {
@@ -148,7 +148,7 @@ namespace {
     public:
         void run() {
             MatrixType overlap = getOverlapMatrix();
-            //Workaround for generalised eigenvalue problem
+            // Workaround for generalised eigenvalue problem
             MatrixType cholesky = Cholesky(overlap);
             MatrixType inv_cholesky = cholesky.inv();
             MatrixType hamilton = getHamiltonMatrix();
@@ -163,7 +163,7 @@ namespace {
 
             auto eigenvectors = solver.getEigenvectors();
             VectorND<T> real_eigenvector = eigenvectors.col(groundStateIndex).reals();
-            real_eigenvector = inv_cholesky.transpose() * real_eigenvector; //Safe for in-place product
+            real_eigenvector = inv_cholesky.transpose() * real_eigenvector; // Safe for in-place product
             plotWave(*plot, real_eigenvector);
 
             plotReferenceWave(*plot);
@@ -173,21 +173,21 @@ namespace {
         }
     private:
         static MatrixType getHamiltonMatrix() {
-            return MatrixType::generate(NumBasis, NumBasis, [](size_t i, size_t j) {
+            return MatrixType::generate([](size_t i, size_t j) {
                 const T sum = T(BasisCoeff[i] + BasisCoeff[j]);
                 const T pro = T(BasisCoeff[i] * BasisCoeff[j]);
                 const T kinetic = T(3) * pro * sqrt(T(M_PI) / sum) * T(M_PI) / square(sum);
                 const T coulomb = T(-2) * T(M_PI) / sum;
                 return kinetic + coulomb;
-            });
+            }, NumBasis, NumBasis);
         }
 
         static MatrixType getOverlapMatrix() {
-            return MatrixType::generate(NumBasis, NumBasis, [](size_t i, size_t j) {
+            return MatrixType::generate([](size_t i, size_t j) {
                 const T sum = T(BasisCoeff[i] + BasisCoeff[j]);
                 const T temp = T(M_PI) / sum;
                 return temp * sqrt(temp);
-            });
+            }, NumBasis, NumBasis);
         }
 
         static T baseFunction(const T& s, size_t n) {
@@ -220,7 +220,7 @@ namespace {
             T temp = T(0);
             for (size_t i = 0; i < SampleCount; ++i) {
                 x[i] = temp;
-                y[i] = exp(-temp) / sqrt(T(M_PI)); //The wave function in [1] is not normalized
+                y[i] = exp(-temp) / sqrt(T(M_PI)); // The wave function in [1] is not normalized
                 temp += step;
             }
             auto& spline = plot.spline(x, y);
@@ -236,7 +236,7 @@ namespace {
     public:
         void run(VectorND<T>& trial_solution, const T& criteria) {
             MatrixType overlap = getOverlapMatrix();
-            //Workaround for generalised eigenvalue problem
+            // Workaround for generalised eigenvalue problem
             MatrixType cholesky = Cholesky(overlap);
             MatrixType inv_cholesky = cholesky.inv();
             auto real_eigenvalues = VectorND<T>{};
@@ -250,7 +250,7 @@ namespace {
                 size_t groundStateIndex = real_eigenvalues.argmin();
                 auto eigenvectors = solver.getEigenvectors();
                 VectorND<T> real_eigenvector = eigenvectors.col(groundStateIndex).reals();
-                real_eigenvector = inv_cholesky.transpose() * real_eigenvector; //Safe for in-place product
+                real_eigenvector = inv_cholesky.transpose() * real_eigenvector; // Safe for in-place product
 
                 stop = VectorND<T>(real_eigenvector - trial_solution).norm() < criteria;
                 trial_solution = real_eigenvector;
@@ -268,21 +268,21 @@ namespace {
         }
 
         static MatrixType getHamiltonMatrix(const VectorND<T>& trial_solution) {
-            return MatrixType::generate(NumBasis, NumBasis, [&](size_t i, size_t j) {
+            return MatrixType::generate([&](size_t i, size_t j) {
                 T coulomb2 = T(0);
                 for (size_t m = 0; m < NumBasis; ++m)
                     for (size_t n = 0; n < NumBasis; ++n)
                         coulomb2 += calcValueQ(i, m, j, n) * trial_solution[m] * trial_solution[n];
                 return calcValueH(i, j) + coulomb2;
-            });
+            }, NumBasis, NumBasis);
         }
 
         static MatrixType getOverlapMatrix() {
-            return MatrixType::generate(NumBasis, NumBasis, [](size_t i, size_t j) {
+            return MatrixType::generate([](size_t i, size_t j) {
                 const T sum = T(BasisCoeff[i] + BasisCoeff[j]);
                 const T temp = T(M_PI) / sum;
                 return temp * sqrt(temp);
-            });
+            }, NumBasis, NumBasis);
         }
 
         static T calcValueH(size_t p, size_t r) {

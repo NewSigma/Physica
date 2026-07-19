@@ -34,9 +34,9 @@ int main() {
     SparseDet<T> idet(GMRES<T>(3, 3));
     idet.getGMRES().setTolerance(1E-4);
 
-    auto samples = VectorND<T>::generate(NumSystem, [&](int) {
+    auto samples = VectorND<T>::generate([&](int) {
         return idet.compute_base<RandomSource>(A, 0.05, NumSample);
-    });
+    }, NumSystem);
     auto mean = samples.mean();
     auto devia = samples.deviation(mean) / sqrt(T(samples.getLength()));
     expect<RandomSource>(abs(mean - A.lnAbsDet()) < T(3) * devia);

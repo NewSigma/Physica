@@ -30,12 +30,12 @@ namespace Physica {
         assert(from < to);
         const size_t n = coeff.getLength();
         const T rep = reciprocal(T(n));
-        const auto funcArr = VectorND<T>::generate(n, [from, to, fn, rep](size_t i) {
+        const auto funcArr = VectorND<T>::generate([from, to, fn, rep](size_t i) {
             const T temp1 = (to - from) * T(0.5);
             const T temp2 = (to + from) * T(0.5);
             const T y = cospi((T(i) + 0.5) * rep);
             return fn(fma(y, temp1, temp2));
-        });
+        }, n);
 
         const T factor = rep * 2;
         for (size_t i = 0; i < n; ++i) {
@@ -57,12 +57,12 @@ namespace Physica {
         const size_t n = coeff.getLength();
         const size_t n2 = n * 2;
         const T rep = reciprocal(T(n2));
-        const auto funcArr = VectorND<T>::generate(n2, [from, to, fn, rep](size_t i) {
+        const auto funcArr = VectorND<T>::generate([from, to, fn, rep](size_t i) {
             const T temp1 = (to - from) * T(0.5);
             const T temp2 = (to + from) * T(0.5);
             const T y = cospi((T(i) + 0.5) * rep);
             return fn(fma(y, temp1, temp2));
-        });
+        }, n2);
 
         const T factor = rep * 4;
         for (size_t i = 0; i < n; ++i) {
@@ -84,13 +84,13 @@ namespace Physica {
         const size_t n = coeff.getLength();
         const size_t n2 = n * 2;
         const T rep = reciprocal(T(n2));
-        const auto funcArr = VectorND<T>::generate(n2, [from, to, fn, rep](size_t i) {
+        const auto funcArr = VectorND<T>::generate([from, to, fn, rep](size_t i) {
             const T temp1 = (to - from) * T(0.5);
             const T temp2 = (to + from) * T(0.5);
             const T y = cospi((T(i) + 0.5) * rep);
             const T x = fma(y, temp1, temp2);
             return fn(x) / x;
-        });
+        }, n2);
 
         const T factor = rep * 4;
         for (size_t i = 0; i < n; ++i) {

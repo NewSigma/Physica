@@ -104,7 +104,7 @@ namespace Physica {
         [[nodiscard]] static This random_any(size_t row, size_t col, auto& distribution);
         [[nodiscard]] static auto meshgrid(const Vector auto& vecX, const Vector auto& vecY) -> std::pair<This, This>;
         [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) noexcept;
-        [[nodiscard]] static This generate(size_t row, size_t col, std::invocable<size_t, size_t> auto fn);
+        [[nodiscard]] static This generate(std::invocable<size_t, size_t> auto fn, size_t row, size_t col);
         /* Friends */
         friend class device_obj<This>;
     };

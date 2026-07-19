@@ -68,11 +68,11 @@ int main(int argc, char** argv) {
         hmc.warmup<RandomSource>(1000, ProbHamiltion{});
 
         T acceptM, acceptV;
-        auto p = Array<Vector2D<T>>::generate(N, [&](size_t i) {
+        auto p = Array<Vector2D<T>>::generate([&](size_t i) {
             auto acc = hmc.step<RandomSource>(ProbHamiltion{});
             acceptV.toNextVariance(acceptM, i, acc);
             return hmc.getSample();
-        });
+        }, N);
         std::println("{}({})", acceptM, sqrt(acceptV));
 
         std::ranges::transform(p, x.begin(), [](Vector2D<T> in) { return in[0]; });

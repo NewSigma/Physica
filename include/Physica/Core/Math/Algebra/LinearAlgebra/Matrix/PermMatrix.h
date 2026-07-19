@@ -112,7 +112,7 @@ namespace Physica {
     template<Scalar T>
     Array<MKL_INT64> PermMatrix<T>::toMKL() const {
         size_t length = indices.getLength();
-        return Array<MKL_INT64>::generate(length, [perm = *this, length](MKL_INT64 i) mutable {
+        return Array<MKL_INT64>::generate([perm = *this, length](MKL_INT64 i) mutable {
             for (auto j = i; j < length; ++j) {
                 if (perm.getIndices()[j] == i) {
                     perm.swap_row(i, j);
@@ -120,7 +120,7 @@ namespace Physica {
                 }
             }
             unreachable();
-        });
+        }, length);
     }
 
     template<Scalar T>

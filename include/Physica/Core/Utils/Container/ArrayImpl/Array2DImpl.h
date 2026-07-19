@@ -240,7 +240,7 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    auto Array2D<T, Major, Row, Col, Allocator>::generate(size_t row, size_t col, std::invocable<size_t, size_t> auto fn) -> This {
+    auto Array2D<T, Major, Row, Col, Allocator>::generate(std::invocable<size_t, size_t> auto fn, size_t row, size_t col) -> This {
         auto generator = [=](size_t index) {
             if constexpr (isColMajor)
                 return fn(index % row, index / row);
@@ -249,7 +249,7 @@ namespace Physica {
         };
 
         if constexpr (Row == Dynamic || Col == Dynamic)
-            return This(ArrayType::generate(row * col, std::move(generator)), row);
+            return This(ArrayType::generate(std::move(generator), row * col), row);
         else
             return This(ArrayType::generate(std::move(generator)), row);
     }

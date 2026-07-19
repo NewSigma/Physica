@@ -213,7 +213,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    auto DenseVector<T, Length, Allocator>::generate(size_t length, std::invocable<size_t> auto fn) -> This {
-        return This(Storage::generate(length, std::move(fn)));
+    auto DenseVector<T, Length, Allocator>::generate(std::invocable<size_t> auto fn, size_t length) -> This {
+        return This(Storage::generate(std::move(fn), length));
     }
 }

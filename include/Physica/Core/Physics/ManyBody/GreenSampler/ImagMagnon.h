@@ -64,9 +64,9 @@ namespace Physica {
 
     template<Scalar T>
     auto ImagMagnon<T>::calcMean() const -> MatrixND<T> {
-        auto result = MatrixND<T>::generate(getNumSite(), magnons.dim(2), [&](size_t r, size_t c) {
+        auto result = MatrixND<T>::generate([&](size_t r, size_t c) {
             return magnons.fiber(var(), r, c).squaredNorms().mean();
-        });
+        }, getNumSite(), magnons.dim(2));
         result *= reciprocal(Base::calcSign());
         return result;
     }

@@ -198,7 +198,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    auto DenseMatrix<T, Major, Row, Col, Allocator>::generate(size_t row, size_t col, std::invocable<size_t, size_t> auto fn) -> This {
-        return This(Storage::generate(row, col, std::move(fn)));
+    auto DenseMatrix<T, Major, Row, Col, Allocator>::generate(std::invocable<size_t, size_t> auto fn, size_t row, size_t col) -> This {
+        return This(Storage::generate(std::move(fn), row, col));
     }
 }

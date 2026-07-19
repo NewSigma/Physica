@@ -30,9 +30,9 @@ namespace Physica {
     template<Scalar T, bool isSpinPolarized>
     class ChargeMixer {
         constexpr static size_t DIISBufferSize = 5;
-        constexpr static double amix = 0.8; //Refer to [1]
-        constexpr static double bmix = 0.8; //Refer to [1]
-        constexpr static double amin = 0.4; //Refer to VASP wiki
+        constexpr static double amix = 0.8; // Refer to [1]
+        constexpr static double bmix = 0.8; // Refer to [1]
+        constexpr static double amin = 0.4; // Refer to VASP wiki
         constexpr static double pulay_mix = 0.4;
         using LatticeMatrix = CrystalCell<T>::LatticeMatrix;
         using DensityType = DensityGrid<T, isSpinPolarized>;
@@ -119,13 +119,13 @@ namespace Physica {
         }
         else {
             const size_t numValidRecord = iteration > mixIteration ? (DIISBufferSize - 1) : (mixIteration + 1);
-            const auto diisMat = DenseMatrix<T>::generate(numValidRecord + 1, numValidRecord + 1, [&](size_t i, size_t j) -> T {
+            const auto diisMat = DenseMatrix<T>::generate([&](size_t i, size_t j) -> T {
                 if (i == 0 && j == 0)
                     return T(0);
                 if (i == 0 || j == 0)
                     return T(1);
                 return residules[i - 1].getTotalDensity().flatten() * residules[j - 1].getTotalDensity().flatten();
-            });
+            }, numValidRecord + 1, numValidRecord + 1);
 
             VectorND<T> x(diisMat.getRow());
             /* Solve */ {

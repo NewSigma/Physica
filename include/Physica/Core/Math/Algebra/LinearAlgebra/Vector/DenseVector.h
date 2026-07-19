@@ -102,7 +102,7 @@ namespace Physica {
         [[nodiscard]] static This read_hdf5(const H5Loc& loc, const char* name);
         [[nodiscard]] static This read(size_t length, const T* __restrict p) noexcept;
         [[nodiscard]] static This generate(std::invocable<size_t> auto fn);
-        [[nodiscard]] static This generate(size_t length, std::invocable<size_t> auto fn);
+        [[nodiscard]] static This generate(std::invocable<size_t> auto fn, size_t length);
         /* Friends */
         friend class device_obj<This>;
     };

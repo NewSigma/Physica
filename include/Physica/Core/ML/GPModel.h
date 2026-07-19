@@ -100,7 +100,7 @@ namespace Physica {
         assert(x.getLength() == getNumFeature());
         if (getNumSamples() == 0) [[unlikely]]
             return {0, 1};
-        auto buffer = VectorND<Tv>::generate(getNumSamples(), [&](size_t i) { return kernel.dot(x, i); });
+        auto buffer = VectorND<Tv>::generate([&](size_t i) { return kernel.dot(x, i); }, getNumSamples());
         auto sol = VectorND<Tv>(lu.inv() * buffer);
         Tv mean = buffer * coeffs;
         Tv devia = sqrt(std::max(exp(kernel.getLnVar()) - buffer * sol, Tv(0)));
