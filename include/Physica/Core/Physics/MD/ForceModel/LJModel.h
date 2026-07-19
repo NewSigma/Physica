@@ -35,7 +35,7 @@ namespace Physica {
         LJModel(This&&) noexcept = default;
         ~LJModel() = default;
         /* Operators */
-        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept;
         /* Operations */
         void swap(This& __restrict obj) noexcept;
         /* Static members */
@@ -45,9 +45,14 @@ namespace Physica {
 
     template<Scalar T, bool IsSmallCell>
     LJModel<T, IsSmallCell>::LJModel(T sigma_, Tv cutoff)
-            : Base(), sigma(std::move(sigma_)) {
-        sigma1 = Tv(6) / sigma;
+            : Base(), sigma(std::move(sigma_)), sigma1(Tv(6) / sigma) {
         Base::setCutoff(std::move(cutoff));
+    }
+
+    template<Scalar T, bool IsSmallCell>
+    auto LJModel<T, IsSmallCell>::operator=(This obj) noexcept -> This& {
+        swap(obj);
+        return *this;
     }
 
     template<Scalar T, bool IsSmallCell>

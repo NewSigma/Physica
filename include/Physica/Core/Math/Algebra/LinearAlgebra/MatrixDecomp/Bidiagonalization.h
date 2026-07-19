@@ -50,7 +50,7 @@ namespace Physica {
         Bidiagonalization(This&&) noexcept = default;
         ~Bidiagonalization() = default;
         /* Operators */
-        This& operator=(This& obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void compute(const Matrix auto& source);
         void resize(size_t row, size_t col);

@@ -24,6 +24,7 @@
 using namespace Physica;
 using RandomSource = Random<>;
 using T = float64;
+using Cube = Vegas<T, false>::Cube;
 
 namespace {
     T func(const VectorND<T>& x) {
@@ -32,8 +33,7 @@ namespace {
 
     void plotCompressRate() {
         constexpr double r = 3;
-        const VectorND<T> from(8, T(-r));
-        const VectorND<T> to(8, T(r));
+        const Cube cube{VectorND<T>(8, T(-r)), VectorND<T>(8, T(r))};
 
         Plot* plot = new Plot(0, 100, -5, -0.5, 25, 1);
         plot->getLegend().setAlignment(Qt::AlignRight);
@@ -46,7 +46,7 @@ namespace {
         Array<double, 3> rates{0.1, 0.2, 0.5};
         Array<const char*, 3> names{"0.1", "0.2", "0.5"};
         for (int i = 0; i < 3; ++i) {
-            Vegas<T, false> vegas(from, to, 100, 100000, 10, rates[i]);
+            Vegas<T, false> vegas(cube, 100, 100000, 10, rates[i]);
             vegas.integral<RandomSource, Thread>(func);
             VectorND<T> vars = ln(vegas.getLoss());
             plot->line(vars).setName(names[i]);
@@ -57,8 +57,7 @@ namespace {
 
     void plotNumPoint() {
         constexpr double r = 3;
-        const VectorND<T> from(8, T(-r));
-        const VectorND<T> to(8, T(r));
+        const Cube cube{VectorND<T>(8, T(-r)), VectorND<T>(8, T(r))};
 
         Plot* plot = new Plot(0, 1000, -9, -1, 250, 2);
         plot->getLegend().setAlignment(Qt::AlignRight);
@@ -70,7 +69,7 @@ namespace {
 
         Array<int, 3> points{10, 100, 1000};
         for (int point : points) {
-            Vegas<T, false> vegas(from, to, 1000, 100000, point, 0.1);
+            Vegas<T, false> vegas(cube, 1000, 100000, point, 0.1);
             vegas.integral<RandomSource, Thread>(func);
             VectorND<T> vars = ln(vegas.getLoss());
             plot->line(vars).setName(std::format("{}", point).c_str());
@@ -81,8 +80,7 @@ namespace {
 
     void plotNumSample() {
         constexpr double r = 3;
-        const VectorND<T> from(8, T(-r));
-        const VectorND<T> to(8, T(r));
+        const Cube cube{VectorND<T>(8, T(-r)), VectorND<T>(8, T(r))};
 
         Plot* plot = new Plot(0, 1000, -9, -5, 250, 1);
         plot->getLegend().setAlignment(Qt::AlignRight);
@@ -95,7 +93,7 @@ namespace {
         Array<int, 2> samples{10000, 100000};
         Array<const char*, 2> names{"10<sup>4</sup>", "10<sup>5</sup>"};
         for (int i = 0; i < 2; ++i) {
-            Vegas<T, false> vegas(from, to, 1000, samples[i], 1000, 0.1);
+            Vegas<T, false> vegas(cube, 1000, samples[i], 1000, 0.1);
             vegas.integral<RandomSource, Thread>(func);
             VectorND<T> vars = ln(vegas.getLoss());
             plot->line(vars).setName(names[i]);

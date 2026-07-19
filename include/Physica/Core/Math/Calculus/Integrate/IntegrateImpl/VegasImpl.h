@@ -22,12 +22,13 @@
 
 namespace Physica {
     template<Scalar T, bool TakeLn>
-    Vegas<T, TakeLn>::Vegas(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int numPoint, Trv compressRate, Trv lr, Trv momentum)
-            : Base(std::move(from), std::move(to), numRefine, numSample)
+    Vegas<T, TakeLn>::Vegas(Cube cube, int numRefine, int numSample, int numPoint, Trv compressRate, Trv lr, Trv momentum)
+            : Base(numRefine, numSample)
+            , cube(std::move(cube))
             , pointGrid(numPoint, getDim())
             , compressRate(compressRate)
-            , lr(std::move(lr))
-            , momentum(std::move(momentum))
+            , lr(lr)
+            , momentum(momentum)
             , losses(numPoint - 1, getDim())
             , counts(numPoint - 1, getDim())
             , indices(getDim(), numSample) {
@@ -42,14 +43,14 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     void Vegas<T, TakeLn>::mesh_uniform(size_t dim) {
-        pointGrid.col(dim) = VectorND<Trv>::linspace(from[dim], to[dim], getNumPoint());
+        pointGrid.col(dim) = VectorND<Trv>::linspace(cube[0, dim], cube[1, dim], getNumPoint());
     }
 
     template<Scalar T, bool TakeLn>
     void Vegas<T, TakeLn>::mesh_tanh(size_t dim, Trv range) {
         assert(range.isPositive());
-        const auto k = (to[dim] - from[dim]) * 0.5;
-        const auto b = (to[dim] + from[dim]) * 0.5;
+        const auto k = (cube[1, dim] - cube[0, dim]) * 0.5;
+        const auto b = (cube[1, dim] + cube[0, dim]) * 0.5;
         auto p = VectorND<Trv>::linspace(-range, range, getNumPoint());
         p = tanh(p);
         p[0] = -1;
@@ -147,9 +148,10 @@ namespace Physica {
         group.readAttr("CompressRate", compressRate);
         group.readAttr("lr", lr);
 
+        cube.read(group, "Cube");
         pointGrid.read(group, "Grid");
-        losses.resize(getNumPoint() - 1, getDim());
-        counts.resize(getNumPoint() - 1, getDim());
+        losses.resize(getNumPoint() - 1, cube.getCol());
+        counts.resize(getNumPoint() - 1, cube.getCol());
         return group;
     }
 
@@ -159,6 +161,7 @@ namespace Physica {
         group.writeAttr("CompressRate", compressRate);
         group.writeAttr("lr", lr);
 
+        cube.write(group, "Cube");
         pointGrid.write(group, "Grid");
         return group;
     }
@@ -168,6 +171,7 @@ namespace Physica {
     void Vegas<T, TakeLn>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
+        cube.swap(obj.cube);
         pointGrid.swap(obj.pointGrid);
         compressRate.swap(obj.compressRate);
         lr.swap(obj.lr);

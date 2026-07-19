@@ -23,15 +23,16 @@
 namespace Physica {
     class PHYSICA_API H5Group : public H5::Group, public H5Loc {
         using Base = H5::Group;
+        using This = H5Group;
         using Location = H5Loc;
     public:
         H5Group(H5::Group group) : Base(group) {}
-        H5Group(const H5Group&) = default;
-        H5Group(H5Group&&) noexcept = default;
+        H5Group(const This&) = default;
+        H5Group(This&&) noexcept = default;
         ~H5Group() = default;
         /* Operators */
-        H5Group& operator=(H5Group& obj) = default;
-        H5Group& operator=(H5Group&&) noexcept = delete;
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         using Location::createDataSet;
         using Location::openDataSet;

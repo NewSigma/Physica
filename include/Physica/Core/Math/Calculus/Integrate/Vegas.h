@@ -42,14 +42,15 @@ namespace Physica {
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tv::RealType;
+    public:
+        using Cube = DenseMatrix<Trv, MatrixMajor::Row, 2, Dynamic>;
     private:
+        Cube cube;
         DenseMatrix<Trv> pointGrid;
         Trv compressRate;
         Trv lr;
         Trv momentum;
     protected:
-        using Base::from;
-        using Base::to;
         using Base::means;
         using Base::vars;
         using Base::loss;
@@ -59,8 +60,7 @@ namespace Physica {
         Array2D<int> indices;
     public:
         Vegas() = default;
-        Vegas(VectorND<Trv> from,
-              VectorND<Trv> to,
+        Vegas(Cube cube,
               int numRefine,
               int numSample,
               int numPoint = 1000,
@@ -87,8 +87,8 @@ namespace Physica {
         H5Group write(H5Loc& loc, const char* name) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        using Base::getDim;
         [[nodiscard]] const auto& getPointGrid() const noexcept { return pointGrid; }
+        [[nodiscard]] size_t getDim() const noexcept { return cube.getCol(); }
         [[nodiscard]] size_t getNumPoint() const noexcept { return pointGrid.getRow(); }
         /* Setters */
         void setLearnRate(Trv lr_) { lr = lr_; }

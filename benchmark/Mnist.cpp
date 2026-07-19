@@ -56,7 +56,7 @@ namespace Physica {
         MnistNet(This&&) noexcept = default;
         ~MnistNet() = default;
         /* Operators */
-        This& operator=(This& obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] CoDiff<VectorND<T>> forward(const Vector auto& x) const {
             auto y1 = layer1.forward(x);

@@ -42,7 +42,8 @@ namespace {
     }
 
     void chern(int band) {
-        auto vegas = Vegas<T>({-std::numbers::pi, -std::numbers::pi}, {std::numbers::pi, std::numbers::pi}, 100, 10000);
+        using Cube = Vegas<T>::Cube;
+        auto vegas = Vegas<T>(Cube{{-std::numbers::pi, -std::numbers::pi}, {std::numbers::pi, std::numbers::pi}}, 100, 10000);
         vegas.integral<Random<>>([band](Vector2D<T> k0) {
             return curv(k0, band);
         });

@@ -42,7 +42,7 @@ namespace Physica {
         LinearCoupler(This&&) noexcept = default;
         ~LinearCoupler() = default;
         /* Operators */
-        This& operator=(This& obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] CoDiff<T> forward(DNN auto& nn, VectorND<Tv>& x) const;
 

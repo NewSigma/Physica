@@ -42,7 +42,7 @@ namespace Physica {
         LJModel1(This&&) noexcept = default;
         ~LJModel1() = default;
         /* Operators */
-        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept;
         /* Operations */
         void swap(This& __restrict obj) noexcept;
         /* Static members */
@@ -52,14 +52,18 @@ namespace Physica {
 
     template<Scalar T, bool IsSmallCell>
     LJModel1<T, IsSmallCell>::LJModel1(T sigma_, T epsilon_, Tv cutoff)
-            : Base(), sigma(std::move(sigma_)), epsilon(std::move(epsilon_)) {
-        factor = Tv(12) * epsilon / sigma;
+            : Base(), sigma(std::move(sigma_)), epsilon(std::move(epsilon_)), factor(Tv(12) * epsilon / sigma) {
         Base::setCutoff(std::move(cutoff));
     }
 
     template<Scalar T, bool IsSmallCell>
-    T LJModel1<T, IsSmallCell>::pot_functor(
-            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, [[maybe_unused]] T r, T r2) const {
+    auto LJModel1<T, IsSmallCell>::operator=(This obj) noexcept -> This& {
+        swap(obj);
+        return *this;
+    }
+
+    template<Scalar T, bool IsSmallCell>
+    T LJModel1<T, IsSmallCell>::pot_functor(size_t, size_t, T, T r2) const {
         const T rep_r2 = T(sigma * sigma) / r2;
         const T rep_r4 = square(rep_r2);
         const T rep_r6 = rep_r4 * rep_r2;
@@ -68,8 +72,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    T LJModel1<T, IsSmallCell>::force_functor(
-            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, T r, [[maybe_unused]] T r2) const {
+    T LJModel1<T, IsSmallCell>::force_functor(size_t, size_t, T r, T) const {
         const T rep_r = sigma / r;
         const T rep_r2 = square(rep_r);
         const T rep_r4 = square(rep_r2);

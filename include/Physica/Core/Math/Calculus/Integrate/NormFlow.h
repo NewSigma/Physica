@@ -42,18 +42,19 @@ namespace Physica {
 
         template<Scalar U>
         using MatrixND = LinearLayer<T>::template MatrixND<U>;
+    public:
+        using Cube = DenseMatrix<Trv, MatrixMajor::Row, 2, Dynamic>;
     protected:
-        using Base::from;
-        using Base::to;
         using Base::means;
         using Base::vars;
         using Base::loss;
     private:
-        int batchsize;
+        Cube cube;
+        int batchsize{};
         Trv decay;
     public:
         NormFlow() = default;
-        NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int batchsize_, Trv decay_ = 0);
+        NormFlow(Cube cube, int numRefine, int numSample, int batchsize, Trv decay = 0);
         NormFlow(const This&) = default;
         NormFlow(This&&) noexcept = default;
         ~NormFlow() = default;
@@ -67,7 +68,7 @@ namespace Physica {
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        using Base::getDim;
+        [[nodiscard]] size_t getDim() const noexcept { return cube.getCol(); }
     private:
         template<DNN Net, RNG R, ExecutePolicy P>
         Trv trial_normal(Net& nn, IntegT& mean, IntegT& var);
@@ -80,10 +81,11 @@ namespace Physica {
     };
 
     template<Scalar T, bool TakeLn>
-    NormFlow<T, TakeLn>::NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int batchsize_, Trv decay_)
-            : Base(std::move(from), std::move(to), numRefine, (numSample + batchsize_ - 1) / batchsize_ * batchsize_)
-            , batchsize(batchsize_)
-            , decay(decay_) {
+    NormFlow<T, TakeLn>::NormFlow(Cube cube, int numRefine, int numSample, int batchsize, Trv decay)
+            : Base(numRefine, (numSample + batchsize - 1) / batchsize * batchsize)
+            , cube(std::move(cube))
+            , batchsize(batchsize)
+            , decay(decay) {
         assert(0 < batchsize && batchsize <= numSample && "[Error]: Invalid batchsize and cannot auto fix");
         assert(!decay.isNegative());
     }
@@ -135,6 +137,7 @@ namespace Physica {
     void NormFlow<T, TakeLn>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
+        cube.swap(obj.cube);
         std::swap(batchsize, obj.batchsize);
         decay.swap(obj.decay);
     }
@@ -143,6 +146,8 @@ namespace Physica {
     template<DNN Net, RNG R, ExecutePolicy P>
     auto NormFlow<T, TakeLn>::trial_normal(Net& nn, IntegT& mean, IntegT& var) -> Trv {
         const int numSample = Base::getNumSample();
+        const auto from = cube.row(0);
+        const auto to = cube.row(1);
         const VectorND<Trv> coeff = to - from;
 
         VectorND<Trv> x(getDim());
@@ -193,13 +198,15 @@ namespace Physica {
     template<DNN Net, RNG R, ExecutePolicy P>
     auto NormFlow<T, TakeLn>::trial_ln(Net& nn, IntegT& mean, IntegT& var) -> Trv {
         const int numSample = Base::getNumSample();
+        const auto from = cube.row(0);
+        const auto to = cube.row(1);
         const VectorND<Trv> coeff = to - from;
         const auto lnVolume = ln(coeff).sum();
 
         VectorND<IntegT> samples(numSample);
         Trv loss = 0;
         if constexpr (P == GPU) {
-            const auto from_d = from.toDeviceAsync();
+            const auto from_d = VectorND<Trv>(from).toDeviceAsync();
             const auto coeff_d = coeff.toDeviceAsync();
             const int numBatch = numSample / batchsize;
 
