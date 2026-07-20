@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<Scalar T, bool TakeLn>
-    class AdaptiveBase {
-        using This = AdaptiveBase<T, TakeLn>;
+    class AdaptiveProcess {
+        using This = AdaptiveProcess<T, TakeLn>;
         using Tr = T::RealType;
         using Trv = Tr::ValueType;
     protected:
@@ -33,11 +33,12 @@ namespace Physica {
     private:
         int numSample{};
     public:
-        AdaptiveBase() = default;
-        AdaptiveBase(int numRefine_, int numSample_);
-        AdaptiveBase(const This&) = default;
-        AdaptiveBase(This&&) noexcept = default;
-        ~AdaptiveBase() = default;
+        AdaptiveProcess() = default;
+        AdaptiveProcess(int numRefine_, int numSample_);
+        AdaptiveProcess(VectorND<T> means, VectorND<T> vars, VectorND<Trv> loss, int numSample);
+        AdaptiveProcess(const This&) = default;
+        AdaptiveProcess(This&&) noexcept = default;
+        ~AdaptiveProcess() = default;
         /* Operators */
         This& operator=(This obj) noexcept;
         /* Operations */
@@ -63,7 +64,8 @@ namespace Physica {
     };
 
     template<Scalar T, bool TakeLn>
-    AdaptiveBase<T, TakeLn>::AdaptiveBase(int numRefine, int numSample_) : means(numRefine), vars(numRefine), loss(numRefine), numSample(numSample_) {
+    AdaptiveProcess<T, TakeLn>::AdaptiveProcess(int numRefine, int numSample_)
+            : means(numRefine), vars(numRefine), loss(numRefine), numSample(numSample_) {
         assert(numRefine > 0);
         assert(numSample > 0);
         means.zeros();
@@ -71,48 +73,55 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    auto AdaptiveBase<T, TakeLn>::operator=(This obj) noexcept -> This& {
+    AdaptiveProcess<T, TakeLn>::AdaptiveProcess(VectorND<T> means, VectorND<T> vars, VectorND<Trv> loss, int numSample)
+            : means(std::move(means))
+            , vars(std::move(vars))
+            , loss(std::move(loss))
+            , numSample(numSample) {}
+
+    template<Scalar T, bool TakeLn>
+    auto AdaptiveProcess<T, TakeLn>::operator=(This obj) noexcept -> This& {
         swap(obj);
         return *this;
     }
 
     template<Scalar T, bool TakeLn>
-    T AdaptiveBase<T, TakeLn>::calcMean(int from) const {
+    T AdaptiveProcess<T, TakeLn>::calcMean(int from) const {
         static_assert(!TakeLn, "[Error]: Not available");
         assert(0 <= from && from < getNumRefine());
         return reciprocal(vars.tail(from)) * means.tail(from) / reciprocal(vars.tail(from)).sum();
     }
 
     template<Scalar T, bool TakeLn>
-    T AdaptiveBase<T, TakeLn>::calcVar(int from) const {
+    T AdaptiveProcess<T, TakeLn>::calcVar(int from) const {
         static_assert(!TakeLn, "[Error]: Not available");
         assert(0 <= from && from < getNumRefine());
         return reciprocal(reciprocal(vars.tail(from)).sum());
     }
 
     template<Scalar T, bool TakeLn>
-    T AdaptiveBase<T, TakeLn>::calcDevia(int from) const {
+    T AdaptiveProcess<T, TakeLn>::calcDevia(int from) const {
         static_assert(!TakeLn, "[Error]: Not available");
         assert(0 <= from && from < getNumRefine());
         return sqrt(calcVar(from));
     }
 
     template<Scalar T, bool TakeLn>
-    T AdaptiveBase<T, TakeLn>::calcLnMean(int from) const {
+    T AdaptiveProcess<T, TakeLn>::calcLnMean(int from) const {
         static_assert(TakeLn, "[Error]: Not available");
         assert(0 <= from && from < getNumRefine());
         return (means.tail(from) - vars.tail(from)).lnSumExp() + calcLnVar();
     }
 
     template<Scalar T, bool TakeLn>
-    T AdaptiveBase<T, TakeLn>::calcLnDevia(int from) const {
+    T AdaptiveProcess<T, TakeLn>::calcLnDevia(int from) const {
         static_assert(TakeLn, "[Error]: Not available");
         assert(0 <= from && from < getNumRefine());
         return Trv(0.5) * calcLnVar(from);
     }
 
     template<Scalar T, bool TakeLn>
-    T AdaptiveBase<T, TakeLn>::calcLnVar(int from) const {
+    T AdaptiveProcess<T, TakeLn>::calcLnVar(int from) const {
         static_assert(TakeLn, "[Error]: Not available");
         assert(0 <= from && from < getNumRefine());
         return -(-vars.tail(from)).lnSumExp();
@@ -122,7 +131,7 @@ namespace Physica {
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. Numerical Recipes(3rd edition)[M]. London: Cambridge University Press, 2007:414-416
      */
     template<Scalar T, bool TakeLn>
-    T AdaptiveBase<T, TakeLn>::calcSquaredChi(int from) const {
+    T AdaptiveProcess<T, TakeLn>::calcSquaredChi(int from) const {
         const int numRefine = getNumRefine();
         assert(0 <= from && from < numRefine);
         if (numRefine == 1)
@@ -143,7 +152,7 @@ namespace Physica {
 
 #ifdef PHYSICA_HDF5
     template<Scalar T, bool TakeLn>
-    const H5Group AdaptiveBase<T, TakeLn>::read(const H5Loc& loc, const char* name) {
+    const H5Group AdaptiveProcess<T, TakeLn>::read(const H5Loc& loc, const char* name) {
         const auto group = loc.openGroup(name);
         group.readAttr("NumSample", numSample);
 
@@ -154,7 +163,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    H5Group AdaptiveBase<T, TakeLn>::write(H5Loc& loc, const char* name) const {
+    H5Group AdaptiveProcess<T, TakeLn>::write(H5Loc& loc, const char* name) const {
         auto group = loc.openGroup(name);
         group.writeAttr("NumSample", numSample);
 
@@ -166,7 +175,7 @@ namespace Physica {
 #endif
 
     template<Scalar T, bool TakeLn>
-    void AdaptiveBase<T, TakeLn>::swap(This& __restrict obj) noexcept {
+    void AdaptiveProcess<T, TakeLn>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         means.swap(obj.means);
         vars.swap(obj.vars);

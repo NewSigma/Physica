@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "IntegrateImpl/AdaptiveBase.h"
+#include "IntegrateImpl/AdaptiveProcess.h"
 
 namespace Physica {
     /**
@@ -35,25 +35,21 @@ namespace Physica {
      * [3] APL Comput. Phys. 2, 026108 (2026); https://doi.org/10.1063/5.0320242
      */
     template<Scalar T, bool TakeLn = false>
-    class Vegas : public AdaptiveBase<T, TakeLn> {
+    class Vegas {
         using This = Vegas<T, TakeLn>;
-        using Base = AdaptiveBase<T, TakeLn>;
-    protected:
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tv::RealType;
     public:
         using Cube = DenseMatrix<Trv, MatrixMajor::Row, 2, Dynamic>;
     private:
+        constexpr static Trv InfBeta = std::numeric_limits<T>::max() * std::numeric_limits<T>::epsilon();
+
         Cube cube;
         DenseMatrix<Trv> pointGrid;
         Trv compressRate;
         Trv lr;
         Trv momentum;
-    protected:
-        using Base::means;
-        using Base::vars;
-        using Base::loss;
 
         DenseMatrix<Trv> losses;
         Array2D<int> counts;
@@ -61,7 +57,6 @@ namespace Physica {
     public:
         Vegas() = default;
         Vegas(Cube cube,
-              int numRefine,
               int numSample,
               int numPoint = 1000,
               Trv compressRate = 1.5,
@@ -79,7 +74,7 @@ namespace Physica {
         template<RNG R, ExecutePolicy P = Sequential>
         Trv warmup(std::invocable<VectorND<Trv>> auto fn, int numWarm);
         template<RNG R, ExecutePolicy P = Sequential>
-        void integral(std::invocable<VectorND<Trv>> auto fn);
+        [[nodiscard]] AdaptiveProcess<T, TakeLn> integral(std::invocable<VectorND<Trv>> auto fn, int numRefine);
         template<RNG R, ExecutePolicy P = Sequential>
         [[nodiscard]] Trv calcGridLoss(std::invocable<VectorND<Trv>> auto fn) const;
 
@@ -90,6 +85,7 @@ namespace Physica {
         [[nodiscard]] const auto& getPointGrid() const noexcept { return pointGrid; }
         [[nodiscard]] size_t getDim() const noexcept { return cube.getCol(); }
         [[nodiscard]] size_t getNumPoint() const noexcept { return pointGrid.getRow(); }
+        [[nodiscard]] size_t getNumSample() const noexcept { return indices.getCol(); }
         /* Setters */
         void setLearnRate(Trv lr_) { lr = lr_; }
     private:

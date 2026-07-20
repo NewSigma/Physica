@@ -39,13 +39,13 @@ namespace {
             auto func = [&](const VectorND<T>& x) {
                 return exp(T(-100) * (x - r1).squaredNorm()) + exp(T(-100) * (x - r2).squaredNorm()); // Eq.26 of [1]
             };
-            auto vegas = Vegas<T, false>(Cube{{0, 0, 0, 0}, {1, 1, 1, 1}}, 50, 10000);
-            vegas.integral<RandomSource>(func);
+            auto vegas = Vegas<T, false>(Cube{{0, 0, 0, 0}, {1, 1, 1, 1}}, 10000);
+            const auto process = vegas.integral<RandomSource>(func, 50);
 
             const T temp = erf(T(5));
             const T answer = T(std::numbers::pi * std::numbers::pi / 10000) * square(temp) * temp * (erf(T(10.0 / 3)) + erf(T(20.0 / 3)));
-            const T result = vegas.calcMean();
-            expect<RandomSource>(abs(answer - result) < T(2) * vegas.calcDevia());
+            const T result = process.calcMean();
+            expect<RandomSource>(abs(answer - result) < T(2) * process.calcDevia());
         }
         {
             const Vector4D<T> r1{1.0 / 3, 0.5, 0.5, 0.5};
@@ -56,12 +56,12 @@ namespace {
                 const bool flag2 = (x - r2).squaredNorm() < T(R * R);
                 return T((flag1 || flag2) ? 1 : 0); // Eq.28 of [1]
             };
-            auto vegas = Vegas<T, false>(Cube{{0, 0, 0, 0}, {1, 1, 1, 1}}, 50, 100000, 1000, 0.2);
-            vegas.integral<RandomSource>(func);
+            auto vegas = Vegas<T, false>(Cube{{0, 0, 0, 0}, {1, 1, 1, 1}}, 100000, 1000, 0.2);
+            const auto process = vegas.integral<RandomSource>(func, 50);
 
             const T answer = square(T(std::numbers::pi * R * R));
-            const T result = vegas.calcMean();
-            expect<RandomSource>(abs(answer - result) < T(2) * vegas.calcDevia());
+            const T result = process.calcMean();
+            expect<RandomSource>(abs(answer - result) < T(2) * process.calcDevia());
         }
     }
 
@@ -70,25 +70,25 @@ namespace {
         auto func = [&](const VectorND<T>& x) {
             return T(-100) * (x - r1).squaredNorm();
         };
-        auto vegas = Vegas<T, true>(Cube{{0, 0, 0, 0}, {1, 1, 1, 1}}, 50, 10000);
+        auto vegas = Vegas<T, true>(Cube{{0, 0, 0, 0}, {1, 1, 1, 1}}, 10000);
         vegas.warmup<RandomSource>(func, 50);
-        vegas.integral<RandomSource>(func);
+        const auto process = vegas.integral<RandomSource>(func, 50);
 
         const T temp = erf(T(5));
         const T answer = T(std::numbers::pi * std::numbers::pi / 20000) * square(temp) * temp * (erf(T(10.0 / 3)) + erf(T(20.0 / 3)));
-        const T result = exp(vegas.calcLnMean());
-        expect<RandomSource>(abs(answer - result) < T(2) * exp(vegas.calcLnDevia()));
+        const T result = exp(process.calcLnMean());
+        expect<RandomSource>(abs(answer - result) < T(2) * exp(process.calcLnDevia()));
     }
 
     void complex() {
         // Test that real-complex results match
-        auto vegas1 = Vegas<T, true>(Cube{{0, 0, 0, 0}, {1, 1, 1, 1}}, 50, 10000);
-        vegas1.integral<RandomSource>([](const VectorND<T>&) static -> T { return -0.5; });
-        const T answer = vegas1.calcLnMean();
+        auto vegas1 = Vegas<T, true>(Cube{{0, 0, 0, 0}, {1, 1, 1, 1}}, 10000);
+        const auto process1 = vegas1.integral<RandomSource>([](const VectorND<T>&) static -> T { return -0.5; }, 50);
+        const T answer = process1.calcLnMean();
 
-        auto vegas2 = Vegas<Tc, true>(Cube{{0, 0, 0, 0}, {1, 1, 1, 1}}, 50, 10000);
-        vegas2.integral<RandomSource>([](const VectorND<T>&) static -> Tc { return -0.5; });
-        const T result = vegas2.calcLnMean().real();
+        auto vegas2 = Vegas<Tc, true>(Cube{{0, 0, 0, 0}, {1, 1, 1, 1}}, 10000);
+        const auto process2 = vegas2.integral<RandomSource>([](const VectorND<T>&) static -> Tc { return -0.5; }, 50);
+        const T result = process2.calcLnMean().real();
         expect<RandomSource>(scalarNear(answer, result, 1E-12));
     }
 }

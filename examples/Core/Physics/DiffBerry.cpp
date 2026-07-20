@@ -43,12 +43,12 @@ namespace {
 
     void chern(int band) {
         using Cube = Vegas<T>::Cube;
-        auto vegas = Vegas<T>(Cube{{-std::numbers::pi, -std::numbers::pi}, {std::numbers::pi, std::numbers::pi}}, 100, 10000);
-        vegas.integral<Random<>>([band](Vector2D<T> k0) {
+        auto vegas = Vegas<T>(Cube{{-std::numbers::pi, -std::numbers::pi}, {std::numbers::pi, std::numbers::pi}}, 10000);
+        const auto process = vegas.integral<Random<>>([band](Vector2D<T> k0) {
             return curv(k0, band);
-        });
+        }, 100);
         T factor = reciprocal(MathConst<T>::pi * 2);
-        std::cout << std::format("{}({})\n", vegas.calcMean() * factor, vegas.calcDevia() * factor);
+        std::cout << std::format("{}({})\n", process.calcMean() * factor, process.calcDevia() * factor);
     }
 }
 

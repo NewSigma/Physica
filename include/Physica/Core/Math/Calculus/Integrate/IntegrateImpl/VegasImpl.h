@@ -22,9 +22,8 @@
 
 namespace Physica {
     template<Scalar T, bool TakeLn>
-    Vegas<T, TakeLn>::Vegas(Cube cube, int numRefine, int numSample, int numPoint, Trv compressRate, Trv lr, Trv momentum)
-            : Base(numRefine, numSample)
-            , cube(std::move(cube))
+    Vegas<T, TakeLn>::Vegas(Cube cube, int numSample, int numPoint, Trv compressRate, Trv lr, Trv momentum)
+            : cube(std::move(cube))
             , pointGrid(numPoint, getDim())
             , compressRate(compressRate)
             , lr(lr)
@@ -93,10 +92,12 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     template<RNG R, ExecutePolicy P>
-    void Vegas<T, TakeLn>::integral(std::invocable<VectorND<Trv>> auto fn) {
+    AdaptiveProcess<T, TakeLn> Vegas<T, TakeLn>::integral(std::invocable<VectorND<Trv>> auto fn, int numRefine) {
         checkIntegrand<VectorND<Trv>>(fn);
 
-        const int numRefine = Base::getNumRefine();
+        VectorND<T> means(numRefine);
+        VectorND<T> vars(numRefine);
+        VectorND<Trv> loss(numRefine);
         DenseMatrix<Trv> losses_old;
         bool hasMomentum = momentum.isPositive();
         if (hasMomentum) {
@@ -128,6 +129,7 @@ namespace Physica {
             else
                 refineGrid<P>();
         }
+        return AdaptiveProcess<T, TakeLn>(std::move(means), std::move(vars), std::move(loss), getNumSample());
     }
 
     template<Scalar T, bool TakeLn>
@@ -144,7 +146,7 @@ namespace Physica {
 #ifdef PHYSICA_HDF5
     template<Scalar T, bool TakeLn>
     const H5Group Vegas<T, TakeLn>::read(const H5Loc& loc, const char* name) {
-        const auto group = Base::read(loc, name);
+        const auto group = loc.openGroup(name);
         group.readAttr("CompressRate", compressRate);
         group.readAttr("lr", lr);
 
@@ -157,7 +159,7 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     H5Group Vegas<T, TakeLn>::write(H5Loc& loc, const char* name) const {
-        auto group = Base::write(loc, name);
+        auto group = loc.openGroup(name);
         group.writeAttr("CompressRate", compressRate);
         group.writeAttr("lr", lr);
 
@@ -170,7 +172,6 @@ namespace Physica {
     template<Scalar T, bool TakeLn>
     void Vegas<T, TakeLn>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        Base::swap(obj);
         cube.swap(obj.cube);
         pointGrid.swap(obj.pointGrid);
         compressRate.swap(obj.compressRate);
@@ -261,7 +262,7 @@ namespace Physica {
     template<Scalar T, bool TakeLn>
     template<RNG R, ExecutePolicy P>
     Vector2D<T> Vegas<T, TakeLn>::sample(std::invocable<VectorND<Trv>> auto fn) {
-        const int numSample = Base::getNumSample();
+        const size_t numSample = getNumSample();
         VectorND<T> samples(numSample);
         parallel_for<P>([&, this](size_t n) {
             const auto [x, deltas] = transform<R>(indices.col(n));
@@ -279,7 +280,7 @@ namespace Physica {
     template<Scalar T, bool TakeLn>
     template<RNG R, ExecutePolicy P>
     Vector2D<T> Vegas<T, TakeLn>::sample_ln(std::invocable<VectorND<Trv>> auto fn) {
-        const int numSample = Base::getNumSample();
+        const size_t numSample = getNumSample();
         VectorND<T> samples(numSample);
         parallel_for<P>([&, this](size_t n) {
             const auto [x, deltas] = transform<R>(indices.col(n));

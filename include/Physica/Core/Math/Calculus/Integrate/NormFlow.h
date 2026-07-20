@@ -20,7 +20,7 @@
 
 #include "Physica/Core/ML/NeuralNetwork/Layer/LinearLayer.h"
 #include "Physica/Core/Parallel/Parallel.h"
-#include "IntegrateImpl/AdaptiveBase.h"
+#include "IntegrateImpl/AdaptiveProcess.h"
 
 namespace Physica {
     class CUDAExecutor;
@@ -31,30 +31,26 @@ namespace Physica {
      * [1] ACM Transactions on Graphics, 38(5) 1-19 (2019); https://doi.org/10.1145/3341156
      */
     template<Scalar T, bool TakeLn>
-    class NormFlow : public AdaptiveBase<typename std::conditional<ReverseDiff<T>, typename T::ValueType, T>::type, TakeLn> {
+    class NormFlow {
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
         using IntegT = std::conditional<ReverseDiff<T>, Tv, T>::type;
         using TrainT = std::conditional<ReverseDiff<T>, T, Tv>::type;
         using This = NormFlow<T, TakeLn>;
-        using Base = AdaptiveBase<IntegT, TakeLn>;
 
         template<Scalar U>
         using MatrixND = LinearLayer<T>::template MatrixND<U>;
     public:
         using Cube = DenseMatrix<Trv, MatrixMajor::Row, 2, Dynamic>;
-    protected:
-        using Base::means;
-        using Base::vars;
-        using Base::loss;
     private:
         Cube cube;
         int batchsize{};
+        int numSample{};
         Trv decay;
     public:
         NormFlow() = default;
-        NormFlow(Cube cube, int numRefine, int numSample, int batchsize, Trv decay = 0);
+        NormFlow(Cube cube, int numSample, int batchsize, Trv decay = 0);
         NormFlow(const This&) = default;
         NormFlow(This&&) noexcept = default;
         ~NormFlow() = default;
@@ -64,7 +60,7 @@ namespace Physica {
         template<DNN Net, RNG R, ExecutePolicy P = Sequential>
         Trv warmup(Net& nn, int numWarm);
         template<DNN Net, RNG R, ExecutePolicy P = Sequential>
-        void integral(Net& nn);
+        [[nodiscard]] AdaptiveProcess<IntegT, TakeLn> integral(Net& nn, int numRefine);
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -81,10 +77,10 @@ namespace Physica {
     };
 
     template<Scalar T, bool TakeLn>
-    NormFlow<T, TakeLn>::NormFlow(Cube cube, int numRefine, int numSample, int batchsize, Trv decay)
-            : Base(numRefine, (numSample + batchsize - 1) / batchsize * batchsize)
-            , cube(std::move(cube))
+    NormFlow<T, TakeLn>::NormFlow(Cube cube, int numSample, int batchsize, Trv decay)
+            : cube(std::move(cube))
             , batchsize(batchsize)
+            , numSample((numSample + batchsize - 1) / batchsize * batchsize)
             , decay(decay) {
         assert(0 < batchsize && batchsize <= numSample && "[Error]: Invalid batchsize and cannot auto fix");
         assert(!decay.isNegative());
@@ -113,12 +109,14 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     template<DNN Net, RNG R, ExecutePolicy P>
-    void NormFlow<T, TakeLn>::integral(Net& nn) {
+    auto NormFlow<T, TakeLn>::integral(Net& nn, int numRefine) -> AdaptiveProcess<IntegT, TakeLn> {
         using CallResult = std::invoke_result<Net, VectorND<Trv>>::type;
         static_assert(Scalar<CallResult>, "[Error]: Integrand should embed into network");
         static_assert(std::same_as<IntegT, CallResult>, "[Error]: Inconsistent ScalarType");
 
-        const int numRefine = Base::getNumRefine();
+        VectorND<IntegT> means(numRefine);
+        VectorND<IntegT> vars(numRefine);
+        VectorND<Trv> loss(numRefine);
         IntegT mean = 0, var = 0;
         for (int refine = 0; refine < numRefine; ++refine) {
             if constexpr (TakeLn)
@@ -131,21 +129,21 @@ namespace Physica {
             nn.step();
             nn.zero_grad();
         }
+        return AdaptiveProcess<IntegT, TakeLn>(std::move(means), std::move(vars), std::move(loss), numSample);
     }
 
     template<Scalar T, bool TakeLn>
     void NormFlow<T, TakeLn>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        Base::swap(obj);
         cube.swap(obj.cube);
         std::swap(batchsize, obj.batchsize);
+        std::swap(numSample, obj.numSample);
         decay.swap(obj.decay);
     }
 
     template<Scalar T, bool TakeLn>
     template<DNN Net, RNG R, ExecutePolicy P>
     auto NormFlow<T, TakeLn>::trial_normal(Net& nn, IntegT& mean, IntegT& var) -> Trv {
-        const int numSample = Base::getNumSample();
         const auto from = cube.row(0);
         const auto to = cube.row(1);
         const VectorND<Trv> coeff = to - from;
@@ -197,7 +195,6 @@ namespace Physica {
     template<Scalar T, bool TakeLn>
     template<DNN Net, RNG R, ExecutePolicy P>
     auto NormFlow<T, TakeLn>::trial_ln(Net& nn, IntegT& mean, IntegT& var) -> Trv {
-        const int numSample = Base::getNumSample();
         const auto from = cube.row(0);
         const auto to = cube.row(1);
         const VectorND<Trv> coeff = to - from;
@@ -288,7 +285,7 @@ namespace Physica {
     auto NormFlow<T, TakeLn>::calcLoss_normal(IntegT y, const CoDiff<TrainT>& lnJ) -> Trv {
         CoDiff<T> l = square(y * exp(lnJ)) + exp(lnJ * Trv(2)) * decay;
         if constexpr (ReverseDiff<T>)
-            l.reverse(reciprocal(Trv(Base::getNumSample())));
+            l.reverse(reciprocal(Trv(numSample)));
         return l.value();
     }
 

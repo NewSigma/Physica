@@ -46,9 +46,9 @@ namespace {
         Array<double, 3> rates{0.1, 0.2, 0.5};
         Array<const char*, 3> names{"0.1", "0.2", "0.5"};
         for (int i = 0; i < 3; ++i) {
-            Vegas<T, false> vegas(cube, 100, 100000, 10, rates[i]);
-            vegas.integral<RandomSource, Thread>(func);
-            VectorND<T> vars = ln(vegas.getLoss());
+            Vegas<T, false> vegas(cube, 100000, 10, rates[i]);
+            const auto process = vegas.integral<RandomSource, Thread>(func, 100);
+            VectorND<T> vars = ln(process.getLoss());
             plot->line(vars).setName(names[i]);
         }
         plot->show();
@@ -69,9 +69,9 @@ namespace {
 
         Array<int, 3> points{10, 100, 1000};
         for (int point : points) {
-            Vegas<T, false> vegas(cube, 1000, 100000, point, 0.1);
-            vegas.integral<RandomSource, Thread>(func);
-            VectorND<T> vars = ln(vegas.getLoss());
+            Vegas<T, false> vegas(cube, 100000, point, 0.1);
+            const auto process = vegas.integral<RandomSource, Thread>(func, 1000);
+            VectorND<T> vars = ln(process.getLoss());
             plot->line(vars).setName(std::format("{}", point).c_str());
         }
         plot->show();
@@ -93,9 +93,9 @@ namespace {
         Array<int, 2> samples{10000, 100000};
         Array<const char*, 2> names{"10<sup>4</sup>", "10<sup>5</sup>"};
         for (int i = 0; i < 2; ++i) {
-            Vegas<T, false> vegas(cube, 1000, samples[i], 1000, 0.1);
-            vegas.integral<RandomSource, Thread>(func);
-            VectorND<T> vars = ln(vegas.getLoss());
+            Vegas<T, false> vegas(cube, samples[i], 1000, 0.1);
+            const auto process = vegas.integral<RandomSource, Thread>(func, 1000);
+            VectorND<T> vars = ln(process.getLoss());
             plot->line(vars).setName(names[i]);
         }
         plot->show();
