@@ -50,6 +50,6 @@ namespace Physica {
 
     template<class V> requires(std::remove_cvref_t<V>::isCompact())
     __host__ __device__ auto device_obj<ImagVector<V>>::data_handle(this auto&& self) noexcept {
-        return self.v.getDerived().data()->imag_ptr();
+        return self.v.getDerived()[0].imag_ptr();
     }
 }

@@ -72,7 +72,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr This operator++(int) noexcept;
         [[nodiscard]] __host__ __device__ constexpr This operator--(int) noexcept;
         [[nodiscard]] __host__ __device__ constexpr RefTy operator*() const noexcept;
-        [[nodiscard]] __host__ __device__ constexpr RefTy operator->() const noexcept;
         [[nodiscard]] __host__ __device__ constexpr RefTy operator[](difference_type n) const noexcept;
         [[nodiscard]] __host__ __device__ constexpr bool operator==(const This& other) const noexcept;
         [[nodiscard]] __host__ __device__ constexpr auto operator<=>(const This& other) const noexcept;
@@ -169,11 +168,6 @@ namespace Physica {
     template<Scalar T> requires(instanceof_tx<T, Diff>)
     __host__ __device__ constexpr auto ScalarPtr<T>::operator*() const noexcept -> RefTy {
         return RefTy(*this);
-    }
-
-    template<Scalar T> requires(instanceof_tx<T, Diff>)
-    __host__ __device__ constexpr auto ScalarPtr<T>::operator->() const noexcept -> RefTy {
-        return operator*();
     }
 
     template<Scalar T> requires(instanceof_tx<T, Diff>)

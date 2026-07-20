@@ -294,9 +294,9 @@ namespace Physica {
 
         const Trv maximum = [&]() {
             if constexpr (T::isComplex())
-                return samples.reals().max().value();
+                return samples.reals().values().max();
             else
-                return samples.max().value();
+                return samples.values().max();
         }();
         samples = exp(samples - maximum);
 
