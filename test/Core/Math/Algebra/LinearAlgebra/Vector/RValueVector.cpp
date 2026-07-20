@@ -39,13 +39,18 @@ namespace {
         expect<RandomSource>(x.min() == x[x.argmin()]);
     }
 
-    void reshapeTest() {
+    void reshape() {
         using T = float32;
         auto id = IdentityMatrix<T>(3);
         auto x = VectorND<T>::random_uniform<RandomSource>(id.getSize());
-        MatrixND<T> y = id * (x + x).reshape_col(3, 3);
-        expect<RandomSource>(vectorNear(y.flatten(), x * T(2), uint64_t(0)));
-
+        /* Dynamic size */ {
+            MatrixND<T> y = id * (x + x).reshape_col(3, 3);
+            expect<RandomSource>(vectorNear(y.flatten(), x * T(2), uint64_t(0)));
+        }
+        /* Static size */ {
+            MatrixND<T> z = id * (x + x).reshape_col<3, 3>(3, 3);
+            expect<RandomSource>(vectorNear(z.flatten(), x * T(2), uint64_t(0)));
+        }
         // Test that we fallback to Col major if cannot infer major from input matrix
         syntax_only([]() {
             auto mat = IdentityMatrix<T>{};
@@ -86,7 +91,7 @@ int main() {
 
     sum();
     argminTest();
-    reshapeTest();
+    reshape();
     dot_reverse();
     transpose_hermite();
     return 0;

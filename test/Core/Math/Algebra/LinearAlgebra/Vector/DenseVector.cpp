@@ -197,13 +197,18 @@ namespace {
         expect(a[0] == T(0.3));
     }
 
-    void reshapeTest() {
+    void reshape() {
         using T = float32;
         MatrixND<T> two(3, 3, 2);
         auto x = VectorND<T>::random_uniform<RandomSource>(two.getSize());
-        MatrixND<T> y = hadamard(two, x.reshape_like(two));
-        expect(vectorNear(y.flatten(), x * T(2), uint64_t(0)));
-
+        /* Dynamic size */ {
+            MatrixND<T> y = hadamard(two, x.reshape_like(two));
+            expect(vectorNear(y.flatten(), x * T(2), uint64_t(0)));
+        }
+        /* Static size */ {
+            MatrixND<T> y = hadamard(two, x.reshape_col<3, 3>(3, 3));
+            expect(vectorNear(y.flatten(), x * T(2), uint64_t(0)));
+        }
         // Test that we fallback to Col major if cannot infer major from input matrix
         syntax_only([]() {
             auto mat = IdentityMatrix<T>{};
@@ -233,7 +238,7 @@ int main() {
     crossEntropyTest();
     softmaxTest();
     testConverts();
-    reshapeTest();
+    reshape();
     transpose_hermite();
     return 0;
 }

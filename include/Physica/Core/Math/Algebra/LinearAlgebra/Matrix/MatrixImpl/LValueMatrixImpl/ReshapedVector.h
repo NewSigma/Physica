@@ -58,9 +58,9 @@ namespace Physica {
     template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
     ReshapedVector<V, MatrixMajor, Row, Col>::ReshapedVector(V&& v_, size_t r_, size_t c_)
             : v(std::forward<V>(v_)), r(r_), c(c_) {
-        assert(r == Row || Row == Dynamic);
-        assert(c == Col || Col == Dynamic);
-        assert(r * c == v.getLength());
+        assert(r_ == Row || Row == Dynamic);
+        assert(c_ == Col || Col == Dynamic);
+        assert(r_ * c_ == v.getLength());
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
