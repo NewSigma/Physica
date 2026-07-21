@@ -20,9 +20,11 @@
 #include <chrono>
 #include <fstream>
 #include <print>
-#include "Physica/Core/Version.h"
+#include <unordered_map>
 #include "Physica/Config.h"
 #include "Benchmark.h"
+
+import Physica.Core;
 
 using namespace benchmark;
 using namespace Physica;

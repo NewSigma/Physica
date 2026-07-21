@@ -16,6 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+module;
+
 #include <format>
 #include <sstream>
 #ifdef PHYSICA_HDF5
@@ -34,7 +36,8 @@
     #include <mimalloc.h>
 #endif
 #include "Physica/Macro.h"
-#include "Physica/Core/Version.h"
+
+module Physica.Core;
 
 PHYSICA_API std::string Physica::version() {
     std::ostringstream os{};

@@ -17,7 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Version.h"
+
+import Physica.Core;
 /**
  * This file is empty, you can include Physica headers to test your code.
  */

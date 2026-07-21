@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.28)
 
 project(Physica
         VERSION 2026
@@ -56,6 +56,7 @@ set(Physica_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
 include_directories(SYSTEM 3rdparty)
 include_directories(${Physica_INCLUDE_DIR})
 add_subdirectory(src)
+add_subdirectory(module)
 
 if(${BUILD_TESTS})
     add_subdirectory(test)
