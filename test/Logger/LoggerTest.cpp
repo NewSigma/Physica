@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Logger/Logger/AbstractLogger.h"
-#include "Physica/Logger/LoggerRuntime.h"
+#include "Physica/Logger/Logger.h"
 #include <unistd.h>
 
 using namespace Physica;

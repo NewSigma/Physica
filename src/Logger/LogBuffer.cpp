@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,13 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Logger/LogBuffer.h"
+module;
+
 #include <cassert>
 #include <ctime>
 #include <iostream>
 #include <sstream>
 #include "Physica/Core/Utils/Cycler.h"
-#include "Physica/Logger/LoggerRuntime.h"
+
+module Physica.Logger.LogBuffer;
+
+import Physica.Logger;
+import Physica.Logger.LoggerTimer;
 
 using namespace Physica;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,26 +16,32 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+module;
 
-#pragma once
+#include <iostream>
+#include "Physica/Macro.h"
 
-#include <string>
-#include "Physica/Core/Utils/Container/RingBuffer.h"
+export module Physica.Logger.StdLogger;
 
-namespace Physica {
+import Physica.Logger.AbstractLogger;
+import Physica.Logger.LogBuffer;
+
+export namespace Physica {
     /**
-     * LogThread will scan and delete buffers that should be deleted.
+     * The standard logger that links to stdout and stderr,
+     * will be created when LoggerRuntime is initialized.
      */
-    class LogBuffer : public RingBuffer {
-        bool shouldDelete = false;
+    class PHYSICA_API StdLogger final : public AbstractLogger {
+        std::ostream& os;
     public:
-        LogBuffer(size_t size) : RingBuffer(size) {}
+        StdLogger() = delete;
+        ~StdLogger() override = default;
         /* Operations */
-        std::string makeMsgString();
-        std::string formatToString(const char* __restrict format);
-        size_t getMsgSize(const char* __restrict format) const;
-        void schedualDelete() noexcept { shouldDelete = true; }
-        /* Getters */
-        [[nodiscard]] bool getShouldDelete() const noexcept { return shouldDelete; }
+        void log(LogBuffer& buffer) override final;
+    protected:
+        //StdLogger can be created by LoggerRuntime only.
+        explicit StdLogger(std::ostream& stream);
+
+        friend class LoggerRuntime;
     };
 }

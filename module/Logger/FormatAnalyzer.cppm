@@ -16,31 +16,41 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+module;
 
-#include <array>
 #include <cstring>
 #include <stdexcept>
-#include "LoggerType.h"
+
+export module Physica.Logger.FormatAnalyzer;
+
+import Physica.Logger.LoggerType;
+
+export namespace Physica {
+    constexpr const char* getFileName(std::string_view file);
+    /**
+     * Spawn a array of all of the args of a format string.
+     *
+     * \tparam ArgCount
+     *      The number of additional format parameters that follow the format
+     *      string in a printf-like function. For example printf("%*.*d", 9, 8, 7)
+     *      would have NParams = 3
+     * \tparam N
+     *      length of the printf style format string (automatically deduced)
+     * \param format
+     *      Format string to generate the array for
+     * \return
+     *      An std::array where the n-th index indicates a conversion specifier.
+     */
+    template<size_t ArgCount, size_t N>
+    constexpr std::array<ArgType, ArgCount> analyzeFormatString(const char(&format)[N]);
+}
 
 namespace Physica {
-    /**
-     * \param format
-     *      C style format string.
-     *
-     * \return
-     *      Return the dynamic arguments in format.
-     */
-    template<size_t N>
-    constexpr size_t getArgCount(const char (&format)[N]) {
-        size_t pos = 0;
-        size_t argCount = 0;
-        while(pos < N - 1) {
-            if(format[pos] == '%' && format[pos + 1] != '%')
-                ++argCount;
-            ++pos;
-        }
-        return argCount;
+    constexpr const char* getFileName(std::string_view file) {
+        auto p = file.find_last_of('/');
+        if(p == std::string_view::npos)
+            return file.data();
+        return std::string_view(file.data() + p + 1).data();
     }
     /**
      * Get the arg type at index position.
@@ -154,7 +164,8 @@ namespace Physica {
      *      An std::array describing the types at each index (zero based).
      */
     template<size_t N, std::size_t... Indices>
-    constexpr auto analyzeFormatStringHelper(const char(&format)[N], std::index_sequence<Indices...>) -> std::array<ArgType, sizeof...(Indices)> {
+    constexpr std::array<ArgType, sizeof...(Indices)>
+    analyzeFormatStringHelper(const char(&format)[N], std::index_sequence<Indices...>) {
         return {{ getArgType(format, Indices)... }};
     }
     /**
@@ -172,15 +183,7 @@ namespace Physica {
      *      An std::array where the n-th index indicates a conversion specifier.
      */
     template<size_t ArgCount, size_t N>
-    constexpr auto analyzeFormatString(const char(&format)[N]) -> std::array<ArgType, ArgCount> {
+    constexpr std::array<ArgType, ArgCount> analyzeFormatString(const char(&format)[N]) {
         return analyzeFormatStringHelper(format, std::make_index_sequence<ArgCount>{});
     }
-
-    constexpr const char* getFileName(std::string_view file) {
-        auto p = file.find_last_of('/');
-        if(p == std::string_view::npos)
-            return file.data();
-        return std::string_view(file.data() + p + 1).data();
-    }
 }
-

@@ -16,13 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+module;
 
 #include <cstdarg>
-#include "Physica/Logger/LogBuffer.h"
-#include "Physica/Logger/LoggerType.h"
+#include "Physica/Macro.h"
 
-namespace Physica {
+export module Physica.Logger.AbstractLogger;
+
+import Physica.Logger.LoggerType;
+import Physica.Logger.LogBuffer;
+
+export namespace Physica {
     /**
      * Abstract father class for all loggers.
      */
