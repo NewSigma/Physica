@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,7 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Gui/Plot/PolarPlot.h"
+module;
+
+#include <QWidget>
+#include <QtCharts/QPolarChart>
+
+module Physica.Gui.PolarPlot;
 
 using namespace Physica;
 

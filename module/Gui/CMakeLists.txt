@@ -1,0 +1,3 @@
+file(GLOB_RECURSE MODULES_GUI *.cppm)
+
+target_sources(PhysicaGui PUBLIC FILE_SET CXX_MODULES FILES ${MODULES_GUI})

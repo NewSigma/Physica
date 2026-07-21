@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+module;
 
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QLineSeries>
@@ -24,12 +24,16 @@
 #include <QtCharts/QScatterSeries>
 #include <QtCharts/QAreaSeries>
 #include <QtCharts/QBoxPlotSeries>
+#include <QtCharts/QLegend>
 #include "Physica/Core/Scalar/Real.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
-#include "PlotImpl/ChartView.h"
-#include "ContourSeries.h"
 
-namespace Physica {
+export module Physica.Gui.Plot;
+
+export import Physica.Gui.ChartView;
+export import Physica.Gui.ContourSeries;
+
+export namespace Physica {
     class PHYSICA_API Plot : public ChartView {
         using Base = ChartView;
 
@@ -81,18 +85,18 @@ namespace Physica {
         [[nodiscard]] double getMinY() const noexcept { return axisY->min(); }
         [[nodiscard]] double getMaxY() const noexcept { return axisY->max(); }
         /* Setters */
-        inline void setAxisX(QValueAxis* axis);
-        inline void setAxisY(QValueAxis* axis);
-        inline void setAxisTop(QValueAxis* axis);
-        inline void setAxisRight(QValueAxis* axis);
-        inline void setMinX(double value) noexcept;
-        inline void setMaxX(double value) noexcept;
-        inline void setRangeX(double minX, double maxX);
-        inline void setMinY(double value) noexcept;
-        inline void setMaxY(double value) noexcept;
-        inline void setRangeY(double minY, double maxY);
-        inline void setDeltaX(double value) noexcept;
-        inline void setDeltaY(double value) noexcept;
+        void setAxisX(QValueAxis* axis);
+        void setAxisY(QValueAxis* axis);
+        void setAxisTop(QValueAxis* axis);
+        void setAxisRight(QValueAxis* axis);
+        void setMinX(double value) noexcept;
+        void setMaxX(double value) noexcept;
+        void setRangeX(double minX, double maxX);
+        void setMinY(double value) noexcept;
+        void setMaxY(double value) noexcept;
+        void setRangeY(double minY, double maxY);
+        void setDeltaX(double value) noexcept;
+        void setDeltaY(double value) noexcept;
         void setBox(float64 minX, float64 maxX, float64 minY, float64 maxY, float64 deltaX, float64 deltaY);
 
         void setTickDirection(QAbstractAxis::TickDirection d);
@@ -316,73 +320,5 @@ namespace Physica {
         auto right = sorted_v[count2 + from];
         auto left = sorted_v[count2 - 1 + from];
         return double((right + left) * 0.5);
-    }
-
-    inline void Plot::setAxisX(QValueAxis* axis) {
-        auto* chart = Base::getChart();
-        chart->removeAxis(axisX);
-        chart->addAxis(axis, Qt::AlignBottom);
-        axisX = axis;
-    }
-
-    inline void Plot::setAxisY(QValueAxis* axis) {
-        auto* chart = Base::getChart();
-        chart->removeAxis(axisY);
-        chart->addAxis(axis, Qt::AlignLeft);
-        axisY = axis;
-    }
-
-    inline void Plot::setAxisTop(QValueAxis* axis) {
-        auto* chart = Base::getChart();
-        chart->removeAxis(axisTop);
-        chart->addAxis(axis, Qt::AlignTop);
-        axisTop = axis;
-    }
-
-    inline void Plot::setAxisRight(QValueAxis* axis) {
-        auto* chart = Base::getChart();
-        chart->removeAxis(axisRight);
-        chart->addAxis(axis, Qt::AlignRight);
-        axisRight = axis;
-    }
-
-    inline void Plot::setMinX(double value) noexcept {
-        axisX->setMin(value);
-        axisTop->setMin(value);
-    }
-
-    inline void Plot::setMaxX(double value) noexcept {
-        axisX->setMax(value);
-        axisTop->setMax(value);
-    }
-
-    inline void Plot::setRangeX(double minX, double maxX) {
-        setMinX(minX);
-        setMaxX(maxX);
-    }
-
-    inline void Plot::setMinY(double value) noexcept {
-        axisY->setMin(value);
-        axisRight->setMin(value);
-    }
-
-    inline void Plot::setMaxY(double value) noexcept {
-        axisY->setMax(value);
-        axisRight->setMax(value);
-    }
-
-    inline void Plot::setRangeY(double minY, double maxY) {
-        setMinY(minY);
-        setMaxY(maxY);
-    }
-
-    inline void Plot::setDeltaX(double value) noexcept {
-        axisX->setTickInterval(value);
-        axisTop->setTickInterval(value);
-    }
-
-    inline void Plot::setDeltaY(double value) noexcept {
-        axisY->setTickInterval(value);
-        axisRight->setTickInterval(value);
     }
 }

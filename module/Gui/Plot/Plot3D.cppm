@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+module;
 
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QVBoxLayout>
@@ -24,7 +24,9 @@
 #include <QtDataVisualization/QSurfaceDataProxy>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 
-namespace Physica {
+export module Physica.Gui.Plot3D;
+
+export namespace Physica {
     class PHYSICA_API Plot3D : public QWidget {
         QVBoxLayout* vLayout;
     protected:

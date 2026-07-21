@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,12 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+module;
 
 #include <QtWidgets/QWidget>
 #include "Physica/Core/Math/Geometry/Point.h"
 
-namespace Physica {
+export module Physica.Gui.DensityPlot;
+
+export namespace Physica {
     /**
      * DensityPlot provide a approach to show 2D data.
      */

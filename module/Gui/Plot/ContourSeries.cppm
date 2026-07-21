@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,12 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+module;
 
 #include <QtCharts/QLineSeries>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 
-namespace Physica {
+export module Physica.Gui.ContourSeries;
+
+export namespace Physica {
     template<Matrix M>
     class ContourSeries : public QObject {
         using ScalarType = M::ScalarType;
@@ -119,5 +121,3 @@ namespace Physica {
         void tryInterpolate(Grid& grid, double level, Edge edge);
     };
 }
-
-#include "ContourSeriesImpl.h"

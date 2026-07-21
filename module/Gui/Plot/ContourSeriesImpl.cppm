@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,10 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+module;
 
 #include <QtCharts/QChart>
-#include "ContourSeries.h"
+#include <QtCharts/QLineSeries>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "Physica/Core/Utils/Container/Array.h"
+
+module Physica.Gui.ContourSeries:Impl;
+
+import Physica.Gui.ContourSeries;
 
 namespace Physica {
     template<Matrix M>
