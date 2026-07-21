@@ -25,7 +25,8 @@
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/KineticModel/CFireModel.h"
 #include "Physica/Core/Physics/MD/Barostat/Berendsen.h"
-#include "Physica/Gui/Plot/Plot.h"
+
+import Physica.Gui.Plot;
 
 using namespace Physica;
 using ScalarType = float64;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,8 @@
 #include <QtWidgets/QApplication>
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Math/Statistics/ProbDistribution.h"
-#include "Physica/Gui/Plot/Plot.h"
+
+import Physica.Gui.Plot;
 
 using namespace Physica;
 using RandomSource = Random<>;

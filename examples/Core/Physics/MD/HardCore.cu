@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,10 +19,12 @@
 #include <algorithm>
 #include <gperftools/profiler.h>
 #include <QApplication>
+#include <QtCharts/QLegend>
 #include <QtCharts/QValueAxis>
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
-#include "Physica/Gui/Plot/Plot.h"
+
+import Physica.Gui.Plot;
 
 using namespace Physica;
 constexpr double timeStep = 0.1;

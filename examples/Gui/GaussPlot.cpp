@@ -21,7 +21,8 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
-#include "Physica/Gui/Plot/GaussPlot.h"
+
+import Physica.Gui.GaussPlot;
 
 using namespace Physica;
 using ScalarType = float64;
