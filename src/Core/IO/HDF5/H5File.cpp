@@ -19,6 +19,7 @@
 #include <filesystem>
 #include "Physica/Core/IO/HDF5/HDF5.h"
 #include "Physica/Core/Exception/IOException.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
 using namespace Physica;
 
@@ -39,7 +40,7 @@ H5DataSet<1> H5File::createDataSet(const std::string& filepath, const std::strin
 
     auto buffer = Array<char>(size);
     fin.read(buffer.data(), size);
-    const auto space = H5DataSpace<1>({static_cast<hsize_t>(size)});
+    const auto space = H5DataSpace<1>(size);
     auto dataset = Base::createDataSet(name, H5::PredType::NATIVE_CHAR, space);
     dataset.write(buffer.data(), H5::PredType::NATIVE_CHAR);
     return dataset;

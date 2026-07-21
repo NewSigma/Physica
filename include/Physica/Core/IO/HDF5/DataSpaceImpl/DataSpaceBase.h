@@ -18,8 +18,10 @@
  */
 #pragma once
 
+#include <array>
+#include <cassert>
 #include "Physica/CRTPBase.h"
-#include "Physica/Core/Utils/Container/Array.h"
+#include "Physica/Core/IO/HDF5/HDF5.h"
 
 namespace Physica {
     template<class Derived>
@@ -29,7 +31,7 @@ namespace Physica {
     public:
         constexpr static size_t Dim = Traits<Derived>::Dim;
         using SizeType = hsize_t;
-        using SizeArray = Array<hsize_t, Dim>;
+        using SizeArray = std::array<hsize_t, Dim>;
     public:
         /* Operations */
         void selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start) { Base::getDerived().selectHyperslab(op, count, start); }

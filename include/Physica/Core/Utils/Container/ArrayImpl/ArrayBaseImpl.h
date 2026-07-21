@@ -22,6 +22,7 @@
 #include <cstdio>
 #include <cstring>
 #include "ArrayBase.h"
+#include "Physica/Core/IO/HDF5/HDF5.h"
 
 namespace Physica {
     template<class Derived, class Allocator>
@@ -69,22 +70,45 @@ namespace Physica {
     }
 
     template<class Derived, class Allocator>
-    void ArrayBase<Derived, Allocator>::read(const auto& loc, const char* name) {
-        const auto group = loc.openGroup(name);
-        std::array<char, 32> buffer{}; // 32 is enough for uint64_t
-        for (size_t i = 0; i < getLength(); ++i) {
-            [[maybe_unused]] const auto count = std::format_to_n(buffer.data(), buffer.size(), "%zu", i).size;
-            Base::getDerived()[i].read(group, buffer.data());
+    void ArrayBase<Derived, Allocator>::read(this auto& self, const auto& loc, const char* name) {
+        if constexpr (std::is_trivially_copyable_v<value_type>) {
+            const auto dataset = loc.template openDataSet<1>(name);
+            const size_t length = dataset.getSize(0);
+            const auto space = H5DataSpace<1>(length);
+            self.resize(length);
+            dataset.read(self.data(), H5Loc::getPredType<value_type>(), space, space);
+        }
+        else {
+            auto group = loc.openGroup(name);
+            std::array<char, 32> buffer{}; // 32 is enough for uint64_t
+            for (size_t i = 0; i < self.getLength(); ++i) {
+                [[maybe_unused]] const auto count = std::format_to_n(buffer.data(), buffer.size(), "%zu", i).size;
+                assert(count <= buffer.size());
+                self[i].read(group, buffer.data());
+            }
         }
     }
 
     template<class Derived, class Allocator>
-    void ArrayBase<Derived, Allocator>::write(auto& loc, const char* name) const {
-        auto group = loc.openGroup(name);
-        std::array<char, 32> buffer{}; // 32 is enough for uint64_t
-        for (size_t i = 0; i < getLength(); ++i) {
-            [[maybe_unused]] const auto count = std::format_to_n(buffer.data(), buffer.size(), "%zu", i).size;
-            Base::getDerived()[i].write(group, buffer.data());
+    void ArrayBase<Derived, Allocator>::write(this const auto& self, auto& loc, const char* name) {
+        if constexpr (std::is_trivially_copyable_v<value_type>) {
+            const size_t length = self.getLength();
+            const auto space = H5DataSpace<1>(length);
+            H5DataSet<1> dataset;
+            if (loc.exists(name))
+                dataset = loc.template openDataSet<1>(name);
+            else
+                dataset = loc.template createDataSet<1>(name, H5Loc::getPredType<value_type>(), space);
+            dataset.write(self.data(), H5Loc::getPredType<value_type>(), space, space);
+        }
+        else {
+            auto group = loc.openGroup(name);
+            std::array<char, 32> buffer{}; // 32 is enough for uint64_t
+            for (size_t i = 0; i < self.getLength(); ++i) {
+                [[maybe_unused]] const auto count = std::format_to_n(buffer.data(), buffer.size(), "%zu", i).size;
+                assert(count <= buffer.size());
+                self[i].write(group, buffer.data());
+            }
         }
     }
 

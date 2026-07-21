@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Scalar/Scalar.h"
+#include "H5Loc.h"
 
 namespace Physica {
     class PHYSICA_API H5Group : public H5::Group, public H5Loc {
@@ -34,6 +34,7 @@ namespace Physica {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
+        using Location::exists;
         using Location::createDataSet;
         using Location::openDataSet;
         using Location::openGroup;
@@ -42,11 +43,6 @@ namespace Physica {
         const H5::Attribute readAttr(const std::string& name, T& value) const;
         template<class T>
         H5::Attribute writeAttr(const std::string& name, T value);
-    private:
-        using Base::createDataSet;
-        using Base::openDataSet;
-        template<class T>
-        [[nodiscard]] static const H5::PredType& getPredType();
     };
 
     template<class T>
@@ -83,35 +79,5 @@ namespace Physica {
             attr = Base::createAttribute(name.c_str(), type, space);
         attr.write(type, &value);
         return attr;
-    }
-
-    template<class T>
-    const H5::PredType& H5Group::getPredType() {
-        if constexpr (std::is_same<T, int8_t>::value)
-            return H5::PredType::NATIVE_INT8;
-        else if constexpr (std::is_same<T, int16_t>::value)
-            return H5::PredType::NATIVE_INT16;
-        else if constexpr (std::is_same<T, int32_t>::value)
-            return H5::PredType::NATIVE_INT32;
-        else if constexpr (std::is_same<T, int64_t>::value)
-            return H5::PredType::NATIVE_INT64;
-        else if constexpr (std::is_same<T, uint8_t>::value)
-            return H5::PredType::NATIVE_UINT8;
-        else if constexpr (std::is_same<T, uint16_t>::value)
-            return H5::PredType::NATIVE_UINT16;
-        else if constexpr (std::is_same<T, uint32_t>::value)
-            return H5::PredType::NATIVE_UINT32;
-        else if constexpr (std::is_same<T, uint64_t>::value)
-            return H5::PredType::NATIVE_UINT64;
-        else if constexpr (std::is_same<T, float>::value)
-            return H5::PredType::NATIVE_FLOAT;
-        else if constexpr (std::is_same<T, Real<Float32>>::value)
-            return H5::PredType::NATIVE_FLOAT;
-        else if constexpr (std::is_same<T, double>::value)
-            return H5::PredType::NATIVE_DOUBLE;
-        else {
-            static_assert(std::is_same<T, Real<Float64>>::value, "[Error]: Not implemented");
-            return H5::PredType::NATIVE_DOUBLE;
-        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/IO/HDF5/HDF5.h"
 #include "Physica/Core/Exception/IOException.h"
 
 namespace Physica {
@@ -27,7 +28,7 @@ namespace Physica {
     public:
         ~H5Loc() = default;
         /* Operations */
-        inline bool exists(const std::string&name, const H5::LinkAccPropList& lapl = H5::LinkAccPropList::DEFAULT) const;
+        [[nodiscard]] inline bool exists(const std::string& name, const H5::LinkAccPropList& lapl = H5::LinkAccPropList::DEFAULT) const;
 
         template<size_t Dim>
         H5DataSet<Dim> createDataSet(
@@ -45,6 +46,9 @@ namespace Physica {
 
         [[nodiscard]] const H5Group openGroup(const std::string& name) const;
         [[nodiscard]] H5Group openGroup(const std::string& name);
+        /* Static members */
+        template<class T>
+        [[nodiscard]] static const H5::PredType& getPredType() noexcept;
     protected:
         H5Loc() = default;
         H5Loc(const H5Loc&) = default;
@@ -53,11 +57,11 @@ namespace Physica {
         H5Loc& operator=(const H5Loc&) = default;
         H5Loc& operator=(H5Loc&&) noexcept = default;
     private:
-        auto& getDerived() { return *reinterpret_cast<H5::H5Location*>(this); }
-        const auto& getDerived() const { return *reinterpret_cast<const H5::H5Location*>(this); }
+        [[nodiscard]] auto& getDerived() { return *reinterpret_cast<H5::H5Location*>(this); }
+        [[nodiscard]] const auto& getDerived() const { return *reinterpret_cast<const H5::H5Location*>(this); }
     };
 
-    inline bool H5Loc::exists(const std::string&name, const H5::LinkAccPropList& lapl) const {
+    inline bool H5Loc::exists(const std::string& name, const H5::LinkAccPropList& lapl) const {
         return getDerived().exists(name, lapl);
     }
 
@@ -84,5 +88,34 @@ namespace Physica {
         if (!exists(name))
             throw IOException("[Error]: Dataset not found");
         return getDerived().openDataSet(name);
+    }
+
+    template<class T>
+    const H5::PredType& H5Loc::getPredType() noexcept {
+        if constexpr (std::is_same<T, int8_t>::value)
+            return H5::PredType::NATIVE_INT8;
+        else if constexpr (std::is_same<T, int16_t>::value)
+            return H5::PredType::NATIVE_INT16;
+        else if constexpr (std::is_same<T, int32_t>::value)
+            return H5::PredType::NATIVE_INT32;
+        else if constexpr (std::is_same<T, int64_t>::value)
+            return H5::PredType::NATIVE_INT64;
+        else if constexpr (std::is_same<T, uint8_t>::value)
+            return H5::PredType::NATIVE_UINT8;
+        else if constexpr (std::is_same<T, uint16_t>::value)
+            return H5::PredType::NATIVE_UINT16;
+        else if constexpr (std::is_same<T, uint32_t>::value)
+            return H5::PredType::NATIVE_UINT32;
+        else if constexpr (std::is_same<T, uint64_t>::value)
+            return H5::PredType::NATIVE_UINT64;
+        else if constexpr (std::is_same<T, float>::value)
+            return H5::PredType::NATIVE_FLOAT;
+        else if constexpr (std::is_same<T, double>::value)
+            return H5::PredType::NATIVE_DOUBLE;
+        else {
+            using M = Traits<T>::MachineType;
+            static_assert(!std::same_as<T, M>, "[Error]: Bad machine type");
+            return getPredType<M>();
+        }
     }
 }

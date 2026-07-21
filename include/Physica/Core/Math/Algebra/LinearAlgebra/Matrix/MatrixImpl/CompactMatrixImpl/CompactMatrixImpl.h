@@ -210,7 +210,7 @@ namespace Physica {
         const size_t maxMinor = dataset.getSize(1);
         Base::resize(Base::rowFromMajorMinor(maxMajor, maxMinor), Base::colFromMajorMinor(maxMajor, maxMinor));
 
-        const auto memSpace = H5DataSpace<1>({maxMinor});
+        const auto memSpace = H5DataSpace<1>(maxMinor);
         auto fileSpace = H5DataSpace<2>({Base::getMaxMajor(), Base::getMaxMinor()});
         for (size_t major = 0; major < maxMajor; ++major) {
             fileSpace.selectHyperslab(H5S_SELECT_SET, {1, maxMinor}, {major, 0});
@@ -233,7 +233,7 @@ namespace Physica {
         else
             dataset = loc.createDataSet<2>(name, ScalarType::dtype_hdf5(), space);
 
-        const auto memSpace = H5DataSpace<1>({maxMinor});
+        const auto memSpace = H5DataSpace<1>(maxMinor);
         auto fileSpace = H5DataSpace<2>({Base::getMaxMajor(), Base::getMaxMinor()});
         for (size_t major = 0; major < maxMajor; ++major) {
             fileSpace.selectHyperslab(H5S_SELECT_SET, {1, maxMinor}, {major, 0});

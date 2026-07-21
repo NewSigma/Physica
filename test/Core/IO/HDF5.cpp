@@ -26,7 +26,7 @@ int main() {
     TempFile temp("/tmp/tmpXXXXXX");
     const char* str = "This is a str\nstr line2";
 
-    const auto dataspace = H5DataSpace<1>({strlen(str)});
+    const auto dataspace = H5DataSpace<1>(strlen(str));
     {
         auto h5f = H5File::open(temp.getName());
         auto dataset = h5f.createDataSet<1>("/data", H5::PredType::NATIVE_CHAR, dataspace);

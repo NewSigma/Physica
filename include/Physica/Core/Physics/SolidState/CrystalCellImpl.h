@@ -84,7 +84,7 @@ namespace Physica {
     template<Scalar T>
     H5Group CrystalCell<T>::write(H5Loc& loc, const char* name) const {
         auto group = Base::write(loc, name);
-        const auto space = H5DataSpace<1>({Base::getNumParticle()});
+        const auto space = H5DataSpace<1>(Base::getNumParticle());
         auto dataset = group.template createDataSet<1>("AtomicNumber", H5::PredType::NATIVE_UINT16, space);
         dataset.write(atomicNumbers.data(), H5::PredType::NATIVE_UINT16);
         return group;

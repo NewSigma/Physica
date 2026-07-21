@@ -19,7 +19,7 @@
 #pragma once
 
 #include <fstream>
-#include "Physica/Core/Utils/Container/Array.h"
+#include <vector>
 #include "HDF5.h"
 
 namespace Physica {
@@ -77,7 +77,7 @@ namespace Physica {
     void H5DataSet<Dim>::toFile(const std::string& path) const {
         std::ofstream fout(path);
         const auto size = getDataSpace().getSize(0);
-        auto buffer = Array<char>(size);
+        auto buffer = std::vector<char>(size);
         fout.write(buffer.data(), size);
     }
 

@@ -63,8 +63,8 @@ namespace Physica {
         void sendrecv(int send_to, int recv_from);
         void bcast(int root);
 
-        void read(const auto& loc, const char* name);
-        void write(auto& loc, const char* name) const;
+        void read(this auto&, const auto& loc, const char* name);
+        void write(this const auto&, auto& loc, const char* name);
         /* Getters */
         [[nodiscard]] __host__ __device__ auto size() const noexcept { return Base::getDerived().size(); }
         [[nodiscard]] __host__ __device__ auto getLength() const noexcept { return Base::getDerived().getLength(); }
