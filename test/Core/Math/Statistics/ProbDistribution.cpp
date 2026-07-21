@@ -18,11 +18,32 @@
  */
 #include "Physica/Core/Math/Statistics/ProbDistribution.h"
 #include "Physica/Core/Math/Statistics/ProbDistribution2D.h"
+#ifdef PHYSICA_HDF5
+    #include "Physica/Core/Utils/Unix/TempFile.h"
+#endif
 #include "Test.h"
 
 using namespace Physica;
 using T = float64;
 using RandomSource = Random<MCG>;
+
+namespace {
+    void hdf5() {
+    #ifdef PHYSICA_HDF5
+        TempFile temp("/tmp/tmpXXXXXX");
+        ProbDistribution<T> answer(2, 3, 10);
+        answer.sample(VectorND<T>::linspace(T(2.1), T(2.9), 5));
+        {
+            auto h5f = H5File::open(temp.getName());
+            answer.write(h5f, "dist");
+        }
+        ProbDistribution<T> result(0, 1, 2);
+        auto h5f = H5File::open(temp.getName(), H5File::ReadOnly);
+        result.read(h5f, "dist");
+        expect(result == answer);
+    #endif
+    }
+}
 
 int main() {
     // Test that getMin(), getMax(), and calcNumSample() are helpful diagnostics when data lies outside the expected range

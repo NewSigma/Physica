@@ -60,8 +60,8 @@ namespace Physica {
         [[nodiscard]] const BucketType& getBucket() const noexcept { return bucket; }
         [[nodiscard]] size_t getNumBinX() const noexcept { return bucket.dim(0); }
         [[nodiscard]] size_t getNumBinY() const noexcept { return bucket.dim(1); }
-        [[nodiscard]] T getFromPointX() const noexcept { return separatesX[0]; }
-        [[nodiscard]] T getFromPointY() const noexcept { return separatesY[0]; }
+        [[nodiscard]] T getFromPointX() const noexcept { return separatesX.front(); }
+        [[nodiscard]] T getFromPointY() const noexcept { return separatesY.front(); }
         [[nodiscard]] T getToPointX() const noexcept { return separatesX.back(); }
         [[nodiscard]] T getToPointY() const noexcept { return separatesY.back(); }
         [[nodiscard]] T getMaxX() const noexcept { return maxX; }

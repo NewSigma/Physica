@@ -36,8 +36,9 @@ namespace Physica {
         ProbDistribution(This&&) noexcept = default;
         ~ProbDistribution() = default;
         /* Operators */
-        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept;
         void operator+=(const This& pdf);
+        [[nodiscard]] bool operator==(const This& other) const noexcept;
         /* Operations */
         void sample(T data);
         void sample(VectorND<T> datas);
@@ -46,11 +47,14 @@ namespace Physica {
         [[nodiscard]] VectorND<T> makePosition() const;
         [[nodiscard]] VectorND<T> makeDistribution() const;
         [[nodiscard]] size_t calcNumSample() const;
+
+        const H5Group read(const H5Loc& loc, const char* name);
+        H5Group write(H5Loc& loc, const char* name) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getBucket() const noexcept { return bucket; }
         [[nodiscard]] size_t getNumBin() const noexcept { return bucket.getLength(); }
-        [[nodiscard]] T getFromPoint() const noexcept { return separates[0]; }
+        [[nodiscard]] T getFromPoint() const noexcept { return separates.front(); }
         [[nodiscard]] T getToPoint() const noexcept { return separates.back(); }
         [[nodiscard]] T getMaximum() const noexcept { return maximum; }
         [[nodiscard]] T getMinimum() const noexcept { return minimum; }
@@ -63,6 +67,27 @@ namespace Physica {
             , repDelta(T(numBin) / (to - from)) {
         assert(from < to);
         clear();
+    }
+
+    template<Scalar T>
+    auto ProbDistribution<T>::operator=(This obj) noexcept -> This& {
+        swap(obj);
+        return *this;
+    }
+
+    template<Scalar T>
+    void ProbDistribution<T>::operator+=(const ProbDistribution<T>& pdf) {
+        for (size_t i = 0; i < bucket.getLength(); ++i)
+            bucket[i] += pdf.bucket[i];
+    }
+
+    template<Scalar T>
+    bool ProbDistribution<T>::operator==(const ProbDistribution<T>& other) const noexcept {
+        return bucket == other.bucket
+            && getFromPoint() == other.getFromPoint()
+            && getToPoint() == other.getToPoint()
+            && maximum == other.maximum
+            && minimum == other.minimum;
     }
 
     template<Scalar T>
@@ -103,10 +128,43 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void ProbDistribution<T>::operator+=(const ProbDistribution<T>& pdf) {
-        for (size_t i = 0; i < bucket.getLength(); ++i)
-            bucket[i] += pdf.bucket[i];
+    size_t ProbDistribution<T>::calcNumSample() const {
+        size_t num = 0;
+        for (auto elem : bucket)
+            num += elem;
+        return num;
     }
+
+#ifdef PHYSICA_HDF5
+    template<Scalar T>
+    const H5Group ProbDistribution<T>::read(const H5Loc& loc, const char* name) {
+        const auto group = loc.openGroup(name);
+        T from, to;
+        size_t numBin{};
+
+        bucket.read(group, "Bucket");
+        group.readAttr("NumBin", numBin);
+        group.readAttr("From", from);
+        group.readAttr("To", to);
+        group.readAttr("Maximum", maximum);
+        group.readAttr("Minimum", minimum);
+        separates = VectorND<T>::linspace(from, to, numBin + 1);
+        repDelta = T(numBin) / (to - from);
+        return H5Group(group);
+    }
+
+    template<Scalar T>
+    H5Group ProbDistribution<T>::write(H5Loc& loc, const char* name) const {
+        auto group = loc.openGroup(name);
+        bucket.write(group, "Bucket");
+        group.writeAttr("NumBin", bucket.getLength());
+        group.writeAttr("From", getFromPoint());
+        group.writeAttr("To", getToPoint());
+        group.writeAttr("Maximum", maximum);
+        group.writeAttr("Minimum", minimum);
+        return H5Group(group);
+    }
+#endif
 
     template<Scalar T>
     void ProbDistribution<T>::swap(This& __restrict obj) noexcept {
@@ -116,13 +174,5 @@ namespace Physica {
         repDelta.swap(obj.repDelta);
         maximum.swap(obj.maximum);
         minimum.swap(obj.minimum);
-    }
-
-    template<Scalar T>
-    size_t ProbDistribution<T>::calcNumSample() const {
-        size_t num = 0;
-        for (auto elem : bucket)
-            num += elem;
-        return num;
     }
 }
