@@ -40,31 +40,23 @@ namespace {
         expect(rectangle.transpose().tril().getCol() == 4);
     }
 
-    void invAndProd() noexcept {
+    void inverse() noexcept {
         constexpr double Prec = 1E-12;
         auto origin = Matrix4D::random_uniform<RandomSource>(4, 4);
         Matrix4D inv = origin.triu().inv();
         Matrix4D prod = origin.triu() * inv;
         expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
-        prod = inv * origin.triu();
-        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
 
         inv = origin.tril().inv();
         prod = origin.tril() * inv;
-        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
-        prod = inv * origin.tril();
         expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
 
         inv = origin.triu_unit().inv();
         prod = origin.triu_unit() * inv;
         expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
-        prod = inv * origin.triu_unit();
-        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
 
         inv = origin.tril_unit().inv();
         prod = origin.tril_unit() * inv;
-        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
-        prod = inv * origin.tril_unit();
         expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
     }
 
@@ -84,11 +76,50 @@ namespace {
         sol = m.triu_unit().inv() * v;
         expect<RandomSource>(vectorNear(m.triu_unit() * sol, v, Prec));
     }
+
+    void invGEMM() {
+        constexpr double Prec = 1E-11;
+        const auto m = Matrix4D::random_uniform<RandomSource>(4, 4);
+        const auto rhs = Matrix4D::random_uniform<RandomSource>(4, 4);
+        const auto lhs = Matrix4D::random_uniform<RandomSource>(4, 4);
+        Matrix4D sol = m.tril().inv() * rhs;
+        Matrix4D prod = m.tril() * sol;
+        expect<RandomSource>(matrixNear(prod, rhs, Prec));
+
+        sol = m.triu().inv() * rhs;
+        prod = m.triu() * sol;
+        expect<RandomSource>(matrixNear(prod, rhs, Prec));
+
+        sol = m.tril_unit().inv() * rhs;
+        prod = m.tril_unit() * sol;
+        expect<RandomSource>(matrixNear(prod, rhs, Prec));
+
+        sol = m.triu_unit().inv() * rhs;
+        prod = m.triu_unit() * sol;
+        expect<RandomSource>(matrixNear(prod, rhs, Prec));
+
+        sol = lhs * m.tril().inv();
+        prod = sol * m.tril();
+        expect<RandomSource>(matrixNear(prod, lhs, Prec));
+
+        sol = lhs * m.triu().inv();
+        prod = sol * m.triu();
+        expect<RandomSource>(matrixNear(prod, lhs, Prec));
+
+        sol = lhs * m.tril_unit().inv();
+        prod = sol * m.tril_unit();
+        expect<RandomSource>(matrixNear(prod, lhs, Prec));
+
+        sol = lhs * m.triu_unit().inv();
+        prod = sol * m.triu_unit();
+        expect<RandomSource>(matrixNear(prod, lhs, Prec));
+    }
 }
 
 int main() {
     testSize();
-    invAndProd();
+    inverse();
     invGEMV();
+    invGEMM();
     return 0;
 }

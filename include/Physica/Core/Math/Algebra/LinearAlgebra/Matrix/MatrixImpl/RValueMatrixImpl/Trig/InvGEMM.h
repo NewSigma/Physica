@@ -21,7 +21,19 @@
 #include "MatrixTrig.h"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
+    namespace Internal {
+        template<Matrix M>
+        consteval bool isInvTrig() noexcept requires(instanceof<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, MatrixTrig>) {
+            return true;
+        }
+
+        template<Matrix M>
+        consteval bool isInvTrig() noexcept {
+            return false;
+        }
+    }
+
+    template<Matrix M1, Matrix M2> requires(Internal::isInvTrig<M1>() != Internal::isInvTrig<M2>())
     class GEMM<M1, M2> : public RValueMatrix<GEMM<M1, M2>> {
         using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
@@ -31,10 +43,10 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tc;
     private:
-        decay_rvalue_t<M1> inv;
+        decay_rvalue_t<M1> lhs;
         decay_rvalue_t<M2> rhs;
     public:
-        GEMM(M1&& inv, M2&& rhs);
+        GEMM(M1&& lhs, M2&& rhs);
         GEMM(const This&) = default;
         GEMM(This&&) noexcept = default;
         ~GEMM() = default;
@@ -45,7 +57,7 @@ namespace Physica {
         void assign(Matrix auto& target) const;
         void assign_mkl(Matrix auto& target) const noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return inv.getRow(); }
+        [[nodiscard]] size_t getRow() const noexcept { return lhs.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return rhs.getCol(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
@@ -53,10 +65,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
     };
 
-    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
-    GEMM<M1, M2>::GEMM(M1&& inv, M2&& rhs) : inv(std::forward<M1>(inv)), rhs(std::forward<M2>(rhs)) {}
+    template<Matrix M1, Matrix M2> requires(Internal::isInvTrig<M1>() != Internal::isInvTrig<M2>())
+    GEMM<M1, M2>::GEMM(M1&& lhs, M2&& rhs) : lhs(std::forward<M1>(lhs)), rhs(std::forward<M2>(rhs)) {}
 
-    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(Internal::isInvTrig<M1>() != Internal::isInvTrig<M2>())
     void GEMM<M1, M2>::assign(Matrix auto& target) const {
         if constexpr (HasMKL())
             assign_mkl(target);
@@ -64,17 +76,17 @@ namespace Physica {
             noImpl();
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(Internal::isInvTrig<M1>() != Internal::isInvTrig<M2>())
     auto&& GEMM<M1, M2>::getLHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), M1>(self.inv);
+        return propagate_rvalue_reference<decltype(self), M1>(self.lhs);
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(Internal::isInvTrig<M1>() != Internal::isInvTrig<M2>())
     auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M2>(self.rhs);
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(Internal::isInvTrig<M1>() != Internal::isInvTrig<M2>())
     __host__ __device__ consteval bool GEMM<M1, M2>::isStaticSquare() noexcept {
         using LHS = std::remove_cvref_t<M1>;
         using RHS = std::remove_cvref_t<M2>;

@@ -21,22 +21,45 @@
 #include "InvGEMM.h"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(Internal::isInvTrig<M1>() != Internal::isInvTrig<M2>())
     void GEMM<M1, M2>::assign_mkl(Matrix auto& target) const noexcept {
         using M = std::remove_cvref_t<decltype(target)>;
         using Tm = decltype(std::declval<T>().toMKL());
-        constexpr auto Layout = MatrixMajor::isRowMatrix<M>() ? CblasRowMajor : CblasColMajor;
-        constexpr auto Side = CblasLeft;
-        constexpr auto Uplo = Traits<M1>::Upper ? CblasUpper : CblasLower;
-        constexpr auto TransA = CblasNoTrans;
-        constexpr auto Diag = Traits<M1>::Unit ? CblasUnit : CblasNonUnit;
-        const M buffer = inv.getExpr();
-        if constexpr (std::same_as<std::remove_cvref_t<M2>, M>) {
-            if (&rhs != &target)
+        M buffer;
+        if constexpr (Internal::isInvTrig<M1>()) {
+            if constexpr (std::same_as<std::remove_cvref_t<M2>, M>) {
+                if (&rhs != &target)
+                    rhs.assign(target);
+            }
+            else
                 rhs.assign(target);
+            buffer = lhs.getExpr();
         }
-        else
-            rhs.assign(target);
+        else {
+            if constexpr (std::same_as<std::remove_cvref_t<M1>, M>) {
+                if (&lhs != &target)
+                    lhs.assign(target);
+            }
+            else
+                lhs.assign(target);
+            buffer = rhs.getExpr();
+        }
+
+        constexpr auto Layout = MatrixMajor::isRowMatrix<M>() ? CblasRowMajor : CblasColMajor;
+        constexpr auto Side = Internal::isInvTrig<M1>() ? CblasLeft : CblasRight;
+        constexpr auto Uplo = []() consteval noexcept {
+            if constexpr (Internal::isInvTrig<M1>())
+                return Traits<M1>::Upper ? CblasUpper : CblasLower;
+            else
+                return Traits<M2>::Upper ? CblasUpper : CblasLower;
+        }();
+        constexpr auto TransA = CblasNoTrans;
+        constexpr auto Diag = []() consteval noexcept {
+            if constexpr (Internal::isInvTrig<M1>())
+                return Traits<M1>::Unit ? CblasUnit : CblasNonUnit;
+            else
+                return Traits<M2>::Unit ? CblasUnit : CblasNonUnit;
+        }();
 
         const size_t m = getRow();
         const size_t n = getCol();

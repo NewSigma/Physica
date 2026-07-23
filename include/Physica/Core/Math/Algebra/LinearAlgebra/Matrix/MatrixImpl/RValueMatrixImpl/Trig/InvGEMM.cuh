@@ -21,7 +21,7 @@
 #include "MatrixTrig.cuh"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(Internal::isInvTrig<M1>() != Internal::isInvTrig<M2>())
     class device_obj<GEMM<M1, M2>> : public device_obj<RValueMatrix<GEMM<M1, M2>>> {
         using host_obj = GEMM<M1, M2>;
         using This = device_obj<host_obj>;
@@ -32,10 +32,10 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tc;
     private:
-        PlainStruct<add_device_obj_t<std::remove_reference_t<M1>>> inv;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M1>>> lhs;
         PlainStruct<add_device_obj_t<std::remove_reference_t<M2>>> rhs;
     public:
-        device_obj(Ref1 inv, Ref2 rhs);
+        device_obj(Ref1 lhs, Ref2 rhs);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -52,24 +52,42 @@ namespace Physica {
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
-    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
-    device_obj<GEMM<M1, M2>>::device_obj(Ref1 inv, Ref2 rhs) : inv(asStruct(inv)), rhs(asStruct(rhs)) {}
+    template<Matrix M1, Matrix M2> requires(Internal::isInvTrig<M1>() != Internal::isInvTrig<M2>())
+    device_obj<GEMM<M1, M2>>::device_obj(Ref1 lhs, Ref2 rhs) : lhs(asStruct(lhs)), rhs(asStruct(rhs)) {}
 
-    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(Internal::isInvTrig<M1>() != Internal::isInvTrig<M2>())
     void device_obj<GEMM<M1, M2>>::assign(Matrix auto& target) const {
         using Tm = decltype(std::declval<T>().toCUDA());
-        getRHS().assign(target);
+        if constexpr (Internal::isInvTrig<M1>())
+            getRHS().assign(target);
+        else
+            getLHS().assign(target);
 
         auto& ctx = CUDAContext::getInstance();
         ctx.setPointerMode(false);
-        constexpr auto Side = CUBLAS_SIDE_LEFT;
-        constexpr auto Uplo = Traits<M1>::Upper ? CUBLAS_FILL_MODE_UPPER : CUBLAS_FILL_MODE_LOWER;
+        constexpr auto Side = Internal::isInvTrig<M1>() ? CUBLAS_SIDE_LEFT : CUBLAS_SIDE_RIGHT;
+        constexpr auto Uplo = []() consteval noexcept {
+            if constexpr (Internal::isInvTrig<M1>())
+                return Traits<M1>::Upper ? CUBLAS_FILL_MODE_UPPER : CUBLAS_FILL_MODE_LOWER;
+            else
+                return Traits<M2>::Upper ? CUBLAS_FILL_MODE_UPPER : CUBLAS_FILL_MODE_LOWER;
+        }();
         constexpr auto Trans = CUBLAS_OP_N;
-        constexpr auto Diag = Traits<M1>::Unit ? CUBLAS_DIAG_UNIT : CUBLAS_DIAG_NON_UNIT;
+        constexpr auto Diag = []() consteval noexcept {
+            if constexpr (Internal::isInvTrig<M1>())
+                return Traits<M1>::Unit ? CUBLAS_DIAG_UNIT : CUBLAS_DIAG_NON_UNIT;
+            else
+                return Traits<M2>::Unit ? CUBLAS_DIAG_UNIT : CUBLAS_DIAG_NON_UNIT;
+        }();
         const size_t m = getRow();
         const size_t n = getCol();
         const auto alpha = Tm(T(1));
-        const auto* A = reinterpret_cast<const Tm*>(getLHS().getExpr().getExpr().data());
+        const auto* A = reinterpret_cast<const Tm*>([&]() noexcept {
+            if constexpr (Internal::isInvTrig<M1>())
+                return getLHS().getExpr().getExpr().data();
+            else
+                return getRHS().getExpr().getExpr().data();
+        }());
         const size_t lda = Side == CUBLAS_SIDE_LEFT ? m : n;
         auto* B = reinterpret_cast<Tm*>(target.data());
         const size_t ldb = MatrixMajor::isColMatrix<M1>() ? m : n;
@@ -87,12 +105,12 @@ namespace Physica {
         }
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(Internal::isInvTrig<M1>() != Internal::isInvTrig<M2>())
     auto&& device_obj<GEMM<M1, M2>>::getLHS(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), Ref1>(self.inv.getDerived());
+        return propagate_rvalue_reference<decltype(self), Ref1>(self.lhs.getDerived());
     }
 
-    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, MatrixTrig>)
+    template<Matrix M1, Matrix M2> requires(Internal::isInvTrig<M1>() != Internal::isInvTrig<M2>())
     auto&& device_obj<GEMM<M1, M2>>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref2>(self.rhs.getDerived());
     }
