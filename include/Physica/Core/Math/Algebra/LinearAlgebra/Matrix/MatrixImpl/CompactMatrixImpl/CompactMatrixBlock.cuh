@@ -111,11 +111,10 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    class device_obj<CompactMatrixBlock<M, Row, Col>>
-            : public device_obj<LValueMatrix<CompactMatrixBlock<M, Row, Col>>> {
+    class device_obj<CompactMatrixBlock<M, Row, Col>> : public device_obj<StridedMatrix<CompactMatrixBlock<M, Row, Col>>> {
         using host_obj = CompactMatrixBlock<M, Row, Col>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<LValueMatrix<host_obj>>;
+        using Base = device_obj<StridedMatrix<host_obj>>;
         using Ref = add_device_obj<M>::type;
         using MaybeRowCount = std::conditional_t<Row == Dynamic, size_t, Empty>;
         using MaybeColCount = std::conditional_t<Col == Dynamic, size_t, Empty>;
@@ -156,7 +155,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
-        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getRowStride() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getColStride() const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle(this auto&& self) noexcept;
     };
 
     template<Matrix M, size_t Row, size_t Col>
@@ -302,10 +303,18 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    __host__ __device__ auto device_obj<CompactMatrixBlock<M, Row, Col>>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
-        assert(row < self.getRow());
-        assert(col < self.getCol());
-        return self.mat.getDerived().data_ptr(row + self.fromRow, col + self.fromCol);
+    __host__ __device__ constexpr size_t device_obj<CompactMatrixBlock<M, Row, Col>>::getRowStride() const noexcept {
+        return mat.getDerived().getRowStride();
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ constexpr size_t device_obj<CompactMatrixBlock<M, Row, Col>>::getColStride() const noexcept {
+        return mat.getDerived().getColStride();
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<CompactMatrixBlock<M, Row, Col>>::data_handle(this auto&& self) noexcept {
+        return self.mat.getDerived().data_ptr(self.fromRow, self.fromCol);
     }
 }
 

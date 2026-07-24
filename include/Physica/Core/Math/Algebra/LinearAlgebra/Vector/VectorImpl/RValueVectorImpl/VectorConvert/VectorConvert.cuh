@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<class V>
-    class device_obj<ImagVector<V>> : public RValueVector<ImagVector<V>> {
+    class device_obj<ImagVector<V>> : public device_obj<RValueVector<ImagVector<V>>> {
         using host_obj = ImagVector<V>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;

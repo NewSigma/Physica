@@ -151,9 +151,9 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    class CompactMatrixBlock<M, Row, Col> : public LValueMatrix<CompactMatrixBlock<M, Row, Col>> {
+    class CompactMatrixBlock<M, Row, Col> : public StridedMatrix<CompactMatrixBlock<M, Row, Col>> {
         using This = CompactMatrixBlock<M, Row, Col>;
-        using Base = LValueMatrix<This>;
+        using Base = StridedMatrix<This>;
         using MaybeRowCount = std::conditional_t<Row == Dynamic, size_t, Empty>;
         using MaybeColCount = std::conditional_t<Col == Dynamic, size_t, Empty>;
     private:
@@ -198,7 +198,9 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
         [[nodiscard]] size_t getOrder() const noexcept;
-        [[nodiscard]] auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
+        [[nodiscard]] constexpr size_t getRowStride() const noexcept;
+        [[nodiscard]] constexpr size_t getColStride() const noexcept;
+        [[nodiscard]] auto data_handle(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
@@ -382,10 +384,18 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto CompactMatrixBlock<M, Row, Col>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
-        assert(row < self.getRow());
-        assert(col < self.getCol());
-        return self.mat.data_ptr(row + self.fromRow, col + self.fromCol);
+    constexpr size_t CompactMatrixBlock<M, Row, Col>::getRowStride() const noexcept {
+        return mat.getRowStride();
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    constexpr size_t CompactMatrixBlock<M, Row, Col>::getColStride() const noexcept {
+        return mat.getColStride();
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto CompactMatrixBlock<M, Row, Col>::data_handle(this auto&& self) noexcept {
+        return self.mat.data_ptr(self.fromRow, self.fromCol);
     }
 
     template<Matrix M, size_t Row, size_t Col>
