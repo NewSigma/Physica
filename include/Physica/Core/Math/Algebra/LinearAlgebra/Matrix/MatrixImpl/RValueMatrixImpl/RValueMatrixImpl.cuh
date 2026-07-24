@@ -190,14 +190,14 @@ namespace Physica {
     __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::row(this auto&& self, size_t r) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<RMatrixBlock<M, 1, Dynamic>>(std::forward<Self>(self), r, 0, self.getCol());
+        return device_obj<RMatrixBlock<M, 1, Dynamic>>(std::forward<Self>(self), r, 1, 0, self.getCol());
     }
 
     template<class Derived, Scalar ScalarT>
     __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::col(this auto&& self, size_t c) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<RMatrixBlock<M, Dynamic, 1>>(std::forward<Self>(self), 0, self.getRow(), c);
+        return device_obj<RMatrixBlock<M, Dynamic, 1>>(std::forward<Self>(self), 0, self.getRow(), c, 1);
     }
 
     template<class Derived, Scalar ScalarT>

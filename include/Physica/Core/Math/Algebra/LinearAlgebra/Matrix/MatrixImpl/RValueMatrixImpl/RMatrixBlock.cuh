@@ -22,22 +22,25 @@
 #include "Physica/PlainStruct.h"
 
 namespace Physica {
-    template<Matrix M>
-    class device_obj<RMatrixBlock<M, 1, Dynamic>> : public device_obj<RValueVector<RMatrixBlock<M, 1, Dynamic>>> {
-        using host_obj = RMatrixBlock<M, 1, Dynamic>;
+    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    class device_obj<RMatrixBlock<M, Row, Col>> : public device_obj<RValueVector<RMatrixBlock<M, Row, Col>>> {
+        using host_obj = RMatrixBlock<M, Row, Col>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
         using Ref = add_device_obj<M>::type;
+        using MaybeRowCount = std::conditional_t<Row == Dynamic, size_t, Empty>;
+        using MaybeColCount = std::conditional_t<Col == Dynamic, size_t, Empty>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     private:
         PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
         size_t fromRow;
+        [[no_unique_address]] MaybeRowCount rowCount;
         size_t fromCol;
-        size_t colCount;
+        [[no_unique_address]] MaybeColCount colCount;
     public:
-        __host__ __device__ device_obj(Ref mat_, size_t fromRow, size_t fromCol, size_t colCount);
+        __host__ __device__ device_obj(Ref mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -47,73 +50,55 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return colCount; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
     };
 
-    template<Matrix M>
-    __host__ __device__ device_obj<RMatrixBlock<M, 1, Dynamic>>::device_obj(Ref mat_, size_t fromRow, size_t fromCol, size_t colCount)
-            : mat(asStruct(mat_)), fromRow(fromRow), fromCol(fromCol), colCount(colCount) {
+    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    __host__ __device__ device_obj<RMatrixBlock<M, Row, Col>>::device_obj(Ref mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
+            : mat(asStruct(mat_))
+            , fromRow(fromRow)
+            , rowCount(rowCount)
+            , fromCol(fromCol)
+            , colCount(colCount) {
         assert(fromRow < mat_.getRow());
-        assert(fromCol + colCount <= mat_.getCol());
-    }
-
-    template<Matrix M>
-    __device__ auto device_obj<RMatrixBlock<M, 1, Dynamic>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
-        assert(index < colCount);
-        return mat.getDerived().calc(fromRow, fromCol + index, block);
-    }
-
-    template<Matrix M>
-    __host__ __device__ auto device_obj<RMatrixBlock<M, 1, Dynamic>>::values(this auto&& self) noexcept {
-        using M1 = decltype(propagate_rvalue_reference<decltype(self), M>(self.mat.getDerived()).values());
-        return RMatrixBlock<M1, 1, Dynamic>(propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived()).values(), self.fromRow, self.fromCol, self.getLength());
-    }
-
-    template<Matrix M>
-    class device_obj<RMatrixBlock<M, Dynamic, 1>> : public device_obj<RValueVector<RMatrixBlock<M, Dynamic, 1>>> {
-        using host_obj = RMatrixBlock<M, Dynamic, 1>;
-        using This = device_obj<host_obj>;
-        using Base = device_obj<RValueVector<host_obj>>;
-        using Ref = add_device_obj<M>::type;
-    protected:
-        using typename Base::T;
-        using typename Base::Tv;
-    private:
-        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
-        size_t fromRow;
-        size_t fromCol;
-        size_t rowCount;
-    public:
-        __host__ __device__ device_obj(Ref mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_);
-        device_obj(const This&) = default;
-        device_obj(This&&) noexcept = default;
-        ~device_obj() = default;
-        /* Getters */
-        using Base::calc;
-        [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
-
-        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
-        /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return rowCount; }
-    };
-
-    template<Matrix M>
-    __host__ __device__ device_obj<RMatrixBlock<M, Dynamic, 1>>::device_obj(Ref mat_, size_t fromRow, size_t rowCount, size_t fromCol)
-            : mat(asStruct(mat_)), fromRow(fromRow), fromCol(fromCol), rowCount(rowCount) {
-        assert(fromRow + rowCount <= mat_.getRow());
         assert(fromCol < mat_.getCol());
+        assert((fromRow + rowCount) <= mat_.getRow());
+        assert((fromCol + colCount) <= mat_.getCol());
+        if constexpr (Row != Dynamic)
+            assert(Row == rowCount);
+        if constexpr (Col != Dynamic)
+            assert(Col == colCount);
     }
 
-    template<Matrix M>
-    __device__ auto device_obj<RMatrixBlock<M, Dynamic, 1>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
-        assert(index < rowCount);
-        return mat.getDerived().calc(fromRow + index, fromCol, block);
+    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    __device__ auto device_obj<RMatrixBlock<M, Row, Col>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
+        assert(index < getLength());
+        if constexpr (Row == 1)
+            return mat.getDerived().calc(fromRow, fromCol + index, block);
+        else
+            return mat.getDerived().calc(fromRow + index, fromCol, block);
     }
 
-    template<Matrix M>
-    __host__ __device__ auto device_obj<RMatrixBlock<M, Dynamic, 1>>::values(this auto&& self) noexcept {
+    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    __host__ __device__ auto device_obj<RMatrixBlock<M, Row, Col>>::values(this auto&& self) noexcept {
         using M1 = decltype(propagate_rvalue_reference<decltype(self), M>(self.mat.getDerived()).values());
-        return RMatrixBlock<M1, Dynamic, 1>(propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived()).values(), self.fromRow, self.rouCount, self.fromCol);
+        return RMatrixBlock<M1, Row, Col>(propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived()).values(), self.fromRow, Row == 1 ? 1 : self.getLength(), self.fromCol, Col == 1 ? 1 : self.getLength());
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    __host__ __device__ size_t device_obj<RMatrixBlock<M, Row, Col>>::getLength() const noexcept {
+        if constexpr (Row == 1) {
+            if constexpr (Col == Dynamic)
+                return colCount;
+            else
+                return Col;
+        }
+        else {
+            if constexpr (Row == Dynamic)
+                return rowCount;
+            else
+                return Row;
+        }
     }
 
     template<Matrix M>
@@ -184,13 +169,13 @@ namespace Physica {
     template<Matrix M>
     __host__ __device__ auto device_obj<RMatrixBlock<M, Dynamic, Dynamic>>::row(this auto&& self, size_t r) noexcept {
         assert(r < self.getRow());
-        return device_obj<RMatrixBlock<M, 1, Dynamic>>(self.mat, self.fromRow + r, self.fromCol, self.getCol());
+        return device_obj<RMatrixBlock<M, 1, Dynamic>>(self.mat, self.fromRow + r, 1, self.fromCol, self.getCol());
     }
 
     template<Matrix M>
     __host__ __device__ auto device_obj<RMatrixBlock<M, Dynamic, Dynamic>>::col(this auto&& self, size_t c) noexcept {
         assert(c < self.getCol());
-        return device_obj<RMatrixBlock<M, Dynamic, 1>>(self.mat, self.fromRow, self.getRow(), self.fromCol + c);
+        return device_obj<RMatrixBlock<M, Dynamic, 1>>(self.mat, self.fromRow, self.getRow(), self.fromCol + c, 1);
     }
 
     template<Matrix M>
@@ -274,7 +259,7 @@ namespace Physica {
     template<Matrix M>
     __host__ __device__ auto device_obj<RMatrixBlock<M, Dynamic, Dynamic>>::values(this auto&& self) noexcept {
         using M1 = decltype(propagate_rvalue_reference<decltype(self), M>(self.mat.getDerived()).values());
-        return RMatrixBlock<M1, Dynamic, 1>(propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived()).values(), self.fromRow, self.rouCount, self.fromCol, self.colCount);
+        return RMatrixBlock<M1, Dynamic, Dynamic>(propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived()).values(), self.fromRow, self.rowCount, self.fromCol, self.colCount);
     }
 }
 

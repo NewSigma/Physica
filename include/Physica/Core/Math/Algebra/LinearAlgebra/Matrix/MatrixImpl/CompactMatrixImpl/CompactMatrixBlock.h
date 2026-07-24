@@ -19,263 +19,161 @@
 #pragma once
 
 #include "../CompactMatrix.h"
+#include "Physica/Core/Utils/Empty.h"
 
 namespace Physica {
     template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class CompactMatrixBlock;
 
-    template<Matrix M, size_t Col>
-    class CompactMatrixBlock<M, 1, Col> : public CompactVector<CompactMatrixBlock<M, 1, Col>> {
-        static_assert(MatrixMajor::isRowMatrix<M>(), "[Error]: Col major does not have continuous row");
-        using This = CompactMatrixBlock<M, 1, Col>;
-        using Base = CompactVector<This>;
-    private:
-        decay_rvalue_t<M> mat;
-        size_t fromRow;
-        size_t fromCol;
-        size_t colCount;
-    public:
-        CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount_, size_t fromCol, size_t colCount);
-        CompactMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol, size_t colCount);
-        CompactMatrixBlock(const This&) = default;
-        CompactMatrixBlock(This&&) noexcept = default;
-        ~CompactMatrixBlock() = default;
-        /* Operators */
-        This& operator=(const This& m) { Base::operator=(m); return *this; }
-        This& operator=(This&& m) noexcept { return *this = m; }
-        using Base::operator=;
-        /* Operations */
-        using Base::resize;
-        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
-
-        [[nodiscard]] auto&& row(this auto&&, size_t r) noexcept;
-
-        [[nodiscard]] auto values(this auto&&) noexcept;
-        template<int GradOrder = 1>
-        [[nodiscard]] auto grads(this auto&&) noexcept;
-        /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
-        [[nodiscard]] auto data(this auto&& self) noexcept;
-        /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Col; }
-    };
-
-    template<Matrix M, size_t Col>
-    CompactMatrixBlock<M, 1, Col>::CompactMatrixBlock(M&& mat_, size_t fromRow, [[maybe_unused]] size_t rowCount, size_t fromCol, size_t colCount)
-            : CompactMatrixBlock(std::forward<M>(mat_), fromRow, fromCol, colCount) {
-        assert(rowCount == 1);
-    }
-
-    template<Matrix M, size_t Col>
-    CompactMatrixBlock<M, 1, Col>::CompactMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol, size_t colCount)
-            : mat(std::forward<M>(mat_))
-            , fromRow(fromRow)
-            , fromCol(fromCol)
-            , colCount(colCount) {
-        assert(fromRow < mat.getRow());
-        assert(fromCol + colCount <= mat.getCol());
-    }
-
-    template<Matrix M, size_t Col>
-    auto&& CompactMatrixBlock<M, 1, Col>::row(this auto&& self, [[maybe_unused]] size_t r) noexcept {
-        assert(r == 0);
-        return self;
-    }
-
-    template<Matrix M, size_t Col>
-    auto CompactMatrixBlock<M, 1, Col>::values(this auto&& self) noexcept {
-        auto&& v = propagate_rvalue_reference<decltype(self), M>(self.mat).values();
-        using M1 = decltype(v);
-        return CompactMatrixBlock<M1, 1, Col>(std::forward<M1>(v), self.fromRow, self.fromCol, self.getLength());
-    }
-
-    template<Matrix M, size_t Col>
-    template<int GradOrder>
-    auto CompactMatrixBlock<M, 1, Col>::grads(this auto&& self) noexcept {
-        auto&& g = propagate_rvalue_reference<decltype(self), M>(self.mat).template grads<GradOrder>();
-        using M1 = decltype(g);
-        return CompactMatrixBlock<M1, 1, Col>(std::forward<M1>(g), self.fromRow, self.fromCol, self.getLength());
-    }
-
-    template<Matrix M, size_t Col>
-    auto CompactMatrixBlock<M, 1, Col>::data(this auto&& self) noexcept {
-        return self.mat.data_ptr(self.fromRow, self.fromCol);
-    }
-
-    template<Matrix M, size_t Row>
-    class CompactMatrixBlock<M, Row, 1> : public CompactVector<CompactMatrixBlock<M, Row, 1>> {
-        static_assert(MatrixMajor::isColMatrix<M>(), "[Error]: Row major does not have continuous col");
-        using This = CompactMatrixBlock<M, Row, 1>;
-        using Base = CompactVector<This>;
-    private:
-        decay_rvalue_t<M> mat;
-        size_t fromRow;
-        size_t rowCount;
-        size_t fromCol;
-    public:
-        CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount);
-        CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol);
-        CompactMatrixBlock(const This&) = default;
-        CompactMatrixBlock(This&&) noexcept = default;
-        ~CompactMatrixBlock() = default;
-        /* Operators */
-        This& operator=(const This& m) { Base::operator=(m); return *this; }
-        This& operator=(This&& m) noexcept { return *this = m; }
-        using Base::operator=;
-        /* Operations */
-        using Base::resize;
-        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
-
-        [[nodiscard]] auto&& col(this auto&&, size_t c) noexcept;
-
-        [[nodiscard]] auto values(this auto&&) noexcept;
-        template<int GradOrder = 1>
-        [[nodiscard]] auto grads(this auto&&) noexcept;
-        /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
-        [[nodiscard]] auto data(this auto&& self) noexcept;
-        /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Row; }
-    };
-
-    template<Matrix M, size_t Row>
-    CompactMatrixBlock<M, Row, 1>::CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount)
-            : CompactMatrixBlock(std::forward<M>(mat_), fromRow, rowCount, fromCol) {
-        assert(colCount == 1);
-    }
-
-    template<Matrix M, size_t Row>
-    CompactMatrixBlock<M, Row, 1>::CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol)
-            : mat(std::forward<M>(mat_))
-            , fromRow(fromRow)
-            , rowCount(rowCount)
-            , fromCol(fromCol) {
-        assert(fromRow + rowCount <= mat.getRow());
-        assert(fromCol < mat.getCol());
-    }
-
-    template<Matrix M, size_t Row>
-    auto&& CompactMatrixBlock<M, Row, 1>::col(this auto&& self, [[maybe_unused]] size_t c) noexcept {
-        assert(c == 0);
-        return self;
-    }
-
-    template<Matrix M, size_t Row>
-    auto CompactMatrixBlock<M, Row, 1>::values(this auto&& self) noexcept {
-        auto&& v = propagate_rvalue_reference<decltype(self), M>(self.mat).values();
-        using M1 = decltype(v);
-        return CompactMatrixBlock<M1, Row, 1>(std::forward<M1>(v), self.fromRow, self.getLength(), self.fromCol);
-    }
-
-    template<Matrix M, size_t Row>
-    template<int GradOrder>
-    auto CompactMatrixBlock<M, Row, 1>::grads(this auto&& self) noexcept {
-        auto&& g = propagate_rvalue_reference<decltype(self), M>(self.mat).template grads<GradOrder>();
-        using M1 = decltype(g);
-        return CompactMatrixBlock<M1, Row, 1>(std::forward<M1>(g), self.fromRow, self.getLength(), self.fromCol);
-    }
-
-    template<Matrix M, size_t Row>
-    auto CompactMatrixBlock<M, Row, 1>::data(this auto&& self) noexcept {
-        return self.mat.data_ptr(self.fromRow, self.fromCol);
-    }
-
-    template<Matrix M>
-    class CompactMatrixBlock<M, 1, 1> : public CompactVector<CompactMatrixBlock<M, 1, 1>> {
-        using This = CompactMatrixBlock<M, 1, 1>;
-        using Base = CompactVector<This>;
-    private:
-        decay_rvalue_t<M> mat;
-        size_t fromRow;
-        size_t fromCol;
-    public:
-        CompactMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol);
-        CompactMatrixBlock(const This&) = default;
-        CompactMatrixBlock(This&&) noexcept = default;
-        ~CompactMatrixBlock() = default;
-        /* Operators */
-        This& operator=(const This& m) { Base::operator=(m); return *this; }
-        This& operator=(This&& m) noexcept { return *this = m; }
-        using Base::operator=;
-        /* Operations */
-        using Base::resize;
-        void resize([[maybe_unused]] size_t length) { assert(length == 1); }
-
-        [[nodiscard]] auto&& row(this auto&&, size_t r) noexcept;
-        [[nodiscard]] auto&& col(this auto&&, size_t c) noexcept;
-
-        [[nodiscard]] auto values(this auto&&) noexcept;
-        template<int GradOrder = 1>
-        [[nodiscard]] auto grads(this auto&&) noexcept;
-        /* Getters */
-        [[nodiscard]] constexpr static size_t getLength() noexcept { return 1; }
-        [[nodiscard]] auto data(this auto&& self) noexcept;
-        /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return 1; }
-    };
-
-    template<Matrix M>
-    CompactMatrixBlock<M, 1, 1>::CompactMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol)
-            : mat(std::forward<M>(mat_))
-            , fromRow(fromRow)
-            , fromCol(fromCol) {
-        assert(fromRow < mat.getRow());
-        assert(fromCol < mat.getCol());
-    }
-
-    template<Matrix M>
-    auto&& CompactMatrixBlock<M, 1, 1>::row(this auto&& self, [[maybe_unused]] size_t r) noexcept {
-        assert(r == 0);
-        return self;
-    }
-
-    template<Matrix M>
-    auto&& CompactMatrixBlock<M, 1, 1>::col(this auto&& self, [[maybe_unused]] size_t c) noexcept {
-        assert(c == 0);
-        return self;
-    }
-
-    template<Matrix M>
-    auto CompactMatrixBlock<M, 1, 1>::values(this auto&& self) noexcept {
-        auto&& v = propagate_rvalue_reference<decltype(self), M>(self.mat).values();
-        using M1 = decltype(v);
-        return CompactMatrixBlock<M1, 1, 1>(std::forward<M1>(v), self.fromRow, self.fromCol);
-    }
-
-    template<Matrix M>
-    template<int GradOrder>
-    auto CompactMatrixBlock<M, 1, 1>::grads(this auto&& self) noexcept {
-        auto&& g = propagate_rvalue_reference<decltype(self), M>(self.mat).template grads<GradOrder>();
-        using M1 = decltype(g);
-        return CompactMatrixBlock<M1, 1, 1>(std::forward<M1>(g), self.fromRow, self.fromCol);
-    }
-
-    template<Matrix M>
-    [[nodiscard]] auto CompactMatrixBlock<M, 1, 1>::data(this auto&& self) noexcept {
-        return self.mat.data_ptr(self.fromRow, self.fromCol);
-    }
-
-    template<Matrix M, size_t Row, size_t Col>
-    class CompactMatrixBlock<M, Row, Col> : public LValueMatrix<CompactMatrixBlock<M, Row, Col>> {
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    class CompactMatrixBlock<M, Row, Col> : public CompactVector<CompactMatrixBlock<M, Row, Col>> {
+        static_assert((Row == 1 && MatrixMajor::isRowMatrix<M>()) || (Col == 1 && MatrixMajor::isColMatrix<M>()) || (Row == 1 || Col == 1),
+                      "[Error]: The matrix block is not compact");
         using This = CompactMatrixBlock<M, Row, Col>;
-        using Base = LValueMatrix<This>;
+        using Base = CompactVector<This>;
+        using MaybeRowCount = std::conditional_t<Row == Dynamic, size_t, Empty>;
+        using MaybeColCount = std::conditional_t<Col == Dynamic, size_t, Empty>;
     private:
         decay_rvalue_t<M> mat;
         size_t fromRow;
-        size_t rowCount;
+        [[no_unique_address]] MaybeRowCount rowCount;
         size_t fromCol;
-        size_t colCount;
+        [[no_unique_address]] MaybeColCount colCount;
     public:
         CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         CompactMatrixBlock(const This&) = default;
         CompactMatrixBlock(This&&) noexcept = default;
         ~CompactMatrixBlock() = default;
         /* Operators */
-        This& operator=(const This& m) { Base::operator=(m); return *this; }
-        This& operator=(This&& m) noexcept { return *this = m; }
+        This& operator=(const This& m);
+        This& operator=(This&& m) noexcept;
         using Base::operator=;
         /* Operations */
         using Base::resize;
-        void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
+        void resize(size_t length);
+
+        [[nodiscard]] auto&& row(this auto&&, size_t r) noexcept requires(Row == 1);
+        [[nodiscard]] auto&& col(this auto&&, size_t c) noexcept requires(Col == 1);
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] auto grads(this auto&&) noexcept;
+        /* Getters */
+        [[nodiscard]] constexpr size_t getLength() const noexcept;
+        [[nodiscard]] auto data(this auto&& self) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
+    };
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    CompactMatrixBlock<M, Row, Col>::CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
+            : mat(std::forward<M>(mat_))
+            , fromRow(fromRow)
+            , rowCount(rowCount)
+            , fromCol(fromCol)
+            , colCount(colCount) {
+        assert(fromRow < mat.getRow());
+        assert(fromCol < mat.getCol());
+        assert(fromRow + rowCount <= mat.getRow());
+        assert(fromCol + colCount <= mat.getCol());
+        if constexpr (Row != Dynamic)
+            assert(Row == rowCount);
+        if constexpr (Col != Dynamic)
+            assert(Col == colCount);
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    auto CompactMatrixBlock<M, Row, Col>::operator=(const This& m) -> This& {
+        Base::operator=(m);
+        return *this;
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    auto CompactMatrixBlock<M, Row, Col>::operator=(This&& m) noexcept -> This& {
+        return *this = m;
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    void CompactMatrixBlock<M, Row, Col>::resize([[maybe_unused]] size_t length) {
+        assert(length == getLength());
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    auto&& CompactMatrixBlock<M, Row, Col>::row(this auto&& self, [[maybe_unused]] size_t r) noexcept requires(Row == 1) {
+        assert(r == 0);
+        return std::forward<decltype(self)>(self);
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    auto&& CompactMatrixBlock<M, Row, Col>::col(this auto&& self, [[maybe_unused]] size_t c) noexcept requires(Col == 1) {
+        assert(c == 0);
+        return std::forward<decltype(self)>(self);
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    auto CompactMatrixBlock<M, Row, Col>::values(this auto&& self) noexcept {
+        auto&& v = propagate_rvalue_reference<decltype(self), M>(self.mat).values();
+        using M1 = decltype(v);
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(v), self.fromRow, Row == 1 ? 1 : self.getLength(), self.fromCol, Col == 1 ? 1 : self.getLength());
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    template<int GradOrder>
+    auto CompactMatrixBlock<M, Row, Col>::grads(this auto&& self) noexcept {
+        auto&& g = propagate_rvalue_reference<decltype(self), M>(self.mat).template grads<GradOrder>();
+        using M1 = decltype(g);
+        return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(g), self.fromRow, Row == 1 ? 1 : self.getLength(), self.fromCol, Col == 1 ? 1 : self.getLength());
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    constexpr size_t CompactMatrixBlock<M, Row, Col>::getLength() const noexcept {
+        if constexpr (Row == 1) {
+            if constexpr (Col == Dynamic)
+                return colCount;
+            else
+                return Col;
+        }
+        else {
+            if constexpr (Row == Dynamic)
+                return rowCount;
+            else
+                return Row;
+        }
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    auto CompactMatrixBlock<M, Row, Col>::data(this auto&& self) noexcept {
+        return self.mat.data_ptr(self.fromRow, self.fromCol);
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    __host__ __device__ consteval size_t CompactMatrixBlock<M, Row, Col>::getSizeAtCompile() noexcept {
+        return Row == 1 ? Col : Row;
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    class CompactMatrixBlock<M, Row, Col> : public LValueMatrix<CompactMatrixBlock<M, Row, Col>> {
+        using This = CompactMatrixBlock<M, Row, Col>;
+        using Base = LValueMatrix<This>;
+        using MaybeRowCount = std::conditional_t<Row == Dynamic, size_t, Empty>;
+        using MaybeColCount = std::conditional_t<Col == Dynamic, size_t, Empty>;
+    private:
+        decay_rvalue_t<M> mat;
+        size_t fromRow;
+        [[no_unique_address]] MaybeRowCount rowCount;
+        size_t fromCol;
+        [[no_unique_address]] MaybeColCount colCount;
+    public:
+        CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
+        CompactMatrixBlock(const This&) = default;
+        CompactMatrixBlock(This&&) noexcept = default;
+        ~CompactMatrixBlock() = default;
+        /* Operators */
+        This& operator=(const This& m);
+        This& operator=(This&& m) noexcept;
+        using Base::operator=;
+        /* Operations */
+        using Base::resize;
+        void resize(size_t row, size_t col);
 
         [[nodiscard]] auto row(this auto&&, size_t r) noexcept;
         [[nodiscard]] auto col(this auto&&, size_t c) noexcept;
@@ -297,8 +195,8 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }
-        [[nodiscard]] size_t getCol() const noexcept { return Col == Dynamic ? colCount : Col; }
+        [[nodiscard]] size_t getRow() const noexcept;
+        [[nodiscard]] size_t getCol() const noexcept;
         [[nodiscard]] size_t getOrder() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
         /* Static members */
@@ -320,14 +218,31 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col>
+    auto CompactMatrixBlock<M, Row, Col>::operator=(const This& m) -> This& {
+        Base::operator=(m);
+        return *this;
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto CompactMatrixBlock<M, Row, Col>::operator=(This&& m) noexcept -> This& {
+        return *this = m;
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    void CompactMatrixBlock<M, Row, Col>::resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
+        assert(row == getRow());
+        assert(col == getCol());
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
     auto CompactMatrixBlock<M, Row, Col>::row(this auto&& self, size_t r) noexcept {
         assert(r < self.getRow());
         auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         if constexpr (MatrixMajor::isRowMatrix<M>())
-            return CompactMatrixBlock<M1, 1, Col>(std::forward<M1>(m), self.fromRow + r, self.fromCol, self.getCol());
+            return CompactMatrixBlock<M1, 1, Col>(std::forward<M1>(m), self.fromRow + r, 1, self.fromCol, self.getCol());
         else
-            return LMatrixBlock<M1, 1, Col>(std::forward<M1>(m), self.fromRow + r, self.fromCol, self.getCol());
+            return LMatrixBlock<M1, 1, Col>(std::forward<M1>(m), self.fromRow + r, 1, self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
@@ -336,9 +251,9 @@ namespace Physica {
         auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
         if constexpr (MatrixMajor::isColMatrix<M>())
-            return CompactMatrixBlock<M1, Row, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c);
+            return CompactMatrixBlock<M1, Row, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c, 1);
         else
-            return LMatrixBlock<M1, Row, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c);
+            return LMatrixBlock<M1, Row, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c, 1);
     }
 
     template<Matrix M, size_t Row, size_t Col>
@@ -481,6 +396,22 @@ namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
     __host__ __device__ consteval size_t CompactMatrixBlock<M, Row, Col>::getColAtCompile() noexcept {
         return Col;
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    size_t CompactMatrixBlock<M, Row, Col>::getRow() const noexcept {
+        if constexpr (Row == Dynamic)
+            return rowCount;
+        else
+            return Row;
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    size_t CompactMatrixBlock<M, Row, Col>::getCol() const noexcept {
+        if constexpr (Col == Dynamic)
+            return colCount;
+        else
+            return Col;
     }
 
     template<Matrix M, size_t Row, size_t Col>

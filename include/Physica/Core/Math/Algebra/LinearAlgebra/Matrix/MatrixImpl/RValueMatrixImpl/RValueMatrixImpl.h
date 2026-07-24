@@ -177,13 +177,13 @@ namespace Physica {
     template<class Derived, Scalar ScalarT>
     auto RValueMatrix<Derived, ScalarT>::row(this auto&& self, size_t r) noexcept {
         using Self = decltype(self);
-        return RMatrixBlock<Self, 1, Dynamic>(std::forward<Self>(self), r, 0, self.getCol());
+        return RMatrixBlock<Self, 1, Dynamic>(std::forward<Self>(self), r, 1, 0, self.getCol());
     }
 
     template<class Derived, Scalar ScalarT>
     auto RValueMatrix<Derived, ScalarT>::col(this auto&& self, size_t c) noexcept {
         using Self = decltype(self);
-        return RMatrixBlock<Self, Dynamic, 1>(std::forward<Self>(self), 0, self.getRow(), c);
+        return RMatrixBlock<Self, Dynamic, 1>(std::forward<Self>(self), 0, self.getRow(), c, 1);
     }
 
     template<class Derived, Scalar ScalarT>

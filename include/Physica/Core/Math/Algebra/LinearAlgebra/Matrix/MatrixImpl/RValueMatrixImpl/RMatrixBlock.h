@@ -25,20 +25,23 @@ namespace Physica {
     template<class Derived, Scalar> class RValueMatrix;
     template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class RMatrixBlock;
 
-    template<Matrix M>
-    class RMatrixBlock<M, 1, Dynamic> : public RValueVector<RMatrixBlock<M, 1, Dynamic>> {
-        using This = RMatrixBlock<M, 1, Dynamic>;
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    class RMatrixBlock<M, Row, Col> : public RValueVector<RMatrixBlock<M, Row, Col>> {
+        using This = RMatrixBlock<M, Row, Col>;
         using Base = RValueVector<This>;
+        using MaybeRowCount = std::conditional_t<Row == Dynamic, size_t, Empty>;
+        using MaybeColCount = std::conditional_t<Col == Dynamic, size_t, Empty>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     private:
         decay_rvalue_t<M> mat;
         size_t fromRow;
+        [[no_unique_address]] MaybeRowCount rowCount;
         size_t fromCol;
-        size_t colCount;
+        [[no_unique_address]] MaybeColCount colCount;
     public:
-        RMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol, size_t colCount);
+        RMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         RMatrixBlock(const This&) = default;
         RMatrixBlock(This&&) noexcept = default;
         ~RMatrixBlock() = default;
@@ -47,76 +50,63 @@ namespace Physica {
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return colCount; }
+        [[nodiscard]] size_t getLength() const noexcept;
         /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
-    template<Matrix M>
-    RMatrixBlock<M, 1, Dynamic>::RMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol, size_t colCount)
-            : mat(std::forward<M>(mat_)), fromRow(fromRow), fromCol(fromCol), colCount(colCount) {
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    RMatrixBlock<M, Row, Col>::RMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
+            : mat(std::forward<M>(mat_))
+            , fromRow(fromRow)
+            , rowCount(rowCount)
+            , fromCol(fromCol)
+            , colCount(colCount) {
         assert(fromRow < mat.getRow());
-        assert(fromCol + colCount <= mat.getCol());
-    }
-
-    template<Matrix M>
-    auto RMatrixBlock<M, 1, Dynamic>::calc(size_t index) const -> T {
-        assert(index < colCount);
-        return mat.calc(fromRow, fromCol + index);
-    }
-
-    template<Matrix M>
-    auto RMatrixBlock<M, 1, Dynamic>::values(this auto&& self) noexcept {
-        auto&& v = propagate_rvalue_reference<decltype(self), M>(self.mat).values();
-        using M1 = decltype(v);
-        return RMatrixBlock<M1, 1, Dynamic>(std::forward<M1>(v), self.fromRow, self.fromCol, self.getLength());
-    }
-
-    template<Matrix M>
-    class RMatrixBlock<M, Dynamic, 1> : public RValueVector<RMatrixBlock<M, Dynamic, 1>> {
-        using This = RMatrixBlock<M, Dynamic, 1>;
-        using Base = RValueVector<This>;
-    protected:
-        using typename Base::T;
-        using typename Base::Tv;
-    private:
-        decay_rvalue_t<M> mat;
-        size_t fromRow;
-        size_t fromCol;
-        size_t rowCount;
-    public:
-        RMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol);
-        RMatrixBlock(const This&) = default;
-        RMatrixBlock(This&&) noexcept = default;
-        ~RMatrixBlock() = default;
-        /* Operations */
-        [[nodiscard]] T calc(size_t index) const;
-
-        [[nodiscard]] auto values(this auto&&) noexcept;
-        /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return rowCount; }
-        /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
-    };
-
-    template<Matrix M>
-    RMatrixBlock<M, Dynamic, 1>::RMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol)
-            : mat(std::forward<M>(mat_)), fromRow(fromRow), fromCol(fromCol), rowCount(rowCount) {
-        assert(fromRow + rowCount <= mat.getRow());
         assert(fromCol < mat.getCol());
+        assert(fromRow + rowCount <= mat.getRow());
+        assert(fromCol + colCount <= mat.getCol());
+        if constexpr (Row != Dynamic)
+            assert(Row == rowCount);
+        if constexpr (Col != Dynamic)
+            assert(Col == colCount);
     }
 
-    template<Matrix M>
-    auto RMatrixBlock<M, Dynamic, 1>::calc(size_t index) const -> T {
-        assert(index < rowCount);
-        return mat.calc(fromRow + index, fromCol);
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    auto RMatrixBlock<M, Row, Col>::calc(size_t index) const -> T {
+        assert(index < getLength());
+        if constexpr (Row == 1)
+            return mat.calc(fromRow, fromCol + index);
+        else
+            return mat.calc(fromRow + index, fromCol);
     }
 
-    template<Matrix M>
-    auto RMatrixBlock<M, Dynamic, 1>::values(this auto&& self) noexcept {
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    auto RMatrixBlock<M, Row, Col>::values(this auto&& self) noexcept {
         auto&& v = propagate_rvalue_reference<decltype(self), M>(self.mat).values();
         using M1 = decltype(v);
-        return RMatrixBlock<M1, Dynamic, 1>(std::forward<M1>(v), self.fromRow, self.rowCount, self.fromCol);
+        return RMatrixBlock<M1, Row, Col>(std::forward<M1>(v), self.fromRow, Row == 1 ? 1 : self.getLength(), self.fromCol, Col == 1 ? 1 : self.getLength());
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    size_t RMatrixBlock<M, Row, Col>::getLength() const noexcept {
+        if constexpr (Row == 1) {
+            if constexpr (Col == Dynamic)
+                return colCount;
+            else
+                return Col;
+        }
+        else {
+            if constexpr (Row == Dynamic)
+                return rowCount;
+            else
+                return Row;
+        }
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    __host__ __device__ consteval size_t RMatrixBlock<M, Row, Col>::getSizeAtCompile() noexcept {
+        return Row == 1 ? Col : Row;
     }
 
     template<Matrix M>
@@ -186,7 +176,7 @@ namespace Physica {
         assert(r < self.getRow());
         auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        return RMatrixBlock<M1, 1, Dynamic>(std::forward<M1>(m), self.fromRow + r, self.fromCol, self.getCol());
+        return RMatrixBlock<M1, 1, Dynamic>(std::forward<M1>(m), self.fromRow + r, 1, self.fromCol, self.getCol());
     }
 
     template<Matrix M>
@@ -194,7 +184,7 @@ namespace Physica {
         assert(c < self.getCol());
         auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        return RMatrixBlock<M1, Dynamic, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c);
+        return RMatrixBlock<M1, Dynamic, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c, 1);
     }
 
     template<Matrix M>

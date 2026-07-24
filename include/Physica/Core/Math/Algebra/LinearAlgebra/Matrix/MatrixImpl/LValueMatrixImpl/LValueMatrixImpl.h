@@ -145,13 +145,13 @@ namespace Physica {
     template<class Derived>
     auto LValueMatrix<Derived>::row(this auto&& self, size_t r) noexcept {
         using Self = decltype(self);
-        return LMatrixBlock<Self, 1, Dynamic>(std::forward<Self>(self), r, 0, self.getCol());
+        return LMatrixBlock<Self, 1, Dynamic>(std::forward<Self>(self), r, 1, 0, self.getCol());
     }
 
     template<class Derived>
     auto LValueMatrix<Derived>::col(this auto&& self, size_t c) noexcept {
         using Self = decltype(self);
-        return LMatrixBlock<Self, Dynamic, 1>(std::forward<Self>(self), 0, self.getRow(), c);
+        return LMatrixBlock<Self, Dynamic, 1>(std::forward<Self>(self), 0, self.getRow(), c, 1);
     }
 
     template<class Derived>

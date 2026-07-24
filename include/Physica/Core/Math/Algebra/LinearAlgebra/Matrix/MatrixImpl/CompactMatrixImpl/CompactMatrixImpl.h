@@ -57,30 +57,20 @@ namespace Physica {
     auto CompactMatrix<Derived>::row(this auto&& self, size_t r) noexcept {
         using Self = decltype(self);
         constexpr size_t ColAtCompile = self.getColAtCompile();
-        constexpr bool IsMat1x1 = ColAtCompile == 1;
-        if constexpr (IsMat1x1)
-            return CompactMatrixBlock<Self, 1, 1>(std::forward<Self>(self), r, 0);
-        else {
-            if constexpr (Derived::isRowMatrix())
-                return CompactMatrixBlock<Self, 1, ColAtCompile>(std::forward<Self>(self), r, 0, self.getCol());
-            else
-                return LMatrixBlock<Self, 1, ColAtCompile>(std::forward<Self>(self), r, 0, self.getCol());
-        }
+        if constexpr (Derived::isRowMatrix() || ColAtCompile == 1)
+            return CompactMatrixBlock<Self, 1, ColAtCompile>(std::forward<Self>(self), r, 1, 0, self.getCol());
+        else
+            return LMatrixBlock<Self, 1, ColAtCompile>(std::forward<Self>(self), r, 1, 0, self.getCol());
     }
 
     template<class Derived>
     auto CompactMatrix<Derived>::col(this auto&& self, size_t c) noexcept {
         using Self = decltype(self);
         constexpr size_t RowAtCompile = self.getRowAtCompile();
-        constexpr bool IsMat1x1 = RowAtCompile == 1;
-        if constexpr (IsMat1x1)
-            return CompactMatrixBlock<Self, 1, 1>(std::forward<Self>(self), 0, c);
-        else {
-            if constexpr (Derived::isColMatrix())
-                return CompactMatrixBlock<Self, RowAtCompile, 1>(std::forward<Self>(self), 0, self.getRow(), c);
-            else
-                return LMatrixBlock<Self, RowAtCompile, 1>(std::forward<Self>(self), 0, self.getRow(), c);
-        }
+        if constexpr (Derived::isColMatrix() || RowAtCompile == 1)
+            return CompactMatrixBlock<Self, RowAtCompile, 1>(std::forward<Self>(self), 0, self.getRow(), c, 1);
+        else
+            return LMatrixBlock<Self, RowAtCompile, 1>(std::forward<Self>(self), 0, self.getRow(), c, 1);
     }
 
     template<class Derived>

@@ -50,15 +50,10 @@ namespace Physica {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         constexpr size_t ColAtCompile = Derived::getColAtCompile();
-        constexpr bool IsMat1x1 = ColAtCompile == 1;
-        if constexpr (IsMat1x1)
-            return device_obj<CompactMatrixBlock<M, 1, 1>>(std::forward<Self>(self), r, 0);
-        else {
-            if constexpr (isRowMatrix)
-                return device_obj<CompactMatrixBlock<M, 1, ColAtCompile>>(std::forward<Self>(self), r, 0, self.getCol());
-            else
-                return device_obj<LMatrixBlock<M, 1, ColAtCompile>>(std::forward<Self>(self), r, 0, self.getCol());
-        }
+        if constexpr (isRowMatrix || ColAtCompile == 1)
+            return device_obj<CompactMatrixBlock<M, 1, ColAtCompile>>(std::forward<Self>(self), r, 1, 0, self.getCol());
+        else
+            return device_obj<LMatrixBlock<M, 1, ColAtCompile>>(std::forward<Self>(self), r, 1, 0, self.getCol());
     }
 
     template<class Derived>
@@ -66,15 +61,10 @@ namespace Physica {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         constexpr size_t RowAtCompile = Derived::getRowAtCompile();
-        constexpr bool IsMat1x1 = RowAtCompile == 1;
-        if constexpr (IsMat1x1)
-            return device_obj<CompactMatrixBlock<M, 1, 1>>(std::forward<Self>(self), 0, c);
-        else {
-            if constexpr (isColMatrix)
-                return device_obj<CompactMatrixBlock<M, RowAtCompile, 1>>(std::forward<Self>(self), 0, self.getRow(), c);
-            else
-                return device_obj<LMatrixBlock<M, RowAtCompile, 1>>(std::forward<Self>(self), 0, self.getRow(), c);
-        }
+        if constexpr (isColMatrix || RowAtCompile == 1)
+            return device_obj<CompactMatrixBlock<M, RowAtCompile, 1>>(std::forward<Self>(self), 0, self.getRow(), c, 1);
+        else
+            return device_obj<LMatrixBlock<M, RowAtCompile, 1>>(std::forward<Self>(self), 0, self.getRow(), c, 1);
     }
 
     template<class Derived>
