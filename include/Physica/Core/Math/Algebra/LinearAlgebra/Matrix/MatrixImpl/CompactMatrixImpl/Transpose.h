@@ -150,6 +150,12 @@ namespace Physica {
     }
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
+    size_t Transpose<V>::getOrder() const noexcept {
+        assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
+        return 1;
+    }
+
+    template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
     auto Transpose<V>::data(this auto&& self) noexcept {
         return self.vec.data();
     }
@@ -162,12 +168,6 @@ namespace Physica {
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
     __host__ __device__ consteval size_t Transpose<V>::getColAtCompile() noexcept {
         return std::remove_cvref_t<V>::getSizeAtCompile();
-    }
-
-    template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
-    size_t Transpose<V>::getOrder() const noexcept {
-        assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
-        return 1;
     }
 }
 

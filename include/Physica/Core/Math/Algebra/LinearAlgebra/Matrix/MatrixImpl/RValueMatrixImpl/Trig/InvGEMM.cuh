@@ -58,6 +58,7 @@ namespace Physica {
     template<Matrix M1, Matrix M2> requires(Internal::isInvTrig<M1>() != Internal::isInvTrig<M2>())
     void device_obj<GEMM<M1, M2>>::assign(Matrix auto& target) const {
         using Tm = decltype(std::declval<T>().toCUDA());
+        using M = std::remove_cvref_t<decltype(target)>;
         if constexpr (Internal::isInvTrig<M1>())
             getRHS().assign(target);
         else
@@ -66,13 +67,25 @@ namespace Physica {
         auto& ctx = CUDAContext::getInstance();
         ctx.setPointerMode(false);
         constexpr auto Side = Internal::isInvTrig<M1>() ? CUBLAS_SIDE_LEFT : CUBLAS_SIDE_RIGHT;
-        constexpr auto Uplo = []() consteval noexcept {
+        constexpr auto TransA = []() consteval noexcept {
+            if constexpr (Internal::isInvTrig<M1>())
+                return MatrixMajor::isSameMajor<M1, M>() ? CUBLAS_OP_N : CUBLAS_OP_T;
+            else
+                return MatrixMajor::isSameMajor<M2, M>() ? CUBLAS_OP_N : CUBLAS_OP_T;
+        }();
+        constexpr auto UploNoTrans = []() consteval noexcept {
             if constexpr (Internal::isInvTrig<M1>())
                 return Traits<M1>::Upper ? CUBLAS_FILL_MODE_UPPER : CUBLAS_FILL_MODE_LOWER;
             else
                 return Traits<M2>::Upper ? CUBLAS_FILL_MODE_UPPER : CUBLAS_FILL_MODE_LOWER;
         }();
-        constexpr auto Trans = CUBLAS_OP_N;
+
+        constexpr auto Uplo = [](auto uploNoTrans) consteval noexcept {
+            if constexpr (TransA == CUBLAS_OP_T)
+                return uploNoTrans == CUBLAS_FILL_MODE_UPPER ? CUBLAS_FILL_MODE_LOWER : CUBLAS_FILL_MODE_UPPER;
+            return uploNoTrans;
+        }(UploNoTrans);
+
         constexpr auto Diag = []() consteval noexcept {
             if constexpr (Internal::isInvTrig<M1>())
                 return Traits<M1>::Unit ? CUBLAS_DIAG_UNIT : CUBLAS_DIAG_NON_UNIT;
@@ -90,18 +103,18 @@ namespace Physica {
         }());
         const size_t lda = Side == CUBLAS_SIDE_LEFT ? m : n;
         auto* B = reinterpret_cast<Tm*>(target.data());
-        const size_t ldb = MatrixMajor::isColMatrix<M1>() ? m : n;
+        const size_t ldb = MatrixMajor::isColMatrix<M>() ? m : n;
         if constexpr (Base::isComplex()) {
             if constexpr (T::Prec == Float32)
-                check(cublasCtrsm_64(ctx, Side, Uplo, Trans, Diag, m, n, &alpha, A, lda, B, ldb));
+                check(cublasCtrsm_64(ctx, Side, Uplo, TransA, Diag, m, n, &alpha, A, lda, B, ldb));
             else
-                check(cublasZtrsm_64(ctx, Side, Uplo, Trans, Diag, m, n, &alpha, A, lda, B, ldb));
+                check(cublasZtrsm_64(ctx, Side, Uplo, TransA, Diag, m, n, &alpha, A, lda, B, ldb));
         }
         else {
             if constexpr (T::Prec == Float32)
-                check(cublasStrsm_64(ctx, Side, Uplo, Trans, Diag, m, n, &alpha, A, lda, B, ldb));
+                check(cublasStrsm_64(ctx, Side, Uplo, TransA, Diag, m, n, &alpha, A, lda, B, ldb));
             else
-                check(cublasDtrsm_64(ctx, Side, Uplo, Trans, Diag, m, n, &alpha, A, lda, B, ldb));
+                check(cublasDtrsm_64(ctx, Side, Uplo, TransA, Diag, m, n, &alpha, A, lda, B, ldb));
         }
     }
 

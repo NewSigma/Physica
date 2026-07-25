@@ -94,3 +94,4 @@ namespace Physica {
 
 #include "CompactMatrixImpl/CompactMatrixImpl.cuh"
 #include "CompactMatrixImpl/Flatten.cuh"
+#include "CompactMatrixImpl/Transpose.cuh"

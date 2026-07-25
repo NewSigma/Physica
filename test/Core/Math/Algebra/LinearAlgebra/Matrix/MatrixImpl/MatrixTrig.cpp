@@ -40,6 +40,33 @@ namespace {
         expect(rectangle.transpose().tril().getCol() == 4);
     }
 
+    void gemm() {
+        constexpr double Prec = 1E-11;
+        const auto rhs = Matrix4D::random_uniform<RandomSource>(4, 4);
+        const auto lhs = Matrix4D::random_uniform<RandomSource>(4, 4);
+        Matrix4D dense, result, answer;
+        const auto doubleProd = [&](const Matrix auto& trig) {
+            dense = trig;
+            result = trig * rhs;
+            answer = dense * rhs;
+            expect<RandomSource>(matrixNear(result, answer, Prec));
+
+            result = lhs * trig;
+            answer = lhs * dense;
+            expect<RandomSource>(matrixNear(result, answer, Prec));
+        };
+
+        const auto data = Matrix4D::random_uniform<RandomSource>(4, 4);
+        doubleProd(data.tril());
+        doubleProd(data.triu());
+        doubleProd(data.tril_unit());
+        doubleProd(data.triu_unit());
+        doubleProd(data.transpose().tril());
+        doubleProd(data.transpose().triu());
+        doubleProd(data.transpose().tril_unit());
+        doubleProd(data.transpose().triu_unit());
+    }
+
     void inverse() noexcept {
         constexpr double Prec = 1E-12;
         auto origin = Matrix4D::random_uniform<RandomSource>(4, 4);
@@ -79,45 +106,34 @@ namespace {
 
     void invGEMM() {
         constexpr double Prec = 1E-11;
-        const auto m = Matrix4D::random_uniform<RandomSource>(4, 4);
         const auto rhs = Matrix4D::random_uniform<RandomSource>(4, 4);
         const auto lhs = Matrix4D::random_uniform<RandomSource>(4, 4);
-        Matrix4D sol = m.tril().inv() * rhs;
-        Matrix4D prod = m.tril() * sol;
-        expect<RandomSource>(matrixNear(prod, rhs, Prec));
+        Matrix4D sol, prod;
+        const auto doubleProd = [&](const Matrix auto& trig) {
+            Matrix4D sol = trig.inv() * rhs;
+            Matrix4D prod = trig * sol;
+            expect<RandomSource>(matrixNear(prod, rhs, Prec));
 
-        sol = m.triu().inv() * rhs;
-        prod = m.triu() * sol;
-        expect<RandomSource>(matrixNear(prod, rhs, Prec));
+            sol = lhs * trig.inv();
+            prod = sol * trig;
+            expect<RandomSource>(matrixNear(prod, lhs, Prec));
+        };
 
-        sol = m.tril_unit().inv() * rhs;
-        prod = m.tril_unit() * sol;
-        expect<RandomSource>(matrixNear(prod, rhs, Prec));
-
-        sol = m.triu_unit().inv() * rhs;
-        prod = m.triu_unit() * sol;
-        expect<RandomSource>(matrixNear(prod, rhs, Prec));
-
-        sol = lhs * m.tril().inv();
-        prod = sol * m.tril();
-        expect<RandomSource>(matrixNear(prod, lhs, Prec));
-
-        sol = lhs * m.triu().inv();
-        prod = sol * m.triu();
-        expect<RandomSource>(matrixNear(prod, lhs, Prec));
-
-        sol = lhs * m.tril_unit().inv();
-        prod = sol * m.tril_unit();
-        expect<RandomSource>(matrixNear(prod, lhs, Prec));
-
-        sol = lhs * m.triu_unit().inv();
-        prod = sol * m.triu_unit();
-        expect<RandomSource>(matrixNear(prod, lhs, Prec));
+        const auto data = Matrix4D::random_uniform<RandomSource>(4, 4);
+        doubleProd(data.tril());
+        doubleProd(data.triu());
+        doubleProd(data.tril_unit());
+        doubleProd(data.triu_unit());
+        doubleProd(data.transpose().tril());
+        doubleProd(data.transpose().triu());
+        doubleProd(data.transpose().tril_unit());
+        doubleProd(data.transpose().triu_unit());
     }
 }
 
 int main() {
     testSize();
+    gemm();
     inverse();
     invGEMV();
     invGEMM();

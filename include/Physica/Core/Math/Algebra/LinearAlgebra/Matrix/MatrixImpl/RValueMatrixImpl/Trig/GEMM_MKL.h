@@ -29,27 +29,29 @@ namespace Physica {
         using Trig = std::conditional_t<TrigLHS, M1, M2>;
         constexpr auto Layout = MatrixMajor::isRowMatrix<M>() ? CblasRowMajor : CblasColMajor;
         constexpr auto Side = TrigLHS ? CblasLeft : CblasRight;
-        constexpr auto Uplo = Traits<Trig>::Upper ? CblasUpper : CblasLower;
-        constexpr auto TransTrig = CblasNoTrans;
-        constexpr auto Diag = Traits<Trig>::Unit ? CblasUnit : CblasNonUnit;
-
-        const M buffer = [this]() -> auto& {
-            if constexpr (TrigLHS)
-                return lhs;
-            else
-                return rhs;
+        constexpr auto TransTrig = MatrixMajor::isSameMajor<Trig, M>() ? CblasNoTrans : CblasTrans;
+        constexpr auto UploNoTrans = Traits<Trig>::Upper ? CblasUpper : CblasLower;
+        constexpr auto Uplo = []() consteval noexcept {
+            if constexpr (TransTrig == CblasTrans)
+                return UploNoTrans == CblasUpper ? CblasLower : CblasUpper;
+            return UploNoTrans;
         }();
 
-        [this]() -> auto& {
-            if constexpr (TrigLHS)
-                return rhs;
-            else
-                return lhs;
-        }().assign(target);
+        constexpr auto Diag = Traits<Trig>::Unit ? CblasUnit : CblasNonUnit;
+
+        if constexpr (TrigLHS)
+            rhs.assign(target);
+        else
+            lhs.assign(target);
 
         const size_t m = getRow();
         const size_t n = getCol();
-        const auto* a = reinterpret_cast<const Tm*>(buffer.data());
+        const auto* a = reinterpret_cast<const Tm*>([this]() noexcept {
+            if constexpr (TrigLHS)
+                return lhs.getExpr().data();
+            else
+                return rhs.getExpr().data();
+        }());
         const size_t lda = Side == CblasLeft ? m : n;
         auto* b = reinterpret_cast<Tm*>(target.data());
         const size_t ldb = Layout == CblasColMajor ? m : n;

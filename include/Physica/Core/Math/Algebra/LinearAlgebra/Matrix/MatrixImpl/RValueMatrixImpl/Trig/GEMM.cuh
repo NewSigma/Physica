@@ -61,16 +61,14 @@ namespace Physica {
         constexpr bool TrigLHS = instanceof_tx<M1, MatrixTrig>;
         using Trig = std::conditional_t<TrigLHS, M1, M2>;
         constexpr auto Side = TrigLHS ? CUBLAS_SIDE_LEFT : CUBLAS_SIDE_RIGHT;
-        constexpr auto Uplo = Traits<Trig>::Upper ? CUBLAS_FILL_MODE_UPPER : CUBLAS_FILL_MODE_LOWER;
-        constexpr auto TransA = CUBLAS_OP_N;
-        constexpr auto Diag = Traits<Trig>::Unit ? CUBLAS_DIAG_UNIT : CUBLAS_DIAG_NON_UNIT;
-
-        const M buffer = [this]() -> auto& {
-            if constexpr (TrigLHS)
-                return getLHS();
-            else
-                return getRHS();
+        constexpr auto TransA = MatrixMajor::isSameMajor<Trig, M>() ? CUBLAS_OP_N : CUBLAS_OP_T;
+        constexpr auto UploNoTrans = Traits<Trig>::Upper ? CUBLAS_FILL_MODE_UPPER : CUBLAS_FILL_MODE_LOWER;
+        constexpr auto Uplo = []() consteval noexcept {
+            if constexpr (TransA == CUBLAS_OP_T)
+                return UploNoTrans == CUBLAS_FILL_MODE_UPPER ? CUBLAS_FILL_MODE_LOWER : CUBLAS_FILL_MODE_UPPER;
+            return UploNoTrans;
         }();
+        constexpr auto Diag = Traits<Trig>::Unit ? CUBLAS_DIAG_UNIT : CUBLAS_DIAG_NON_UNIT;
 
         [this]() -> auto& {
             if constexpr (TrigLHS)
@@ -82,7 +80,12 @@ namespace Physica {
         const size_t m = getRow();
         const size_t n = getCol();
         const Tm alpha = 1;
-        const auto* A = reinterpret_cast<const Tm*>(buffer.data());
+        const auto* A = reinterpret_cast<const Tm*>([this]() noexcept {
+            if constexpr (TrigLHS)
+                return getLHS().getExpr().data();
+            else
+                return getRHS().getExpr().data();
+        }());
         const size_t lda = Side == CUBLAS_SIDE_LEFT ? m : n;
         auto* B = reinterpret_cast<Tm*>(target.data());
         const size_t ldb = MatrixMajor::isColMatrix<M>() ? m : n;
