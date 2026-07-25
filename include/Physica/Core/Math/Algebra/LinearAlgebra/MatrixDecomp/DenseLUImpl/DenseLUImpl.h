@@ -39,32 +39,7 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     void DenseLU<T, Pivot>::compute_base() {
-        size_t order = getOrder();
-        for (size_t i = 0; i < order; ++i) {
-            auto col = working.col(i);
-            if (i == 0) {
-                col.tail(1) *= reciprocal(col[0]);
-                continue;
-            }
-
-            const size_t alpha = i + 1;
-            for (size_t j = 1; j < alpha; ++j)
-                col[j] -= working.row(j).head(j) * col.head(j);
-
-            if (alpha < getRow()) {
-                auto tail = col.tail(alpha);
-                tail -= working.bottomLeftCorner(alpha, i) * col.head(i);
-
-                if constexpr (Pivot) {
-                    size_t pivot = working.pivotPartial(i);
-                    if (i != pivot) {
-                        working.swap_row(i, pivot);
-                        perm.swap_row(i, pivot);
-                    }
-                }
-                tail *= reciprocal(working[i, i]);
-            }
-        }
+        decomp(working, 0);
 
         if constexpr (Pivot)
             perm = perm.inv();
@@ -129,5 +104,30 @@ namespace Physica {
     const auto& DenseLU<T, Pivot>::getPerm() const noexcept {
         static_assert(Pivot, "[Error]: Perm is available to PLU decomp only");
         return perm;
+    }
+
+    template<Scalar T, bool Pivot>
+    void DenseLU<T, Pivot>::decomp(Matrix auto& block, size_t offset) {
+        size_t order = block.getOrder();
+        for (size_t i = 0; i < order; ++i) {
+            auto col = block.col(i);
+            for (size_t k = 0; k < i; ++k)
+                col.tail(k + 1) -= block.col(k).tail(k + 1) * col[k];
+
+            const size_t alpha = i + 1;
+            if (alpha < order) {
+                if constexpr (Pivot) {
+                    size_t pivot = block.pivotPartial(i);
+                    if (i != pivot) {
+                        i += offset;
+                        pivot += offset;
+                        working.swap_row(i, pivot);
+                        perm.swap_row(i, pivot);
+                    }
+                }
+
+                col.tail(alpha) *= reciprocal(col[i]);
+            }
+        }
     }
 }

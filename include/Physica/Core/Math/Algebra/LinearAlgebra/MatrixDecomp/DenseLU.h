@@ -71,7 +71,7 @@ namespace Physica {
         [[nodiscard]] const auto& getPerm() const noexcept;
         [[nodiscard]] consteval static bool isPivot() noexcept { return Pivot; }
     private:
-        void decomp_col(size_t index);
+        void decomp(Matrix auto& block, size_t offset);
     };
 }
 
