@@ -26,19 +26,23 @@ namespace Physica {
         using Tm = decltype(std::declval<T>().toMKL());
         constexpr auto Layout = MatrixMajor::getMajor<M>() == MatrixMajor::Row ? CblasRowMajor : CblasColMajor;
         constexpr auto Trans = instanceof<M, Transpose> ? CblasTrans : CblasNoTrans;
-        auto getData = [](const auto& mat) static {
-            if constexpr (instanceof<M, Transpose>)
-                return mat.transpose().data();
-            else
-                return mat.data();
-        };
 
         const size_t m = mat.getRow();
         const size_t n = mat.getCol();
-        const size_t lda = mat.getMaxMinor();
-        const auto* a = reinterpret_cast<const Tm*>(getData(mat));
+        const size_t lda = [this]() {
+            if constexpr (instanceof<M, Transpose>)
+                return mat.transpose().getMajorStride();
+            else
+                return mat.getMajorStride();
+        }();
+        const auto* a = reinterpret_cast<const Tm*>([this]() {
+            if constexpr (instanceof<M, Transpose>)
+                return mat.transpose().data_handle();
+            else
+                return mat.data_handle();
+        }());
         const auto* x = reinterpret_cast<const Tm*>(vec.data());
-        auto* y = reinterpret_cast<Tm*>(target.data());
+        auto* y = reinterpret_cast<Tm*>(target.data_handle());
         if constexpr (Base::isComplex()) {
             using Tc = T::ComplexType;
             const Tc alpha = 1;

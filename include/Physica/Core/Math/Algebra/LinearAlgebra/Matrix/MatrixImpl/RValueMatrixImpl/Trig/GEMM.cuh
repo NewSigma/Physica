@@ -82,13 +82,18 @@ namespace Physica {
         const Tm alpha = 1;
         const auto* A = reinterpret_cast<const Tm*>([this]() noexcept {
             if constexpr (TrigLHS)
-                return getLHS().getExpr().data();
+                return getLHS().getExpr().data_handle();
             else
-                return getRHS().getExpr().data();
+                return getRHS().getExpr().data_handle();
         }());
-        const size_t lda = Side == CUBLAS_SIDE_LEFT ? m : n;
-        auto* B = reinterpret_cast<Tm*>(target.data());
-        const size_t ldb = MatrixMajor::isColMatrix<M>() ? m : n;
+        const size_t lda = [this]() noexcept {
+            if constexpr (TrigLHS)
+                return getLHS().getExpr().getMajorStride();
+            else
+                return getRHS().getExpr().getMajorStride();
+        }();
+        auto* B = reinterpret_cast<Tm*>(target.data_handle());
+        const size_t ldb = target.getMajorStride();
 
         auto& ctx = CUDAContext::getInstance();
         ctx.setPointerMode(false);

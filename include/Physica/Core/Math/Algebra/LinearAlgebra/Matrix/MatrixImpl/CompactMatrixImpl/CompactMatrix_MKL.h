@@ -34,10 +34,10 @@ namespace Physica {
         constexpr char trans = 'T';
         const size_t rows = Base::getRow();
         const size_t cols = Base::getCol();
-        const auto* A = reinterpret_cast<const Tm*>(data());
-        auto* B = reinterpret_cast<Tm*>(target.data());
-        const size_t lda = Base::getMaxMinor();
-        const size_t ldb = target.getMaxMinor();
+        const auto* A = reinterpret_cast<const Tm*>(data_handle());
+        auto* B = reinterpret_cast<Tm*>(target.data_handle());
+        const size_t lda = Base::getMajorStride();
+        const size_t ldb = target.getMajorStride();
         if constexpr (T::isComplex()) {
             const auto alpha = T(1).toMKL();
             if constexpr (T::Prec == Float32)
@@ -62,8 +62,8 @@ namespace Physica {
         constexpr int Layout = MatrixMajor::getMajor<Derived>() == MatrixMajor::Row ? CblasRowMajor : CblasColMajor;
         constexpr char job = 'S';
         size_t n = Base::getRow();
-        auto* a = reinterpret_cast<Tm*>(data());
-        size_t lda = n;
+        auto* a = reinterpret_cast<Tm*>(data_handle());
+        size_t lda = Base::getMajorStride();
         lapack_int ilo{}, ihi{};
         VectorND<T> result(n);
         auto* scale = reinterpret_cast<Tm*>(result.data());

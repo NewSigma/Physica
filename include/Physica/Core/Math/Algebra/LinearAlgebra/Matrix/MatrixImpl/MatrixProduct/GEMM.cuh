@@ -155,36 +155,45 @@ namespace Physica {
 
         const Tm* A{};
         size_t k{};
+        size_t lda{};
         if constexpr (isTranspose1) {
             k = getLHS().getRow();
-            A = (Tm*)getLHS().getExpr().data();
+            A = (Tm*)getLHS().transpose().data_handle();
+            lda = getLHS().transpose().getMajorStride();
         }
         else {
             k = getLHS().getCol();
-            A = (Tm*)getLHS().data();
+            A = (Tm*)getLHS().data_handle();
+            lda = getLHS().getMajorStride();
         }
 
         const Tm* B{};
-        if constexpr (isTranspose2)
-            B = (Tm*)getRHS().getExpr().data();
-        else
-            B = (Tm*)getRHS().data();
+        size_t ldb{};
+        if constexpr (isTranspose2) {
+            B = (Tm*)getRHS().transpose().data_handle();
+            ldb = getRHS().transpose().getMajorStride();
+        }
+        else {
+            B = (Tm*)getRHS().data_handle();
+            ldb = getRHS().getMajorStride();
+        }
 
         Tm* C{};
         if constexpr (Diffable<decltype(target)>)
-            C = (Tm*)target.data().value_ptr();
+            C = (Tm*)target.data_handle().value_ptr();
         else
-            C = (Tm*)target.data();
+            C = (Tm*)target.data_handle();
+        const size_t ldc = target.getMajorStride();
 
         auto& ctx = CUDAContext::getInstance();
         ctx.setPointerMode(false);
         if constexpr (T::Prec == Float16)
-            check(cublasHgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, r, B, k, pBeta, C, r));
+            check(cublasHgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, lda, B, ldb, pBeta, C, ldc));
         else if constexpr (T::Prec == Float32)
-            check(cublasSgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, r, B, k, pBeta, C, r));
+            check(cublasSgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, lda, B, ldb, pBeta, C, ldc));
         else {
             static_assert(T::Prec == Float64, "[Error]: Unknown ScalarType");
-            check(cublasDgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, r, B, k, pBeta, C, r));
+            check(cublasDgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, lda, B, ldb, pBeta, C, ldc));
         }
     }
 }

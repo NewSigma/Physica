@@ -83,8 +83,8 @@ namespace Physica {
         public:
             constexpr static bool value = std::same_as<T, typename U2::ScalarType>
                                        && (T::Prec == Float16 || T::Prec == Float32 || T::Prec == Float64)
-                                       && U1::isCompact()
-                                       && U2::isCompact()
+                                       && U1::isStrided()
+                                       && U2::isStrided()
                                        && !Diffable<U1>
                                        && (EnableSIMD<U1, U2>::SizeAtCompile == Dynamic);
         };

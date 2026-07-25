@@ -34,6 +34,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] constexpr size_t getRowStride() const noexcept;
         [[nodiscard]] constexpr size_t getColStride() const noexcept;
+        [[nodiscard]] constexpr size_t getMajorStride() const noexcept;
+        [[nodiscard]] constexpr size_t getMinorStride() const noexcept;
         [[nodiscard]] auto data_handle() noexcept;
         [[nodiscard]] auto data_handle() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
@@ -61,6 +63,22 @@ namespace Physica {
             return Derived::getColStrideAtCompile();
         else
             return Base::getDerived().getColStride();
+    }
+
+    template<class Derived>
+    constexpr size_t StridedMatrix<Derived>::getMajorStride() const noexcept {
+        if constexpr (Derived::isRowMatrix())
+            return getRowStride();
+        else
+            return getColStride();
+    }
+
+    template<class Derived>
+    constexpr size_t StridedMatrix<Derived>::getMinorStride() const noexcept {
+        if constexpr (Derived::isRowMatrix())
+            return getColStride();
+        else
+            return getRowStride();
     }
 
     template<class Derived>

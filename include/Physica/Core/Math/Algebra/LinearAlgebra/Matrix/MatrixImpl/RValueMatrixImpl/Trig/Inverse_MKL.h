@@ -31,18 +31,19 @@ namespace Physica {
         constexpr char Uplo = Traits<M>::Upper ? 'U' : 'L';
         constexpr char Diag = Traits<M>::Unit ? 'U' : 'N';
         size_t n = getOrder();
-        auto* a = reinterpret_cast<Tm*>(target.data());
+        auto* a = reinterpret_cast<Tm*>(target.data_handle());
+        const size_t lda = target.getMajorStride();
         if constexpr (Base::isComplex()) {
             if constexpr (T::Prec == Float32)
-                check_lapack(LAPACKE_ctrtri_64(Layout, Uplo, Diag, n, a, n));
+                check_lapack(LAPACKE_ctrtri_64(Layout, Uplo, Diag, n, a, lda));
             else
-                check_lapack(LAPACKE_ztrtri_64(Layout, Uplo, Diag, n, a, n));
+                check_lapack(LAPACKE_ztrtri_64(Layout, Uplo, Diag, n, a, lda));
         }
         else {
             if constexpr (T::Prec == Float32)
-                check_lapack(LAPACKE_strtri_64(Layout, Uplo, Diag, n, a, n));
+                check_lapack(LAPACKE_strtri_64(Layout, Uplo, Diag, n, a, lda));
             else
-                check_lapack(LAPACKE_dtrtri_64(Layout, Uplo, Diag, n, a, n));
+                check_lapack(LAPACKE_dtrtri_64(Layout, Uplo, Diag, n, a, lda));
         }
     }
 }

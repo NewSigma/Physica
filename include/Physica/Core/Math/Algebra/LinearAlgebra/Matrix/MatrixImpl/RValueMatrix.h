@@ -54,8 +54,8 @@ namespace Physica {
             constexpr static bool value = std::same_as<T1, T2>
                                        && !Diffable<T1>
                                        && (T1::Prec == Float32 || T2::Prec == Float64)
-                                       && U1::isCompact()
-                                       && U2::isCompact();
+                                       && U1::isStrided()
+                                       && U2::isStrided();
         };
     }
     /**

@@ -36,6 +36,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr size_t getRowStride() const noexcept;
         [[nodiscard]] __host__ __device__ constexpr size_t getColStride() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getMajorStride() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getMinorStride() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_handle() noexcept;
         [[nodiscard]] __host__ __device__ auto data_handle() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
@@ -62,6 +64,22 @@ namespace Physica {
             return Derived::getColStrideAtCompile();
         else
             return Base::getDerived().getColStride();
+    }
+
+    template<class Derived>
+    __host__ __device__ constexpr size_t device_obj<StridedMatrix<Derived>>::getMajorStride() const noexcept {
+        if constexpr (Derived::isRowMatrix())
+            return getRowStride();
+        else
+            return getColStride();
+    }
+
+    template<class Derived>
+    __host__ __device__ constexpr size_t device_obj<StridedMatrix<Derived>>::getMinorStride() const noexcept {
+        if constexpr (Derived::isRowMatrix())
+            return getColStride();
+        else
+            return getRowStride();
     }
 
     template<class Derived>

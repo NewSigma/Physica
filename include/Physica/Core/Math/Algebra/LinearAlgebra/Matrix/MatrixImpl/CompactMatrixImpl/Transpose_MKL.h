@@ -32,10 +32,10 @@ namespace Physica {
         constexpr char trans = 'T';
         const size_t rows = getRow();
         const size_t cols = getCol();
-        const auto* A = reinterpret_cast<const Tm*>(mat.data());
-        auto* B = reinterpret_cast<Tm*>(target.data());
-        const size_t lda = Base::getMaxMinor();
-        const size_t ldb = target.getMaxMinor();
+        const auto* A = reinterpret_cast<const Tm*>(mat.data_handle());
+        auto* B = reinterpret_cast<Tm*>(target.data_handle());
+        const size_t lda = mat.getMajorStride();
+        const size_t ldb = target.getMajorStride();
         if constexpr (T::isComplex()) {
             const auto alpha = T(1).toMKL();
             if constexpr (T::Prec == Float32)

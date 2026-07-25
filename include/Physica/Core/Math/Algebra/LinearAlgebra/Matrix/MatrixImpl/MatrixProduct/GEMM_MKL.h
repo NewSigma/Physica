@@ -30,20 +30,26 @@ namespace Physica {
         constexpr auto TransB = MatrixMajor::isSameMajor<M, M2>() ? CblasNoTrans : CblasTrans;
         auto getData = [](const auto& mat) static {
             if constexpr (instanceof<decltype(mat), Transpose>)
-                return mat.transpose().data();
+                return mat.transpose().data_handle();
             else
-                return mat.data();
+                return mat.data_handle();
+        };
+        auto getMajorStride = [](const auto& mat) static {
+            if constexpr (instanceof<decltype(mat), Transpose>)
+                return mat.transpose().getMajorStride();
+            else
+                return mat.getMajorStride();
         };
 
         const size_t m = getRow();
         const size_t n = getCol();
         const size_t k = mat1.getCol();
-        const size_t lda = mat1.getMaxMinor();
-        const size_t ldb = mat2.getMaxMinor();
-        const size_t ldc = target.getMaxMinor();
+        const size_t lda = getMajorStride(mat1);
+        const size_t ldb = getMajorStride(mat2);
+        const size_t ldc = target.getMajorStride();
         const auto* a = reinterpret_cast<const Tm*>(getData(mat1));
         const auto* b = reinterpret_cast<const Tm*>(getData(mat2));
-        auto* c = reinterpret_cast<Tm*>(target.data());
+        auto* c = reinterpret_cast<Tm*>(target.data_handle());
         if constexpr (Base::isComplex()) {
             using Tc = T::ComplexType;
             const Tc alpha = 1;

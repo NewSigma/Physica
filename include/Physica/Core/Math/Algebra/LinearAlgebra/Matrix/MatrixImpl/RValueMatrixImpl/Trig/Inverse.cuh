@@ -79,13 +79,14 @@ namespace Physica {
         constexpr auto Uplo = Traits<M>::Upper ? cublasFillMode_t::CUBLAS_FILL_MODE_UPPER : cublasFillMode_t::CUBLAS_FILL_MODE_LOWER;
         constexpr auto Diag = Traits<M>::Unit ? cublasDiagType_t::CUBLAS_DIAG_UNIT : cublasDiagType_t::CUBLAS_DIAG_NON_UNIT;
         size_t n = getOrder();
-        auto* A = reinterpret_cast<Tm*>(target.data());
+        auto* A = reinterpret_cast<Tm*>(target.data_handle());
+        const size_t lda = target.getMajorStride();
         void* bufferOnDevice = deviceBuffer.data();
         size_t workspaceInBytesOnDevice = deviceBuffer.getLength();
         void* bufferOnHost = hostBuffer.getLength() == 0 ? nullptr : hostBuffer.data();
         size_t workspaceInBytesOnHost = hostBuffer.getLength();
         int* info = err.data();
-        check(cusolverDnXtrtri(ctx, Uplo, Diag, n, DataType, A, n, bufferOnDevice, workspaceInBytesOnDevice, bufferOnHost, workspaceInBytesOnHost, info));
+        check(cusolverDnXtrtri(ctx, Uplo, Diag, n, DataType, A, lda, bufferOnDevice, workspaceInBytesOnDevice, bufferOnHost, workspaceInBytesOnHost, info));
     }
 
     template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)

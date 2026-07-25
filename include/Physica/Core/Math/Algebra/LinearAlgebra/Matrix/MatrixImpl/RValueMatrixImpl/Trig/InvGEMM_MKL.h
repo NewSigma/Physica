@@ -75,13 +75,18 @@ namespace Physica {
         const size_t n = getCol();
         const auto* a = reinterpret_cast<const Tm*>([&]() noexcept {
             if constexpr (Internal::isInvTrig<M1>())
-                return lhs.getExpr().getExpr().data();
+                return lhs.getExpr().getExpr().data_handle();
             else
-                return rhs.getExpr().getExpr().data();
+                return rhs.getExpr().getExpr().data_handle();
         }());
-        const size_t lda = Side == CblasLeft ? m : n;
-        auto* b = reinterpret_cast<Tm*>(target.data());
-        const size_t ldb = Layout == CblasColMajor ? m : n;
+        const size_t lda = [&]() noexcept {
+            if constexpr (Internal::isInvTrig<M1>())
+                return lhs.getExpr().getExpr().getMajorStride();
+            else
+                return rhs.getExpr().getExpr().getMajorStride();
+        }();
+        auto* const b = reinterpret_cast<Tm*>(target.data_handle());
+        const size_t ldb = target.getMajorStride();
         if constexpr (isComplex()) {
             const Tc alpha = 1;
             if constexpr (T::Prec == Float32)

@@ -108,17 +108,22 @@ namespace Physica {
         constexpr auto Trans = (instanceof<M, Transpose> ^ MatrixMajor::isRowMatrix<M>()) ? CUBLAS_OP_T : CUBLAS_OP_N;
         const size_t m = getLHS().getRow();
         const size_t n = getLHS().getCol();
-        const size_t lda = getLHS().getMaxMinor();
+        const size_t lda = [this]() {
+            if constexpr (instanceof<M, Transpose>)
+                return getLHS().transpose().getMajorStride();
+            else
+                return getLHS().getMajorStride();
+        }();
         const Tm alpha = T(1).toCUDA();
         const Tm beta = T(0).toCUDA();
         const auto* a = reinterpret_cast<const Tm*>([this]() {
             if constexpr (instanceof<M, Transpose>)
-                return getLHS().transpose().data();
+                return getLHS().transpose().data_handle();
             else
-                return getLHS().data();
+                return getLHS().data_handle();
         }());
         const auto* x = reinterpret_cast<const Tm*>(getRHS().data());
-        auto* y = reinterpret_cast<Tm*>(target.data());
+        auto* y = reinterpret_cast<Tm*>(target.data_handle());
         if constexpr (Base::isComplex()) {
             if constexpr (T::Prec == Float32)
                 cublasCgemv_64(ctx, Trans, m, n, &alpha, a, lda, x, 1, &beta, y, 1);

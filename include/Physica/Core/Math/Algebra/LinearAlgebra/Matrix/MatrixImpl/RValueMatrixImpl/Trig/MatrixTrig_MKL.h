@@ -32,10 +32,10 @@ namespace Physica {
         constexpr char Uplo = Upper ? 'U' : 'L';
         const size_t m = getRow();
         const size_t n = getCol();
-        const auto* a = reinterpret_cast<const Tm*>(mat.data());
-        const size_t lda = MatrixMajor::isRowMatrix<M>() ? n : m;
-        auto* b = reinterpret_cast<Tm*>(target.data());
-        const size_t ldb = lda;
+        const auto* a = reinterpret_cast<const Tm*>(mat.data_handle());
+        const size_t lda = mat.getMajorStride();
+        auto* b = reinterpret_cast<Tm*>(target.data_handle());
+        const size_t ldb = target.getMajorStride();
         if constexpr (Base::isComplex()) {
             if constexpr (T::Prec == Float32)
                 check_lapack(LAPACKE_clacpy_64(Layout, Uplo, m, n, a, lda, b, ldb));
