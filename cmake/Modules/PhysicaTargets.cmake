@@ -51,3 +51,4 @@ endif()
 add_library(Physica::Logger INTERFACE IMPORTED)
 
 target_link_libraries(Physica::Logger INTERFACE ${PhysicaLogger_LIBRARIES})
+target_link_libraries(Physica::Logger INTERFACE PhysicaCore)

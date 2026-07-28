@@ -8,9 +8,7 @@ target_sources(PhysicaLogger PRIVATE
     LoggerTimer.cpp
 )
 
-if(${PHYSICA_MIMALLOC})
-    target_link_libraries(PhysicaLogger PRIVATE mimalloc)
-endif()
+target_link_libraries(PhysicaLogger PUBLIC Physica::Logger)
 
 install(TARGETS PhysicaLogger DESTINATION lib)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/Physica/Logger DESTINATION include/Physica)

@@ -4,7 +4,7 @@ project(Physica
         VERSION 2026
         DESCRIPTION "Modern template library for computational physics"
         HOMEPAGE_URL https://gitee.com/newsigma/Physica
-        LANGUAGES CXX)
+        LANGUAGES C CXX)
 
 if(${CMAKE_SOURCE_DIR} MATCHES ${CMAKE_BINARY_DIR})
     message(FATAL_ERROR "In source build is a bad practice")
