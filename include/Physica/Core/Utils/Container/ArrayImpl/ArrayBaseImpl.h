@@ -76,7 +76,7 @@ namespace Physica {
             const size_t length = dataset.getSize(0);
             const auto space = H5DataSpace<1>(length);
             self.resize(length);
-            dataset.read(self.data(), H5Loc::getPredType<value_type>(), space, space);
+            dataset.read(self.data(), H5Type::get<value_type>(), space, space);
         }
         else {
             auto group = loc.openGroup(name);
@@ -98,8 +98,8 @@ namespace Physica {
             if (loc.exists(name))
                 dataset = loc.template openDataSet<1>(name);
             else
-                dataset = loc.template createDataSet<1>(name, H5Loc::getPredType<value_type>(), space);
-            dataset.write(self.data(), H5Loc::getPredType<value_type>(), space, space);
+                dataset = loc.template createDataSet<1>(name, H5Type::get<value_type>(), space);
+            dataset.write(self.data(), H5Type::get<value_type>(), space, space);
         }
         else {
             auto group = loc.openGroup(name);

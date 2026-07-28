@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,33 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#include "Physica/Core/IO/HDF5/H5Type.h"
+#include <cassert>
 
-#include "Physica/Macro.h"
+using namespace Physica;
 
-#ifdef PHYSICA_HDF5
-    #include <H5Cpp.h>
+H5Type::H5Type(hid_t hid) : H5ID(hid) {}
 
-    #include "H5ID.h"
-    #include "H5Type.h"
-    #include "H5DataSet.h"
-    #include "H5DataSpace.h"
-    #include "H5Loc.h"
-    #include "H5File.h"
-    #include "H5Group.h"
-#else
-    namespace H5 {
-        class DataType;
-        class DSetMemXferPropList;
-    }
+void H5Type::insert(const char* name, size_t offset, const H5Type& memberType) noexcept {
+    assert(isCompound());
+    H5Tinsert(getHID(), name, offset, memberType.getHID());
+}
 
-    namespace Physica {
-        template<class Derived> class DataSpaceBase {};
-        template<size_t Dim> class H5DataSpace {};
-        template<size_t Dim> class H5DataSet {};
-        class H5DataType;
-        class H5File;
-        class H5Group {};
-        class H5Loc {};
-    }
-#endif
+bool H5Type::isCompound() const noexcept {
+    return H5Tget_class(getHID()) == H5T_COMPOUND;
+}

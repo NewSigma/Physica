@@ -225,15 +225,14 @@ namespace Physica {
 
 #ifdef PHYSICA_HDF5
     template<Scalar T>
-    const H5::DataType& Complex<T>::dtype_hdf5() noexcept {
-        static const auto instance = std::unique_ptr<H5::DataType>([]() -> H5::DataType* {
-            auto* result = new (std::nothrow) H5::DataType(H5T_COMPOUND, sizeof(This));
-            const auto id = result->getId();
-            H5Tinsert(id, "Real", HOFFSET(This, re), T::dtype_hdf5().getId());
-            H5Tinsert(id, "Imag", HOFFSET(This, im), T::dtype_hdf5().getId());
+    const H5Type& Complex<T>::dtype_hdf5() noexcept {
+        static const auto instance = []() static noexcept -> H5Type {
+            auto result = H5Type::compound<This>();
+            result.insert("Real", HOFFSET(This, re), T::dtype_hdf5());
+            result.insert("Imag", HOFFSET(This, im), T::dtype_hdf5());
             return result;
-        }());
-        return *instance;
+        }();
+        return instance;
     }
 #endif
 

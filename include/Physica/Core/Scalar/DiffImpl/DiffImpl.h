@@ -161,15 +161,14 @@ namespace Physica {
 
 #ifdef PHYSICA_HDF5
     template<Scalar T, DiffMode Mode, int Order>
-    const H5::DataType& Diff<T, Mode, Order>::dtype_hdf5() noexcept {
-        static const auto instance = std::unique_ptr<H5::DataType>([]() -> H5::DataType* {
-            auto* result = new (std::nothrow) H5::DataType(H5T_COMPOUND, sizeof(This));
-            const auto id = result->getId();
-            H5Tinsert(id, "Value", HOFFSET(This, v), T::dtype_hdf5().getId());
-            H5Tinsert(id, "Grad", HOFFSET(This, g), GradType::dtype_hdf5().getId());
+    const H5Type& Diff<T, Mode, Order>::dtype_hdf5() noexcept {
+        static const auto instance = []() static noexcept -> H5Type {
+            auto result = H5Type::compound<This>();
+            result.insert("Value", HOFFSET(This, v), T::dtype_hdf5());
+            result.insert("Grad", HOFFSET(This, g), GradType::dtype_hdf5());
             return result;
-        }());
-        return *instance;
+        }();
+        return instance;
     }
 #endif
 

@@ -29,8 +29,8 @@ int main() {
     const auto dataspace = H5DataSpace<1>(strlen(str));
     {
         auto h5f = H5File::open(temp.getName());
-        auto dataset = h5f.createDataSet<1>("/data", H5::PredType::NATIVE_CHAR, dataspace);
-        dataset.write(str, H5::PredType::NATIVE_CHAR);
+        auto dataset = h5f.createDataSet<1>("/data", H5Type::get<char>(), dataspace);
+        dataset.write(str, H5Type::get<char>());
     }
     {
         Array<char, 32> buffer{};

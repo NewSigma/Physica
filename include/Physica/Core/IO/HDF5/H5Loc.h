@@ -46,9 +46,6 @@ namespace Physica {
 
         [[nodiscard]] const H5Group openGroup(const std::string& name) const;
         [[nodiscard]] H5Group openGroup(const std::string& name);
-        /* Static members */
-        template<class T>
-        [[nodiscard]] static const H5::PredType& getPredType() noexcept;
     protected:
         H5Loc() = default;
         H5Loc(const H5Loc&) = default;
@@ -88,34 +85,5 @@ namespace Physica {
         if (!exists(name))
             throw IOException("[Error]: Dataset not found");
         return getDerived().openDataSet(name);
-    }
-
-    template<class T>
-    const H5::PredType& H5Loc::getPredType() noexcept {
-        if constexpr (std::is_same<T, int8_t>::value)
-            return H5::PredType::NATIVE_INT8;
-        else if constexpr (std::is_same<T, int16_t>::value)
-            return H5::PredType::NATIVE_INT16;
-        else if constexpr (std::is_same<T, int32_t>::value)
-            return H5::PredType::NATIVE_INT32;
-        else if constexpr (std::is_same<T, int64_t>::value)
-            return H5::PredType::NATIVE_INT64;
-        else if constexpr (std::is_same<T, uint8_t>::value)
-            return H5::PredType::NATIVE_UINT8;
-        else if constexpr (std::is_same<T, uint16_t>::value)
-            return H5::PredType::NATIVE_UINT16;
-        else if constexpr (std::is_same<T, uint32_t>::value)
-            return H5::PredType::NATIVE_UINT32;
-        else if constexpr (std::is_same<T, uint64_t>::value)
-            return H5::PredType::NATIVE_UINT64;
-        else if constexpr (std::is_same<T, float>::value)
-            return H5::PredType::NATIVE_FLOAT;
-        else if constexpr (std::is_same<T, double>::value)
-            return H5::PredType::NATIVE_DOUBLE;
-        else {
-            using M = Traits<T>::MachineType;
-            static_assert(!std::same_as<T, M>, "[Error]: Bad machine type");
-            return getPredType<M>();
-        }
     }
 }

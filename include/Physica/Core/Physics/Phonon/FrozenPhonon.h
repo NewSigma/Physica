@@ -177,7 +177,7 @@ namespace Physica {
         const auto group = loc.openGroup(name);
         unsigned char superSize[Dim];
         auto attr = group.openAttribute("SuperSize");
-        attr.read(H5::PredType::NATIVE_UCHAR, superSize);
+        attr.read(H5Type::get<unsigned char>(), superSize);
         const auto gridDim = Index3D{superSize[0], superSize[1], superSize[2]};
         rSpaceFC.resize(gridDim);
 

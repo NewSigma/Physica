@@ -52,7 +52,7 @@ namespace Physica {
         static_assert(!IsArray || std::rank<T>::value == 1, "[Error]: High dim array is not supported");
         static_assert(NumElem > 0, "[Error]: Bad array size");
 
-        const auto type = getPredType<T>();
+        const auto type = H5Type::get<T>();
         const auto space = H5DataSpace<1>(NumElem);
         H5::Attribute attr;
         if (Base::attrExists(name.c_str()))
@@ -70,7 +70,7 @@ namespace Physica {
         static_assert(!IsArray || std::rank<T>::value == 1, "[Error]: High dim array is not supported");
         static_assert(NumElem > 0, "[Error]: Bad array size");
 
-        const auto type = getPredType<T>();
+        const auto type = H5Type::get<T>();
         const auto space = H5DataSpace<1>(NumElem);
         H5::Attribute attr;
         if (Base::attrExists(name.c_str()))
