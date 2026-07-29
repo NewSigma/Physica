@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "DataSpaceBase.h"
+
 namespace Physica {
     template<class SpaceType, size_t Dim>
     class SubDataSpace : public DataSpaceBase<SubDataSpace<SpaceType, Dim>> {

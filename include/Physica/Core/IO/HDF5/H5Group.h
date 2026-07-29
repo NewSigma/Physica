@@ -39,47 +39,8 @@ namespace Physica {
         using Loc::createDataSet;
         using Loc::openDataSet;
         using Loc::openGroup;
-
-        template<class T>
-        void readAttr(const std::string& name, T& value) const;
-        template<class T>
-        void writeAttr(const std::string& name, T value);
         /* Static members */
         [[nodiscard]] static H5Group create(const H5ID& loc, const std::string& name);
         [[nodiscard]] static H5Group open(const H5ID& loc, const std::string& name);
     };
-
-    template<class T>
-    void H5Group::readAttr(const std::string& name, T& value) const {
-        constexpr bool IsArray = std::is_array<T>::value;
-        constexpr size_t NumElem = IsArray ? std::extent<T>::value : 1;
-        static_assert(!IsArray || std::rank<T>::value == 1, "[Error]: High dim array is not supported");
-        static_assert(NumElem > 0, "[Error]: Bad array size");
-
-        const auto type = H5Type::get<T>();
-        const auto space = H5DataSpace<1>(NumElem);
-        H5Attribute attr;
-        if (attrExists(name.c_str()))
-            attr = openAttribute(name);
-        else
-            attr = createAttribute(name, type, space);
-        attr.read(type, &value);
-    }
-
-    template<class T>
-    void H5Group::writeAttr(const std::string& name, T value) {
-        constexpr bool IsArray = std::is_array<T>::value;
-        constexpr size_t NumElem = IsArray ? std::extent<T>::value : 1;
-        static_assert(!IsArray || std::rank<T>::value == 1, "[Error]: High dim array is not supported");
-        static_assert(NumElem > 0, "[Error]: Bad array size");
-
-        const auto type = H5Type::get<T>();
-        const auto space = H5DataSpace<1>(NumElem);
-        H5Attribute attr;
-        if (attrExists(name.c_str()))
-            attr = openAttribute(name);
-        else
-            attr = createAttribute(name, type, space);
-        attr.write(type, &value);
-    }
 }

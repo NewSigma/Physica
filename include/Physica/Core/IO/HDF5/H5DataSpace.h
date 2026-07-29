@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include "Physica/Core/IO/HDF5/HDF5.h"
 #include "DataSpaceImpl/DataSpaceBase.h"
 #include "DataSpaceImpl/SubDataSpace.h"
 

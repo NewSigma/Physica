@@ -20,15 +20,15 @@
 
 #include <hdf5.h>
 #include "H5Type.h"
-#include "H5Attribute.h"
 #include "Physica/Core/Exception/IOException.h"
+#include "Physica/Core/IO/HDF5/Mixin/Attributable.h"
 
 namespace Physica {
     template<size_t Dim> class H5DataSpace;
     template<size_t Dim> class H5DataSet;
     class H5Group;
 
-    class PHYSICA_API H5Loc : public H5ID {
+    class PHYSICA_API H5Loc : public H5ID, public Attributable {
         using This = H5Loc;
     public:
         H5Loc() = default;
@@ -50,13 +50,8 @@ namespace Physica {
 
         [[nodiscard]] H5Group openGroup(const std::string& name);
         [[nodiscard]] H5Group openGroup(const std::string& name) const;
-
-        [[nodiscard]] H5Attribute openAttribute(const std::string& name) const;
-        template<class SpaceType>
-        [[nodiscard]] H5Attribute createAttribute(const std::string& name, const H5Type& dtype, const SpaceType& space) const;
         /* Getters */
         [[nodiscard]] bool exists(const std::string& name) const;
-        [[nodiscard]] bool attrExists(const char* name) const;
     };
 
     template<size_t Dim>
@@ -76,10 +71,5 @@ namespace Physica {
         if (!exists(name))
             throw IOException("[Error]: Dataset not found");
         return H5DataSet<Dim>(H5ID(H5Dopen2(getHID(), name.c_str(), H5P_DEFAULT)));
-    }
-
-    template<class SpaceType>
-    H5Attribute H5Loc::createAttribute(const std::string& name, const H5Type& dtype, const SpaceType& space) const {
-        return H5Attribute(H5ID(H5Acreate2(getHID(), name.c_str(), dtype.getHID(), space.getHID(), H5P_DEFAULT, H5P_DEFAULT)));
     }
 }

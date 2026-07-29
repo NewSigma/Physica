@@ -21,7 +21,7 @@
 #include <array>
 #include <cassert>
 #include "Physica/CRTPBase.h"
-#include "Physica/Core/IO/HDF5/HDF5.h"
+#include <H5Spublic.h>
 
 namespace Physica {
     template<class Derived>

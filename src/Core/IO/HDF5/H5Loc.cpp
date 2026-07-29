@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/IO/HDF5/HDF5.h"
 #include "Physica/Core/IO/HDF5/H5Group.h"
 
 using namespace Physica;
@@ -37,12 +36,4 @@ H5Group H5Loc::openGroup(const std::string& name) const {
     if (!exists(name))
         throw IOException("[Error]: Group not found");
     return H5Group::open(*this, name);
-}
-
-H5Attribute H5Loc::openAttribute(const std::string& name) const {
-    return H5Attribute(H5ID(H5Aopen(getHID(), name.c_str(), H5P_DEFAULT)));
-}
-
-bool H5Loc::attrExists(const char* name) const {
-    return H5Aexists(getHID(), name) > 0;
 }

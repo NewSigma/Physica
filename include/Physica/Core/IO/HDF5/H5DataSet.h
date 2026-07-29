@@ -21,14 +21,13 @@
 #include <fstream>
 #include <vector>
 #include "H5Type.h"
-#include "HDF5.h"
-#include "H5Attribute.h"
+#include "Mixin/Attributable.h"
 
 namespace Physica {
     template<size_t Dim> class H5DataSpace;
 
     template<size_t Dim>
-    class H5DataSet : public H5ID {
+    class H5DataSet : public H5ID, public Attributable {
         using This = H5DataSet<Dim>;
     public:
         H5DataSet() = default;
@@ -50,10 +49,6 @@ namespace Physica {
 
         void readStr(char* buffer) const;
         void toFile(const std::string& path) const;
-        /* Attributes */
-        [[nodiscard]] H5Attribute openAttribute(const char* name) const;
-        template<class SpaceType>
-        [[nodiscard]] H5Attribute createAttribute(const char* name, const H5Type& dtype, const SpaceType& space) const;
         /* Getters */
         [[nodiscard]] H5DataSpace<Dim> getDataSpace() const noexcept;
         [[nodiscard]] size_t getDim() const noexcept;
@@ -84,17 +79,6 @@ namespace Physica {
     template<size_t Dim>
     void H5DataSet<Dim>::write(const void* buf, const H5Type& dtype) const {
         H5Dwrite(getHID(), dtype.getHID(), H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-    }
-
-    template<size_t Dim>
-    H5Attribute H5DataSet<Dim>::openAttribute(const char* name) const {
-        return H5Attribute(H5ID(H5Aopen(getHID(), name, H5P_DEFAULT)));
-    }
-
-    template<size_t Dim>
-    template<class SpaceType>
-    H5Attribute H5DataSet<Dim>::createAttribute(const char* name, const H5Type& dtype, const SpaceType& space) const {
-        return H5Attribute(H5ID(H5Acreate2(getHID(), name, dtype.getHID(), space.getHID(), H5P_DEFAULT, H5P_DEFAULT)));
     }
 
     template<size_t Dim>
