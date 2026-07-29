@@ -25,7 +25,7 @@
 
 namespace Physica {
     template<size_t Dim> class H5DataSpace;
-    template<size_t Dim> class H5DataSet;
+    template<size_t Dim> class H5Dataset;
     class H5Group;
 
     class PHYSICA_API H5Loc : public H5ID, public Attributable {
@@ -41,12 +41,12 @@ namespace Physica {
         This& operator=(This&&) noexcept = default;
         /* Operations */
         template<size_t Dim>
-        [[nodiscard]] H5DataSet<Dim> createDataSet(const char* name, const H5Type& dtype, const H5DataSpace<Dim>& data_space) const;
+        [[nodiscard]] H5Dataset<Dim> createDataSet(const char* name, const H5Type& dtype, const H5DataSpace<Dim>& data_space) const;
 
         template<size_t Dim>
-        [[nodiscard]] H5DataSet<Dim> openDataSet(const char* name);
+        [[nodiscard]] H5Dataset<Dim> openDataSet(const char* name);
         template<size_t Dim>
-        [[nodiscard]] const H5DataSet<Dim> openDataSet(const char* name) const;
+        [[nodiscard]] const H5Dataset<Dim> openDataSet(const char* name) const;
 
         [[nodiscard]] H5Group openGroup(const char* name);
         [[nodiscard]] H5Group openGroup(const char* name) const;
@@ -55,21 +55,21 @@ namespace Physica {
     };
 
     template<size_t Dim>
-    H5DataSet<Dim> H5Loc::createDataSet(const char* name, const H5Type& dtype, const H5DataSpace<Dim>& data_space) const {
-        return H5DataSet<Dim>(H5ID(H5Dcreate2(getHID(), name, dtype.getHID(), data_space.getHID(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)));
+    H5Dataset<Dim> H5Loc::createDataSet(const char* name, const H5Type& dtype, const H5DataSpace<Dim>& data_space) const {
+        return H5Dataset<Dim>(H5ID(H5Dcreate2(getHID(), name, dtype.getHID(), data_space.getHID(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)));
     }
 
     template<size_t Dim>
-    H5DataSet<Dim> H5Loc::openDataSet(const char* name) {
+    H5Dataset<Dim> H5Loc::openDataSet(const char* name) {
         if (!exists(name))
             throw IOException("[Error]: Dataset not found");
-        return H5DataSet<Dim>(H5ID(H5Dopen2(getHID(), name, H5P_DEFAULT)));
+        return H5Dataset<Dim>(H5ID(H5Dopen2(getHID(), name, H5P_DEFAULT)));
     }
 
     template<size_t Dim>
-    const H5DataSet<Dim> H5Loc::openDataSet(const char* name) const {
+    const H5Dataset<Dim> H5Loc::openDataSet(const char* name) const {
         if (!exists(name))
             throw IOException("[Error]: Dataset not found");
-        return H5DataSet<Dim>(H5ID(H5Dopen2(getHID(), name, H5P_DEFAULT)));
+        return H5Dataset<Dim>(H5ID(H5Dopen2(getHID(), name, H5P_DEFAULT)));
     }
 }

@@ -94,7 +94,7 @@ namespace Physica {
         if constexpr (std::is_trivially_copyable_v<value_type>) {
             const size_t length = self.getLength();
             const auto space = H5DataSpace<1>(length);
-            H5DataSet<1> dataset;
+            H5Dataset<1> dataset;
             if (loc.exists(name))
                 dataset = loc.template openDataSet<1>(name);
             else

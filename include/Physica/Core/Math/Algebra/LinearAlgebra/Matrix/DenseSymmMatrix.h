@@ -66,8 +66,8 @@ namespace Physica {
         template<RNG R>
         void random_any(auto& distribution) { asVector().template random_any<R>(distribution); }
 
-        const H5DataSet<1> read(const H5Loc& loc, const char* name) { return storage.read(loc, name); }
-        H5DataSet<1> write(H5Loc& loc, const char* name) const { return storage.write(loc, name); }
+        const H5Dataset<1> read(const H5Loc& loc, const char* name) { return storage.read(loc, name); }
+        H5Dataset<1> write(H5Loc& loc, const char* name) const { return storage.write(loc, name); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return storage.getOrder(); }
         [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const noexcept { return storage.toIndex1D(r, c); }

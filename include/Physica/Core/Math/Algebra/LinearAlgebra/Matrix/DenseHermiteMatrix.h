@@ -61,8 +61,8 @@ namespace Physica {
         template<RNG R>
         void random_any(auto& distribution);
 
-        const H5DataSet<1> read(const H5Loc& loc, const char* name);
-        H5DataSet<1> write(H5Loc& loc, const char* name) const;
+        const H5Dataset<1> read(const H5Loc& loc, const char* name);
+        H5Dataset<1> write(H5Loc& loc, const char* name) const;
         /* Getters */
         using Base::getDerived;
         [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return storage.getOrder(); }
@@ -195,13 +195,13 @@ namespace Physica {
     }
 #ifdef PHYSICA_HDF5
     template<Scalar T, size_t Order>
-    const H5DataSet<1> DenseHermiteMatrix<T, Order>::read(
+    const H5Dataset<1> DenseHermiteMatrix<T, Order>::read(
             const H5Loc& loc, const char* name) {
         return asVector().read(loc, name);
     }
 
     template<Scalar T, size_t Order>
-    H5DataSet<1> DenseHermiteMatrix<T, Order>::write(
+    H5Dataset<1> DenseHermiteMatrix<T, Order>::write(
             H5Loc& loc, const char* name) const {
         return asVector().write(loc, name);
     }

@@ -24,7 +24,7 @@
     #include <hdf5.h>
 
     #include "H5Type.h"
-    #include "H5DataSet.h"
+    #include "H5Dataset.h"
     #include "H5DataSpace.h"
     #include "H5File.h"
     #include "H5Group.h"
@@ -32,7 +32,7 @@
     namespace Physica {
         template<class Derived> class DataSpaceBase {};
         template<size_t Dim> class H5DataSpace {};
-        template<size_t Dim> class H5DataSet {};
+        template<size_t Dim> class H5Dataset {};
         class H5Attribute;
         class H5DataType;
         class H5File;

@@ -48,8 +48,8 @@ namespace Physica {
         void zeros() noexcept { arr.zeros(); }
         void swap(This& __restrict storage) noexcept;
 
-        const H5DataSet<1> read(const H5Loc& loc, const char* name);
-        H5DataSet<1> write(H5Loc& loc, const char* name) const;
+        const H5Dataset<1> read(const H5Loc& loc, const char* name);
+        H5Dataset<1> write(H5Loc& loc, const char* name) const;
         /* Getters */
         [[nodiscard]] auto&& asArray(this auto&& self) noexcept { return self.arr; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getOrder(); }
@@ -93,14 +93,14 @@ namespace Physica {
 
 #ifdef PHYSICA_HDF5
     template<class T, size_t Order>
-    const H5DataSet<1> SymmArray<T, Order>::read(const H5Loc& loc, const char* name) {
+    const H5Dataset<1> SymmArray<T, Order>::read(const H5Loc& loc, const char* name) {
         auto group = arr.read(loc, name);
         assert(order * (order + 1) / 2 == getLength() && "[Error]: Order is not well initialized");
         return group;
     }
 
     template<class T, size_t Order>
-    H5DataSet<1> SymmArray<T, Order>::write(H5Loc& loc, const char* name) const {
+    H5Dataset<1> SymmArray<T, Order>::write(H5Loc& loc, const char* name) const {
         return arr.write(loc, name);
     }
 #endif

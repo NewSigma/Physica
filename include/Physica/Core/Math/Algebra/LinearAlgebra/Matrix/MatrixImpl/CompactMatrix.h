@@ -87,8 +87,8 @@ namespace Physica {
         template<RNG R>
         void random_normal();
         [[nodiscard]] VectorND<T> balance_mkl();
-        const H5DataSet<2> read(const H5Loc& loc, const char* name);
-        H5DataSet<2> write(H5Loc& loc, const char* name) const;
+        const H5Dataset<2> read(const H5Loc& loc, const char* name);
+        H5Dataset<2> write(H5Loc& loc, const char* name) const;
         /* Getters */
         [[nodiscard]] auto data() noexcept;
         [[nodiscard]] auto data() const noexcept;

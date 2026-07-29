@@ -194,7 +194,7 @@ namespace Physica {
 
 #ifdef PHYSICA_HDF5
     template<class Derived>
-    const H5DataSet<2> CompactMatrix<Derived>::read(const H5Loc& loc, const char* name) {
+    const H5Dataset<2> CompactMatrix<Derived>::read(const H5Loc& loc, const char* name) {
         const auto dataset = loc.openDataSet<2>(name);
         const size_t maxMajor = dataset.getSize(0);
         const size_t maxMinor = dataset.getSize(1);
@@ -213,11 +213,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    H5DataSet<2> CompactMatrix<Derived>::write(H5Loc& loc, const char* name) const {
+    H5Dataset<2> CompactMatrix<Derived>::write(H5Loc& loc, const char* name) const {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
         const auto space = H5DataSpace<2>({maxMajor, maxMinor});
-        H5DataSet<2> dataset;
+        H5Dataset<2> dataset;
         if (loc.exists(name))
             dataset = loc.openDataSet<2>(name);
         else

@@ -34,7 +34,7 @@ namespace Physica {
     private:
         constexpr static int DiffOrder = T::Order;
         constexpr static int DataDim = 1 + (DiffOrder > 0);
-        using DataSetType = H5DataSet<DataDim>;
+        using DataSetType = H5Dataset<DataDim>;
         using DataSpaceType = H5DataSpace<DataDim>;
 
         template<Vector> class View;
