@@ -23,7 +23,7 @@
 
 namespace Physica {
     /**
-     * \class H5ID; A type-safe RAII wrapper for hid_t of HDF5
+     * \class H5ID: A type-safe RAII wrapper for hid_t of HDF5
      */
     class PHYSICA_API H5ID {
         hid_t id = H5I_INVALID_HID;

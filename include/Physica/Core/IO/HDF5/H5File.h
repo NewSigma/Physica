@@ -23,7 +23,6 @@
 namespace Physica {
     class PHYSICA_API H5File : public H5Loc {
         using This = H5File;
-        using Loc = H5Loc;
 
         unsigned int openflag = OpenFlag::ReadOnly;
     public:
@@ -36,28 +35,19 @@ namespace Physica {
             SingleWriteMultiRead_Write = 0x0020U,
             SingleWriteMultiRead_Read = 0x0040U
         };
-    private:
-        H5File(H5ID id_, unsigned int flag_);
     public:
-        H5File() = default;
         H5File(const This& obj) = delete;
         H5File(This&&) noexcept = default;
         ~H5File() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = default;
-        /* Operations */
-        using Loc::exists;
-        using Loc::createDataSet;
-        using Loc::openDataSet;
-        using Loc::openGroup;
-
-        [[nodiscard]] H5DataSet<1> createDataSet(const std::string& filepath, const std::string& name);
-        [[nodiscard]] H5Group openGroup(const std::string& name);
         /* Getters */
         [[nodiscard]] unsigned int getOpenflag() const noexcept { return openflag; }
         [[nodiscard]] bool isReadOnly() const noexcept { return (openflag & ReadWrite) == 0; }
         /* Static members */
-        [[nodiscard]] static H5File open(const std::string& name, unsigned int openflag = ReadWrite);
+        [[nodiscard]] static H5File open(const char* name, unsigned int openflag = ReadWrite);
+    private:
+        H5File(H5ID id_, unsigned int flag_);
     };
 }

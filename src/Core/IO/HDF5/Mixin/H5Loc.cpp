@@ -22,17 +22,17 @@ using namespace Physica;
 
 H5Loc::H5Loc(H5ID id_) : H5ID(std::move(id_)) {}
 
-bool H5Loc::exists(const std::string& name) const {
-    return H5Lexists(getHID(), name.c_str(), H5P_DEFAULT) > 0;
+bool H5Loc::exists(const char* name) const {
+    return H5Lexists(getHID(), name, H5P_DEFAULT) > 0;
 }
 
-H5Group H5Loc::openGroup(const std::string& name) {
+H5Group H5Loc::openGroup(const char* name) {
     if (exists(name))
         return H5Group::open(*this, name);
     return H5Group::create(*this, name);
 }
 
-H5Group H5Loc::openGroup(const std::string& name) const {
+H5Group H5Loc::openGroup(const char* name) const {
     if (!exists(name))
         throw IOException("[Error]: Group not found");
     return H5Group::open(*this, name);

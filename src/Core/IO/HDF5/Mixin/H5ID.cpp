@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/IO/HDF5/H5ID.h"
+#include "Physica/Core/IO/HDF5/Mixin/H5ID.h"
 #include <cassert>
 
 using namespace Physica;

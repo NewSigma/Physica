@@ -18,13 +18,11 @@
  */
 #pragma once
 
-#include "H5Type.h"
-#include "HDF5.h"
+#include "Mixin/H5Loc.h"
 
 namespace Physica {
     class PHYSICA_API H5Group : public H5Loc {
         using This = H5Group;
-        using Loc = H5Loc;
     public:
         H5Group() = default;
         explicit H5Group(H5ID id);
@@ -34,13 +32,8 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
-        /* Operations */
-        using Loc::exists;
-        using Loc::createDataSet;
-        using Loc::openDataSet;
-        using Loc::openGroup;
         /* Static members */
-        [[nodiscard]] static H5Group create(const H5ID& loc, const std::string& name);
-        [[nodiscard]] static H5Group open(const H5ID& loc, const std::string& name);
+        [[nodiscard]] static H5Group create(const H5ID& loc, const char* name);
+        [[nodiscard]] static H5Group open(const H5ID& loc, const char* name);
     };
 }

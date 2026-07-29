@@ -19,7 +19,7 @@
 #pragma once
 
 #include <H5Tpublic.h>
-#include "H5ID.h"
+#include "Mixin/H5ID.h"
 
 namespace Physica {
     class PHYSICA_API H5Type : public H5ID {

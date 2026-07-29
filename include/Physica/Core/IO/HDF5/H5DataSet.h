@@ -48,7 +48,7 @@ namespace Physica {
         void write(const void* buf, const H5Type& dtype) const;
 
         void readStr(char* buffer) const;
-        void toFile(const std::string& path) const;
+        void toFile(const char* path) const;
         /* Getters */
         [[nodiscard]] H5DataSpace<Dim> getDataSpace() const noexcept;
         [[nodiscard]] size_t getDim() const noexcept;
@@ -88,7 +88,7 @@ namespace Physica {
     }
 
     template<size_t Dim>
-    void H5DataSet<Dim>::toFile(const std::string& path) const {
+    void H5DataSet<Dim>::toFile(const char* path) const {
         std::ofstream fout(path);
         const auto size = getDataSpace().getSize(0);
         auto buffer = std::vector<char>(size);
