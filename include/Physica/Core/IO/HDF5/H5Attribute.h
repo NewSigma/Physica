@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,27 +18,23 @@
  */
 #pragma once
 
-#include "Physica/Macro.h"
+#include "H5Type.h"
 
-#ifdef PHYSICA_HDF5
-    #include <hdf5.h>
-
-    #include "H5ID.h"
-    #include "H5Type.h"
-    #include "H5DataSet.h"
-    #include "H5DataSpace.h"
-    #include "H5Loc.h"
-    #include "H5File.h"
-    #include "H5Group.h"
-#else
-    namespace Physica {
-        template<class Derived> class DataSpaceBase {};
-        template<size_t Dim> class H5DataSpace {};
-        template<size_t Dim> class H5DataSet {};
-        class H5Attribute;
-        class H5DataType;
-        class H5File;
-        class H5Group {};
-        class H5Loc {};
-    }
-#endif
+namespace Physica {
+    class PHYSICA_API H5Attribute : public H5ID {
+        using This = H5Attribute;
+    public:
+        H5Attribute() = default;
+        explicit H5Attribute(H5ID id);
+        H5Attribute(const This&) = default;
+        H5Attribute(This&&) noexcept = default;
+        ~H5Attribute() = default;
+        /* Operators */
+        This& operator=(This obj) noexcept;
+        /* Operations */
+        void read(const H5Type& dtype, void* buf) const;
+        void write(const H5Type& dtype, const void* buf) const;
+        /* Getters */
+        void swap(This& obj) noexcept;
+    };
+}

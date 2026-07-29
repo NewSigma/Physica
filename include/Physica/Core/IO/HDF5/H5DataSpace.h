@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,44 +24,41 @@
 
 namespace Physica {
     template<size_t Dim>
-    class H5DataSpace : public DataSpaceBase<H5DataSpace<Dim>>, public H5::DataSpace {
+    class H5DataSpace : public DataSpaceBase<H5DataSpace<Dim>>, public H5ID {
         static_assert(Dim > 0, "[Error]: Invalid dim");
         using Base = DataSpaceBase<H5DataSpace<Dim>>;
-        using ImplType = H5::DataSpace;
         using This = H5DataSpace<Dim>;
     public:
         using SizeArray = Base::SizeArray;
     private:
         using typename Base::SizeType;
 
-        SizeArray selectedCount;
-        SizeArray selectedStart;
+        SizeArray selectedCount{};
+        SizeArray selectedStart{};
     public:
         H5DataSpace() = default;
         explicit H5DataSpace(hsize_t size);
         explicit H5DataSpace(SizeArray dims);
+        explicit H5DataSpace(H5ID id);
         H5DataSpace(SizeArray dims, SizeArray maxdims);
-        explicit H5DataSpace(const H5::DataSpace& obj);
-        H5DataSpace(const H5DataSpace&) = default;
-        H5DataSpace(H5DataSpace&& obj) noexcept;
-        virtual ~H5DataSpace() = default;
+        H5DataSpace(const This&) = default;
+        H5DataSpace(This&&) noexcept = default;
+        ~H5DataSpace() = default;
         /* Operators */
-        H5DataSpace& operator=(const H5DataSpace& obj);
-        H5DataSpace& operator=(H5DataSpace&&) noexcept;
+        This& operator=(This obj) noexcept;
         /* Operations */
         void selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start);
         template<size_t SubDim>
         [[nodiscard]] SubDataSpace<This, SubDim> tail(size_t from);
         template<size_t SubDim>
         [[nodiscard]] const SubDataSpace<This, SubDim> tail(size_t from) const;
+
+        void swap(This& obj) noexcept;
         /* Getters */
-        [[nodiscard]] const ImplType& asH5Type() const noexcept { return *this; }
-        [[nodiscard]] ImplType& asH5Type() noexcept { return *this; }
         [[nodiscard]] consteval static size_t getDim() noexcept { return Dim; }
         [[nodiscard]] size_t getSize(size_t dim) const noexcept;
-        [[nodiscard]] const SizeArray& getSelectedCount() const noexcept { return selectedCount; }
-        [[nodiscard]] const SizeArray& getSelectedStart() const noexcept { return selectedStart; }
-        [[nodiscard]] bool isValid() const noexcept { return ImplType::isValid(ImplType::getId()); }
+        [[nodiscard]] const auto& getSelectedCount() const noexcept { return selectedCount; }
+        [[nodiscard]] const auto& getSelectedStart() const noexcept { return selectedStart; }
         /* Setters */
         void setSize(size_t dim, hsize_t newSize);
     };
@@ -72,21 +69,18 @@ namespace Physica {
     }
 
     template<size_t Dim>
-    H5DataSpace<Dim>::H5DataSpace(SizeArray dims) : H5DataSpace(H5::DataSpace(Dim, dims.data())) {}
+    H5DataSpace<Dim>::H5DataSpace(SizeArray dims) : H5ID(H5Screate_simple(Dim, dims.data(), nullptr)) {}
 
     template<size_t Dim>
-    H5DataSpace<Dim>::H5DataSpace(SizeArray dims, SizeArray maxdims) : H5DataSpace(H5::DataSpace(Dim, dims.data(), maxdims.data())) {}
+    H5DataSpace<Dim>::H5DataSpace(H5ID id) : H5ID(std::move(id)) {}
 
     template<size_t Dim>
-    H5DataSpace<Dim>::H5DataSpace(const H5::DataSpace& obj) : ImplType(obj) {}
+    H5DataSpace<Dim>::H5DataSpace(SizeArray dims, SizeArray maxdims) : H5ID(H5Screate_simple(Dim, dims.data(), maxdims.data())) {}
 
     template<size_t Dim>
-    H5DataSpace<Dim>::H5DataSpace(H5DataSpace&& obj) noexcept
-            : ImplType(obj), selectedCount(std::move(obj.selectedCount)), selectedStart(std::move(obj.selectedStart)) {}
-
-    template<size_t Dim>
-    H5DataSpace<Dim>& H5DataSpace<Dim>::operator=(H5DataSpace&& obj) noexcept {
-        return *this = obj;
+    H5DataSpace<Dim>& H5DataSpace<Dim>::operator=(This obj) noexcept {
+        swap(obj);
+        return *this;
     }
 
     template<size_t Dim>
@@ -95,7 +89,7 @@ namespace Physica {
         assert(start.size() == getDim());
         selectedCount = count;
         selectedStart = start;
-        ImplType::selectHyperslab(op, count.data(), start.data());
+        H5Sselect_hyperslab(getHID(), op, start.data(), nullptr, count.data(), nullptr);
     }
 
     template<size_t Dim>
@@ -111,15 +105,17 @@ namespace Physica {
     }
 
     template<size_t Dim>
-    H5DataSpace<Dim>& H5DataSpace<Dim>::operator=(const H5DataSpace& obj) {
-        ImplType::operator=(obj);
-        return *this;
+    void H5DataSpace<Dim>::swap(This& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        H5ID::swap(obj);
+        selectedCount.swap(obj.selectedCount);
+        selectedStart.swap(obj.selectedStart);
     }
 
     template<size_t Dim>
     size_t H5DataSpace<Dim>::getSize(size_t dim) const noexcept {
         SizeArray sizes{};
-        [[maybe_unused]] size_t d = getSimpleExtentDims(sizes.data());
+        [[maybe_unused]] auto d = H5Sget_simple_extent_dims(getHID(), sizes.data(), nullptr);
         assert(d == getDim());
         return sizes[dim];
     }
@@ -127,10 +123,10 @@ namespace Physica {
     template<size_t Dim>
     void H5DataSpace<Dim>::setSize(size_t dim, hsize_t newSize) {
         SizeArray sizes{};
-        [[maybe_unused]] size_t d = getSimpleExtentDims(sizes.data());
+        [[maybe_unused]] auto d = H5Sget_simple_extent_dims(getHID(), sizes.data(), nullptr);
         assert(d == getDim());
         sizes[dim] = newSize;
-        setExtentSimple(sizes.size(), sizes.data());
+        H5Sset_extent_simple(getHID(), Dim, sizes.data(), nullptr);
     }
 }
 

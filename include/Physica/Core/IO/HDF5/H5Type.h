@@ -19,7 +19,6 @@
 #pragma once
 
 #include <H5Tpublic.h>
-#include <H5Cpp.h>
 #include "H5ID.h"
 
 namespace Physica {
@@ -32,7 +31,6 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
-        operator H5::DataType() const { return H5::DataType(getHID()); }
         /* Operations */
         void insert(const char* name, size_t offset, const H5Type& memberType) noexcept;
         /* Getters */

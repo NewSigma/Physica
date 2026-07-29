@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,29 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#include "Physica/Core/IO/HDF5/H5Attribute.h"
+#include <cassert>
+#include "H5Apublic.h"
 
-#include "Physica/Macro.h"
+using namespace Physica;
 
-#ifdef PHYSICA_HDF5
-    #include <hdf5.h>
+H5Attribute::H5Attribute(H5ID id) : H5ID(std::move(id)) {}
 
-    #include "H5ID.h"
-    #include "H5Type.h"
-    #include "H5DataSet.h"
-    #include "H5DataSpace.h"
-    #include "H5Loc.h"
-    #include "H5File.h"
-    #include "H5Group.h"
-#else
-    namespace Physica {
-        template<class Derived> class DataSpaceBase {};
-        template<size_t Dim> class H5DataSpace {};
-        template<size_t Dim> class H5DataSet {};
-        class H5Attribute;
-        class H5DataType;
-        class H5File;
-        class H5Group {};
-        class H5Loc {};
-    }
-#endif
+H5Attribute& H5Attribute::operator=(H5Attribute obj) noexcept {
+    swap(obj);
+    return *this;
+}
+
+void H5Attribute::read(const H5Type& dtype, void* buf) const {
+    H5Aread(getHID(), dtype.getHID(), buf);
+}
+
+void H5Attribute::write(const H5Type& dtype, const void* buf) const {
+    H5Awrite(getHID(), dtype.getHID(), buf);
+}
+
+void H5Attribute::swap(H5Attribute& obj) noexcept {
+    assert(this != &obj && "[Error]: Self swap is likely a bug");
+    H5ID::swap(obj);
+}

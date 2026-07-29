@@ -41,7 +41,7 @@ namespace {
         GlobalEnv() noexcept {
             setThreadEnv();
         #ifdef PHYSICA_HDF5
-            H5::Exception::dontPrint();
+            H5Eset_auto2(H5E_DEFAULT, nullptr, nullptr);
         #endif
         }
     };

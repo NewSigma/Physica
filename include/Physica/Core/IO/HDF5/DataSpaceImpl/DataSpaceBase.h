@@ -36,8 +36,6 @@ namespace Physica {
         /* Operations */
         void selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start) { Base::getDerived().selectHyperslab(op, count, start); }
         /* Getters */
-        [[nodiscard]] const H5::DataSpace& asH5Type() const noexcept { return Base::getDerived().asH5Type(); }
-        [[nodiscard]] H5::DataSpace& asH5Type() noexcept { return Base::getDerived().asH5Type(); }
         [[nodiscard]] size_t getDim() const noexcept { return Base::getDerived().getDim(); }
         [[nodiscard]] size_t getSize(size_t dim) const noexcept { return Base::getDerived().getSize(dim); }
         [[nodiscard]] const SizeArray& getSelectedCount() const noexcept { return Base::getDerived().getSelectedCount(); }

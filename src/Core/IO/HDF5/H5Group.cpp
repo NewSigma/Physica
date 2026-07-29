@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,29 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#include "Physica/Core/IO/HDF5/H5Group.h"
 
-#include "Physica/Macro.h"
+using namespace Physica;
 
-#ifdef PHYSICA_HDF5
-    #include <hdf5.h>
+H5Group::H5Group(H5ID id) : H5Loc(std::move(id)) {}
 
-    #include "H5ID.h"
-    #include "H5Type.h"
-    #include "H5DataSet.h"
-    #include "H5DataSpace.h"
-    #include "H5Loc.h"
-    #include "H5File.h"
-    #include "H5Group.h"
-#else
-    namespace Physica {
-        template<class Derived> class DataSpaceBase {};
-        template<size_t Dim> class H5DataSpace {};
-        template<size_t Dim> class H5DataSet {};
-        class H5Attribute;
-        class H5DataType;
-        class H5File;
-        class H5Group {};
-        class H5Loc {};
-    }
-#endif
+H5Group H5Group::create(const H5ID& loc, const std::string& name) {
+    return H5Group(H5ID(H5Gcreate2(loc.getHID(), name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)));
+}
+
+H5Group H5Group::open(const H5ID& loc, const std::string& name) {
+    return H5Group(H5ID(H5Gopen2(loc.getHID(), name.c_str(), H5P_DEFAULT)));
+}

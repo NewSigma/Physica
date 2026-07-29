@@ -18,15 +18,16 @@
  */
 #pragma once
 
-#include "HDF5.h"
+#include "H5Group.h"
 
 namespace Physica {
-    class PHYSICA_API H5File : public H5::H5File, public H5Loc {
+    class PHYSICA_API H5File : public H5Loc {
         using This = H5File;
-        using Base = H5::H5File;
         using Loc = H5Loc;
+
+        unsigned int openflag = OpenFlag::ReadOnly;
     public:
-        enum OpenFlag : unsigned int {
+        enum OpenFlag : int8_t {
             ReadOnly = 0x0000U,
             ReadWrite = 0x0001U,
             Trunc = 0x0002U,
@@ -36,20 +37,21 @@ namespace Physica {
             SingleWriteMultiRead_Read = 0x0040U
         };
     private:
-        unsigned int openflag;
+        H5File(H5ID id_, unsigned int flag_);
     public:
         H5File() = default;
         H5File(const This& obj) = delete;
-        H5File(This&&) noexcept = delete;
-        virtual ~H5File() = default;
+        H5File(This&&) noexcept = default;
+        ~H5File() = default;
         /* Operators */
         This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
+        This& operator=(This&&) noexcept = default;
         /* Operations */
         using Loc::exists;
         using Loc::createDataSet;
         using Loc::openDataSet;
         using Loc::openGroup;
+
         [[nodiscard]] H5DataSet<1> createDataSet(const std::string& filepath, const std::string& name);
         [[nodiscard]] H5Group openGroup(const std::string& name);
         /* Getters */
@@ -57,10 +59,5 @@ namespace Physica {
         [[nodiscard]] bool isReadOnly() const noexcept { return (openflag & ReadWrite) == 0; }
         /* Static members */
         [[nodiscard]] static H5File open(const std::string& name, unsigned int openflag = ReadWrite);
-    private:
-        H5File(const std::string& name,
-               unsigned int openflag_ = OpenFlag::ReadOnly,
-               const H5::FileCreatPropList& create_plist = H5::FileCreatPropList::DEFAULT,
-               const H5::FileAccPropList& access_plist = H5::FileAccPropList::DEFAULT);
     };
 }

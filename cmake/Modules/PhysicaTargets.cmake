@@ -15,7 +15,7 @@ if(${PHYSICA_PROFILE})
 endif()
 
 if(${PHYSICA_HDF5})
-    target_link_libraries(Physica::Core INTERFACE hdf5::hdf5 hdf5::hdf5_cpp)
+    target_link_libraries(Physica::Core INTERFACE hdf5::hdf5)
 endif()
 
 if(${PHYSICA_CUDA})

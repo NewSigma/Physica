@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,16 +17,32 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/IO/HDF5/HDF5.h"
+#include "Physica/Core/IO/HDF5/H5Group.h"
 
 using namespace Physica;
 
-const H5Group H5Loc::openGroup(const std::string& name) const {
-    return getDerived().openGroup(name);
+H5Loc::H5Loc(H5ID id_) : H5ID(std::move(id_)) {}
+
+bool H5Loc::exists(const std::string& name) const {
+    return H5Lexists(getHID(), name.c_str(), H5P_DEFAULT) > 0;
 }
 
 H5Group H5Loc::openGroup(const std::string& name) {
-    auto& loc = getDerived();
-    if (loc.exists(name))
-        return loc.openGroup(name);
-    return loc.createGroup(name, 0);
+    if (exists(name))
+        return H5Group::open(*this, name);
+    return H5Group::create(*this, name);
+}
+
+H5Group H5Loc::openGroup(const std::string& name) const {
+    if (!exists(name))
+        throw IOException("[Error]: Group not found");
+    return H5Group::open(*this, name);
+}
+
+H5Attribute H5Loc::openAttribute(const std::string& name) const {
+    return H5Attribute(H5ID(H5Aopen(getHID(), name.c_str(), H5P_DEFAULT)));
+}
+
+bool H5Loc::attrExists(const char* name) const {
+    return H5Aexists(getHID(), name) > 0;
 }

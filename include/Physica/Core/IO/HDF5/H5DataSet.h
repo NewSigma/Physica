@@ -20,56 +20,86 @@
 
 #include <fstream>
 #include <vector>
+#include "H5Type.h"
 #include "HDF5.h"
+#include "H5Attribute.h"
 
 namespace Physica {
     template<size_t Dim> class H5DataSpace;
 
     template<size_t Dim>
-    class H5DataSet : public H5::DataSet {
-        using Base = H5::DataSet;
-        constexpr static auto Dynamic = Physica::Dynamic;
+    class H5DataSet : public H5ID {
+        using This = H5DataSet<Dim>;
     public:
         H5DataSet() = default;
-        H5DataSet(const H5::DataSet& obj);
-        H5DataSet(const H5DataSet&) = default;
-        H5DataSet(H5DataSet&&) noexcept = default;
-        virtual ~H5DataSet() = default;
+        explicit H5DataSet(H5ID id_);
+        H5DataSet(const This&) = default;
+        H5DataSet(This&&) noexcept = default;
+        ~H5DataSet() = default;
         /* Operators */
-        H5DataSet& operator=(const H5DataSet& obj);
-        H5DataSet& operator=(H5DataSet&&);
-        using Base::operator=;
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
         /* Operations */
+        template<class MemSpace, class FileSpace>
+        void read(void* buf, const H5Type& dtype, const MemSpace& mem_space, const FileSpace& file_space) const;
+        void read(void* buf, const H5Type& dtype) const;
+
+        template<class MemSpace, class FileSpace>
+        void write(const void* buf, const H5Type& dtype, const MemSpace& mem_space, const FileSpace& file_space) const;
+        void write(const void* buf, const H5Type& dtype) const;
+
         void readStr(char* buffer) const;
         void toFile(const std::string& path) const;
+        /* Attributes */
+        [[nodiscard]] H5Attribute openAttribute(const char* name) const;
+        template<class SpaceType>
+        [[nodiscard]] H5Attribute createAttribute(const char* name, const H5Type& dtype, const SpaceType& space) const;
         /* Getters */
-        [[nodiscard]] H5DataSpace<Dim> getDataSpace() const noexcept { return H5DataSpace<Dim>(Base::getSpace()); }
+        [[nodiscard]] H5DataSpace<Dim> getDataSpace() const noexcept;
         [[nodiscard]] size_t getDim() const noexcept;
         [[nodiscard]] size_t getSize(size_t dim) const noexcept;
         [[nodiscard]] bool empty() const noexcept { return getSize(0) == 0; }
-    private:
-        using Base::flush;
-        using Base::getSpace;
     };
 
     template<size_t Dim>
-    H5DataSet<Dim>::H5DataSet(const H5::DataSet& obj) : Base(obj) {}
+    H5DataSet<Dim>::H5DataSet(H5ID id_) : H5ID(std::move(id_)) {}
 
     template<size_t Dim>
-    H5DataSet<Dim>& H5DataSet<Dim>::operator=(const H5DataSet& obj) {
-        Base::operator=(obj);
-        return *this;
+    template<class MemSpace, class FileSpace>
+    void H5DataSet<Dim>::read(void* buf, const H5Type& dtype, const MemSpace& mem_space, const FileSpace& file_space) const {
+        H5Dread(getHID(), dtype.getHID(), mem_space.getHID(), file_space.getHID(), H5P_DEFAULT, buf);
     }
 
     template<size_t Dim>
-    H5DataSet<Dim>& H5DataSet<Dim>::operator=(H5DataSet&& obj) {
-        Base::operator=(obj);
-        return *this;
+    void H5DataSet<Dim>::read(void* buf, const H5Type& dtype) const {
+        H5Dread(getHID(), dtype.getHID(), H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    }
+
+    template<size_t Dim>
+    template<class MemSpace, class FileSpace>
+    void H5DataSet<Dim>::write(const void* buf, const H5Type& dtype, const MemSpace& mem_space, const FileSpace& file_space) const {
+        H5Dwrite(getHID(), dtype.getHID(), mem_space.getHID(), file_space.getHID(), H5P_DEFAULT, buf);
+    }
+
+    template<size_t Dim>
+    void H5DataSet<Dim>::write(const void* buf, const H5Type& dtype) const {
+        H5Dwrite(getHID(), dtype.getHID(), H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    }
+
+    template<size_t Dim>
+    H5Attribute H5DataSet<Dim>::openAttribute(const char* name) const {
+        return H5Attribute(H5ID(H5Aopen(getHID(), name, H5P_DEFAULT)));
+    }
+
+    template<size_t Dim>
+    template<class SpaceType>
+    H5Attribute H5DataSet<Dim>::createAttribute(const char* name, const H5Type& dtype, const SpaceType& space) const {
+        return H5Attribute(H5ID(H5Acreate2(getHID(), name, dtype.getHID(), space.getHID(), H5P_DEFAULT, H5P_DEFAULT)));
     }
 
     template<size_t Dim>
     void H5DataSet<Dim>::readStr(char* buffer) const {
-        Base::read(buffer, H5::PredType::NATIVE_CHAR);
+        H5Dread(getHID(), H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
         buffer[getSize(0)] = '\0';
     }
 
@@ -79,6 +109,11 @@ namespace Physica {
         const auto size = getDataSpace().getSize(0);
         auto buffer = std::vector<char>(size);
         fout.write(buffer.data(), size);
+    }
+
+    template<size_t Dim>
+    H5DataSpace<Dim> H5DataSet<Dim>::getDataSpace() const noexcept {
+        return H5DataSpace<Dim>(H5ID(H5Dget_space(getHID())));
     }
 
     template<size_t Dim>

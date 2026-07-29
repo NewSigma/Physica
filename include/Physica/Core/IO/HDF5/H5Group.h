@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,35 +18,39 @@
  */
 #pragma once
 
-#include "H5Loc.h"
+#include "H5Type.h"
+#include "HDF5.h"
 
 namespace Physica {
-    class PHYSICA_API H5Group : public H5::Group, public H5Loc {
-        using Base = H5::Group;
+    class PHYSICA_API H5Group : public H5Loc {
         using This = H5Group;
-        using Location = H5Loc;
+        using Loc = H5Loc;
     public:
-        H5Group(H5::Group group) : Base(group) {}
+        H5Group() = default;
+        explicit H5Group(H5ID id);
         H5Group(const This&) = default;
         H5Group(This&&) noexcept = default;
         ~H5Group() = default;
         /* Operators */
         This& operator=(const This&) = default;
-        This& operator=(This&&) noexcept = delete;
+        This& operator=(This&&) noexcept = default;
         /* Operations */
-        using Location::exists;
-        using Location::createDataSet;
-        using Location::openDataSet;
-        using Location::openGroup;
+        using Loc::exists;
+        using Loc::createDataSet;
+        using Loc::openDataSet;
+        using Loc::openGroup;
 
         template<class T>
-        const H5::Attribute readAttr(const std::string& name, T& value) const;
+        void readAttr(const std::string& name, T& value) const;
         template<class T>
-        H5::Attribute writeAttr(const std::string& name, T value);
+        void writeAttr(const std::string& name, T value);
+        /* Static members */
+        [[nodiscard]] static H5Group create(const H5ID& loc, const std::string& name);
+        [[nodiscard]] static H5Group open(const H5ID& loc, const std::string& name);
     };
 
     template<class T>
-    const H5::Attribute H5Group::readAttr(const std::string& name, T& value) const {
+    void H5Group::readAttr(const std::string& name, T& value) const {
         constexpr bool IsArray = std::is_array<T>::value;
         constexpr size_t NumElem = IsArray ? std::extent<T>::value : 1;
         static_assert(!IsArray || std::rank<T>::value == 1, "[Error]: High dim array is not supported");
@@ -54,17 +58,16 @@ namespace Physica {
 
         const auto type = H5Type::get<T>();
         const auto space = H5DataSpace<1>(NumElem);
-        H5::Attribute attr;
-        if (Base::attrExists(name.c_str()))
-            attr = Base::openAttribute(name.c_str());
+        H5Attribute attr;
+        if (attrExists(name.c_str()))
+            attr = openAttribute(name);
         else
-            attr = Base::createAttribute(name.c_str(), type, space);
+            attr = createAttribute(name, type, space);
         attr.read(type, &value);
-        return attr;
     }
 
     template<class T>
-    H5::Attribute H5Group::writeAttr(const std::string& name, T value) {
+    void H5Group::writeAttr(const std::string& name, T value) {
         constexpr bool IsArray = std::is_array<T>::value;
         constexpr size_t NumElem = IsArray ? std::extent<T>::value : 1;
         static_assert(!IsArray || std::rank<T>::value == 1, "[Error]: High dim array is not supported");
@@ -72,12 +75,11 @@ namespace Physica {
 
         const auto type = H5Type::get<T>();
         const auto space = H5DataSpace<1>(NumElem);
-        H5::Attribute attr;
-        if (Base::attrExists(name.c_str()))
-            attr = Base::openAttribute(name.c_str());
+        H5Attribute attr;
+        if (attrExists(name.c_str()))
+            attr = openAttribute(name);
         else
-            attr = Base::createAttribute(name.c_str(), type, space);
+            attr = createAttribute(name, type, space);
         attr.write(type, &value);
-        return attr;
     }
 }

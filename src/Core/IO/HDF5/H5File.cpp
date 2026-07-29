@@ -23,12 +23,7 @@
 
 using namespace Physica;
 
-H5File::H5File(
-        const std::string& name,
-        unsigned int openflag_,
-        const H5::FileCreatPropList& create_plist,
-        const H5::FileAccPropList& access_plist)
-        : Base(name, openflag_, create_plist, access_plist), openflag(openflag_) {}
+H5File::H5File(H5ID id_, unsigned int flag_) : H5Loc(std::move(id_)), openflag(flag_) {}
 
 H5DataSet<1> H5File::createDataSet(const std::string& filepath, const std::string& name) {
     std::ifstream fin(filepath);
@@ -41,23 +36,31 @@ H5DataSet<1> H5File::createDataSet(const std::string& filepath, const std::strin
     auto buffer = Array<char>(size);
     fin.read(buffer.data(), size);
     const auto space = H5DataSpace<1>(size);
-    auto dataset = Base::createDataSet(name, H5::PredType::NATIVE_CHAR, space);
-    dataset.write(buffer.data(), H5::PredType::NATIVE_CHAR);
+    auto dataset = createDataSet<1>(name, H5Type::get<char>(), space);
+    dataset.write(buffer.data(), H5Type::get<char>());
     return dataset;
 }
 
 H5Group H5File::openGroup(const std::string& name) {
-    if (Base::exists(name))
-        return Base::openGroup(name);
+    if (exists(name))
+        return H5Group::open(*this, name);
     if (isReadOnly())
         throw IOException("[Error]: Group not found");
-    return Base::createGroup(name, 0);
+    return H5Group::create(*this, name);
 }
 
 H5File H5File::open(const std::string& name, unsigned int openflag) {
-    if (std::filesystem::exists(name))
-        return H5File(name, openflag);
+    if (std::filesystem::exists(name)) {
+        if (openflag & Trunc) {
+            auto fid = H5Fcreate(name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+            return H5File(H5ID(fid), openflag);
+        }
+        unsigned int access = (openflag & ReadWrite) ? H5F_ACC_RDWR : H5F_ACC_RDONLY;
+        auto fid = H5Fopen(name.c_str(), access, H5P_DEFAULT);
+        return H5File(H5ID(fid), openflag);
+    }
     if (!bool(openflag & ReadWrite))
         throw IOException("File not found");
-    return H5File(name, H5File::Creat | openflag);
+    auto fid = H5Fcreate(name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    return H5File(H5ID(fid), openflag | Creat);
 }

@@ -18,72 +18,68 @@
  */
 #pragma once
 
-#include "Physica/Core/IO/HDF5/HDF5.h"
+#include <hdf5.h>
+#include "H5Type.h"
+#include "H5Attribute.h"
 #include "Physica/Core/Exception/IOException.h"
 
 namespace Physica {
+    template<size_t Dim> class H5DataSpace;
+    template<size_t Dim> class H5DataSet;
     class H5Group;
 
-    class PHYSICA_API H5Loc {
+    class PHYSICA_API H5Loc : public H5ID {
+        using This = H5Loc;
     public:
+        H5Loc() = default;
+        explicit H5Loc(H5ID id_);
+        H5Loc(const This&) = default;
+        H5Loc(This&&) noexcept = default;
         ~H5Loc() = default;
+        /* Operators */
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
         /* Operations */
-        [[nodiscard]] inline bool exists(const std::string& name, const H5::LinkAccPropList& lapl = H5::LinkAccPropList::DEFAULT) const;
-
         template<size_t Dim>
-        H5DataSet<Dim> createDataSet(
-                const std::string&name,
-                const H5::DataType& data_type,
-                const H5::DataSpace& data_space,
-                const H5::DSetCreatPropList& create_plist = H5::DSetCreatPropList::DEFAULT,
-                const H5::DSetAccPropList& dapl = H5::DSetAccPropList::DEFAULT,
-                const H5::LinkCreatPropList& lcpl = H5::LinkCreatPropList::DEFAULT) const;
+        [[nodiscard]] H5DataSet<Dim> createDataSet(const std::string& name, const H5Type& dtype, const H5DataSpace<Dim>& data_space) const;
 
         template<size_t Dim>
         [[nodiscard]] H5DataSet<Dim> openDataSet(const std::string& name);
         template<size_t Dim>
         [[nodiscard]] const H5DataSet<Dim> openDataSet(const std::string& name) const;
 
-        [[nodiscard]] const H5Group openGroup(const std::string& name) const;
         [[nodiscard]] H5Group openGroup(const std::string& name);
-    protected:
-        H5Loc() = default;
-        H5Loc(const H5Loc&) = default;
-        H5Loc(H5Loc&&) noexcept = default;
-        /* Operators */
-        H5Loc& operator=(const H5Loc&) = default;
-        H5Loc& operator=(H5Loc&&) noexcept = default;
-    private:
-        [[nodiscard]] auto& getDerived() { return *reinterpret_cast<H5::H5Location*>(this); }
-        [[nodiscard]] const auto& getDerived() const { return *reinterpret_cast<const H5::H5Location*>(this); }
+        [[nodiscard]] H5Group openGroup(const std::string& name) const;
+
+        [[nodiscard]] H5Attribute openAttribute(const std::string& name) const;
+        template<class SpaceType>
+        [[nodiscard]] H5Attribute createAttribute(const std::string& name, const H5Type& dtype, const SpaceType& space) const;
+        /* Getters */
+        [[nodiscard]] bool exists(const std::string& name) const;
+        [[nodiscard]] bool attrExists(const char* name) const;
     };
 
-    inline bool H5Loc::exists(const std::string& name, const H5::LinkAccPropList& lapl) const {
-        return getDerived().exists(name, lapl);
-    }
-
     template<size_t Dim>
-    H5DataSet<Dim> H5Loc::createDataSet(
-            const std::string&name,
-            const H5::DataType& data_type,
-            const H5::DataSpace& data_space,
-            const H5::DSetCreatPropList& create_plist,
-            const H5::DSetAccPropList& dapl,
-            const H5::LinkCreatPropList& lcpl) const {
-        return getDerived().createDataSet(name, data_type, data_space, create_plist, dapl, lcpl);
+    H5DataSet<Dim> H5Loc::createDataSet(const std::string& name, const H5Type& dtype, const H5DataSpace<Dim>& data_space) const {
+        return H5DataSet<Dim>(H5ID(H5Dcreate2(getHID(), name.c_str(), dtype.getHID(), data_space.getHID(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)));
     }
 
     template<size_t Dim>
     H5DataSet<Dim> H5Loc::openDataSet(const std::string& name) {
         if (!exists(name))
             throw IOException("[Error]: Dataset not found");
-        return getDerived().openDataSet(name);
+        return H5DataSet<Dim>(H5ID(H5Dopen2(getHID(), name.c_str(), H5P_DEFAULT)));
     }
 
     template<size_t Dim>
     const H5DataSet<Dim> H5Loc::openDataSet(const std::string& name) const {
         if (!exists(name))
             throw IOException("[Error]: Dataset not found");
-        return getDerived().openDataSet(name);
+        return H5DataSet<Dim>(H5ID(H5Dopen2(getHID(), name.c_str(), H5P_DEFAULT)));
+    }
+
+    template<class SpaceType>
+    H5Attribute H5Loc::createAttribute(const std::string& name, const H5Type& dtype, const SpaceType& space) const {
+        return H5Attribute(H5ID(H5Acreate2(getHID(), name.c_str(), dtype.getHID(), space.getHID(), H5P_DEFAULT, H5P_DEFAULT)));
     }
 }

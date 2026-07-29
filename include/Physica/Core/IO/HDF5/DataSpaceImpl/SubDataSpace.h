@@ -37,10 +37,9 @@ namespace Physica {
         /* Operations */
         void selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start);
         /* Getters */
-        [[nodiscard]] const H5::DataSpace& asH5Type() const noexcept { return space.asH5Type(); }
-        [[nodiscard]] H5::DataSpace& asH5Type() noexcept { return space.asH5Type(); }
         [[nodiscard]] size_t getDim() const noexcept;
         [[nodiscard]] size_t getSize(size_t dim) const noexcept { return space.getSize(fromDim + dim); }
+        [[nodiscard]] auto getHID() const noexcept { return space.getHID(); }
     };
 
     template<class SpaceType, size_t Dim>

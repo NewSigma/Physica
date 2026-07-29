@@ -172,7 +172,7 @@ if(${PHYSICA_MPI})
 endif()
 
 if (${PHYSICA_HDF5})
-    find_package(HDF5 REQUIRED COMPONENTS C CXX)
+    find_package(HDF5 REQUIRED COMPONENTS C)
     add_definitions(-DPHYSICA_HDF5 -DH5_NO_DEPRECATED_SYMBOLS)
 endif()
 
