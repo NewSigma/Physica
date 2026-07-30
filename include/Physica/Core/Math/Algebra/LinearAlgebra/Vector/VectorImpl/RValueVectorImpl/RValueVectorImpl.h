@@ -256,12 +256,8 @@ namespace Physica {
 
     template<class Derived, Scalar ScalarT>
     auto RValueVector<Derived, ScalarT>::reshape_like(this auto&& self, const Matrix auto& mat) noexcept {
-        using M = std::remove_cvref_t<decltype(mat)>;
-        constexpr auto Major = MatrixMajor::getMajor<M>();
-        if constexpr (Major == MatrixMajor::BothMajor)
-            return std::forward<decltype(self)>(self).template reshape<MatrixMajor::Col, M::getRowAtCompile(), M::getColAtCompile()>(mat.getRow(), mat.getCol());
-        else
-            return std::forward<decltype(self)>(self).template reshape<Major, M::getRowAtCompile(), M::getColAtCompile()>(mat.getRow(), mat.getCol());
+        constexpr auto Major = (mat.isColMatrix() || mat.isBothMajor()) ? MatrixMajor::Col : MatrixMajor::Row;
+        return std::forward<decltype(self)>(self).template reshape<Major, mat.getRowAtCompile(), mat.getColAtCompile()>(mat.getRow(), mat.getCol());
     }
 
     template<class Derived, Scalar ScalarT>

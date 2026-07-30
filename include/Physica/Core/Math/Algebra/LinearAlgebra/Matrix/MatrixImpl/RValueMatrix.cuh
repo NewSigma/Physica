@@ -108,8 +108,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto getCol() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getRow() * getCol(); }
         [[nodiscard]] __host__ __device__ auto getOrder() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getMaxMajor() const noexcept { return MatrixMajor::getMaxMajor<device_obj<Derived>>(Base::getDerived()); }
-        [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept { return MatrixMajor::getMaxMinor<device_obj<Derived>>(Base::getDerived()); }
+        [[nodiscard]] __host__ __device__ size_t getMaxMajor(this const auto&) noexcept;
+        [[nodiscard]] __host__ __device__ size_t getMaxMinor(this const auto&) noexcept;
         [[nodiscard]] __host__ __device__ bool empty() const noexcept { return Base::getDerived().getSize() == 0; }
 
         [[nodiscard]] __host__ __device__ constexpr bool isSquare() const noexcept;

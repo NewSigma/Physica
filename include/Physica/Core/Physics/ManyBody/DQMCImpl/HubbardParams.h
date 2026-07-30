@@ -44,6 +44,7 @@ namespace Physica {
         HubbardParams() = default;
         template<int Dim, BoundaryCond BC>
         HubbardParams(Tr hoppingT, Tr repelU, const SquareLattice<Dim, BC>& lattice, Tr beta, Tr chemMu, int numSplit);
+        HubbardParams(MatrixND<T> hoppingMatrix, Tr repelU, Tr beta, Tr chemMu, int numSplit);
         HubbardParams(const This&) = default;
         HubbardParams(This&&) noexcept = default;
         ~HubbardParams() = default;
@@ -72,11 +73,11 @@ namespace Physica {
         /* Setters */
         void setChemMu(Tr chemMu_);
         /* Static members */
+        template<int Dim, BoundaryCond BC>
+        [[nodiscard]] static MatrixND<T> makeHoppingMatrix(Tr hoppingT, const SquareLattice<Dim, BC>& lattice);
         [[nodiscard]] static Tr calcAlpha(Tr beta, Tr repelU, int numSplit) noexcept;
         [[nodiscard]] static Tr calcBetaMu(Tr beta, Tr repelU, Tr chemMu) noexcept;
     private:
-        template<int Dim, BoundaryCond BC>
-        void makeHoppingMatrix(Tr hoppingT, const SquareLattice<Dim, BC>& lattice);
         void makeLnSpinWeights();
         /* Friends */
         friend class device_obj<This>;
@@ -85,15 +86,19 @@ namespace Physica {
     template<Scalar T>
     template<int Dim, BoundaryCond BC>
     HubbardParams<T>::HubbardParams(Tr hoppingT, Tr repelU, const SquareLattice<Dim, BC>& lattice, Tr beta, Tr chemMu, int numSplit)
-            : beta(beta)
+            : HubbardParams(makeHoppingMatrix(hoppingT, lattice), repelU, beta, chemMu, numSplit) {}
+
+    template<Scalar T>
+    HubbardParams<T>::HubbardParams(MatrixND<T> hoppingMatrix, Tr repelU, Tr beta, Tr chemMu, int numSplit)
+            : hoppingMatrix(std::move(hoppingMatrix))
+            , beta(beta)
             , repelU(repelU)
             , chemMu(chemMu)
             , numSplit(numSplit)
-            , lnSpinWeights(lattice.getNumSuperCellSite()) {
+            , lnSpinWeights(numSplit + 1) {
         assert(!repelU.isNegative() && "[Error]: It is assumed U >= 0");
         assert(!beta.isNegative() && "[Error]: Negative temperature is invalid");
         assert(numSplit > 0 && "[Error]: Invalid NumSplit");
-        makeHoppingMatrix<Dim, BC>(hoppingT, lattice);
 
         MatrixND<T> hoppingMatrixB = -beta / T(numSplit) * hoppingMatrix;
         expT = exp(hoppingMatrixB);
@@ -144,12 +149,12 @@ namespace Physica {
 
     template<Scalar T>
     template<int Dim, BoundaryCond BC>
-    void HubbardParams<T>::makeHoppingMatrix(Tr hoppingT, const SquareLattice<Dim, BC>& lattice) {
+    MatrixND<T> HubbardParams<T>::makeHoppingMatrix(Tr hoppingT, const SquareLattice<Dim, BC>& lattice) {
         const auto CheckTemplateParam = HubbardMatrix<T, FermiRepr<Dim, Dynamic, false>, BC>{};
 
         const size_t numSite = lattice.getNumSuperCellSite();
-        hoppingMatrix.resize(numSite);
-        hoppingMatrix.zeros();
+        auto result = MatrixND<T>(numSite);
+        result.zeros();
 
         using enum BoundaryCond;
         if constexpr (BC == PBC) {
@@ -157,14 +162,14 @@ namespace Physica {
                 if constexpr (Dim > 1) {
                     const auto& targets = lattice.getNeighbors()[from];
                     for (size_t to : targets) {
-                        hoppingMatrix[from, to] -= hoppingT;
-                        hoppingMatrix[to, from] -= hoppingT;
+                        result[from, to] -= hoppingT;
+                        result[to, from] -= hoppingT;
                     }
                 }
                 else {
                     size_t next = (from + 1) % numSite;
-                    hoppingMatrix[from, next] = -hoppingT;
-                    hoppingMatrix[next, from] = -hoppingT;
+                    result[from, next] = -hoppingT;
+                    result[next, from] = -hoppingT;
                 }
             }
         }
@@ -184,8 +189,8 @@ namespace Physica {
                             int dim = boundary.find(pair)->second;
                             phase = phases[dim];
                         }
-                        hoppingMatrix[from, to] -= hoppingT * phase;
-                        hoppingMatrix[to, from] -= hoppingT * phase.conjugate();
+                        result[from, to] -= hoppingT * phase;
+                        result[to, from] -= hoppingT * phase.conjugate();
                     }
                 }
                 else {
@@ -196,18 +201,18 @@ namespace Physica {
                         int dim = boundary.find(pair)->second;
                         phase = phases[dim];
                     }
-                    hoppingMatrix[from, next] = -hoppingT * phase;
-                    hoppingMatrix[next, from] = -hoppingT * phase.conjugate();
+                    result[from, next] = -hoppingT * phase;
+                    result[next, from] = -hoppingT * phase.conjugate();
                 }
             }
         }
+        return result;
     }
 
     template<Scalar T>
     void HubbardParams<T>::makeLnSpinWeights() {
         const Tr lncoshBetaMu = lncosh(calcBetaMu());
         const int numSplit = getNumSplit();
-        lnSpinWeights.resize(numSplit + 1);
         for (int spinUp = 0; spinUp <= numSplit; ++spinUp) {
             int sumSpin = 2 * spinUp - numSplit;
             lnSpinWeights[spinUp] = ln1pexp(lncosh(alpha * sumSpin) - lncoshBetaMu);

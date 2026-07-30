@@ -48,6 +48,11 @@ namespace Physica {
         MatrixMajor() = delete;
         /* Static members */
         template<class M>
+        consteval static int getMajor() noexcept {
+            return std::remove_cvref_t<M>::getMajor();
+        }
+
+        template<class M>
         consteval static bool isColMatrix() noexcept {
             return (getMajor<M>() & Col) != 0;
         }
@@ -60,11 +65,6 @@ namespace Physica {
         template<class M>
         consteval static bool isBothMajor() noexcept {
             return getMajor<M>() == BothMajor;
-        }
-
-        template<class M>
-        consteval static int getMajor() noexcept {
-            return std::remove_cvref_t<M>::getMajor();
         }
 
         template<class M1, class M2>
@@ -80,14 +80,6 @@ namespace Physica {
         template<class M>
         [[nodiscard]] constexpr static size_t selectMinor(size_t row, size_t col) noexcept {
             return isColMatrix<M>() ? row : col;
-        }
-
-        [[nodiscard]] constexpr static size_t getMaxMajor(const Matrix auto& mat) noexcept {
-            return isColMatrix<decltype(mat)>() ? mat.getCol() : mat.getRow();
-        }
-
-        [[nodiscard]] constexpr static size_t getMaxMinor(const Matrix auto& mat) noexcept {
-            return isColMatrix<decltype(mat)>() ? mat.getRow() : mat.getCol();
         }
 
         template<class M>

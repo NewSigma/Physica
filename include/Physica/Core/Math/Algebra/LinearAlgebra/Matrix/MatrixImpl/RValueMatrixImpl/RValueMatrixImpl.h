@@ -563,6 +563,16 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    size_t RValueMatrix<Derived, ScalarT>::getMaxMajor(this const auto& self) noexcept {
+        return Derived::isColMatrix() ? self.getCol() : self.getRow();
+    }
+
+    template<class Derived, Scalar ScalarT>
+    size_t RValueMatrix<Derived, ScalarT>::getMaxMinor(this const auto& self) noexcept {
+        return Derived::isColMatrix() ? self.getRow() : self.getCol();
+    }
+
+    template<class Derived, Scalar ScalarT>
     constexpr bool RValueMatrix<Derived, ScalarT>::isOverdetermined() const noexcept {
         if constexpr (Derived::isStaticSquare())
             return false;

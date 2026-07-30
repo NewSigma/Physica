@@ -442,6 +442,16 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    __host__ __device__ size_t device_obj<RValueMatrix<Derived, ScalarT>>::getMaxMajor(this const auto& self) noexcept {
+        return isColMatrix() ? self.getCol() : self.getRow();
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ size_t device_obj<RValueMatrix<Derived, ScalarT>>::getMaxMinor(this const auto& self) noexcept {
+        return isColMatrix() ? self.getRow() : self.getCol();
+    }
+
+    template<class Derived, Scalar ScalarT>
     __host__ __device__ constexpr bool device_obj<RValueMatrix<Derived, ScalarT>>::isSquare() const noexcept {
         if constexpr (isStaticSquare())
             return true;
