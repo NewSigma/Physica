@@ -212,23 +212,30 @@ namespace Physica {
     template<ExecutePolicy P>
     void Vegas<T, TakeLn>::refineGrid() {
         parallel_for<P>([this](size_t dim) {
-            const auto mean = losses.col(dim).mean();
-            auto oldPoints = pointGrid.col(dim);
-            VectorND<Trv> newPoints(getNumPoint());
-            newPoints.front() = oldPoints.front();
-            Trv temp = 0;
-            for (size_t i = 1, j = 0; i < newPoints.getLength() - 1; ++i) {
-                while (temp < mean) {
-                    assert(j < getNumPoint() && "[Error]: Unexpected not enough loss, this is likely a bug");
-                    temp += losses[j, dim];
-                    j += 1;
-                }
-                temp -= mean;
-                Trv delta = oldPoints[j] - oldPoints[j - 1];
-                newPoints[i] = fma(temp / losses[j - 1, dim], -delta, oldPoints[j]);
-            }
-            newPoints.back() = oldPoints.back();
-            oldPoints = newPoints * lr + oldPoints * (Trv(1) - lr);
+            const auto accum = VectorND<Trv>::generate([this, dim, sum = Trv(0)](size_t i) mutable {
+                if (i == getNumPoint() - 1)
+                    return sum;
+                return std::exchange(sum, sum + losses[i, dim]);
+            }, getNumPoint());
+
+            const size_t numBin = getNumPoint() - 1;
+            const Trv total = accum.back();
+            auto oldP = pointGrid.col(dim);
+            auto newP = VectorND<Trv>::generate([&, cur = size_t(0)](size_t i) mutable {
+                if (i == 0 || i == numBin)
+                    return oldP[i];
+
+                const Trv target = total * Trv(i) / Trv(numBin);
+                while (accum[cur + 1] <= target)
+                    cur += 1;
+
+                const Trv width = oldP[cur + 1] - oldP[cur];
+                const Trv factor = (target - accum[cur]) / losses[cur, dim];
+                assert(width.isPositive() && "[Error]: Broken grid");
+                assert(Trv(0) <= factor && factor < Trv(1));
+                return fma(factor, width, oldP[cur]);
+            }, getNumPoint());
+            oldP = newP * lr + oldP * (Trv(1) - lr);
         }, getDim(), 0).wait();
     }
 
