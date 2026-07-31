@@ -19,6 +19,7 @@
 #pragma once
 
 #include <format>
+#include <istream>
 #include "Physica/CRCoro.h"
 #include "../Real.h"
 

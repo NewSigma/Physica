@@ -69,6 +69,7 @@ namespace Physica {
         return self[R::select(self.getLength())];
     }
 
+#ifdef PHYSICA_HDF5
     template<class Derived, class Allocator>
     void ArrayBase<Derived, Allocator>::read(this auto& self, const auto& loc, const char* name) {
         if constexpr (std::is_trivially_copyable_v<value_type>) {
@@ -111,6 +112,7 @@ namespace Physica {
             }
         }
     }
+#endif
 
     template<class Derived, class Allocator>
     __host__ __device__ auto* ArrayBase<Derived, Allocator>::data(this auto&& self) noexcept {

@@ -99,7 +99,9 @@ namespace Physica {
         template<RNG R>
         [[nodiscard]] static This random_any(size_t len, auto& distribution);
         [[nodiscard]] static This linspace(T from, T to, size_t count);
+    #ifdef PHYSICA_HDF5
         [[nodiscard]] static This read_hdf5(const H5Loc& loc, const char* name);
+    #endif
         [[nodiscard]] static This read(size_t length, const T* __restrict p) noexcept;
         [[nodiscard]] static This generate(std::invocable<size_t> auto fn);
         [[nodiscard]] static This generate(std::invocable<size_t> auto fn, size_t length);

@@ -89,7 +89,9 @@ namespace Physica {
         [[nodiscard]] static auto random_normal();
         template<RNG R>
         [[nodiscard]] static auto random_any(auto& distribution);
+    #ifdef PHYSICA_HDF5
         [[nodiscard]] static const H5Type& dtype_hdf5() noexcept;
+    #endif
     };
 
     template<Scalar T>

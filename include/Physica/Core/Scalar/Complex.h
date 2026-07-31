@@ -116,7 +116,9 @@ namespace Physica {
         [[nodiscard]] static This random_uniform();
         template<RNG R>
         [[nodiscard]] static This random_normal();
+    #ifdef PHYSICA_HDF5
         [[nodiscard]] static const H5Type& dtype_hdf5() noexcept;
+    #endif
     };
 
     template<Scalar T>

@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <array>
 #include <cassert>
 #include <cstring>
 #include "Physica/Macro.h"

@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <stack>
 #include "Physica/Core/Physics/MD/KineticModel/OpenModel.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 

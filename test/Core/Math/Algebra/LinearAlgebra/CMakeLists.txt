@@ -1,5 +1,7 @@
-physica_add_test(EigenSolver Eigen/EigenSolver.cpp)
-physica_add_test(JacobiDavidson Eigen/JacobiDavidson.cpp)
+if(${PHYSICA_MKL}) # FIXME: Remove MKL dependency
+    physica_add_test(EigenSolver Eigen/EigenSolver.cpp)
+    physica_add_test(JacobiDavidson Eigen/JacobiDavidson.cpp)
+endif()
 physica_add_test(SymmEigenSolver Eigen/SymmEigenSolver.cpp)
 
 physica_add_test(TensorBlock Tensor/TensorBlock.cpp)

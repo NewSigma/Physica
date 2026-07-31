@@ -72,8 +72,10 @@ namespace Physica {
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
 
+    #ifdef PHYSICA_HDF5
         using Base::read;
         using Base::write;
+    #endif
         __host__ __device__ void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Length; }
@@ -130,8 +132,10 @@ namespace Physica {
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
 
+#ifdef PHYSICA_HDF5
         using Base::read;
         using Base::write;
+#endif
         void swap(This& obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }

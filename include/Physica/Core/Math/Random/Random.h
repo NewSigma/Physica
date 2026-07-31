@@ -52,7 +52,7 @@ namespace Physica {
         #endif
 
             SeedSequence<> seq;
-            VSLStreamStatePtr pStream = nullptr;
+            mkl_handle pStream = nullptr;
             [[no_unique_address]] curand_handle curand = nullptr;
         private:
             uint64_t seed{};
