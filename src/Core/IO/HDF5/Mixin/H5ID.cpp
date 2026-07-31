@@ -44,6 +44,30 @@ bool H5ID::isValid() const noexcept {
     return H5Iis_valid(id) > 0;
 }
 
+bool H5ID::isFile() const noexcept {
+    return H5Iget_type(id) == H5I_FILE;
+}
+
+bool H5ID::isGroup() const noexcept {
+    return H5Iget_type(id) == H5I_GROUP;
+}
+
+bool H5ID::isDatatype() const noexcept {
+    return H5Iget_type(id) == H5I_DATATYPE;
+}
+
+bool H5ID::isDataspace() const noexcept {
+    return H5Iget_type(id) == H5I_DATASPACE;
+}
+
+bool H5ID::isDataset() const noexcept {
+    return H5Iget_type(id) == H5I_DATASET;
+}
+
+bool H5ID::isAttribute() const noexcept {
+    return H5Iget_type(id) == H5I_ATTR;
+}
+
 void H5ID::incRef() const noexcept {
     assert(isValid());
     [[maybe_unused]] auto err = H5Iinc_ref(id);

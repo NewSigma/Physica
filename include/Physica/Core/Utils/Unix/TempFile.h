@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <array>
 #include <cstdlib>
 #include <unistd.h>
 #include "Physica/Core/Exception/SystemException.h"
@@ -27,35 +28,34 @@ namespace Physica {
     class TempFile {
         using This = TempFile<N>;
 
-        char name[N];
+        std::array<char, N> name;
         int fd;
     public:
-        TempFile(const char (&name_template)[N]);
-        TempFile(const TempFile&) = delete;
-        TempFile(TempFile&& obj) noexcept;
+        TempFile(const char (&nameFmt)[N]);
+        TempFile(const This&) = delete;
+        TempFile(This&& obj) noexcept;
         ~TempFile();
         /* Operators */
-        TempFile& operator=(TempFile obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void reserve(size_t size);
+        void reserve(int64_t size);
         void release() noexcept { fd = -1; }
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const char* getName() const noexcept { return name; }
+        [[nodiscard]] const char* getName() const noexcept { return name.data(); }
         [[nodiscard]] int getFd() const noexcept { return fd; }
     };
 
     template<size_t N>
-    TempFile<N>::TempFile(const char (&name_template)[N]) {
-        for (size_t i = 0; i < N; ++i)
-            name[i] = name_template[i];
-        fd = mkstemp(name);
+    TempFile<N>::TempFile(const char (&nameFmt)[N])
+            : name(std::to_array(nameFmt))
+            , fd(mkstemp(name.data())) {
         if (fd == -1) [[unlikely]]
             throw SystemException();
     }
 
     template<size_t N>
-    TempFile<N>::TempFile(TempFile&& obj) noexcept : fd(obj.fd) {
+    TempFile<N>::TempFile(This&& obj) noexcept : fd(obj.fd) {
         for (size_t i = 0; i < N; ++i)
             name[i] = obj.name[i];
         obj.fd = -1;
@@ -65,19 +65,19 @@ namespace Physica {
     TempFile<N>::~TempFile() {
         if (fd != -1) {
             close(fd);
-            unlink(name);
+            unlink(name.data());
             fd = -1;
         }
     }
 
     template<size_t N>
-    void TempFile<N>::reserve(size_t size) {
+    void TempFile<N>::reserve(int64_t size) {
         if (ftruncate64(fd, size))
             throw SystemException();
     }
 
     template<size_t N>
-    void TempFile<N>::swap(TempFile& __restrict obj) noexcept {
+    void TempFile<N>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(name, obj.name);
         std::swap(fd, obj.fd);

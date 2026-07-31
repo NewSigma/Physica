@@ -40,6 +40,13 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto getHID() const noexcept { return id; }
         [[nodiscard]] bool isValid() const noexcept;
+
+        [[nodiscard]] bool isFile() const noexcept;
+        [[nodiscard]] bool isGroup() const noexcept;
+        [[nodiscard]] bool isDatatype() const noexcept;
+        [[nodiscard]] bool isDataspace() const noexcept;
+        [[nodiscard]] bool isDataset() const noexcept;
+        [[nodiscard]] bool isAttribute() const noexcept;
     protected:
         void incRef() const noexcept;
     };
