@@ -40,5 +40,5 @@ jobs:
 
     - name: Test
       run: |
-        cd test
-        ctest --parallel --output-on-failure .
+        cd build/test
+        ctest --parallel --output-on-failure --progress .
