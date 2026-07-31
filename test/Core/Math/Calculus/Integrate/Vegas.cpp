@@ -18,11 +18,12 @@
  */
 #include "Physica/Core/Math/Calculus/SpecialFunctions.h"
 #include "Physica/Core/Math/Calculus/Integrate/Vegas.h"
+#include "Physica/Core/Math/Optimization/TestFunction.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Test.h"
 
 using namespace Physica;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<PCG64DXSM, 9732626621958645290UL>;
 using T = float64;
 using Tc = cfloat64;
 using Cube = Vegas<T, false>::Cube;
@@ -91,11 +92,32 @@ namespace {
         const T result = process2.calcLnMean().real();
         expect<RandomSource>(scalarNear(answer, result, 1E-12));
     }
+
+    void maximize() {
+        /* Rosenbrock */ {
+            constexpr int Dim = 2;
+            auto vegas = Vegas<T, true>({VectorND<T>(Dim, -5), VectorND<T>(Dim, 10)}, 10000, 50);
+            auto optimal = vegas.maximize<RandomSource>([](const VectorND<T>& x) {
+                return -rosenbrock(x);
+            }, 10);
+
+            for (T elem : optimal)
+                expect<RandomSource>(scalarNear(elem, T(1), 1E-2));
+        }
+        /* Forrester */ {
+            auto vegas = Vegas<T, true>({Vector1D<T>{0}, Vector1D<T>{1}}, 1000, 30);
+            auto optimal = vegas.maximize<RandomSource>([](const VectorND<T>& x) {
+                return -forrester(x[0]);
+            }, 10);
+            expect<RandomSource>(scalarNear(optimal[0], T(0.75724875784183199), 1E-2));
+        }
+    }
 }
 
 int main() {
     reference();
     lnVegas();
     complex();
+    maximize();
     return 0;
 }

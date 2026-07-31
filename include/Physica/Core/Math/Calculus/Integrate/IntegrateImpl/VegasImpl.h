@@ -143,6 +143,32 @@ namespace Physica {
         return calcGridLossImpl();
     }
 
+    template<Scalar T, bool TakeLn>
+    template<RNG R, ExecutePolicy P>
+    VectorND<T> Vegas<T, TakeLn>::maximize(std::invocable<VectorND<Trv>> auto fn, int iteration, Trv beta) {
+        static_assert(TakeLn, "[Error]: Requires exponential mode");
+        assert(beta.isPositive() && beta <= InfBeta);
+        warmup<R, P>([fn, beta](const VectorND<Trv>& x) {
+            auto y = fn(x) * beta;
+            assert(y.isFinite() && "[Error]: Range of fn is uncontrolled");
+            return y;
+        }, iteration);
+
+        return VectorND<T>::generate([this](size_t dim) {
+            auto points = pointGrid.col(dim);
+            size_t i = (points.tail(1) - points.head(getNumPoint() - 1)).argmin();
+            return (points[i] + points[i + 1]) * Trv(0.5);
+        }, getDim());
+    }
+
+    template<Scalar T, bool TakeLn>
+    template<RNG R, ExecutePolicy P>
+    VectorND<T> Vegas<T, TakeLn>::minimize(std::invocable<VectorND<Trv>> auto fn, int iteration, Trv beta) {
+        return maximize<R, P>([fn](const VectorND<Trv>& x) {
+            return -fn(x);
+        }, iteration, beta);
+    }
+
 #ifdef PHYSICA_HDF5
     template<Scalar T, bool TakeLn>
     const H5Group Vegas<T, TakeLn>::read(const H5Loc& loc, const char* name) {

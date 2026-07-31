@@ -59,7 +59,7 @@ namespace Physica {
         Vegas(Cube cube,
               int numSample,
               int numPoint = 1000,
-              Trv compressRate = 1.5,
+              Trv compressRate = 0.5,
               Trv lr = 1,
               Trv momentum = 0);
         Vegas(const This&) = default;
@@ -77,6 +77,11 @@ namespace Physica {
         [[nodiscard]] AdaptiveProcess<T, TakeLn> integral(std::invocable<VectorND<Trv>> auto fn, int numRefine);
         template<RNG R, ExecutePolicy P = Sequential>
         [[nodiscard]] Trv calcGridLoss(std::invocable<VectorND<Trv>> auto fn) const;
+
+        template<RNG R, ExecutePolicy P = Sequential>
+        [[nodiscard]] VectorND<T> maximize(std::invocable<VectorND<Trv>> auto fn, int iteration, Trv beta = InfBeta);
+        template<RNG R, ExecutePolicy P = Sequential>
+        [[nodiscard]] VectorND<T> minimize(std::invocable<VectorND<Trv>> auto fn, int iteration, Trv beta = InfBeta);
 
         const H5Group read(const H5Loc& loc, const char* name);
         H5Group write(H5Loc& loc, const char* name) const;

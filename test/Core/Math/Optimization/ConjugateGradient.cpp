@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Functions.h"
+#include "Physica/Core/Math/Optimization/TestFunction.h"
 #include "Physica/Core/Math/Calculus/Differential.h"
 #include "Physica/Core/Math/Optimization/ConjugateGradient.h"
 #include "Test.h"
