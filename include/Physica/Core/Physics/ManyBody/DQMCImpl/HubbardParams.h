@@ -89,8 +89,8 @@ namespace Physica {
             : HubbardParams(makeHoppingMatrix(hoppingT, lattice), repelU, beta, chemMu, numSplit) {}
 
     template<Scalar T>
-    HubbardParams<T>::HubbardParams(MatrixND<T> hoppingMatrix, Tr repelU, Tr beta, Tr chemMu, int numSplit)
-            : hoppingMatrix(std::move(hoppingMatrix))
+    HubbardParams<T>::HubbardParams(MatrixND<T> hoppingMatrix_, Tr repelU, Tr beta, Tr chemMu, int numSplit)
+            : hoppingMatrix(std::move(hoppingMatrix_))
             , beta(beta)
             , repelU(repelU)
             , chemMu(chemMu)
