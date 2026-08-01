@@ -13,10 +13,12 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7.0.1
 
     - name: Install ccache
       uses: hendrikmuhs/ccache-action@v1.2.23
+      with:
+        key: Minimal-${{ inputs.build_config }}
 
     - name: Install clang
       uses: egor-tensin/setup-clang@v2.3
@@ -36,7 +38,8 @@ jobs:
           -DCMAKE_C_COMPILER=clang-23 \
           -DCMAKE_CXX_COMPILER=clang++-23 \
           -DCMAKE_LINKER_TYPE=LLD \
-          -DCMAKE_CXX_FLAGS=-Werror
+          -DCMAKE_CXX_FLAGS=-Werror \
+          -DPHYSICA_CCACHE=ON
 
     - name: Build
       run: |
