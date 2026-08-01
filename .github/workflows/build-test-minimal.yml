@@ -1,0 +1,19 @@
+name: Build-Test Minimal
+
+on:
+  push:
+    branches: [ "Physica" ]
+  pull_request:
+    branches: [ "Physica" ]
+
+jobs:
+  debug:
+    uses: ./.github/workflows/preset-minimal.yml
+    with:
+      build_config: Debug
+
+  release:
+    needs: debug
+    uses: ./.github/workflows/preset-minimal.yml
+    with:
+      build_config: Release

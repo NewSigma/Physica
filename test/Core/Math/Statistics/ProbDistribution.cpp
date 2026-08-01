@@ -28,6 +28,28 @@ using T = float64;
 using RandomSource = Random<MCG>;
 
 namespace {
+    void minmax() {
+        // Test that getMin(), getMax(), and calcNumSample() are helpful diagnostics when data lies outside the expected range
+        const auto data = VectorND<T>::random_uniform<RandomSource>(8);
+        {
+            ProbDistribution<T> dist(2, 3, 10);
+            dist.sample(data);
+            expect(dist.getMinimum() == data.min());
+            expect(dist.getMaximum() == data.max());
+            expect(dist.calcNumSample() == 0);
+        }
+        {
+            ProbDistribution2D<T> dist(2, 3, 2, 3, 8, 8);
+            for (auto elem : data)
+                dist.sample(elem, elem);
+            expect(dist.getMinX() == data.min());
+            expect(dist.getMaxX() == data.max());
+            expect(dist.getMinY() == data.min());
+            expect(dist.getMaxY() == data.max());
+            expect(dist.calcNumSample() == 0);
+        }
+    }
+
     void hdf5() {
     #ifdef PHYSICA_HDF5
         TempFile temp("/tmp/tmpXXXXXX");
@@ -46,24 +68,7 @@ namespace {
 }
 
 int main() {
-    // Test that getMin(), getMax(), and calcNumSample() are helpful diagnostics when data lies outside the expected range
-    const auto data = VectorND<T>::random_uniform<RandomSource>(8);
-    {
-        ProbDistribution<T> dist(2, 3, 10);
-        dist.sample(data);
-        expect(dist.getMinimum() == data.min());
-        expect(dist.getMaximum() == data.max());
-        expect(dist.calcNumSample() == 0);
-    }
-    {
-        ProbDistribution2D<T> dist(2, 3, 2, 3, 8, 8);
-        for (auto elem : data)
-            dist.sample(elem, elem);
-        expect(dist.getMinX() == data.min());
-        expect(dist.getMaxX() == data.max());
-        expect(dist.getMinY() == data.min());
-        expect(dist.getMaxY() == data.max());
-        expect(dist.calcNumSample() == 0);
-    }
+    minmax();
+    hdf5();
     return 0;
 }
