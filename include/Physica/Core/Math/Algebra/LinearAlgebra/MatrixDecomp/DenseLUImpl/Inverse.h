@@ -66,9 +66,10 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     void Inverse<DenseLU<T, Pivot>>::assign_base(Matrix auto& target) const {
-        static_assert(!Pivot, "[Error]: No impl");
         const auto& matrixLU = lu.getMatrixLU();
         matrixLU.tril_unit().inv().assign(target);
+        if constexpr (Pivot)
+            target *= lu.getPerm().inv();
         (matrixLU.triu().inv() * target).assign(target);
     }
 }

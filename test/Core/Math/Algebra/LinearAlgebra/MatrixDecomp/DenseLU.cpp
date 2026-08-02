@@ -56,11 +56,9 @@ namespace {
 
         M buffer, prod;
         buffer.resize(source);
-        if constexpr (!Pivot) {
-            lu.inv().assign_base(buffer);
-            prod = buffer * source;
-            expect(matrixNear(prod, IdentityMatrix<T>(source.getRow()), prec));
-        }
+        lu.inv().assign_base(buffer);
+        prod = buffer * source;
+        expect(matrixNear(prod, IdentityMatrix<T>(source.getRow()), prec));
 
         if constexpr (HasMKL()) {
             lu.inv().assign_mkl(buffer);
