@@ -52,6 +52,7 @@ namespace Physica {
         void swap(This& obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getKernel() const noexcept { return kernel; }
+        [[nodiscard]] const auto& getSampleX() const noexcept { return kernel.getSampleX(); }
         [[nodiscard]] size_t getNumFeature() const noexcept { return kernel.getNumFeature(); }
         [[nodiscard]] size_t getNumSamples() const noexcept { return kernel.getOrder(); }
         [[nodiscard]] const auto& getCovarLU() const noexcept { return covarLU; }
@@ -143,6 +144,7 @@ namespace Physica {
 
         [[nodiscard]] auto&& transpose(this auto&& self) noexcept { return std::forward<decltype(self)>(self); }
         /* Getters */
+        [[nodiscard]] const auto& getSampleX() const noexcept { return sampleX; }
         [[nodiscard]] size_t getOrder() const noexcept { return sampleX.getCol(); }
         [[nodiscard]] size_t getNumFeature() const noexcept { return alpha.getLength(); }
         [[nodiscard]] const auto& getAlpha() const noexcept { return alpha; }

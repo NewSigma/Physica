@@ -105,7 +105,7 @@ namespace {
                 expect<RandomSource>(scalarNear(elem, T(1), 1E-2));
         }
         /* Forrester */ {
-            auto vegas = Vegas<T, true>({Vector1D<T>{0}, Vector1D<T>{1}}, 1000, 30);
+            auto vegas = Vegas<T, true>({0, 1}, 1000, 30);
             auto optimal = vegas.maximize<RandomSource>([](const VectorND<T>& x) {
                 return -forrester(x[0]);
             }, 10);

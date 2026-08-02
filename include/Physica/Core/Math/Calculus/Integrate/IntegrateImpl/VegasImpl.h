@@ -257,7 +257,6 @@ namespace Physica {
 
                 const Trv width = oldP[cur + 1] - oldP[cur];
                 const Trv factor = (target - accum[cur]) / losses[cur, dim];
-                assert(width.isPositive() && "[Error]: Broken grid");
                 assert(Trv(0) <= factor && factor < Trv(1));
                 return fma(factor, width, oldP[cur]);
             }, getNumPoint());
