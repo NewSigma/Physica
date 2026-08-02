@@ -93,7 +93,7 @@ namespace Physica {
      */
     PHYSICA_API MPUnit div2WordByFullWordR(MPUnit high, MPUnit low, MPUnit divisor) noexcept;
     /*
-     * Acquirement:
+     * Requirement:
      * The quotient must be one word.
      * len is the length of divisor, length of dividend should equals to len + 1.
      * FullArr here indicates that the highest bit of divisor is set.

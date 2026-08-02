@@ -89,10 +89,10 @@ namespace Physica {
                 (expr.getLHS() * vec + expr.getRHS() * vec).template assign<P>(target);
             else if constexpr (ID == ExprID::Sub)
                 (expr.getLHS() * vec - expr.getRHS() * vec).template assign<P>(target);
-            else if constexpr (ID == ExprID::Mul)
+            else {
+                static_assert(ID == ExprID::Mul, "[Error]: assign is not implemented");
                 ((expr.getLHS() * vec) * expr.getRHS()).template assign<P>(target);
-            else
-                static_assert(ID == ExprID::Minus, "[Error]: assign is not implemented");
+            }
         }
         else
             Base::assign(target);
@@ -119,12 +119,11 @@ namespace Physica {
                 auto expr1 = expr.getLHS() * vec - expr.getRHS() * vec;
                 expr1.template assign_add<P>(target);
             }
-            else if constexpr (ID == ExprID::Mul) {
+            else {
+                static_assert(ID == ExprID::Mul, "[Error]: assign is not implemented");
                 auto expr1 = (expr.getLHS() * vec) * expr.getRHS();
                 expr1.template assign_add<P>(target);
             }
-            else
-                static_assert(ID == ExprID::Minus, "[Error]: assign is not implemented");
         }
         else
             Base::assign_add(target);

@@ -45,13 +45,13 @@ int main(int argc, char** argv) {
         p[i] = solution[1, i];
     }
 
-    /* Get fractal dimention */ {
+    /* Get fractal dimension */ {
         const size_t length = 32;
         using VectorType = VectorND<T>;
         DenseMatrix<T> trans = solution.transpose();
         const VectorType r = exp(VectorType::linspace(-4, -1, length));
         const T dim = DimEstimator::corrDimen(trans, r);
-        std::cout << "Effective dimention: " << dim << '\n';
+        std::cout << "Effective dimension: " << dim << '\n';
     }
 
     QApplication app(argc, argv);

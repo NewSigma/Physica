@@ -40,7 +40,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim>
     class PeriodicCell : public Internal::PeriodicCellImpl {
-        static_assert(Dim == 1 || Dim == 2 || Dim == 3, "[Error]: Unsupported dimention");
+        static_assert(Dim == 1 || Dim == 2 || Dim == 3, "[Error]: Unsupported dimension");
 
         using This = PeriodicCell<T, Dim>;
         using Base = Internal::PeriodicCellImpl;

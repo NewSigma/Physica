@@ -61,7 +61,7 @@ namespace Physica {
     __host__ __device__ inline PeriodIndex3D::PeriodIndex3D(Index1D index_, Index3D shape_) : PeriodIndex3D(toIndex3D(index_, shape_), shape_) {}
 
     __host__ __device__ inline auto PeriodIndex3D::operator+(const This& other) const -> This {
-        assert(shape == other.shape && "[Error]: Inconsistent dimention");
+        assert(shape == other.shape && "[Error]: Inconsistent dimension");
         Index3D result{};
         for (int i = 0; i < 3; ++i)
             result[i] = (index[i] + other.index[i]) % shape[i];

@@ -151,14 +151,14 @@ int main(int argc, char** argv) {
     axisY->setLabelFormat("%d");
     {
         const auto rdf = calcRDF<Physica::Dynamic>(32);
-        const VectorType dists = rdf.makeDists() * ScalarType(PhyConst<AU>::bohrToAngstorm(1));
+        const VectorType dists = rdf.makeDists() * ScalarType(PhyConst<AU>::bohrToAngstrom(1));
         const VectorType rdfLine = rdf.makeRDF();
         auto& line = plot->line(dists, rdfLine);
         line.setName("PIMD");
     }
     {
         const auto rdf = calcRDF<1>(1);
-        const VectorType dists = rdf.makeDists() * ScalarType(PhyConst<AU>::bohrToAngstorm(1));
+        const VectorType dists = rdf.makeDists() * ScalarType(PhyConst<AU>::bohrToAngstrom(1));
         const VectorType rdfLine = rdf.makeRDF();
         auto& line = plot->line(dists, rdfLine);
         line.setName("MD");

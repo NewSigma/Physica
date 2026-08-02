@@ -60,7 +60,7 @@ namespace Physica {
     template<Scalar T, size_t Dim>
     void ODESolver<T, Dim>::rungeKutta4(std::invocable<T, VectorType> auto fn) {
         using FunctionResult = std::invoke_result<decltype(fn), T, VectorType>::type;
-        static_assert(FunctionResult::getSizeAtCompile() == Dim, "[Possible optimization]: Dimention between ODESolver and functor do not match");
+        static_assert(FunctionResult::getSizeAtCompile() == Dim, "[Possible optimization]: Dimension between ODESolver and functor do not match");
         const size_t col_1 = solution.getCol() - 1;
         for (size_t i = 0; i < col_1; ++i) {
             const T& x_i = x[i];

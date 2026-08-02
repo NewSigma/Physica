@@ -109,7 +109,7 @@ Integer Integer::operator*(const Integer& i) const {
         return *this;
     const int size1 = getSize();
     const int size2 = i.getSize();
-    // Estimate the ed of result first. we will calculate it accurately later.
+    // Estimate the end of result first. we will calculate it accurately later.
     auto resultLength = size1 + size2;
     auto* resultByte = HostAllocator<MPUnit>{}.allocate(resultLength);
     for (int j = 0; j < size2; ++j)
@@ -145,7 +145,7 @@ Integer Integer::operator/(const Integer& i) const {
     memset(arr2, 0, i2_blank * sizeof(MPUnit));
     /*
      * We shift s1 and s2, making the less highest bit of s1 is set and the highest bit of s2 is set
-     * to meet the acquirement of the function divArrByFullArrWith1Word().
+     * to meet the requirement of the function divArrByFullArrWith1Word().
      */
     const int i1_shift = static_cast<int>(std::countl_zero(byte[i1_size - 1])) - 1;
     if (i1_shift > 0)

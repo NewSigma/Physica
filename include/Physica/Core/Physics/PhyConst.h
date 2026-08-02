@@ -97,7 +97,7 @@ namespace Physica {
     private:
         constexpr static double hartreeInEv = 27.211386245981;
         constexpr static double rydbergInEv = hartreeInEv * 0.5;
-        constexpr static double bohrInAngstorm = PhyConst<SI>::bohrRadius * 1E10;
+        constexpr static double bohrInAngstrom = PhyConst<SI>::bohrRadius * 1E10;
         constexpr static double hartreeInJoule = PhyConst<SI>::unitCharge * hartreeInEv;
         constexpr static double jouleInHartree = 1 / hartreeInJoule;
         constexpr static double timeInSecond = PhyConst<SI>::reducedPlanck * jouleInHartree;
@@ -121,8 +121,8 @@ namespace Physica {
 
         [[nodiscard]] constexpr static double hartreeToEv(double hartree) { return hartree * hartreeInEv; }
         [[nodiscard]] constexpr static double eVToHartree(double ev) { return ev * (1.0 / hartreeInEv); }
-        [[nodiscard]] constexpr static double bohrToAngstorm(double bohr) { return bohr * bohrInAngstorm; }
-        [[nodiscard]] constexpr static double angstromToBohr(double angstrom) { return angstrom * (1.0 / bohrInAngstorm); }
+        [[nodiscard]] constexpr static double bohrToAngstrom(double bohr) { return bohr * bohrInAngstrom; }
+        [[nodiscard]] constexpr static double angstromToBohr(double angstrom) { return angstrom * (1.0 / bohrInAngstrom); }
         [[nodiscard]] constexpr static double timeToSecond(double atomic_time) { return atomic_time * timeInSecond; }
         [[nodiscard]] constexpr static double secondToTime(double second) { return second / timeInSecond; }
         [[nodiscard]] constexpr static double temperatureToK(double atomic_tem) { return atomic_tem * temperatureInK; }

@@ -61,8 +61,8 @@ namespace Physica {
             std::invocable<T, VectorType> auto random) {
         using FunctionResult = std::invoke_result<decltype(fn), T, VectorType>::type;
         using RandFunctionResult = std::invoke_result<decltype(random), T, VectorType>::type;
-        static_assert(FunctionResult::getSizeAtCompile() == Dim, "[Possible optimization]: Dimention between ODESolver and functor do not match");
-        static_assert(RandFunctionResult::getSizeAtCompile() == Dim, "[Possible optimization]: Dimention between ODESolver and functor do not match");
+        static_assert(FunctionResult::getSizeAtCompile() == Dim, "[Possible optimization]: Dimension between ODESolver and functor do not match");
+        static_assert(RandFunctionResult::getSizeAtCompile() == Dim, "[Possible optimization]: Dimension between ODESolver and functor do not match");
         const VectorType randVec = random(x, sol);
         VectorType term1 = fn(x, sol);
         x += stepSize;

@@ -54,7 +54,7 @@ namespace Physica {
         [[nodiscard]] size_t getBufferSize() const noexcept { return buffer.getLength(); }
     private:
         void fillExchange(const DensityType& density, PotType& xc);
-        void addCorreclation(const DensityType& density, PotType& xc);
+        void addCorrelation(const DensityType& density, PotType& xc);
     };
 
     template<Scalar T, LDAType type>
@@ -76,7 +76,7 @@ namespace Physica {
         assert(rho.getLength() == getBufferSize());
         assert(zeta.getLength() == getBufferSize());
         fillExchange(density, xc);
-        addCorreclation(density, xc);
+        addCorrelation(density, xc);
     }
     /**
      * Reference:
@@ -122,7 +122,7 @@ namespace Physica {
      * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:479-480
      */
     template<Scalar T, LDAType type>
-    void LDA<T, type, true>::addCorreclation([[maybe_unused]] const DensityType& density, PotType& xc) {
+    void LDA<T, type, true>::addCorrelation([[maybe_unused]] const DensityType& density, PotType& xc) {
         auto xc_up = xc[0].flatten();
         auto xc_down = xc[1].flatten();
         switch(type) {
@@ -168,7 +168,7 @@ namespace Physica {
         [[nodiscard]] size_t getBufferSize() const noexcept { return buffer.getLength(); }
     private:
         void fillExchange(const DensityType& density, PotType& xc);
-        void addCorreclation(const DensityType& density, PotType& xc);
+        void addCorrelation(const DensityType& density, PotType& xc);
     };
 
     template<Scalar T, LDAType type>
@@ -185,7 +185,7 @@ namespace Physica {
         [[maybe_unused]] const auto& rho = density[0].flatten();
         assert(rho.getLength() == getBufferSize());
         fillExchange(density, xc);
-        addCorreclation(density, xc);
+        addCorrelation(density, xc);
     }
     /**
      * Reference:
@@ -205,7 +205,7 @@ namespace Physica {
      * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:479-480
      */
     template<Scalar T, LDAType type>
-    void LDA<T, type, false>::addCorreclation([[maybe_unused]] const DensityType& density, PotType& xc) {
+    void LDA<T, type, false>::addCorrelation([[maybe_unused]] const DensityType& density, PotType& xc) {
         auto V = xc[0].flatten();
         switch(type) {
         case LDAType::HL:

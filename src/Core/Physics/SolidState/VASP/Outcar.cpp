@@ -70,7 +70,7 @@ void Outcar::readForce(std::ifstream& fin, Array<char>& buffer) {
 
     if (!fin)
         throw BadFileFormatException("[Error]: Failed to read force");
-    force *= ScalarType(PhyConst<AU>::eVToHartree(1) * PhyConst<AU>::bohrToAngstorm(1));
+    force *= ScalarType(PhyConst<AU>::eVToHartree(1) * PhyConst<AU>::bohrToAngstrom(1));
 }
 
 void Outcar::readEnergy(std::ifstream& fin, Array<char>& buffer) {

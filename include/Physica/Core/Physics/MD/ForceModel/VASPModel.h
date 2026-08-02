@@ -109,7 +109,7 @@ namespace Physica {
                 const auto path = makePath("%s/POSCAR", workingDir.getName());
                 std::ofstream os(path.data(), std::ios_base::out | std::ios_base::trunc);
                 os << '\n';
-                os << PhyConst<AU>::bohrToAngstorm(1) << '\n';
+                os << PhyConst<AU>::bohrToAngstrom(1) << '\n';
                 os << cell.getLattice();
                 for (size_t elem : numOfEachType)
                     os << elem << ' ';

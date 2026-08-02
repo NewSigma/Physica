@@ -96,7 +96,7 @@ namespace Physica {
         static bool absCompare(const Integer& i1, const Integer& i2);
     protected:
         /**
-         * Degigned for performance,
+         * Designed for performance,
          * this constructor should only be called operator+, -, *, / and etc.
          */
         Integer(MPUnit* byte_, int length_) : byte(byte_), length(length_) {}

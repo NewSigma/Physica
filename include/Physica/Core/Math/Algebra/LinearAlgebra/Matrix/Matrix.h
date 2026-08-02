@@ -42,7 +42,7 @@ namespace Physica {
             RightMajor = Col,
             LeftMajor = Row,
             FMajor = Col, // Fortran convention
-            CMajor = Row, // C conversion
+            CMajor = Row, // C convention
         };
     public:
         MatrixMajor() = delete;

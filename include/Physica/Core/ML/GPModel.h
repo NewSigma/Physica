@@ -33,7 +33,7 @@ namespace Physica {
     private:
         GaussKernel kernel;
 
-        DenseLU<Tv, true> lu;
+        DenseLU<Tv, true> covarLU;
         VectorND<Tv> coeffs;
     public:
         GPModel(size_t numFeature);
@@ -54,7 +54,7 @@ namespace Physica {
         [[nodiscard]] const auto& getKernel() const noexcept { return kernel; }
         [[nodiscard]] size_t getNumFeature() const noexcept { return kernel.getNumFeature(); }
         [[nodiscard]] size_t getNumSamples() const noexcept { return kernel.getOrder(); }
-        [[nodiscard]] const auto& getLU() const noexcept { return lu; }
+        [[nodiscard]] const auto& getCovarLU() const noexcept { return covarLU; }
     };
 
     template<Scalar T>
@@ -69,9 +69,9 @@ namespace Physica {
         assert(sampleX.getRow() == getNumFeature());
         assert(sampleX.getCol() == sampleY.getLength());
         kernel.setSampleX(sampleX);
-        lu.resize(getNumSamples());
+        covarLU.resize(getNumSamples());
 
-        auto& covars = lu.getMatrixLU();
+        auto& covars = covarLU.getMatrixLU();
         const Tv var = exp(kernel.getLnVar());
         for (size_t major = 0; major < covars.getMaxMajor(); ++major) {
             for (size_t minor = 0; minor < covars.getMaxMinor(); ++minor) {
@@ -84,12 +84,12 @@ namespace Physica {
                 }
             }
         }
-        lu.compute();
-        coeffs = lu.inv() * sampleY;
-        const Tv likelihood = Tv(-0.5) * (sampleY * coeffs + lu.lnAbsDet() + ln(Tv(2) * MathConst<Tv>::pi));
+        covarLU.compute();
+        coeffs = covarLU.inv() * sampleY;
+        const Tv likelihood = Tv(-0.5) * (sampleY * coeffs + covarLU.lnAbsDet() + ln(Tv(2) * MathConst<Tv>::pi));
         if constexpr (T::isDiffable()) {
             const auto& l = co_yield likelihood;
-            kernel.reverse(Tv(2) * l.grad() * reciprocal_elem(coeffs * coeffs.transpose() - MatrixND<Tv>(lu.inv())));
+            kernel.reverse(Tv(2) * l.grad() * reciprocal_elem(coeffs * coeffs.transpose() - MatrixND<Tv>(covarLU.inv())));
         }
         else
             co_return likelihood;
@@ -101,7 +101,7 @@ namespace Physica {
         if (getNumSamples() == 0) [[unlikely]]
             return {0, 1};
         auto buffer = VectorND<Tv>::generate([&](size_t i) { return kernel.dot(x, i); }, getNumSamples());
-        auto sol = VectorND<Tv>(lu.inv() * buffer);
+        auto sol = VectorND<Tv>(covarLU.inv() * buffer);
         Tv mean = buffer * coeffs;
         Tv devia = sqrt(std::max(exp(kernel.getLnVar()) - buffer * sol, Tv(0)));
         return {mean, devia};
@@ -112,7 +112,7 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         kernel.swap(obj.kernel);
 
-        lu.swap(obj.lu);
+        covarLU.swap(obj.covarLU);
         coeffs.swap(obj.coeffs);
     }
 

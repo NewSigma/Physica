@@ -26,6 +26,11 @@ namespace Physica {
      * [1] Test Functions and Datasets; http://www.sfu.ca/~ssurjano/index.html
      */
     template<Scalar T>
+    T ackley(const VectorND<T>& x) noexcept {
+        return T(20) * (T(1) - exp(T(-0.2) * x.norm2())) - exp(cos(T(2) * MathConst<T>::pi * x).mean()) + exp(T(1));
+    }
+
+    template<Scalar T>
     T rosenbrock(const VectorND<T>& x) noexcept {
         assert(x.getLength() >= 2);
         T result = 0;

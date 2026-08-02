@@ -128,7 +128,7 @@ namespace Physica {
         [[nodiscard]] static double toDouble(MPUnit* __restrict byte, int length, int power) noexcept;
     private:
         /**
-         * Degigned for performance,
+         * Designed for performance,
          * this constructor should only be called by add(), sub() and etc.
          *
          * \param byte

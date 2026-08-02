@@ -83,7 +83,7 @@ namespace Physica {
     template<class HostModel, class DeviceModel>
     __host__ __device__ consteval bool CPUGPUModel<HostModel, DeviceModel>::isPeriodBoundary() noexcept {
         constexpr bool result = HostModel::isPeriodBoundary();
-        static_assert(result == DeviceModel::isPeriodBoundary(), "[Error]: Inconsistend boundary condition");
+        static_assert(result == DeviceModel::isPeriodBoundary(), "[Error]: Inconsistent boundary condition");
         return result;
     }
 }

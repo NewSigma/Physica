@@ -125,7 +125,7 @@ namespace Physica {
     [[nodiscard("[Warn]: Discarding a coroutine")]] auto co_if(Predicate&& pred, FuncTrue&& t, FuncFalse&& f) noexcept(noexcept(t()) && noexcept(f())) {
         using Handle1 = std::invoke_result<FuncTrue>::type;
         using Handle2 = std::invoke_result<FuncFalse>::type;
-        static_assert(std::is_same<Handle1, Handle2>::value, "[Error]: Inconsistend return value");
+        static_assert(std::is_same<Handle1, Handle2>::value, "[Error]: Inconsistent return value");
         static_assert(std::is_class<Handle1>::value, "[Error]: Invalid handle type");
         static_assert(!std::is_trivially_destructible<Handle1>::value, "[Error]: Invalid handle type");
         static_assert(std::predicate<Predicate>, "[Error]: Invalid predicate");

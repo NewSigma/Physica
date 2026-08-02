@@ -51,7 +51,7 @@ namespace Physica {
         constexpr static double charge = 1.1128;
         constexpr static double gamma = 0.73612;
         constexpr static double Dr = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(116.09 * 1000) / PhyConst<SI>::unitCharge) / PhyConst<SI>::avogadroNa;
-        constexpr static double alphaR = PhyConst<AU>::bohrToAngstorm(2.287);
+        constexpr static double alphaR = PhyConst<AU>::bohrToAngstrom(2.287);
         constexpr static double equalR = PhyConst<AU>::angstromToBohr(0.9419);
         constexpr static double kTheta = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(87.85 * 1000) / PhyConst<SI>::unitCharge) / PhyConst<SI>::avogadroNa;
         constexpr static double equalTheta = PhyConst<SI>::degreeToRadian(107.4);

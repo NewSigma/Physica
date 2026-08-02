@@ -108,7 +108,7 @@ namespace Physica {
         using T1 = std::remove_cvref_t<LHS>::ScalarType;
         using T2 = std::remove_cvref_t<RHS>::ScalarType;
         using T12 = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
-        static_assert(NDim1 == Dynamic || NDim2 == Dynamic || (NDim1 == NDim2), "[Error]: Tensor dimentions do not match");
+        static_assert(NDim1 == Dynamic || NDim2 == Dynamic || (NDim1 == NDim2), "[Error]: Tensor dimensions do not match");
     public:
         using ScalarType = std::conditional<ID == ExprID::Abs, typename T1::RealType, T12>::type;
         constexpr static int NDim = NDim1 > NDim2 ? NDim1 : NDim2;

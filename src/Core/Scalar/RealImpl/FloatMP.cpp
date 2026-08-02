@@ -452,7 +452,7 @@ Real<FloatMP> Real<FloatMP>::add(const Real<FloatMP>& s1, const Real<FloatMP>& s
     const Real& small = flag ? s2 : s1;
     const int bigSize = big.getSize();
     const int smallSize = small.getSize();
-    // Estimate the ed of result first, will calculate it accurately later.
+    // Estimate the end of result first, will calculate it accurately later.
     int length = (big.power + std::max(bigSize - big.power, smallSize - small.power));
     length = length > GlobalPrecision
                     ? GlobalPrecision
@@ -519,7 +519,7 @@ Real<FloatMP> Real<FloatMP>::sub(const Real<FloatMP>& s1, const Real<FloatMP>& s
         redo:
             const int bigSize = big->getSize();
             const int smallSize = small->getSize();
-            // Estimate the ed of result first, will calculate it accurately later.
+            // Estimate the end of result first, will calculate it accurately later.
             int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
             length = length > GlobalPrecision
                            ? GlobalPrecision
@@ -592,7 +592,7 @@ Real<FloatMP> Real<FloatMP>::mul(const Real<FloatMP>& s1, const Real<FloatMP>& s
         return s1;
     const int size1 = s1.getSize();
     const int size2 = s2.getSize();
-    // Estimate the ed of result first. we will calculate it accurately later.
+    // Estimate the end of result first. we will calculate it accurately later.
     auto length = size1 + size2;
     auto* byte = HostAllocator<MPUnit>{}.allocate(length);
     for (int i = 0; i < size2; ++i)
@@ -629,7 +629,7 @@ Real<FloatMP> Real<FloatMP>::div(const Real<FloatMP>& s1, const Real<FloatMP>& s
             memset(arr2, 0, s2_blank * sizeof(MPUnit));
             /*
              * We shift s1 and s2, making the less highest bit of s1 is set and the highest bit of s2 is set
-             * to meet the acquirement of the function divArrByFullArrWith1Word().
+             * to meet the requirement of the function divArrByFullArrWith1Word().
              */
             const int s1_shift = static_cast<int>(std::countl_zero(s1.byte[s1_size - 1])) - 1;
             if (s1_shift > 0)
