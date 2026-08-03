@@ -67,19 +67,35 @@ namespace Physica {
 
     template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     void Inverse<M>::assign_base(Matrix auto& target) const noexcept {
+        constexpr bool Unit = Traits<M>::Unit;
         target.assert_assign(*this);
-        if constexpr (!Traits<M>::Upper && Traits<M>::Unit) {
-            (-trig).assign(target);
+        target.zeros();
+        if constexpr (Unit)
             target.diag() = Trv(1);
-            for (size_t i = 1; i < getOrder() - 1; ++i) {
-                auto corner = target.bottomLeftCorner(i + 1, i);
-                auto head = target.row(i).head(i);
-                auto tail = target.col(i).tail(i + 1);
-                corner += tail * head.transpose();
+        else
+            target.diag() = reciprocal(trig.diag());
+
+        if constexpr (Traits<M>::Upper) {
+            for (size_t i = getOrder(); i > 1; --i) {
+                const size_t k = i - 1;
+                auto corner = target.topRightCorner(k, k);
+                auto head = target.row(k).tail(k);
+                if constexpr (Unit)
+                    corner += (-trig.col(k).head(k)) * head.transpose();
+                else
+                    corner += divide(-trig.col(k).head(k), trig.diag().head(k)) * head.transpose();
             }
         }
-        else
-            noImpl();
+        else {
+            for (size_t i = 0; i + 1 < getOrder(); ++i) {
+                auto corner = target.bottomLeftCorner(i + 1, i + 1);
+                auto head = target.row(i).head(i + 1);
+                if constexpr (Unit)
+                    corner += (-trig.col(i).tail(i + 1)) * head.transpose();
+                else
+                    corner += divide(-trig.col(i).tail(i + 1), trig.diag().tail(i + 1)) * head.transpose();
+            }
+        }
     }
 
     template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)

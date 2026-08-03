@@ -70,32 +70,40 @@ namespace Physica {
     }
 
     constexpr int rngID_MKL(RandomOption option) noexcept {
-    #ifdef PHYSICA_MKL
-        switch (option) {
-        case MCG:
-            return VSL_BRNG_MCG31;
-        case MT19937:
-            return VSL_BRNG_MT19937;
-        default:
-            return 0;
-        }
-    #else
-        return 0;
+    #ifndef PHYSICA_MKL
+        constexpr int VSL_BRNG_MCG31 = 0;
+        constexpr int VSL_BRNG_MT19937 = 0;
     #endif
+        if constexpr (HasMKL()) {
+            switch (option) {
+            case MCG:
+                return VSL_BRNG_MCG31;
+            case MT19937:
+                return VSL_BRNG_MT19937;
+            default:
+                return 0;
+            }
+        }
+        else
+            return 0;
     }
 
     constexpr auto rngID_cuRAND([[maybe_unused]] RandomOption option) noexcept {
-    #ifdef PHYSICA_CUDA
-        switch (option) {
-        case MT19937:
-            return CURAND_RNG_PSEUDO_MTGP32;
-        default:
-            static_assert(CURAND_RNG_TEST == 0, "Returns 0 by default");
-            return CURAND_RNG_TEST;
-        }
-    #else
-        return 0;
+    #ifndef PHYSICA_CUDA
+        constexpr int CURAND_RNG_PSEUDO_MTGP32 = 0;
+        constexpr int CURAND_RNG_TEST = 0;
     #endif
+        if constexpr (HasCUDA()) {
+            switch (option) {
+            case MT19937:
+                return CURAND_RNG_PSEUDO_MTGP32;
+            default:
+                static_assert(CURAND_RNG_TEST == 0, "Returns 0 by default");
+                return CURAND_RNG_TEST;
+            }
+        }
+        else
+            return 0;
     }
     /**
      * \class Random provides a general, per-thread, reusable random generator implementation.

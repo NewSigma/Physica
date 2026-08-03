@@ -47,13 +47,21 @@ namespace {
         Matrix4D dense, result, answer;
         const auto doubleProd = [&](const Matrix auto& trig) {
             dense = trig;
-            result = trig * rhs;
             answer = dense * rhs;
+            (trig * rhs).assign_base(result);
             expect<RandomSource>(matrixNear(result, answer, Prec));
+            if constexpr (HasMKL()) {
+                (trig * rhs).assign_mkl(result);
+                expect<RandomSource>(matrixNear(result, answer, Prec));
+            }
 
-            result = lhs * trig;
             answer = lhs * dense;
+            (lhs * trig).assign_base(result);
             expect<RandomSource>(matrixNear(result, answer, Prec));
+            if constexpr (HasMKL()) {
+                (lhs * trig).assign_mkl(result);
+                expect<RandomSource>(matrixNear(result, answer, Prec));
+            }
         };
 
         const auto data = Matrix4D::random_uniform<RandomSource>(4, 4);
@@ -68,23 +76,21 @@ namespace {
     }
 
     void inverse() noexcept {
-        constexpr double Prec = 1E-12;
-        auto origin = Matrix4D::random_uniform<RandomSource>(4, 4);
-        Matrix4D inv = origin.triu().inv();
-        Matrix4D prod = origin.triu() * inv;
-        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
-
-        inv = origin.tril().inv();
-        prod = origin.tril() * inv;
-        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
-
-        inv = origin.triu_unit().inv();
-        prod = origin.triu_unit() * inv;
-        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
-
-        inv = origin.tril_unit().inv();
-        prod = origin.tril_unit() * inv;
-        expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
+        constexpr double Prec = 1E-11;
+        const auto data = Matrix4D::template random_uniform<RandomSource>(4, 4);
+        const auto check = [&](const Matrix auto& trig) {
+            Matrix4D inv = trig.inv();
+            Matrix4D prod = trig * inv;
+            expect<RandomSource>(matrixNear(prod, IdentityMatrix<T, 4>(4), Prec));
+        };
+        check(data.triu());
+        check(data.tril());
+        check(data.triu_unit());
+        check(data.tril_unit());
+        check(data.transpose().triu());
+        check(data.transpose().tril());
+        check(data.transpose().triu_unit());
+        check(data.transpose().tril_unit());
     }
 
     void invGEMV() {

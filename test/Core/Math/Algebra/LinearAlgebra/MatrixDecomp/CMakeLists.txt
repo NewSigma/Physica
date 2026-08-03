@@ -1,10 +1,8 @@
 physica_add_test(Bidiagonalization Bidiagonalization.cpp)
 physica_add_test(Cholesky Cholesky.cpp)
+physica_add_test(DenseLU DenseLU.cpp)
+physica_add_test(DenseQR DenseQR.cpp)
 physica_add_test(Hessenberg Hessenberg.cpp)
-if(${PHYSICA_MKL}) # FIXME: Remove MKL dependency
-    physica_add_test(DenseLU DenseLU.cpp)
-    physica_add_test(DenseQR DenseQR.cpp)
-endif()
 physica_add_test(Schur Schur.cpp)
 physica_add_test(SVD SVD.cpp)
 physica_add_test(Tridiagonalization Tridiagonalization.cpp)

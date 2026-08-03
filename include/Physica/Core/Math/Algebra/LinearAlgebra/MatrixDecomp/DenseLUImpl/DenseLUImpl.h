@@ -126,7 +126,8 @@ namespace Physica {
                     }
                 }
 
-                col.tail(alpha) *= reciprocal(col[i]);
+                if (!col[i].isSubNormal())
+                    col.tail(alpha) *= reciprocal(col[i]);
             }
         }
     }

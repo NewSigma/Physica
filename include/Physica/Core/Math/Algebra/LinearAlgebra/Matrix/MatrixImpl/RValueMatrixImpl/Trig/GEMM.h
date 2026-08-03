@@ -23,9 +23,12 @@
 namespace Physica {
     template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> || instanceof_tx<M2, MatrixTrig>)
     class GEMM<M1, M2> : public RValueMatrix<GEMM<M1, M2>> {
-        static_assert(!instanceof_tx<M1, MatrixTrig> || !instanceof_tx<M2, MatrixTrig>, "[Error]: NoImpl");
         using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
+
+        constexpr static bool TrigLHS = instanceof_tx<M1, MatrixTrig>;
+        constexpr static bool TrigRHS = instanceof_tx<M2, MatrixTrig>;
+        static_assert(!TrigLHS || !TrigRHS, "[Error]: NoImpl");
     protected:
         using typename Base::T;
         using typename Base::Tc;
@@ -43,6 +46,7 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
         void assign_mkl(Matrix auto& target) const noexcept;
+        void assign_base(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return lhs.getRow(); }
         [[nodiscard]] size_t getCol() const { return rhs.getCol(); }
@@ -60,7 +64,39 @@ namespace Physica {
         if constexpr (HasMKL())
             assign_mkl(target);
         else
-            noImpl();
+            assign_base(target);
+    }
+
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> || instanceof_tx<M2, MatrixTrig>)
+    void GEMM<M1, M2>::assign_base(Matrix auto& target) const {
+        using Trig = std::conditional_t<TrigLHS, M1, M2>;
+        constexpr bool Upper = Traits<Trig>::Upper;
+        target.assert_assign(*this);
+        target.zeros();
+
+        const size_t maxK = lhs.getCol();
+        if constexpr (TrigLHS) {
+            for (size_t c = 0; c < getCol(); ++c) {
+                auto col = target.col(c);
+                for (size_t k = 0; k < maxK; ++k) {
+                    if constexpr (Upper)
+                        col.head(k + 1) += lhs.col(k).head(k + 1) * rhs.calc(k, c);
+                    else
+                        col.tail(k) += lhs.col(k).tail(k) * rhs.calc(k, c);
+                }
+            }
+        }
+        else {
+            for (size_t r = 0; r < getRow(); ++r) {
+                auto row = target.row(r);
+                for (size_t k = 0; k < maxK; ++k) {
+                    if constexpr (Upper)
+                        row.tail(k) += lhs.calc(r, k) * rhs.row(k).tail(k);
+                    else
+                        row.head(k + 1) += lhs.calc(r, k) * rhs.row(k).head(k + 1);
+                }
+            }
+        }
     }
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> || instanceof_tx<M2, MatrixTrig>)

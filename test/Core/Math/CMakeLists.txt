@@ -9,10 +9,8 @@ physica_add_test(CubeCross Geometry/CubeCross.cpp)
 physica_add_test(NumberTheory NumberTheory/NumberTheory.cpp)
 # Optimization
 physica_add_test(ConjugateGradient Optimization/ConjugateGradient.cpp)
-if(${PHYSICA_MKL}) # FIXME: Remove MKL dependency
-    physica_add_test(EqualityQuadraticProgramming Optimization/EqualityQuadraticProgramming.cpp)
-    physica_add_test(QuadraticProgramming Optimization/QuadraticProgramming.cpp)
-endif()
+physica_add_test(EqualityQuadraticProgramming Optimization/EqualityQuadraticProgramming.cpp)
+physica_add_test(QuadraticProgramming Optimization/QuadraticProgramming.cpp)
 physica_add_test(SteepestDescent Optimization/SteepestDescent.cpp)
 # Statistics
 physica_add_test(LinearFit Statistics/LinearFit.cpp)

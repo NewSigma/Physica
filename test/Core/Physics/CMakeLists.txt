@@ -1,9 +1,7 @@
 physica_add_test(GaussBase GaussBase.cpp)
 physica_add_test(HamiltonMC HamiltonMC.cpp)
 physica_add_test(IceGenerator IceGenerator.cpp)
-if(${PHYSICA_MKL}) # FIXME: Remove MKL dependency
-    physica_add_test(RHFSolver RHFSolver.cpp)
-endif()
+physica_add_test(RHFSolver RHFSolver.cpp)
 
 add_subdirectory(ManyBody)
 add_subdirectory(MD)

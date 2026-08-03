@@ -27,7 +27,7 @@ namespace {
     void samples() {
         GPModel<T> gp(1);
         const auto x = VectorND<T>::linspace(-MathConst<T>::pi, MathConst<T>::pi, 8);
-        const auto y = VectorND<T>(sin(x));
+        const auto y = VectorND<T>(sin(x) + VectorND<T>::random_normal<RandomSource>(x.getLength()) * T(1E-3));
         // Test exact prediction
         gp.regression(x.transpose(), y, T(0));
         for (auto [x_elem, y_elem] : zip(x, y)) {
