@@ -50,6 +50,10 @@ namespace Physica {
             void push(Handle handle) noexcept;
             [[nodiscard]] Handle pop() noexcept;
         };
+
+        struct Awaiter : public suspend_always {
+            static void await_suspend(Handle) noexcept;
+        };
     public:
         static int numThreadRequired;
         // Larger than any thread ID, main thread is not maintained by thread pool
@@ -66,8 +70,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        [[nodiscard]] Awaiter operator co_await() noexcept;
         /* Operations */
-        void schedule(Handle handle) noexcept;
+        void notify_one();
+        void notify_all();
         [[nodiscard]] Handle steal() noexcept;
 
         void shouldExit() noexcept;

@@ -32,17 +32,11 @@ namespace Physica {
         using Base = TaskBase;
 
         struct Promise {
-            struct ThreadAwaiter : public suspend_always {
-                static void await_suspend(std::coroutine_handle<> handle) noexcept {
-                    ThreadPool::getInstance().schedule(handle);
-                }
-            };
-
             std::exception_ptr ex = nullptr;
         public:
             Task get_return_object() noexcept { return std::coroutine_handle<Promise>::from_promise(*this); }
             static Task get_return_object_on_allocation_failure() noexcept { unreachable("Expect coro frame is small"); }
-            auto initial_suspend() noexcept { return ThreadAwaiter{}; }
+            auto initial_suspend() noexcept { return ThreadPool::getInstance().operator co_await(); }
             auto final_suspend() noexcept { return suspend_always{}; }
             void return_void() noexcept {}
             void unhandled_exception() noexcept { ex = std::current_exception(); }

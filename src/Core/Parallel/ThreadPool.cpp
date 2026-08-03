@@ -79,6 +79,23 @@ namespace {
     }
 }
 
+void ThreadPool::Awaiter::await_suspend(Handle handle) noexcept {
+    assert(handle != nullptr);
+    assert(!handle.done());
+    int schedule_to{};
+    auto& pool = getInstance();
+    if (isMainThread()) {
+        static int MainThreadCounter = 0;
+        schedule_to = MainThreadCounter;
+        MainThreadCounter = (MainThreadCounter + 1) % pool.getNumThreads();
+    }
+    else
+        schedule_to = getThreadInfo().id;
+
+    pool.queues[schedule_to].push(handle);
+    pool.cond.notify_one();
+}
+
 int ThreadPool::numThreadRequired = 0;
 
 void ThreadPool::ThreadQueue::push(Handle handle) noexcept {
@@ -106,20 +123,16 @@ ThreadPool::~ThreadPool() {
     waitExit();
 }
 
-void ThreadPool::schedule(Handle handle) noexcept {
-    assert(handle != nullptr);
-    assert(!handle.done());
-    int schedule_to{};
-    if (isMainThread()) {
-        static int MainThreadCounter = 0;
-        schedule_to = MainThreadCounter;
-        MainThreadCounter = (MainThreadCounter + 1) % getNumThreads();
-    }
-    else
-        schedule_to = getThreadInfo().id;
+auto ThreadPool::operator co_await() noexcept -> Awaiter {
+    return Awaiter{};
+}
 
-    queues[schedule_to].push(handle);
+void ThreadPool::notify_one() {
     cond.notify_one();
+}
+
+void ThreadPool::notify_all() {
+    cond.notify_all();
 }
 
 auto ThreadPool::steal() noexcept -> Handle {
