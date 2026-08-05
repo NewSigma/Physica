@@ -21,6 +21,7 @@
 #include "Test.h"
 
 using namespace Physica;
+using RandomSource = Random<>;
 
 namespace {
     void testLnGamma() noexcept {
@@ -54,6 +55,9 @@ namespace {
             temp = gammaQ(T(a[i]), T(x[i]));
             expect(scalarNear(temp, T(1 - result[i]), 1E-11));
         }
+        // Test special values
+        expect<RandomSource>(gammaP(T::random_uniform<RandomSource>(), T(0)).isZero());
+        expect<RandomSource>(gammaQ(T::random_uniform<RandomSource>(), T(0)) == T(1));
     }
 
     void testBiGamma() noexcept {

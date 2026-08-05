@@ -28,7 +28,7 @@ namespace Physica {
          */
         template<Scalar T>
         T incompGammaImpl1(T a, T x) noexcept {
-            assert(a.isPositive() && !x.isNegative());
+            assert(a.isPositive() && x.isPositive());
             assert(x < a + T(1) && "[Error]: When x > a + 1, the algorithm is slow, use the other method is better");
             const T epsilon = std::numeric_limits<T>::epsilon();
             T ap = a;
@@ -47,7 +47,7 @@ namespace Physica {
          */
         template<Scalar T>
         T incompGammaImpl2(T a, T x) noexcept {
-            assert(a.isPositive() && !x.isNegative());
+            assert(a.isPositive() && x.isPositive());
             assert(x > a + T(1) && "[Error]: When x < a + 1, the algorithm is slow, use the other method is better");
             const T epsilon = std::numeric_limits<T>::epsilon();
             const T floatMin = T(std::numeric_limits<T>::min()) / epsilon;
@@ -138,13 +138,17 @@ namespace Physica {
 
     template<Scalar T>
     T gammaP(T a, T x) noexcept {
-        assert(a.isPositive() && !x.isNegative());
+        if (x.isZero())
+            return T(0);
+        assert(a.isPositive() && x.isPositive());
         return (x < a + T(1)) ? Internal::incompGammaImpl1(a, x) : (T(1) - Internal::incompGammaImpl2(a, x));
     }
 
     template<Scalar T>
     T gammaQ(T a, T x) noexcept {
-        assert(a.isPositive() && !x.isNegative());
+        if (x.isZero())
+            return T(1);
+        assert(a.isPositive() && x.isPositive());
         return (x < a + T(1)) ? (T(1) - Internal::incompGammaImpl1(a, x)) : Internal::incompGammaImpl2(a, x);
     }
 
