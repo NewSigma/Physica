@@ -22,7 +22,7 @@
     #include <mkl_vml.h>
 #endif
 #ifdef PHYSICA_HDF5
-    #include "Physica/Core/IO/HDF5/HDF5.h"
+    #include <H5Epublic.h>
 #endif
 
 using namespace Physica;
@@ -79,6 +79,34 @@ namespace {
     }
 }
 
+class ThreadPool::ThreadQueue {
+public:
+    std::thread thread;
+private:
+    std::queue<Handle> queue;
+    std::mutex mutex;
+public:
+    ThreadQueue() = default;
+    /* Operations */
+    void push(Handle handle) noexcept;
+    [[nodiscard]] Handle pop() noexcept;
+};
+
+void ThreadPool::ThreadQueue::push(Handle handle) noexcept {
+    std::lock_guard locker(mutex);
+    queue.push(handle);
+}
+
+auto ThreadPool::ThreadQueue::pop() noexcept -> Handle {
+    Handle handle = nullptr;
+    std::lock_guard locker(mutex);
+    if (!queue.empty()) {
+        handle = queue.front();
+        queue.pop();
+    }
+    return handle;
+}
+
 void ThreadPool::Awaiter::await_suspend(Handle handle) noexcept {
     assert(handle != nullptr);
     assert(!handle.done());
@@ -97,21 +125,6 @@ void ThreadPool::Awaiter::await_suspend(Handle handle) noexcept {
 }
 
 int ThreadPool::numThreadRequired = 0;
-
-void ThreadPool::ThreadQueue::push(Handle handle) noexcept {
-    std::lock_guard locker(mutex);
-    queue.push(handle);
-}
-
-auto ThreadPool::ThreadQueue::pop() noexcept -> Handle {
-    Handle handle = nullptr;
-    std::lock_guard locker(mutex);
-    if (!queue.empty()) {
-        handle = queue.front();
-        queue.pop();
-    }
-    return handle;
-}
 
 ThreadPool::ThreadPool(int numThreads) : queues(numThreads) {
     assert(numThreads > 0 && "[Error]: numThreads must be positive");

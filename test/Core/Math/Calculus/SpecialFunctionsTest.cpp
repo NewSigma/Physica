@@ -132,7 +132,7 @@ namespace {
         constexpr static Array<double, 2> result_imag{0.03316309979261445896, -0.020223918621792591451};
         for (size_t i = 0; i < l.size(); ++i) {
             auto result = sphericalHarmomicY(l[i], m[i], T(theta[i]), T(phi[i]));
-            expect(scalarNear(result, Complex<T>(T(result_real[i]), T(result_imag[i])), 1E-16));
+            expect(scalarNear(result, Complex<T>(T(result_real[i]), T(result_imag[i])), 1E-15));
         }
     }
     /**

@@ -23,47 +23,47 @@
 namespace Physica {
     namespace Internal {
         template<FloatPrec Prec>
-        Real<Prec> incompBetaImpl(const Real<Prec>& a, const Real<Prec>& b, const Real<Prec>& x) {
-            using ScalarType = Real<Prec>;
+        Real<Prec> incompBetaImpl(Real<Prec> a, Real<Prec> b, Real<Prec> x) {
+            using T = Real<Prec>;
             constexpr int MaxIteration = 100;
-            constexpr auto epsilon = std::numeric_limits<ScalarType>::epsilon();
-            constexpr auto minimum = std::numeric_limits<ScalarType>::min();
-            const ScalarType smallValue(minimum / epsilon);
-            const ScalarType p_ab = a + b;
-            const ScalarType p_a1 = a + ScalarType(1);
-            const ScalarType m_a1 = a - ScalarType(1);
+            constexpr auto epsilon = std::numeric_limits<T>::epsilon();
+            constexpr auto minimum = std::numeric_limits<T>::min();
+            const T smallValue(minimum / epsilon);
+            const T p_ab = a + b;
+            const T p_a1 = a + T(1);
+            const T m_a1 = a - T(1);
 
-            ScalarType c = 1;
-            ScalarType d = ScalarType(1) - p_ab * x / p_a1;
+            T c = 1;
+            T d = T(1) - p_ab * x / p_a1;
             if (abs(d) < smallValue)
                 d = smallValue;
             d = reciprocal(d);
-            ScalarType result = d;
+            T result = d;
             int iteration = 1;
             for (iteration = 1; iteration <= MaxIteration; ++iteration) {
-                const ScalarType i = iteration;
-                const ScalarType i2 = 2 * iteration;
-                ScalarType aa = i * (b - i) * x / ((m_a1 + i2) * (a + i2));
-                d = ScalarType(1) + aa * d;
+                const T i = iteration;
+                const T i2 = 2 * iteration;
+                T aa = i * (b - i) * x / ((m_a1 + i2) * (a + i2));
+                d = fma(aa, d, T(1));
                 if (abs(d) < smallValue)
                     d = smallValue;
-                c = ScalarType(1) + aa / c;
+                c = T(1) + aa / c;
                 if (abs(c) < smallValue)
                     c = smallValue;
                 d = reciprocal(d);
                 result *= c * d;
 
                 aa = -(a + i) * (p_ab + i) * x / ((p_a1 + i2) * (a + i2));
-                d = ScalarType(1) + aa * d;
+                d = fma(aa, d, T(1));
                 if (abs(d) < smallValue)
                     d = smallValue;
-                c = ScalarType(1) + aa / c;
+                c = T(1) + aa / c;
                 if (abs(c) < smallValue)
                     c = smallValue;
                 d = reciprocal(d);
-                const ScalarType delta = c * d;
+                const T delta = c * d;
                 result *= delta;
-                if (abs(delta - ScalarType(1)) < ScalarType(epsilon))
+                if (abs(delta - T(1)) < T(epsilon))
                     break;
             }
 
@@ -74,29 +74,29 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    Real<Prec> incompBeta(const Real<Prec>& a, const Real<Prec>& b, const Real<Prec>& x) {
-        using ScalarType = Real<Prec>;
-        assert(x.isPositive() && x <= ScalarType(1) && "[Error]: Invalid value");
-        if (x.isZero() || x == ScalarType(1)) [[unlikely]]
+    Real<Prec> incompBeta(Real<Prec> a, Real<Prec> b, Real<Prec> x) {
+        using T = Real<Prec>;
+        assert(x.isPositive() && x <= T(1) && "[Error]: Invalid value");
+        if (x.isZero() || x == T(1)) [[unlikely]]
             return x;
-        const ScalarType factor = exp(lnGamma(a + b) - lnGamma(a) - lnGamma(b) + a * ln(x) + b * ln(ScalarType(1) - x));
-        const bool flag = x * (a + b + ScalarType(2)) < (a + ScalarType(1));
+        const T factor = exp(lnGamma(a + b) - lnGamma(a) - lnGamma(b) + a * ln(x) + b * ln(T(1) - x));
+        const bool flag = x * (a + b + T(2)) < (a + T(1));
         if (flag)
             return factor * Internal::incompBetaImpl(a, b, x) / a;
         else
-            return ScalarType(1) - factor * Internal::incompBetaImpl(b, a, ScalarType(1) - x) / b;
+            return T(1) - factor * Internal::incompBetaImpl(b, a, T(1) - x) / b;
     }
 
     template<FloatPrec Prec>
-    Real<Prec> studentT(size_t n, const Real<Prec>& x) {
-        using ScalarType = Real<Prec>;
-        const auto n1 = ScalarType(n);
-        return ScalarType(1) - incompBeta(n1 * ScalarType(0.5), ScalarType(0.5), n1 / (n1 + square(x)));
+    Real<Prec> studentT(size_t n, Real<Prec> x) {
+        using T = Real<Prec>;
+        const auto n1 = T(n);
+        return T(1) - incompBeta(n1 * T(0.5), T(0.5), n1 / (n1 + square(x)));
     }
 
     template<FloatPrec Prec>
-    Real<Prec> distributionF(const Real<Prec>& v1, const Real<Prec>& v2, const Real<Prec>& x) {
-        using ScalarType = Real<Prec>;
-        return ScalarType(1) - incompBeta(v1 * ScalarType(0.5), v2 * ScalarType(0.5), v2 / (v2 + v1 * x));
+    Real<Prec> distributionF(Real<Prec> v1, Real<Prec> v2, Real<Prec> x) {
+        using T = Real<Prec>;
+        return T(1) - incompBeta(v1 * T(0.5), v2 * T(0.5), v2 / (v2 + v1 * x));
     }
 }

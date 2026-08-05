@@ -59,39 +59,6 @@ namespace Physica {
             }
         }
     }
-
-    template<FloatPrec Prec>
-    Real<Prec> lnGamma(const Real<Prec>& x) noexcept;
-
-    template<FloatPrec Prec>
-    Real<Prec> gamma(const Real<Prec>& s);
-
-    template<FloatPrec Prec>
-    Real<Prec> beta(const Real<Prec>& s1, const Real<Prec>& s2);
-
-    template<Scalar T> T gammaP(const T& a_, const T& x_);
-
-    template<Scalar T> T gammaQ(const T& a_, const T& x_);
-
-    template<FloatPrec Prec>
-    Real<Prec> bigamma(const Real<Prec>& x, const Real<Prec>& step) noexcept;
-
-    template<FloatPrec Prec>
-    Real<Prec> erf(const Real<Prec>& x);
-
-    template<Scalar T> T erfc(const T& x_);
-
-    template<FloatPrec Prec>
-    Real<Prec> standardNormalDistribution(const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> legendreP(unsigned int l, const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> legendreP(unsigned int l, unsigned int m, const Real<Prec>& x);
-
-    template<Scalar T>
-    Complex<T> sphericalHarmomicY(unsigned int l, int m, const T& theta, const T& phi);
     /**
      * This class generates rotation matrix for spherical harmonic functions
      *
@@ -124,17 +91,6 @@ namespace Physica {
         ScalarType V(int m, int n, int l);
         ScalarType W(int m, int n, int l);
     };
-
-    template<Scalar T> T hermiteH(unsigned int n, const T& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> incompBeta(const Real<Prec>& a, const Real<Prec>& b, const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> studentT(size_t n, const Real<Prec>& x);
-
-    template<FloatPrec Prec>
-    Real<Prec> distributionF(const Real<Prec>& v1, const Real<Prec>& v2, const Real<Prec>& x);
 }
 
 #include "SpecialFunctionsImpl/Bessel.h"

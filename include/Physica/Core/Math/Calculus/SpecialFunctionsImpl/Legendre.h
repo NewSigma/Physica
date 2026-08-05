@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<FloatPrec Prec>
-    Real<Prec> legendreP(unsigned int l, const Real<Prec>& x) {
+    Real<Prec> legendreP(unsigned int l, Real<Prec> x) noexcept {
         using T = Real<Prec>;
         assert(abs(x) <= T(1));
         T legendre_n(1);
@@ -31,7 +31,7 @@ namespace Physica {
 
         T legendre_n_1 = x;
         for (unsigned int i = 2; i <= l; ++i) {
-            const T temp = (x * legendre_n_1 * T(2 * i - 1) - legendre_n * T(i - 1)) / T(i);
+            const T temp = fma(T(2 * i - 1) * legendre_n_1, x, -T(i - 1) * legendre_n) / T(i);
             legendre_n = legendre_n_1;
             legendre_n_1 = temp;
         }
@@ -42,7 +42,7 @@ namespace Physica {
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:189
      */
     template<FloatPrec Prec>
-    Real<Prec> legendreP(unsigned int l, unsigned int m, const Real<Prec>& x) {
+    Real<Prec> legendreP(unsigned int l, unsigned int m, Real<Prec> x) noexcept {
         using T = Real<Prec>;
         assert(m <= l && abs(x) <= T(1));
         //Get P^m_m
@@ -60,7 +60,7 @@ namespace Physica {
 
         T legendre_m_n_1 = x * legendre_m_n * T(2 * m + 1);
         for (unsigned int i = m + 2; i <= l; ++i) {
-            const T temp = (x * legendre_m_n_1 * T(2 * i - 1) - legendre_m_n * T(i + m - 1)) / T(i - m);
+            const T temp = fma(T(2 * i - 1) * legendre_m_n_1, x, -T(i + m - 1) * legendre_m_n) / T(i - m);
             legendre_m_n = legendre_m_n_1;
             legendre_m_n_1 = temp;
         }
@@ -68,7 +68,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    Complex<T> sphericalHarmomicY(unsigned int l, int m, const T& theta, const T& phi) {
+    Complex<T> sphericalHarmomicY(unsigned int l, int m, T theta, T phi) noexcept {
         constexpr static double pi_4 = M_PI * 4;
         const unsigned int abs_m = std::abs(m);
         assert(l >= abs_m);

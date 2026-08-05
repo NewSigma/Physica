@@ -20,10 +20,10 @@
 
 namespace Physica {
     template<FloatPrec Prec, bool errorTrack>
-    Real<Prec> lnGamma(const Real<Prec>& s);
+    Real<Prec> lnGamma(Real<Prec> s) noexcept;
 
     template<Scalar T>
-    T hermiteH(unsigned int n, const T& x) {
+    T hermiteH(unsigned int n, T x) noexcept {
         if (n == 0)
             return T(1);
         const T double_x = T(2) * x;
@@ -34,7 +34,7 @@ namespace Physica {
         T H = double_x;
         T float_i = T(1);
         for (unsigned int i = 1; i != n; ++i) {
-            old_H = double_x * H - float_i * old_H * T(2);
+            old_H = fma(double_x, H, T(-2) * float_i * old_H);
             old_H.swap(H);
             float_i += T(1);
         }

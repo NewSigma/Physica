@@ -27,7 +27,7 @@ namespace Physica {
          * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:156
          */
         template<Scalar T>
-        T incompGammaImpl1(const T& a, const T& x) {
+        T incompGammaImpl1(T a, T x) noexcept {
             assert(a.isPositive() && !x.isNegative());
             assert(x < a + T(1) && "[Error]: When x > a + 1, the algorithm is slow, use the other method is better");
             const T epsilon = std::numeric_limits<T>::epsilon();
@@ -46,7 +46,7 @@ namespace Physica {
          * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:161
          */
         template<Scalar T>
-        T incompGammaImpl2(const T& a, const T& x) {
+        T incompGammaImpl2(T a, T x) noexcept {
             assert(a.isPositive() && !x.isNegative());
             assert(x > a + T(1) && "[Error]: When x < a + 1, the algorithm is slow, use the other method is better");
             const T epsilon = std::numeric_limits<T>::epsilon();
@@ -86,7 +86,7 @@ namespace Physica {
      * [2] Lanczos, C. 1964, SIAM Journal on Numerical Analysis, ser. B, vol. 1, pp. 86-96
      */
     template<FloatPrec Prec>
-    Real<Prec> lnGamma(const Real<Prec>& x) noexcept {
+    Real<Prec> lnGamma(Real<Prec> x) noexcept {
         assert(x.isPositive());
         using T = Real<Prec>;
         if constexpr (Prec == Double) {
@@ -127,47 +127,47 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    Real<Prec> gamma(const Real<Prec>& s) {
+    Real<Prec> gamma(Real<Prec> s) noexcept {
         return exp(lnGamma(s));
     }
 
     template<FloatPrec Prec>
-    Real<Prec> beta(const Real<Prec>& s1, const Real<Prec>& s2) {
+    Real<Prec> beta(Real<Prec> s1, Real<Prec> s2) noexcept {
         return exp(lnGamma(s1) + lnGamma(s2) - lnGamma(s1 + s2));
     }
 
     template<Scalar T>
-    T gammaP(const T& a, const T& x) {
+    T gammaP(T a, T x) noexcept {
         assert(a.isPositive() && !x.isNegative());
         return (x < a + T(1)) ? Internal::incompGammaImpl1(a, x) : (T(1) - Internal::incompGammaImpl2(a, x));
     }
 
     template<Scalar T>
-    T gammaQ(const T& a, const T& x) {
+    T gammaQ(T a, T x) noexcept {
         assert(a.isPositive() && !x.isNegative());
         return (x < a + T(1)) ? (T(1) - Internal::incompGammaImpl1(a, x)) : Internal::incompGammaImpl2(a, x);
     }
 
     template<FloatPrec Prec>
-    Real<Prec> bigamma(const Real<Prec>& x, const Real<Prec>& step) noexcept {
+    Real<Prec> bigamma(Real<Prec> x, Real<Prec> step) noexcept {
         return Differential<Real<Prec>>::ridders(lnGamma<Prec>, x, step);
     }
 
     template<FloatPrec Prec>
-    Real<Prec> erf(const Real<Prec>& x) {
+    Real<Prec> erf(Real<Prec> x) noexcept {
         using T = Real<Prec>;
         T x2 = square(x);
         return (x.isNegative()) ? -gammaP(T(0.5), x2) : gammaP(T(0.5), x2);
     }
 
     template<Scalar T>
-    T erfc(const T& x) {
+    T erfc(T x) noexcept {
         T x2 = square(x);
         return (x.isNegative()) ? (T(1) + gammaP(T(0.5), x2)) : gammaQ(T(0.5), x2);
     }
 
     template<FloatPrec Prec>
-    Real<Prec> standardNormalDistribution(const Real<Prec>& x) {
+    Real<Prec> standardNormalDistribution(Real<Prec> x) noexcept {
         using T = Real<Prec>;
         return (erf(x / sqrt(T(2))) + T(1)) >> 1U;
     }

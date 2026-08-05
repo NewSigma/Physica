@@ -38,18 +38,8 @@ namespace Physica {
     class PHYSICA_API ThreadPool final {
         using This = ThreadPool;
         using Handle = std::coroutine_handle<>;
-        class ThreadQueue {
-        public:
-            std::thread thread;
-        private:
-            std::queue<Handle> queue;
-            std::mutex mutex;
-        public:
-            ThreadQueue() = default;
-            /* Operations */
-            void push(Handle handle) noexcept;
-            [[nodiscard]] Handle pop() noexcept;
-        };
+
+        class ThreadQueue;
 
         struct Awaiter : public suspend_always {
             static void await_suspend(Handle) noexcept;
