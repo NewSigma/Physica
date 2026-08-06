@@ -87,6 +87,7 @@ namespace Physica {
         H5Group write(H5Loc& loc, const char* name) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] const auto& getCube() const noexcept { return cube; }
         [[nodiscard]] const auto& getPointGrid() const noexcept { return pointGrid; }
         [[nodiscard]] size_t getDim() const noexcept { return cube.getCol(); }
         [[nodiscard]] size_t getNumPoint() const noexcept { return pointGrid.getRow(); }

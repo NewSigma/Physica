@@ -73,7 +73,7 @@ namespace Physica {
         covarLU.resize(getNumSamples());
 
         auto& covars = covarLU.getMatrixLU();
-        const Tv var = exp(kernel.getLnVar());
+        const Tv var = kernel.getVar();
         for (size_t major = 0; major < covars.getMaxMajor(); ++major) {
             for (size_t minor = 0; minor < covars.getMaxMinor(); ++minor) {
                 bool diag = major == minor;
@@ -81,7 +81,7 @@ namespace Physica {
                     covars.refFromMajorMinor(major, minor) = diag ? (var + uncertainty) : kernel.calc_value(major, minor);
                 else {
                     static_assert(Vector<decltype(uncertainty)>, "[Error]: Unexpected uncertainty type");
-                    covars.refFromMajorMinor(major, minor) = diag ? (var + uncertainty[major]) : kernel.calc_value(major, minor);
+                    covars.refFromMajorMinor(major, minor) = diag ? (var + uncertainty.calc(major)) : kernel.calc_value(major, minor);
                 }
             }
         }
@@ -104,7 +104,7 @@ namespace Physica {
         auto buffer = VectorND<Tv>::generate([&](size_t i) { return kernel.dot(x, i); }, getNumSamples());
         auto sol = VectorND<Tv>(covarLU.inv() * buffer);
         Tv mean = buffer * coeffs;
-        Tv devia = sqrt(std::max(exp(kernel.getLnVar()) - buffer * sol, Tv(0)));
+        Tv devia = sqrt(std::max(kernel.getVar() - buffer * sol, Tv(0)));
         return {mean, devia};
     }
 
@@ -124,7 +124,7 @@ namespace Physica {
 
         MatrixND<Tv> sampleX;
         VectorND<T> alpha;
-        T lnVar;
+        T var;
     public:
         explicit GaussKernel(size_t numFeature);
         GaussKernel(VectorND<Tv> alpha, Tv var);
@@ -148,7 +148,7 @@ namespace Physica {
         [[nodiscard]] size_t getOrder() const noexcept { return sampleX.getCol(); }
         [[nodiscard]] size_t getNumFeature() const noexcept { return alpha.getLength(); }
         [[nodiscard]] const auto& getAlpha() const noexcept { return alpha; }
-        [[nodiscard]] Tv getLnVar() const noexcept { return lnVar.value(); }
+        [[nodiscard]] Tv getVar() const noexcept { return var.value(); }
         /* Setters */
         void setSampleX(const MatrixND<Tv>& sample) { sampleX = sample; }
         /* Static members */
@@ -156,36 +156,36 @@ namespace Physica {
     };
 
     template<Scalar T>
-    GPModel<T>::GaussKernel::GaussKernel(size_t numFeature) : GaussKernel(VectorND<Tv>(numFeature, 1), 0) {}
+    GPModel<T>::GaussKernel::GaussKernel(size_t numFeature) : GaussKernel(VectorND<Tv>(numFeature, 1), 1) {}
 
     template<Scalar T>
-    GPModel<T>::GaussKernel::GaussKernel(VectorND<Tv> alpha, Tv lnVar) : alpha(std::move(alpha)), lnVar(lnVar) {
+    GPModel<T>::GaussKernel::GaussKernel(VectorND<Tv> alpha, Tv var) : alpha(std::move(alpha)), var(var) {
         static_assert(Base::isStaticSquare());
     }
 
     template<Scalar T>
     CoDiff<T> GPModel<T>::GaussKernel::calc(size_t r, size_t c) const {
-        return exp(-square(alpha * (sampleX.col(r) - sampleX.col(c))) + lnVar);
+        return exp(-square(alpha * (sampleX.col(r) - sampleX.col(c)))) * abs(var);
     }
 
     template<Scalar T>
     auto GPModel<T>::GaussKernel::calc_value(size_t r, size_t c) const -> Tv {
-        return exp(-square(alpha.values() * (sampleX.col(r) - sampleX.col(c))) + lnVar.value());
+        return exp(-square(alpha.values() * (sampleX.col(r) - sampleX.col(c)))) * abs(var.value());
     }
 
     template<Scalar T>
     auto GPModel<T>::GaussKernel::dot(const VectorND<Tv>& x, size_t i) const -> Tv {
-        return exp(-square(alpha.values() * (x - sampleX.col(i))) + lnVar.value());
+        return exp(-square(alpha.values() * (x - sampleX.col(i)))) * abs(var.value());
     }
 
     template<Scalar T>
     void GPModel<T>::GaussKernel::step(auto& opt) noexcept {
-        opt.step(alpha, lnVar);
+        opt.step(alpha, var);
     }
 
     template<Scalar T>
     void GPModel<T>::GaussKernel::zero_grad() noexcept {
         alpha.zero_grad();
-        lnVar.zero_grad();
+        var.zero_grad();
     }
 }
