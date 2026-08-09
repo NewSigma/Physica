@@ -43,6 +43,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] Tv calcSign() const noexcept;
+        [[nodiscard]] Tv calcRSign() const noexcept;
 
         void reset() { cursor = 0; }
         /* Getters */
@@ -68,7 +69,12 @@ namespace Physica {
     template<Scalar T>
     auto GreenSampler<T>::calcSign() const noexcept -> Tv {
         // DQMC returns relative sign, we do not care about it
-        return abs(rsigns.mean());
+        return abs(calcRSign());
+    }
+
+    template<Scalar T>
+    auto GreenSampler<T>::calcRSign() const noexcept -> Tv {
+        return rsigns.mean();
     }
 
     template<Scalar T>

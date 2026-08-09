@@ -122,15 +122,15 @@ namespace Physica {
                 model.zero_grad();
             }
 
-            auto [newMu, newRho] = bayes.template propose<R>([&](const VectorND<T>& x) -> T {
+            auto [mu, _] = bayes.template propose<R>([&](const VectorND<T>& x) -> T {
                 const auto [rho, devia] = runDQMC(x.front());
                 auto l = likelyhood(rho, target);
-                mus.append(x.front());
                 rhos.append(rho);
                 noises.append(devia);
                 likelyhoods.append(l);
                 return l;
             }, model, numVegasIter);
+            mus.append(mu.front());
         }
         return bayes.getOptimal().front();
     }

@@ -67,7 +67,7 @@ namespace Physica {
         auto result = MatrixND<T>::generate([&](size_t r, size_t c) {
             return magnons.fiber(var(), r, c).squaredNorms().mean();
         }, getNumSite(), magnons.dim(2));
-        result *= reciprocal(Base::calcSign());
+        result *= reciprocal(Base::calcRSign());
         return result;
     }
 }

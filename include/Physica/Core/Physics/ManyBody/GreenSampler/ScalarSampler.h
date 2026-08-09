@@ -86,7 +86,7 @@ namespace Physica {
 
     template<Scalar T>
     T ScalarSampler<T>::calcMean() const {
-        return calcRawMean() / Base::calcSign();
+        return calcRawMean() / Base::calcRSign();
     }
 
     template<Scalar T>

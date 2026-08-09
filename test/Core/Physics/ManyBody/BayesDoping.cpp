@@ -24,12 +24,12 @@
 using namespace Physica;
 using T = float64;
 using RandomSource = Random<PCG64DXSM, 5746352372098963138>;
-constexpr int Dim = 2;
 constexpr T HoppingT = 1;
 constexpr T RepelU = 4;
 constexpr T Beta = 4;
-constexpr int NumSiteX = 4;
-constexpr int NumSiteY = 4;
+constexpr int Dim = 2;
+constexpr int NumSiteX = 2;
+constexpr int NumSiteY = 2;
 constexpr int NumSplit = Beta.toMachine() * 8;
 
 namespace {
@@ -49,11 +49,11 @@ namespace {
         constexpr T From = -4;
         constexpr T To = 0;
         constexpr int NumVegasSample = 10000;
-        constexpr int NumBayesIter = 8;
+        constexpr int NumBayesIter = 16;
         constexpr int NumVegasIter = 64;
         constexpr int NumWarmup = 32;
         constexpr int NumSample = 1024;
-        constexpr int NumStepSGD = 100;
+        constexpr int NumStepSGD = 300;
         constexpr T Target = 0.8;
         const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
         HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, NumSplit);

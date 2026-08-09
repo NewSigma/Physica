@@ -98,7 +98,7 @@ namespace Physica {
 
     template<Scalar T>
     auto MatrixSampler<T>::calcMean() const -> MatrixND<T> {
-        return calcRawMean() * reciprocal(Base::calcSign());
+        return calcRawMean() * reciprocal(Base::calcRSign());
     }
 
     template<Scalar T>

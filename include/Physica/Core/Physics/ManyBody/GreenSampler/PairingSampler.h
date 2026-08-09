@@ -91,7 +91,7 @@ namespace Physica {
 
     template<Scalar T>
     MatrixND<T> PairingSampler<T>::calcMean() const {
-        return corr * reciprocal(Base::calcSign());
+        return corr * reciprocal(Base::calcRSign());
     }
 
     template<Scalar T>
