@@ -63,6 +63,8 @@ namespace Physica {
         [[nodiscard]] constexpr auto&& get(this auto&&) noexcept;
 
         __host__ __device__ void insert(size_t, auto&&...) = delete;
+        __host__ __device__ void push_back(auto&&) = delete;
+        __host__ __device__ void pop_back() = delete;
         __host__ __device__ void resize(size_t length, auto&&... args) noexcept;
         __host__ __device__ void reserve([[maybe_unused]] size_t size) noexcept { assert(size == Length); }
         __host__ __device__ void zeros() noexcept;
@@ -118,6 +120,8 @@ namespace Physica {
         /* Operations */
         void grow(auto&&... args) noexcept;
         void append(auto&&... args) noexcept;
+        void push_back(auto&& value) noexcept;
+        void pop_back() noexcept;
         void insert(size_t index, auto&&... args) noexcept;
         void resize(size_t size, auto&&... args) noexcept;
         void reserve(size_t size) noexcept;

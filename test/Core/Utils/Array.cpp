@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Utils/Container/Array.h"
+#include <stack>
 #include "Test.h"
 
 using namespace Physica;
@@ -59,6 +60,15 @@ namespace {
         expect(fixed == origin);
         expect(dynamic == Array<int>(origin));
     }
+
+    void makeStack() noexcept {
+        // Test that std::stack accepts Array
+        std::stack<int, Array<int>> s;
+        s.push(1);
+        expect(s.top() == 1 && s.size() == 1);
+        s.pop();
+        expect(s.empty());
+    }
 }
 
 int main() {
@@ -67,5 +77,6 @@ int main() {
     structuredBinding();
     emptyCopy();
     array_read();
+    makeStack();
     return 0;
 }

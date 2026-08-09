@@ -211,6 +211,19 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
+    void Array<T, Dynamic, Allocator>::push_back(auto&& value) noexcept {
+        append(std::forward<decltype(value)>(value));
+    }
+
+    template<class T, class Allocator>
+    void Array<T, Dynamic, Allocator>::pop_back() noexcept {
+        assert(length != 0);
+        if constexpr (!std::is_trivially_destructible<T>::value)
+            std::allocator_traits<Allocator>::destroy(alloc, arr + length - 1);
+        length -= 1;
+    }
+
+    template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::insert(size_t index, auto&&... args) noexcept {
         assert(capacity != 0 && "[Error]: Cannot insert to empty array");
         assert(index <= length);

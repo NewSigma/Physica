@@ -43,6 +43,9 @@ namespace Physica {
         using lvalue_reference = AllocatorTraits::lvalue_reference;
         using const_lvalue_reference = AllocatorTraits::const_lvalue_reference;
         using rvalue_reference = AllocatorTraits::rvalue_reference;
+        using size_type = std::size_t;
+        using reference = lvalue_reference;
+        using const_reference = const_lvalue_reference;
 
         using ElemType = Traits<Derived>::ElemType;
         static_assert(std::is_same<value_type, ElemType>::value, "[Error]: Declaration is not self consistent");
