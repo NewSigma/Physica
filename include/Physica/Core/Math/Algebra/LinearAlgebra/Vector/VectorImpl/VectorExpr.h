@@ -274,7 +274,6 @@ namespace Physica {
 #include "VectorExprImpl/Operator/Square.h"
 #include "VectorExprImpl/Operator/Ln.h"
 #include "VectorExprImpl/Operator/Ln1p.h"
-#include "VectorExprImpl/Operator/Ln1pExp.h"
 #include "VectorExprImpl/Operator/Exp.h"
 #include "VectorExprImpl/Operator/Pow.h"
 #include "VectorExprImpl/Operator/Sin.h"
@@ -289,3 +288,4 @@ namespace Physica {
 #include "VectorExprImpl/Operator/LnCosh.h"
 #include "VectorExprImpl/Operator/Softmax.h"
 #include "VectorExprImpl/Operator/Sigmoid.h"
+#include "VectorExprImpl/Operator/Softplus.h"

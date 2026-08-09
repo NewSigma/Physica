@@ -80,11 +80,6 @@ namespace Physica {
     }
 
     template<FloatPrec Prec, int Size>
-    [[nodiscard]] auto ln1pexp(SIMD<Real<Prec>, Size> x) noexcept {
-        return relu(x) + ln1p(exp(-abs(x)));
-    }
-
-    template<FloatPrec Prec, int Size>
     [[nodiscard]] auto pow(SIMD<Real<Prec>, Size> x, SIMD<Real<Prec>, Size> y) noexcept {
         return SIMD<Real<Prec>, Size>(pow(x.toMachine(), y.toMachine()));
     }
@@ -131,6 +126,11 @@ namespace Physica {
         using Pack = SIMD<Real<Prec>, Size>;
         const auto x1 = abs(x);
         return x1 + ln1p(exp(-x1 * Pack(2))) - Pack(M_LN2);
+    }
+
+    template<FloatPrec Prec, int Size>
+    [[nodiscard]] auto softplus(SIMD<Real<Prec>, Size> x) noexcept {
+        return relu(x) + ln1p(exp(-abs(x)));
     }
 
     template<FloatPrec Prec, int Size>

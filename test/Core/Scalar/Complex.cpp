@@ -43,6 +43,6 @@ namespace {
 int main() {
     static_assert(std::formattable<Complex<float64>, char>);
     simd();
-    expect(ln1pexp(cfloat64(-1000, 0)).isZero()); // Test underflow
+    expect(softplus(cfloat64(-1000, 0)).isZero()); // Test underflow
     return 0;
 }

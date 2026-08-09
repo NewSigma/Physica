@@ -99,22 +99,6 @@ namespace Physica {
         return ResultType(ln1p(x.value()), x.grad() / (Tv(1) + x.template grad_mask<GradOrder>()));
     }
 
-    template<Scalar T>
-    [[nodiscard]] auto ln1pexp(const T& x) noexcept requires(ForwardDiff<T>) {
-        using ResultType = T::ScalarType;
-        using GradType = ResultType::GradType;
-        constexpr int GradOrder = GradType::Order;
-        const GradType x1 = x.template grad_mask<GradOrder>();
-        GradType g;
-        if (x.value().real().isPositive())
-            g = reciprocal(GradType(1) + exp(-x1));
-        else {
-            const GradType expx = exp(x1);
-            g = expx / (GradType(1) + expx);
-        }
-        return ResultType(ln1pexp(x.value()), g * x.grad());
-    }
-
     //template<Scalar T>
     //[[nodiscard]] auto log(const T& x, const T& a) noexcept requires(ForwardDiff<T>);
 
@@ -275,6 +259,13 @@ namespace Physica {
         using ResultType = T::ScalarType;
         constexpr int GradOrder = T::GradType::Order;
         return ResultType(lncosh(x.value()), x.grad() * tanh(x.template grad_mask<GradOrder>()));
+    }
+
+    template<Scalar T>
+    [[nodiscard]] auto softplus(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        constexpr int GradOrder = T::GradType::Order;
+        return ResultType(softplus(x.value()), x.grad() * sigmoid(x.template grad_mask<GradOrder>()));
     }
 
     template<Scalar T>

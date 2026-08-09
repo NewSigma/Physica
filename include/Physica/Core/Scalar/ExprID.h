@@ -39,7 +39,6 @@ namespace Physica {
         Square,
         Ln,
         Ln1p,
-        Ln1pExp,
         Exp,
         Pow,
         Sin,
@@ -56,5 +55,6 @@ namespace Physica {
         LnCosh,
         Softmax,
         Sigmoid,
+        Softplus,
     };
 }

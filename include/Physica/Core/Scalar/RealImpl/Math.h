@@ -76,11 +76,6 @@ namespace Physica {
     [[nodiscard]] __host__ __device__ Real<Prec> ln1p(const Real<Prec>& x) noexcept {
         return Real<Prec>(std::log1p(x.toMachine()));
     }
-
-    template<FloatPrec Prec>
-    [[nodiscard]] __host__ __device__ Real<Prec> ln1pexp(const Real<Prec>& x) noexcept {
-        return relu(x) + ln1p(exp(-abs(x)));
-    }
     /**
      * \return log_a n
      */
@@ -354,6 +349,11 @@ namespace Physica {
 
         auto y = exp(x);
         return y / (T(1) + y);
+    }
+
+    template<FloatPrec Prec>
+    [[nodiscard]] __host__ __device__ Real<Prec> softplus(const Real<Prec>& x) noexcept {
+        return relu(x) + ln1p(exp(-abs(x)));
     }
 
     template<FloatPrec Prec>

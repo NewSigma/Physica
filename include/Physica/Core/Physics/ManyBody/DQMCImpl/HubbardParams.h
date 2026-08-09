@@ -215,7 +215,7 @@ namespace Physica {
         const int numSplit = getNumSplit();
         for (int spinUp = 0; spinUp <= numSplit; ++spinUp) {
             int sumSpin = 2 * spinUp - numSplit;
-            lnSpinWeights[spinUp] = ln1pexp(lncosh(alpha * sumSpin) - lncoshBetaMu);
+            lnSpinWeights[spinUp] = softplus(lncosh(alpha * sumSpin) - lncoshBetaMu);
         }
     }
 }

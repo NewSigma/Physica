@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprID::Ln1pExp, V> : public UnitaryVectorExpr<ExprID::Ln1pExp, V> {
-        using This = VectorExpr<ExprID::Ln1pExp, V>;
-        using Base = UnitaryVectorExpr<ExprID::Ln1pExp, V>;
+    class VectorExpr<ExprID::Softplus, V> : public UnitaryVectorExpr<ExprID::Softplus, V> {
+        using This = VectorExpr<ExprID::Softplus, V>;
+        using Base = UnitaryVectorExpr<ExprID::Softplus, V>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -37,35 +37,35 @@ namespace Physica {
         template<int Size>
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
-        [[nodiscard]] T calc(size_t index) const { return ln1pexp(Base::getExpr().calc(index)); }
+        [[nodiscard]] T calc(size_t index) const { return softplus(Base::getExpr().calc(index)); }
         [[nodiscard]] auto values(this auto&&) noexcept;
-};
+    };
 
     template<Vector V>
-    auto VectorExpr<ExprID::Ln1pExp, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {
-        return ln1pexp(*input);
+    auto VectorExpr<ExprID::Softplus, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {
+        return softplus(*input);
     }
 
     template<Vector V>
     template<int Size>
-    auto VectorExpr<ExprID::Ln1pExp, V>::operator()(std::random_access_iterator auto input) noexcept -> SIMD<T, Size> {
-        return ln1pexp(input.template load<Size>());
+    auto VectorExpr<ExprID::Softplus, V>::operator()(std::random_access_iterator auto input) noexcept -> SIMD<T, Size> {
+        return softplus(input.template load<Size>());
     }
 
     template<Vector V>
     template<int Size>
-    auto VectorExpr<ExprID::Ln1pExp, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept -> SIMD<T, Size> {
-        return ln1pexp(input.template load<Size>(count)).cutoff(count);
+    auto VectorExpr<ExprID::Softplus, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept -> SIMD<T, Size> {
+        return softplus(input.template load<Size>(count)).cutoff(count);
     }
 
     template<Vector V>
-    auto VectorExpr<ExprID::Ln1pExp, V>::values(this auto&& self) noexcept {
+    auto VectorExpr<ExprID::Softplus, V>::values(this auto&& self) noexcept {
         using Self = decltype(self);
-        return ln1pexp(std::forward<Self>(self).getExpr().values());
+        return softplus(std::forward<Self>(self).getExpr().values());
     }
 
-template<Vector V>
-    [[nodiscard, gnu::always_inline]] auto ln1pexp(V&& v) noexcept requires(!DeviceObj<V>) {
-        return VectorExpr<ExprID::Ln1pExp, V&&>(std::forward<V>(v));
+    template<Vector V>
+    [[nodiscard, gnu::always_inline]] auto softplus(V&& v) noexcept requires(!DeviceObj<V>) {
+        return VectorExpr<ExprID::Softplus, V&&>(std::forward<V>(v));
     }
 }

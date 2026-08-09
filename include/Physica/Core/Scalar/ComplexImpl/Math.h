@@ -99,15 +99,6 @@ namespace Physica {
     }
 
     template<Scalar T>
-    [[nodiscard]] __host__ __device__ Complex<T> ln1pexp(const Complex<T>& c) noexcept {
-        if (c.real().isPositive()) {
-            T norm = c.norm();
-            return norm + ln(exp(-norm) + exp(c - norm));
-        }
-        return ln1p(exp(c));
-    }
-
-    template<Scalar T>
     [[nodiscard]] __host__ __device__ Complex<T> exp(const Complex<T>& c) noexcept {
         return Complex<T>(std::exp(c.toMachine()));
     }
@@ -179,5 +170,14 @@ namespace Physica {
         auto [sine, cosine] = sincos(c.real().isPositive() ? c.imag() : -c.imag());
         const auto temp = Complex<T>(fma(norm1, cosine, cosine), fma(-norm1, sine, sine)) * T(0.5);
         return abs_real + ln(temp);
+    }
+
+    template<Scalar T>
+    [[nodiscard]] __host__ __device__ Complex<T> softplus(const Complex<T>& c) noexcept {
+        if (c.real().isPositive()) {
+            T norm = c.norm();
+            return norm + ln(exp(-norm) + exp(c - norm));
+        }
+        return ln1p(exp(c));
     }
 }

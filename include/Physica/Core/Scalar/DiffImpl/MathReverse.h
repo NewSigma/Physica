@@ -83,9 +83,6 @@ namespace Physica {
     [[nodiscard]] auto ln1p(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
-    [[nodiscard]] auto ln1pexp(const T& x) noexcept requires(ReverseDiff<T>);
-
-    template<Scalar T>
     [[nodiscard]] auto log(const T& x, const T& a) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
@@ -222,6 +219,9 @@ namespace Physica {
         auto& y = co_yield lncosh(x_.value());
         x_.reverse(tanh(x_.value()) * y.grad());
     }
+
+    template<Scalar T>
+    [[nodiscard]] auto softplus(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
     [[nodiscard]] T floor(const T& x) noexcept requires(ReverseDiff<T>);

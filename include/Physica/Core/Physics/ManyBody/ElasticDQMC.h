@@ -202,7 +202,7 @@ namespace Physica {
             green.diag() += Trv(0.5) + correction;
         }
         Tr betaU = params->getBeta() * params->getRepelU();
-        lnAbsDet -= ln1pexp(lncosh(actionR.diag()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum();
+        lnAbsDet -= softplus(lncosh(actionR.diag()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum();
         return lnAbsDet;
     }
 }
