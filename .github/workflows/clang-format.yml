@@ -2,9 +2,9 @@ name: clang-format
 
 on:
   push:
-    branches: [ "Physica" ]
+    branches: [ "Physica", "dev" ]
   pull_request:
-    branches: [ "Physica" ]
+    branches: [ "Physica", "dev" ]
 
 jobs:
   build:

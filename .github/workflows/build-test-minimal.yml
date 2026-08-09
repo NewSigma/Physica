@@ -2,9 +2,9 @@ name: Build-Test Minimal
 
 on:
   push:
-    branches: [ "Physica" ]
+    branches: [ "Physica", "dev" ]
   pull_request:
-    branches: [ "Physica" ]
+    branches: [ "Physica", "dev" ]
 
 jobs:
   debug:
