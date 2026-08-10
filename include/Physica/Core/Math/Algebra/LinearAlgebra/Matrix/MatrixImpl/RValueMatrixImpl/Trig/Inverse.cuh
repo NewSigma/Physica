@@ -19,6 +19,7 @@
 #pragma once
 
 #include "MatrixTrig.cuh"
+#include "Physica/Core/Exception/CUDA/cuSolver.cuh"
 #include "Physica/Core/Utils/Container/Array.cuh"
 
 namespace Physica {

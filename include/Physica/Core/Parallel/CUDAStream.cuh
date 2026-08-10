@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,24 +18,30 @@
  */
 #pragma once
 
-#include <cuda_runtime.h>
 #include "Physica/Macro.h"
+
+struct CUstream_st;
+using cudaStream_t = CUstream_st*;
 
 namespace Physica {
     class PHYSICA_API CUDAStream {
+        using This = CUDAStream;
+
         cudaStream_t stream = nullptr;
     public:
         CUDAStream();
         CUDAStream(std::nullptr_t);
-        CUDAStream(const CUDAStream&) = delete;
-        CUDAStream(CUDAStream&& obj) noexcept;
+        CUDAStream(const This&) = delete;
+        CUDAStream(This&& obj) noexcept;
         ~CUDAStream();
         /* Operators */
-        CUDAStream& operator=(CUDAStream obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] __host__ __device__ operator cudaStream_t() const noexcept { return stream; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
+
+        [[nodiscard]] __host__ __device__ operator cudaStream_t() const noexcept;
         /* Operations */
-        [[nodiscard]] cudaError_t query() const noexcept;
         void wait() const;
-        void swap(CUDAStream& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
+        /* Getters */
+        [[nodiscard]] bool query() const noexcept;
     };
 }

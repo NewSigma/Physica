@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/PlainStruct.h"
+#include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "GEMM.h"

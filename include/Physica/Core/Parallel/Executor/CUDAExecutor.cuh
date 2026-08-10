@@ -68,7 +68,7 @@ namespace Physica {
         // Both host and device must instantiate the global function
         std::ignore = Internal::kernel<std::remove_reference_t<decltype(fn)>, MaxThreadsPerBlock, MinBlocksPerMultiprocessor>;
         if constexpr (IsHost()) {
-            stream = cudaStream_t(CUDAContext::getInstance().getStream());
+            stream = cudaStream_t(CUDAContext::getInstance().stream());
             // FIXME: We have to wrap it with lambda because clang rejects it
             [=]() noexcept {
                 Internal::kernel<std::remove_reference_t<decltype(fn)>, MaxThreadsPerBlock, MinBlocksPerMultiprocessor><<<config.blocks, config.threads, sharedMem, stream>>>(fn);
@@ -86,7 +86,7 @@ namespace Physica {
         cudaStream_t stream = nullptr;
         std::ignore = Internal::kernel<std::remove_reference_t<decltype(fn)>, RtnTy, MaxThreadsPerBlock, MinBlocksPerMultiprocessor>;
         if constexpr (IsHost()) {
-            stream = cudaStream_t(CUDAContext::getInstance().getStream());
+            stream = cudaStream_t(CUDAContext::getInstance().stream());
             device_obj<Array<RtnTy>> buffer(1);
             [&]() noexcept {
                 Internal::kernel<std::remove_reference_t<decltype(fn)>, RtnTy, MaxThreadsPerBlock, MinBlocksPerMultiprocessor><<<config.blocks, config.threads, sharedMem, stream>>>(fn, buffer.data());
@@ -101,5 +101,13 @@ namespace Physica {
     inline void CUDAExecutor::wait() {
         if constexpr (IsHost())
             CUDAContext::getInstance().wait();
+    }
+
+    __host__ __device__ inline bool isZeroThread() noexcept {
+    #ifdef __CUDA_ARCH__
+        return !threadIdx.x && !threadIdx.y && !threadIdx.z && !blockIdx.x && !blockIdx.x && !blockIdx.x;
+    #else
+        return false;
+    #endif
     }
 }

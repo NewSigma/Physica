@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
 #include "Physica/PlainStruct.h"
 #include "GEMV.h"
 

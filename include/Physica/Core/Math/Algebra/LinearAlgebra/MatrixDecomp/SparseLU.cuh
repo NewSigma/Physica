@@ -19,6 +19,7 @@
 #pragma once
 
 #include "SparseLU.h"
+#include "Physica/Core/Exception/CUDA/cuDSS.cuh"
 #include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/SparseMatrix.cuh"

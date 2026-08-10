@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/VectorExpr.cuh"
 #include "Physica/Core/Parallel/ThreadBlock.cuh"
 

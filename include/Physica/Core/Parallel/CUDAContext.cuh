@@ -19,13 +19,13 @@
 #pragma once
 
 #include <stack>
-#include "CUDAStream.cuh"
-#include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
-#include "Physica/Core/Exception/CUDA/cuDSS.cuh"
-#include "Physica/Core/Exception/CUDA/cuSolver.cuh"
+#include "Physica/Core/Parallel/CUDAStream.cuh"
 #include "Physica/Core/Scalar/Scalar.h"
 
 struct cublasContext;
+struct cusolverDnContext;
+struct cusolverDnParams;
+struct cudssContext;
 
 namespace Physica {
     /**
@@ -33,14 +33,15 @@ namespace Physica {
      */
     class PHYSICA_API CUDAContext {
         using This = CUDAContext;
-
         struct Page {
             int device = 0;
+        #ifdef PHYSICA_CUDA
             CUDAStream stream;
             cublasContext* cublas = nullptr;
             cusolverDnContext* cuSolverDn = nullptr;
             cusolverDnParams* cuSolverDnParams = nullptr;
-            cudssHandle_t cudss = nullptr;
+            cudssContext* cudss = nullptr;
+        #endif
 
             Page(int device_, CUDAStream stream_);
             Page(const Page&) = delete;
@@ -51,11 +52,11 @@ namespace Physica {
             Page& operator=(Page&&) noexcept = delete;
         };
 
+        std::stack<Page> pages;
+    public:
         struct PageGuard {
             ~PageGuard() { CUDAContext::getInstance().pages.pop(); }
         };
-
-        std::stack<Page> pages;
     public:
         CUDAContext(const This&) = delete;
         CUDAContext(This&&) noexcept = delete;
@@ -63,56 +64,47 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        [[nodiscard]] operator cudaStream_t() const noexcept { return getStream(); }
-        [[nodiscard]] operator cublasContext*() const noexcept { return pages.top().cublas; }
-        [[nodiscard]] operator cusolverDnContext*() const noexcept { return pages.top().cuSolverDn; }
-        [[nodiscard]] operator cusolverDnParams*() const noexcept { return pages.top().cuSolverDnParams; }
-        [[nodiscard]] operator cudssHandle_t() const noexcept { return pages.top().cudss; }
+        [[nodiscard]] operator cudaStream_t() const noexcept;
+        [[nodiscard]] operator cublasContext*() const noexcept;
+        [[nodiscard]] operator cusolverDnContext*() const noexcept;
+        [[nodiscard]] operator cusolverDnParams*() const noexcept;
+        [[nodiscard]] operator cudssContext*() const noexcept;
         /* Operations */
-        [[nodiscard]] PageGuard push() { return push(device()); }
+        [[nodiscard]] PageGuard push();
         [[nodiscard]] PageGuard push(int device);
-        [[nodiscard]] cudaError_t query() const noexcept { return getStream().query(); }
-        [[gnu::nodebug]] void wait() const { getStream().wait(); }
+        [[gnu::nodebug]] void wait() const;
         /* Getters */
-        [[nodiscard]] int device() const noexcept { return pages.top().device; }
-        [[nodiscard]] const CUDAStream& getStream() const noexcept { return pages.top().stream; }
+        [[nodiscard]] int device() const noexcept;
+        [[nodiscard]] const CUDAStream& stream() const noexcept;
         /* Setters */
         void setPointerMode(bool isDeviceSide) const noexcept;
         /* Static members */
         [[nodiscard]] static This& getInstance() noexcept;
         template<Scalar T>
-        [[nodiscard]] constexpr static cudaDataType getDataType() noexcept;
+        [[nodiscard]] constexpr static auto getDataType() noexcept;
     private:
         CUDAContext();
         /* Operations */
         static void setDevice(int device);
     };
 
-    inline void CUDAContext::setPointerMode(bool isDeviceSide) const noexcept {
-        cublasSetPointerMode(*this, isDeviceSide ? CUBLAS_POINTER_MODE_DEVICE : CUBLAS_POINTER_MODE_HOST);
-    }
-
     template<Scalar T>
-    constexpr cudaDataType CUDAContext::getDataType() noexcept {
+    constexpr auto CUDAContext::getDataType() noexcept {
+    #ifdef PHYSICA_CUDA
         if constexpr (T::isComplex()) {
             if constexpr (T::Prec == Float32)
-                return cudaDataType::CUDA_C_32F;
+                return CUDA_C_32F;
             else
-                return cudaDataType::CUDA_C_64F;
+                return CUDA_C_64F;
         }
         else {
             if constexpr (T::Prec == Float32)
-                return cudaDataType::CUDA_R_32F;
+                return CUDA_R_32F;
             else
-                return cudaDataType::CUDA_R_64F;
+                return CUDA_R_64F;
         }
-    }
-
-    __host__ __device__ inline bool isZeroThread() {
-    #ifdef __CUDA_ARCH__
-        return !threadIdx.x && !threadIdx.y && !threadIdx.z && !blockIdx.x && !blockIdx.x && !blockIdx.x;
     #else
-        return false;
+        static_assert(false, "[Error]: No impl");
     #endif
     }
 }

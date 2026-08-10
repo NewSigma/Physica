@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "Physica/Core/Physics/MD/ForceModel/EmptyForceModel.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "../RPMD.h"
@@ -76,7 +77,7 @@ namespace Physica {
                 parallel_for<HostPolicy>(kernel, getNumReplica()).wait();
 
             if constexpr (P == GPU)
-                Task<P>::wait();
+                CUDAContext::getInstance().wait();
             return;
         }
 

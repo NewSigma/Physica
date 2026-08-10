@@ -19,6 +19,7 @@
 #pragma once
 
 #include "DenseQR.h"
+#include "Physica/Core/Exception/CUDA/cuSolver.cuh"
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Core/Utils/Container/Array.cuh"
 

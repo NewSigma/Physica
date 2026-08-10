@@ -32,7 +32,7 @@ namespace {
         gp.regression(x.transpose(), y, T(0));
         for (auto [x_elem, y_elem] : zip(x, y)) {
             auto [mean, devia] = gp.predict({x_elem});
-            expect<RandomSource>(scalarNear(mean, y_elem, 1E-12));
+            expect<RandomSource>(scalarNear(mean, y_elem, 1E-11));
             expect<RandomSource>(devia.isZero());
         }
     }

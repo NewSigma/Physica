@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Harmonic.h"
 
@@ -112,7 +113,7 @@ namespace Physica {
             original.template forceAsync<P>(cell, result);
         const VectorND<ScalarType> harmonicF = harmonic.template force<P>(cell);
         if constexpr (P == GPU)
-            Task<GPU>::wait();
+            CUDAContext::getInstance().wait();
         result = lambda * result.getDerived() + (ScalarType(1) - lambda) * harmonicF;
     }
 

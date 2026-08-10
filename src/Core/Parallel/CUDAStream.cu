@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -39,8 +39,13 @@ CUDAStream::~CUDAStream() {
     }
 }
 
-cudaError_t CUDAStream::query() const noexcept {
-    return cudaStreamQuery(stream);
+__host__ __device__ CUDAStream::operator cudaStream_t() const noexcept {
+    return reinterpret_cast<cudaStream_t>(stream);
+}
+
+bool CUDAStream::query() const noexcept {
+    assert(stream != nullptr);
+    return cudaStreamQuery(stream) == cudaSuccess;
 }
 
 void CUDAStream::wait() const {
