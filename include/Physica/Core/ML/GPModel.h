@@ -74,6 +74,7 @@ namespace Physica {
 
         auto& covars = covarLU.getMatrixLU();
         const Tv var = kernel.getVar();
+        assert(!var.isNegative());
         for (size_t major = 0; major < covars.getMaxMajor(); ++major) {
             for (size_t minor = 0; minor < covars.getMaxMinor(); ++minor) {
                 bool diag = major == minor;
@@ -124,10 +125,10 @@ namespace Physica {
 
         MatrixND<Tv> sampleX;
         VectorND<T> alpha;
-        T var;
+        T svar;
     public:
         explicit GaussKernel(size_t numFeature);
-        GaussKernel(VectorND<Tv> alpha, Tv var);
+        GaussKernel(VectorND<Tv> alpha, Tv svar);
         GaussKernel(const This&) = default;
         GaussKernel(This&&) noexcept = default;
         ~GaussKernel() = default;
@@ -148,7 +149,7 @@ namespace Physica {
         [[nodiscard]] size_t getOrder() const noexcept { return sampleX.getCol(); }
         [[nodiscard]] size_t getNumFeature() const noexcept { return alpha.getLength(); }
         [[nodiscard]] const auto& getAlpha() const noexcept { return alpha; }
-        [[nodiscard]] Tv getVar() const noexcept { return var.value(); }
+        [[nodiscard]] Tv getVar() const noexcept { return abs(svar.value()); }
         /* Setters */
         void setSampleX(const MatrixND<Tv>& sample) { sampleX = sample; }
         /* Static members */
@@ -159,33 +160,33 @@ namespace Physica {
     GPModel<T>::GaussKernel::GaussKernel(size_t numFeature) : GaussKernel(VectorND<Tv>(numFeature, 1), 1) {}
 
     template<Scalar T>
-    GPModel<T>::GaussKernel::GaussKernel(VectorND<Tv> alpha, Tv var) : alpha(std::move(alpha)), var(var) {
+    GPModel<T>::GaussKernel::GaussKernel(VectorND<Tv> alpha, Tv svar) : alpha(std::move(alpha)), svar(svar) {
         static_assert(Base::isStaticSquare());
     }
 
     template<Scalar T>
     CoDiff<T> GPModel<T>::GaussKernel::calc(size_t r, size_t c) const {
-        return exp(-square(alpha * (sampleX.col(r) - sampleX.col(c)))) * abs(var);
+        return exp(-square(alpha * (sampleX.col(r) - sampleX.col(c)))) * abs(svar);
     }
 
     template<Scalar T>
     auto GPModel<T>::GaussKernel::calc_value(size_t r, size_t c) const -> Tv {
-        return exp(-square(alpha.values() * (sampleX.col(r) - sampleX.col(c)))) * abs(var.value());
+        return exp(-square(alpha.values() * (sampleX.col(r) - sampleX.col(c)))) * abs(svar.value());
     }
 
     template<Scalar T>
     auto GPModel<T>::GaussKernel::dot(const VectorND<Tv>& x, size_t i) const -> Tv {
-        return exp(-square(alpha.values() * (x - sampleX.col(i)))) * abs(var.value());
+        return exp(-square(alpha.values() * (x - sampleX.col(i)))) * abs(svar.value());
     }
 
     template<Scalar T>
     void GPModel<T>::GaussKernel::step(auto& opt) noexcept {
-        opt.step(alpha, var);
+        opt.step(alpha, svar);
     }
 
     template<Scalar T>
     void GPModel<T>::GaussKernel::zero_grad() noexcept {
         alpha.zero_grad();
-        var.zero_grad();
+        svar.zero_grad();
     }
 }

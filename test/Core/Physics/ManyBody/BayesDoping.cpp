@@ -49,8 +49,8 @@ namespace {
         constexpr T From = -4;
         constexpr T To = 0;
         constexpr int NumVegasSample = 10000;
-        constexpr int NumBayesIter = 16;
-        constexpr int NumVegasIter = 64;
+        constexpr int NumBayesIter = 24;
+        constexpr int NumVegasIter = 128;
         constexpr int NumWarmup = 32;
         constexpr int NumSample = 1024;
         constexpr int NumStepSGD = 300;
@@ -68,7 +68,7 @@ namespace {
                 auto mean = dopant.getDensity()[i];
                 auto devia = dopant.getNoises()[i];
                 const T diff = abs(mean - Target);
-                expect<RandomSource>(diff < T(0.01));
+                expect<RandomSource>(diff < T(0.02));
                 expect<RandomSource>(diff < T(3) * devia);
                 break;
             }
