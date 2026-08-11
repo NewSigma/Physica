@@ -123,8 +123,9 @@ namespace Physica {
                     target.zeros();
                     break;
                 }
-                target *= reciprocal(norm1); // Avoid overflow
-                lnNorm1 += ln(norm1);
+                const auto scale = norm1.stripSignificand();
+                target *= reciprocal(scale); // Avoid overflow
+                lnNorm1 += ln(scale);
             }
 
             target.assign(term);
@@ -174,10 +175,11 @@ namespace Physica {
         }
 
         Array<Trv, MaxNormOrder> powerNorms{};
-        const Tr normalizer = reciprocal(norm1); // Avoid potential overflow of pow()
+        const auto scale = norm1.stripSignificand();
+        const Tr normalizer = reciprocal(scale); // Avoid potential overflow of pow()
         for (int order = 2; order <= MaxNormOrder + 1; ++order) {
             const Tr pNorm1 = pow(mexp.getMatrix() * normalizer - (traceMu * normalizer) * matI, order).template norm1_power<P>(MaxNormIteration);
-            powerNorms[order - 2] = pow(pNorm1.value(), reciprocal(Trv(order))) * norm1.value();
+            powerNorms[order - 2] = pow(pNorm1.value(), reciprocal(Trv(order))) * scale.value();
         }
 
         for (int order = 2; order <= MaxNormOrder; ++order) {

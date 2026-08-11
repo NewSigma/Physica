@@ -330,11 +330,12 @@ namespace Physica {
                     T t0 = matrixT[i + 1, i];
                     T t1 = matrixT[i, i + 1];
                     const T max = std::max(abs(p), std::max(abs(t0), abs(t1)));
-                    const T inv_max = reciprocal(max);
-                    t0 *= inv_max;
-                    t1 *= inv_max;
-                    T p0 = p * inv_max;
-                    z = max * sqrt(abs(fma(t0, t1, square(p0))));
+                    const T scale = max.stripSignificand();
+                    const T inv = reciprocal(scale);
+                    t0 *= inv;
+                    t1 *= inv;
+                    T p0 = p * inv;
+                    z = scale * sqrt(abs(fma(t0, t1, square(p0))));
                 }
                 const T real = p + matrixT[i + 1, i + 1];
                 eigenvalues[i] = Tc(real, z);

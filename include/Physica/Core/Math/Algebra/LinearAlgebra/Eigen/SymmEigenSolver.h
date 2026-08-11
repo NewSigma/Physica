@@ -38,6 +38,7 @@ namespace Physica {
         static_assert(!isComplex, "[Error]: Complex matrix is not supported");
 
         using Tr = T::RealType;
+        using Trv = Tr::ValueType;
         using Tc = T::ComplexType;
         using Tcv = Tc::ValueType;
     public:
@@ -111,8 +112,9 @@ namespace Physica {
             eigenvalues = Tr(0);
             return;
         }
-        const Tr inv_factor = reciprocal(factor);
-        const WorkingMatrix normalized = source * inv_factor; // Referenced from eigen, to avoid under/overflow in householder
+        // Referenced from eigen, to avoid under/overflow in householder.
+        const Trv scale = factor.value().stripSignificand();
+        const WorkingMatrix normalized = source * reciprocal(scale);
         auto tridiagonal = Tridiagonalization<T, Order>(normalized);
         WorkingMatrix working = tridiagonal.getMatrixT();
         if (getNeedEigenvectors())
@@ -136,9 +138,7 @@ namespace Physica {
             if (total_iter == max_iter)
                 throw BadConvergenceException("Exceed max iteration of SymmEigenSolver");
         }
-
-        for (size_t i = 0; i < order; ++i)
-            eigenvalues[i] = working[i, i] * factor;
+        eigenvalues = working.diag() * scale;
     }
 
     template<Scalar T, size_t Order>

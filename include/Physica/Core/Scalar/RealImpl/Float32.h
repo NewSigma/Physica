@@ -47,7 +47,7 @@ namespace Physica {
 
 namespace Physica {
     template<>
-    class Real<Float32> : public ScalarBase<Real<Float32>>, public CRCoro<Real<Float32>> {
+    class PHYSICA_API Real<Float32> : public ScalarBase<Real<Float32>>, public CRCoro<Real<Float32>> {
         using This = Real<Float32>;
         using Base = ScalarBase<This>;
     public:
@@ -84,7 +84,8 @@ namespace Physica {
         friend std::istream& operator>>(std::istream& is, Real& scalar);
         /* Operations */
         [[nodiscard]] __host__ __device__ inline Real mod() const noexcept;
-        PHYSICA_API void dump() const noexcept;
+        [[nodiscard]] __host__ __device__ Real stripSignificand() const noexcept;
+        void dump() const noexcept;
 
         using Base::random_uniform;
         using Base::random_normal;

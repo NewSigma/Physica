@@ -315,8 +315,8 @@ namespace Physica {
         const Tr maxabs = abs(derived).max();
         // We require a small threshold to avoid latter ill-conditioned reciprocal.
         assert(!maxabs.isSubNormal() && "[Error]: Vectors near zero are invalid");
-        const Tr factor = reciprocal(maxabs);
-        return ln((derived * factor).squaredNorm()) + Tr(2) * ln(maxabs);
+        const Tr scale = maxabs.stripSignificand();
+        return ln((derived * reciprocal(scale)).squaredNorm()) + Tr(2) * ln(scale);
     }
 
     template<class Derived, Scalar ScalarT>

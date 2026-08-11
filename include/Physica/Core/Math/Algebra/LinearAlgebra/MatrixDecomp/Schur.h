@@ -92,9 +92,9 @@ namespace Physica {
             matrixT = Tr(0);
             return;
         }
-
-        const Tr inv_factor = reciprocal(factor);
-        const auto normalized = source * inv_factor; // Referenced from eigen, to avoid under/overflow in householder, but will lost relative accuracy(from 10^-15 to 10^-14)
+        // Referenced from eigen, to avoid under/overflow in householder.
+        const Tr scale = factor.stripSignificand();
+        const auto normalized = source * reciprocal(scale);
         exshift = 0;
         if constexpr (Order == 2)
             compute2D(normalized);
@@ -104,7 +104,7 @@ namespace Physica {
             else
                 compute2D(normalized);
         }
-        matrixT *= factor;
+        matrixT *= scale;
     }
 
     template<Scalar T, size_t Order>
@@ -381,7 +381,8 @@ namespace Physica {
         // diagonal block on the bottom of the active submatrix
         const auto activeBlock = matrixT.block(upper - 1, 2, upper - 1, 2);
         const Tr t_norm = abs(activeBlock[0, 0]) + abs(activeBlock[0, 1]) + abs(activeBlock[1, 0]) + abs(activeBlock[1, 1]);
-        const Matrix2D t = activeBlock * reciprocal(t_norm); // Normalization to avoid under/overflow
+        const Tr scale = t_norm.stripSignificand();
+        const Matrix2D t = activeBlock * reciprocal(scale); // Normalization to avoid under/overflow
 
         const Tc b = t[0, 1] * t[1, 0];
         const Tc c = t[0, 0] - t[1, 1];
@@ -399,7 +400,7 @@ namespace Physica {
             eival1 = det / eival2;
 
         const bool firstEigenValueCloserToDiagonal = (eival1 - t[1, 1]).norm() < (eival2 - t[1, 1]).norm();
-        return t_norm * (firstEigenValueCloserToDiagonal ? eival1 : eival2);
+        return scale * (firstEigenValueCloserToDiagonal ? eival1 : eival2);
     }
 
     template<Scalar T, size_t Order>
