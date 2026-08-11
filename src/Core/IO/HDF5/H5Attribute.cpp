@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/IO/HDF5/H5Attribute.h"
 #include <cassert>
+#include <utility>
 #include "H5Apublic.h"
 
 using namespace Physica;

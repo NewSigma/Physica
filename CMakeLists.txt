@@ -25,6 +25,7 @@ option(PHYSICA_CUDA "Enables CUDA acceleration" OFF)
 option(PHYSICA_LLVM "" OFF)
 option(PHYSICA_MIMALLOC "Use mimalloc" OFF)
 # Dev options
+set(PHYSICA_ARCH "native" CACHE STRING "Architecture for -march")
 option(PHYSICA_PROFILE "Build with profiling support" OFF)
 option(PHYSICA_TRANSFORMS "Enable custom LLVM passes" OFF)
 option(PHYSICA_EmitLLVM "Collect LLVM IR for benchmark" OFF)

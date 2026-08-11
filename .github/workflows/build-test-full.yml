@@ -1,0 +1,19 @@
+name: Build-Test Full
+
+on:
+  push:
+    branches: [ "Physica", "dev" ]
+  pull_request:
+    branches: [ "Physica", "dev" ]
+
+jobs:
+  debug:
+    uses: ./.github/workflows/preset-full.yml
+    with:
+      build_config: Debug
+
+  release:
+    needs: debug
+    uses: ./.github/workflows/preset-full.yml
+    with:
+      build_config: Release

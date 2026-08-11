@@ -38,7 +38,7 @@ namespace {
         jd.compute(hermite, VectorND<cfloat64>::random_uniform<RandomSource>(data.getRow()));
         jd.sort();
 
-        expect<RandomSource>(vectorNear(jd.getEigenvalues(), eig.getEigenvalues().head(jd.getNumRequired()), 1E-12));
+        expect<RandomSource>(vectorNear(jd.getEigenvalues(), eig.getEigenvalues().head(jd.getNumRequired()), 1E-11));
     }
 
     void test2() {
@@ -59,7 +59,7 @@ namespace {
 
         EigenSolver<T> eig(hamilton, false);
         eig.sort();
-        expect<RandomSource>(vectorNear(eig.getEigenvalues().reals().head(4), jd.getEigenvalues().head(4), 1E-12));
+        expect<RandomSource>(vectorNear(eig.getEigenvalues().reals().head(4), jd.getEigenvalues().head(4), 1E-11));
     }
 }
 

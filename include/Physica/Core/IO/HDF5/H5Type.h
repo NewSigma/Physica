@@ -96,7 +96,7 @@ namespace Physica {
             return get<std::underlying_type_t<T>>();
         else {
             using M = Traits<T>::MachineType;
-            static_assert(!std::same_as<T, M>, "[Error]: Bad machine type");
+            static_assert(!std::is_same_v<T, M>, "[Error]: Bad machine type");
             return get<M>();
         }
     }
