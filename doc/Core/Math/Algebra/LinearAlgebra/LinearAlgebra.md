@@ -25,40 +25,42 @@ Inspired by C++ linear algebra libraries such as *Eigen*$^{[1]}$ and *Armadillo*
 
 Historically, the definitions of lvalue and rvalue in the C language were very simple:
 
-- LValue: An expression that can appear on the left side of an assignment statement. It represents a named memory location with a fixed address.
-- RValue: An expression that can only appear on the right side of an assignment statement. It represents a temporary, soon-to-be-destroyed value.
+- lvalue: An expression that can appear on the left side of an assignment statement. It represents a named memory location with a fixed address.
+- rvalue: An expression that can only appear on the right side of an assignment statement. It represents a temporary, soon-to-be-destroyed value.
 
 The linear space used for numerical computation is not an abstract linear space; all computations must take place within a specific physical memory. By introducing assignment operations into the linear space, a generalized linear space can be constructed. This design explicitly incorporates expression templates into the type system of *LinearAlgebra*, facilitating the writing of pattern recognition.
 
 The base classes for linear algebra objects generally fall into the following categories:
 
-- RValue objects
-- LValue objects
+- *RValue* objects
+- *LValue* objects
 - Strided objects
 - Compact objects
+
+> Note: Distinct from the rvalue/lvalue in programming languages, the capitalized and italicized *RValue*/*LValue* in this article refer to a property of linear algebra objects.
 
 Taking a dense vector as an example, the inheritance hierarchy is: `DenseVector` → `CompactVector` → `StridedVector` → `LValueVector` → `RValueVector`.
 
 **RValue object**:
 
-Taking an RValue vector as an example, there are only two core operations:
+Taking an *RValue* vector as an example, there are only two core operations:
 
 ``` C++
 Scalar RValueVector::calc(size_t index) { ... }
 size_t RValueVector::getLength() { ... }
 ```
 
-In principle, all "mathematical" vector operations can be implemented on the basis of these core operations. The elements of an rvalue object can be accessed, but their pointers cannot be taken. Therefore, **any** expression template is an rvalue object. The `calc_value()` function is provided to return the value of an element, which is used in cases where gradients are not needed during backpropagation.
+In principle, all "mathematical" vector operations can be implemented on the basis of these core operations. The elements of an *RValue* object can be accessed, but their pointers cannot be taken. Therefore, **any** expression template is an *RValue* object. The `calc_value()` function is provided to return the value of an element, which is used in cases where gradients are not needed during backpropagation.
 
 **LValue object**:
 
-The only core operation on LValue objects:
+The only core operation on *LValue* objects:
 
 ``` C++
 Scalar* LValueVector::data_ptr(size_t index) { ... }
 ```
 
-Obviously, LValue objects are calculable, and the operation for calculation is dereferencing:
+Obviously, *LValue* objects are calculable, and the operation for calculation is dereferencing:
 
 ``` C++
 Scalar LValueVector::calc(size_t index) { return *data_ptr(index); }
@@ -73,11 +75,11 @@ Scalar* StridedVector::data_handle() { ... }
 size_t StridedVector::getStride() { ... }
 ```
 
-Strided objects are LValue objects whose elements are spaced according to the given stride. That is
+Strided objects are *LValue* objects whose elements are spaced according to the given stride. That is
 
 ``` C++
 Scalar* StridedVector::data_ptr(this auto&& self, size_t index) {
-    return self.data_ptr() + index * getStride();
+    return self.data_handle() + index * getStride();
 }
 ```
 
@@ -129,7 +131,7 @@ Unary operations can have explicit constraints:
 
 ``` C++
 template<ExprID, Matrix M>
-class UnitaryMatrixExpr { ... };
+class UnaryMatrixExpr { ... };
 ```
 
 Considering potential non-Abelian properties, binary operations require more general declarations:

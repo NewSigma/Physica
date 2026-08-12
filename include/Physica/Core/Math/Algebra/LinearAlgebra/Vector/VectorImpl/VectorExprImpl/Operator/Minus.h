@@ -23,8 +23,8 @@
 namespace Physica {
     template<Vector V>
     class VectorExpr<ExprID::Minus, V>
-            : public UnitaryVectorExpr<ExprID::Minus, V> {
-        using Base = UnitaryVectorExpr<ExprID::Minus, V>;
+            : public UnaryVectorExpr<ExprID::Minus, V> {
+        using Base = UnaryVectorExpr<ExprID::Minus, V>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -46,7 +46,7 @@ namespace Physica {
 
         void reverse(const auto& grad) const noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
-};
+    };
 
     template<Vector V>
     auto VectorExpr<ExprID::Minus, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {

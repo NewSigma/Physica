@@ -23,8 +23,8 @@
 namespace Physica {
     template<Matrix M>
     class device_obj<MatrixExpr<ExprID::Square, M>>
-            : public device_obj<UnitaryMatrixExpr<ExprID::Square, M>> {
-        using Base = device_obj<UnitaryMatrixExpr<ExprID::Square, M>>;
+            : public device_obj<UnaryMatrixExpr<ExprID::Square, M>> {
+        using Base = device_obj<UnaryMatrixExpr<ExprID::Square, M>>;
     public:
         using Base::isReverseDiff;
     protected:

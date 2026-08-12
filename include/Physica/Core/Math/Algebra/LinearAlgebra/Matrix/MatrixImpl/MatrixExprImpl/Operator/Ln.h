@@ -23,8 +23,8 @@
 namespace Physica {
     template<Matrix M>
     class MatrixExpr<ExprID::Ln, M>
-            : public UnitaryMatrixExpr<ExprID::Ln, M> {
-        using Base = UnitaryMatrixExpr<ExprID::Ln, M>;
+            : public UnaryMatrixExpr<ExprID::Ln, M> {
+        using Base = UnaryMatrixExpr<ExprID::Ln, M>;
     public:
         using typename Base::T;
         using typename Base::Tv;

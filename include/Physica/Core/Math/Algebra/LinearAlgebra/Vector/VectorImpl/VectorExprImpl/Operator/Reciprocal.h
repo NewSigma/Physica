@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprID::Reciprocal, V> : public UnitaryVectorExpr<ExprID::Reciprocal, V> {
+    class VectorExpr<ExprID::Reciprocal, V> : public UnaryVectorExpr<ExprID::Reciprocal, V> {
         using This = VectorExpr<ExprID::Reciprocal, V>;
-        using Base = UnitaryVectorExpr<ExprID::Reciprocal, V>;
+        using Base = UnaryVectorExpr<ExprID::Reciprocal, V>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -44,7 +44,7 @@ namespace Physica {
         void reverse(const Vector auto& grad) const noexcept;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
-};
+    };
 
     template<Vector V>
     auto VectorExpr<ExprID::Reciprocal, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {
@@ -90,7 +90,7 @@ namespace Physica {
         return reciprocal(std::forward<Self>(self).getExpr().values());
     }
 
-template<Vector V>
+    template<Vector V>
     [[nodiscard, gnu::always_inline]] auto reciprocal(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Reciprocal, V&&>(std::forward<V>(v));
     }

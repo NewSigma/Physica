@@ -23,8 +23,8 @@
 namespace Physica {
     template<Matrix M>
     class device_obj<MatrixExpr<ExprID::Unit, M>>
-            : public device_obj<UnitaryMatrixExpr<ExprID::Unit, M>> {
-        using Base = device_obj<UnitaryMatrixExpr<ExprID::Unit, M>>;
+            : public device_obj<UnaryMatrixExpr<ExprID::Unit, M>> {
+        using Base = device_obj<UnaryMatrixExpr<ExprID::Unit, M>>;
     public:
         using typename Base::T;
         using typename Base::Tv;

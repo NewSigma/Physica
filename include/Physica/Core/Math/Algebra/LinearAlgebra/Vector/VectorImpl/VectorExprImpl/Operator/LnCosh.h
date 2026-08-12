@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprID::LnCosh, V> : public UnitaryVectorExpr<ExprID::LnCosh, V> {
+    class VectorExpr<ExprID::LnCosh, V> : public UnaryVectorExpr<ExprID::LnCosh, V> {
         using This = VectorExpr<ExprID::LnCosh, V>;
-        using Base = UnitaryVectorExpr<ExprID::LnCosh, V>;
+        using Base = UnaryVectorExpr<ExprID::LnCosh, V>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -40,7 +40,7 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
 
         [[nodiscard]] auto values(this auto&&) noexcept;
-};
+    };
 
     template<Vector V>
     auto VectorExpr<ExprID::LnCosh, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {

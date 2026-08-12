@@ -23,8 +23,8 @@
 namespace Physica {
     template<Matrix M>
     class MatrixExpr<ExprID::Tanh, M>
-            : public UnitaryMatrixExpr<ExprID::Tanh, M> {
-        using Base = UnitaryMatrixExpr<ExprID::Tanh, M>;
+            : public UnaryMatrixExpr<ExprID::Tanh, M> {
+        using Base = UnaryMatrixExpr<ExprID::Tanh, M>;
     public:
         using typename Base::T;
         using typename Base::Tv;
@@ -34,7 +34,6 @@ namespace Physica {
         [[nodiscard]] T calc(size_t row, size_t col) const { return tanh(Base::getExpr().calc(row, col)); }
 
         [[nodiscard]] auto values(this auto&&) noexcept;
-
     };
 
     template<Matrix M>

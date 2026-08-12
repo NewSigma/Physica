@@ -23,8 +23,8 @@
 
 namespace Physica {
     template<ExprID ID, Vector V>
-    class device_obj<UnitaryVectorExpr<ID, V>> : public device_obj<RValueVector<VectorExpr<ID, V>>> {
-        using host_obj = UnitaryVectorExpr<ID, V>;
+    class device_obj<UnaryVectorExpr<ID, V>> : public device_obj<RValueVector<VectorExpr<ID, V>>> {
+        using host_obj = UnaryVectorExpr<ID, V>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<VectorExpr<ID, V>>>;
     protected:
@@ -47,10 +47,10 @@ namespace Physica {
     };
 
     template<ExprID ID, Vector V>
-    __host__ __device__ device_obj<UnitaryVectorExpr<ID, V>>::device_obj(Ref expr_) noexcept : expr(asStruct(expr_)) {}
+    __host__ __device__ device_obj<UnaryVectorExpr<ID, V>>::device_obj(Ref expr_) noexcept : expr(asStruct(expr_)) {}
 
     template<ExprID ID, Vector V>
-    __host__ __device__ constexpr auto&& device_obj<UnitaryVectorExpr<ID, V>>::getExpr(this auto&& self) noexcept {
+    __host__ __device__ constexpr auto&& device_obj<UnaryVectorExpr<ID, V>>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.expr.getDerived());
     }
 

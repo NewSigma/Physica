@@ -23,8 +23,8 @@
 namespace Physica {
     template<Vector V>
     class VectorExpr<ExprID::Softmax, V>
-            : public UnitaryVectorExpr<ExprID::Softmax, V> {
-        using Base = UnitaryVectorExpr<ExprID::Softmax, V>;
+            : public UnaryVectorExpr<ExprID::Softmax, V> {
+        using Base = UnaryVectorExpr<ExprID::Softmax, V>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -43,7 +43,7 @@ namespace Physica {
 
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
-};
+    };
 
     template<Vector V>
     auto VectorExpr<ExprID::Softmax, V>::calc(size_t i, T lnsumexp) const -> T {

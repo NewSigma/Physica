@@ -23,8 +23,8 @@
 namespace Physica {
     template<Vector V>
     class device_obj<VectorExpr<ExprID::Tan, V>>
-            : public device_obj<UnitaryVectorExpr<ExprID::Tan, V>> {
-        using Base = device_obj<UnitaryVectorExpr<ExprID::Tan, V>>;
+            : public device_obj<UnaryVectorExpr<ExprID::Tan, V>> {
+        using Base = device_obj<UnaryVectorExpr<ExprID::Tan, V>>;
     public:
         using Base::isReverseDiff;
     protected:

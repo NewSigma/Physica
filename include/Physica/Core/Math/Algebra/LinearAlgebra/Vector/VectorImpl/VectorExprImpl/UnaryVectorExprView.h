@@ -23,7 +23,7 @@
 namespace Physica {
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    class UnitaryVectorExpr<ID, V>::View : public std::ranges::view_base {
+    class UnaryVectorExpr<ID, V>::View : public std::ranges::view_base {
         using This = View<Operand>;
 
         class Iterator;
@@ -46,17 +46,17 @@ namespace Physica {
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr UnitaryVectorExpr<ID, V>::View<Operand>::View(Operand operand) : operand(std::move(operand)) {}
+    constexpr UnaryVectorExpr<ID, V>::View<Operand>::View(Operand operand) : operand(std::move(operand)) {}
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::begin(this auto&& self) noexcept {
+    constexpr auto UnaryVectorExpr<ID, V>::View<Operand>::begin(this auto&& self) noexcept {
         return Iterator(self.operand.begin());
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::end(this auto&& self) noexcept {
+    constexpr auto UnaryVectorExpr<ID, V>::View<Operand>::end(this auto&& self) noexcept {
         return Iterator(self.operand.end());
     }
 }
@@ -64,7 +64,7 @@ namespace Physica {
 namespace Physica {
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    class UnitaryVectorExpr<ID, V>::View<Operand>::Iterator {
+    class UnaryVectorExpr<ID, V>::View<Operand>::Iterator {
         using This = Iterator;
     public:
         using iterator_concept = std::random_access_iterator_tag;
@@ -107,101 +107,101 @@ namespace Physica {
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::Iterator(std::ranges::iterator_t<Operand> it) noexcept : it(std::move(it)) {}
+    constexpr UnaryVectorExpr<ID, V>::View<Operand>::Iterator::Iterator(std::ranges::iterator_t<Operand> it) noexcept : it(std::move(it)) {}
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::operator++() noexcept -> This& {
+    constexpr auto UnaryVectorExpr<ID, V>::View<Operand>::Iterator::operator++() noexcept -> This& {
         ++it;
         return *this;
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::operator--() noexcept -> This& {
+    constexpr auto UnaryVectorExpr<ID, V>::View<Operand>::Iterator::operator--() noexcept -> This& {
         --it;
         return *this;
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::operator+=(difference_type n) noexcept -> This& {
+    constexpr auto UnaryVectorExpr<ID, V>::View<Operand>::Iterator::operator+=(difference_type n) noexcept -> This& {
         it += n;
         return *this;
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::operator-=(difference_type n) noexcept -> This& {
+    constexpr auto UnaryVectorExpr<ID, V>::View<Operand>::Iterator::operator-=(difference_type n) noexcept -> This& {
         it -= n;
         return *this;
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::operator++(int) noexcept -> This {
+    constexpr auto UnaryVectorExpr<ID, V>::View<Operand>::Iterator::operator++(int) noexcept -> This {
         return std::exchange(*this, it++);
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::operator--(int) noexcept -> This {
+    constexpr auto UnaryVectorExpr<ID, V>::View<Operand>::Iterator::operator--(int) noexcept -> This {
         return std::exchange(*this, it--);
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::operator*() const noexcept -> reference {
+    constexpr auto UnaryVectorExpr<ID, V>::View<Operand>::Iterator::operator*() const noexcept -> reference {
         return VectorExpr<ID, V>::operator()(it);
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::operator[](difference_type n) const noexcept -> reference {
+    constexpr auto UnaryVectorExpr<ID, V>::View<Operand>::Iterator::operator[](difference_type n) const noexcept -> reference {
         return VectorExpr<ID, V>::operator()(it + n);
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr bool UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::operator==(const This& other) const noexcept {
+    constexpr bool UnaryVectorExpr<ID, V>::View<Operand>::Iterator::operator==(const This& other) const noexcept {
         return it == other.it;
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::operator<=>(const This& other) const noexcept {
+    constexpr auto UnaryVectorExpr<ID, V>::View<Operand>::Iterator::operator<=>(const This& other) const noexcept {
         return it <=> other.it;
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::operator+(difference_type n) const noexcept -> This {
+    constexpr auto UnaryVectorExpr<ID, V>::View<Operand>::Iterator::operator+(difference_type n) const noexcept -> This {
         return This(it + n);
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::operator-(difference_type n) const noexcept -> This {
+    constexpr auto UnaryVectorExpr<ID, V>::View<Operand>::Iterator::operator-(difference_type n) const noexcept -> This {
         return This(it - n);
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
-    constexpr auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::operator-(const This& other) const noexcept -> difference_type {
+    constexpr auto UnaryVectorExpr<ID, V>::View<Operand>::Iterator::operator-(const This& other) const noexcept -> difference_type {
         return it - other.it;
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
     template<int Size>
-    auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::load() const noexcept -> SIMD<value_type, Size> {
+    auto UnaryVectorExpr<ID, V>::View<Operand>::Iterator::load() const noexcept -> SIMD<value_type, Size> {
         return VectorExpr<ID, V>::template operator()<Size>(it);
     }
 
     template<ExprID ID, Vector V>
     template<std::ranges::view Operand>
     template<int Size>
-    auto UnitaryVectorExpr<ID, V>::View<Operand>::Iterator::load(size_t count) const noexcept -> SIMD<value_type, Size> {
+    auto UnaryVectorExpr<ID, V>::View<Operand>::Iterator::load(size_t count) const noexcept -> SIMD<value_type, Size> {
         return VectorExpr<ID, V>::template operator()<Size>(it, count);
     }
 }

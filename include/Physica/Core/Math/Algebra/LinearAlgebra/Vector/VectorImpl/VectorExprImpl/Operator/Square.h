@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprID::Square, V> : public UnitaryVectorExpr<ExprID::Square, V> {
+    class VectorExpr<ExprID::Square, V> : public UnaryVectorExpr<ExprID::Square, V> {
         using This = VectorExpr<ExprID::Square, V>;
-        using Base = UnitaryVectorExpr<ExprID::Square, V>;
+        using Base = UnaryVectorExpr<ExprID::Square, V>;
     protected:
         using typename Base::T;
         using typename Base::Tv;

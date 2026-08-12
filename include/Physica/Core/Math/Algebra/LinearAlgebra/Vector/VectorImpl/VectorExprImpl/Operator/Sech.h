@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprID::Sech, V> : public UnitaryVectorExpr<ExprID::Sech, V> {
+    class VectorExpr<ExprID::Sech, V> : public UnaryVectorExpr<ExprID::Sech, V> {
         using This = VectorExpr<ExprID::Sech, V>;
-        using Base = UnitaryVectorExpr<ExprID::Sech, V>;
+        using Base = UnaryVectorExpr<ExprID::Sech, V>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -36,7 +36,7 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return sech(Base::getExpr().calc(index)); }
 
         [[nodiscard]] auto values(this auto&&) noexcept;
-};
+    };
 
     template<Vector V>
     auto VectorExpr<ExprID::Sech, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {
@@ -49,7 +49,7 @@ namespace Physica {
         return sech(std::forward<Self>(self).getExpr().values());
     }
 
-template<Vector V>
+    template<Vector V>
     [[nodiscard, gnu::always_inline]] auto sech(V&& v) noexcept requires(!DeviceObj<V>) {
         return VectorExpr<ExprID::Sech, V&&>(std::forward<V>(v));
     }

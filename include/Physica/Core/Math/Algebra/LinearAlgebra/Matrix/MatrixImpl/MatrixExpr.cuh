@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<ExprID ID, Matrix M>
-    class device_obj<UnitaryMatrixExpr<ID, M>> : public device_obj<RValueMatrix<MatrixExpr<ID, M>>> {
-        using host_obj = UnitaryMatrixExpr<ID, M>;
+    class device_obj<UnaryMatrixExpr<ID, M>> : public device_obj<RValueMatrix<MatrixExpr<ID, M>>> {
+        using host_obj = UnaryMatrixExpr<ID, M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<MatrixExpr<ID, M>>>;
         using Ref = add_device_obj<M>::type;
@@ -49,10 +49,10 @@ namespace Physica {
     };
 
     template<ExprID ID, Matrix M>
-    __host__ __device__ device_obj<UnitaryMatrixExpr<ID, M>>::device_obj(Ref expr_) noexcept : expr(asStruct(expr_)) {}
+    __host__ __device__ device_obj<UnaryMatrixExpr<ID, M>>::device_obj(Ref expr_) noexcept : expr(asStruct(expr_)) {}
 
     template<ExprID ID, Matrix M>
-    __host__ __device__ decltype(auto) device_obj<UnitaryMatrixExpr<ID, M>>::transpose() const noexcept {
+    __host__ __device__ decltype(auto) device_obj<UnaryMatrixExpr<ID, M>>::transpose() const noexcept {
         if constexpr (M::isStaticSymm())
             return Base::getDerived();
         else
@@ -60,7 +60,7 @@ namespace Physica {
     }
 
     template<ExprID ID, Matrix M>
-    __host__ __device__ decltype(auto) device_obj<UnitaryMatrixExpr<ID, M>>::hermite() const noexcept {
+    __host__ __device__ decltype(auto) device_obj<UnaryMatrixExpr<ID, M>>::hermite() const noexcept {
         if constexpr (M::isStaticHermite())
             return Base::getDerived();
         else
@@ -68,7 +68,7 @@ namespace Physica {
     }
 
     template<ExprID ID, Matrix M>
-    __host__ __device__ constexpr auto&& device_obj<UnitaryMatrixExpr<ID, M>>::getExpr(this auto&& self) noexcept {
+    __host__ __device__ constexpr auto&& device_obj<UnaryMatrixExpr<ID, M>>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.expr.getDerived());
     }
 

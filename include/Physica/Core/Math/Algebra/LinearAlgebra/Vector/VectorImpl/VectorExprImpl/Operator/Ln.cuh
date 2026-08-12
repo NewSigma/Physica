@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class device_obj<VectorExpr<ExprID::Ln, V>> : public device_obj<UnitaryVectorExpr<ExprID::Ln, V>> {
+    class device_obj<VectorExpr<ExprID::Ln, V>> : public device_obj<UnaryVectorExpr<ExprID::Ln, V>> {
         using This = device_obj<VectorExpr<ExprID::Ln, V>>;
-        using Base = device_obj<UnitaryVectorExpr<ExprID::Ln, V>>;
+        using Base = device_obj<UnaryVectorExpr<ExprID::Ln, V>>;
     public:
         using typename Base::T;
         using typename Base::Tv;

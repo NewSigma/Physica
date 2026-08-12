@@ -25,8 +25,8 @@
 
 namespace Physica {
     template<ExprID ID, Vector V>
-    class UnitaryVectorExpr : public RValueVector<VectorExpr<ID, V>> {
-        using This = UnitaryVectorExpr<ID, V>;
+    class UnaryVectorExpr : public RValueVector<VectorExpr<ID, V>> {
+        using This = UnaryVectorExpr<ID, V>;
         using Base = RValueVector<VectorExpr<ID, V>>;
 
         template<std::ranges::view Operand> class View;
@@ -35,10 +35,10 @@ namespace Physica {
     private:
         decay_rvalue_t<V> expr;
     public:
-        UnitaryVectorExpr(V expr_) noexcept : expr(std::forward<V>(expr_)) {}
-        UnitaryVectorExpr(const This&) = default;
-        UnitaryVectorExpr(This&&) noexcept = default;
-        ~UnitaryVectorExpr() = default;
+        UnaryVectorExpr(V expr_) noexcept : expr(std::forward<V>(expr_)) {}
+        UnaryVectorExpr(const This&) = default;
+        UnaryVectorExpr(This&&) noexcept = default;
+        ~UnaryVectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -60,41 +60,41 @@ namespace Physica {
     };
 
     template<ExprID ID, Vector V>
-    constexpr auto UnitaryVectorExpr<ID, V>::view() const noexcept {
+    constexpr auto UnaryVectorExpr<ID, V>::view() const noexcept {
         return View(expr.view());
     }
 
     template<ExprID ID, Vector V>
     template<int Size>
-    auto UnitaryVectorExpr<ID, V>::packet(size_t index) const noexcept -> SIMD<T, Size> {
+    auto UnaryVectorExpr<ID, V>::packet(size_t index) const noexcept -> SIMD<T, Size> {
         return (view().begin() + index).template load<Size>();
     }
 
     template<ExprID ID, Vector V>
     template<int Size>
-    auto UnitaryVectorExpr<ID, V>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
+    auto UnaryVectorExpr<ID, V>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
         return (view().begin() + index).template load<Size>(count);
     }
 
     template<ExprID ID, Vector V>
-    constexpr auto&& UnitaryVectorExpr<ID, V>::getExpr(this auto&& self) noexcept {
+    constexpr auto&& UnaryVectorExpr<ID, V>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.expr);
     }
 
     template<ExprID ID, Vector V>
-    __host__ __device__ consteval size_t UnitaryVectorExpr<ID, V>::getSizeAtCompile() noexcept {
+    __host__ __device__ consteval size_t UnaryVectorExpr<ID, V>::getSizeAtCompile() noexcept {
         return std::remove_cvref_t<V>::getSizeAtCompile();
     }
 
     template<ExprID ID, Vector V>
-    __host__ __device__ consteval bool UnitaryVectorExpr<ID, V>::isFastAssign() noexcept {
+    __host__ __device__ consteval bool UnaryVectorExpr<ID, V>::isFastAssign() noexcept {
         if constexpr (ID == ExprID::Minus)
             return std::remove_cvref_t<V>::isFastAssign();
         return false;
     }
 
     template<ExprID ID, Vector V>
-    __host__ __device__ constexpr bool UnitaryVectorExpr<ID, V>::isFastPacket() noexcept {
+    __host__ __device__ constexpr bool UnaryVectorExpr<ID, V>::isFastPacket() noexcept {
         return std::remove_cvref_t<V>::isFastPacket();
     }
 
@@ -255,7 +255,7 @@ namespace Physica {
     class Traits<VectorExpr<ID, LHS, RHS>> : public Traits<VectorExpr<ID, RHS, LHS>> {};
 }
 
-#include "VectorExprImpl/UnitaryVectorExprView.h"
+#include "VectorExprImpl/UnaryVectorExprView.h"
 #include "VectorExprImpl/BinaryVectorExprView.h"
 #ifdef PHYSICA_MKL
     #include <mkl_vml.h>

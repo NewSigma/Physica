@@ -23,19 +23,19 @@
 
 namespace Physica {
     template<ExprID ID, Matrix M>
-    class UnitaryMatrixExpr : public RValueMatrix<MatrixExpr<ID, M>> {
+    class UnaryMatrixExpr : public RValueMatrix<MatrixExpr<ID, M>> {
         using Derived = MatrixExpr<ID, M>;
-        using This = UnitaryMatrixExpr<ID, M>;
+        using This = UnaryMatrixExpr<ID, M>;
         using Base = RValueMatrix<Derived>;
     public:
         using Base::isReverseDiff;
     private:
         decay_rvalue_t<M> expr;
     public:
-        UnitaryMatrixExpr(M expr_) noexcept : expr(std::forward<M>(expr_)) {}
-        UnitaryMatrixExpr(const This&) = default;
-        UnitaryMatrixExpr(This&&) noexcept requires(isReverseDiff()) = default;
-        ~UnitaryMatrixExpr() = default;
+        UnaryMatrixExpr(M expr_) noexcept : expr(std::forward<M>(expr_)) {}
+        UnaryMatrixExpr(const This&) = default;
+        UnaryMatrixExpr(This&&) noexcept requires(isReverseDiff()) = default;
+        ~UnaryMatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -56,7 +56,7 @@ namespace Physica {
     };
 
     template<ExprID ID, Matrix M>
-    decltype(auto) UnitaryMatrixExpr<ID, M>::transpose(this auto&& self) noexcept {
+    decltype(auto) UnaryMatrixExpr<ID, M>::transpose(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (self.expr.isStaticSymm())
             return std::forward<Self>(self);
@@ -68,7 +68,7 @@ namespace Physica {
     }
 
     template<ExprID ID, Matrix M>
-    decltype(auto) UnitaryMatrixExpr<ID, M>::hermite(this auto&& self) noexcept {
+    decltype(auto) UnaryMatrixExpr<ID, M>::hermite(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (self.expr.isStaticHermite())
             return std::forward<Self>(self);
@@ -80,12 +80,12 @@ namespace Physica {
     }
 
     template<ExprID ID, Matrix M>
-    constexpr auto&& UnitaryMatrixExpr<ID, M>::getExpr(this auto&& self) noexcept {
+    constexpr auto&& UnaryMatrixExpr<ID, M>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.expr);
     }
 
     template<ExprID ID, Matrix M>
-    __host__ __device__ consteval int UnitaryMatrixExpr<ID, M>::getMajor() noexcept {
+    __host__ __device__ consteval int UnaryMatrixExpr<ID, M>::getMajor() noexcept {
         return std::remove_cvref_t<M>::getMajor();
     }
 
