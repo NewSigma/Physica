@@ -107,7 +107,7 @@ auto ThreadPool::ThreadQueue::pop() noexcept -> Handle {
     return handle;
 }
 
-void ThreadPool::Awaiter::await_suspend(Handle handle) noexcept {
+void ThreadPool::Scheduler::await_suspend(Handle handle) noexcept {
     assert(handle != nullptr);
     assert(!handle.done());
     int schedule_to{};
@@ -136,8 +136,8 @@ ThreadPool::~ThreadPool() {
     waitExit();
 }
 
-auto ThreadPool::operator co_await() noexcept -> Awaiter {
-    return Awaiter{};
+auto ThreadPool::operator co_await() noexcept -> Scheduler {
+    return Scheduler{};
 }
 
 void ThreadPool::notify_one() {

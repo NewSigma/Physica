@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Decouplable.h"
+#include "Deflatable.h"
 #include "Hessenberg.h"
 #include "Physica/Core/Exception/BadConvergenceException.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
@@ -32,7 +32,7 @@ namespace Physica {
      * [2] Eigen; https://eigen.tuxfamily.org
      */
     template<Scalar T, size_t Order = Dynamic>
-    class Schur : public Decouplable {
+    class Schur : public Deflatable {
         constexpr static const char* BadConvergenceMessage = "Exceed max iteration of Schur";
         using HessenbergType = Hessenberg<T, Order>;
         using This = Schur<T, Order>;
@@ -133,7 +133,7 @@ namespace Physica {
         if constexpr (T::isComplex()) {
             size_t iter = 0;
             while (activeWindowDownDiag(matrixT, 1) != 1) {
-                if (iter == Decouplable::MaxIterationPerCol) [[unlikely]]
+                if (iter == Deflatable::MaxIterationPerCol) [[unlikely]]
                     throw BadConvergenceException(BadConvergenceMessage);
                 const auto shift = complexShift(1, iter);
                 complexQR(0, 1, shift);
@@ -155,7 +155,7 @@ namespace Physica {
         size_t order = normalized.getRow();
         size_t upper = order - 1;
         size_t total_iter = 0;
-        const size_t max_iter = Decouplable::MaxIterationPerCol * order;
+        const size_t max_iter = Deflatable::MaxIterationPerCol * order;
         while (1 <= upper && upper < order) {
             const size_t lower = activeWindowDownDiag(matrixT, upper);
             if (lower == upper) {

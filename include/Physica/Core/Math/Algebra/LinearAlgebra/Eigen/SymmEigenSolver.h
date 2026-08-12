@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Decouplable.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Deflatable.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Tridiagonalization.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
@@ -32,7 +32,7 @@ namespace Physica {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013
      */
     template<Scalar T, size_t Order = Dynamic>
-    class SymmEigenSolver : public Decouplable {
+    class SymmEigenSolver : public Deflatable {
         using This = SymmEigenSolver<T, Order>;
         constexpr static bool isComplex = T::isComplex();
         static_assert(!isComplex, "[Error]: Complex matrix is not supported");
@@ -123,9 +123,9 @@ namespace Physica {
         const size_t order = working.getRow();
         size_t upper = order - 1;
         size_t total_iter = 0;
-        const size_t max_iter = Decouplable::MaxIterationPerCol * order;
+        const size_t max_iter = Deflatable::MaxIterationPerCol * order;
         while (1 <= upper && upper < order) {
-            const size_t lower = Decouplable::activeWindowDownDiag(working, upper);
+            const size_t lower = Deflatable::activeWindowDownDiag(working, upper);
             if (lower == upper) {
                 upper -= 1;
             }

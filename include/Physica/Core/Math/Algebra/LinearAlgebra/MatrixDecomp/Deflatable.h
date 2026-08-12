@@ -22,9 +22,9 @@
 
 namespace Physica {
     /**
-     * Hold public part of decouplable algorithms. E.g. \class Schur and \class SymmEigenSolver
+     * Hold public part of deflatable algorithms. E.g. \class Schur and \class SymmEigenSolver
      */
-    class Decouplable {
+    class Deflatable {
     protected:
         constexpr static size_t MaxIterationPerCol = 40; // Reference to Eigen
 
@@ -36,7 +36,7 @@ namespace Physica {
      *
      * \returns We should process columns whose index is greater or equal to the returned index
      */
-    size_t Decouplable::activeWindowDownDiag(Matrix auto& mat, size_t upper) {
+    size_t Deflatable::activeWindowDownDiag(Matrix auto& mat, size_t upper) {
         using Trv = std::remove_cvref_t<decltype(mat)>::ScalarType::RealType::ValueType;
         const Trv epsilon = std::numeric_limits<Trv>::epsilon();
         assert(upper < mat.getRow());
@@ -53,7 +53,7 @@ namespace Physica {
         return lower;
     }
 
-    size_t Decouplable::activeWindowUpDiag(Matrix auto& mat, size_t upper) {
+    size_t Deflatable::activeWindowUpDiag(Matrix auto& mat, size_t upper) {
         using Trv = std::remove_cvref_t<decltype(mat)>::ScalarType::RealType::ValueType;
         assert(upper < mat.getRow());
         size_t lower = upper;

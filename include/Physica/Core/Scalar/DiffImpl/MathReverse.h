@@ -80,7 +80,11 @@ namespace Physica {
     }
 
     template<Scalar T>
-    [[nodiscard]] auto ln1p(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] auto ln1p(T&& x) noexcept requires(ReverseDiff<T>) {
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield ln1p(x_.value());
+        x_.reverse(y.grad() / (x_.value() + 1.0));
+    }
 
     template<Scalar T>
     [[nodiscard]] auto log(const T& x, const T& a) noexcept requires(ReverseDiff<T>);
@@ -221,7 +225,11 @@ namespace Physica {
     }
 
     template<Scalar T>
-    [[nodiscard]] auto softplus(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> softplus(T&& x) noexcept requires(ReverseDiff<T>) {
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield softplus(x_.value());
+        x_.reverse(sigmoid(x_.value()) * y.grad());
+    }
 
     template<Scalar T>
     [[nodiscard]] T floor(const T& x) noexcept requires(ReverseDiff<T>);

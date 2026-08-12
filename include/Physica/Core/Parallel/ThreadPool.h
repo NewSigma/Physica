@@ -41,7 +41,7 @@ namespace Physica {
 
         class ThreadQueue;
 
-        struct Awaiter : public suspend_always {
+        struct Scheduler : public suspend_always { // TODO: Align with the split of std::execution once we dump to CXX26
             static void await_suspend(Handle) noexcept;
         };
     public:
@@ -60,7 +60,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        [[nodiscard]] Awaiter operator co_await() noexcept;
+        [[nodiscard]] Scheduler operator co_await() noexcept;
         /* Operations */
         void notify_one();
         void notify_all();

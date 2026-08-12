@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
 #include "Physica/Core/Exception/BadConvergenceException.h"
 #include "Bidiagonalization.h"
-#include "Decouplable.h"
+#include "Deflatable.h"
 
 namespace Physica {
     /**
@@ -32,9 +32,9 @@ namespace Physica {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:488-492
      */
     template<Scalar T, size_t RowAtCompile = Dynamic, size_t ColAtCompile = Dynamic>
-    class SVD : public Decouplable {
+    class SVD : public Deflatable {
         static_assert(!T::isComplex(), "[Error]: SVD class do not support complex data");
-        using Base = Decouplable;
+        using Base = Deflatable;
         using Tr = T::RealType;
         constexpr static int Major = MatrixMajor::Col;
     public:
@@ -116,7 +116,7 @@ namespace Physica {
         const size_t order = working.getCol();
         size_t upper = order - 1;
         size_t total_iter = 0;
-        const size_t max_iter = Decouplable::MaxIterationPerCol * order;
+        const size_t max_iter = Deflatable::MaxIterationPerCol * order;
         const T factor = working.diag().normInf();
         while (1 <= upper && upper < order) {
             size_t lower = Base::activeWindowUpDiag(working, upper);
