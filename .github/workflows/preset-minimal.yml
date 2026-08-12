@@ -14,6 +14,7 @@ defaults:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     steps:
     - name: Checkout
@@ -37,9 +38,16 @@ jobs:
         platform: # optional, default is x64
         cc: # optional, default is 1
 
+    - name: Install conda
+      uses: conda-incubator/setup-miniconda@v4.0.1
+      with:
+        activate-environment: base
+        channels: conda-forge
+
     - name: Install dependency
       run: |
         sudo apt-get install libfftw3-dev
+        conda install -y benchmark
 
     - name: Configure
       run: |
@@ -48,9 +56,11 @@ jobs:
           -DCMAKE_C_COMPILER=clang-23 \
           -DCMAKE_CXX_COMPILER=clang++-23 \
           -DCMAKE_LINKER_TYPE=LLD \
+          -DCMAKE_PREFIX_PATH=$CONDA_PREFIX \
           -DCMAKE_CXX_FLAGS="-Werror -mrdseed" \
           -DPHYSICA_ARCH=x86-64-v3 \
-          -DPHYSICA_CCACHE=ON
+          -DPHYSICA_CCACHE=ON \
+          -DBUILD_BENCHMARKS=ON
 
     - name: Build
       run: |

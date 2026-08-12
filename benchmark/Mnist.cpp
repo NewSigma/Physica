@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <benchmark/benchmark.h>
-#include <gperftools/profiler.h>
 #include "Physica/Core/IO/Mnist.h"
 #include "Physica/Core/ML/NeuralNetwork/Layer/LinearLayer.h"
 #include "Physica/Core/ML/NeuralNetwork/SeqNet.h"

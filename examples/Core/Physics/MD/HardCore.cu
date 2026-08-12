@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <algorithm>
-#include <gperftools/profiler.h>
 #include <QApplication>
 #include <QtCharts/QValueAxis>
 #include "Physica/Core/Math/Random/Random.h"
@@ -93,7 +92,7 @@ int main(int argc, char** argv) {
                     kineticModel.updateMomentum(rpmd.getRingPolymer());
                 }
             }
-            record.col(sys) = std::move(mean);
+            record.col(sys) = mean;
         }, record.getCol(), ThreadPool::numThreadRequired).wait();
 
         for (size_t i = 0; i < mean.getLength(); ++i) {

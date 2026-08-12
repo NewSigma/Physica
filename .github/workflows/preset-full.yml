@@ -14,6 +14,7 @@ defaults:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     steps:
     - name: Checkout
@@ -46,7 +47,11 @@ jobs:
     - name: Install dependency
       run: |
         sudo apt-get install libfftw3-dev libopenmpi-dev
-        conda install -y "hdf5=1.14.6=nompi*" mimalloc=3.2.8 mkl-devel=2025.0.1
+        conda install -y \
+          "hdf5=1.14.6=nompi*" \
+          mimalloc=3.2.8 \
+          mkl-devel=2025.0.1 \
+          benchmark
 
     - name: Configure
       run: |
@@ -62,7 +67,8 @@ jobs:
           -DPHYSICA_HDF5=ON \
           -DPHYSICA_MKL=ON \
           -DPHYSICA_MPI=ON \
-          -DPHYSICA_MIMALLOC=ON
+          -DPHYSICA_MIMALLOC=ON \
+          -DBUILD_BENCHMARKS=ON
 
     - name: Build
       run: |

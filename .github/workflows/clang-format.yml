@@ -3,12 +3,17 @@ name: clang-format
 on:
   push:
     branches: [ "Physica", "dev" ]
+    paths-ignore:
+      - 'doc/**'
+      - '*.md'
   pull_request:
     branches: [ "Physica", "dev" ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
     - uses: actions/checkout@v7.0.1
