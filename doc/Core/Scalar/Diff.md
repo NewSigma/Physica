@@ -21,7 +21,7 @@ Implemented using the well-known dual number approach.
 
 Coroutine-based backpropagation is defined as a backpropagation implementation that uses coroutines to manage the lifetime of the computation graph nodes. *Physica* view forward propagation and backpropagation as a unified process, cross function call boundaries, and expose more optimization opportunities to the compiler.
 
-Physica suspends the coroutine upon completing the forward pass to wait for future gradients, uses RAII to resume coroutine execution upon destruction, and performs gradient accumulation when the coroutine resumes execution.
+*Physica* suspends the coroutine upon completing the forward pass to wait for future gradients, uses RAII to resume coroutine execution upon destruction, and performs gradient accumulation when the coroutine resumes execution.
 
 By [1]:
 

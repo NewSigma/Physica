@@ -45,7 +45,7 @@ struct CRCoro { // Curiously Recurring Coroutine
 
     auto get_return_object() noexcept {
         struct RValueWrapper {
-            This* p;
+            CRCoro<T>* p;
 
             operator T&&() const noexcept { return std::move(p->getDerived()); }
         };
