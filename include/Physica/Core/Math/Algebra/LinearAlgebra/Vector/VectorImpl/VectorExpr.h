@@ -275,6 +275,7 @@ namespace Physica {
 #include "VectorExprImpl/Operator/Ln.h"
 #include "VectorExprImpl/Operator/Ln1p.h"
 #include "VectorExprImpl/Operator/Exp.h"
+#include "VectorExprImpl/Operator/ExpM1.h"
 #include "VectorExprImpl/Operator/Pow.h"
 #include "VectorExprImpl/Operator/Sin.h"
 #include "VectorExprImpl/Operator/Cos.h"

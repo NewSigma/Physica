@@ -38,6 +38,11 @@ namespace {
             for (int i = 0; i < Size; ++i)
                 expect(scalarNear(result[i], exp(x[i]), prec));
         }
+        /* ExpM1 */ {
+            const auto result = expm1(x);
+            for (int i = 0; i < Size; ++i)
+                expect(scalarNear(result[i], expm1(x[i]), prec));
+        }
         /* Ln */ {
             const auto result = ln(x);
             for (int i = 0; i < Size; ++i)

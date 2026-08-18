@@ -69,6 +69,12 @@ namespace Physica {
     }
 
     template<Packet T>
+    [[nodiscard]] T expm1(const T& x) noexcept requires(ForwardDiff<T>) {
+        using Grad = T::GradType;
+        return T(expm1(x.value()), exp(Grad(x)) * x.grad());
+    }
+
+    template<Packet T>
     [[nodiscard]] T tanh(const T& x) noexcept requires(ForwardDiff<T>) {
         using Grad = T::GradType;
         const Grad y = tanh(Grad(x));

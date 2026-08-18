@@ -65,6 +65,11 @@ namespace {
             y = sqrt(x);
             good &= scalarNear(y.grad().value(), reciprocal(T(2) * sqrt(x.value())), 1E-15);
             good &= scalarNear(y.grad<2>(), -reciprocal(T(4) * x.value() * sqrt(x.value())), 1E-15);
+
+            y = expm1(x);
+            good &= scalarNear(y.value(), expm1(x.value()), 1E-15);
+            good &= scalarNear(y.grad().value(), exp(x.value()), 1E-15);
+            good &= scalarNear(y.grad<2>(), exp(x.value()), 1E-15);
         }
         expect(good);
     }
@@ -97,6 +102,10 @@ namespace {
         result = exp(packet);
         for (int i = 0; i < 4; ++i)
             good &= scalarNear(exp(dfloat(value[i], grad1[i])), result[i], 1E-15);
+
+        result = expm1(packet);
+        for (int i = 0; i < 4; ++i)
+            good &= scalarNear(expm1(dfloat(value[i], grad1[i])), result[i], 1E-15);
 
         expect(good);
     }
@@ -132,6 +141,11 @@ namespace {
             func(x, y).reverse();
             expect(scalarNear(x.grad(), (x.value() - 1.0) * 2.0, 1E-15));
             expect(scalarNear(y.grad(), (y.value() - 2.0) * 2.0, 1E-15));
+        }
+        /* Test expm1 */ {
+            x.zero_grad();
+            expm1(x).reverse();
+            expect(scalarNear(x.grad(), exp(x.value()), 1E-15));
         }
     }
 

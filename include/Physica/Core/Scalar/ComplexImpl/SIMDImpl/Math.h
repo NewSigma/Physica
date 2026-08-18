@@ -173,6 +173,11 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
+    [[nodiscard]] SIMD<Complex<T>, Size> expm1(const SIMD<Complex<T>, Size> x) noexcept {
+        return exp(x) - SIMD<Complex<T>, Size>(T(1));
+    }
+
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<Complex<T>, Size> tanh(const SIMD<Complex<T>, Size> x) noexcept {
         using ResultType = SIMD<Complex<T>, Size>;
         std::array<Complex<T>, Size> arr;

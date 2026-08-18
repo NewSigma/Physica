@@ -110,6 +110,13 @@ namespace Physica {
         return ResultType(v.value(), v * x.grad());
     }
 
+    template<Scalar T>
+    [[nodiscard]] __host__ __device__ auto expm1(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        constexpr int GradOrder = T::GradType::Order;
+        return ResultType(expm1(x.value()), exp(x.template grad_mask<GradOrder>()) * x.grad());
+    }
+
     template<Scalar T, Scalar U>
     [[nodiscard]] __host__ __device__ auto pow(T&& x, U&& a) noexcept requires(ForwardDiff<T> && !Diffable<U>) {
         using ResultType = T::ScalarType;

@@ -71,6 +71,13 @@ namespace Physica {
     }
 
     template<Packet T>
+    [[nodiscard]] CoDiff<T> expm1(T&& x) noexcept requires(ReverseDiff<T>) {
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield expm1(x_.value());
+        x_.reverse(exp(x_.value()) * y.grad());
+    }
+
+    template<Packet T>
     [[nodiscard]] CoDiff<T> tanh(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_cvref_t<T>::ValueType::ScalarType;
         decltype(auto) x_ = decay_rvalue(std::forward<T>(x));

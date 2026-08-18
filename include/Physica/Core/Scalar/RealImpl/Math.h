@@ -92,6 +92,13 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
+    [[nodiscard]] __host__ __device__ Real<Prec> expm1(const Real<Prec>& x) noexcept {
+        auto ret = Real<Prec>(std::expm1(x.toMachine()));
+        assert(ret.isFinite() && "[Error]: expm1 overflow");
+        return ret;
+    }
+
+    template<FloatPrec Prec>
     [[nodiscard]] Real<Prec> pow(const Real<Prec>& x, const Real<Prec>& a) noexcept {
         assert((!x.isSubNormal() || a.isPositive()) && "[Error]: Invalid param");
         if constexpr (Prec == Float32)

@@ -96,6 +96,13 @@ namespace Physica {
         x_.reverse(y.value() * y.grad());
     }
 
+    template<Scalar T>
+    [[nodiscard]] CoDiff<T> expm1(T&& x) noexcept requires(ReverseDiff<T>) {
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield expm1(x_.value());
+        x_.reverse(exp(x_.value()) * y.grad());
+    }
+
     template<Scalar T, Scalar U>
     [[nodiscard]] CoDiff<T> pow(T&& x, U&& a) noexcept requires(ReverseDiff<T> && !Diffable<U>) {
         decltype(auto) x_ = decay_rvalue(std::forward<T>(x));

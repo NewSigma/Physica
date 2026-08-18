@@ -359,6 +359,7 @@ namespace Physica {
 #include "MatrixExprImpl/Operator/Ln.h"
 #include "MatrixExprImpl/Operator/Ln1p.h"
 #include "MatrixExprImpl/Operator/Exp.h"
+#include "MatrixExprImpl/Operator/ExpM1.h"
 #include "MatrixExprImpl/Operator/Sin.h"
 #include "MatrixExprImpl/Operator/Cos.h"
 #include "MatrixExprImpl/Operator/Tanh.h"

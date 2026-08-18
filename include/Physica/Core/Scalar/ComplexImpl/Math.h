@@ -104,6 +104,11 @@ namespace Physica {
     }
 
     template<Scalar T>
+    [[nodiscard]] __host__ __device__ Complex<T> expm1(const Complex<T>& c) noexcept {
+        return exp(c) - T(1);
+    }
+
+    template<Scalar T>
     [[nodiscard]] __host__ __device__ Complex<T> cos(const Complex<T>& c) noexcept {
         return Complex<T>(std::cos(c.toMachine()));
     }

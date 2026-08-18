@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,44 +18,21 @@
  */
 #pragma once
 
+#include "../ExpM1.h"
+
 namespace Physica {
-    /**
-     * \class ExprID is used in implementation of expression template and auto differential.
-     */
-    enum class ExprID : char {
-        Minus,
-        Add,
-        Sub,
-        Mul,
-        Div,
-        MulAdd,
-        Sum,
-        Reciprocal,
-        Sqrt,
-        Cbrt,
-        Abs,
-        Relu,
-        Unit,
-        Square,
-        Ln,
-        Ln1p,
-        Exp,
-        ExpM1,
-        Pow,
-        Sin,
-        Cos,
-        Tan,
-        Sec,
-        ArcCos,
-        Cosh,
-        Sinh,
-        Tanh,
-        Sech,
-        ArcSinh,
-        ArcTanh,
-        LnCosh,
-        Softmax,
-        Sigmoid,
-        Softplus,
-    };
+    template<Vector V>
+    void VectorExpr<ExprID::ExpM1, V>::assign_mkl(Vector auto& v) const noexcept {
+        static_assert(!isComplex(), "[Error]: MKL has no complex expm1");
+        using Tm = decltype(std::declval<T>().toMKL());
+        v.assert_assign_lapack(Base::getExpr());
+
+        size_t n = Base::getLength();
+        const auto* a = reinterpret_cast<const Tm*>(Base::getExpr().data());
+        auto* y = reinterpret_cast<Tm*>(v.data());
+        if constexpr (T::Prec == Float32)
+            vsExpm1_64(n, a, y);
+        else
+            vdExpm1_64(n, a, y);
+    }
 }

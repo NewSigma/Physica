@@ -176,4 +176,12 @@ namespace Physica {
         else
             return Internal::exp_float64<SIMD<Real<Prec>, Size>, false, 0>(x);
     }
+
+    template<FloatPrec Prec, int Size>
+    [[nodiscard]] auto expm1(SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size> {
+        if constexpr (Prec == Float32)
+            return Internal::exp_float32<SIMD<Real<Prec>, Size>, true, 0>(x);
+        else
+            return Internal::exp_float64<SIMD<Real<Prec>, Size>, true, 0>(x);
+    }
 }
