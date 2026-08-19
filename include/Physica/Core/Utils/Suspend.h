@@ -53,7 +53,7 @@ namespace Physica {
 
     [[nodiscard]] PHYSICA_API std::coroutine_handle<> noop_coroutine() noexcept;
 
-    decltype(auto) toAwaiter(auto&& expr) noexcept {
+    [[nodiscard]] decltype(auto) toAwaiter(auto&& expr) noexcept {
         using Expr = decltype(expr);
         if constexpr (Awaitable<Expr>)
             return std::forward<Expr>(expr);

@@ -107,7 +107,7 @@ auto ThreadPool::ThreadQueue::pop() noexcept -> Handle {
     return handle;
 }
 
-void ThreadPool::Scheduler::await_suspend(Handle handle) noexcept {
+void ThreadPool::ImplicitScheduler::await_suspend(Handle handle) noexcept {
     assert(handle != nullptr);
     assert(!handle.done());
     int schedule_to{};
@@ -119,16 +119,23 @@ void ThreadPool::Scheduler::await_suspend(Handle handle) noexcept {
     }
     else
         schedule_to = getThreadInfo().id;
-
     pool.queues[schedule_to].push(handle);
-    pool.cond.notify_one();
 }
 
-void ThreadPool::Scheduler::on_wait(Handle) noexcept {
+void ThreadPool::ImplicitScheduler::on_wait(Handle) noexcept {
     if (auto handle = getInstance().steal())
         handle.resume();
     else
         std::this_thread::yield();
+}
+
+auto ThreadPool::Scheduler::implicit() noexcept -> Base {
+    return {};
+}
+
+void ThreadPool::Scheduler::await_suspend(Handle handle) noexcept {
+    Base::await_suspend(handle);
+    getInstance().notify_one();
 }
 
 int ThreadPool::numThreadRequired = 0;
@@ -147,11 +154,11 @@ auto ThreadPool::operator co_await() noexcept -> Scheduler {
     return Scheduler{};
 }
 
-void ThreadPool::notify_one() {
+void ThreadPool::notify_one() noexcept {
     cond.notify_one();
 }
 
-void ThreadPool::notify_all() {
+void ThreadPool::notify_all() noexcept {
     cond.notify_all();
 }
 

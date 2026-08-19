@@ -42,9 +42,16 @@ namespace Physica {
         class ThreadQueue;
 
         // TODO: Align with the split of std::execution once we dump to CXX26
-        struct Scheduler : public suspend_always {
+        struct ImplicitScheduler : public suspend_always {
             static void await_suspend(Handle) noexcept;
             static void on_wait(Handle) noexcept;
+        };
+
+        struct Scheduler : public ImplicitScheduler {
+            using Base = ImplicitScheduler;
+
+            static Base implicit() noexcept;
+            static void await_suspend(Handle) noexcept;
         };
     public:
         static int numThreadRequired;
@@ -64,8 +71,8 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         [[nodiscard]] Scheduler operator co_await() noexcept;
         /* Operations */
-        void notify_one();
-        void notify_all();
+        void notify_one() noexcept;
+        void notify_all() noexcept;
         [[nodiscard]] Handle steal() noexcept;
 
         void shouldExit() noexcept;
