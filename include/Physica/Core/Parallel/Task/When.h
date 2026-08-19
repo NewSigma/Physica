@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,27 +18,24 @@
  */
 #pragma once
 
-#include "Physica/Core/Parallel/CUDAContext.cuh"
+#include <exception>
+#include <ranges>
+#include "Physica/Core/Parallel/Task/Task.h"
 
 namespace Physica {
-    template<>
-    class Task<GPU> {
-        using This = Task<GPU>;
-    public:
-        static void wait();
-    };
+    [[nodiscard]] Task when_all(std::ranges::range auto&& tasks) {
+        std::exception_ptr ex = nullptr;
+        for (auto& task : decay_rvalue(std::forward<decltype(tasks)>(tasks))) {
+            try {
+                co_await task;
+            }
+            catch (...) {
+                if (ex == nullptr)
+                    ex = std::current_exception();
+            }
+        }
 
-    inline void Task<GPU>::wait() {
-        CUDAContext::getInstance().wait();
-    }
-
-    template<ExecutePolicy P>
-    Task<Concurrent> parallel_for(std::invocable<size_t> auto fn, size_t num_loop) noexcept requires(P == GPU) {
-        return parallel_for<Thread>(fn, num_loop);
-    }
-
-    template<ExecutePolicy P>
-    Task<Concurrent> parallel_for(std::invocable<size_t> auto fn, size_t num_loop, int part) noexcept requires(P == GPU) {
-        return parallel_for<Thread>(fn, num_loop, part);
+        if (ex) [[unlikely]]
+            std::rethrow_exception(ex);
     }
 }

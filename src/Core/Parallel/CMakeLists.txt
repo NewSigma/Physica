@@ -2,6 +2,7 @@ add_subdirectory(Executor)
 add_subdirectory(Future)
 
 target_sources(PhysicaCore PRIVATE
+    Task/Task.cpp
     MPIContext.cpp
     SubProcess.cpp
     ThreadPool.cpp

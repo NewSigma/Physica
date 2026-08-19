@@ -20,6 +20,7 @@
 
 #include <concepts>
 #include <type_traits>
+#include <utility>
 
 namespace Physica {
     namespace Internal {
@@ -148,4 +149,7 @@ namespace Physica {
     public:
         using type = std::conditional<std::is_lvalue_reference_v<From>, T2&, T2>::type;
     };
+
+    template<class T, class... Types>
+    concept Either = (std::same_as<T, Types> || ...);
 }

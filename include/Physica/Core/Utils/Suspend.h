@@ -19,8 +19,16 @@
 #pragma once
 
 #include <coroutine>
+#include "MetaProgramming.h"
+#include "Physica/Macro.h"
 
 namespace Physica {
+    template<class T>
+    concept Awaitable = requires(T t, std::coroutine_handle<> handle) {
+        { t.await_ready() } -> std::same_as<bool>;
+        { t.await_suspend(handle) } -> Either<void, bool, std::coroutine_handle<>>;
+        { t.await_resume() };
+    };
     // Clang implements await_suspend using an intrinsic. We provide the necessary information to help with optimization.
     template<bool Ready>
     struct StaticSuspend {
@@ -37,4 +45,6 @@ namespace Physica {
 
     using suspend_always = StaticSuspend<false>;
     using suspend_never = StaticSuspend<true>;
+
+    [[nodiscard]] PHYSICA_API std::coroutine_handle<> noop_coroutine() noexcept;
 }

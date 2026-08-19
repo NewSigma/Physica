@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,17 +16,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#include "Physica/Core/Parallel/Task/Task.h"
+#include "Test.h"
 
-#include <cstdint>
+using namespace Physica;
 
-namespace Physica {
-    enum ExecutePolicy : int8_t {
-        Sequential,
-        Thread,
-        GPU,
-    };
+namespace {
+    void doneOnException() noexcept {
+        auto task = [](bool throws) -> Task {
+            if (throws)
+                throw 1;
+            co_return;
+        }(true);
+
+        int err = 0;
+        try {
+            task.wait();
+        }
+        catch (int i) {
+            err = i;
+        }
+        expect(err == 1 && task.done());
+    }
 }
 
-#include "Algorithm/Sequential.h"
-#include "Algorithm/Thread.h"
+int main() {
+    doneOnException();
+    return 0;
+}

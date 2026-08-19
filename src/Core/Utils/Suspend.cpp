@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,17 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
-
-#include <cstdint>
+#include "Physica/Core/Utils/Suspend.h"
 
 namespace Physica {
-    enum ExecutePolicy : int8_t {
-        Sequential,
-        Thread,
-        GPU,
-    };
+    std::coroutine_handle<> noop_coroutine() noexcept {
+    #ifdef __clang__
+        return std::coroutine_handle<>::from_address(__builtin_coro_noop());
+    #else
+        return std::noop_coroutine();
+    #endif
+    }
 }
-
-#include "Algorithm/Sequential.h"
-#include "Algorithm/Thread.h"

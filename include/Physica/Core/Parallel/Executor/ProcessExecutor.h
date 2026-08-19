@@ -19,10 +19,8 @@
 #pragma once
 
 #include <cassert>
-#include "Physica/Core/Utils/Container/Array.h"
 #include "Physica/Core/Parallel/Future/ProcessFuture.h"
 #include "Physica/Core/Parallel/SubProcess.h"
-#include "Physica/Core/Parallel/Parallel.h"
 
 namespace Physica {
     class ProcessExecutor {
@@ -34,7 +32,6 @@ namespace Physica {
         /* Operations */
         template<class... Args>
         static FutureType schedule(std::invocable<Args...> auto fn, Args&&... args);
-        static Task<Concurrent> parallel_for(std::invocable<unsigned int> auto fn, unsigned int loopCount, unsigned int core);
     };
 
     template<class... Args>
@@ -44,31 +41,5 @@ namespace Physica {
 
         SubProcess process([=]() { fn(std::forward<Args>(args)...); }, nice_incr);
         return process.execute();
-    }
-
-    Task<Concurrent> ProcessExecutor::parallel_for(std::invocable<unsigned int> auto fn, unsigned int loopCount, unsigned int core) {
-        using ResultType = std::invoke_result<decltype(fn), unsigned int>::type;
-        static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
-        assert(loopCount >= core);
-        assert(core > 0);
-
-        const unsigned int maxLoopPerCore = (loopCount + core - 1) / core;
-        unsigned int from = 0;
-        unsigned int to = maxLoopPerCore;
-        Array<FutureType> futures(core);
-        for (unsigned int _ = 0; _ < core; ++_) {
-            SubProcess process([=]() {
-                for (unsigned int i = from; i < to; ++i)
-                    fn(i);
-            }, nice_incr);
-            futures.append(process.execute());
-            from += maxLoopPerCore;
-            const unsigned int next_to = to + maxLoopPerCore;
-            to = next_to > loopCount ? loopCount : next_to;
-        }
-        co_await suspend_always{};
-
-        for (auto& future : futures)
-            std::ignore = future.wait();
     }
 }
