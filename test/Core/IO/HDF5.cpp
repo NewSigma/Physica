@@ -56,6 +56,8 @@ namespace {
             auto dataset = h5f.openDataSet<1>("/data");
             dataset.readStr(buffer.data());
             expect(strcmp(str, buffer.data()) == 0);
+            expect(h5f.isReadOnly());
+            expect(dataset.isReadOnly());
         }
     }
 }

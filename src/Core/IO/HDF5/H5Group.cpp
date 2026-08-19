@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <cassert>
 #include "Physica/Core/IO/HDF5/H5Group.h"
 
 using namespace Physica;
@@ -23,6 +24,7 @@ using namespace Physica;
 H5Group::H5Group(H5ID id) : H5Loc(std::move(id)) {}
 
 H5Group H5Group::create(const H5ID& loc, const char* name) {
+    assert(!loc.isReadOnly());
     return H5Group(H5ID(H5Gcreate2(loc.getHID(), name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)));
 }
 

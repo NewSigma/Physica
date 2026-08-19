@@ -22,20 +22,28 @@
 
 using namespace Physica;
 
-H5File::H5File(H5ID id_, unsigned int flag_) : H5Loc(std::move(id_)), openflag(flag_) {}
+H5File::H5File(H5ID id_) noexcept : H5Loc(std::move(id_)) {
+    assert(Base::isFile());
+}
+
+bool H5File::isReadOnly() const noexcept {
+    unsigned intent = H5F_ACC_RDWR;
+    H5Fget_intent(getHID(), &intent);
+    return (intent & H5F_ACC_RDWR) == 0;
+}
 
 H5File H5File::open(const char* name, unsigned int openflag) {
     if (std::filesystem::exists(name)) {
         if (openflag & Trunc) {
             auto fid = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-            return H5File(H5ID(fid), openflag);
+            return H5File(H5ID(fid));
         }
         unsigned int access = (openflag & ReadWrite) ? H5F_ACC_RDWR : H5F_ACC_RDONLY;
         auto fid = H5Fopen(name, access, H5P_DEFAULT);
-        return H5File(H5ID(fid), openflag);
+        return H5File(H5ID(fid));
     }
     if (!bool(openflag & ReadWrite))
         throw IOException("File not found");
     auto fid = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    return H5File(H5ID(fid), openflag | Creat);
+    return H5File(H5ID(fid));
 }

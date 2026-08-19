@@ -16,9 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/IO/HDF5/Mixin/H5ID.h"
 #include <cassert>
 #include <utility>
+#include <H5Fpublic.h>
+#include "Physica/Core/IO/HDF5/H5File.h"
 
 using namespace Physica;
 
@@ -43,6 +44,11 @@ H5ID& H5ID::operator=(H5ID other) noexcept {
 
 bool H5ID::isValid() const noexcept {
     return H5Iis_valid(id) > 0;
+}
+
+bool H5ID::isReadOnly() const noexcept {
+    assert(isValid());
+    return H5File(H5ID(H5Iget_file_id(id))).isReadOnly();
 }
 
 bool H5ID::isFile() const noexcept {

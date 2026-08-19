@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <cassert>
 #include <fstream>
 #include <vector>
 #include "H5Type.h"
@@ -73,11 +74,13 @@ namespace Physica {
     template<size_t Dim>
     template<class MemSpace, class FileSpace>
     void H5Dataset<Dim>::write(const void* buf, const H5Type& dtype, const MemSpace& mem_space, const FileSpace& file_space) const {
+        assert(!isReadOnly());
         H5Dwrite(getHID(), dtype.getHID(), mem_space.getHID(), file_space.getHID(), H5P_DEFAULT, buf);
     }
 
     template<size_t Dim>
     void H5Dataset<Dim>::write(const void* buf, const H5Type& dtype) const {
+        assert(!isReadOnly());
         H5Dwrite(getHID(), dtype.getHID(), H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
     }
 

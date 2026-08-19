@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <cassert>
 #include <hdf5.h>
 #include "Physica/Core/Exception/IOException.h"
 #include "H5ID.h"
@@ -56,6 +57,7 @@ namespace Physica {
 
     template<size_t Dim>
     H5Dataset<Dim> H5Loc::createDataSet(const char* name, const H5Type& dtype, const H5DataSpace<Dim>& data_space) const {
+        assert(!isReadOnly());
         return H5Dataset<Dim>(H5ID(H5Dcreate2(getHID(), name, dtype.getHID(), data_space.getHID(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)));
     }
 

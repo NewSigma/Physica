@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <cassert>
 #include <H5Ppublic.h>
 #include "Physica/Core/IO/HDF5/H5Attribute.h"
 #include "Physica/Core/IO/HDF5/H5DataSpace.h"
@@ -53,6 +54,7 @@ namespace Physica {
     }
 
     H5Attribute Attributable::createAttribute(this const auto& self, const char* name, const H5Type& dtype, const auto& space) noexcept {
+        assert(!self.isReadOnly());
         return H5Attribute(H5ID(H5Acreate2(self.getHID(), name, dtype.getHID(), space.getHID(), H5P_DEFAULT, H5P_DEFAULT)));
     }
 

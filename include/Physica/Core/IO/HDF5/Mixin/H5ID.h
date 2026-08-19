@@ -41,6 +41,8 @@ namespace Physica {
         [[nodiscard]] auto getHID() const noexcept { return id; }
         [[nodiscard]] bool isValid() const noexcept;
 
+        [[nodiscard]] bool isReadOnly() const noexcept;
+
         [[nodiscard]] bool isFile() const noexcept;
         [[nodiscard]] bool isGroup() const noexcept;
         [[nodiscard]] bool isDatatype() const noexcept;

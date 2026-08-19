@@ -23,8 +23,7 @@
 namespace Physica {
     class PHYSICA_API H5File : public H5Loc {
         using This = H5File;
-
-        unsigned int openflag = OpenFlag::ReadOnly;
+        using Base = H5Loc;
     public:
         enum OpenFlag : int8_t {
             ReadOnly = 0x0000U,
@@ -43,11 +42,12 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = default;
         /* Getters */
-        [[nodiscard]] unsigned int getOpenflag() const noexcept { return openflag; }
-        [[nodiscard]] bool isReadOnly() const noexcept { return (openflag & ReadWrite) == 0; }
+        [[nodiscard]] bool isReadOnly() const noexcept;
         /* Static members */
         [[nodiscard]] static H5File open(const char* name, unsigned int openflag = ReadWrite);
     private:
-        H5File(H5ID id_, unsigned int flag_);
+        H5File(H5ID id_) noexcept;
+
+        friend class H5ID;
     };
 }
