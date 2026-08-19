@@ -124,6 +124,13 @@ void ThreadPool::Scheduler::await_suspend(Handle handle) noexcept {
     pool.cond.notify_one();
 }
 
+void ThreadPool::Scheduler::on_wait(Handle) noexcept {
+    if (auto handle = getInstance().steal())
+        handle.resume();
+    else
+        std::this_thread::yield();
+}
+
 int ThreadPool::numThreadRequired = 0;
 
 ThreadPool::ThreadPool(int numThreads) : queues(numThreads) {

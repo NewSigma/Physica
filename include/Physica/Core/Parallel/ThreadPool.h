@@ -41,8 +41,10 @@ namespace Physica {
 
         class ThreadQueue;
 
-        struct Scheduler : public suspend_always { // TODO: Align with the split of std::execution once we dump to CXX26
+        // TODO: Align with the split of std::execution once we dump to CXX26
+        struct Scheduler : public suspend_always {
             static void await_suspend(Handle) noexcept;
+            static void on_wait(Handle) noexcept;
         };
     public:
         static int numThreadRequired;

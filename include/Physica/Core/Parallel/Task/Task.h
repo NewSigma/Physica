@@ -57,10 +57,12 @@ namespace Physica {
 
     class Task::promise_type {
         using This = promise_type;
+        using Callback = void (*)(std::coroutine_handle<>);
 
         struct suspend_final;
 
         std::atomic<std::coroutine_handle<>> continuation;
+        std::atomic<Callback> onWait = nullptr;
         std::exception_ptr ex = nullptr;
     public:
         promise_type() noexcept;
@@ -75,19 +77,48 @@ namespace Physica {
         [[nodiscard]] static Task get_return_object_on_allocation_failure() noexcept;
         [[nodiscard]] static suspend_never initial_suspend() noexcept;
         [[nodiscard]] static suspend_final final_suspend() noexcept;
+        [[nodiscard]] auto await_transform(auto&& expr) noexcept;
         static void return_void() noexcept;
         void unhandled_exception() noexcept;
 
-        [[nodiscard]] std::coroutine_handle<> schedule(std::coroutine_handle<> todo) noexcept;
+        [[nodiscard]] auto schedule(std::coroutine_handle<> parent) noexcept -> std::coroutine_handle<>;
+        [[nodiscard]] auto schedule(Handle parent) noexcept -> std::coroutine_handle<>;
         /* Getters */
-        [[nodiscard]] std::exception_ptr exception() noexcept;
+        [[nodiscard]] auto handle() noexcept -> Handle;
+        [[nodiscard]] auto waiter() const noexcept -> Callback;
         [[nodiscard]] bool done() const noexcept;
-        [[nodiscard]] Handle handle() noexcept;
+        [[nodiscard]] auto exception() noexcept -> std::exception_ptr;
     };
 
     struct Task::promise_type::suspend_final : public suspend_always {
-        [[nodiscard]] static auto await_suspend(std::coroutine_handle<> h) noexcept -> std::coroutine_handle<>;
+        [[nodiscard]] static auto await_suspend(std::coroutine_handle<> self) noexcept -> std::coroutine_handle<>;
     };
+
+    auto Task::promise_type::await_transform(auto&& expr) noexcept {
+        auto awaiter = toAwaiter(std::forward<decltype(expr)>(expr));
+        struct WaitWrapper {
+            using Awaiter = decltype(awaiter);
+            Awaiter awaiter;
+            This* promise;
+
+            bool await_ready() {
+                return awaiter.await_ready();
+            }
+
+            auto await_suspend(std::coroutine_handle<> h) {
+                if constexpr (Waitable<Awaiter>)
+                    promise->onWait.store(&Awaiter::on_wait, std::memory_order_release);
+                else
+                    static_assert(std::same_as<suspend_transfer, Awaiter>, "[Error]: Must co_await a Task or Waitable, otherwise coroutine leaks");
+                return awaiter.await_suspend(h);
+            }
+
+            decltype(auto) await_resume() {
+                return awaiter.await_resume();
+            }
+        };
+        return WaitWrapper{.awaiter = std::move(awaiter), .promise = this};
+    }
     /**
      * Parent task co_await child task, parent is suspended and will be resumed by child
      */

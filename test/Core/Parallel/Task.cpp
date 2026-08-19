@@ -22,6 +22,28 @@
 using namespace Physica;
 
 namespace {
+    void onWait() noexcept {
+        static int counter = 0;
+        struct suspend_if : public suspend_always {
+            bool ready;
+
+            [[nodiscard]] bool await_ready() const noexcept { return ready; }
+            static void on_wait(std::coroutine_handle<> h) noexcept {
+                counter += 1;
+                h.resume();
+            }
+        };
+
+        auto task = []() static noexcept -> Task {
+            co_await suspend_if{.ready = true};
+            expect(counter == 0); // Do not call on_wait if coroutine is ready
+            co_await suspend_if{.ready = false};
+            expect(counter == 1);
+        }();
+        task.wait();
+        expect(task.done());
+    }
+
     void doneOnException() noexcept {
         auto task = [](bool throws) -> Task {
             if (throws)
@@ -41,6 +63,7 @@ namespace {
 }
 
 int main() {
+    onWait();
     doneOnException();
     return 0;
 }

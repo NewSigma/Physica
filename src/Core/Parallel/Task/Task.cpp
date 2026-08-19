@@ -41,10 +41,14 @@ void Task::wait() {
         std::rethrow_exception(ex);
 }
 
-std::exception_ptr Task::wait(std::nothrow_t) noexcept {
-    while (!done())
-        __builtin_ia32_pause();
-    return h.promise().exception();
+auto Task::wait(std::nothrow_t) noexcept -> std::exception_ptr {
+    auto& p = h.promise();
+    while (!done()) {
+        auto waiter = p.waiter();
+        assert(waiter != nullptr && "[Error]: Unexpected empty waiter, this is a bug");
+        waiter(h);
+    }
+    return p.exception();
 }
 
 void Task::swap(Task& __restrict obj) noexcept {
@@ -84,24 +88,34 @@ void Task::promise_type::unhandled_exception() noexcept {
     ex = std::current_exception();
 }
 
-std::coroutine_handle<> Task::promise_type::schedule(std::coroutine_handle<> todo) noexcept {
-    return continuation.exchange(todo, std::memory_order_acq_rel);
+auto Task::promise_type::schedule(std::coroutine_handle<> parent) noexcept -> std::coroutine_handle<> {
+    return continuation.exchange(parent, std::memory_order_acq_rel);
 }
 
-std::exception_ptr Task::promise_type::exception() noexcept {
-    return std::move(ex);
-}
-
-bool Task::promise_type::done() const noexcept {
-    return continuation.load(std::memory_order_acquire) == nullptr;
+auto Task::promise_type::schedule(Handle parent) noexcept -> std::coroutine_handle<> {
+    auto w = waiter();
+    parent.promise().onWait.store(w, std::memory_order_release);
+    return continuation.exchange(parent, std::memory_order_acq_rel);
 }
 
 auto Task::promise_type::handle() noexcept -> Handle {
     return Handle::from_promise(*this);
 }
 
-auto Task::promise_type::suspend_final::await_suspend(std::coroutine_handle<> h) noexcept -> std::coroutine_handle<> {
-    return Handle::from_address(h.address()).promise().schedule(nullptr);
+auto Task::promise_type::waiter() const noexcept -> Callback {
+    return onWait.load(std::memory_order_acquire);
+}
+
+bool Task::promise_type::done() const noexcept {
+    return continuation.load(std::memory_order_acquire) == nullptr;
+}
+
+auto Task::promise_type::exception() noexcept -> std::exception_ptr {
+    return std::move(ex);
+}
+
+auto Task::promise_type::suspend_final::await_suspend(std::coroutine_handle<> self) noexcept -> std::coroutine_handle<> {
+    return Handle::from_address(self.address()).promise().schedule(std::coroutine_handle<>(nullptr));
 }
 
 bool Task::suspend_transfer::await_ready() const noexcept {
@@ -109,7 +123,7 @@ bool Task::suspend_transfer::await_ready() const noexcept {
 }
 
 bool Task::suspend_transfer::await_suspend(std::coroutine_handle<> parent) const noexcept {
-    const auto todo = child.promise().schedule(parent);
+    const auto todo = child.promise().schedule(Handle::from_address(parent.address()));
     bool done = todo == nullptr;
     if (done)
         return false;
