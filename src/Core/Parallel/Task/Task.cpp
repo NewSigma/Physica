@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Parallel/Task/Task.h"
-#include "Physica/Core/Utils/Builtin.h"
 
 using namespace Physica;
 
@@ -66,14 +65,6 @@ bool Task::empty() const noexcept {
 
 Task::promise_type::promise_type() noexcept : continuation(noop_coroutine()) {}
 
-Task Task::promise_type::get_return_object() noexcept {
-    return Task(handle());
-}
-
-Task Task::promise_type::get_return_object_on_allocation_failure() noexcept {
-    unreachable("Expect coro frame is small");
-}
-
 auto Task::promise_type::initial_suspend() noexcept -> suspend_never {
     return {};
 }
@@ -82,24 +73,21 @@ auto Task::promise_type::final_suspend() noexcept -> suspend_final {
     return {};
 }
 
-void Task::promise_type::return_void() noexcept {}
-
 void Task::promise_type::unhandled_exception() noexcept {
     ex = std::current_exception();
 }
 
-auto Task::promise_type::schedule(std::coroutine_handle<> parent) noexcept -> std::coroutine_handle<> {
-    return continuation.exchange(parent, std::memory_order_acq_rel);
-}
-
 auto Task::promise_type::schedule(Handle parent) noexcept -> std::coroutine_handle<> {
-    auto w = waiter();
-    parent.promise().onWait.store(w, std::memory_order_release);
-    return continuation.exchange(parent, std::memory_order_acq_rel);
+    auto expected = noop_coroutine();
+    if (continuation.compare_exchange_strong(expected, parent, std::memory_order_acq_rel))
+        parent.promise().onWait.store(waiter(), std::memory_order_release);
+    else
+        assert(expected == nullptr && "[Error]: child has more than one parent, this is a bug");
+    return expected;
 }
 
-auto Task::promise_type::handle() noexcept -> Handle {
-    return Handle::from_promise(*this);
+auto Task::promise_type::schedule(std::nullptr_t) noexcept -> std::coroutine_handle<> {
+    return continuation.exchange(nullptr, std::memory_order_acq_rel);
 }
 
 auto Task::promise_type::waiter() const noexcept -> Callback {
@@ -115,7 +103,7 @@ auto Task::promise_type::exception() noexcept -> std::exception_ptr {
 }
 
 auto Task::promise_type::suspend_final::await_suspend(std::coroutine_handle<> self) noexcept -> std::coroutine_handle<> {
-    return Handle::from_address(self.address()).promise().schedule(std::coroutine_handle<>(nullptr));
+    return Handle::from_address(self.address()).promise().schedule(nullptr);
 }
 
 bool Task::suspend_transfer::await_ready() const noexcept {
@@ -123,15 +111,13 @@ bool Task::suspend_transfer::await_ready() const noexcept {
 }
 
 bool Task::suspend_transfer::await_suspend(std::coroutine_handle<> parent) const noexcept {
-    const auto todo = child.promise().schedule(Handle::from_address(parent.address()));
-    bool done = todo == nullptr;
-    if (done)
-        return false;
-    assert(todo == noop_coroutine() && "[Error]: child has more than one parent, this is a bug");
-    return true;
+    assert(parent != nullptr);
+    bool suspend = child.promise().schedule(Handle::from_address(parent.address())) != nullptr;
+    return suspend;
 }
 
 void Task::suspend_transfer::await_resume() const {
+    assert(child.promise().done());
     if (auto ex = child.promise().exception()) [[unlikely]]
         std::rethrow_exception(ex);
 }

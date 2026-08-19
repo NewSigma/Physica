@@ -20,6 +20,7 @@
 
 #include <atomic>
 #include <exception>
+#include "Physica/Core/Utils/Builtin.h"
 #include "Physica/Core/Utils/Suspend.h"
 #include "Physica/Macro.h"
 
@@ -73,18 +74,17 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] Task get_return_object() noexcept;
-        [[nodiscard]] static Task get_return_object_on_allocation_failure() noexcept;
+        [[nodiscard]] Task get_return_object() noexcept { return Task(Handle::from_promise(*this)); }
+        [[nodiscard]] static Task get_return_object_on_allocation_failure() noexcept { unreachable("Expect coro frame is small"); }
         [[nodiscard]] static suspend_never initial_suspend() noexcept;
         [[nodiscard]] static suspend_final final_suspend() noexcept;
         [[nodiscard]] auto await_transform(auto&& expr) noexcept;
-        static void return_void() noexcept;
+        static void return_void() noexcept {}
         void unhandled_exception() noexcept;
 
-        [[nodiscard]] auto schedule(std::coroutine_handle<> parent) noexcept -> std::coroutine_handle<>;
         [[nodiscard]] auto schedule(Handle parent) noexcept -> std::coroutine_handle<>;
+        [[nodiscard]] auto schedule(std::nullptr_t) noexcept -> std::coroutine_handle<>;
         /* Getters */
-        [[nodiscard]] auto handle() noexcept -> Handle;
         [[nodiscard]] auto waiter() const noexcept -> Callback;
         [[nodiscard]] bool done() const noexcept;
         [[nodiscard]] auto exception() noexcept -> std::exception_ptr;
