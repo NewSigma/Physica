@@ -74,7 +74,7 @@ namespace Physica {
     template<Scalar T>
     auto ImagKinetic<T>::calcDelta(int site, int split, Tr alpha) const noexcept -> Vector2D<Tr> {
         const Tr x = Trv(2) * alpha * aux[site, split];
-        return exp(Vector2D<Tr>{-x, x}) - Trv(1); // The Eq. above Eq.(7.33) of [1]
+        return expm1(Vector2D<Tr>{-x, x}); // The Eq. above Eq.(7.33) of [1]
     }
 
     template<Scalar T>

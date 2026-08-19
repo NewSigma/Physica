@@ -27,7 +27,7 @@ namespace Physica {
      */
     template<Scalar T>
     T ackley(const VectorND<T>& x) noexcept {
-        return T(20) * (T(1) - exp(T(-0.2) * x.norm2())) - exp(cos(T(2) * MathConst<T>::pi * x).mean()) + exp(T(1));
+        return T(-20) * expm1(T(-0.2) * x.norm2()) - exp(cos(T(2) * MathConst<T>::pi * x).mean()) + exp(T(1));
     }
 
     template<Scalar T>

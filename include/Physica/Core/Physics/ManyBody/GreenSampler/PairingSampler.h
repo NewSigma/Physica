@@ -24,6 +24,9 @@
 namespace Physica {
     /**
      * \class PairingSampler: Samples pairing-wave correlation function for square hubbard model
+     *
+     * Reference:
+     * [1] Phys. Rev. B 39, 839(R) (1989); https://doi.org/10.1103/PhysRevB.39.839
      */
     template<Scalar T>
     class PairingSampler : public GreenSampler<T> {
@@ -33,6 +36,7 @@ namespace Physica {
         using IndexType = SquareLattice<2>::IndexType;
         using typename Base::Trv;
     public:
+        // Refer to Fig.1 of [1] for pairing types
         enum Observable : char {
             Sxxyy,
             Dxxyy,

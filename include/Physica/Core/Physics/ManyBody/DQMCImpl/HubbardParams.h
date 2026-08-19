@@ -133,7 +133,7 @@ namespace Physica {
     auto HubbardParams<T>::calcAlpha(Tr beta, Tr repelU, int numSplit) noexcept -> Tr {
         const Tr betaM = beta / Tr(numSplit);
         const Tr x = betaM * repelU;
-        return x * Tr(0.5) + ln1p(sqrt(Tr(1) - exp(-x)));
+        return x * Tr(0.5) + ln1p(sqrt(-expm1(-x)));
     }
 
     template<Scalar T>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -118,7 +118,7 @@ namespace Physica {
         const T freq = omegaW * T(1 / (2 * M_PI));
         const T dos = calcDOS(freq);
         const T zeroPointE = omegaW * 0.5;
-        const T helmholtz1 = temperatureT * ln(T(1) - exp(-omegaW / temperatureT));
+        const T helmholtz1 = temperatureT * ln(-expm1(-omegaW / temperatureT));
         return (zeroPointE + helmholtz1) * dos;
     }
 
@@ -127,9 +127,8 @@ namespace Physica {
         const T freq = omegaW * T(1 / (2 * M_PI));
         const T dos = calcDOS(freq);
         const T x = omegaW / temperatureT;
-        const T exp_x = exp(x);
-        const T temp = exp_x - T(1);
-        return (ln(temp) - x * exp_x / temp) * dos;
+        const T temp = expm1(x);
+        return (ln(temp) - x * exp(x) / temp) * dos;
     }
 
     template<Scalar T>
