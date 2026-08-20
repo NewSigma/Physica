@@ -45,6 +45,7 @@ namespace Physica {
         [[nodiscard]] bool isReadOnly() const noexcept;
         /* Static members */
         [[nodiscard]] static H5File open(const char* name, unsigned int openflag = ReadWrite);
+        [[nodiscard]] constexpr static IdentifierType itype() noexcept { return IdentifierType::File; }
     private:
         H5File(H5ID id_) noexcept;
 

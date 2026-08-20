@@ -38,7 +38,7 @@ namespace Physica {
         H5DataSpace() = default;
         explicit H5DataSpace(hsize_t size);
         explicit H5DataSpace(SizeArray dims);
-        explicit H5DataSpace(H5ID id);
+        explicit H5DataSpace(H5ID id) noexcept;
         H5DataSpace(SizeArray dims, SizeArray maxdims);
         H5DataSpace(const This&) = default;
         H5DataSpace(This&&) noexcept = default;
@@ -60,6 +60,8 @@ namespace Physica {
         [[nodiscard]] const auto& getSelectedStart() const noexcept { return selectedStart; }
         /* Setters */
         void setSize(size_t dim, hsize_t newSize);
+        /* Static members */
+        [[nodiscard]] constexpr static IdentifierType itype() noexcept { return IdentifierType::Dataspace; }
     };
 
     template<size_t Dim>
@@ -71,7 +73,9 @@ namespace Physica {
     H5DataSpace<Dim>::H5DataSpace(SizeArray dims) : H5ID(H5Screate_simple(Dim, dims.data(), nullptr)) {}
 
     template<size_t Dim>
-    H5DataSpace<Dim>::H5DataSpace(H5ID id) : H5ID(std::move(id)) {}
+    H5DataSpace<Dim>::H5DataSpace(H5ID id) noexcept : H5ID(std::move(id)) {
+        assert(isa<H5DataSpace>());
+    }
 
     template<size_t Dim>
     H5DataSpace<Dim>::H5DataSpace(SizeArray dims, SizeArray maxdims) : H5ID(H5Screate_simple(Dim, dims.data(), maxdims.data())) {}

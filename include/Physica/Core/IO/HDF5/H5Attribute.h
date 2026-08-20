@@ -25,7 +25,7 @@ namespace Physica {
         using This = H5Attribute;
     public:
         H5Attribute() = default;
-        explicit H5Attribute(H5ID id);
+        explicit H5Attribute(H5ID id) noexcept;
         H5Attribute(const This&) = default;
         H5Attribute(This&&) noexcept = default;
         ~H5Attribute() = default;
@@ -36,5 +36,7 @@ namespace Physica {
         void write(const H5Type& dtype, const void* buf) const;
         /* Getters */
         void swap(This& obj) noexcept;
+        /* Static members */
+        [[nodiscard]] constexpr static IdentifierType itype() noexcept { return IdentifierType::Attribute; }
     };
 }

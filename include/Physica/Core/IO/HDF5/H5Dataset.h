@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -32,7 +32,7 @@ namespace Physica {
         using This = H5Dataset<Dim>;
     public:
         H5Dataset() = default;
-        explicit H5Dataset(H5ID id_);
+        explicit H5Dataset(H5ID id_) noexcept;
         H5Dataset(const This&) = default;
         H5Dataset(This&&) noexcept = default;
         ~H5Dataset() = default;
@@ -55,10 +55,14 @@ namespace Physica {
         [[nodiscard]] size_t getDim() const noexcept;
         [[nodiscard]] size_t getSize(size_t dim) const noexcept;
         [[nodiscard]] bool empty() const noexcept { return getSize(0) == 0; }
+        /* Static members */
+        [[nodiscard]] constexpr static IdentifierType itype() noexcept { return IdentifierType::Dataset; }
     };
 
     template<size_t Dim>
-    H5Dataset<Dim>::H5Dataset(H5ID id_) : H5ID(std::move(id_)) {}
+    H5Dataset<Dim>::H5Dataset(H5ID id_) noexcept : H5ID(std::move(id_)) {
+        assert(isa<H5Dataset>());
+    }
 
     template<size_t Dim>
     template<class MemSpace, class FileSpace>

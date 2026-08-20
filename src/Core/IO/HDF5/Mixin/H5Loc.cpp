@@ -20,7 +20,7 @@
 
 using namespace Physica;
 
-H5Loc::H5Loc(H5ID id_) : H5ID(std::move(id_)) {}
+H5Loc::H5Loc(H5ID id_) noexcept : H5ID(std::move(id_)) {}
 
 bool H5Loc::exists(const char* name) const {
     return H5Lexists(getHID(), name, H5P_DEFAULT) > 0;

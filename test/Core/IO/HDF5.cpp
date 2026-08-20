@@ -32,12 +32,15 @@ namespace {
         auto dataset = h5f.createDataSet<1>("D", type, space);
         auto attr = h5f.createAttribute("A", type, space);
 
-        expect(h5f.isFile());
-        expect(group.isGroup());
-        expect(type.isDatatype());
-        expect(space.isDataspace());
-        expect(dataset.isDataset());
-        expect(attr.isAttribute());
+        expect(h5f.isa<H5File>() && !h5f.isa<H5Group>());
+        expect(group.isa<H5Group>());
+        expect(type.isa<H5Type>());
+        expect(space.isa<H5DataSpace<1>>());
+        expect(dataset.isa<H5Dataset<1>>());
+        expect(attr.isa<H5Attribute>());
+
+        auto casted = std::move(group).cast<H5Group>();
+        expect(casted.isValid() && casted.isa<H5Group>());
     }
 
     void stringIO() {

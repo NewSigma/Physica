@@ -20,6 +20,7 @@
 #include <utility>
 #include <H5Fpublic.h>
 #include "Physica/Core/IO/HDF5/H5File.h"
+#include "Physica/Core/Utils/NoImpl.h"
 
 using namespace Physica;
 
@@ -42,37 +43,18 @@ H5ID& H5ID::operator=(H5ID other) noexcept {
     return *this;
 }
 
+void H5ID::swap(H5ID& other) noexcept {
+    assert(this != &other && "[Error]: Self swap is likely a bug");
+    std::swap(id, other.id);
+}
+
 bool H5ID::isValid() const noexcept {
     return H5Iis_valid(id) > 0;
 }
 
 bool H5ID::isReadOnly() const noexcept {
     assert(isValid());
-    return H5File(H5ID(H5Iget_file_id(id))).isReadOnly();
-}
-
-bool H5ID::isFile() const noexcept {
-    return H5Iget_type(id) == H5I_FILE;
-}
-
-bool H5ID::isGroup() const noexcept {
-    return H5Iget_type(id) == H5I_GROUP;
-}
-
-bool H5ID::isDatatype() const noexcept {
-    return H5Iget_type(id) == H5I_DATATYPE;
-}
-
-bool H5ID::isDataspace() const noexcept {
-    return H5Iget_type(id) == H5I_DATASPACE;
-}
-
-bool H5ID::isDataset() const noexcept {
-    return H5Iget_type(id) == H5I_DATASET;
-}
-
-bool H5ID::isAttribute() const noexcept {
-    return H5Iget_type(id) == H5I_ATTR;
+    return H5ID(H5Iget_file_id(id)).cast<H5File>().isReadOnly();
 }
 
 void H5ID::incRef() const noexcept {
@@ -81,7 +63,21 @@ void H5ID::incRef() const noexcept {
     assert(err >= 0);
 }
 
-void H5ID::swap(H5ID& other) noexcept {
-    assert(this != &other && "[Error]: Self swap is likely a bug");
-    std::swap(id, other.id);
+auto H5ID::itype() const noexcept -> IdentifierType {
+    switch (H5Iget_type(id)) {
+    case H5I_FILE:
+        return IdentifierType::File;
+    case H5I_GROUP:
+        return IdentifierType::Group;
+    case H5I_DATATYPE:
+        return IdentifierType::Datatype;
+    case H5I_DATASPACE:
+        return IdentifierType::Dataspace;
+    case H5I_DATASET:
+        return IdentifierType::Dataset;
+    case H5I_ATTR:
+        return IdentifierType::Attribute;
+    default:
+        return IdentifierType::Invalid;
+    }
 }

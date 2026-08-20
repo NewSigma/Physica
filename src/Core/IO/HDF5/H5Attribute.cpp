@@ -23,7 +23,9 @@
 
 using namespace Physica;
 
-H5Attribute::H5Attribute(H5ID id) : H5ID(std::move(id)) {}
+H5Attribute::H5Attribute(H5ID id) noexcept : H5ID(std::move(id)) {
+    assert(isa<H5Attribute>());
+}
 
 H5Attribute& H5Attribute::operator=(H5Attribute obj) noexcept {
     swap(obj);

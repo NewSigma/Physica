@@ -21,7 +21,9 @@
 
 using namespace Physica;
 
-H5Group::H5Group(H5ID id) : H5Loc(std::move(id)) {}
+H5Group::H5Group(H5ID id) noexcept : H5Loc(std::move(id)) {
+    assert(isa<H5Group>());
+}
 
 H5Group H5Group::create(const H5ID& loc, const char* name) {
     assert(!loc.isReadOnly());

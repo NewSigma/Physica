@@ -33,7 +33,7 @@ namespace Physica {
         using This = H5Loc;
     public:
         H5Loc() = default;
-        explicit H5Loc(H5ID id_);
+        explicit H5Loc(H5ID id_) noexcept;
         H5Loc(const This&) = default;
         H5Loc(This&&) noexcept = default;
         ~H5Loc() = default;

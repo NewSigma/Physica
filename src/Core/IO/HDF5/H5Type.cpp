@@ -21,7 +21,11 @@
 
 using namespace Physica;
 
-H5Type::H5Type(hid_t hid) : H5ID(hid) {}
+H5Type::H5Type(H5ID id) noexcept : H5ID(std::move(id)) {
+    assert(isa<H5Type>());
+}
+
+H5Type::H5Type(hid_t hid) noexcept : H5Type(H5ID(hid)) {}
 
 void H5Type::insert(const char* name, size_t offset, const H5Type& memberType) noexcept {
     assert(isCompound());

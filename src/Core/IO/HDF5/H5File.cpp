@@ -23,7 +23,7 @@
 using namespace Physica;
 
 H5File::H5File(H5ID id_) noexcept : H5Loc(std::move(id_)) {
-    assert(Base::isFile());
+    assert(Base::isa<H5File>());
 }
 
 bool H5File::isReadOnly() const noexcept {

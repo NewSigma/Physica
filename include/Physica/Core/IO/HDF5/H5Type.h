@@ -40,8 +40,12 @@ namespace Physica {
         [[nodiscard]] static This get() noexcept;
         template<class T>
         [[nodiscard]] static This compound();
+        [[nodiscard]] constexpr static IdentifierType itype() noexcept { return IdentifierType::Datatype; }
     private:
-        explicit H5Type(hid_t hid);
+        explicit H5Type(H5ID id) noexcept;
+        explicit H5Type(hid_t hid) noexcept;
+
+        friend class H5ID;
     };
 
     template<class T>
