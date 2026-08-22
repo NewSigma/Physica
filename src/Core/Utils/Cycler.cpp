@@ -16,19 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <cmath>
+#include <iostream>
 #ifdef __linux__
     #include <sys/time.h>
 #endif
 #include <cassert>
 #include "Physica/Core/Utils/Cycler.h"
-#include "Physica/Core/Exception/SystemException.h"
 
 using namespace Physica;
 
 namespace {
-    double makeCyclesPerSec() {
+    timeval getTimeOfDay() noexcept {
+        timeval result{};
+        if (gettimeofday(&result, nullptr) != 0) [[unlikely]] {
+            std::cerr << "Cycler: gettimeofday failed";
+            std::abort();
+        }
+        return result;
+    }
+
+    double makeCyclesPerSec() noexcept {
     #ifdef __linux__
-        struct timeval startTime, stopTime; /* NOLINT no initializing is intended */
         // There is one tricky aspect, which is that we could get interrupted
         // between calling gettimeofday and reading the cycle counter, in which
         // case we won't have corresponding readings.  To handle this (unlikely)
@@ -39,14 +48,11 @@ namespace {
         double result = 0;
         while (true) {
             oldCycles = result;
-            if (gettimeofday(&startTime, nullptr) != 0) [[unlikely]]
-                throw SystemException();
+            const auto startTime = getTimeOfDay();
 
             const uint64_t startCycles = Cycler::now();
             while (true) {
-                if (gettimeofday(&stopTime, nullptr) != 0) [[unlikely]]
-                    throw SystemException();
-
+                const auto stopTime = getTimeOfDay();
                 const uint64_t stopCycles = Cycler::now();
                 const uint64_t micros = (stopTime.tv_usec - startTime.tv_usec) + (stopTime.tv_sec - startTime.tv_sec) * 1000000;
                 if (micros > 10000) {
@@ -66,122 +72,45 @@ namespace {
     }
 }
 
-double Cycler::getCyclesPerSec() {
+double Cycler::getCyclesPerSec() noexcept {
     static const double localCyclesPerSec = makeCyclesPerSec();
     return localCyclesPerSec;
 }
-/**
- * Given an elapsed time measured in cycles, return an integer
- * giving the corresponding time in nanoseconds. Note: toSeconds()
- * is faster than this method.
- * \param cycles
- *      Difference between the results of two calls to rdtsc.
- * \param cyclesPerSec
- *      Optional parameter to specify the frequency of the counter that #cycles
- *      was taken from. Useful when converting a remote machine's tick counter
- *      to seconds. The default value of 0 will use the local processor's
- *      computed counter frequency.
- * \return
- *      The time in nanoseconds corresponding to cycles (rounded).
- */
-uint64_t Cycler::toNanoseconds(uint64_t cycles, double cyclesPerSec) {
+
+uint64_t Cycler::toNanoseconds(uint64_t cycles, double cyclesPerSec) noexcept {
     assert(cyclesPerSec > 0);
     if (cyclesPerSec == 0)
         cyclesPerSec = getCyclesPerSec();
-    /*
-     * Add 0.5 in order that when round from double to integer,
-     * round to nearest integer instead of 0.
-     * Avoid using library function lround() for performance.
-     */
-    return (uint64_t)(1e09 * static_cast<double>(cycles) / cyclesPerSec + 0.5); // NOLINT cycles > 0, cyclesPerSec > 0, rounding is safe
+    return std::llround(1e09 * static_cast<double>(cycles) / cyclesPerSec);
 }
-/**
- * Given an elapsed time measured in cycles, return an integer
- * giving the corresponding time in microseconds. Note: toSeconds()
- * is faster than this method.
- * \param cycles
- *      Difference between the results of two calls to rdtsc.
- * \param cyclesPerSec
- *      Optional parameter to specify the frequency of the counter that #cycles
- *      was taken from. Useful when converting a remote machine's tick counter
- *      to seconds. The default value of 0 will use the local processor's
- *      computed counter frequency.
- * \return
- *      The time in microseconds corresponding to cycles (rounded).
- */
-uint64_t Cycler::toMicroseconds(uint64_t cycles, double cyclesPerSec) {
+
+uint64_t Cycler::toMicroseconds(uint64_t cycles, double cyclesPerSec) noexcept {
     assert(cyclesPerSec > 0);
     return toNanoseconds(cycles, cyclesPerSec) / 1000;
 }
 
-uint64_t Cycler::toMillisecond(uint64_t cycles, double cyclesPerSec) {
+uint64_t Cycler::toMillisecond(uint64_t cycles, double cyclesPerSec) noexcept {
     assert(cyclesPerSec > 0);
     return toNanoseconds(cycles, cyclesPerSec) / 1000000;
 }
-/**
- * Given an elapsed time measured in cycles, return a floating-point number
- * giving the corresponding time in seconds.
- * \param cycles
- *      Difference between the results of two calls to rdtsc.
- * \param cyclesPerSec
- *      Optional parameter to specify the frequency of the counter that #cycles
- *      was taken from. Useful when converting a remote machine's tick counter
- *      to seconds. The default value of 0 will use the local processor's
- *      computed counter frequency.
- * \return
- *      The time in seconds corresponding to cycles.
- */
-double Cycler::toSeconds(uint64_t cycles, double cyclesPerSec) {
+
+double Cycler::toSeconds(uint64_t cycles, double cyclesPerSec) noexcept {
     assert(cyclesPerSec > 0);
     if (cyclesPerSec == 0)
         cyclesPerSec = getCyclesPerSec();
     return static_cast<double>(cycles) / cyclesPerSec;
 }
-/**
- * Given a number of nanoseconds, return an approximate number of
- * cycles for an equivalent time length.
- * \param ns
- *      Number of nanoseconds.
- * \param cyclesPerSec
- *      Optional parameter to specify the frequency of the counter that #cycles
- *      was taken from. Useful when converting a remote machine's tick counter
- *      to seconds. The default value of 0 will use the local processor's
- *      computed counter frequency.
- * \return
- *      The approximate number of cycles for the same time length.
- */
-uint64_t Cycler::fromNanoseconds(uint64_t ns, double cyclesPerSec) {
+
+uint64_t Cycler::fromNanoseconds(uint64_t ns, double cyclesPerSec) noexcept {
     assert(cyclesPerSec > 0);
     if (cyclesPerSec == 0)
         cyclesPerSec = getCyclesPerSec();
-    /*
-     * Add 0.5 in order that when round from double to integer,
-     * round to nearest integer instead of 0.
-     * Avoid using library function lround() for performance.
-     */
-    return (uint64_t)(static_cast<double>(ns) * cyclesPerSec / 1e09 + 0.5); // NOLINT ns > 0, cyclesPerSec > 0, rounding is safe
+    return std::llround(static_cast<double>(ns) * cyclesPerSec / 1e09);
 }
-/**
- * Given a time in seconds, return the number of cycles that it
- * corresponds to.
- * \param seconds
- *      Time in seconds.
- * \param cyclesPerSec
- *      Optional parameter to specify the frequency of the counter that #cycles
- *      was taken from. Useful when converting a remote machine's tick counter
- *      to seconds. The default value of 0 will use the local processor's
- *      computed counter frequency.
- * \return
- *      The approximate number of cycles corresponding to #seconds.
- */
-uint64_t Cycler::fromSeconds(double seconds, double cyclesPerSec) {
+
+uint64_t Cycler::fromSeconds(double seconds, double cyclesPerSec) noexcept {
     assert(cyclesPerSec > 0);
     if (cyclesPerSec == 0)
         cyclesPerSec = getCyclesPerSec();
-    /*
-     * Add 0.5 in order that when round from double to integer,
-     * round to nearest integer instead of 0.
-     * Avoid using library function lround() for performance.
-     */
-    return (uint64_t)(seconds * cyclesPerSec + 0.5); // NOLINT second > 0, cyclesPerSec > 0, rounding is safe
+    return std::llround(seconds * cyclesPerSec);
 }

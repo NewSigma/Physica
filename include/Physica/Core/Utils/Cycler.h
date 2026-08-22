@@ -102,14 +102,14 @@ namespace Physica {
          * Returns the conversion factor between cycles in seconds, using
          * a mock value for testing when appropriate.
          */
-        [[nodiscard]] static double getCyclesPerSec();
+        [[nodiscard]] static double getCyclesPerSec() noexcept;
 
-        static uint64_t toNanoseconds(uint64_t cycles, double cyclesPerSec = getCyclesPerSec());
-        static uint64_t toMicroseconds(uint64_t cycles, double cyclesPerSec = getCyclesPerSec());
-        static uint64_t toMillisecond(uint64_t cycles, double cyclesPerSec = getCyclesPerSec());
-        static double toSeconds(uint64_t cycles, double cyclesPerSec = getCyclesPerSec());
-        static uint64_t fromNanoseconds(uint64_t ns, double cyclesPerSec = getCyclesPerSec());
-        static uint64_t fromSeconds(double seconds, double cyclesPerSec = getCyclesPerSec());
+        [[nodiscard]] static uint64_t toNanoseconds(uint64_t cycles, double cyclesPerSec = getCyclesPerSec()) noexcept;
+        [[nodiscard]] static uint64_t toMicroseconds(uint64_t cycles, double cyclesPerSec = getCyclesPerSec()) noexcept;
+        [[nodiscard]] static uint64_t toMillisecond(uint64_t cycles, double cyclesPerSec = getCyclesPerSec()) noexcept;
+        [[nodiscard]] static double toSeconds(uint64_t cycles, double cyclesPerSec = getCyclesPerSec()) noexcept;
+        [[nodiscard]] static uint64_t fromNanoseconds(uint64_t ns, double cyclesPerSec = getCyclesPerSec()) noexcept;
+        [[nodiscard]] static uint64_t fromSeconds(double seconds, double cyclesPerSec = getCyclesPerSec()) noexcept;
     private:
         Cycler() = default;
     };
