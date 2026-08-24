@@ -45,14 +45,16 @@ namespace Physica {
     __host__ __device__ bool Diff<T, Mode, Order>::operator==(const This& other) const {
         return v == other.v && g == other.g;
     }
-
+    /**
+     * \param factor: helps lowering to FMA
+     */
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ T Diff<T, Mode, Order>::reverse(GradType grad) const noexcept {
+    __host__ __device__ T Diff<T, Mode, Order>::reverse(GradType grad, T factor) const noexcept {
         static_assert(Mode == DiffMode::Reverse, "[Error]: Call reverse() of a forward diff scalar is not well defined");
         auto& g1 = const_cast<GradType&>(this->grad());
-        g1.value() += grad.value();
+        g1.value() = fma(grad.value(), factor, g1.value());
         if constexpr (Order != 1)
-            g1.reverse(grad.grad());
+            g1.reverse(grad.grad(), factor);
         return v;
     }
 
@@ -70,7 +72,7 @@ namespace Physica {
     auto Diff<T, Mode, Order>::squaredNorm() const noexcept -> CoDiff<This> {
         if constexpr (isReverseDiff()) {
             auto& y = co_yield value().squaredNorm();
-            reverse(T(2) * v * y.grad());
+            reverse(T(2) * v, y.grad());
         }
         else
             co_return This(v.squaredNorm(), T(2) * v * g);
@@ -220,7 +222,7 @@ namespace Physica {
         if constexpr (Diffable<U>) {
             using GradType = ResultType::GradType;
             constexpr int GradOrder = GradType::Order;
-            return ResultType(x.value() * y.value(), GradType(y.template grad_mask<GradOrder>() * x.grad() + x.template grad_mask<GradOrder>() * y.grad()));
+            return ResultType(x.value() * y.value(), fma(GradType(y.template grad_mask<GradOrder>()), x.grad(), x.template grad_mask<GradOrder>() * y.grad()));
         }
         else
             return ResultType(x.value() * y.value(), x.grad() * y.value());
@@ -233,9 +235,9 @@ namespace Physica {
         decltype(auto) y_ = decay_rvalue(std::forward<U>(y));
         auto& result = co_yield x_.value() * y_.value();
         auto& g = result.grad();
-        x_.reverse(y_.value() * g);
+        x_.reverse(y_.value(), g);
         if constexpr (Diffable<U>)
-            y_.reverse(x_.value() * g);
+            y_.reverse(x_.value(), g);
     }
 
     template<Scalar T, Scalar U>
@@ -245,7 +247,7 @@ namespace Physica {
             using GradType = ResultType::GradType;
             constexpr int GradOrder = GradType::Order;
             const auto v = reciprocal(y.template grad_mask<GradOrder>());
-            return ResultType(x.value() * v.value(), GradType((y.template grad_mask<GradOrder>() * x.grad() - x.template grad_mask<GradOrder>() * y.grad()) * square(v)));
+            return ResultType(x.value() * v.value(), GradType(fma(y.template grad_mask<GradOrder>(), x.grad(), -x.template grad_mask<GradOrder>() * y.grad()) * square(v)));
         }
         else {
             const auto v = reciprocal(y.value());
@@ -259,10 +261,10 @@ namespace Physica {
         decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         decltype(auto) y_ = decay_rvalue(std::forward<U>(y));
         auto& result = co_yield x_.value() / y_.value();
-        const auto factor = reciprocal(y_.value()) * result.grad();
+        const auto factor = result.grad() / y_.value();
         x_.reverse(factor);
         if constexpr (Diffable<U>)
-            y_.reverse(-factor * result.value());
+            y_.reverse(-factor, result.value());
     }
 
     template<Scalar T, Scalar U>
@@ -293,7 +295,7 @@ namespace Physica {
         decltype(auto) x_ = decay_rvalue(std::forward<U>(x));
         auto rep = reciprocal(std::forward<T>(y));
         auto& result = co_yield x_ * rep.value();
-        rep.reverse(x_ * result.grad());
+        rep.reverse(x_, result.grad());
     }
 
     template<Scalar T>

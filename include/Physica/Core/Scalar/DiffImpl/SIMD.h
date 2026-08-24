@@ -93,7 +93,7 @@ namespace Physica {
         void operator*=(const SIMD& x) noexcept { *this = *this * x; }
         void operator/=(const SIMD& x) noexcept { *this = *this / x; }
         /* Operations */
-        ValueType reverse(GradType grad = 1) const noexcept;
+        ValueType reverse(GradType grad = 1, ValueType factor = 1) const noexcept;
 
         void load(ConstPtrTy p) noexcept;
         void load(ConstPtrTy p, int n) noexcept;

@@ -28,8 +28,8 @@ namespace Physica {
         decltype(auto) c_ = decay_rvalue(std::forward<T>(c));
         auto& y = co_yield fma(a_.value(), b_.value(), c_.value());
         auto& grad = y.grad();
-        a_.reverse(grad * b_.value());
-        b_.reverse(grad * a_.value());
+        a_.reverse(b_.value(), grad);
+        b_.reverse(a_.value(), grad);
         c_.reverse(grad);
     }
 
@@ -46,14 +46,14 @@ namespace Physica {
         using Tv = std::remove_cvref_t<T>::ValueType::ScalarType;
         decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield square(x_.value());
-        x_.reverse(Tv(2) * x_.value() * y.grad());
+        x_.reverse(Tv(2) * x_.value(), y.grad());
     }
 
     template<Packet T>
     [[nodiscard]] CoDiff<T> reciprocal(T&& x) noexcept requires(ReverseDiff<T>) {
         decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield reciprocal(x_.value());
-        x_.reverse(-square(y.value()) * y.grad());
+        x_.reverse(-square(y.value()), y.grad());
     }
 
     template<Packet T>
@@ -67,14 +67,14 @@ namespace Physica {
     [[nodiscard]] CoDiff<T> exp(T&& x) noexcept requires(ReverseDiff<T>) {
         decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield exp(x_.value());
-        x_.reverse(y.value() * y.grad());
+        x_.reverse(y.value(), y.grad());
     }
 
     template<Packet T>
     [[nodiscard]] CoDiff<T> expm1(T&& x) noexcept requires(ReverseDiff<T>) {
         decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield expm1(x_.value());
-        x_.reverse(exp(x_.value()) * y.grad());
+        x_.reverse(exp(x_.value()), y.grad());
     }
 
     template<Packet T>
@@ -82,13 +82,13 @@ namespace Physica {
         using Tv = std::remove_cvref_t<T>::ValueType::ScalarType;
         decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield tanh(x_.value());
-        x_.reverse((Tv(1) - square(y.value())) * y.grad());
+        x_.reverse(Tv(1) - square(y.value()), y.grad());
     }
 
     template<Packet T>
     [[nodiscard]] CoDiff<T> lncosh(T&& x) noexcept requires(ReverseDiff<T>) {
         decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield lncosh(x_.value());
-        x_.reverse(tanh(x_.value()) * y.grad());
+        x_.reverse(tanh(x_.value()), y.grad());
     }
 }

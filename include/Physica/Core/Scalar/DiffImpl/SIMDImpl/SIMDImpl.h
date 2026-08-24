@@ -111,7 +111,7 @@ namespace Physica {
             constexpr int MaskOrder = RtnTy::ScalarType::Order;
             const auto x1 = x.template grad_mask<MaskOrder>();
             const auto v = reciprocal(x1);
-            return RtnTy(values * x.value(), RtnGradTy((x1 * grads - grad_mask<MaskOrder>() * x.grad()) * square(v)));
+            return RtnTy(values * v.value(), RtnGradTy((x1 * grads - grad_mask<MaskOrder>() * x.grad()) * square(v)));
         }
         else {
             const auto v = reciprocal(x);
@@ -125,8 +125,9 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, int Size>
-    auto SIMD<Diff<T, Mode, Order>, Size>::reverse(GradType grad) const noexcept -> ValueType {
-        grads += grad;
+    auto SIMD<Diff<T, Mode, Order>, Size>::reverse(GradType grad, ValueType factor) const noexcept -> ValueType {
+        auto& g = const_cast<GradType&>(this->grad());
+        g = fma(grad, factor, g);
         return values;
     }
 

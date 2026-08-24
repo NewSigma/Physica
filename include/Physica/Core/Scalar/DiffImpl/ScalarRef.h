@@ -64,7 +64,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(T(*this)); }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(T(*this)); }
         /* Operations */
-        __host__ __device__ T reverse(GradType grad = 1) const noexcept;
+        __host__ __device__ Tv reverse(GradType grad = 1, Tv factor = 1) const noexcept;
         __host__ __device__ void zero_grad();
 
         __host__ __device__ void swap(This&& obj) noexcept;
@@ -162,12 +162,12 @@ namespace Physica {
     }
 
     template<Scalar T> requires(instanceof_tx<T, Diff>)
-    __host__ __device__ T ScalarRef<T>::reverse(GradType grad) const noexcept {
+    __host__ __device__ auto ScalarRef<T>::reverse(GradType grad, Tv factor) const noexcept -> Tv {
         static_assert(Mode == DiffMode::Reverse, "[Error]: Call reverse() of a forward diff scalar is not well defined");
         decltype(auto) g = this->grad();
-        const_cast<Tv&>(g.value()) += grad.value();
+        const_cast<Tv&>(g.value()) = fma(grad.value(), factor, g.value());
         if constexpr (Order != 1)
-            g.reverse(grad.grad());
+            g.reverse(grad.grad(), factor);
         return value();
     }
 

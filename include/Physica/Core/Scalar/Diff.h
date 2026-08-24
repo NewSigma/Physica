@@ -60,7 +60,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ explicit operator double() const { return double(v); }
         [[nodiscard]] __host__ __device__ bool operator==(const This& other) const;
         /* Operations */
-        __host__ __device__ T reverse(GradType grad = 1) const noexcept;
+        __host__ __device__ T reverse(GradType grad = 1, T factor = 1) const noexcept;
         __host__ __device__ void zero_grad();
 
         [[nodiscard]] This conjugate() const noexcept;
