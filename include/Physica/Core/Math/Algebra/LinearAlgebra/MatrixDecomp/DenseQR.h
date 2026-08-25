@@ -159,8 +159,10 @@ namespace Physica {
                 diagD[i] = 1;
                 continue;
             }
-            if constexpr (isComplex)
-                assert(working.operator[](i, i).imag().isZero() && "[Error]: Householder QR should have real diagonals");
+            if constexpr (isComplex) {
+                [[maybe_unused]] bool isReal = abs(working[i, i].imag()) < abs(working[i, i].real()) * sqrt(Trv(std::numeric_limits<T>::epsilon()));
+                assert(isReal && "[Error]: Householder QR should have real diagonals");
+            }
             diagD[i] = working[i, i].real();
             working.row(i).tail(i) *= reciprocal(diagD[i]);
         }

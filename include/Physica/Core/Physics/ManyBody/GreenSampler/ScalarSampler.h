@@ -116,7 +116,7 @@ namespace Physica {
             return calcObservable(greenU, greenD, Density) - calcObservable(greenU, greenD, DoubleOccupy) * Trv(2);
         case Kinetic: {
             const auto& hoppingT = Base::getHoppingMatrix();
-            return -hadamard(hoppingT, greenU + greenD).sum().real() / T(getNumSite());
+            return -(hoppingT * (greenU + greenD)).trace().real() / T(getNumSite());
         }
         case Potential:
             return calcObservable(greenU, greenD, DoubleOccupy) * Base::getRepelU();
