@@ -21,6 +21,7 @@
 #include <cassert>
 #include <cmath>
 #include <type_traits>
+#include <numbers>
 #include "Physica/CRTPBase.h"
 #include "Physica/Core/Scalar/Scalar.h"
 
@@ -49,6 +50,13 @@ namespace Physica {
         public:
             using Type = void;
         };
+
+        template<bool IsPiVariant>
+        __host__ __device__ constexpr void checkTrigonometricParam(Scalar auto x) noexcept {
+            using T = decltype(x);
+            [[maybe_unused]] bool flag = abs(x) * std::numeric_limits<T>::epsilon() < T(IsPiVariant ? 1 : std::numbers::pi_v<typename T::MachineType>);
+            assert(flag && "[Error]: Precision lost is significant for x");
+        }
     }
 
     template<class Derived>

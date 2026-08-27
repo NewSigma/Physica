@@ -208,6 +208,12 @@ namespace Physica {
     }
 
     template<Scalar T>
+    auto Complex<T>::fromPhasePi(T phasepi) noexcept -> Complex<T> {
+        auto [s, c] = sincospi(phasepi);
+        return {c, s};
+    }
+
+    template<Scalar T>
     template<RNG R>
     auto Complex<T>::random_uniform() -> Complex<T> {
         T re = T::template random_uniform<R>();

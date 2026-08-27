@@ -86,16 +86,19 @@ namespace Physica {
 
     template<FloatPrec Prec, int Size>
     [[nodiscard]] auto sin(SIMD<Real<Prec>, Size> x) noexcept {
+        Internal::checkTrigonometricParam<false>(abs(x).max());
         return SIMD<Real<Prec>, Size>(Physica::sin(x.toMachine()));
     }
 
     template<FloatPrec Prec, int Size>
     [[nodiscard]] auto cos(SIMD<Real<Prec>, Size> x) noexcept {
+        Internal::checkTrigonometricParam<false>(abs(x).max());
         return SIMD<Real<Prec>, Size>(Physica::cos(x.toMachine()));
     }
 
     template<FloatPrec Prec, int Size>
     [[nodiscard]] auto sincos(SIMD<Real<Prec>, Size> x) noexcept {
+        Internal::checkTrigonometricParam<false>(abs(x).max());
         SIMD<Real<Prec>, Size> s, c;
         Physica::sincos(x.toMachine(), s.toMachine(), c.toMachine());
         return std::make_pair(s, c);
@@ -103,6 +106,7 @@ namespace Physica {
 
     template<FloatPrec Prec, int Size>
     [[nodiscard]] auto tan(SIMD<Real<Prec>, Size> x) noexcept {
+        Internal::checkTrigonometricParam<false>(abs(x).max());
         return SIMD<Real<Prec>, Size>(Physica::tan(x.toMachine()));
     }
 

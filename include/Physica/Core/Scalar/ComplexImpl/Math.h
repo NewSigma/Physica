@@ -110,31 +110,37 @@ namespace Physica {
 
     template<Scalar T>
     [[nodiscard]] __host__ __device__ Complex<T> cos(const Complex<T>& c) noexcept {
+        Internal::checkTrigonometricParam<false>(c.real());
         return Complex<T>(std::cos(c.toMachine()));
     }
 
     template<Scalar T>
     [[nodiscard]] __host__ __device__ Complex<T> sin(const Complex<T>& c) noexcept {
+        Internal::checkTrigonometricParam<false>(c.real());
         return Complex<T>(std::sin(c.toMachine()));
     }
 
     template<Scalar T>
     [[nodiscard]] __host__ __device__ Complex<T> tan(const Complex<T>& c) noexcept {
+        Internal::checkTrigonometricParam<false>(c.real());
         return Complex<T>(std::tan(c.toMachine()));
     }
 
     template<Scalar T>
     [[nodiscard]] __host__ __device__ Complex<T> sec(const Complex<T>& c) noexcept {
+        Internal::checkTrigonometricParam<false>(c.real());
         return reciprocal(cos(c));
     }
 
     template<Scalar T>
     [[nodiscard]] __host__ __device__ Complex<T> csc(const Complex<T>& c) noexcept {
+        Internal::checkTrigonometricParam<false>(c.real());
         return reciprocal(sin(c));
     }
 
     template<Scalar T>
     [[nodiscard]] __host__ __device__ Complex<T> cot(const Complex<T>& c) noexcept {
+        Internal::checkTrigonometricParam<false>(c.real());
         return reciprocal(tan(c));
     }
 

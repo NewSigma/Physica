@@ -139,6 +139,7 @@ namespace Physica {
 
     template<FloatPrec Prec>
     [[nodiscard]] __host__ __device__ Real<Prec> cos(const Real<Prec>& x) noexcept {
+        Internal::checkTrigonometricParam<false>(x);
         if constexpr (Prec == Float32)
             return Real<Prec>(::cosf(x.toMachine()));
         else
@@ -147,6 +148,7 @@ namespace Physica {
 
     template<FloatPrec Prec>
     [[nodiscard]] __host__ __device__ Real<Prec> cospi(const Real<Prec>& x) noexcept {
+        Internal::checkTrigonometricParam<true>(x);
     #ifdef __CUDA_ARCH__
         if constexpr (Prec == Float32)
             return Real<Prec>(::cospif(x.toMachine()));
@@ -159,6 +161,7 @@ namespace Physica {
 
     template<FloatPrec Prec>
     [[nodiscard]] __host__ __device__ Real<Prec> sin(const Real<Prec>& x) noexcept {
+        Internal::checkTrigonometricParam<false>(x);
         if constexpr (Prec == Float32)
             return Real<Prec>(::sinf(x.toMachine()));
         else
@@ -167,6 +170,7 @@ namespace Physica {
 
     template<FloatPrec Prec>
     [[nodiscard]] __host__ __device__ Real<Prec> sinpi(const Real<Prec>& x) noexcept {
+        Internal::checkTrigonometricParam<true>(x);
     #ifdef __CUDA_ARCH__
         if constexpr (Prec == Float32)
             return Real<Prec>(::sinpif(x.toMachine()));
@@ -183,22 +187,23 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ void sincospi(Real<Prec> x, Real<Prec>& __restrict sin_result, Real<Prec>& __restrict cos_result) noexcept {
-        assert(&sin_result != &cos_result);
+    [[nodiscard]] __host__ __device__ auto sincospi(Real<Prec> x) noexcept {
+        Internal::checkTrigonometricParam<true>(x);
     #ifdef __CUDA_ARCH__
+        Real<Prec> s{}, c{};
         if constexpr (Prec == Float32)
-            ::sincospif(x.toMachine(), (float*)&sin_result, (float*)&cos_result);
+            ::sincospif(x.toMachine(), (float*)&s, (float*)&c);
         else
-            ::sincospi(x.toMachine(), (double*)&sin_result, (double*)&cos_result);
+            ::sincospi(x.toMachine(), (double*)&s, (double*)&c);
+        return std::make_pair(s, c);
     #else
-        auto [s, c] = sincos(MathConst<Real<Prec>>::pi * x);
-        *sin_result = s;
-        *cos_result = c;
+        return sincos(MathConst<Real<Prec>>::pi * x);
     #endif
     }
 
     template<FloatPrec Prec>
     [[nodiscard]] __host__ __device__ Real<Prec> tan(const Real<Prec>& x) noexcept {
+        Internal::checkTrigonometricParam<false>(x);
         if constexpr (Prec == Float32)
             return Real<Prec>(::tanf(x.toMachine()));
         else
@@ -207,10 +212,8 @@ namespace Physica {
 
     template<FloatPrec Prec>
     [[nodiscard]] __host__ __device__ Real<Prec> tanpi(const Real<Prec>& x) noexcept {
-        Real<Prec> sinpi_;
-        Real<Prec> cospi_;
-        sincospi(x, sinpi_, cospi_);
-        return sinpi_ / cospi_;
+        auto [s, c] = sincospi(x);
+        return s / c;
     }
 
     template<FloatPrec Prec>
@@ -235,18 +238,14 @@ namespace Physica {
 
     template<FloatPrec Prec>
     [[nodiscard]] Real<Prec> cot(const Real<Prec>& x) noexcept {
-        Real<Prec> sin_;
-        Real<Prec> cos_;
-        sincos(x, sin_, cos_);
-        return cos_ / sin_;
+        auto [s, c] = sincos(x);
+        return c / s;
     }
 
     template<FloatPrec Prec>
     [[nodiscard]] Real<Prec> cotpi(const Real<Prec>& x) noexcept {
-        Real<Prec> sinpi_;
-        Real<Prec> cospi_;
-        sincospi(x, sinpi_, cospi_);
-        return cospi_ / sinpi_;
+        auto [s, c] = sincospi(x);
+        return c / s;
     }
 
     template<FloatPrec Prec>

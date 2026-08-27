@@ -112,6 +112,7 @@ namespace Physica {
         /* Static Members */
         [[nodiscard]] static This nan() noexcept;
         [[nodiscard]] static This fromPhase(T phase) noexcept;
+        [[nodiscard]] static This fromPhasePi(T phasepi) noexcept;
         template<RNG R>
         [[nodiscard]] static This random_uniform();
         template<RNG R>

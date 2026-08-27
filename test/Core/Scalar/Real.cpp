@@ -20,6 +20,7 @@
 #include "Test.h"
 
 using namespace Physica;
+using RandomSource = Random<>;
 
 namespace {
     // We handle type casts in the CRTP base class. Test that we do not accidentally fall into infinite recursion.
@@ -37,6 +38,18 @@ namespace {
         x.real() += T(1);
         expect(x == T(1));
     }
+
+    void trig() {
+        using T = float64;
+        constexpr uint64_t ULP = 3;
+        auto x = T::random_uniform<RandomSource>();
+        expect<RandomSource>(scalarNear(square(cos(x)) + square(sin(x)), T(1), ULP));
+        expect<RandomSource>(scalarNear(T(1) + square(tan(x)), square(sec(x)), ULP));
+        expect<RandomSource>(scalarNear(T(1) + square(cot(x)), square(csc(x)), ULP));
+        expect<RandomSource>(scalarNear(square(cospi(x)) + square(sinpi(x)), T(1), ULP));
+        expect<RandomSource>(scalarNear(T(1) + square(tanpi(x)), square(secpi(x)), ULP));
+        expect<RandomSource>(scalarNear(T(1) + square(cotpi(x)), square(cscpi(x)), ULP));
+    }
 }
 
 int main() {
@@ -45,5 +58,6 @@ int main() {
     static_assert(std::same_as<std::strong_ordering, decltype(float32() <=> float32())>);
     infiniteCompare(float32(0), float64(0)); // Always x = y = 0, we make it a function to silent useless comparison warning
     real();
+    trig();
     return 0;
 }
