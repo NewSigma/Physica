@@ -25,11 +25,11 @@ H5Group::H5Group(H5ID id) noexcept : H5Loc(std::move(id)) {
     assert(isa<H5Group>());
 }
 
-H5Group H5Group::create(const H5ID& loc, const char* name) {
-    assert(!loc.isReadOnly());
+H5Group H5Group::create(const H5Loc& loc, const char* name) {
+    loc.checkWrite();
     return H5Group(H5ID(H5Gcreate2(loc.getHID(), name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)));
 }
 
-H5Group H5Group::open(const H5ID& loc, const char* name) {
+H5Group H5Group::open(const H5Loc& loc, const char* name) {
     return H5Group(H5ID(H5Gopen2(loc.getHID(), name, H5P_DEFAULT)));
 }

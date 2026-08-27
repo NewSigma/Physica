@@ -37,7 +37,7 @@ void H5Attribute::read(const H5Type& dtype, void* buf) const {
 }
 
 void H5Attribute::write(const H5Type& dtype, const void* buf) const {
-    assert(!isReadOnly());
+    checkWrite();
     H5Awrite(getHID(), dtype.getHID(), buf);
 }
 

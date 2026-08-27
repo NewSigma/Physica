@@ -23,6 +23,17 @@
 using namespace Physica;
 
 namespace {
+    void expect_throw(auto&& fn) noexcept {
+        bool threw = false;
+        try {
+            fn();
+        }
+        catch (...) {
+            threw = true;
+        }
+        expect(threw);
+    }
+
     void predicates() {
         TempFile temp("/tmp/tmpXXXXXX");
         auto h5f = H5File::open(temp.getName());
@@ -63,10 +74,33 @@ namespace {
             expect(dataset.isReadOnly());
         }
     }
+
+    void readOnlyWrite() {
+        TempFile temp("/tmp/tmpXXXXXX");
+        const auto type = H5Type::get<int>();
+        const auto space = H5DataSpace<1>(1);
+        const int value = 42;
+        {
+            auto h5f = H5File::open(temp.getName());
+            auto dataset = h5f.createDataSet<1>("/data", type, space);
+            dataset.write(&value, type);
+            auto attr = h5f.createAttribute("A", type, space);
+            attr.write(type, &value);
+        }
+
+        auto h5f = H5File::open(temp.getName(), H5File::ReadOnly);
+
+        expect_throw([&] { std::ignore = h5f.createDataSet<1>("/new", type, space); });
+        expect_throw([&] { std::ignore = h5f.createAttribute("B", type, space); });
+        expect_throw([&] { std::ignore = H5Group::create(h5f, "G"); });
+        expect_throw([&] { h5f.openDataSet<1>("/data").write(&value, type); });
+        expect_throw([&] { h5f.openAttribute("A").write(type, &value); });
+    }
 }
 
 int main() {
     predicates();
     stringIO();
+    readOnlyWrite();
     return 0;
 }

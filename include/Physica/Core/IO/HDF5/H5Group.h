@@ -33,8 +33,8 @@ namespace Physica {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
         /* Static members */
-        [[nodiscard]] static H5Group create(const H5ID& loc, const char* name);
-        [[nodiscard]] static H5Group open(const H5ID& loc, const char* name);
+        [[nodiscard]] static H5Group create(const H5Loc& loc, const char* name);
+        [[nodiscard]] static H5Group open(const H5Loc& loc, const char* name);
         [[nodiscard]] constexpr static IdentifierType itype() noexcept { return IdentifierType::Group; }
     };
 }

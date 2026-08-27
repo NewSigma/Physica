@@ -63,6 +63,11 @@ void H5ID::incRef() const noexcept {
     assert(err >= 0);
 }
 
+void H5ID::checkWrite() const {
+    if (isReadOnly())
+        throw IOException("Cannot write a readonly file");
+}
+
 auto H5ID::itype() const noexcept -> IdentifierType {
     switch (H5Iget_type(id)) {
     case H5I_FILE:

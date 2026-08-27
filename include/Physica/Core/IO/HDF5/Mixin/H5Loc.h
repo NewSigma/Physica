@@ -57,7 +57,7 @@ namespace Physica {
 
     template<size_t Dim>
     H5Dataset<Dim> H5Loc::createDataSet(const char* name, const H5Type& dtype, const H5DataSpace<Dim>& data_space) const {
-        assert(!isReadOnly());
+        checkWrite();
         return H5Dataset<Dim>(H5ID(H5Dcreate2(getHID(), name, dtype.getHID(), data_space.getHID(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)));
     }
 

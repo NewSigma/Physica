@@ -53,6 +53,7 @@ namespace Physica {
         template<class T>
         [[nodiscard]] T cast() && noexcept;
 
+        void checkWrite() const;
         void swap(H5ID& other) noexcept;
         /* Getters */
         [[nodiscard]] auto getHID() const noexcept { return id; }

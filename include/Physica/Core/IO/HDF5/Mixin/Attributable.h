@@ -30,10 +30,10 @@ namespace Physica {
         ~Attributable() = default;
         /* Operations */
         [[nodiscard]] H5Attribute openAttribute(this auto&&, const char* name) noexcept;
-        [[nodiscard]] H5Attribute createAttribute(this const auto&, const char* name, const H5Type& dtype, const auto& space) noexcept;
+        [[nodiscard]] H5Attribute createAttribute(this const auto&, const char* name, const H5Type& dtype, const auto& space);
 
-        void readAttr(this const auto&, const char* name, auto& value) noexcept;
-        void writeAttr(this auto&& self, const char* name, auto value) noexcept;
+        void readAttr(this const auto&, const char* name, auto& value);
+        void writeAttr(this auto&& self, const char* name, auto value);
         /* Getters */
         [[nodiscard]] bool attrExists(this const auto&, const char* name) noexcept;
     protected:
@@ -53,12 +53,12 @@ namespace Physica {
         return H5Attribute(H5ID(H5Aopen(self.getHID(), name, H5P_DEFAULT)));
     }
 
-    H5Attribute Attributable::createAttribute(this const auto& self, const char* name, const H5Type& dtype, const auto& space) noexcept {
-        assert(!self.isReadOnly());
+    H5Attribute Attributable::createAttribute(this const auto& self, const char* name, const H5Type& dtype, const auto& space) {
+        self.checkWrite();
         return H5Attribute(H5ID(H5Acreate2(self.getHID(), name, dtype.getHID(), space.getHID(), H5P_DEFAULT, H5P_DEFAULT)));
     }
 
-    void Attributable::readAttr(this const auto& self, const char* name, auto& value) noexcept {
+    void Attributable::readAttr(this const auto& self, const char* name, auto& value) {
         using T = std::remove_reference_t<decltype(value)>;
         const auto type = H5Type::get<T>();
         const auto space = H5DataSpace<1>(calcNumElem<T>());
@@ -70,7 +70,7 @@ namespace Physica {
         attr.read(type, &value);
     }
 
-    void Attributable::writeAttr(this auto&& self, const char* name, auto value) noexcept {
+    void Attributable::writeAttr(this auto&& self, const char* name, auto value) {
         using T = decltype(value);
         const auto type = H5Type::get<T>();
         const auto space = H5DataSpace<1>(calcNumElem<T>());
