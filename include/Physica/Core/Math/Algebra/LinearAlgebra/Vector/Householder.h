@@ -29,29 +29,28 @@ namespace Physica {
     void applyHouseholder(const Scalar auto factor, const V& householder, M&& mat) {
         constexpr size_t BufferSize = householder.getSizeAtCompile() == Dynamic ? Dynamic : (householder.getSizeAtCompile() + 1);
         using T = V::ScalarType;
-        using BufferType = DenseVector<T, BufferSize>;
+        using BufferVec = DenseVector<T, BufferSize>;
         assert(householder.getLength() + 1 == mat.getRow());
-        auto copy = BufferType(householder.getLength() + 1);
+        auto copy = BufferVec(householder.getLength() + 1);
         copy[0] = 1;
         copy.tail(1) = householder;
 
-        const BufferType temp1 = copy * factor;
-        using BufferType1 = DenseMatrix<T, MatrixMajor::Row, 1, decltype(mat * copy)::getSizeAtCompile()>;
-        mat -= temp1 * BufferType1(copy.hermite() * mat);
+        using BufferMat = DenseMatrix<T, MatrixMajor::Row, 1, decltype(mat * copy)::getSizeAtCompile()>;
+        ((copy * -factor) * BufferMat(copy.hermite() * mat)).assign_add(mat);
     }
 
     template<Matrix M, Vector V>
     void applyHouseholder(M&& mat, const Scalar auto factor, const V& householder) {
         constexpr size_t BufferSize = householder.getSizeAtCompile() == Dynamic ? Dynamic : (householder.getSizeAtCompile() + 1);
         using T = V::ScalarType;
-        using BufferType = DenseVector<T, BufferSize>;
+        using BufferVec = DenseVector<T, BufferSize>;
         assert(householder.getLength() + 1 == mat.getCol());
-        auto copy = BufferType(householder.getLength() + 1);
+        auto copy = BufferVec(householder.getLength() + 1);
         copy[0] = 1;
         copy.tail(1) = householder;
 
-        using BufferType1 = DenseVector<T, decltype(mat * copy)::getSizeAtCompile()>;
-        mat -= BufferType1(mat * copy) * (copy.hermite() * factor);
+        using BufferMat = DenseVector<T, decltype(mat * copy)::getSizeAtCompile()>;
+        (BufferMat(mat * copy) * (copy.hermite() * -factor)).assign_add(mat);
     }
 
     template<Matrix M, Vector V>

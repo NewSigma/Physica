@@ -23,7 +23,7 @@
 
 using namespace Physica;
 using T = float64;
-using RandomSource = Random<PCG64DXSM, 5746352372098963138>;
+using RandomSource = Random<PCG64DXSM, 5746352372098963137>;
 constexpr T HoppingT = 1;
 constexpr T RepelU = 4;
 constexpr T Beta = 4;
@@ -49,7 +49,7 @@ namespace {
         constexpr T From = -4;
         constexpr T To = 0;
         constexpr int NumVegasSample = 10000;
-        constexpr int NumBayesIter = 24;
+        constexpr int NumBayesIter = 32;
         constexpr int NumVegasIter = 128;
         constexpr int NumWarmup = 32;
         constexpr int NumSample = 1024;

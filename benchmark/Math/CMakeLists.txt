@@ -6,4 +6,7 @@ add_subdirectory(Matrix)
 add_subdirectory(MatrixDecomp)
 add_subdirectory(VectorExpr)
 
-target_sources(Benchmark PRIVATE LnSumExp.cpp)
+target_sources(Benchmark PRIVATE
+    HouseHolder.cpp
+    LnSumExp.cpp
+)
