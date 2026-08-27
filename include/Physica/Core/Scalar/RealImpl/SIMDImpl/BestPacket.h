@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Scalar/RealImpl/SIMD.h"
+#include "Instruset.h"
 
 namespace Physica {
     /**
@@ -34,9 +35,9 @@ namespace Physica {
         constexpr static size_t size128 = isFloat32 ? 4 : 2;
         constexpr static size_t size256 = isFloat32 ? 8 : 4;
         constexpr static size_t size512 = isFloat32 ? 16 : 8;
-        constexpr static bool support128 = INSTRSET >= 2;
-        constexpr static bool support256 = INSTRSET >= 7 && support128;
-        constexpr static bool support512 = INSTRSET >= 9 && support256;
+        constexpr static bool support128 = Instruset::support128();
+        constexpr static bool support256 = Instruset::support256();
+        constexpr static bool support512 = Instruset::support512();
         constexpr static bool use128 = support128 && Length >= size128 && size128 != 0;
         constexpr static bool use256 = support256 && Length >= size256 && size256 != 0;
         constexpr static bool use512 = support512 && Length >= size512 && size512 != 0;

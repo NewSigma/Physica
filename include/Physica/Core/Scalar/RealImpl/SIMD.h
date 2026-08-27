@@ -34,7 +34,7 @@ namespace Physica {
     template<Scalar T, int Size> class BoolSIMD;
 
     template<Scalar T, int Size>
-    class SIMD : public SIMDBase<SIMD<T, Size>> {
+    class PHYSICA_API SIMD : public SIMDBase<SIMD<T, Size>> {
         constexpr static bool isFloat32 = T::Prec == Float32;
         constexpr static bool isForward = T::isForwardDiff();
         using This = SIMD<T, Size>;
@@ -231,3 +231,19 @@ namespace std {
 #ifdef PHYSICA_CUDA
     #include "SIMDImpl/Half2.h"
 #endif
+
+namespace Physica {
+    extern template void SIMD<Real<Float32>, 4>::load(const Real<Float32>*, int) & noexcept;
+    extern template void SIMD<Real<Float32>, 8>::load(const Real<Float32>*, int) & noexcept;
+    extern template void SIMD<Real<Float32>, 16>::load(const Real<Float32>*, int) & noexcept;
+    extern template void SIMD<Real<Float64>, 2>::load(const Real<Float64>*, int) & noexcept;
+    extern template void SIMD<Real<Float64>, 4>::load(const Real<Float64>*, int) & noexcept;
+    extern template void SIMD<Real<Float64>, 8>::load(const Real<Float64>*, int) & noexcept;
+
+    extern template void SIMD<Real<Float32>, 4>::store(Real<Float32>*, int) const noexcept;
+    extern template void SIMD<Real<Float32>, 8>::store(Real<Float32>*, int) const noexcept;
+    extern template void SIMD<Real<Float32>, 16>::store(Real<Float32>*, int) const noexcept;
+    extern template void SIMD<Real<Float64>, 2>::store(Real<Float64>*, int) const noexcept;
+    extern template void SIMD<Real<Float64>, 4>::store(Real<Float64>*, int) const noexcept;
+    extern template void SIMD<Real<Float64>, 8>::store(Real<Float64>*, int) const noexcept;
+}
