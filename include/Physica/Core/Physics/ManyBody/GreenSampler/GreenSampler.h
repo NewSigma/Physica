@@ -74,6 +74,7 @@ namespace Physica {
 
     template<Scalar T>
     auto GreenSampler<T>::calcRSign() const noexcept -> Tv {
+        assert(cursor == 0 && "[Error]: Samples are not fully initialized!");
         return rsigns.mean();
     }
 

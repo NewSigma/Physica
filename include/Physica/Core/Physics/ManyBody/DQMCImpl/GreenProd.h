@@ -126,12 +126,12 @@ namespace Physica {
         const auto& diagD = qdt.getMatrixD().diag();
         const Tr expBetaMu = exp(betaMu);
         for (int i = 0; i < getNumSite(); ++i) {
-            const Tr originD = diagD[i];
-            const Tr expBetaMuD = expBetaMu * originD;
+            const Tr expBetaMuD = expBetaMu * diagD[i];
             const Tr absBetaMuD = abs(expBetaMuD);
-            const bool sep = absBetaMuD > Tr(1);
-            diagB.diag()[i] = sep ? absBetaMuD : Tr(1);
-            diagS.diag()[i] = sep ? unit(originD) : expBetaMuD; // Use originD to avoid underflow
+            const Tr halfAbs = sqrt(absBetaMuD);
+            bool isSubNormal = halfAbs.isSubNormal();
+            diagB.diag()[i] = isSubNormal ? Tr(1) : halfAbs;
+            diagS.diag()[i] = isSubNormal ? Tr(0) : expBetaMuD / halfAbs;
         }
     }
 
