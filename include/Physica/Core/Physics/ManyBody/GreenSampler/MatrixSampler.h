@@ -37,7 +37,9 @@ namespace Physica {
         using GreenPair = ImagKinetic<T>::GreenPair;
         constexpr static int Dim = 2;
 
+        using typename Base::Tr;
         using typename Base::Tv;
+        using typename Base::Trv;
     public:
         enum Observable : char {
             Spin,
@@ -61,7 +63,7 @@ namespace Physica {
 
         [[nodiscard]] MatrixND<T> calcRawMean() const;
         [[nodiscard]] MatrixND<T> calcMean() const;
-        [[nodiscard]] MatrixND<T> calcStructFactor() const;
+        [[nodiscard]] MatrixND<Tr> calcStructFactor() const;
         /* Getters */
         using Base::getNumSample;
         [[nodiscard]] const auto& getObserves() const noexcept { return observes; }
@@ -102,15 +104,15 @@ namespace Physica {
     }
 
     template<Scalar T>
-    MatrixND<T> MatrixSampler<T>::calcStructFactor() const {
+    auto MatrixSampler<T>::calcStructFactor() const -> MatrixND<Tr> {
         FFT<T, Dim> fft(lattice.getSuperSize(), PlanFlag::Estimate);
         fft.getRSpace() = calcMean();
         fft.transform();
 
-        MatrixND<T> result = fft.getKSpace().squaredNorms();
+        MatrixND<Tr> result = fft.getKSpace().squaredNorms();
         if (type == Spin) {
             // Add a minimum value to highlight the paramagnetic phase
-            result += T(std::numeric_limits<T>::min());
+            result += Trv(std::numeric_limits<T>::min());
         }
         else if (type == Charge) {
             // Ignore numerical errors
@@ -118,7 +120,7 @@ namespace Physica {
             const int kY = FFT<T, 1>::rSizeToKSize(getNumSiteY());
             for (int x = 0; x < kX; ++x)
                 for (int y = 0; y < kY; ++y)
-                    if (result[x, y] < square(T(std::numeric_limits<T>::epsilon())))
+                    if (result[x, y] < square(Trv(std::numeric_limits<T>::epsilon())))
                         result[x, y] = 0;
         }
         return result;
