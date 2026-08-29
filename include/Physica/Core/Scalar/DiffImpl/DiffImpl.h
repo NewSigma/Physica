@@ -246,13 +246,11 @@ namespace Physica {
         if constexpr (Diffable<U>) {
             using GradType = ResultType::GradType;
             constexpr int GradOrder = GradType::Order;
-            const auto v = reciprocal(y.template grad_mask<GradOrder>());
-            return ResultType(x.value() * v.value(), GradType(fma(y.template grad_mask<GradOrder>(), x.grad(), -x.template grad_mask<GradOrder>() * y.grad()) * square(v)));
+            const auto v = y.template grad_mask<GradOrder>();
+            return ResultType(x.value() / v.value(), GradType(fma(y.template grad_mask<GradOrder>(), x.grad(), -x.template grad_mask<GradOrder>() * y.grad()) / square(v)));
         }
-        else {
-            const auto v = reciprocal(y.value());
-            return ResultType(x.value() * v, x.grad() * v);
-        }
+        else
+            return ResultType(x.value() / y.value(), x.grad() / y.value());
     }
 
     template<Scalar T, Scalar U>
@@ -285,17 +283,16 @@ namespace Physica {
     template<Scalar T, Scalar U>
     [[nodiscard]] __host__ __device__ auto operator/(const U& x, const T& y) noexcept requires(ForwardDiff<T> && !Diffable<U>) {
         using ResultType = Internal::BinaryScalarOpRtnTy<T, U>::Type;
-        const auto rep = reciprocal(y.value());
-        return ResultType(x * rep, -x * square(rep) * y.grad());
+        return ResultType(x / y.value(), -x / square(y.value()) * y.grad());
     }
 
     template<Scalar T, Scalar U>
     [[nodiscard]] auto operator/(U&& x, T&& y) noexcept -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
             requires(ReverseDiff<T> && !Diffable<U>) {
         decltype(auto) x_ = decay_rvalue(std::forward<U>(x));
-        auto rep = reciprocal(std::forward<T>(y));
-        auto& result = co_yield x_ * rep.value();
-        rep.reverse(x_, result.grad());
+        decltype(auto) y_ = decay_rvalue(std::forward<T>(y));
+        auto& result = co_yield x_ / y_.value();
+        y_.reverse(result.value(), -result.grad() / y_.value());
     }
 
     template<Scalar T>

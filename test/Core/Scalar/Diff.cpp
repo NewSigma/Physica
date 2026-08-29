@@ -81,7 +81,9 @@ namespace {
 
         using dfloat = Diff<T, DiffMode::Forward, 2>;
         SIMD<dfloat, 4> packet{};
-        packet.load({value.data(), {grad1.data(), grad2.data()}});
+        packet.load({
+            value.data(), {grad1.data(), grad2.data()}
+        });
 
         bool good = true;
         auto result = abs(packet);
@@ -149,6 +151,30 @@ namespace {
         }
     }
 
+    void forwardReverseDiv() {
+        // Regression test that we do not use reciprocal for operator/
+        using dfloatF = Diff<T, DiffMode::Forward>;
+        using dfloatR = Diff<T, DiffMode::Reverse>;
+        const T x = T::random_uniform<RandomSource>();
+        const T y = T::random_uniform<RandomSource>() + T(1);
+        T answer = x / y;
+        {
+            const auto fwd = (dfloatF(x, T(1)) / dfloatF(y, T(0))).value();
+            const auto rev = (dfloatR(x) / dfloatR(y)).reverse();
+            expect(fwd == answer && rev == answer);
+        }
+        {
+            const auto fwd = (dfloatF(x, T(1)) / y).value();
+            const auto rev = (dfloatR(x) / y).reverse();
+            expect(fwd == answer && rev == answer);
+        }
+        {
+            const auto fwd = (x / dfloatF(y, T(1))).value();
+            const auto rev = (x / dfloatR(y)).reverse();
+            expect(fwd == answer && rev == answer);
+        }
+    }
+
     void testCompare() noexcept {
         using dfloat = Diff<float32, DiffMode::Forward>;
         auto xv = float32::random_uniform<RandomSource>();
@@ -167,6 +193,7 @@ int main() {
     testForwardMath();
     testForwardSIMD();
     testReverse();
+    forwardReverseDiv();
     testCompare();
     return 0;
 }
