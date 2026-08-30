@@ -21,6 +21,7 @@
 #include <format>
 #include <istream>
 #include "Physica/CRCoro.h"
+#include "Physica/Core/Utils/Handle.h"
 #include "../Real.h"
 
 namespace Physica {
@@ -113,9 +114,7 @@ namespace Physica {
     #ifdef PHYSICA_HDF5
         [[nodiscard]] static H5Type dtype_hdf5() noexcept { return H5Type::get<double>(); }
     #endif
-    #ifdef PHYSICA_MPI
-        [[nodiscard]] static MPI_Datatype dtype_mpi() noexcept { return MPI_DOUBLE; }
-    #endif
+        [[nodiscard]] static Handle<HandleType::MPI_Dtype> dtype_mpi() noexcept;
     };
 
     template<Scalar T>

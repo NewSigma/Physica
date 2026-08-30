@@ -18,6 +18,9 @@
  */
 #include <print>
 #include "Physica/Core/Scalar/Real.h"
+#ifdef PHYSICA_MPI
+    #include <mpi/mpi.h>
+#endif
 
 using namespace Physica;
 
@@ -46,3 +49,13 @@ auto Real<Float64>::stripSignificand() const noexcept -> Real {
 void Real<Float64>::dump() const noexcept {
     std::println("{}", *this);
 }
+
+#ifdef PHYSICA_MPI
+auto Real<Float32>::dtype_mpi() noexcept -> Handle<HandleType::MPI_Dtype> {
+    return Handle<HandleType::MPI_Dtype>(MPI_FLOAT);
+}
+
+auto Real<Float64>::dtype_mpi() noexcept -> Handle<HandleType::MPI_Dtype> {
+    return Handle<HandleType::MPI_Dtype>(MPI_DOUBLE);
+}
+#endif

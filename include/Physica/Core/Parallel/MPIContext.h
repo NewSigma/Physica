@@ -18,14 +18,17 @@
  */
 #pragma once
 
-#ifdef PHYSICA_MPI
-    #include <mpi/mpi.h>
-#endif
 #include "Physica/Macro.h"
+#include "Physica/Core/Utils/Handle.h"
 
 namespace Physica {
     class PHYSICA_API MPIContext final {
         using This = MPIContext;
+    public:
+        using comm_handle = Handle<HandleType::MPI_Comm>;
+        using dtype_handle = Handle<HandleType::MPI_Dtype>;
+
+        static const comm_handle World;
     public:
         MPIContext(const This&) = delete;
         MPIContext(This&&) noexcept = delete;
@@ -34,36 +37,15 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Static memebers */
-        [[nodiscard]] static MPIContext& getInstance() noexcept;
-        [[nodiscard]] constexpr static auto getWorld() noexcept;
-        [[nodiscard]] static inline int getNumProcess() noexcept;
-        [[nodiscard]] static inline int getProcessID() noexcept;
-        static void wait();
+        [[nodiscard]] static This& getInstance() noexcept;
+        [[nodiscard]] static int getNumProcess() noexcept;
+        [[nodiscard]] static int getProcessID() noexcept;
+
+        static void send(int from, int to, void* data, int count, dtype_handle dtype, comm_handle comm = World);
+        static void sendrecv(int send_to, int recv_from, void* data, int count, dtype_handle dtype, comm_handle comm = World);
+        static void bcast(int root, void* data, int count, dtype_handle dtype, comm_handle comm = World);
+        static void wait(comm_handle comm = World);
     private:
         MPIContext() noexcept;
     };
-
-    constexpr auto MPIContext::getWorld() noexcept {
-    #ifdef PHYSICA_MPI
-        return MPI_COMM_WORLD;
-    #else
-        return 0;
-    #endif
-    }
-
-    int MPIContext::getNumProcess() noexcept {
-        int result = 1;
-    #ifdef PHYSICA_MPI
-        MPI_Comm_size(getWorld(), &result);
-    #endif
-        return result;
-    }
-
-    int MPIContext::getProcessID() noexcept {
-        int result = 0;
-    #ifdef PHYSICA_MPI
-        MPI_Comm_rank(getWorld(), &result);
-    #endif
-        return result;
-    }
 }

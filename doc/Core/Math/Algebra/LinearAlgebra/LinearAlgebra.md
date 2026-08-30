@@ -17,9 +17,9 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 The *LinearAlgebra* module provides differentiable linear algebra functionalities with SIMD and GPU acceleration.
 
-**Differentiable Scientific Computing**: By extensively and deeply integrating automatic differentiation with modern scientific computing, the goal is to lower the cost of using automatic differentiation techniques and enable continuous benefits from algorithmic advancements through integration with underlying modules. The first step is to have a differentiable linear algebra library.
-
 Inspired by C++ linear algebra libraries such as *Eigen*$^{[1]}$ and *Armadillo*$^{[2]}$, *LinearAlgebra* makes extensive use of expression template techniques to reduce intermediate objects and perform compile-time expression transformations.
+
+**Differentiable Scientific Computing**: By extensively and deeply integrating automatic differentiation with modern scientific computing, the goal is to lower the cost of using automatic differentiation techniques and enable continuous benefits from algorithmic advancements through integration with underlying modules. The first step is to have a differentiable linear algebra library.
 
 ## Architecture Design: LValue/RValue Linear Space
 
