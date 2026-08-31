@@ -38,6 +38,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Static memebers */
         [[nodiscard]] static This& getInstance() noexcept;
+        [[nodiscard]] static bool initialized() noexcept;
         [[nodiscard]] static int getNumProcess() noexcept;
         [[nodiscard]] static int getProcessID() noexcept;
 

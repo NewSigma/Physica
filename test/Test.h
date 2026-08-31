@@ -18,9 +18,10 @@
  */
 #pragma once
 
-#include <cstdlib>
-#include <print>
+#include <cstdint>
 #include <source_location>
+#include <utility>
+#include "Physica/Macro.h"
 #include "Physica/Core/Math/Random/Random.h"
 
 namespace Physica {
@@ -29,23 +30,11 @@ namespace Physica {
         MKL
     };
 
-    [[noreturn]] inline void expect_fail(std::source_location loc, uint64_t seed) noexcept {
-        std::println("Failed at file: {}:{}:{}", loc.file_name(), loc.line(), loc.column());
-        std::println("          func: {}", loc.function_name());
-        if (seed != 0)
-            std::println("          seed: {}", seed);
-        exit(EXIT_FAILURE);
-    }
-
-    inline void expect(bool pass, std::source_location loc = std::source_location::current()) noexcept {
-        if (!pass) [[unlikely]]
-            expect_fail(loc, 0);
-    }
+    PHYSICA_API void expect(bool pass, std::source_location loc = std::source_location::current(), uint64_t seed = 0) noexcept;
 
     template<RNG R>
     void expect(bool pass, std::source_location loc = std::source_location::current()) noexcept {
-        if (!pass) [[unlikely]]
-            expect_fail(loc, R::getInstance().getSeed());
+        expect(pass, std::move(loc), R::getInstance().getSeed());
     }
 
     consteval void syntax_only([[maybe_unused]] auto expr) noexcept {}

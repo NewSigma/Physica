@@ -61,6 +61,16 @@ MPIContext& MPIContext::getInstance() noexcept {
     return mpi;
 }
 
+bool MPIContext::initialized() noexcept {
+#ifdef PHYSICA_MPI
+    int result = 0;
+    MPI_Initialized(&result);
+    return result != 0;
+#else
+    return false;
+#endif
+}
+
 int MPIContext::getNumProcess() noexcept {
 #ifdef PHYSICA_MPI
     int result{};
