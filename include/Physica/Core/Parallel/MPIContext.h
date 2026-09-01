@@ -20,35 +20,11 @@
 
 #include "Physica/Macro.h"
 #include "Physica/Core/Utils/Handle.h"
+#include "Physica/Core/Utils/PrimitiveType.h"
 
 namespace Physica {
     class PHYSICA_API MPIContext final {
         using This = MPIContext;
-        enum class Dtype : int8_t {
-            Int8,
-            Int16,
-            Int32,
-            Int64,
-            UInt8,
-            UInt16,
-            UInt32,
-            UInt64,
-            Bool,
-            Char,
-            SignedChar,
-            UnsignedChar,
-            Short,
-            UnsignedShort,
-            Int,
-            UnsignedInt,
-            Long,
-            UnsignedLong,
-            LongLong,
-            UnsignedLongLong,
-            Float,
-            Double,
-            LongDouble
-        };
     public:
         using comm_handle = Handle<HandleType::MPI_Comm>;
         using dtype_handle = Handle<HandleType::MPI_Dtype>;
@@ -76,58 +52,58 @@ namespace Physica {
         [[nodiscard]] static dtype_handle dtype() noexcept;
     private:
         MPIContext() noexcept;
-        /* Static members */
-        [[nodiscard]] static dtype_handle dtype_scalar(Dtype type) noexcept;
+        /* Static memebers */
+        [[nodiscard]] static dtype_handle dtype_primitive(PrimitiveType type) noexcept;
     };
 
     template<class T>
     auto MPIContext::dtype() noexcept -> dtype_handle {
         if constexpr (std::is_same_v<T, int8_t>)
-            return dtype_scalar(Dtype::Int8);
+            return dtype_primitive(PrimitiveType::Int8);
         else if constexpr (std::is_same_v<T, int16_t>)
-            return dtype_scalar(Dtype::Int16);
+            return dtype_primitive(PrimitiveType::Int16);
         else if constexpr (std::is_same_v<T, int32_t>)
-            return dtype_scalar(Dtype::Int32);
+            return dtype_primitive(PrimitiveType::Int32);
         else if constexpr (std::is_same_v<T, int64_t>)
-            return dtype_scalar(Dtype::Int64);
+            return dtype_primitive(PrimitiveType::Int64);
         else if constexpr (std::is_same_v<T, uint8_t>)
-            return dtype_scalar(Dtype::UInt8);
+            return dtype_primitive(PrimitiveType::UInt8);
         else if constexpr (std::is_same_v<T, uint16_t>)
-            return dtype_scalar(Dtype::UInt16);
+            return dtype_primitive(PrimitiveType::UInt16);
         else if constexpr (std::is_same_v<T, uint32_t>)
-            return dtype_scalar(Dtype::UInt32);
+            return dtype_primitive(PrimitiveType::UInt32);
         else if constexpr (std::is_same_v<T, uint64_t>)
-            return dtype_scalar(Dtype::UInt64);
+            return dtype_primitive(PrimitiveType::UInt64);
         else if constexpr (std::is_same_v<T, bool>)
-            return dtype_scalar(Dtype::Bool);
+            return dtype_primitive(PrimitiveType::Bool);
         else if constexpr (std::is_same_v<T, char>)
-            return dtype_scalar(Dtype::Char);
+            return dtype_primitive(PrimitiveType::Char);
         else if constexpr (std::is_same_v<T, signed char>)
-            return dtype_scalar(Dtype::SignedChar);
+            return dtype_primitive(PrimitiveType::SignedChar);
         else if constexpr (std::is_same_v<T, unsigned char>)
-            return dtype_scalar(Dtype::UnsignedChar);
+            return dtype_primitive(PrimitiveType::UnsignedChar);
         else if constexpr (std::is_same_v<T, short>)
-            return dtype_scalar(Dtype::Short);
+            return dtype_primitive(PrimitiveType::Short);
         else if constexpr (std::is_same_v<T, unsigned short>)
-            return dtype_scalar(Dtype::UnsignedShort);
+            return dtype_primitive(PrimitiveType::UnsignedShort);
         else if constexpr (std::is_same_v<T, int>)
-            return dtype_scalar(Dtype::Int);
+            return dtype_primitive(PrimitiveType::Int);
         else if constexpr (std::is_same_v<T, unsigned int>)
-            return dtype_scalar(Dtype::UnsignedInt);
+            return dtype_primitive(PrimitiveType::UnsignedInt);
         else if constexpr (std::is_same_v<T, long>)
-            return dtype_scalar(Dtype::Long);
+            return dtype_primitive(PrimitiveType::Long);
         else if constexpr (std::is_same_v<T, unsigned long>)
-            return dtype_scalar(Dtype::UnsignedLong);
+            return dtype_primitive(PrimitiveType::UnsignedLong);
         else if constexpr (std::is_same_v<T, long long>)
-            return dtype_scalar(Dtype::LongLong);
+            return dtype_primitive(PrimitiveType::LongLong);
         else if constexpr (std::is_same_v<T, unsigned long long>)
-            return dtype_scalar(Dtype::UnsignedLongLong);
+            return dtype_primitive(PrimitiveType::UnsignedLongLong);
         else if constexpr (std::is_same_v<T, float>)
-            return dtype_scalar(Dtype::Float);
+            return dtype_primitive(PrimitiveType::Float);
         else if constexpr (std::is_same_v<T, double>)
-            return dtype_scalar(Dtype::Double);
+            return dtype_primitive(PrimitiveType::Double);
         else if constexpr (std::is_same_v<T, long double>)
-            return dtype_scalar(Dtype::LongDouble);
+            return dtype_primitive(PrimitiveType::LongDouble);
         else if constexpr (std::is_enum_v<T>)
             return dtype<std::underlying_type_t<T>>();
         else

@@ -18,7 +18,10 @@
  */
 #pragma once
 
+#include <cstdint>
+#include <type_traits>
 #include <H5Tpublic.h>
+#include "Physica/Core/Utils/PrimitiveType.h"
 #include "Mixin/H5ID.h"
 
 namespace Physica {
@@ -44,6 +47,8 @@ namespace Physica {
     private:
         explicit H5Type(H5ID id) noexcept;
         explicit H5Type(hid_t hid) noexcept;
+        /* Static members */
+        [[nodiscard]] static This getPrimitiveType(PrimitiveType type) noexcept;
 
         friend class H5ID;
     };
@@ -51,51 +56,51 @@ namespace Physica {
     template<class T>
     auto H5Type::get() noexcept -> This {
         if constexpr (std::is_same_v<T, int8_t>)
-            return This(H5T_NATIVE_INT8);
+            return getPrimitiveType(PrimitiveType::Int8);
         else if constexpr (std::is_same_v<T, int16_t>)
-            return This(H5T_NATIVE_INT16);
+            return getPrimitiveType(PrimitiveType::Int16);
         else if constexpr (std::is_same_v<T, int32_t>)
-            return This(H5T_NATIVE_INT32);
+            return getPrimitiveType(PrimitiveType::Int32);
         else if constexpr (std::is_same_v<T, int64_t>)
-            return This(H5T_NATIVE_INT64);
+            return getPrimitiveType(PrimitiveType::Int64);
         else if constexpr (std::is_same_v<T, uint8_t>)
-            return This(H5T_NATIVE_UINT8);
+            return getPrimitiveType(PrimitiveType::UInt8);
         else if constexpr (std::is_same_v<T, uint16_t>)
-            return This(H5T_NATIVE_UINT16);
+            return getPrimitiveType(PrimitiveType::UInt16);
         else if constexpr (std::is_same_v<T, uint32_t>)
-            return This(H5T_NATIVE_UINT32);
+            return getPrimitiveType(PrimitiveType::UInt32);
         else if constexpr (std::is_same_v<T, uint64_t>)
-            return This(H5T_NATIVE_UINT64);
+            return getPrimitiveType(PrimitiveType::UInt64);
         else if constexpr (std::is_same_v<T, bool>)
-            return This(H5T_NATIVE_HBOOL);
+            return getPrimitiveType(PrimitiveType::Bool);
         else if constexpr (std::is_same_v<T, char>)
-            return This(H5T_NATIVE_CHAR);
+            return getPrimitiveType(PrimitiveType::Char);
         else if constexpr (std::is_same_v<T, signed char>)
-            return This(H5T_NATIVE_SCHAR);
+            return getPrimitiveType(PrimitiveType::SignedChar);
         else if constexpr (std::is_same_v<T, unsigned char>)
-            return This(H5T_NATIVE_UCHAR);
+            return getPrimitiveType(PrimitiveType::UnsignedChar);
         else if constexpr (std::is_same_v<T, short>)
-            return This(H5T_NATIVE_SHORT);
+            return getPrimitiveType(PrimitiveType::Short);
         else if constexpr (std::is_same_v<T, unsigned short>)
-            return This(H5T_NATIVE_USHORT);
+            return getPrimitiveType(PrimitiveType::UnsignedShort);
         else if constexpr (std::is_same_v<T, int>)
-            return This(H5T_NATIVE_INT);
+            return getPrimitiveType(PrimitiveType::Int);
         else if constexpr (std::is_same_v<T, unsigned int>)
-            return This(H5T_NATIVE_UINT);
+            return getPrimitiveType(PrimitiveType::UnsignedInt);
         else if constexpr (std::is_same_v<T, long>)
-            return This(H5T_NATIVE_LONG);
+            return getPrimitiveType(PrimitiveType::Long);
         else if constexpr (std::is_same_v<T, unsigned long>)
-            return This(H5T_NATIVE_ULONG);
+            return getPrimitiveType(PrimitiveType::UnsignedLong);
         else if constexpr (std::is_same_v<T, long long>)
-            return This(H5T_NATIVE_LLONG);
+            return getPrimitiveType(PrimitiveType::LongLong);
         else if constexpr (std::is_same_v<T, unsigned long long>)
-            return This(H5T_NATIVE_ULLONG);
+            return getPrimitiveType(PrimitiveType::UnsignedLongLong);
         else if constexpr (std::is_same_v<T, float>)
-            return This(H5T_NATIVE_FLOAT);
+            return getPrimitiveType(PrimitiveType::Float);
         else if constexpr (std::is_same_v<T, double>)
-            return This(H5T_NATIVE_DOUBLE);
+            return getPrimitiveType(PrimitiveType::Double);
         else if constexpr (std::is_same_v<T, long double>)
-            return This(H5T_NATIVE_LDOUBLE);
+            return getPrimitiveType(PrimitiveType::LongDouble);
         else if constexpr (std::is_enum_v<T>)
             return get<std::underlying_type_t<T>>();
         else {

@@ -114,7 +114,7 @@ namespace Physica {
     #ifdef PHYSICA_HDF5
         [[nodiscard]] static H5Type dtype_hdf5() noexcept { return H5Type::get<float>(); }
     #endif
-        [[nodiscard]] static Handle<HandleType::MPI_Dtype> dtype_mpi() noexcept;
+        [[nodiscard]] static auto dtype_mpi() noexcept -> Handle<HandleType::MPI_Dtype>;
     };
 
     template<Scalar T>

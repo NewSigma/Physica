@@ -148,54 +148,54 @@ void MPIContext::wait(comm_handle comm) {
 #endif
 }
 
-auto MPIContext::dtype_scalar(Dtype type) noexcept -> dtype_handle {
+auto MPIContext::dtype_primitive(PrimitiveType type) noexcept -> dtype_handle {
     switch (type) {
 #ifdef PHYSICA_MPI
-    case Dtype::Int8:
+    case PrimitiveType::Int8:
         return dtype_handle(MPI_INT8_T);
-    case Dtype::Int16:
+    case PrimitiveType::Int16:
         return dtype_handle(MPI_INT16_T);
-    case Dtype::Int32:
+    case PrimitiveType::Int32:
         return dtype_handle(MPI_INT32_T);
-    case Dtype::Int64:
+    case PrimitiveType::Int64:
         return dtype_handle(MPI_INT64_T);
-    case Dtype::UInt8:
+    case PrimitiveType::UInt8:
         return dtype_handle(MPI_UINT8_T);
-    case Dtype::UInt16:
+    case PrimitiveType::UInt16:
         return dtype_handle(MPI_UINT16_T);
-    case Dtype::UInt32:
+    case PrimitiveType::UInt32:
         return dtype_handle(MPI_UINT32_T);
-    case Dtype::UInt64:
+    case PrimitiveType::UInt64:
         return dtype_handle(MPI_UINT64_T);
-    case Dtype::Bool:
+    case PrimitiveType::Bool:
         return dtype_handle(MPI_C_BOOL);
-    case Dtype::Char:
+    case PrimitiveType::Char:
         return dtype_handle(MPI_CHAR);
-    case Dtype::SignedChar:
+    case PrimitiveType::SignedChar:
         return dtype_handle(MPI_SIGNED_CHAR);
-    case Dtype::UnsignedChar:
+    case PrimitiveType::UnsignedChar:
         return dtype_handle(MPI_UNSIGNED_CHAR);
-    case Dtype::Short:
+    case PrimitiveType::Short:
         return dtype_handle(MPI_SHORT);
-    case Dtype::UnsignedShort:
+    case PrimitiveType::UnsignedShort:
         return dtype_handle(MPI_UNSIGNED_SHORT);
-    case Dtype::Int:
+    case PrimitiveType::Int:
         return dtype_handle(MPI_INT);
-    case Dtype::UnsignedInt:
+    case PrimitiveType::UnsignedInt:
         return dtype_handle(MPI_UNSIGNED);
-    case Dtype::Long:
+    case PrimitiveType::Long:
         return dtype_handle(MPI_LONG);
-    case Dtype::UnsignedLong:
+    case PrimitiveType::UnsignedLong:
         return dtype_handle(MPI_UNSIGNED_LONG);
-    case Dtype::LongLong:
+    case PrimitiveType::LongLong:
         return dtype_handle(MPI_LONG_LONG);
-    case Dtype::UnsignedLongLong:
+    case PrimitiveType::UnsignedLongLong:
         return dtype_handle(MPI_UNSIGNED_LONG_LONG);
-    case Dtype::Float:
+    case PrimitiveType::Float:
         return dtype_handle(MPI_FLOAT);
-    case Dtype::Double:
+    case PrimitiveType::Double:
         return dtype_handle(MPI_DOUBLE);
-    case Dtype::LongDouble:
+    case PrimitiveType::LongDouble:
         return dtype_handle(MPI_LONG_DOUBLE);
 #endif
     default:

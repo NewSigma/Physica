@@ -34,7 +34,7 @@ namespace {
         HostDevAttr::CacheSizeL1D * 3 / 4,
         HostDevAttr::CacheSizeL2 * 3 / 4,
         HostDevAttr::CacheSizeL3 * 3 / 4,
-        HostDevAttr::CacheSizeL3  * 6 / 5
+        HostDevAttr::CacheSizeL3 * 6 / 5
     };
 
     class Reporter : public ConsoleReporter {
