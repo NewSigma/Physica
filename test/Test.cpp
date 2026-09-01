@@ -19,7 +19,7 @@
 #include "Test.h"
 #include <cstdlib>
 #include <print>
-#include "Physica/Core/Parallel/MPIContext.h"
+#include "Physica/Core/Parallel/MPI.h"
 #ifdef PHYSICA_MPI
     #include <mpi/mpi.h>
 #endif
@@ -32,8 +32,8 @@ namespace {
             std::println("          seed: {}", seed);
     #ifdef PHYSICA_MPI
         using namespace Physica;
-        if (MPIContext::initialized())
-            MPI_Abort(MPI_Comm(MPIContext::World), EXIT_FAILURE);
+        if (MPI::initialized())
+            MPI_Abort(MPI_Comm(MPI::World), EXIT_FAILURE);
     #endif
         exit(EXIT_FAILURE);
     }

@@ -6,5 +6,5 @@ if(${PHYSICA_CUDA})
 endif()
 
 if(${PHYSICA_MPI})
-    physica_add_mpi_test(MPIContext MPIContext.cpp 2)
+    physica_add_mpi_test(MPI MPI.cpp 2)
 endif()

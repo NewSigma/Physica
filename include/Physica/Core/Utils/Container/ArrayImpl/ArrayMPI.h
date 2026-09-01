@@ -19,22 +19,22 @@
 #pragma once
 
 #include "ArrayBase.h"
-#include "Physica/Core/Parallel/MPIContext.h"
+#include "Physica/Core/Parallel/MPI.h"
 #include "Physica/Core/Exception/MPIException.h"
 
 namespace Physica {
     template<class Derived, class Allocator>
-    void ArrayBase<Derived, Allocator>::send(int from, int to) {
-        MPIContext::send(from, to, data(), getLength(), MPIContext::dtype<ElemType>(), MPIContext::World);
+    void ArrayBase<Derived, Allocator>::pass(int from, int to) {
+        MPI::pass(from, to, data(), getLength(), MPI::dtype<ElemType>(), MPI::World);
     }
 
     template<class Derived, class Allocator>
     void ArrayBase<Derived, Allocator>::sendrecv(int send_to, int recv_from) {
-        MPIContext::sendrecv(send_to, recv_from, data(), getLength(), MPIContext::dtype<ElemType>(), MPIContext::World);
+        MPI::sendrecv(send_to, recv_from, data(), getLength(), MPI::dtype<ElemType>(), MPI::World);
     }
 
     template<class Derived, class Allocator>
     void ArrayBase<Derived, Allocator>::bcast(int root) {
-        MPIContext::bcast(root, data(), getLength(), MPIContext::dtype<ElemType>(), MPIContext::World);
+        MPI::bcast(root, data(), getLength(), MPI::dtype<ElemType>(), MPI::World);
     }
 }

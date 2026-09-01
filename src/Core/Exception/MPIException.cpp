@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Exception/MPIException.h"
-#include "Physica/Core/Parallel/MPIContext.h"
+#include "Physica/Core/Parallel/MPI.h"
 #include <array>
 #include <format>
 #include <mpi/mpi.h>
@@ -26,7 +26,7 @@ using namespace Physica;
 
 namespace {
     class Impl final : public std::error_category {
-        int rank = MPIContext::getProcessID();
+        int rank = MPI::getProcessID();
     public:
         Impl() = default;
         Impl(const Impl&) = delete;

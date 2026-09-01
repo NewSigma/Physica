@@ -16,33 +16,34 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include <format>
-#include "Physica/Core/Parallel/MPIContext.h"
+#include "Physica/Core/Parallel/MPI.h"
 #include "Physica/Core/Exception/MPIException.h"
 #include "Physica/Core/Utils/Builtin.h"
 #include "Physica/Core/Utils/NoImpl.h"
 #ifdef PHYSICA_MPI
     #include <mpi/mpi.h>
 #else
-    constexpr void* MPI_COMM_WORLD = nullptr;
+constexpr static void* MPI_COMM_WORLD = nullptr;
 #endif
 
 using namespace Physica;
 
 namespace {
-    [[maybe_unused]] constexpr void checkPID([[maybe_unused]] int pid) noexcept {
-        assert(0 <= pid && pid < MPIContext::getNumProcess());
+    constexpr void checkPID([[maybe_unused]] int pid) noexcept {
+        assert(0 <= pid && pid < MPI::getNumProcess());
     }
 
-    [[maybe_unused]] constexpr void checkPID(int pid, auto... pids) {
+    constexpr void checkPID(int pid, auto... pids) {
         checkPID(pid);
         checkPID(pids...);
     }
 }
 
-const auto MPIContext::World = Handle<HandleType::MPI_Comm>(MPI_COMM_WORLD);
+const auto MPI::World = Handle<HandleType::MPI_Comm>(MPI_COMM_WORLD);
 
-MPIContext::MPIContext() noexcept {
+MPI::MPI() noexcept {
 #ifdef PHYSICA_MPI
     try {
         int mode = -1;
@@ -62,18 +63,18 @@ MPIContext::MPIContext() noexcept {
 #endif
 }
 
-MPIContext::~MPIContext() {
+MPI::~MPI() {
 #ifdef PHYSICA_MPI
     MPI_Finalize();
 #endif
 }
 
-MPIContext& MPIContext::getInstance() noexcept {
-    static MPIContext mpi{};
+MPI& MPI::getInstance() noexcept {
+    static MPI mpi{};
     return mpi;
 }
 
-bool MPIContext::initialized() noexcept {
+bool MPI::initialized() noexcept {
 #ifdef PHYSICA_MPI
     int result = 0;
     MPI_Initialized(&result);
@@ -83,7 +84,7 @@ bool MPIContext::initialized() noexcept {
 #endif
 }
 
-int MPIContext::getNumProcess() noexcept {
+int MPI::getNumProcess() noexcept {
 #ifdef PHYSICA_MPI
     int result{};
     MPI_Comm_size(MPI_Comm(World), &result);
@@ -93,7 +94,7 @@ int MPIContext::getNumProcess() noexcept {
 #endif
 }
 
-int MPIContext::getProcessID() noexcept {
+int MPI::getProcessID() noexcept {
 #ifdef PHYSICA_MPI
     int result{};
     MPI_Comm_rank(MPI_Comm(World), &result);
@@ -103,28 +104,41 @@ int MPIContext::getProcessID() noexcept {
 #endif
 }
 
-void MPIContext::send(int from, int to, void* data, int count, dtype_handle dtype, comm_handle comm) {
+void MPI::send(int to, void* data, int count, dtype_handle dtype, comm_handle comm) {
+    checkPID(to);
 #ifdef PHYSICA_MPI
-    checkPID(from, to);
-    assert(from != to);
-    const int id = MPIContext::getProcessID();
-    if (id == from)
-        check_mpi(MPI_Send(data, count, MPI_Datatype(dtype), to, 0, MPI_Comm(comm)));
-    else if (id == to) {
-        MPI_Status status;
-        check_mpi(MPI_Recv(data, count, MPI_Datatype(dtype), from, MPI_ANY_TAG, MPI_Comm(comm), IsDebug() ? &status : MPI_STATUS_IGNORE));
-        if constexpr (IsDebug()) {
-            int recv_count{};
-            MPI_Get_count(&status, MPI_Datatype(dtype), &recv_count);
-            assert(recv_count == count && "[Error]: Recv length do not match");
-        }
-    }
+
+    check_mpi(MPI_Send(data, count, MPI_Datatype(dtype), to, 0, MPI_Comm(comm)));
 #endif
 }
 
-void MPIContext::sendrecv(int send_to, int recv_from, void* data, int count, dtype_handle dtype, comm_handle comm) {
+void MPI::recv(int from, void* data, int count, dtype_handle dtype, comm_handle comm) {
+    checkPID(from);
 #ifdef PHYSICA_MPI
+    MPI_Status status;
+    check_mpi(MPI_Recv(data, count, MPI_Datatype(dtype), from, MPI_ANY_TAG, MPI_Comm(comm), IsDebug() ? &status : MPI_STATUS_IGNORE));
+    if constexpr (IsDebug()) {
+        int recv_count{};
+        MPI_Get_count(&status, MPI_Datatype(dtype), &recv_count);
+        assert(recv_count == count && "[Error]: Recv length do not match");
+    }
+#endif
+}
+/**
+ * A paired send-recv, useful for avoiding dead lock
+ */
+void MPI::pass(int from, int to, void* data, int count, dtype_handle dtype, comm_handle comm) {
+    assert(from != to);
+    const int id = MPI::getProcessID();
+    if (id == from)
+        send(to, data, count, dtype, comm);
+    else if (id == to)
+        recv(from, data, count, dtype, comm);
+}
+
+void MPI::sendrecv(int send_to, int recv_from, void* data, int count, dtype_handle dtype, comm_handle comm) {
     checkPID(send_to, recv_from);
+#ifdef PHYSICA_MPI
     MPI_Status status;
     check_mpi(MPI_Sendrecv_replace(data, count, MPI_Datatype(dtype), send_to, 0, recv_from, MPI_ANY_TAG, MPI_Comm(comm), IsDebug() ? &status : MPI_STATUS_IGNORE));
     if constexpr (IsDebug()) {
@@ -135,20 +149,20 @@ void MPIContext::sendrecv(int send_to, int recv_from, void* data, int count, dty
 #endif
 }
 
-void MPIContext::bcast(int root, void* data, int count, dtype_handle dtype, comm_handle comm) {
-#ifdef PHYSICA_MPI
+void MPI::bcast(int root, void* data, int count, dtype_handle dtype, comm_handle comm) {
     checkPID(root);
+#ifdef PHYSICA_MPI
     check_mpi(MPI_Bcast(data, count, MPI_Datatype(dtype), root, MPI_Comm(comm)));
 #endif
 }
 
-void MPIContext::wait(comm_handle comm) {
+void MPI::wait(comm_handle comm) {
 #ifdef PHYSICA_MPI
     check_mpi(MPI_Barrier(MPI_Comm(comm)));
 #endif
 }
 
-auto MPIContext::dtype_primitive(PrimitiveType type) noexcept -> dtype_handle {
+auto MPI::dtype_primitive(PrimitiveType type) noexcept -> dtype_handle {
     switch (type) {
 #ifdef PHYSICA_MPI
     case PrimitiveType::Int8:

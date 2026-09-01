@@ -173,6 +173,7 @@ if(${PHYSICA_MPI})
     set(MPI_CXX_COMPILE_OPTIONS "")
     find_package(MPI REQUIRED)
     add_definitions(-DPHYSICA_MPI)
+    add_definitions(-DOMPI_SKIP_MPICXX) # Ubuntu 24.04 builds OpenMPI with CXX support. Drop it to avoid ambiguous name.
 endif()
 
 if (${PHYSICA_HDF5})

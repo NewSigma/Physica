@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Parallel/MPIContext.h"
+#include "Physica/Core/Parallel/MPI.h"
 #include "Physica/Core/Utils/Container/Array.h"
 #include "Test.h"
 
@@ -24,14 +24,14 @@ using namespace Physica;
 
 namespace {
     void send() noexcept {
-        const int id = MPIContext::getProcessID();
+        const int id = MPI::getProcessID();
         Array<int, 1> arr{id};
-        arr.send(0, 1);
+        arr.pass(0, 1);
         expect(arr[0] == 0);
     }
 
     void sendrecv() noexcept {
-        const int id = MPIContext::getProcessID();
+        const int id = MPI::getProcessID();
         int partner = id == 0 ? 1 : 0;
         Array<int, 1> arr{id};
         arr.sendrecv(partner, partner);
@@ -39,15 +39,15 @@ namespace {
     }
 
     void bcast() noexcept {
-        Array<int, 1> arr{MPIContext::getProcessID()};
+        Array<int, 1> arr{MPI::getProcessID()};
         arr.bcast(0);
         expect(arr[0] == 0);
     }
 }
 
 int main() {
-    std::ignore = MPIContext::getInstance();
-    expect(MPIContext::getNumProcess() == 2);
+    std::ignore = MPI::getInstance();
+    expect(MPI::getNumProcess() == 2);
     send();
     sendrecv();
     bcast();

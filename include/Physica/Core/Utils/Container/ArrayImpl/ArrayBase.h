@@ -62,7 +62,7 @@ namespace Physica {
         template<class R>
         auto& select(this auto&&) noexcept;
 
-        void send(int from, int to);
+        void pass(int from, int to);
         void sendrecv(int send_to, int recv_from);
         void bcast(int root);
 

@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Math/Random/RandomSeed.h"
 #include "Physica/Core/Parallel/ThreadPool.h"
-#include "Physica/Core/Parallel/MPIContext.h"
+#include "Physica/Core/Parallel/MPI.h"
 #include "Physica/Core/Utils/Cycler.h"
 
 using namespace Physica;
@@ -62,14 +62,14 @@ void RandomBase::reseed(RandomOption option) {
 
 void RandomBase::reseed(uint64_t seed_, RandomOption option) {
     if constexpr (HasMPI())
-        std::ignore = MPIContext::getInstance();
+        std::ignore = MPI::getInstance();
 
     seed = seed_;
     seq = SeedSequence<4>({
         static_cast<uint32_t>(seed),
         static_cast<uint32_t>(seed >> 32UL),
         static_cast<uint32_t>(ThreadPool::getThreadID()),
-        static_cast<uint32_t>(MPIContext::getProcessID())
+        static_cast<uint32_t>(MPI::getProcessID())
     });
 
     if constexpr (HasMKL()) {

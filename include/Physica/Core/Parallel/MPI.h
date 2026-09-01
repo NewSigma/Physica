@@ -23,27 +23,28 @@
 #include "Physica/Core/Utils/PrimitiveType.h"
 
 namespace Physica {
-    class PHYSICA_API MPIContext final {
-        using This = MPIContext;
+    class PHYSICA_API MPI final {
     public:
         using comm_handle = Handle<HandleType::MPI_Comm>;
         using dtype_handle = Handle<HandleType::MPI_Dtype>;
 
         static const comm_handle World;
     public:
-        MPIContext(const This&) = delete;
-        MPIContext(This&&) noexcept = delete;
-        ~MPIContext();
+        MPI(const MPI&) = delete;
+        MPI(MPI&&) noexcept = delete;
+        ~MPI();
         /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
+        MPI& operator=(const MPI&) = delete;
+        MPI& operator=(MPI&&) noexcept = delete;
         /* Static members */
-        [[nodiscard]] static This& getInstance() noexcept;
+        [[nodiscard]] static MPI& getInstance() noexcept;
         [[nodiscard]] static bool initialized() noexcept;
         [[nodiscard]] static int getNumProcess() noexcept;
         [[nodiscard]] static int getProcessID() noexcept;
 
-        static void send(int from, int to, void* data, int count, dtype_handle dtype, comm_handle comm = World);
+        static void send(int to, void* data, int count, dtype_handle dtype, comm_handle comm = World);
+        static void recv(int from, void* data, int count, dtype_handle dtype, comm_handle comm = World);
+        static void pass(int from, int to, void* data, int count, dtype_handle dtype, comm_handle comm = World);
         static void sendrecv(int send_to, int recv_from, void* data, int count, dtype_handle dtype, comm_handle comm = World);
         static void bcast(int root, void* data, int count, dtype_handle dtype, comm_handle comm = World);
         static void wait(comm_handle comm = World);
@@ -51,13 +52,13 @@ namespace Physica {
         template<class T>
         [[nodiscard]] static dtype_handle dtype() noexcept;
     private:
-        MPIContext() noexcept;
+        MPI() noexcept;
         /* Static memebers */
         [[nodiscard]] static dtype_handle dtype_primitive(PrimitiveType type) noexcept;
     };
 
     template<class T>
-    auto MPIContext::dtype() noexcept -> dtype_handle {
+    auto MPI::dtype() noexcept -> dtype_handle {
         if constexpr (std::is_same_v<T, int8_t>)
             return dtype_primitive(PrimitiveType::Int8);
         else if constexpr (std::is_same_v<T, int16_t>)
