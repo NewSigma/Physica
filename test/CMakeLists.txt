@@ -16,6 +16,18 @@ function(physica_add_test NAME SOURCES)
     add_dependencies(Tests Test-${NAME})
 endfunction()
 
+function(physica_add_mpi_test NAME SOURCES NUM_PROCS)
+    add_executable(Test-${NAME})
+    target_sources(Test-${NAME} PRIVATE ${SOURCES} ${ARGN})
+    target_include_directories(Test-${NAME} PRIVATE ${CMAKE_SOURCE_DIR}/test)
+    target_link_libraries(Test-${NAME} TestSupportLib ${GPerfTools_LIBRARY})
+
+    add_test(NAME Test-${NAME}
+             COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${NUM_PROCS} $<TARGET_FILE:Test-${NAME}>)
+
+    add_dependencies(Tests Test-${NAME})
+endfunction()
+
 message(STATUS "Configuring tests.")
 
 add_subdirectory(Core)

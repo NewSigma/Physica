@@ -25,16 +25,16 @@
 namespace Physica {
     template<class Derived, class Allocator>
     void ArrayBase<Derived, Allocator>::send(int from, int to) {
-        MPIContext::send(from, to, data(), getLength(), ElemType::dtype_mpi(), MPIContext::World);
+        MPIContext::send(from, to, data(), getLength(), MPIContext::dtype<ElemType>(), MPIContext::World);
     }
 
     template<class Derived, class Allocator>
     void ArrayBase<Derived, Allocator>::sendrecv(int send_to, int recv_from) {
-        MPIContext::sendrecv(send_to, recv_from, data(), getLength(), ElemType::dtype_mpi(), MPIContext::World);
+        MPIContext::sendrecv(send_to, recv_from, data(), getLength(), MPIContext::dtype<ElemType>(), MPIContext::World);
     }
 
     template<class Derived, class Allocator>
     void ArrayBase<Derived, Allocator>::bcast(int root) {
-        MPIContext::bcast(root, data(), getLength(), ElemType::dtype_mpi(), MPIContext::World);
+        MPIContext::bcast(root, data(), getLength(), MPIContext::dtype<ElemType>(), MPIContext::World);
     }
 }
