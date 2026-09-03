@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -117,7 +117,7 @@ namespace Physica {
         }
         if constexpr (IsSpinPolarized) {
             auto zeta = getPolarDensity().flatten();
-            zeta = T(0);
+            zeta.zeros();
         }
     }
 

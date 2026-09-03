@@ -166,7 +166,7 @@ namespace Physica {
 
     template<Matrix M>
     void BiDiagMatrixB<M>::assign(Matrix auto& target) const {
-        target = T(0);
+        target.zeros();
         const size_t col_1 = target.getCol() - 1;
         for (size_t i = 0; i < col_1; ++i) {
             target[i, i] = bidiag.mainDiag[i];

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -65,7 +65,7 @@ namespace Physica {
             : Base(std::move(fire))
             , baro(reciprocal(lattMass_), 0, targetP)
             , lattMass(lattMass_) {
-        lattMomentum = T(0);
+        lattMomentum.zeros();
     }
 
     template<Scalar T, unsigned int Dim, BaroType Type>

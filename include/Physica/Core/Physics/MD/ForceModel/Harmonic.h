@@ -91,7 +91,7 @@ namespace Physica {
     template<ExecutePolicy P>
     void Harmonic<T, Dim>::forceAsync(const MDCellType& cell, Vector auto& result) const {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
-        result = T(0);
+        result.zeros();
         for (size_t i = 0; i < getNumParticle(); ++i) {
             auto force_i = result.template segment<Dim>(i * Dim, (i + 1) * Dim);
             force_i = -springCoeffs[i] * cell.minDistVector(sites.row(i), i);

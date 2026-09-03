@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -109,7 +109,7 @@ namespace Physica {
         }
         else {
             timeStep *= stepDecFactor;
-            momentum = T(0);
+            momentum.zeros();
             mixAlpha = mixAlpha0;
             numStep = 0;
         }

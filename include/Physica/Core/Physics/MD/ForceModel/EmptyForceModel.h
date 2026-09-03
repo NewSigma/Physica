@@ -71,7 +71,7 @@ namespace Physica {
     void EmptyForceModel<T, Dim>::forceAsync(
             [[maybe_unused]] const MDCellType& cell, Vector auto& result) const {
         assert(result.getLength() == cell.getDOF() && "[Error]: Array length does not match");
-        result = T(0);
+        result.zeros();
     }
 
     template<Scalar T, unsigned int Dim>

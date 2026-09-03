@@ -317,8 +317,8 @@ namespace Physica {
 
         auto& newFock = deltaFock;
         auto& newDensity = deltaDensity;
-        newFock = T(0);
-        newDensity = T(0);
+        newFock.zeros();
+        newDensity.zeros();
         for (size_t i = 0; i < problemDim; ++i) {
             newFock += fockMatrices[offset + i] * QP.getSolution()[i];
             newDensity += densityMatrices[i] * QP.getSolution()[i];

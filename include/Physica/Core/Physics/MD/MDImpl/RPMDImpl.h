@@ -759,7 +759,7 @@ namespace Physica {
         assert(posID < getDOF());
         fftContract.transform(forceContract.row(posID));
         auto row = ringPolymer.getBuffer().row(0);
-        row = T(0);
+        row.zeros();
         auto head = row.head(fftContract.getKSpaceSize());
         head = fftContract.getKSpace();
     }

@@ -75,7 +75,7 @@ namespace Physica {
 
         VectorND<T> buffer(order);
         exemplars.clear();
-        availabilities = T(0);
+        availabilities.zeros();
 
         unsigned int iteration = 0;
         unsigned int converge = 0;

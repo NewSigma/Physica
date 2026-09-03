@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -79,7 +79,7 @@ namespace Physica {
     auto Berendsen<T, NumReplica, Type>::makeDecayMatrix(const LatticeMatrix& stress, T pressPerDOF) -> LatticeMatrix {
         lastStress = stress;
         LatticeMatrix result{};
-        result = T(0);
+        result.zeros();
         const T centerTargetP = targetP - pressPerDOF;
         if constexpr (Type == BaroType::Anisotropic) {
             result = lastStress;
@@ -135,8 +135,7 @@ namespace Physica {
             result = deltaLattice * invLatt;
         else {
             result = deltaLattice * invLatt;
-            auto col = result.col(2);
-            col = T(0);
+            result.col(2).zeros();
         }
         return result;
     }

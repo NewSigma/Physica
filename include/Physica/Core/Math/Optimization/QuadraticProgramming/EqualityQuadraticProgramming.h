@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -105,7 +105,7 @@ namespace Physica {
                 auto topRight = equationMatA.topRightCorner(degreeOfFreedom, degreeOfFreedom);
                 topRight = matA.transpose();
                 auto bottomRight = equationMatA.bottomRightCorner(degreeOfFreedom);
-                bottomRight = T(0);
+                bottomRight.zeros();
             }
             else
                 equationMatA = objectiveMatG;

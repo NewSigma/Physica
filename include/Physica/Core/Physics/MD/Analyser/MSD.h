@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -110,7 +110,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim>
     void MSD<T, Dim>::clear() {
-        buffer = T(0);
+        buffer.zeros();
         numSample = 0;
     }
 

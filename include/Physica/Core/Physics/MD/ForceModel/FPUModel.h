@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -64,7 +64,7 @@ namespace Physica {
         static_assert(P == Sequential, "[Error]: Parallelization not implemented");
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
-        result = T(0);
+        result.zeros();
         if constexpr (IsPeriodBoundary) {
             for (size_t i = 0; i < numParticle; ++i) {
                 const size_t i1 = (i + 1) % numParticle;

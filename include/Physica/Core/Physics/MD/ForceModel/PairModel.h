@@ -176,7 +176,7 @@ namespace Physica {
     template<ExecutePolicy P>
     void PairModel<Derived>::forceAsync(
             const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, Vector auto& result) const {
-        result = T(0);
+        result.zeros();
         auto kernel = [this, &result](size_t i, size_t j, Vec3D r, const T& norm1, const T& norm2) {
             const T f_norm = force_functor(i, j, norm1, norm2);
             r *= f_norm / norm1;

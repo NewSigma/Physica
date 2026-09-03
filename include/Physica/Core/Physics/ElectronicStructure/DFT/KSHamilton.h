@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -105,7 +105,7 @@ namespace Physica {
 
     template<Scalar T, bool IsSpinPolarized>
     void KSHamilton<T, IsSpinPolarized>::makeFreeHamilton(Vector3D<T> kPoint) {
-        hamiltonH = T(0);
+        hamiltonH.asVector().zeros();
         size_t i = 0;
         BasisType::forKInBasis(repLatt, basisDim, [this, kPoint, &i](Vector3D<T> waveK) {
             constexpr double factor = PhyConst<AU>::reducedPlanck * PhyConst<AU>::reducedPlanck / PhyConst<AU>::electronMass * 0.5;

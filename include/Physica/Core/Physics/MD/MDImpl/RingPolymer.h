@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -99,7 +99,7 @@ namespace Physica {
         buffer.resize(2, fft.getKSpaceSize());
 
         auto momentum = phase.topRows(dof);
-        momentum = T(0);
+        momentum.zeros();
         /* Fill pos */ {
             size_t index = dof;
             for (auto elem : cell.getPos().asArray()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -136,7 +136,7 @@ namespace Physica {
             }
 
             auto rho_new = result.getTotalDensity().flatten();
-            rho_new = T(0);
+            rho_new.zeros();
             for (size_t i = 1; i < x.getLength(); ++i) {
                 const auto& rho_old = oldDensities[i - 1].getTotalDensity().flatten();
                 const auto& residule = residules[i - 1].getTotalDensity().flatten();

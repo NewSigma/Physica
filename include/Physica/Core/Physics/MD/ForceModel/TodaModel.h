@@ -105,7 +105,7 @@ namespace Physica {
             const MDCellType& cell, Vector auto& result) const {
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
-        result = T(0);
+        result.zeros();
         if constexpr (IsPeriodBoundary) {
             for (size_t i = 0; i < numParticle; ++i) {
                 const size_t i1 = (i + 1) % numParticle;

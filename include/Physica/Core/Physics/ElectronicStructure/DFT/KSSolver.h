@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -240,7 +240,7 @@ namespace Physica {
         const size_t numFilledBand = getNumFilledBand();
         const int numElectronLastBand = getNumElectron() % 2 == 0 ? 2 : 1;
         chargeMixer.fetchInputDensity(density);
-        density.getTotalDensity() = T(0);
+        density.getTotalDensity().flatten().zeros();
         for (size_t band = 0; band < numFilledBand; ++band) {
             calcDensity(orbits[band][SpinState::Up]);
             const bool isLastBand = band == numFilledBand - 1;
