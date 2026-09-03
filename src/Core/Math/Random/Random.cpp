@@ -69,7 +69,7 @@ void RandomBase::reseed(uint64_t seed_, RandomOption option) {
         static_cast<uint32_t>(seed),
         static_cast<uint32_t>(seed >> 32UL),
         static_cast<uint32_t>(ThreadPool::getThreadID()),
-        static_cast<uint32_t>(MPI::getProcessID())
+        static_cast<uint32_t>(MPI::getRank())
     });
 
     if constexpr (HasMKL()) {

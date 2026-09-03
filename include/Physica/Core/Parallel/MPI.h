@@ -27,6 +27,20 @@ namespace Physica {
     public:
         using comm_handle = Handle<HandleType::MPI_Comm>;
         using dtype_handle = Handle<HandleType::MPI_Dtype>;
+        using op_handle = Handle<HandleType::MPI_Op>;
+
+        enum class ReduceOp : int8_t {
+            Sum,
+            Prod,
+            Max,
+            Min,
+            Land,
+            Lor,
+            BAnd,
+            BOr,
+            LXor,
+            BXor,
+        };
 
         static const comm_handle World;
     public:
@@ -39,14 +53,19 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] static MPI& getInstance() noexcept;
         [[nodiscard]] static bool initialized() noexcept;
-        [[nodiscard]] static int getNumProcess() noexcept;
-        [[nodiscard]] static int getProcessID() noexcept;
+        [[nodiscard]] static int getNumRank() noexcept;
+        [[nodiscard]] static int getRank() noexcept;
 
         static void send(int to, void* data, int count, dtype_handle dtype, comm_handle comm = World);
         static void recv(int from, void* data, int count, dtype_handle dtype, comm_handle comm = World);
         static void pass(int from, int to, void* data, int count, dtype_handle dtype, comm_handle comm = World);
         static void sendrecv(int send_to, int recv_from, void* data, int count, dtype_handle dtype, comm_handle comm = World);
         static void bcast(int root, void* data, int count, dtype_handle dtype, comm_handle comm = World);
+        static void reduce(int to, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, ReduceOp op, comm_handle comm = World);
+        static void allreduce(const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, ReduceOp op, comm_handle comm = World);
+        static void gather(int to, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm = World);
+        static void scatter(int from, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm = World);
+        static void allgather(const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm = World);
         static void wait(comm_handle comm = World);
 
         template<class T>

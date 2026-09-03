@@ -26,7 +26,7 @@ using namespace Physica;
 
 namespace {
     class Impl final : public std::error_category {
-        int rank = MPI::getProcessID();
+        int rank = MPI::getRank();
     public:
         Impl() = default;
         Impl(const Impl&) = delete;

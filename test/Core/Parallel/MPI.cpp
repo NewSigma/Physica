@@ -24,32 +24,87 @@ using namespace Physica;
 
 namespace {
     void send() noexcept {
-        const int id = MPI::getProcessID();
-        Array<int, 1> arr{id};
+        const int rank = MPI::getRank();
+        Array<int, 1> arr{rank};
         arr.pass(0, 1);
         expect(arr[0] == 0);
     }
 
     void sendrecv() noexcept {
-        const int id = MPI::getProcessID();
-        int partner = id == 0 ? 1 : 0;
-        Array<int, 1> arr{id};
+        const int rank = MPI::getRank();
+        int partner = rank == 0 ? 1 : 0;
+        Array<int, 1> arr{rank};
         arr.sendrecv(partner, partner);
         expect(arr[0] == partner);
     }
 
     void bcast() noexcept {
-        Array<int, 1> arr{MPI::getProcessID()};
+        Array<int, 1> arr{MPI::getRank()};
         arr.bcast(0);
         expect(arr[0] == 0);
+    }
+
+    void reduce() noexcept {
+        Array<int, 1> arr{MPI::getRank()};
+        arr.reduce(0, MPI::ReduceOp::Sum);
+        expect(arr[0] == 1);
+    }
+
+    void allreduce() noexcept {
+        Array<int, 1> arr{MPI::getRank()};
+        arr.allreduce(MPI::ReduceOp::Sum);
+        expect(arr[0] == 1);
+    }
+
+    void gather() noexcept {
+        const int rank = MPI::getRank();
+        if (rank == 0) {
+            Array<int, 2> arr{0, 0};
+            arr.gather(0);
+            expect(arr[0] == 0);
+            expect(arr[1] == 1);
+        }
+        else {
+            Array<int, 1> arr{rank};
+            arr.gather(0);
+        }
+    }
+
+    void scatter() noexcept {
+        const int rank = MPI::getRank();
+        if (rank == 0) {
+            Array<int, 2> src{0, 1};
+            src.scatter(0);
+            expect(src[0] == 0);
+            expect(src[1] == 1);
+        }
+        else {
+            Array<int, 1> dst{100};
+            dst.scatter(0);
+            expect(dst[0] == 1);
+        }
+    }
+
+    void allgather() noexcept {
+        const int rank = MPI::getRank();
+        Array<int, 2> arr{0, 0};
+        arr[rank] = rank;
+        arr.allgather();
+        expect(arr[0] == 0);
+        expect(arr[1] == 1);
     }
 }
 
 int main() {
     std::ignore = MPI::getInstance();
-    expect(MPI::getNumProcess() == 2);
+    expect(MPI::getNumRank() == 2);
     send();
     sendrecv();
     bcast();
+    reduce();
+    allreduce();
+    gather();
+    scatter();
+    allgather();
     return 0;
 }

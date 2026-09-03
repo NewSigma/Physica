@@ -25,19 +25,48 @@
 #ifdef PHYSICA_MPI
     #include <mpi/mpi.h>
 #else
-constexpr static void* MPI_COMM_WORLD = nullptr;
+    constexpr static void* MPI_COMM_WORLD = nullptr;
 #endif
 
 using namespace Physica;
 
 namespace {
     constexpr void checkPID([[maybe_unused]] int pid) noexcept {
-        assert(0 <= pid && pid < MPI::getNumProcess());
+        assert(0 <= pid && pid < MPI::getNumRank());
     }
 
     constexpr void checkPID(int pid, auto... pids) {
         checkPID(pid);
         checkPID(pids...);
+    }
+
+    [[maybe_unused]] constexpr MPI::op_handle toOpHandle(MPI::ReduceOp op) noexcept {
+        switch (op) {
+    #ifdef PHYSICA_MPI
+        case MPI::ReduceOp::Sum:
+            return MPI::op_handle(MPI_SUM);
+        case MPI::ReduceOp::Prod:
+            return MPI::op_handle(MPI_PROD);
+        case MPI::ReduceOp::Max:
+            return MPI::op_handle(MPI_MAX);
+        case MPI::ReduceOp::Min:
+            return MPI::op_handle(MPI_MIN);
+        case MPI::ReduceOp::Land:
+            return MPI::op_handle(MPI_LAND);
+        case MPI::ReduceOp::Lor:
+            return MPI::op_handle(MPI_LOR);
+        case MPI::ReduceOp::BAnd:
+            return MPI::op_handle(MPI_BAND);
+        case MPI::ReduceOp::BOr:
+            return MPI::op_handle(MPI_BOR);
+        case MPI::ReduceOp::LXor:
+            return MPI::op_handle(MPI_LXOR);
+        case MPI::ReduceOp::BXor:
+            return MPI::op_handle(MPI_BXOR);
+    #endif
+        default:
+            unreachable();
+        }
     }
 }
 
@@ -84,7 +113,7 @@ bool MPI::initialized() noexcept {
 #endif
 }
 
-int MPI::getNumProcess() noexcept {
+int MPI::getNumRank() noexcept {
 #ifdef PHYSICA_MPI
     int result{};
     MPI_Comm_size(MPI_Comm(World), &result);
@@ -94,7 +123,7 @@ int MPI::getNumProcess() noexcept {
 #endif
 }
 
-int MPI::getProcessID() noexcept {
+int MPI::getRank() noexcept {
 #ifdef PHYSICA_MPI
     int result{};
     MPI_Comm_rank(MPI_Comm(World), &result);
@@ -107,7 +136,6 @@ int MPI::getProcessID() noexcept {
 void MPI::send(int to, void* data, int count, dtype_handle dtype, comm_handle comm) {
     checkPID(to);
 #ifdef PHYSICA_MPI
-
     check_mpi(MPI_Send(data, count, MPI_Datatype(dtype), to, 0, MPI_Comm(comm)));
 #endif
 }
@@ -129,10 +157,10 @@ void MPI::recv(int from, void* data, int count, dtype_handle dtype, comm_handle 
  */
 void MPI::pass(int from, int to, void* data, int count, dtype_handle dtype, comm_handle comm) {
     assert(from != to);
-    const int id = MPI::getProcessID();
-    if (id == from)
+    const int rank = MPI::getRank();
+    if (rank == from)
         send(to, data, count, dtype, comm);
-    else if (id == to)
+    else if (rank == to)
         recv(from, data, count, dtype, comm);
 }
 
@@ -153,6 +181,57 @@ void MPI::bcast(int root, void* data, int count, dtype_handle dtype, comm_handle
     checkPID(root);
 #ifdef PHYSICA_MPI
     check_mpi(MPI_Bcast(data, count, MPI_Datatype(dtype), root, MPI_Comm(comm)));
+#endif
+}
+
+void MPI::reduce(int to, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, ReduceOp op, comm_handle comm) {
+    checkPID(to);
+#ifdef PHYSICA_MPI
+    if (MPI::getRank() == to && sendbuf == recvbuf)
+        sendbuf = MPI_IN_PLACE;
+    check_mpi(MPI_Reduce(sendbuf, recvbuf, count, MPI_Datatype(dtype), MPI_Op(toOpHandle(op)), to, MPI_Comm(comm)));
+#endif
+}
+
+void MPI::allreduce(const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, ReduceOp op, comm_handle comm) {
+#ifdef PHYSICA_MPI
+    if (sendbuf == recvbuf)
+        sendbuf = MPI_IN_PLACE;
+    check_mpi(MPI_Allreduce(sendbuf, recvbuf, count, MPI_Datatype(dtype), MPI_Op(toOpHandle(op)), MPI_Comm(comm)));
+#endif
+}
+
+void MPI::gather(int to, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm) {
+    checkPID(to);
+    if (to == getRank()) {
+        assert(count % getNumRank() == 0);
+        count /= getNumRank();
+    }
+#ifdef PHYSICA_MPI
+    if (MPI::getRank() == to && sendbuf == recvbuf)
+        sendbuf = MPI_IN_PLACE;
+    check_mpi(MPI_Gather(sendbuf, count, MPI_Datatype(dtype), recvbuf, count, MPI_Datatype(dtype), to, MPI_Comm(comm)));
+#endif
+}
+
+void MPI::scatter(int from, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm) {
+    checkPID(from);
+    if (from == getRank()) {
+        assert(count % getNumRank() == 0);
+        count /= getNumRank();
+    }
+#ifdef PHYSICA_MPI
+    if (MPI::getRank() == from && sendbuf == recvbuf)
+        recvbuf = MPI_IN_PLACE;
+    check_mpi(MPI_Scatter(sendbuf, count, MPI_Datatype(dtype), recvbuf, count, MPI_Datatype(dtype), from, MPI_Comm(comm)));
+#endif
+}
+
+void MPI::allgather(const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm) {
+#ifdef PHYSICA_MPI
+    if (sendbuf == recvbuf)
+        sendbuf = MPI_IN_PLACE;
+    check_mpi(MPI_Allgather(sendbuf, count, MPI_Datatype(dtype), recvbuf, count, MPI_Datatype(dtype), MPI_Comm(comm)));
 #endif
 }
 

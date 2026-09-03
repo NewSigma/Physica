@@ -29,6 +29,7 @@ namespace Physica {
     enum class HandleType : int8_t {
         MPI_Comm,
         MPI_Dtype,
+        MPI_Op,
     };
     /**
      * \class Handle: A zero-cost wrapper for opaque handles in 3rdparty C libraries, dedicated to provide:
