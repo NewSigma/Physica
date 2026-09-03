@@ -18,16 +18,16 @@
  */
 #pragma once
 
-#include "LayerBase.h"
+#include "LayerMixin.h"
 #include "Physica/Core/Utils/CUDA/device_obj.h"
 
 namespace Physica {
     template<class Derived>
-    class device_obj<LayerBase<Derived>> : public CRTPBase<device_obj<LayerBase<Derived>>> {
+    class device_obj<LayerMixin<Derived>> : public CRTP<device_obj<LayerMixin<Derived>>> {
         static_assert(!is_device_obj<Derived>::value, "[Error]: device_obj<> is unnecessary");
-        using host_obj = LayerBase<Derived>;
+        using host_obj = LayerMixin<Derived>;
         using This = device_obj<host_obj>;
-        using Base = CRTPBase<This>;
+        using Base = CRTP<This>;
         using device_obj_type = device_obj<Derived>;
     public:
         template<Scalar U>
@@ -60,7 +60,7 @@ namespace Physica {
 
 namespace Physica {
     template<class T>
-    class Traits<device_obj<LayerBase<T>>> {
+    class Traits<device_obj<LayerMixin<T>>> {
     public:
         using Derived = device_obj<T>;
     };

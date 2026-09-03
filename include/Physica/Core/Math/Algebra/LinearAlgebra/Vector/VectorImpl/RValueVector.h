@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/CRTPBase.h"
+#include "Physica/CRTP.h"
 #include "Physica/Core/Scalar/Complex.h" // IWYU pragma: export
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Parallel/Parallel.h"
@@ -93,10 +93,10 @@ namespace Physica {
      * \class RValueVector: The base class for all vectors.
      */
     template<class Derived, Scalar ScalarT>
-    class RValueVector : public CRTPBase<RValueVector<Derived, ScalarT>> {
+    class RValueVector : public CRTP<RValueVector<Derived, ScalarT>> {
         static_assert(!DeviceObj<Derived>, "[Error]: device_obj<> must be outside RValueVector<>");
         using This = RValueVector<Derived, ScalarT>;
-        using Base = CRTPBase<This>;
+        using Base = CRTP<This>;
 
         template<Vector> class View;
     public:

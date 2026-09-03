@@ -22,7 +22,7 @@
 #include <cmath>
 #include <type_traits>
 #include <numbers>
-#include "Physica/CRTPBase.h"
+#include "Physica/CRTP.h"
 #include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica {
@@ -60,9 +60,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    class ScalarBase : public CRTPBase<ScalarBase<Derived>> {
-        using This = ScalarBase<Derived>;
-        using Base = CRTPBase<This>;
+    class ScalarMixin : public CRTP<ScalarMixin<Derived>> {
+        using This = ScalarMixin<Derived>;
+        using Base = CRTP<This>;
         using TraitsType = Traits<Derived>;
     public:
         constexpr static FloatPrec Prec = TraitsType::Prec;
@@ -86,7 +86,7 @@ namespace Physica {
         template<int MaskOrder>
         using GradMaskType = std::conditional<MaskOrder == 0, ValueType, Diff<ValueType, Mode, MaskOrder>>::type;
     public:
-        constexpr ~ScalarBase() = default;
+        constexpr ~ScalarMixin() = default;
         /* Operators */
         __host__ __device__ Derived& operator=(const Scalar auto& x);
         __host__ __device__ void operator+=(this auto&, const Scalar auto& x) noexcept;
@@ -138,9 +138,9 @@ namespace Physica {
         consteval static void static_assert_assign() noexcept;
         consteval static void checkComplexCompare() noexcept;
     protected:
-        constexpr ScalarBase() = default;
-        constexpr ScalarBase(const This&) = default;
-        constexpr ScalarBase(This&&) = default;
+        constexpr ScalarMixin() = default;
+        constexpr ScalarMixin(const This&) = default;
+        constexpr ScalarMixin(This&&) = default;
         /* Operators */
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
@@ -150,49 +150,49 @@ namespace Physica {
     };
 
     template<class Derived>
-    __host__ __device__ Derived& ScalarBase<Derived>::operator=(const Scalar auto& x) {
+    __host__ __device__ Derived& ScalarMixin<Derived>::operator=(const Scalar auto& x) {
         static_assert_assign<decltype(x)>();
         return Base::getDerived() = ScalarType(x);
     }
 
     template<class Derived>
-    __host__ __device__ void ScalarBase<Derived>::operator+=(this auto& self, const Scalar auto& x) noexcept {
+    __host__ __device__ void ScalarMixin<Derived>::operator+=(this auto& self, const Scalar auto& x) noexcept {
         static_assert_assign<decltype(x)>();
         self = self + x;
     }
 
     template<class Derived>
-    __host__ __device__ void ScalarBase<Derived>::operator-=(this auto& self, const Scalar auto& x) noexcept {
+    __host__ __device__ void ScalarMixin<Derived>::operator-=(this auto& self, const Scalar auto& x) noexcept {
         static_assert_assign<decltype(x)>();
         self = self - x;
     }
 
     template<class Derived>
-    __host__ __device__ void ScalarBase<Derived>::operator*=(this auto& self, const Scalar auto& x) noexcept {
+    __host__ __device__ void ScalarMixin<Derived>::operator*=(this auto& self, const Scalar auto& x) noexcept {
         static_assert_assign<decltype(x)>();
         self = self * x;
     }
 
     template<class Derived>
-    __host__ __device__ void ScalarBase<Derived>::operator/=(this auto& self, const Scalar auto& x) noexcept {
+    __host__ __device__ void ScalarMixin<Derived>::operator/=(this auto& self, const Scalar auto& x) noexcept {
         static_assert_assign<decltype(x)>();
         self = self / x;
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::operator<=>(this const auto& x, float y) noexcept {
+    __host__ __device__ auto ScalarMixin<Derived>::operator<=>(this const auto& x, float y) noexcept {
         checkComplexCompare();
         return float(x.value()) <=> y;
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::operator<=>(this const auto& x, double y) noexcept {
+    __host__ __device__ auto ScalarMixin<Derived>::operator<=>(this const auto& x, double y) noexcept {
         checkComplexCompare();
         return double(x.value()) <=> y;
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::operator<=>(this const auto& x, const Scalar auto& y) noexcept {
+    __host__ __device__ auto ScalarMixin<Derived>::operator<=>(this const auto& x, const Scalar auto& y) noexcept {
         using X = std::remove_cvref<decltype(x)>::type;
         using Y = std::remove_cvref<decltype(y)>::type;
         static_assert(X::isDiffable() || Y::isDiffable() || !std::same_as<X, Y>, "[Error]: This function handles type casts only");
@@ -201,7 +201,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ decltype(auto) ScalarBase<Derived>::real(this auto&& self) noexcept {
+    __host__ __device__ decltype(auto) ScalarMixin<Derived>::real(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (isDiffable())
             return RealType(self.value().real(), self.grad().real());
@@ -212,7 +212,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ decltype(auto) ScalarBase<Derived>::imag(this auto&& self) noexcept {
+    __host__ __device__ decltype(auto) ScalarMixin<Derived>::imag(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (isDiffable())
             return RealType(self.value().imag(), self.grad().imag());
@@ -223,7 +223,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::conjugate() const noexcept -> ScalarType {
+    __host__ __device__ auto ScalarMixin<Derived>::conjugate() const noexcept -> ScalarType {
         const auto& x = this->getDerived();
         if constexpr (isDiffable())
             return ScalarType(x.value().conjugate(), x.grad().conjugate());
@@ -234,12 +234,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::norm() const noexcept -> RealType {
+    __host__ __device__ auto ScalarMixin<Derived>::norm() const noexcept -> RealType {
         return sqrt(squaredNorm());
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::squaredNorm() const noexcept {
+    __host__ __device__ auto ScalarMixin<Derived>::squaredNorm() const noexcept {
         if constexpr (isComplex() || isReverseDiff())
             return this->getDerived().squaredNorm();
         else
@@ -247,14 +247,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::sum() const noexcept -> ScalarType {
+    __host__ __device__ auto ScalarMixin<Derived>::sum() const noexcept -> ScalarType {
         return this->getDerived();
     }
     /**
      * Algorithms of toNext*() are also known as welford accumulators
      */
     template<class Derived>
-    __host__ __device__ void ScalarBase<Derived>::toNextMean(size_t lastNumSample, ScalarType sample) noexcept {
+    __host__ __device__ void ScalarMixin<Derived>::toNextMean(size_t lastNumSample, ScalarType sample) noexcept {
         auto& mean = Base::getDerived();
         if (lastNumSample == 0) [[unlikely]] {
             mean = sample;
@@ -264,7 +264,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ void ScalarBase<Derived>::toNextVariance(ScalarType& __restrict mean, size_t lastNumSample, ScalarType sample) noexcept {
+    __host__ __device__ void ScalarMixin<Derived>::toNextVariance(ScalarType& __restrict mean, size_t lastNumSample, ScalarType sample) noexcept {
         assert(this != &mean && "[Error]: Var and mean cannot overlap");
         auto& var = Base::getDerived();
         if (lastNumSample == 0) [[unlikely]] {
@@ -279,18 +279,18 @@ namespace Physica {
 
     template<class Derived>
     template<class R>
-    void ScalarBase<Derived>::random_uniform() noexcept {
+    void ScalarMixin<Derived>::random_uniform() noexcept {
         Base::getDerived() = Derived::template random_uniform<R>();
     }
 
     template<class Derived>
     template<class R>
-    void ScalarBase<Derived>::random_normal() noexcept {
+    void ScalarMixin<Derived>::random_normal() noexcept {
         Base::getDerived() = Derived::template random_normal<R>();
     }
 
     template<class Derived>
-    __host__ __device__ auto* ScalarBase<Derived>::real_ptr(this auto&& self) noexcept {
+    __host__ __device__ auto* ScalarMixin<Derived>::real_ptr(this auto&& self) noexcept {
         if constexpr (isComplex())
             return self.real_ptr();
         else
@@ -298,7 +298,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto* ScalarBase<Derived>::value_ptr(this auto&& self) noexcept {
+    __host__ __device__ auto* ScalarMixin<Derived>::value_ptr(this auto&& self) noexcept {
         if constexpr (isDiffable())
             return self.value_ptr();
         else
@@ -307,25 +307,25 @@ namespace Physica {
 
     template<class Derived>
     template<int GradOrder>
-    __host__ __device__ auto* ScalarBase<Derived>::grad_ptr(this auto&& self) noexcept {
+    __host__ __device__ auto* ScalarMixin<Derived>::grad_ptr(this auto&& self) noexcept {
         static_assert(isDiffable(), "[Error]: Cannot take grad ptr of a undiffable scalar");
         return self.template grad_ptr<GradOrder>();
     }
 
     template<class Derived>
-    __host__ __device__ auto& ScalarBase<Derived>::value(this auto&& self) noexcept {
+    __host__ __device__ auto& ScalarMixin<Derived>::value(this auto&& self) noexcept {
         return *self.value_ptr();
     }
 
     template<class Derived>
     template<int GradOrder>
-    __host__ __device__  auto& ScalarBase<Derived>::grad(this auto&& self) noexcept {
+    __host__ __device__  auto& ScalarMixin<Derived>::grad(this auto&& self) noexcept {
         return *self.template grad_ptr<GradOrder>();
     }
 
     template<class Derived>
     template<int MaskOrder>
-    __host__ __device__ decltype(auto) ScalarBase<Derived>::grad_mask(this auto&& self) noexcept {
+    __host__ __device__ decltype(auto) ScalarMixin<Derived>::grad_mask(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (isDiffable())
             return std::forward<Self>(self).template grad_mask<MaskOrder>();
@@ -334,7 +334,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::isZero() const noexcept {
+    __host__ __device__ auto ScalarMixin<Derived>::isZero() const noexcept {
         if constexpr (isDiffable())
             return Base::getDerived().value().isZero();
         else
@@ -342,7 +342,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::isSubNormal() const noexcept {
+    __host__ __device__ auto ScalarMixin<Derived>::isSubNormal() const noexcept {
         if constexpr (isDiffable())
             return Base::getDerived().value().isSubNormal();
         else
@@ -350,7 +350,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::isPositive() const noexcept {
+    __host__ __device__ auto ScalarMixin<Derived>::isPositive() const noexcept {
         checkComplexCompare();
         if constexpr (isDiffable())
             return Base::getDerived().value().isPositive();
@@ -359,7 +359,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::isNegative() const noexcept {
+    __host__ __device__ auto ScalarMixin<Derived>::isNegative() const noexcept {
         checkComplexCompare();
         if constexpr (isDiffable())
             return Base::getDerived().value().isNegative();
@@ -368,38 +368,38 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::isFinite() const noexcept {
+    __host__ __device__ auto ScalarMixin<Derived>::isFinite() const noexcept {
         return Base::getDerived().isFinite();
     }
 
     template<class Derived>
-    __host__ __device__ consteval bool ScalarBase<Derived>::isComplex() noexcept {
+    __host__ __device__ consteval bool ScalarMixin<Derived>::isComplex() noexcept {
         return TraitsType::isComplex;
     }
 
     template<class Derived>
-    __host__ __device__ consteval bool ScalarBase<Derived>::isForwardDiff() noexcept {
+    __host__ __device__ consteval bool ScalarMixin<Derived>::isForwardDiff() noexcept {
         return TraitsType::isForwardDiff;
     }
 
     template<class Derived>
-    __host__ __device__ consteval bool ScalarBase<Derived>::isReverseDiff() noexcept {
+    __host__ __device__ consteval bool ScalarMixin<Derived>::isReverseDiff() noexcept {
         return TraitsType::isReverseDiff;
     }
 
     template<class Derived>
-    __host__ __device__ consteval bool ScalarBase<Derived>::isDiffable() noexcept {
+    __host__ __device__ consteval bool ScalarMixin<Derived>::isDiffable() noexcept {
         return isForwardDiff() || isReverseDiff();
     }
 
     template<class Derived>
-    bool ScalarBase<Derived>::matchSign(const ScalarType& s1, const ScalarType& s2) {
+    bool ScalarMixin<Derived>::matchSign(const ScalarType& s1, const ScalarType& s2) {
         return (s1.isPositive() && s2.isPositive()) || (s1.isNegative() && s2.isNegative());
     }
 
     template<class Derived>
     template<Scalar Src>
-    consteval void ScalarBase<Derived>::static_assert_assign() noexcept {
+    consteval void ScalarMixin<Derived>::static_assert_assign() noexcept {
         using U = std::remove_cvref_t<Src>;
         static_assert(!ReverseDiff<Src>, "[Error]: Assign reverse diffable scalar to another scalar breaks compute graph");
         static_assert(isDiffable() || !U::isDiffable(), "[Error]: Assign diffable scalar to normal scalar discards grad");
@@ -407,7 +407,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    consteval void ScalarBase<Derived>::checkComplexCompare() noexcept {
+    consteval void ScalarMixin<Derived>::checkComplexCompare() noexcept {
         static_assert(!isComplex(), "[Error]: Comparison between complex scalars is invalid");
     }
 
@@ -482,7 +482,7 @@ namespace Physica {
 
 namespace Physica {
     template<class T>
-    class Traits<ScalarBase<T>> {
+    class Traits<ScalarMixin<T>> {
     public:
         using Derived = T;
     };

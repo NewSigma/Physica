@@ -30,7 +30,7 @@
     #include "H5Group.h"
 #else
     namespace Physica {
-        template<class Derived> class DataSpaceBase {};
+        template<class Derived> class DataSpaceMixin {};
         template<size_t Dim> class H5DataSpace {};
         template<size_t Dim> class H5Dataset {};
         class H5Attribute;

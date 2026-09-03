@@ -54,9 +54,9 @@ namespace Physica {
     constexpr static MPUnit MPUnitLowerMask = MPUnitMax >> (MPUnitWidth / 2);
 
     template<class Derived>
-    class ScalarBase;
+    class ScalarMixin;
     template<class Derived>
-    class SIMDBase;
+    class SIMDMixin;
 
     template<class ScalarType> class ScalarRef;
 
@@ -74,11 +74,11 @@ namespace Physica {
     using remove_scalar_ref_t = remove_scalar_ref<T>::Type;
 
     template<class T>
-    concept Scalar = std::derived_from<std::remove_cvref_t<T>, ScalarBase<std::remove_cvref_t<T>>>
+    concept Scalar = std::derived_from<std::remove_cvref_t<T>, ScalarMixin<std::remove_cvref_t<T>>>
                   || std::derived_from<std::remove_cvref_t<T>, typename std::remove_cvref_t<T>::ScalarType>;
 
     template<class T>
-    concept Packet = std::derived_from<std::remove_cvref_t<T>, SIMDBase<std::remove_cvref_t<T>>>;
+    concept Packet = std::derived_from<std::remove_cvref_t<T>, SIMDMixin<std::remove_cvref_t<T>>>;
 
     template<class T>
     concept ForwardDiff = std::remove_cvref_t<T>::ScalarType::isForwardDiff();

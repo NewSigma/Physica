@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/CRTPBase.h"
+#include "Physica/CRTP.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar.h"
 #include "Physica/Core/Utils/Container/Array.h"
@@ -34,10 +34,10 @@ namespace Physica {
     template<class T, int GradOrder> class GradTensor;
 
     template<class Derived, Scalar ScalarT>
-    class RValueTensor : public CRTPBase<RValueTensor<Derived, ScalarT>> {
+    class RValueTensor : public CRTP<RValueTensor<Derived, ScalarT>> {
         static_assert(!DeviceObj<Derived>, "[Error]: device_obj<> must be outside RValueTensor<>");
         using This = RValueTensor<Derived, ScalarT>;
-        using Base = CRTPBase<This>;
+        using Base = CRTP<This>;
     public:
         using ScalarType = ScalarT;
         constexpr static int NDim = Traits<Derived>::NDim;

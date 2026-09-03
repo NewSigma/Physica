@@ -19,7 +19,7 @@
 #pragma once
 
 #include <array>
-#include "ArrayImpl/ArrayBase.h"
+#include "ArrayImpl/ArrayMixin.h"
 #include "Physica/CRCoro.h"
 #include "Physica/Core/Utils/Allocator/HostAllocator.h"
 #include "Physica/Core/Utils/CUDA/device_obj.h"
@@ -33,10 +33,10 @@ namespace Physica {
      * 2. Array<bool> is not bitwise;
      */
     template<class T, size_t Length, class Allocator>
-    class Array : public ArrayBase<Array<T, Length, Allocator>, Allocator>
+    class Array : public ArrayMixin<Array<T, Length, Allocator>, Allocator>
             , public CRCoro<Array<T, Length, Allocator>> {
         using This = Array<T, Length, Allocator>;
-        using Base = ArrayBase<This, Allocator>;
+        using Base = ArrayMixin<This, Allocator>;
         using IndexType = Array<size_t, Length>;
         static_assert(std::is_default_constructible<T>::value, "[Error]: Expect default constructible T");
         static_assert(!std::same_as<Allocator, PageLockedAllocator<T>>, "[Error]: Page locked array can not have fixed size");
@@ -97,10 +97,10 @@ namespace Physica {
     };
 
     template<class T, class Allocator>
-    class Array<T, Dynamic, Allocator> : public ArrayBase<Array<T, Dynamic, Allocator>, Allocator>
+    class Array<T, Dynamic, Allocator> : public ArrayMixin<Array<T, Dynamic, Allocator>, Allocator>
             , public CRCoro<Array<T, Dynamic, Allocator>> {
         using This = Array<T, Dynamic, Allocator>;
-        using Base = ArrayBase<This, Allocator>;
+        using Base = ArrayMixin<This, Allocator>;
     private:
         T* arr = nullptr;
         size_t length = 0;

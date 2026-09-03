@@ -48,9 +48,9 @@ namespace Physica {
 
 namespace Physica {
     template<>
-    class PHYSICA_API Real<Float64> : public ScalarBase<Real<Float64>>, public CRCoro<Real<Float64>> {
+    class PHYSICA_API Real<Float64> : public ScalarMixin<Real<Float64>>, public CRCoro<Real<Float64>> {
         using This = Real<Float64>;
-        using Base = ScalarBase<This>;
+        using Base = ScalarMixin<This>;
     public:
         using device_obj_type = This;
     private:

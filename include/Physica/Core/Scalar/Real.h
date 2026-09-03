@@ -105,7 +105,7 @@ namespace Physica {
 #include "Rational.h"
 #include "Physica/Core/IO/HDF5/HDF5.h"
 #include "Physica/Core/Math/Random/Random.h"
-#include "ScalarImpl/ScalarBase.h"
+#include "ScalarImpl/ScalarMixin.h"
 #include "RealImpl/Float32.h"
 #include "RealImpl/Float64.h"
 #include "RealImpl/FloatMP.h"

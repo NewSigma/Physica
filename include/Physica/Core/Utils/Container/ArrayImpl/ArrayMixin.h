@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <memory>
 #include <type_traits>
-#include "Physica/CRTPBase.h"
+#include "Physica/CRTP.h"
 #include "Physica/Core/Parallel/MPI.h"
 
 namespace Physica {
@@ -30,9 +30,9 @@ namespace Physica {
      * Public parts among specializations of \class Array.
      */
     template<class Derived, class Allocator>
-    class ArrayBase : public CRTPBase<ArrayBase<Derived, Allocator>> {
-        using This = ArrayBase<Derived, Allocator>;
-        using Base = CRTPBase<This>;
+    class ArrayMixin : public CRTP<ArrayMixin<Derived, Allocator>> {
+        using This = ArrayMixin<Derived, Allocator>;
+        using Base = CRTP<This>;
         using AllocatorTraits = std::allocator_traits<Allocator>;
 
         template<class> class Iterator;
@@ -51,7 +51,7 @@ namespace Physica {
         using ElemType = Traits<Derived>::ElemType;
         static_assert(std::is_same<value_type, ElemType>::value, "[Error]: Declaration is not self consistent");
     public:
-        ~ArrayBase() = default;
+        ~ArrayMixin() = default;
         /* Operators */
         [[nodiscard]] __host__ __device__ constexpr auto& operator[](this auto&&, size_t index) noexcept;
         [[nodiscard]] __host__ __device__ bool operator==(this const This& lhs, const This& rhs);
@@ -90,17 +90,17 @@ namespace Physica {
         template<class... Args>
         [[nodiscard]] __host__ __device__ consteval static bool isTrivialDefaultConstruct() noexcept;
     protected:
-        ArrayBase() = default;
-        ArrayBase(const ArrayBase&) = default;
-        ArrayBase(ArrayBase&&) noexcept = default;
+        ArrayMixin() = default;
+        ArrayMixin(const ArrayMixin&) = default;
+        ArrayMixin(ArrayMixin&&) noexcept = default;
         /* Operators */
-        ArrayBase& operator=(const ArrayBase&) = default;
-        ArrayBase& operator=(ArrayBase&&) noexcept = default;
+        ArrayMixin& operator=(const ArrayMixin&) = default;
+        ArrayMixin& operator=(ArrayMixin&&) noexcept = default;
     };
 
     template<class Derived, class Allocator>
     template<class Container>
-    class ArrayBase<Derived, Allocator>::Iterator {
+    class ArrayMixin<Derived, Allocator>::Iterator {
         using This = Iterator<Container>;
         using ElemType = Traits<std::remove_const_t<Container>>::ElemType;
         constexpr static bool isConst = std::is_const<Container>::value;
@@ -142,13 +142,13 @@ namespace Physica {
 
 namespace Physica {
     template<class T, class Allocator>
-    class Traits<ArrayBase<T, Allocator>> {
+    class Traits<ArrayMixin<T, Allocator>> {
     public:
         using Derived = T;
     };
 }
 
-#include "ArrayBaseImpl.h"
+#include "ArrayMixinImpl.h"
 #ifdef PHYSICA_MPI
     #include "ArrayMPI.h"
 #endif

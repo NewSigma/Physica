@@ -19,13 +19,13 @@
 #pragma once
 
 #include <type_traits>
-#include "Physica/CRTPBase.h"
+#include "Physica/CRTP.h"
 
 namespace Physica {
     template<class Derived>
-    class ReprBasis : public CRTPBase<ReprBasis<Derived>> {
+    class ReprBasis : public CRTP<ReprBasis<Derived>> {
         using This = ReprBasis<Derived>;
-        using Base = CRTPBase<This>;
+        using Base = CRTP<This>;
     public:
         using StateType = Traits<Derived>::StateType;
         constexpr static unsigned int Dim = Traits<Derived>::Dim;

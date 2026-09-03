@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "LayerBase.cuh"
+#include "LayerMixin.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.cuh"
 
 namespace Physica {
@@ -30,9 +30,9 @@ namespace Physica {
      * [2] pytorch; https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm1d.html
      */
     template<Scalar T>
-    class device_obj<BatchNorm1D<T>> : public device_obj<LayerBase<BatchNorm1D<T>>> {
+    class device_obj<BatchNorm1D<T>> : public device_obj<LayerMixin<BatchNorm1D<T>>> {
         using This = device_obj<BatchNorm1D<T>>;
-        using Base = device_obj<LayerBase<BatchNorm1D<T>>>;
+        using Base = device_obj<LayerMixin<BatchNorm1D<T>>>;
         using Tv = T::ValueType;
         constexpr static Tv Epsilon = std::numeric_limits<Tv>::epsilon();
         constexpr static Tv Momentum = 0.1;

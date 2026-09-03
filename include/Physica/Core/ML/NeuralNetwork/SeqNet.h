@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "Layer/LayerBase.h"
+#include "Layer/LayerMixin.h"
 
 namespace Physica {
     template<class Derived>
-    class SeqNet : public LayerBase<Derived> {
+    class SeqNet : public LayerMixin<Derived> {
         using This = SeqNet<Derived>;
-        using Base = LayerBase<Derived>;
+        using Base = LayerMixin<Derived>;
     protected:
         using T = Base::T;
         using Tv = Base::Tv;

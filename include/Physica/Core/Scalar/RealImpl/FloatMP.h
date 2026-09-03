@@ -44,9 +44,9 @@ namespace Physica {
 
 namespace Physica {
     template<>
-    class PHYSICA_API Real<FloatMP> : public ScalarBase<Real<FloatMP>>, public CRCoro<Real<FloatMP>> {
+    class PHYSICA_API Real<FloatMP> : public ScalarMixin<Real<FloatMP>>, public CRCoro<Real<FloatMP>> {
         using This = Real<FloatMP>;
-        using Base = ScalarBase<This>;
+        using Base = ScalarMixin<This>;
     public:
         constexpr static int GlobalPrecision = 4;
         static_assert(GlobalPrecision > 1, "GlobalPrecision must be larger than 1.");

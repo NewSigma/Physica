@@ -27,18 +27,18 @@
     #include <vectorclass/vectormath_hyp.h>
 #pragma GCC diagnostic pop
 #include "Physica/Core/Scalar/Scalar.h"
-#include "Physica/Core/Scalar/ScalarImpl/SIMDBase.h"
+#include "Physica/Core/Scalar/ScalarImpl/SIMDMixin.h"
 #include "Physica/Core/Utils/Empty.h"
 
 namespace Physica {
     template<Scalar T, int Size> class BoolSIMD;
 
     template<Scalar T, int Size>
-    class PHYSICA_API SIMD : public SIMDBase<SIMD<T, Size>> {
+    class PHYSICA_API SIMD : public SIMDMixin<SIMD<T, Size>> {
         constexpr static bool isFloat32 = T::Prec == Float32;
         constexpr static bool isForward = T::isForwardDiff();
         using This = SIMD<T, Size>;
-        using Base = SIMDBase<This>;
+        using Base = SIMDMixin<This>;
         using Pack = Traits<This>::Pack;
         using HalfType = std::conditional<sizeof(Pack) * CHAR_BIT != 128, SIMD<T, Size / 2>, Empty>::type;
     public:

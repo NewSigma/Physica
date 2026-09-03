@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/ML/NeuralNetwork/Layer/LayerBase.h"
+#include "Physica/Core/ML/NeuralNetwork/Layer/LayerMixin.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica {

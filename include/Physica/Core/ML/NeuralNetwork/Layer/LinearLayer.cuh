@@ -19,16 +19,16 @@
 #pragma once
 
 #include "LinearLayer.h"
-#include "LayerBase.cuh"
+#include "LayerMixin.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.cuh"
 
 namespace Physica {
     template<Scalar T, bool WithBias>
-    class device_obj<LinearLayer<T, WithBias>> : public device_obj<LayerBase<LinearLayer<T, WithBias>>> {
+    class device_obj<LinearLayer<T, WithBias>> : public device_obj<LayerMixin<LinearLayer<T, WithBias>>> {
         using host_obj = LinearLayer<T, WithBias>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<LayerBase<host_obj>>;
+        using Base = device_obj<LayerMixin<host_obj>>;
         using BiasType = std::conditional<WithBias, device_obj<VectorND<T>>, Empty>::type;
     public:
         template<Scalar U>

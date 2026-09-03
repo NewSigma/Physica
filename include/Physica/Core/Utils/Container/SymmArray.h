@@ -25,9 +25,9 @@ namespace Physica {
      * \class SymmArray stores half of the elements of a matrix, while the other half may be symmetric, hermitian, or etc.
      */
     template<class T, size_t Order = Dynamic>
-    class SymmArray : public ArrayBase<SymmArray<T, Order>, HostAllocator<T>> {
+    class SymmArray : public ArrayMixin<SymmArray<T, Order>, HostAllocator<T>> {
         using This = SymmArray<T, Order>;
-        using Base = ArrayBase<This, HostAllocator<T>>;
+        using Base = ArrayMixin<This, HostAllocator<T>>;
     protected:
         using ArrayType = Traits<This>::ArrayType;
     private:

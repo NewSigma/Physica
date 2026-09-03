@@ -28,10 +28,10 @@ namespace Physica {
      * \class Diff provides auto differential support for scalars
      */
     template<Scalar T, DiffMode Mode, int Order>
-    class Diff<T, Mode, Order> : public ScalarBase<Diff<T, Mode, Order>>
+    class Diff<T, Mode, Order> : public ScalarMixin<Diff<T, Mode, Order>>
                                , public std::conditional<Mode == DiffMode::Forward, CRCoro<Diff<T, Mode, Order>>, Empty>::type {
         using This = Diff<T, Mode, Order>;
-        using Base = ScalarBase<This>;
+        using Base = ScalarMixin<This>;
     public:
         using device_obj_type = This;
         using typename Base::RealType;

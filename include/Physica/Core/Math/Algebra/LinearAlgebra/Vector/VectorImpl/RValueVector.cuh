@@ -25,11 +25,11 @@
 
 namespace Physica {
     template<class Derived, Scalar ScalarT>
-    class device_obj<RValueVector<Derived, ScalarT>> : public CRTPBase<device_obj<RValueVector<Derived, ScalarT>>> {
+    class device_obj<RValueVector<Derived, ScalarT>> : public CRTP<device_obj<RValueVector<Derived, ScalarT>>> {
         static_assert(!is_device_obj<Derived>::value, "[Error]: Nested device_obj is not allowed");
         using host_obj = RValueVector<Derived, ScalarT>;
         using This = device_obj<host_obj>;
-        using Base = CRTPBase<This>;
+        using Base = CRTP<This>;
     public:
         using ScalarType = ScalarT;
     protected:

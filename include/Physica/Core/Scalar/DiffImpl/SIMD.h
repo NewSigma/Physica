@@ -46,10 +46,10 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order, int Size>
     class SIMD<Diff<T, Mode, Order>, Size>
-            : public SIMDBase<SIMD<Diff<T, Mode, Order>, Size>>
+            : public SIMDMixin<SIMD<Diff<T, Mode, Order>, Size>>
             , public std::conditional<Mode == DiffMode::Forward, CRCoro<SIMD<Diff<T, Mode, Order>, Size>>, Empty>::type {
         using This = SIMD<Diff<T, Mode, Order>, Size>;
-        using Base = SIMDBase<This>;
+        using Base = SIMDMixin<This>;
         using RealType = SIMD<Diff<typename T::RealType, Mode, Order>, Size>;
     public:
         using typename Base::ScalarType;

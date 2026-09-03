@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "DataSpaceBase.h"
+#include "DataSpaceMixin.h"
 
 namespace Physica {
     template<class SpaceType, size_t Dim>
-    class SubDataSpace : public DataSpaceBase<SubDataSpace<SpaceType, Dim>> {
+    class SubDataSpace : public DataSpaceMixin<SubDataSpace<SpaceType, Dim>> {
         using This = SubDataSpace<SpaceType, Dim>;
-        using Base = DataSpaceBase<This>;
+        using Base = DataSpaceMixin<This>;
     public:
         using SizeArray = Base::SizeArray;
     private:
@@ -32,7 +32,7 @@ namespace Physica {
         size_t fromDim;
         size_t toDim;
     public:
-        SubDataSpace(DataSpaceBase<SpaceType>& space_, size_t fromDim_, size_t toDim_);
+        SubDataSpace(DataSpaceMixin<SpaceType>& space_, size_t fromDim_, size_t toDim_);
         SubDataSpace(const SubDataSpace&) = default;
         SubDataSpace(SubDataSpace&&) noexcept = default;
         ~SubDataSpace() = default;
@@ -45,7 +45,7 @@ namespace Physica {
     };
 
     template<class SpaceType, size_t Dim>
-    SubDataSpace<SpaceType, Dim>::SubDataSpace(DataSpaceBase<SpaceType>& space_, size_t fromDim_, size_t toDim_)
+    SubDataSpace<SpaceType, Dim>::SubDataSpace(DataSpaceMixin<SpaceType>& space_, size_t fromDim_, size_t toDim_)
             : space(space_.getDerived())
             , fromDim(fromDim_)
             , toDim(toDim_) {

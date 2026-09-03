@@ -38,9 +38,9 @@ namespace Physica {
     };
 
     template<Scalar T, int Size>
-    class SIMD<Complex<T>, Size> : public SIMDBase<SIMD<Complex<T>, Size>> {
+    class SIMD<Complex<T>, Size> : public SIMDMixin<SIMD<Complex<T>, Size>> {
         using This = SIMD<Complex<T>, Size>;
-        using Base = SIMDBase<This>;
+        using Base = SIMDMixin<This>;
         using MachineType = Complex<T>::MachineType;
     public:
         using typename Base::ScalarType;

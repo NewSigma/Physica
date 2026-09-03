@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "Physica/Core/ML/NeuralNetwork/Layer/LayerBase.h"
+#include "Physica/Core/ML/NeuralNetwork/Layer/LayerMixin.h"
 
 namespace Physica {
     template<class Derived>
-    class ConservedFieldNet : public LayerBase<Derived> {
+    class ConservedFieldNet : public LayerMixin<Derived> {
         using This = ConservedFieldNet<Derived>;
-        using Base = LayerBase<Derived>;
+        using Base = LayerMixin<Derived>;
         using TraitsType = Traits<Derived>;
     public:
         using typename Base::ScalarType;

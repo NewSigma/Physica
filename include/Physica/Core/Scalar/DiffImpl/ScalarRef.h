@@ -25,9 +25,9 @@ namespace Physica {
      * \class ScalarRef is a proxy type returned when dereferencing \class ScalarPtr
      */
     template<Scalar T> requires(instanceof_tx<T, Diff>)
-    class ScalarRef<T> : public ScalarBase<ScalarRef<T>> {
+    class ScalarRef<T> : public ScalarMixin<ScalarRef<T>> {
         using This = ScalarRef<T>;
-        using Base = ScalarBase<This>;
+        using Base = ScalarMixin<This>;
 
         using Tr = std::remove_const_t<T>::RealType;
         using Tv = std::remove_const_t<T>::ValueType;

@@ -22,11 +22,11 @@
 
 namespace Physica {
     template<class Derived>
-    class device_obj<SeqNet<Derived>> : public device_obj<LayerBase<Derived>> {
+    class device_obj<SeqNet<Derived>> : public device_obj<LayerMixin<Derived>> {
         static_assert(!is_device_obj<Derived>::value, "[Error]: device_obj<> is unnecessary");
         using host_obj = SeqNet<Derived>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<LayerBase<Derived>>;
+        using Base = device_obj<LayerMixin<Derived>>;
     public:
         using typename Base::ScalarType;
     protected:

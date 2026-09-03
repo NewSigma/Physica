@@ -25,10 +25,10 @@ namespace Physica {
 
     template<class Derived>
     class FFTRSpace<Derived, 1>
-            : public CRTPBase<FFTRSpace<Derived, 1>>
+            : public CRTP<FFTRSpace<Derived, 1>>
             , public CompactVector<FFTRSpace<Derived, 1>> {
         using This = FFTRSpace<Derived, 1>;
-        using Base = CRTPBase<This>;
+        using Base = CRTP<This>;
         using VectorBase = CompactVector<This>;
     public:
         using typename VectorBase::ScalarType;
@@ -81,10 +81,10 @@ namespace Physica {
     //////////////////////////////////////////////////////////////////////
     template<class Derived>
     class FFTRSpace<Derived, 2>
-            : public CRTPBase<FFTRSpace<Derived, 2>>
+            : public CRTP<FFTRSpace<Derived, 2>>
             , public LValueMatrix<FFTRSpace<Derived, 2>> {
         using This = FFTRSpace<Derived, 2>;
-        using Base = CRTPBase<This>;
+        using Base = CRTP<This>;
         using MatrixBase = LValueMatrix<This>;
     public:
         using typename MatrixBase::ScalarType;
@@ -142,10 +142,10 @@ namespace Physica {
     //////////////////////////////////////////////////////////////////////
     template<class Derived>
     class FFTRSpace<Derived, 3>
-            : public CRTPBase<FFTRSpace<Derived, 3>>
+            : public CRTP<FFTRSpace<Derived, 3>>
             , public LValueTensor<FFTRSpace<Derived, 3>> {
         using This = FFTRSpace<Derived, 3>;
-        using Base = CRTPBase<This>;
+        using Base = CRTP<This>;
         using TensorBase = LValueTensor<This>;
     public:
         using typename TensorBase::ScalarType;

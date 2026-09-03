@@ -26,11 +26,11 @@
 
 namespace Physica {
     template<class Derived>
-    class device_obj<PairModel<Derived>> : public CRTPBase<device_obj<PairModel<Derived>>> {
+    class device_obj<PairModel<Derived>> : public CRTP<device_obj<PairModel<Derived>>> {
         static_assert(!is_device_obj<Derived>::value, "[Error]: Nested device_obj is unnecessary");
         using host_obj = PairModel<Derived>;
         using This = device_obj<PairModel<Derived>>;
-        using Base = CRTPBase<This>;
+        using Base = CRTP<This>;
         using TraitsType = Traits<Derived>;
 
         constexpr static bool IsPotDependOnAtomIndex = TraitsType::IsPotDependOnAtomIndex;

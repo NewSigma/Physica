@@ -27,9 +27,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    class Element : public CRTPBase<Element<Derived>> {
+    class Element : public CRTP<Element<Derived>> {
         using This = Element<Derived>;
-        using Base = CRTPBase<This>;
+        using Base = CRTP<This>;
     public:
         using ScalarType = Traits<Derived>::ScalarType;
         constexpr static unsigned int Dim = Traits<Derived>::Dim;

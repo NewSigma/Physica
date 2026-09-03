@@ -18,14 +18,14 @@
  */
 #pragma once
 
-#include "Physica/CRTPBase.h"
+#include "Physica/CRTP.h"
 #include "Physica/Core/Math/Algebra/Canonicalization.h"
 
 namespace Physica {
     template<class Derived>
-    class SIMDBase : public CRTPBase<SIMDBase<Derived>> {
-        using This = SIMDBase<Derived>;
-        using Base = CRTPBase<This>;
+    class SIMDMixin : public CRTP<SIMDMixin<Derived>> {
+        using This = SIMDMixin<Derived>;
+        using Base = CRTP<This>;
         using TraitsType = Traits<Derived>;
     public:
         constexpr static bool isSeparatable = TraitsType::isSeparatable;
@@ -38,7 +38,7 @@ namespace Physica {
         using BoolSIMDType = TraitsType::BoolSIMDType;
         using MachineType = TraitsType::MachineType;
     public:
-        constexpr ~SIMDBase() = default;
+        constexpr ~SIMDMixin() = default;
         /* Operations */
         [[nodiscard]] FullRealType squaredNorm() const;
         [[nodiscard]] FullRealType swapRealImag() const;
@@ -52,16 +52,16 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isComplex() noexcept { return ScalarType::isComplex(); }
         [[nodiscard]] __host__ __device__ consteval static bool isDiffable() noexcept { return ScalarType::isDiffable(); }
     protected:
-        constexpr SIMDBase() = default;
-        constexpr SIMDBase(const This&) = default;
-        constexpr SIMDBase(This&&) = default;
+        constexpr SIMDMixin() = default;
+        constexpr SIMDMixin(const This&) = default;
+        constexpr SIMDMixin(This&&) = default;
         /* Operators */
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
     };
 
     template<class Derived>
-    auto SIMDBase<Derived>::squaredNorm() const -> FullRealType {
+    auto SIMDMixin<Derived>::squaredNorm() const -> FullRealType {
         const FullRealType x2 = square(asReal());
         if constexpr (isComplex())
             return x2 + x2.swapRealImag();
@@ -70,7 +70,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto SIMDBase<Derived>::swapRealImag() const -> FullRealType {
+    auto SIMDMixin<Derived>::swapRealImag() const -> FullRealType {
         const auto x = asReal();
         if constexpr (ScalarType::Prec == Float32)
             return x.template shuffle<1, 0, 3, 2>();
@@ -88,7 +88,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto SIMDBase<Derived>::gatherRealImag() const noexcept -> FullRealType {
+    auto SIMDMixin<Derived>::gatherRealImag() const noexcept -> FullRealType {
         const auto x = asReal();
         constexpr int Size1 = isComplex() ? size() * 2 : size();
         if constexpr (Size1 == 2)
@@ -104,7 +104,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto SIMDBase<Derived>::scatterRealImag() const noexcept -> FullRealType {
+    auto SIMDMixin<Derived>::scatterRealImag() const noexcept -> FullRealType {
         const auto x = asReal();
         constexpr int Size1 = isComplex() ? size() * 2 : size();
         if constexpr (Size1 == 2)
@@ -120,7 +120,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto SIMDBase<Derived>::value() const noexcept -> ValueType {
+    auto SIMDMixin<Derived>::value() const noexcept -> ValueType {
         if constexpr (isDiffable())
             return Base::getDerived_host().value();
         else
@@ -128,7 +128,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto SIMDBase<Derived>::asReal() const noexcept -> FullRealType {
+    auto SIMDMixin<Derived>::asReal() const noexcept -> FullRealType {
         if constexpr (isComplex())
             return Base::getDerived_host().asReal();
         else
@@ -149,7 +149,7 @@ namespace Physica {
 
 namespace Physica {
     template<class T>
-    class Traits<SIMDBase<T>> {
+    class Traits<SIMDMixin<T>> {
     public:
         using Derived = T;
     };

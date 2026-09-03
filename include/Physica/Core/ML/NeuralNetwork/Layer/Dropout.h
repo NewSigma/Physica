@@ -19,13 +19,13 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
-#include "LayerBase.h"
+#include "LayerMixin.h"
 
 namespace Physica {
     template<Scalar T>
-    class Dropout : public LayerBase<Dropout<T>> {
+    class Dropout : public LayerMixin<Dropout<T>> {
         using This = Dropout<T>;
-        using Base = LayerBase<This>;
+        using Base = LayerMixin<This>;
         using Tv = T::ValueType;
 
         Tv p;

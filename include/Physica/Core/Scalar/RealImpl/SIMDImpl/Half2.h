@@ -50,7 +50,7 @@ namespace Physica {
     class device_obj<BestPacket<float16, Length>> : public BestPacket<float16, Length> {};
 
     template<>
-    class SIMD<Real<Float16>, 2> : public SIMDBase<SIMD<Real<Float16>, 2>>, private __half2 {
+    class SIMD<Real<Float16>, 2> : public SIMDMixin<SIMD<Real<Float16>, 2>>, private __half2 {
         constexpr static int Size = 2;
         using This = SIMD<float16, Size>;
         using Base = __half2;

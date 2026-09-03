@@ -20,13 +20,13 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h" // IWYU pragma: export
 #include "Physica/PlainStruct.h"
-#include "LayerBase.h"
+#include "LayerMixin.h"
 
 namespace Physica {
     template<Scalar T, bool WithBias = true>
-    class LinearLayer : public LayerBase<LinearLayer<T, WithBias>> {
+    class LinearLayer : public LayerMixin<LinearLayer<T, WithBias>> {
         using This = LinearLayer<T, WithBias>;
-        using Base = LayerBase<This>;
+        using Base = LayerMixin<This>;
 
         using Tv = T::ValueType;
         using BiasType = std::conditional<WithBias, VectorND<T>, Empty>::type;

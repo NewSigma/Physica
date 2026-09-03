@@ -19,14 +19,14 @@
 #pragma once
 
 #include <concepts>
-#include "Physica/CRTPBase.h"
+#include "Physica/CRTP.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica {
     template<class Derived>
-    class LayerBase : public CRTPBase<LayerBase<Derived>> {
-        using This = LayerBase<Derived>;
-        using Base = CRTPBase<This>;
+    class LayerMixin : public CRTP<LayerMixin<Derived>> {
+        using This = LayerMixin<Derived>;
+        using Base = CRTP<This>;
         using TraitsType = Traits<Derived>;
     public:
         template<Scalar U>
@@ -35,7 +35,7 @@ namespace Physica {
         using T = TraitsType::ScalarType;
         using Tv = T::ValueType;
     public:
-        ~LayerBase() = default;
+        ~LayerMixin() = default;
         /* Operations */
         [[nodiscard]] auto forward(const auto& x) const { return Base::getDerived().forward(x); }
         auto reverse(const Derived& __restrict other) const noexcept;
@@ -47,16 +47,16 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isTraining() noexcept { return T::isDiffable(); }
         [[nodiscard]] __host__ __device__ consteval static bool isInfering() noexcept { return !isTraining(); }
     protected:
-        LayerBase() = default;
-        LayerBase(const This&) = default;
-        LayerBase(This&&) noexcept = default;
+        LayerMixin() = default;
+        LayerMixin(const This&) = default;
+        LayerMixin(This&&) noexcept = default;
         /* Operators */
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
     };
 
     template<class Derived>
-    auto LayerBase<Derived>::reverse(const Derived& __restrict other) const noexcept {
+    auto LayerMixin<Derived>::reverse(const Derived& __restrict other) const noexcept {
         assert(this != &other && "[Error]: Self reverse is invalid");
         return Base::getDerived().reverse(other);
     }
@@ -64,12 +64,12 @@ namespace Physica {
      * Deep Neutral Network
      */
     template<class T>
-    concept DNN = std::derived_from<T, LayerBase<T>>;
+    concept DNN = std::derived_from<T, LayerMixin<T>>;
 }
 
 namespace Physica {
     template<class T>
-    class Traits<LayerBase<T>> {
+    class Traits<LayerMixin<T>> {
     public:
         using Derived = T;
     };

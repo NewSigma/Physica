@@ -20,14 +20,14 @@
 
 #include <array>
 #include <cassert>
-#include "Physica/CRTPBase.h"
+#include "Physica/CRTP.h"
 #include <H5Spublic.h>
 
 namespace Physica {
     template<class Derived>
-    class DataSpaceBase : public CRTPBase<DataSpaceBase<Derived>> {
-        using This = DataSpaceBase<Derived>;
-        using Base = CRTPBase<This>;
+    class DataSpaceMixin : public CRTP<DataSpaceMixin<Derived>> {
+        using This = DataSpaceMixin<Derived>;
+        using Base = CRTP<This>;
     public:
         constexpr static size_t Dim = Traits<Derived>::Dim;
         using SizeType = hsize_t;
@@ -45,7 +45,7 @@ namespace Physica {
 
 namespace Physica {
     template<class T>
-    class Traits<DataSpaceBase<T>> {
+    class Traits<DataSpaceMixin<T>> {
     public:
         using Derived = T;
     };

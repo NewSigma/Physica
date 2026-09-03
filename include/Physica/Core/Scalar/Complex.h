@@ -31,9 +31,9 @@ namespace Physica {
     using cfloat64 = Complex<float64>;
 
     template<Scalar T>
-    class Complex<T> : public ScalarBase<Complex<T>>, public CRCoro<Complex<T>> {
+    class Complex<T> : public ScalarMixin<Complex<T>>, public CRCoro<Complex<T>> {
         using This = Complex<T>;
-        using Base = ScalarBase<This>;
+        using Base = ScalarMixin<This>;
     #ifndef PHYSICA_MKL
         struct MKL_Complex8 {};
         struct MKL_Complex16 {};

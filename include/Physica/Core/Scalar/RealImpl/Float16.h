@@ -46,9 +46,9 @@ namespace Physica {
 
 namespace Physica {
     template<>
-    class Real<Float16> : public ScalarBase<Real<Float16>>, public CRCoro<Real<Float16>> {
+    class Real<Float16> : public ScalarMixin<Real<Float16>>, public CRCoro<Real<Float16>> {
         using This = Real<Float16>;
-        using Base = ScalarBase<This>;
+        using Base = ScalarMixin<This>;
     public:
         using device_obj_type = This;
     private:

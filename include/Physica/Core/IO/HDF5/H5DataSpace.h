@@ -18,14 +18,14 @@
  */
 #pragma once
 
-#include "DataSpaceImpl/DataSpaceBase.h"
+#include "DataSpaceImpl/DataSpaceMixin.h"
 #include "DataSpaceImpl/SubDataSpace.h"
 
 namespace Physica {
     template<size_t Dim>
-    class H5DataSpace : public DataSpaceBase<H5DataSpace<Dim>>, public H5ID {
+    class H5DataSpace : public DataSpaceMixin<H5DataSpace<Dim>>, public H5ID {
         static_assert(Dim > 0, "[Error]: Invalid dim");
-        using Base = DataSpaceBase<H5DataSpace<Dim>>;
+        using Base = DataSpaceMixin<H5DataSpace<Dim>>;
         using This = H5DataSpace<Dim>;
     public:
         using SizeArray = Base::SizeArray;

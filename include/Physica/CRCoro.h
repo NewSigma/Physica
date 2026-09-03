@@ -20,7 +20,7 @@
 
 #include <cstdlib>
 #include <utility>
-#include "CRTPBase.h"
+#include "CRTP.h"
 #include "Physica/Core/Utils/Suspend.h"
 
 namespace Physica {
@@ -30,10 +30,10 @@ namespace Physica {
      * Allow a normal function become a trivial coroutine without cost
      */
     template<class T>
-    class CRCoro : public CRTPBase<CRCoro<T>> {
+    class CRCoro : public CRTP<CRCoro<T>> {
         static_assert(std::is_object<T>::value, "[Error]: Must save the return by value");
         using This = CRCoro<T>;
-        using Base = CRTPBase<This>;
+        using Base = CRTP<This>;
     public:
         using promise_type = T;
     public:
