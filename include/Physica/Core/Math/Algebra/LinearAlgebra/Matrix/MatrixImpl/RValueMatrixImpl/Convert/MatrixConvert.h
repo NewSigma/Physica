@@ -41,7 +41,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const { return mat.calc(row, col).real(); }
 
-        [[nodiscard]] auto values(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
@@ -54,7 +54,7 @@ namespace Physica {
     };
 
     template<class M>
-    auto RealMatrix<M>::values(this auto&& self) noexcept {
+    decltype(auto) RealMatrix<M>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat).values().reals();
     }
 
@@ -78,7 +78,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const { return mat.calc(row, col).imag(); }
 
-        [[nodiscard]] auto values(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
@@ -91,7 +91,7 @@ namespace Physica {
     };
 
     template<class M>
-    auto ImagMatrix<M>::values(this auto&& self) noexcept {
+    decltype(auto) ImagMatrix<M>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat).values().imags();
     }
 
@@ -119,7 +119,7 @@ namespace Physica {
         void reverse(const auto& grad) const noexcept;
         using Base::reverse;
 
-        [[nodiscard]] auto values(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
@@ -143,7 +143,7 @@ namespace Physica {
     }
 
     template<class M>
-    auto SquaredNormMatrix<M>::values(this auto&& self) noexcept {
+    decltype(auto) SquaredNormMatrix<M>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat).values().squaredNorms();
     }
 
@@ -167,7 +167,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const { return mat.calc(row, col).norm(); }
 
-        [[nodiscard]] auto values(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
@@ -180,7 +180,7 @@ namespace Physica {
     };
 
     template<class M>
-    auto NormMatrix<M>::values(this auto&& self) noexcept {
+    decltype(auto) NormMatrix<M>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat).values().norms();
     }
 

@@ -44,13 +44,13 @@ namespace Physica {
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t i, instanceof_x<ThreadBlock> auto block) const { return v.getDerived().calc(i, block).imag(); }
 
-        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
     template<class V>
-    __host__ __device__ auto device_obj<ImagVector<V>>::values(this auto&& self) noexcept {
+    __host__ __device__ decltype(auto) device_obj<ImagVector<V>>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.v.getDerived()).values().imags();
     }
 
@@ -79,13 +79,13 @@ namespace Physica {
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t i, instanceof_x<ThreadBlock> auto block) const { return v.getDerived().calc(i, block).squaredNorm(); }
 
-        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
     template<class V>
-    __host__ __device__ auto device_obj<SquaredNormVector<V>>::values(this auto&& self) noexcept {
+    __host__ __device__ decltype(auto) device_obj<SquaredNormVector<V>>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.v.getDerived()).values().squaredNorms();
     }
 
@@ -112,13 +112,13 @@ namespace Physica {
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t i, instanceof_x<ThreadBlock> auto block) const { return v.getDerived().calc(i, block).norm(); }
 
-        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
     template<class V>
-    __host__ __device__ auto device_obj<NormVector<V>>::values(this auto&& self) noexcept {
+    __host__ __device__ decltype(auto) device_obj<NormVector<V>>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.v.getDerived()).values().norms();
     }
 

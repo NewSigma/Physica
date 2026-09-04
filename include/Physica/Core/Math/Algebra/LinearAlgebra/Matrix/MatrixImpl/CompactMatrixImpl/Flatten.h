@@ -39,8 +39,8 @@ namespace Physica {
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
 
-        [[nodiscard]] auto values(this auto&&) noexcept;
-        [[nodiscard]] auto grads(this auto&& self) noexcept;
+        [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) grads(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getSize(); }
         [[nodiscard]] auto data(this auto&& self) noexcept;
@@ -49,12 +49,12 @@ namespace Physica {
     };
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
-    auto Flatten<M>::values(this auto&& self) noexcept {
+    decltype(auto) Flatten<M>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat).values().flatten();
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
-    auto Flatten<M>::grads(this auto&& self) noexcept {
+    decltype(auto) Flatten<M>::grads(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat).grads().flatten();
     }
 

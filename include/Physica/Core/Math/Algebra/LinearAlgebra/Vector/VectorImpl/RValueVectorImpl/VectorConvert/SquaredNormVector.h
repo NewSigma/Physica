@@ -59,7 +59,7 @@ namespace Physica {
 
         [[nodiscard]] CoDiff<T> sum() const noexcept;
 
-        [[nodiscard]] auto values(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
@@ -164,7 +164,7 @@ namespace Physica {
     }
 
     template<class V>
-    auto SquaredNormVector<V>::values(this auto&& self) noexcept {
+    decltype(auto) SquaredNormVector<V>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v).values().squaredNorms();
     }
 

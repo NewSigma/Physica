@@ -45,7 +45,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t r1, size_t c1) const;
 
-        [[nodiscard]] auto values(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
@@ -75,7 +75,7 @@ namespace Physica {
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
-    auto ReshapedVector<V, MatrixMajor, Row, Col>::values(this auto&& self) noexcept {
+    decltype(auto) ReshapedVector<V, MatrixMajor, Row, Col>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v).values().template reshape<MatrixMajor, Row, Col>();
     }
 

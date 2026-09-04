@@ -41,7 +41,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).imag(); }
 
-        [[nodiscard]] auto values(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
@@ -49,7 +49,7 @@ namespace Physica {
     };
 
     template<class V>
-    auto ImagVector<V>::values(this auto&& self) noexcept {
+    decltype(auto) ImagVector<V>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v).values().imags();
     }
 
@@ -73,7 +73,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t s) const { return v.calc(s).norm(); }
 
-        [[nodiscard]] auto values(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
@@ -81,7 +81,7 @@ namespace Physica {
     };
 
     template<class V>
-    auto NormVector<V>::values(this auto&& self) noexcept {
+    decltype(auto) NormVector<V>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v).values().norms();
     }
 

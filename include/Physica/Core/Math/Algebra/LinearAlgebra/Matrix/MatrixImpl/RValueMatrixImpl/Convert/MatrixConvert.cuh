@@ -44,7 +44,7 @@ namespace Physica {
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const { return mat.getDerived().calc(row, col, block).real(); }
 
-        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
@@ -52,7 +52,7 @@ namespace Physica {
     };
 
     template<class M>
-    __host__ __device__ auto device_obj<RealMatrix<M>>::values(this auto&& self) noexcept {
+    __host__ __device__ decltype(auto) device_obj<RealMatrix<M>>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived()).values().reals();
     }
 
@@ -79,7 +79,7 @@ namespace Physica {
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const { return mat.getDerived().calc(row, col, block).imag(); }
 
-        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
@@ -87,7 +87,7 @@ namespace Physica {
     };
 
     template<class M>
-    __host__ __device__ auto device_obj<ImagMatrix<M>>::values(this auto&& self) noexcept {
+    __host__ __device__ decltype(auto) device_obj<ImagMatrix<M>>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived()).values().imags();
     }
 
@@ -116,7 +116,7 @@ namespace Physica {
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const { return mat.getDerived().calc(row, col, block).squaredNorm(); }
 
-        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
@@ -124,7 +124,7 @@ namespace Physica {
     };
 
     template<class M>
-    __host__ __device__ auto device_obj<SquaredNormMatrix<M>>::values(this auto&& self) noexcept {
+    __host__ __device__ decltype(auto) device_obj<SquaredNormMatrix<M>>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived()).values().squaredNorms();
     }
 
@@ -151,7 +151,7 @@ namespace Physica {
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const { return mat.getDerived().calc(row, col, block).norm(); }
 
-        [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
@@ -159,8 +159,8 @@ namespace Physica {
     };
 
     template<class M>
-    __host__ __device__ auto device_obj<NormMatrix<M>>::values(this auto&& self) noexcept {
-        return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived()).values().squaredNorms();
+    __host__ __device__ decltype(auto) device_obj<NormMatrix<M>>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived()).values().norms();
     }
 
     template<class M>

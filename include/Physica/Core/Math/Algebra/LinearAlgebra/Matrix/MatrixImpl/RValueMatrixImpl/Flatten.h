@@ -46,8 +46,8 @@ namespace Physica {
 
         [[nodiscard]] T calc(size_t index) const;
 
-        [[nodiscard]] auto values(this auto&&) noexcept;
-        [[nodiscard]] auto grads(this auto&& self) noexcept;
+        [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) grads(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getSize(); }
         /* Static members */
@@ -73,12 +73,12 @@ namespace Physica {
     }
 
     template<Matrix M>
-    auto Flatten<M>::values(this auto&& self) noexcept {
+    decltype(auto) Flatten<M>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat).values().flatten();
     }
 
     template<Matrix M>
-    auto Flatten<M>::grads(this auto&& self) noexcept {
+    decltype(auto) Flatten<M>::grads(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat).grads().flatten();
     }
 

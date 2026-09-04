@@ -42,7 +42,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).real(); }
 
-        [[nodiscard]] auto values(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
@@ -50,7 +50,7 @@ namespace Physica {
     };
 
     template<class V>
-    auto RealVector<V>::values(this auto&& self) noexcept {
+    decltype(auto) RealVector<V>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v).values().reals();
     }
 
