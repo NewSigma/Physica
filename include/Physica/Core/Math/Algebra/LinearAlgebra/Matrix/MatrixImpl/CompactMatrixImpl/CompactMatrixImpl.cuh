@@ -32,7 +32,7 @@ namespace Physica {
     template<Matrix M>
     void device_obj<CompactMatrix<Derived>>::toHostAsync(CompactMatrix<M>& obj) const {
         static_assert(std::same_as<ScalarType, typename M::ScalarType>, "[Error]: Incompatible ScalarType");
-        obj.resize(Base::getRow(), Base::getCol());
+        obj.getDerived().resize(Base::getRow(), Base::getCol());
 
         const size_t size = Base::getSize() * sizeof(T);
         if constexpr (M::getSizeAtCompile() != Dynamic)
@@ -226,7 +226,7 @@ namespace Physica {
     void CompactMatrix<Derived>::toDeviceAsync(device_obj<CompactMatrix<M>>& obj) const {
         static_assert(std::is_same<T, typename M::ScalarType>::value,
                 "[Error]: ScalarType inconsistent, additional buffer is necessary");
-        obj.resize(Base::getRow(), Base::getCol());
+        obj.getDerived().resize(Base::getRow(), Base::getCol());
 
         const size_t size = Base::getSize() * sizeof(T);
         if constexpr (M::getSizeAtCompile() != Dynamic)

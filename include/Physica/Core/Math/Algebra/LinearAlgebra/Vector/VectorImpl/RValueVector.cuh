@@ -65,8 +65,8 @@ namespace Physica {
         [[nodiscard]] __device__ SIMD<T, Size> packet(this const auto&, size_t index, size_t count) noexcept;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
 
-        __host__ __device__ void resize(const Vector auto& x) { resize(x.getLength()); }
-        __host__ __device__ auto resize(size_t length) { return Base::getDerived().resize(length); }
+        __host__ __device__ void resize(this auto&, const Vector auto& x);
+        __host__ __device__ auto resize(this auto&, size_t length);
 
         [[nodiscard]] __host__ __device__ decltype(auto) conjugate(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto transpose(this auto&&) noexcept;

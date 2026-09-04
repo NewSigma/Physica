@@ -72,6 +72,21 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    void RValueTensor<Derived, ScalarT>::resize(this auto& self, const Tensor auto& x) {
+        self.resize(x.getShape());
+    }
+
+    template<class Derived, Scalar ScalarT>
+    auto RValueTensor<Derived, ScalarT>::resize(this auto& self, std::integral auto... dims) {
+        return self.resize(dims...);
+    }
+
+    template<class Derived, Scalar ScalarT>
+    auto RValueTensor<Derived, ScalarT>::resize(this auto& self, IndexType shape) {
+        return self.resize(shape);
+    }
+
+    template<class Derived, Scalar ScalarT>
     auto RValueTensor<Derived, ScalarT>::reals() const noexcept {
         return RealTensor<Derived>(Base::getDerived());
     }

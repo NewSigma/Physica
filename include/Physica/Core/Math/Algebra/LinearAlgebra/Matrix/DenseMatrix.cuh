@@ -56,10 +56,9 @@ namespace Physica {
         This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
         /* Operations */
-        __host__ __device__ void resize(size_t order);
-        __host__ __device__ void resize(const Matrix auto& m, auto&&... args);
-        __host__ __device__ void resize(size_t row, size_t col, auto&&... args);
-        void reserve(size_t size);
+        using Base::resize;
+        __host__ __device__ void resize(this auto&, size_t row, size_t col, auto&&... args);
+        void reserve(this auto&, size_t size);
 
         [[nodiscard]] host_obj toHost() const;
         [[nodiscard]] host_obj toHostAsync() const;
@@ -74,7 +73,7 @@ namespace Physica {
         using Base::random_normal;
         using Base::random_any;
 
-        void zeros() noexcept;
+        void zeros(this auto&) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;

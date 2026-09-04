@@ -205,13 +205,13 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    void RValueVector<Derived, ScalarT>::resize(const Vector auto& x) {
-        resize(x.getLength());
+    void RValueVector<Derived, ScalarT>::resize(this auto& self, const Vector auto& x) {
+        self.resize(x.getLength());
     }
 
     template<class Derived, Scalar ScalarT>
-    void RValueVector<Derived, ScalarT>::resize(size_t length) {
-        Base::getDerived().resize(length);
+    auto RValueVector<Derived, ScalarT>::resize(this auto& self, size_t length) {
+        self.resize(length);
     }
 
     template<class Derived, Scalar ScalarT>

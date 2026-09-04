@@ -55,7 +55,7 @@ namespace Physica {
         static_assert(std::same_as<T, typename V::ScalarType>, "[Error]: Incompatible ScalarType");
         const size_t length = Base::getLength();
         const size_t size = length * sizeof(T);
-        obj.resize(length);
+        obj.getDerived().resize(length);
         if constexpr (obj.getSizeAtCompile() != Dynamic)
             memcpy(obj.data(), data(), size);
         else if constexpr (Diffable<T>) {
@@ -183,7 +183,7 @@ namespace Physica {
                       "[Error]: Type inconsistent between source and target, please cast instead of memcpy");
         const size_t length = Base::getLength();
         const size_t size = length * sizeof(T);
-        obj.resize(length);
+        obj.getDerived().resize(length);
         if constexpr (obj.getSizeAtCompile() != Dynamic)
             memcpy(obj.data(), data(), size);
         else if constexpr (Diffable<V>) {

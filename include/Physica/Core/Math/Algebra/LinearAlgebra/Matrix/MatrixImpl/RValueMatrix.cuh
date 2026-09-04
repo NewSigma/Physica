@@ -63,8 +63,9 @@ namespace Physica {
         [[nodiscard]] __device__ T calcFromMajorMinor(this const auto&, size_t major, size_t minor);
         void reverse(const Matrix auto& y, const Matrix auto& grad) const noexcept;
 
-        __host__ __device__ void resize(const Matrix auto& m, auto&&... args);
-        __host__ __device__ auto resize(size_t r, size_t c, auto&&... args);
+        __host__ __device__ void resize(this auto&, size_t order);
+        __host__ __device__ void resize(this auto&, const Matrix auto& m, auto&&... args);
+        __host__ __device__ auto resize(this auto&, size_t r, size_t c, auto&&... args);
 
         [[nodiscard]] __host__ __device__ auto row(this auto&&, size_t r) noexcept;
         [[nodiscard]] __host__ __device__ auto col(this auto&&, size_t c) noexcept;

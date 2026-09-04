@@ -46,15 +46,15 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    void device_obj<DenseVector<Diff<T, Mode, Order>>>::resize(const Vector auto& x) {
-        resize(x.getLength());
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::resize(this auto& self, const Vector auto& x) {
+        self.resize(x.getLength());
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    void device_obj<DenseVector<Diff<T, Mode, Order>>>::resize(size_t size) {
-        if (size != getLength()) {
-            v.resize(size);
-            g.resize(size);
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::resize(this auto& self, size_t size) {
+        if (size != self.getLength()) {
+            self.v.resize(size);
+            self.g.resize(size);
         }
     }
 
@@ -85,29 +85,29 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    void device_obj<DenseVector<Diff<T, Mode, Order>>>::zero_grad() {
-        g.zeros();
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::zero_grad(this auto& self) {
+        self.g.zeros();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     template<RNG R>
-    void device_obj<DenseVector<Diff<T, Mode, Order>>>::random_uniform() {
-        v.template random_uniform<R>();
-        zero_grad();
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::random_uniform(this auto& self) {
+        self.v.template random_uniform<R>();
+        self.zero_grad();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     template<RNG R>
-    void device_obj<DenseVector<Diff<T, Mode, Order>>>::random_normal() {
-        v.template random_normal<R>();
-        zero_grad();
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::random_normal(this auto& self) {
+        self.v.template random_normal<R>();
+        self.zero_grad();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     template<RNG R>
-    void device_obj<DenseVector<Diff<T, Mode, Order>>>::random_any(auto& distribution) {
-        v.template random_any<R>(distribution);
-        zero_grad();
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::random_any(this auto& self, auto& distribution) {
+        self.v.template random_any<R>(distribution);
+        self.zero_grad();
     }
 
     template<Scalar T, DiffMode Mode, int Order>

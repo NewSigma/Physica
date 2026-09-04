@@ -49,8 +49,8 @@ namespace Physica {
         void operator*=(Scalar auto x) noexcept;
         void operator/=(Scalar auto x) noexcept;
         /* Operations */
-        void resize(size_t order, auto&&... args);
-        void resize(const Matrix auto& m, auto&&... args);
+        void resize(this auto&, size_t order, auto&&... args);
+        void resize(this auto&, const Matrix auto& m, auto&&... args);
 
         [[nodiscard]] T max() const { return asVector().max(); }
         [[nodiscard]] T min() const { return asVector().min(); }
@@ -58,13 +58,13 @@ namespace Physica {
         [[nodiscard]] decltype(auto) hermite() const noexcept;
         void swap(This& __restrict m) noexcept;
 
-        void zeros() noexcept { storage.zeros(); }
+        void zeros(this auto&) noexcept;
         template<RNG R>
-        void random_uniform() { asVector().template random_uniform<R>(); }
+        void random_uniform(this auto&);
         template<RNG R>
-        void random_normal() { asVector().template random_normal<R>(); }
+        void random_normal(this auto&);
         template<RNG R>
-        void random_any(auto& distribution) { asVector().template random_any<R>(distribution); }
+        void random_any(this auto&, auto& distribution);
 
         const H5Dataset<1> read(const H5Loc& loc, const char* name) { return storage.read(loc, name); }
         H5Dataset<1> write(H5Loc& loc, const char* name) const { return storage.write(loc, name); }
@@ -130,14 +130,14 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    void DenseSymmMatrix<T, Order>::resize(size_t order, auto&&... args) {
-        storage.resize(order, std::forward<decltype(args)>(args)...);
+    void DenseSymmMatrix<T, Order>::resize(this auto& self, size_t order, auto&&... args) {
+        self.storage.resize(order, std::forward<decltype(args)>(args)...);
     }
 
     template<Scalar T, size_t Order>
-    void DenseSymmMatrix<T, Order>::resize(const Matrix auto& m, auto&&... args) {
+    void DenseSymmMatrix<T, Order>::resize(this auto& self, const Matrix auto& m, auto&&... args) {
         assert(m.isSquare());
-        resize(m.getRow(), std::forward<decltype(args)>(args)...);
+        self.resize(m.getRow(), std::forward<decltype(args)>(args)...);
     }
 
     template<Scalar T, size_t Order>
@@ -179,6 +179,29 @@ namespace Physica {
         DenseSymmMatrix<T, Order> result(order);
         result.toIdentity();
         return result;
+    }
+
+    template<Scalar T, size_t Order>
+    void DenseSymmMatrix<T, Order>::zeros(this auto& self) noexcept {
+        self.storage.zeros();
+    }
+
+    template<Scalar T, size_t Order>
+    template<RNG R>
+    void DenseSymmMatrix<T, Order>::random_uniform(this auto& self) {
+        self.asVector().template random_uniform<R>();
+    }
+
+    template<Scalar T, size_t Order>
+    template<RNG R>
+    void DenseSymmMatrix<T, Order>::random_normal(this auto& self) {
+        self.asVector().template random_normal<R>();
+    }
+
+    template<Scalar T, size_t Order>
+    template<RNG R>
+    void DenseSymmMatrix<T, Order>::random_any(this auto& self, auto& distribution) {
+        self.asVector().template random_any<R>(distribution);
     }
 
     template<Scalar T, size_t Order>

@@ -177,13 +177,18 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    __host__ __device__ void device_obj<RValueMatrix<Derived, ScalarT>>::resize(const Matrix auto& m, auto&&... args) {
-        resize(m.getRow(), m.getCol(), std::forward<decltype(args)>(args)...);
+    __host__ __device__ void device_obj<RValueMatrix<Derived, ScalarT>>::resize(this auto& self, size_t order) {
+        self.resize(order, order);
     }
 
     template<class Derived, Scalar ScalarT>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::resize(size_t r, size_t c, auto&&... args) {
-        return Base::getDerived().resize(r, c, std::forward<decltype(args)>(args)...);
+    __host__ __device__ void device_obj<RValueMatrix<Derived, ScalarT>>::resize(this auto& self, const Matrix auto& m, auto&&... args) {
+        self.resize(m.getRow(), m.getCol(), std::forward<decltype(args)>(args)...);
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::resize(this auto& self, size_t r, size_t c, auto&&... args) {
+        self.resize(r, c, std::forward<decltype(args)>(args)...);
     }
 
     template<class Derived, Scalar ScalarT>

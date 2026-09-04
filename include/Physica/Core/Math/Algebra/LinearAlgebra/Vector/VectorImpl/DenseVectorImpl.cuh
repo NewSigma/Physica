@@ -41,18 +41,18 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    __host__ __device__ void device_obj<DenseVector<T, Length, Allocator>>::resize(const Vector auto& x) {
-        resize(x.getLength());
+    __host__ __device__ void device_obj<DenseVector<T, Length, Allocator>>::resize(this auto& self, const Vector auto& x) {
+        self.resize(x.getLength());
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    __host__ __device__ void device_obj<DenseVector<T, Length, Allocator>>::resize(size_t size, auto&&... args) noexcept {
-        storage.resize(size, std::forward<decltype(args)>(args)...);
+    __host__ __device__ void device_obj<DenseVector<T, Length, Allocator>>::resize(this auto& self, size_t size, auto&&... args) noexcept {
+        self.storage.resize(size, std::forward<decltype(args)>(args)...);
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    void device_obj<DenseVector<T, Length, Allocator>>::reserve(size_t size) noexcept {
-        storage.reserve(size);
+    void device_obj<DenseVector<T, Length, Allocator>>::reserve(this auto& self, size_t size) noexcept {
+        self.storage.reserve(size);
     }
 
     template<Scalar T, size_t Length, class Allocator>
@@ -77,25 +77,25 @@ namespace Physica {
 
     template<Scalar T, size_t Length, class Allocator>
     template<RNG R>
-    void device_obj<DenseVector<T, Length, Allocator>>::random_uniform() {
-        host_obj::template random_uniform<R>(getLength()).toDevice(*this);
+    void device_obj<DenseVector<T, Length, Allocator>>::random_uniform(this auto& self) {
+        host_obj::template random_uniform<R>(self.getLength()).toDevice(self);
     }
 
     template<Scalar T, size_t Length, class Allocator>
     template<RNG R>
-    void device_obj<DenseVector<T, Length, Allocator>>::random_normal() {
-        host_obj::template random_normal<R>(getLength()).toDevice(*this);
+    void device_obj<DenseVector<T, Length, Allocator>>::random_normal(this auto& self) {
+        host_obj::template random_normal<R>(self.getLength()).toDevice(self);
     }
 
     template<Scalar T, size_t Length, class Allocator>
     template<RNG R>
-    void device_obj<DenseVector<T, Length, Allocator>>::random_any(auto& distribution) {
-        host_obj::template random_any<R>(getLength(), distribution).toDevice(*this);
+    void device_obj<DenseVector<T, Length, Allocator>>::random_any(this auto& self, auto& distribution) {
+        host_obj::template random_any<R>(self.getLength(), distribution).toDevice(self);
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    void device_obj<DenseVector<T, Length, Allocator>>::zeros() noexcept {
-        storage.zeros();
+    void device_obj<DenseVector<T, Length, Allocator>>::zeros(this auto& self) noexcept {
+        self.storage.zeros();
     }
 
     template<Scalar T, size_t Length, class Allocator>

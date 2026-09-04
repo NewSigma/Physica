@@ -100,8 +100,9 @@ namespace Physica {
         void reverse(this const auto&, const Matrix auto& grad) noexcept;
         void reverse(this const auto&, const Matrix auto& y, const Matrix auto& grad) noexcept;
 
-        void resize(const Matrix auto& m, auto&&... args);
-        decltype(auto) resize(size_t r, size_t c, auto&&... args);
+        void resize(this auto&, size_t order);
+        void resize(this auto&, const Matrix auto& m, auto&&... args);
+        auto resize(this auto&, size_t r, size_t c, auto&&... args);
 
         [[nodiscard]] auto row(this auto&&, size_t r) noexcept;
         [[nodiscard]] auto col(this auto&&, size_t c) noexcept;

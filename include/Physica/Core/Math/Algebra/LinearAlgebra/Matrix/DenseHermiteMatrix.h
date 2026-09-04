@@ -51,15 +51,15 @@ namespace Physica {
 
         [[nodiscard]] const This& hermite() const noexcept { return *this; }
 
-        void resize(size_t order, auto&&... args);
+        void resize(this auto&, size_t order, auto&&... args);
         void swap(This& __restrict m) noexcept;
 
         template<RNG R>
-        void random_uniform();
+        void random_uniform(this auto&);
         template<RNG R>
-        void random_normal();
+        void random_normal(this auto&);
         template<RNG R>
-        void random_any(auto& distribution);
+        void random_any(this auto&, auto& distribution);
 
         const H5Dataset<1> read(const H5Loc& loc, const char* name);
         H5Dataset<1> write(H5Loc& loc, const char* name) const;
@@ -119,8 +119,8 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    void DenseHermiteMatrix<T, Order>::resize(size_t order, auto&&... args) {
-        storage.resize(order, std::forward<decltype(args)>(args)...);
+    void DenseHermiteMatrix<T, Order>::resize(this auto& self, size_t order, auto&&... args) {
+        self.storage.resize(order, std::forward<decltype(args)>(args)...);
     }
 
     template<Scalar T, size_t Order>
@@ -131,26 +131,26 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     template<RNG R>
-    void DenseHermiteMatrix<T, Order>::random_uniform() {
-        asVector().template random_uniform<R>();
-        for (size_t i = 0; i < getOrder(); ++i)
-            (*this)[i, i].imag() = Tr(0);
+    void DenseHermiteMatrix<T, Order>::random_uniform(this auto& self) {
+        self.asVector().template random_uniform<R>();
+        for (size_t i = 0; i < self.getOrder(); ++i)
+            self[i, i].imag() = Tr(0);
     }
 
     template<Scalar T, size_t Order>
     template<RNG R>
-    void DenseHermiteMatrix<T, Order>::random_normal() {
-        asVector().template random_normal<R>();
-        for (size_t i = 0; i < getOrder(); ++i)
-            (*this)[i, i].imag() = Tr(0);
+    void DenseHermiteMatrix<T, Order>::random_normal(this auto& self) {
+        self.asVector().template random_normal<R>();
+        for (size_t i = 0; i < self.getOrder(); ++i)
+            self[i, i].imag() = Tr(0);
     }
 
     template<Scalar T, size_t Order>
     template<RNG R>
-    void DenseHermiteMatrix<T, Order>::random_any(auto& distribution) {
-        asVector().template random_any<R>(distribution);
-        for (size_t i = 0; i < getOrder(); ++i)
-            (*this)[i, i].imag() = Tr(0);
+    void DenseHermiteMatrix<T, Order>::random_any(this auto& self, auto& distribution) {
+        self.asVector().template random_any<R>(distribution);
+        for (size_t i = 0; i < self.getOrder(); ++i)
+            self[i, i].imag() = Tr(0);
     }
 
     template<Scalar T, size_t Order>

@@ -68,26 +68,26 @@ namespace Physica {
         using Base::operator=;
         using Base::operator[];
         /* Operations */
-        void zero_grad();
+        void zero_grad(this auto&);
 
         using Base::resize;
-        void resize(size_t row, size_t col);
-        void reserve(size_t size) noexcept;
+        void resize(this auto&, size_t row, size_t col, auto&&... args);
+        void reserve(this auto&, size_t size) noexcept;
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
 
         template<RNG R>
-        void random_uniform();
+        void random_uniform(this auto&);
         template<RNG R>
-        void random_normal();
+        void random_normal(this auto&);
         template<RNG R>
-        void random_any(auto& distribution);
+        void random_any(this auto&, auto& distribution);
 
         void swap(This& __restrict obj) noexcept;
-        void swap_row(size_t r1, size_t r2) noexcept;
-        void swap_col(size_t c1, size_t c2) noexcept;
+        void swap_row(this auto&, size_t r1, size_t r2) noexcept;
+        void swap_col(this auto&, size_t c1, size_t c2) noexcept;
         /* Getters */
         [[nodiscard]] auto data(this auto&&) noexcept;
         [[nodiscard]] size_t getCol() const noexcept { return v.getCol(); }

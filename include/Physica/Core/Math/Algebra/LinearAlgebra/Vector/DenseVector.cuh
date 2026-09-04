@@ -53,9 +53,9 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
         /* Operations */
-        __host__ __device__ void resize(const Vector auto& x);
-        __host__ __device__ void resize(size_t size, auto&&... args) noexcept;
-        void reserve(size_t size) noexcept;
+        __host__ __device__ void resize(this auto&, const Vector auto& x);
+        __host__ __device__ void resize(this auto&, size_t size, auto&&... args) noexcept;
+        void reserve(this auto&, size_t size) noexcept;
 
         [[nodiscard]] host_obj toHost() const;
         [[nodiscard]] host_obj toHostAsync() const;
@@ -65,15 +65,15 @@ namespace Physica {
         using Base::toHostAsync;
 
         template<RNG R>
-        void random_uniform();
+        void random_uniform(this auto&);
         template<RNG R>
-        void random_normal();
+        void random_normal(this auto&);
         template<RNG R>
-        void random_any(auto& distribution);
+        void random_any(this auto&, auto& distribution);
 
         using Base::read;
         using Base::write;
-        void zeros() noexcept;
+        void zeros(this auto&) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return storage.getLength(); }

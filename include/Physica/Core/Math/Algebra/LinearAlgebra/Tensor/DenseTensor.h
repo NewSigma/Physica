@@ -42,8 +42,8 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         using Base::resize;
-        void resize(IndexType shape);
-        void reserve(size_t size) noexcept;
+        void resize(this auto&, IndexType shape);
+        void reserve(this auto&, size_t size) noexcept;
 
         using Base::random_normal;
         void swap(This& __restrict obj) noexcept;

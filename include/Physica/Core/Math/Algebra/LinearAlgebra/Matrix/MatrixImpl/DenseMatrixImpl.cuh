@@ -59,23 +59,13 @@ namespace Physica {
     }
 
     template<tparams>
-    __host__ __device__ void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::resize(size_t order) {
-        storage.resize(order);
+    __host__ __device__ void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::resize(this auto& self, size_t row, size_t col, auto&&... args) {
+        self.storage.resize(row, col, std::forward<decltype(args)>(args)...);
     }
 
     template<tparams>
-    __host__ __device__ void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::resize(const Matrix auto& m, auto&&... args) {
-        Base::resize(m, std::forward<decltype(args)>(args)...);
-    }
-
-    template<tparams>
-    __host__ __device__ void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::resize(size_t row, size_t col, auto&&... args) {
-        storage.resize(row, col, std::forward<decltype(args)>(args)...);
-    }
-
-    template<tparams>
-    void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::reserve(size_t size) {
-        storage.reserve(size);
+    void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::reserve(this auto& self, size_t size) {
+        self.storage.reserve(size);
     }
 
     template<tparams>
@@ -94,8 +84,8 @@ namespace Physica {
     }
 
     template<tparams>
-    void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::zeros() noexcept {
-        storage.zeros();
+    void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::zeros(this auto& self) noexcept {
+        self.storage.zeros();
     }
 
     template<tparams>

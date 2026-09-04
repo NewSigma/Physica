@@ -62,23 +62,23 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    void DenseVector<T, Length, Allocator>::append(auto&&... args) noexcept {
-        storage.append(std::forward<decltype(args)>(args)...);
+    void DenseVector<T, Length, Allocator>::append(this auto& self, auto&&... args) noexcept {
+        self.storage.append(std::forward<decltype(args)>(args)...);
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    void DenseVector<T, Length, Allocator>::resize(const Vector auto& x) {
-        resize(x.getLength());
+    void DenseVector<T, Length, Allocator>::resize(this auto& self, const Vector auto& x) {
+        self.resize(x.getLength());
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    void DenseVector<T, Length, Allocator>::resize(size_t size, auto&&... args) noexcept {
-        storage.resize(size, std::forward<decltype(args)>(args)...);
+    void DenseVector<T, Length, Allocator>::resize(this auto& self, size_t size, auto&&... args) noexcept {
+        self.storage.resize(size, std::forward<decltype(args)>(args)...);
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    void DenseVector<T, Length, Allocator>::reserve(size_t size) noexcept {
-        storage.reserve(size);
+    void DenseVector<T, Length, Allocator>::reserve(this auto& self, size_t size) noexcept {
+        self.storage.reserve(size);
     }
 
     template<Scalar T, size_t Length, class Allocator>
@@ -114,19 +114,19 @@ namespace Physica {
      * Both \param from and \param to are included
      */
     template<Scalar T, size_t Length, class Allocator>
-    void DenseVector<T, Length, Allocator>::linspace(T from, T to) {
-        const size_t length = getLength();
+    void DenseVector<T, Length, Allocator>::linspace(this auto& self, T from, T to) {
+        const size_t length = self.getLength();
         assert(length > 1);
         Trv n = Trv(length - 1);
         for (size_t i = 0; i < length; ++i) {
             Trv factor = Trv(i) / n;
-            (*this)[i] = from * (Trv(1) - factor) + to * factor;
+            self[i] = from * (Trv(1) - factor) + to * factor;
         }
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    void DenseVector<T, Length, Allocator>::zeros() noexcept {
-        storage.zeros();
+    void DenseVector<T, Length, Allocator>::zeros(this auto& self) noexcept {
+        self.storage.zeros();
     }
 
     template<Scalar T, size_t Length, class Allocator>

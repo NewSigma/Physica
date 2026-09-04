@@ -59,26 +59,21 @@ namespace Physica {
     }
 
     template<tparams>
-    void device_obj<DenseMatrix>::zero_grad() {
-        g.zeros();
+    void device_obj<DenseMatrix>::zero_grad(this auto& self) {
+        self.g.zeros();
     }
 
     template<tparams>
-    __host__ __device__ void device_obj<DenseMatrix>::resize(size_t row, size_t col) {
-        v.resize(row, col);
-        g.resize(row, col);
+    __host__ __device__ void device_obj<DenseMatrix>::resize(this auto& self, size_t row, size_t col, auto&&... args) {
+        static_assert(sizeof...(args) == 0, "[Error]: Not well defined");
+        self.v.resize(row, col);
+        self.g.resize(row, col);
     }
 
     template<tparams>
-    void device_obj<DenseMatrix>::reserve(size_t size) {
-        v.reserve(size);
-        g.reserve(size);
-    }
-
-    template<tparams>
-    void device_obj<DenseMatrix>::zeros() {
-        v.zeros();
-        g.zeros();
+    void device_obj<DenseMatrix>::reserve(this auto& self, size_t size) {
+        self.v.reserve(size);
+        self.g.reserve(size);
     }
 
     template<tparams>
@@ -109,20 +104,20 @@ namespace Physica {
 
     template<tparams>
     template<RNG R>
-    void device_obj<DenseMatrix>::random_uniform() {
-        *this = random_uniform<R>(getRow(), getCol());
+    void device_obj<DenseMatrix>::random_uniform(this auto& self) {
+        self = random_uniform<R>(self.getRow(), self.getCol());
     }
 
     template<tparams>
     template<RNG R>
-    void device_obj<DenseMatrix>::random_normal() {
-        *this = random_normal<R>(getRow(), getCol());
+    void device_obj<DenseMatrix>::random_normal(this auto& self) {
+        self = random_normal<R>(self.getRow(), self.getCol());
     }
 
     template<tparams>
     template<RNG R>
-    void device_obj<DenseMatrix>::random_any(auto& distribution) {
-        *this = random_any<R>(getRow(), getCol(), distribution);
+    void device_obj<DenseMatrix>::random_any(this auto& self, auto& distribution) {
+        self = random_any<R>(self.getRow(), self.getCol(), distribution);
     }
 
     template<tparams>

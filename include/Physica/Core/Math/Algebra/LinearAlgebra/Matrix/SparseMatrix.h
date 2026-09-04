@@ -45,16 +45,16 @@ namespace Physica {
         This& operator=(const Matrix auto& m);
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
-        void insert(T x, size_t row, size_t col);
+        void insert(this auto&, T x, size_t row, size_t col);
 
         using Base::resize;
-        void resize(size_t row, size_t col);
+        void resize(this auto&, size_t row, size_t col);
         [[nodiscard]] device_obj<This> toDevice() const;
         [[nodiscard]] device_obj<This> toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
 
-        void zeros();
+        void zeros(this auto&);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
@@ -116,20 +116,20 @@ namespace Physica {
     }
 
     template<Scalar T, int Major>
-    void SparseMatrix<T, Major>::insert(T x, size_t row, size_t col) {
-        assert(row < getRow());
-        assert(col < getCol());
+    void SparseMatrix<T, Major>::insert(this auto& self, T x, size_t row, size_t col) {
+        assert(row < self.getRow());
+        assert(col < self.getCol());
         assert(!x.isZero() && "[Error]: Zero element is useless");
         const size_t major = MatrixMajor::selectMajor<This>(row, col);
         const size_t minor = MatrixMajor::selectMinor<This>(row, col);
-        const size_t from = majorStarts[major];
-        const size_t to = majorStarts[major + 1];
+        const size_t from = self.majorStarts[major];
+        const size_t to = self.majorStarts[major + 1];
         /* Search existing element */ {
             size_t index = 0;
             for (size_t i = from; i < to && index <= minor; ++i) {
-                index = minorIndexes[i];
+                index = self.minorIndexes[i];
                 if (index == minor) {
-                    elements[i] = x;
+                    self.elements[i] = x;
                     return;
                 }
             }
@@ -137,27 +137,27 @@ namespace Physica {
 
         /* If not exist */ {
             size_t insert_to = from;
-            while (insert_to < to && minorIndexes[insert_to] < minor)
+            while (insert_to < to && self.minorIndexes[insert_to] < minor)
                 ++insert_to;
-            elements.insert(insert_to, x);
-            minorIndexes.insert(insert_to, minor);
-            for (size_t i = major + 1; i < majorStarts.getLength(); ++i)
-                ++majorStarts[i];
+            self.elements.insert(insert_to, x);
+            self.minorIndexes.insert(insert_to, minor);
+            for (size_t i = major + 1; i < self.majorStarts.getLength(); ++i)
+                ++self.majorStarts[i];
         }
     }
 
     template<Scalar T, int Major>
-    void SparseMatrix<T, Major>::resize(size_t row, size_t col) {
-        zeros();
-        majorStarts.resize(MatrixMajor::selectMajor<This>(row, col) + 1, 0);
-        maxMinor = MatrixMajor::selectMinor<This>(row, col);
+    void SparseMatrix<T, Major>::resize(this auto& self, size_t row, size_t col) {
+        self.zeros();
+        self.majorStarts.resize(MatrixMajor::selectMajor<This>(row, col) + 1, 0);
+        self.maxMinor = MatrixMajor::selectMinor<This>(row, col);
     }
 
     template<Scalar T, int Major>
-    void SparseMatrix<T, Major>::zeros() {
-        elements.resize(0);
-        minorIndexes.resize(0);
-        majorStarts.zeros();
+    void SparseMatrix<T, Major>::zeros(this auto& self) {
+        self.elements.resize(0);
+        self.minorIndexes.resize(0);
+        self.majorStarts.zeros();
     }
 
     template<Scalar T, int Major>

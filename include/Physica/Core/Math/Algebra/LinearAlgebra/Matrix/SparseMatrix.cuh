@@ -47,13 +47,13 @@ namespace Physica {
         [[nodiscard]] __device__ T calc(size_t, size_t, instanceof_x<ThreadBlock> auto) const { noImpl(); }
 
         using Base::resize;
-        void resize(size_t row, size_t col);
+        void resize(this auto&, size_t row, size_t col);
         [[nodiscard]] host_obj toHost() const;
         [[nodiscard]] host_obj toHostAsync() const;
         void toHost(host_obj& obj) const;
         void toHostAsync(host_obj& obj) const;
 
-        void zeros();
+        void zeros(this auto&);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
@@ -83,10 +83,10 @@ namespace Physica {
     }
 
     template<Scalar T, int Major>
-    void device_obj<SparseMatrix<T, Major>>::resize(size_t row, size_t col) {
-        zeros();
-        majorStarts.resize(MatrixMajor::selectMajor<This>(row, col) + 1, 0);
-        maxMinor = MatrixMajor::selectMinor<This>(row, col);
+    void device_obj<SparseMatrix<T, Major>>::resize(this auto& self, size_t row, size_t col) {
+        self.zeros();
+        self.majorStarts.resize(MatrixMajor::selectMajor<This>(row, col) + 1, 0);
+        self.maxMinor = MatrixMajor::selectMinor<This>(row, col);
     }
 
     template<Scalar T, int Major>
@@ -118,10 +118,10 @@ namespace Physica {
     }
 
     template<Scalar T, int Major>
-    void device_obj<SparseMatrix<T, Major>>::zeros() {
-        elements.resize(0);
-        minorIndexes.resize(0);
-        majorStarts.zeros();
+    void device_obj<SparseMatrix<T, Major>>::zeros(this auto& self) {
+        self.elements.resize(0);
+        self.minorIndexes.resize(0);
+        self.majorStarts.zeros();
     }
 
     template<Scalar T, int Major>

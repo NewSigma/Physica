@@ -82,40 +82,41 @@ namespace Physica {
     }
 
     template<tparams>
-    void DiffDenseMatrix::resize(size_t row, size_t col) {
-        v.resize(row, col);
+    void DiffDenseMatrix::resize(this auto& self, size_t row, size_t col, auto&&... args) {
+        static_assert(sizeof...(args) == 0, "[Error]: Not well defined");
+        self.v.resize(row, col);
         if constexpr (isForwardDiff())
-            g.resize(row, col);
+            self.g.resize(row, col);
         else
-            assert(g.empty() && "[Error]: Reject resize-after-reverse");
+            assert(self.g.empty() && "[Error]: Reject resize-after-reverse");
     }
 
     template<tparams>
-    void DiffDenseMatrix::reserve(size_t size) noexcept {
-        v.reserve(size);
+    void DiffDenseMatrix::reserve(this auto& self, size_t size) noexcept {
+        self.v.reserve(size);
         if constexpr (isForwardDiff())
-            g.reserve(size);
+            self.g.reserve(size);
     }
 
     template<tparams>
     template<RNG R>
-    void DiffDenseMatrix::random_uniform() {
-        v.template random_uniform<R>();
-        zero_grad();
+    void DiffDenseMatrix::random_uniform(this auto& self) {
+        self.v.template random_uniform<R>();
+        self.zero_grad();
     }
 
     template<tparams>
     template<RNG R>
-    void DiffDenseMatrix::random_normal() {
-        v.template random_normal<R>();
-        zero_grad();
+    void DiffDenseMatrix::random_normal(this auto& self) {
+        self.v.template random_normal<R>();
+        self.zero_grad();
     }
 
     template<tparams>
     template<RNG R>
-    void DiffDenseMatrix::random_any(auto& distribution) {
-        v.template random_any<R>(distribution);
-        zero_grad();
+    void DiffDenseMatrix::random_any(this auto& self, auto& distribution) {
+        self.v.template random_any<R>(distribution);
+        self.zero_grad();
     }
 
     template<tparams>
@@ -126,20 +127,20 @@ namespace Physica {
     }
 
     template<tparams>
-    void DiffDenseMatrix::swap_row(size_t r1, size_t r2) noexcept {
-        v.swap_row(r1, r2);
-        g.swap_row(r1, r2);
+    void DiffDenseMatrix::swap_row(this auto& self, size_t r1, size_t r2) noexcept {
+        self.v.swap_row(r1, r2);
+        self.g.swap_row(r1, r2);
     }
 
     template<tparams>
-    void DiffDenseMatrix::swap_col(size_t c1, size_t c2) noexcept {
-        v.swap_col(c1, c2);
-        g.swap_col(c1, c2);
+    void DiffDenseMatrix::swap_col(this auto& self, size_t c1, size_t c2) noexcept {
+        self.v.swap_col(c1, c2);
+        self.g.swap_col(c1, c2);
     }
 
     template<tparams>
-    void DiffDenseMatrix::zero_grad() {
-        g.zeros();
+    void DiffDenseMatrix::zero_grad(this auto& self) {
+        self.g.zeros();
     }
 
     template<tparams>

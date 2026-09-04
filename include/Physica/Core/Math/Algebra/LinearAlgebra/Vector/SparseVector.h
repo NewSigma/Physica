@@ -49,9 +49,9 @@ namespace Physica {
         /* Operations */
         void assign_sparse(Vector auto& v) const;
 
-        void resize(size_t newLength);
-        void reserve(size_t numNonZero);
-        void clear();
+        void resize(this auto&, size_t newLength);
+        void reserve(this auto&, size_t numNonZero);
+        void clear(this auto&);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T calc(size_t index) const;
@@ -83,35 +83,35 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void SparseVector<T>::resize(size_t newLength) {
-        if (newLength < length) {
+    void SparseVector<T>::resize(this auto& self, size_t newLength) {
+        if (newLength < self.length) {
             IndexArray newIndexes;
             ElemArray newElems;
-            newIndexes.reserve(indexes.getLength());
-            newElems.reserve(elems.getLength());
-            for (size_t i = 0; i < indexes.getLength(); ++i) {
-                const size_t index = indexes[i];
+            newIndexes.reserve(self.indexes.getLength());
+            newElems.reserve(self.elems.getLength());
+            for (size_t i = 0; i < self.indexes.getLength(); ++i) {
+                const size_t index = self.indexes[i];
                 if (index < newLength) {
                     newIndexes.grow(index);
-                    newElems.grow(elems[i]);
+                    newElems.grow(self.elems[i]);
                 }
             }
-            indexes.swap(newIndexes);
-            elems.swap(newElems);
+            self.indexes.swap(newIndexes);
+            self.elems.swap(newElems);
         }
-        length = newLength;
+        self.length = newLength;
     }
 
     template<Scalar T>
-    void SparseVector<T>::reserve(size_t numNonZero) {
-        indexes.reserve(numNonZero);
-        elems.reserve(numNonZero);
+    void SparseVector<T>::reserve(this auto& self, size_t numNonZero) {
+        self.indexes.reserve(numNonZero);
+        self.elems.reserve(numNonZero);
     }
 
     template<Scalar T>
-    void SparseVector<T>::clear() {
-        indexes.clear();
-        elems.clear();
+    void SparseVector<T>::clear(this auto& self) {
+        self.indexes.clear();
+        self.elems.clear();
     }
 
     template<Scalar T>

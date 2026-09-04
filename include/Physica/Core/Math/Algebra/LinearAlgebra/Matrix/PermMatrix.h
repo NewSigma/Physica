@@ -50,7 +50,7 @@ namespace Physica {
         [[nodiscard]] PermMatrix transpose() const noexcept;
         [[nodiscard]] Array<MKL_INT64> toMKL() const;
 
-        void resize(size_t order);
+        void resize(this auto&, size_t order);
         void swap_row(size_t row1, size_t row2);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -124,8 +124,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void PermMatrix<T>::resize(size_t order) {
-        *this = PermMatrix<T>(order);
+    void PermMatrix<T>::resize(this auto& self, size_t order) {
+        self = PermMatrix<T>(order);
     }
 
     template<Scalar T>

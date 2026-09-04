@@ -110,7 +110,7 @@ namespace Physica {
     auto CompactVector<Derived>::read(const H5Loc& loc, const char* name) -> const DataSetType {
         const auto dataset = loc.openDataSet<DataDim>(name);
         const size_t length = dataset.getSize(0);
-        Base::resize(length);
+        Base::getDerived().resize(length);
 
         const auto memSpace = H5DataSpace<1>(length);
         if constexpr (isDiffable()) {

@@ -30,13 +30,13 @@ namespace Physica {
     DenseTensor<T, Dims...>::DenseTensor(IndexType shape, auto&&... args) : storage(std::move(shape), std::forward<decltype(args)>(args)...) {}
 
     template<Scalar T, int... Dims>
-    void DenseTensor<T, Dims...>::resize(IndexType shape) {
-        storage.resize(std::move(shape));
+    void DenseTensor<T, Dims...>::resize(this auto& self, IndexType shape) {
+        self.storage.resize(std::move(shape));
     }
 
     template<Scalar T, int... Dims>
-    void DenseTensor<T, Dims...>::reserve(size_t size) noexcept {
-        storage.reserve(size);
+    void DenseTensor<T, Dims...>::reserve(this auto& self, size_t size) noexcept {
+        self.storage.reserve(size);
     }
 
     template<Scalar T, int... Dims>

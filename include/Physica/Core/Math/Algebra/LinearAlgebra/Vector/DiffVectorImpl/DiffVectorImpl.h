@@ -88,38 +88,38 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::resize(size_t size) {
-        v.resize(size);
+    void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::resize(this auto& self, size_t size) {
+        self.v.resize(size);
         if constexpr (isForwardDiff())
-            g.resize(size);
+            self.g.resize(size);
         else
-            assert(g.empty() && "[Error]: Reject resize-after-reverse");
+            assert(self.g.empty() && "[Error]: Reject resize-after-reverse");
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::zero_grad() {
-        g.zeros();
-    }
-
-    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    template<RNG R>
-    void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_uniform() {
-        v.template random_uniform<R>();
-        zero_grad();
+    void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::zero_grad(this auto& self) {
+        self.g.zeros();
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     template<RNG R>
-    void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_normal() {
-        v.template random_normal<R>();
-        zero_grad();
+    void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_uniform(this auto& self) {
+        self.v.template random_uniform<R>();
+        self.zero_grad();
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     template<RNG R>
-    void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_any(auto& distribution) {
-        v.template random_any<R>(distribution);
-        zero_grad();
+    void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_normal(this auto& self) {
+        self.v.template random_normal<R>();
+        self.zero_grad();
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
+    template<RNG R>
+    void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_any(this auto& self, auto& distribution) {
+        self.v.template random_any<R>(distribution);
+        self.zero_grad();
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>

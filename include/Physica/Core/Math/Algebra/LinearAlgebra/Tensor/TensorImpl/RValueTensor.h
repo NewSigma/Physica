@@ -60,9 +60,9 @@ namespace Physica {
         [[nodiscard]] IndexType toIndexND(size_t index) const noexcept;
         void forND(std::invocable<T, IndexType> auto fn) const;
 
-        void resize(const Tensor auto& x) { resize(x.getShape()); }
-        decltype(auto) resize(std::integral auto... dims) { return Base::getDerived().resize(dims...); }
-        decltype(auto) resize(IndexType shape) { return Base::getDerived().resize(shape); }
+        void resize(this auto&, const Tensor auto& x);
+        auto resize(this auto&, std::integral auto... dims);
+        auto resize(this auto&, IndexType shape);
 
         [[nodiscard]] auto reals() const noexcept;
         [[nodiscard]] auto imags() const noexcept;

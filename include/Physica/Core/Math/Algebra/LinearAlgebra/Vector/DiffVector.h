@@ -66,13 +66,13 @@ namespace Physica {
         [[nodiscard]] constexpr auto end(this auto&&) noexcept;
 
         using Base::resize;
-        void resize(size_t size);
+        void resize(this auto&, size_t size);
 
-        void zero_grad();
-        template<RNG R> void random_uniform();
-        template<RNG R> void random_normal();
+        void zero_grad(this auto&);
+        template<RNG R> void random_uniform(this auto&);
+        template<RNG R> void random_normal(this auto&);
         template<RNG R>
-        void random_any(auto& distribution);
+        void random_any(this auto&, auto& distribution);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }

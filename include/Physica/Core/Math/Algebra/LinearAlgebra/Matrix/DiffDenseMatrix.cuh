@@ -60,24 +60,22 @@ namespace Physica {
         using Base::operator=;
         using Base::operator[];
         /* Operations */
-        void zero_grad();
+        void zero_grad(this auto&);
 
         using Base::resize;
-        __host__ __device__ void resize(size_t row, size_t col);
-        void reserve(size_t size);
-
-        void zeros();
+        __host__ __device__ void resize(this auto&, size_t row, size_t col, auto&&... args);
+        void reserve(this auto&, size_t size);
         [[nodiscard]] host_obj toHost() const;
         [[nodiscard]] host_obj toHostAsync() const;
         void toHost(host_obj& obj) const;
         void toHostAsync(host_obj& obj) const;
 
         template<RNG R>
-        void random_uniform();
+        void random_uniform(this auto&);
         template<RNG R>
-        void random_normal();
+        void random_normal(this auto&);
         template<RNG R>
-        void random_any(auto& distribution);
+        void random_any(this auto&, auto& distribution);
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */

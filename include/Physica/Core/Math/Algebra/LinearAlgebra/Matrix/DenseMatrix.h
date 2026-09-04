@@ -59,10 +59,9 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
         /* Operations */
-        void resize(size_t order);
-        void resize(const Matrix auto& m, auto&&... args);
-        void resize(size_t row, size_t col, auto&&... args);
-        void reserve(size_t size) noexcept;
+        using Base::resize;
+        void resize(this auto&, size_t row, size_t col, auto&&... args);
+        void reserve(this auto&, size_t size) noexcept;
 
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
@@ -76,9 +75,9 @@ namespace Physica {
         using Base::random_uniform;
 
         using Base::read;
-        void zeros() noexcept;
-        void swap_row(size_t r1, size_t r2) noexcept;
-        void swap_col(size_t c1, size_t c2) noexcept;
+        void zeros(this auto&) noexcept;
+        void swap_row(this auto&, size_t r1, size_t r2) noexcept;
+        void swap_col(this auto&, size_t c1, size_t c2) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] auto data(this auto&&) noexcept;

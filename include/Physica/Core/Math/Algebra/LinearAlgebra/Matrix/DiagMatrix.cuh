@@ -56,7 +56,7 @@ namespace Physica {
         [[nodiscard]] This inv() const;
         [[nodiscard]] __host__ __device__ const This& transpose() const noexcept { return *this; }
 
-        void resize(size_t order);
+        void resize(this auto&, size_t order);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto&& diag(this auto&& self) noexcept;
@@ -108,8 +108,8 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    void device_obj<DiagMatrix<T, Order>>::resize(size_t order) {
-        diags.resize(order);
+    void device_obj<DiagMatrix<T, Order>>::resize(this auto& self, size_t order) {
+        self.diags.resize(order);
     }
 
     template<Scalar T, size_t Order>

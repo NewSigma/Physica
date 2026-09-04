@@ -136,8 +136,9 @@ namespace Physica {
         [[nodiscard]] constexpr auto view(this auto&&) noexcept;
         void reverse(this const auto&, const Vector auto& grad) noexcept;
         void reverse(this const auto&, const Vector auto& y, const Vector auto& grad) noexcept;
-        void resize(const Vector auto& x);
-        void resize(size_t length);
+
+        void resize(this auto&, const Vector auto& x);
+        auto resize(this auto&, size_t length);
 
         template<size_t Length = Dynamic>
         [[nodiscard]] auto head(this auto&&, size_t to = Length) noexcept;

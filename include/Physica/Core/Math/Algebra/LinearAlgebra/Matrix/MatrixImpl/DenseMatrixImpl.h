@@ -66,23 +66,13 @@ namespace Physica {
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    void DenseMatrix<T, Major, Row, Col, Allocator>::resize(size_t order) {
-        storage.resize(order);
+    void DenseMatrix<T, Major, Row, Col, Allocator>::resize(this auto& self, size_t row, size_t col, auto&&... args) {
+        self.storage.resize(row, col, std::forward<decltype(args)>(args)...);
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    void DenseMatrix<T, Major, Row, Col, Allocator>::resize(const Matrix auto& m, auto&&... args) {
-        Base::resize(m, std::forward<decltype(args)>(args)...);
-    }
-
-    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    void DenseMatrix<T, Major, Row, Col, Allocator>::resize(size_t row, size_t col, auto&&... args) {
-        storage.resize(row, col, std::forward<decltype(args)>(args)...);
-    }
-
-    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    void DenseMatrix<T, Major, Row, Col, Allocator>::reserve(size_t size) noexcept {
-        storage.reserve(size);
+    void DenseMatrix<T, Major, Row, Col, Allocator>::reserve(this auto& self, size_t size) noexcept {
+        self.storage.reserve(size);
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
@@ -91,18 +81,18 @@ namespace Physica {
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    void DenseMatrix<T, Major, Row, Col, Allocator>::zeros() noexcept {
-        storage.zeros();
+    void DenseMatrix<T, Major, Row, Col, Allocator>::zeros(this auto& self) noexcept {
+        self.storage.zeros();
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    void DenseMatrix<T, Major, Row, Col, Allocator>::swap_row(size_t r1, size_t r2) noexcept {
-        storage.swap_row(r1, r2);
+    void DenseMatrix<T, Major, Row, Col, Allocator>::swap_row(this auto& self, size_t r1, size_t r2) noexcept {
+        self.storage.swap_row(r1, r2);
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    void DenseMatrix<T, Major, Row, Col, Allocator>::swap_col(size_t c1, size_t c2) noexcept {
-        storage.swap_col(c1, c2);
+    void DenseMatrix<T, Major, Row, Col, Allocator>::swap_col(this auto& self, size_t c1, size_t c2) noexcept {
+        self.storage.swap_col(c1, c2);
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>

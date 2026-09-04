@@ -198,7 +198,7 @@ namespace Physica {
         const auto dataset = loc.openDataSet<2>(name);
         const size_t maxMajor = dataset.getSize(0);
         const size_t maxMinor = dataset.getSize(1);
-        Base::resize(Base::rowFromMajorMinor(maxMajor, maxMinor), Base::colFromMajorMinor(maxMajor, maxMinor));
+        Base::getDerived().resize(Base::rowFromMajorMinor(maxMajor, maxMinor), Base::colFromMajorMinor(maxMajor, maxMinor));
 
         const auto memSpace = H5DataSpace<1>(maxMinor);
         auto fileSpace = H5DataSpace<2>({Base::getMaxMajor(), Base::getMaxMinor()});

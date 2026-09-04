@@ -60,10 +60,10 @@ namespace Physica {
         [[nodiscard]] constexpr auto begin(this auto&&) noexcept;
         [[nodiscard]] constexpr auto end(this auto&&) noexcept;
 
-        void append(auto&&... args) noexcept;
-        void resize(const Vector auto& x);
-        void resize(size_t size, auto&&... args) noexcept;
-        void reserve(size_t size) noexcept;
+        void append(this auto&, auto&&... args) noexcept;
+        void resize(this auto&, const Vector auto& x);
+        void resize(this auto&, size_t size, auto&&... args) noexcept;
+        void reserve(this auto&, size_t size) noexcept;
 
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
@@ -80,8 +80,8 @@ namespace Physica {
 
         using Base::read;
         using Base::write;
-        void linspace(T from, T to);
-        void zeros() noexcept;
+        void linspace(this auto&, T from, T to);
+        void zeros(this auto&) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return storage.getLength(); }

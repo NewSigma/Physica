@@ -178,6 +178,16 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    __host__ __device__ void device_obj<RValueVector<Derived, ScalarT>>::resize(this auto& self, const Vector auto& x) {
+        self.resize(x.getLength());
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueVector<Derived, ScalarT>>::resize(this auto& self, size_t length) {
+        self.resize(length);
+    }
+
+    template<class Derived, Scalar ScalarT>
     __host__ __device__ decltype(auto) device_obj<RValueVector<Derived, ScalarT>>::conjugate(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (isComplex()) {

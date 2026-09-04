@@ -58,8 +58,8 @@ namespace Physica {
         using Base::operator=;
         using Base::operator[];
         /* Operations */
-        void resize(const Vector auto& x);
-        void resize(size_t size);
+        void resize(this auto&, const Vector auto& x);
+        void resize(this auto&, size_t size);
 
         [[nodiscard]] host_obj toHost() const;
         [[nodiscard]] host_obj toHostAsync() const;
@@ -68,13 +68,13 @@ namespace Physica {
         using Base::toHost;
         using Base::toHostAsync;
 
-        void zero_grad();
+        void zero_grad(this auto&);
         template<RNG R>
-        void random_uniform();
+        void random_uniform(this auto&);
         template<RNG R>
-        void random_normal();
+        void random_normal(this auto&);
         template<RNG R>
-        void random_any(auto& distribution);
+        void random_any(this auto&, auto& distribution);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getLength(); }
