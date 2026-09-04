@@ -20,6 +20,7 @@
 
 #include <cmath>
 #include <cassert>
+#include <compare>
 #include "Physica/Core/Utils/Allocator/HostAllocator.h"
 #include "Scalar.h"
 
@@ -57,12 +58,8 @@ namespace Physica {
         Integer operator<<(int bits) const;
         Integer operator>>(int bits) const;
         Integer operator-() const;
-        bool operator>(const Integer& i) const;
-        bool operator<(const Integer& i) const;
-        bool operator==(const Integer& i) const;
-        bool operator!=(const Integer& i) const { return !(*this == i); }
-        bool operator>=(const Integer& i) const { return !(*this < i); }
-        bool operator<=(const Integer& i) const { return !(*this > i); }
+        [[nodiscard]] auto operator<=>(const Integer& i) const noexcept -> std::strong_ordering;
+        [[nodiscard]] bool operator==(const Integer& i) const noexcept;
         void operator+=(const Integer& i) { *this = *this + i; }
         void operator-=(const Integer& i) { *this = *this - i; }
         void operator*=(const Integer& i) { *this = *this * i; }

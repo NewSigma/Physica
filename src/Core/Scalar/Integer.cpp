@@ -75,29 +75,25 @@ Integer Integer::operator-(const Integer& i) const {
     if (length > 0) {
         if (i.length > 0)
             return integerSubImpl(*this, i);
-        else {
-            Integer abs_i2(i.byte, -i.length);
-            Integer result = integerAddImpl(*this, abs_i2);
-            abs_i2.byte = nullptr;
-            return result;
-        }
+
+        Integer abs_i2(i.byte, -i.length);
+        Integer result = integerAddImpl(*this, abs_i2);
+        abs_i2.byte = nullptr;
+        return result;
     }
-    else {
-        if (i.length > 0) {
-            Integer abs_i1(byte, -length);
-            Integer result = integerAddImpl(abs_i1, i);
-            abs_i1.byte = nullptr;
-            return -result;
-        }
-        else {
-            Integer abs_i1(byte, -length);
-            Integer abs_i2(i.byte, -i.length);
-            Integer result = integerSubImpl(abs_i2, abs_i1);
-            abs_i1.byte = nullptr;
-            abs_i2.byte = nullptr;
-            return result;
-        }
+
+    if (i.length > 0) {
+        Integer abs_i1(byte, -length);
+        Integer result = integerAddImpl(abs_i1, i);
+        abs_i1.byte = nullptr;
+        return -result;
     }
+    Integer abs_i1(byte, -length);
+    Integer abs_i2(i.byte, -i.length);
+    Integer result = integerSubImpl(abs_i2, abs_i1);
+    abs_i1.byte = nullptr;
+    abs_i2.byte = nullptr;
+    return result;
 }
 
 Integer Integer::operator*(const Integer& i) const {
@@ -134,25 +130,25 @@ Integer Integer::operator/(const Integer& i) const {
 
     auto arr1_len = std::max(i1_size, i2_size) + 1;
     auto i1_blank = arr1_len - i1_size;
-    auto arr1 = HostAllocator<MPUnit>{}.allocate(arr1_len);
+    auto* arr1 = HostAllocator<MPUnit>{}.allocate(arr1_len);
     memcpy(arr1 + i1_blank, byte, i1_size * sizeof(MPUnit));
     memset(arr1, 0, i1_blank * sizeof(MPUnit));
     // Size of arr2 is arranged 1 less than arr1.
     auto arr2_len = arr1_len - 1;
     auto i2_blank = arr2_len - i2_size;
-    auto arr2 = HostAllocator<MPUnit>{}.allocate(arr2_len);
+    auto* arr2 = HostAllocator<MPUnit>{}.allocate(arr2_len);
     memcpy(arr2 + i2_blank, i.byte, i2_size * sizeof(MPUnit));
     memset(arr2, 0, i2_blank * sizeof(MPUnit));
     /*
      * We shift s1 and s2, making the less highest bit of s1 is set and the highest bit of s2 is set
      * to meet the requirement of the function divArrByFullArrWith1Word().
      */
-    const int i1_shift = static_cast<int>(std::countl_zero(byte[i1_size - 1])) - 1;
+    const int i1_shift = std::countl_zero(byte[i1_size - 1]) - 1;
     if (i1_shift > 0)
         byteLeftShiftEq(arr1, arr1_len, i1_shift);
     else
         byteRightShiftEq(arr1, arr1_len, -i1_shift);
-    const int i2_shift = static_cast<int>(std::countl_zero(i.byte[i2_size - 1]));
+    const int i2_shift = std::countl_zero(i.byte[i2_size - 1]);
     byteLeftShiftEq(arr2, arr2_len, i2_shift);
     ////////////////////////////////Calculate cursory first//////////////////////////////////////
     // Estimate the length of result.
@@ -245,27 +241,17 @@ Integer Integer::operator-() const {
     return copy;
 }
 
-bool Integer::operator>(const Integer& i) const {
+auto Integer::operator<=>(const Integer& i) const noexcept -> std::strong_ordering {
     if (length == i.length) {
         for (int j = getSize() - 1; j >= 0; --j)
-            if (byte[j] > i.byte[j])
-                return true;
-        return false;
+            if (byte[j] != i.byte[j])
+                return byte[j] <=> i.byte[j];
+        return std::strong_ordering::equal;
     }
-    return length > i.length;
+    return length <=> i.length;
 }
 
-bool Integer::operator<(const Integer& i) const {
-    if (length == i.length) {
-        for (int j = getSize() - 1; j >= 0; --j)
-            if (byte[j] < i.byte[j])
-                return true;
-        return false;
-    }
-    return length < i.length;
-}
-
-bool Integer::operator==(const Integer& i) const {
+bool Integer::operator==(const Integer& i) const noexcept {
     if (length != i.length)
         return false;
     for (int j = 0; j < length; ++j)

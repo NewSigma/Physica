@@ -44,11 +44,6 @@ namespace Physica {
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ bool ArrayMixin<Derived, Allocator>::operator!=(this const This& lhs, const This& rhs) {
-        return !(lhs == rhs);
-    }
-
-    template<class Derived, class Allocator>
     __host__ __device__ constexpr auto ArrayMixin<Derived, Allocator>::begin(this auto&& self) noexcept {
         using Self = decltype(self);
         using Container = std::conditional<std::is_const_v<std::remove_reference_t<Self>>, const Derived, Derived>::type;

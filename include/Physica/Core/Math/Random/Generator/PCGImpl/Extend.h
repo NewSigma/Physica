@@ -20,7 +20,7 @@
  */
 
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -123,7 +123,8 @@ namespace Physica::Internal {
         result_type operator()();
         result_type operator()(result_type upper_bound);
 
-        bool operator==(const This& other) const;
+        [[nodiscard]] bool operator==(const This& other) const;
+        [[nodiscard]] bool operator!=(const This& other) const = default;
 
         template<typename CharT, typename Traits, uint8_t table_pow2_, uint8_t advance_pow2_, typename baseclass_, typename extvalclass_, bool KDD_>
         friend std::basic_ostream<CharT, Traits>&
@@ -214,12 +215,6 @@ namespace Physica::Internal {
         auto& base_rhs = static_cast<const baseclass&>(other);
         return base_lhs == base_rhs
             && std::equal(data_.begin(), data_.end(), other.data_.begin());
-    }
-
-    template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
-    inline bool operator!=(const extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>& lhs,
-                           const extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>& rhs) {
-        return !operator==(lhs, rhs);
     }
 
     template<typename CharT, typename Traits, uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>

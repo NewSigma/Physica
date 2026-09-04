@@ -20,7 +20,7 @@
  */
 
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -40,13 +40,16 @@
 #pragma once
 
 #include <cstddef>
+#include <ios>
 #include <iosfwd>
+#include <limits>
 #include <utility>
 #include "OutputFn.h"
 
 namespace Physica::Internal {
     template<class OutI, class WorkI, OutputFnType Type, class Stream>
     class engine final : public Stream {
+        using This = engine<OutI, WorkI, Type, Stream>;
     public:
         using result_type = OutI;
         using state_type = WorkI;
@@ -65,9 +68,8 @@ namespace Physica::Internal {
         result_type operator()() noexcept;
         result_type operator()(result_type upper_bound) noexcept;
 
-        template<typename xtype1, typename itype1, OutputFnType Type1, typename stream_mixin_lhs, typename stream_mixin_rhs>
-        friend bool operator==(const engine<xtype1, itype1, Type1, stream_mixin_lhs>&,
-                               const engine<xtype1, itype1, Type1, stream_mixin_rhs>&);
+        [[nodiscard]] bool operator==(const This&) const;
+        [[nodiscard]] bool operator!=(const This&) const = default;
 
         template<typename xtype1, typename itype1, OutputFnType Type1, typename stream_mixin_lhs, typename stream_mixin_rhs>
         friend itype1 operator-(const engine<xtype1, itype1, Type1, stream_mixin_lhs>&,
@@ -187,18 +189,11 @@ namespace Physica::Internal {
         return rhs.distance(rhs_diff, lhs_diff, rhs.multiplier(), WorkI(0U));
     }
 
-    template<class OutI, class WorkI, OutputFnType Type, typename stream_mixin_lhs, typename stream_mixin_rhs>
-    bool operator==(const engine<OutI, WorkI, Type, stream_mixin_lhs>& lhs,
-                    const engine<OutI, WorkI, Type, stream_mixin_rhs>& rhs) {
-        return (lhs.multiplier() == rhs.multiplier())
-            && (lhs.increment() == rhs.increment())
-            && (lhs.state_ == rhs.state_);
-    }
-
-    template<class OutI, class WorkI, OutputFnType Type, typename stream_mixin_lhs, typename stream_mixin_rhs>
-    inline bool operator!=(const engine<OutI, WorkI, Type, stream_mixin_lhs>& lhs,
-                           const engine<OutI, WorkI, Type, stream_mixin_rhs>& rhs) {
-        return !operator==(lhs, rhs);
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    bool engine<OutI, WorkI, Type, Stream>::operator==(const This& other) const {
+        return (this->multiplier() == other.multiplier())
+            && (this->increment() == other.increment())
+            && (state_ == other.state_);
     }
 
     template<class OutI, class WorkI, OutputFnType Type, class Stream>

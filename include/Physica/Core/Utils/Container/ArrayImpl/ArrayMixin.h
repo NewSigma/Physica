@@ -55,7 +55,7 @@ namespace Physica {
         /* Operators */
         [[nodiscard]] __host__ __device__ constexpr auto& operator[](this auto&&, size_t index) noexcept;
         [[nodiscard]] __host__ __device__ bool operator==(this const This& lhs, const This& rhs);
-        [[nodiscard]] __host__ __device__ bool operator!=(this const This& lhs, const This& rhs);
+        [[nodiscard]] __host__ __device__ bool operator!=(this const This& lhs, const This& rhs) = default;
         /* Operations */
         [[nodiscard]] __host__ __device__ constexpr auto begin(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ constexpr auto end(this auto&&) noexcept;

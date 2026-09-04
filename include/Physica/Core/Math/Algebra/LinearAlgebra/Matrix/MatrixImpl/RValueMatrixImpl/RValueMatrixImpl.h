@@ -24,6 +24,11 @@
 
 namespace Physica {
     template<class Derived, Scalar ScalarT>
+    bool RValueMatrix<Derived, ScalarT>::operator!=(this const auto& self, const Matrix auto& other) noexcept {
+        return !(self == other);
+    }
+
+    template<class Derived, Scalar ScalarT>
     auto RValueMatrix<Derived, ScalarT>::operator*(this auto&& self, Vector auto&& v) noexcept {
         assert(self.getCol() == v.getLength());
         using Self = decltype(self);

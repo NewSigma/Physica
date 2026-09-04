@@ -113,7 +113,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        [[nodiscard]] bool operator!=(const Vector auto& other) const noexcept;
+        [[nodiscard]] bool operator!=(this const auto&, const Vector auto& other) noexcept;
         [[nodiscard, gnu::always_inline]] auto operator*(this auto&&, Scalar auto&& x) noexcept;
         [[nodiscard]] auto operator*(this auto&&, Matrix auto&& m) noexcept;
         [[nodiscard, gnu::always_inline]] auto operator-(this auto&&) noexcept;

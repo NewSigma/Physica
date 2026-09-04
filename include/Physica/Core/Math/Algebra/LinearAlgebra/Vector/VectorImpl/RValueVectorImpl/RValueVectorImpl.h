@@ -23,8 +23,8 @@
 
 namespace Physica {
     template<class Derived, Scalar ScalarT>
-    bool RValueVector<Derived, ScalarT>::operator!=(const Vector auto& other) const noexcept {
-        return !(Base::getDerived() == other);
+    bool RValueVector<Derived, ScalarT>::operator!=(this const auto& self, const Vector auto& other) noexcept {
+        return !(self == other);
     }
 
     template<class Derived, Scalar ScalarT>

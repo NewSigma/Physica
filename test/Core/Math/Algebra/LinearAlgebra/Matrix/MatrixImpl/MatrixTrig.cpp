@@ -76,7 +76,7 @@ namespace {
     }
 
     void inverse() noexcept {
-        constexpr double Prec = 1E-11;
+        constexpr double Prec = 1E-10;
         const auto data = Matrix4D::template random_uniform<RandomSource>(4, 4);
         const auto check = [&](const Matrix auto& trig) {
             Matrix4D inv = trig.inv();

@@ -80,6 +80,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        [[nodiscard]] bool operator!=(this const auto&, const Matrix auto& other) noexcept;
         [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept;
         [[nodiscard]] auto operator*(this auto&&, Matrix auto&& m) noexcept;
         [[nodiscard, gnu::always_inline]] auto operator-(this auto&&) noexcept;
@@ -247,8 +248,6 @@ namespace Physica {
         }
         return true;
     }
-
-    bool operator!=(const Matrix auto& m1, const Matrix auto& m2) noexcept { return !(m1 == m2); }
 
     std::ostream& operator<<(std::ostream& os, const Matrix auto& m) noexcept {
         return os << std::format("{}", m.format());
