@@ -90,7 +90,7 @@ namespace Physica {
         return Base::norm2();
     }
     /**
-     * Prefer zeros() over simply assigning zero for better performance.
+     * Hint: Prefer zeros() over simply assigning zero for better performance.
      */
     template<class Derived>
     void StridedVector<Derived>::zeros() noexcept {

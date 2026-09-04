@@ -127,7 +127,7 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     template<ExecutePolicy P>
     void GEMM<M1, M2>::assign_base(Matrix auto&& target) const noexcept {
-        if constexpr (isStaticGEMM())
+        if constexpr (isStaticGEMM() || Base::isDiffable())
             Base::template assign_base<P>(target);
         else {
             target.zeros();

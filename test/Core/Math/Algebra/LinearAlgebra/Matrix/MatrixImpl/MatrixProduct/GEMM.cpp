@@ -21,35 +21,33 @@
 #include "Test.h"
 
 using namespace Physica;
+using RandomSource = Random<>;
 
-int main() {
-    {
-        using Matrix = DenseMatrix<float32, MatrixMajor::Col, 2, 2>;
-        const Matrix m1{{1, 2}, {2, 1}};
-        const Matrix m2{{3, 3}, {1, 5}};
-        const Matrix result = m1 * m2;
-        const Matrix answer{{9, 9}, {11, 7}};
+namespace {
+    void simple2D() {
+        using M = DenseMatrix<float32, MatrixMajor::Col, 2, 2>;
+        const M m1{{1, 2}, {2, 1}};
+        const M m2{{3, 3}, {1, 5}};
+        const M result = m1 * m2;
+        const M answer{{9, 9}, {11, 7}};
         expect(matrixNear(result, answer, std::numeric_limits<float>::epsilon()));
     }
-    {
-        using ScalarType = Diff<float32, DiffMode::Reverse>;
-        using MatrixType = DenseMatrix<float32, MatrixMajor::Col, 3, 3>;
-        using DVector = Vector3D<ScalarType>;
-        using DMatrix = DenseMatrix<ScalarType, MatrixMajor::Col, 3, 3>;
-        DMatrix m{1, 2, 3, 4, 5, 6, 7, 8, 9};
-        DVector x{1, 2, 3};
-        {
-            CoDiff<DVector> y = m * x;
-            y.sum().reverse();
-        }
-        const Vector3D<float32> dx = x.grads();
-        for (size_t i = 0; i < dx.getLength(); ++i)
-            expect(scalarNear(dx[i], m.values().col(i).sum(), 1E-15));
 
-        const MatrixType dm = m.grads();
-        for (size_t r = 0; r < dm.getRow(); ++r)
-            for (size_t c = 0; c < dm.getCol(); ++c)
-                expect(scalarNear(dm[r, c], x.values().calc(c), 1E-15));
+    void forward() {
+        using T = float64;
+        using dfloat = Diff<T, DiffMode::Forward>;
+        auto a = MatrixND<dfloat>::random_uniform<RandomSource>(4, 4);
+        auto b = MatrixND<dfloat>::random_uniform<RandomSource>(4, 4);
+        a.grads().random_uniform<RandomSource>();
+        b.grads().random_uniform<RandomSource>();
+        auto c = MatrixND<dfloat>::random_uniform<RandomSource>(4, 4); // Fill with gabbage
+        c = a * b;
+        expect<RandomSource>(matrixNear(c.values(), MatrixND<T>(a.values() * b.values()), 1E-13));
     }
+}
+
+int main() {
+    simple2D();
+    forward();
     return 0;
 }
