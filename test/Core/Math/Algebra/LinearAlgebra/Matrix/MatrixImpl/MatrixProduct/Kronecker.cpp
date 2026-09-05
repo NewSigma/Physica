@@ -26,7 +26,11 @@ using T = float64;
 int main() {
     const auto a = MatrixND<T>::random_uniform<RandomSource>(4, 4);
     const auto b = MatrixND<T>::random_uniform<RandomSource>(6, 6);
+    auto k = MatrixND<T>::junk(a.getRow() * b.getRow(), a.getCol() * b.getCol());
+    k = kronecker(a, b);
+    expect<RandomSource>(matrixNear(k, MatrixND<T>(kronecker(a, b)), 1E-15));
+
     const auto v = VectorND<T>::random_uniform<RandomSource>(kronecker(a, b).getRow());
-    expect<RandomSource>(vectorNear(MatrixND<T>(kronecker(a, b)) * v, kronecker(a, b) * v, 4UL));
+    expect<RandomSource>(vectorNear(k * v, kronecker(a, b) * v, 4UL));
     return 0;
 }

@@ -114,6 +114,7 @@ namespace Physica {
         void toHostAsync(host_obj& obj) const;
 
         void zeros();
+        void junk();
         void reserve(size_t size);
         void resize(size_t size, auto&&... args);
         [[nodiscard]] pointer release() noexcept;
@@ -291,7 +292,14 @@ namespace Physica {
 
     template<class T, class Allocator>
     void device_obj<Array<T, Dynamic, Allocator>>::zeros() {
+        static_assert(std::is_trivially_copyable<T>::value, "[Error]: zeros() does not apply to non-trivial type");
         check(cudaMemsetAsync(data(), 0, length * sizeof(T), CUDAContext::getInstance()));
+    }
+
+    template<class T, class Allocator>
+    void device_obj<Array<T, Dynamic, Allocator>>::junk() {
+        static_assert(std::is_trivially_copyable<T>::value, "[Error]: junk() does not apply to non-trivial type");
+        check(cudaMemsetAsync(data(), Base::Poison, length * sizeof(T), CUDAContext::getInstance()));
     }
 
     template<class T, class Allocator>

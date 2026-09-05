@@ -51,7 +51,8 @@ namespace {
 
     void sumRowCol() {
         const auto x = MatrixND<float32>::random_uniform<Random<>>(4, 5);
-        VectorND<float32> buffer = x.sum_cols();
+        VectorND<float32> buffer = VectorND<float32>::junk(x.getRow());
+        buffer = x.sum_cols();
         for (size_t i = 0; i < x.getRow(); ++i)
             expect(buffer[i] == x.row(i).sum());
 

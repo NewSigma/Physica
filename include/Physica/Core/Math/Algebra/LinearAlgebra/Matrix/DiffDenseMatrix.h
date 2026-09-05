@@ -68,8 +68,6 @@ namespace Physica {
         using Base::operator=;
         using Base::operator[];
         /* Operations */
-        void zero_grad(this auto&);
-
         using Base::resize;
         void resize(this auto&, size_t row, size_t col, auto&&... args);
         void reserve(this auto&, size_t size) noexcept;
@@ -85,6 +83,8 @@ namespace Physica {
         template<RNG R>
         void random_any(this auto&, auto& distribution);
 
+        void zero_grad(this auto&);
+        void junk(this auto&);
         void swap(This& __restrict obj) noexcept;
         void swap_row(this auto&, size_t r1, size_t r2) noexcept;
         void swap_col(this auto&, size_t c1, size_t c2) noexcept;
@@ -100,6 +100,8 @@ namespace Physica {
         [[nodiscard]] auto&& grads(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return Major; }
+        [[nodiscard]] static This junk(size_t order) { return junk(order, order); }
+        [[nodiscard]] static This junk(size_t row, size_t col);
         [[nodiscard]] static This identity(size_t order);
         template<RNG R>
         [[nodiscard]] static auto random_uniform(size_t row, size_t col);

@@ -21,8 +21,20 @@
 #include "Test.h"
 
 using namespace Physica;
+using RandomSource = Random<>;
 
 namespace {
+    void forward() {
+        using T = float64;
+        using dfloat = Diff<T, DiffMode::Forward>;
+        auto m = MatrixND<dfloat>::random_uniform<RandomSource>(4, 4);
+        auto x = VectorND<dfloat>::random_uniform<RandomSource>(4);
+        auto y = VectorND<dfloat>::junk(4);
+        y = m * x;
+        expect<RandomSource>(vectorNear(y.values(), VectorND<T>(m.values() * x.values()), 1E-13));
+        expect(y.grads().isZero());
+    }
+
     void reverse() {
         using ScalarType = Diff<float32, DiffMode::Reverse>;
         using MatrixType = DenseMatrix<float32, MatrixMajor::Col, 3, 3>;
@@ -46,6 +58,7 @@ namespace {
 }
 
 int main() {
+    forward();
     reverse();
     return 0;
 }

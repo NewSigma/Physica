@@ -120,6 +120,18 @@ namespace Physica {
     }
 
     template<tparams>
+    void DiffDenseMatrix::zero_grad(this auto& self) {
+        self.g.zeros();
+    }
+
+    template<tparams>
+    void DiffDenseMatrix::junk(this auto& self) {
+        self.v.junk();
+        if constexpr (isForwardDiff())
+            self.g.junk();
+    }
+
+    template<tparams>
     void DiffDenseMatrix::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         v.swap(obj.v);
@@ -136,11 +148,6 @@ namespace Physica {
     void DiffDenseMatrix::swap_col(this auto& self, size_t c1, size_t c2) noexcept {
         self.v.swap_col(c1, c2);
         self.g.swap_col(c1, c2);
-    }
-
-    template<tparams>
-    void DiffDenseMatrix::zero_grad(this auto& self) {
-        self.g.zeros();
     }
 
     template<tparams>
@@ -173,6 +180,13 @@ namespace Physica {
             return forward_like<decltype(self)>(self.g);
         else
             return forward_like<decltype(self)>(self.g.template grads<GradOrder - 1>());
+    }
+
+    template<tparams>
+    DiffDenseMatrix DiffDenseMatrix::junk(size_t row, size_t col) {
+        This result(row, col);
+        result.junk();
+        return result;
     }
 
     template<tparams>

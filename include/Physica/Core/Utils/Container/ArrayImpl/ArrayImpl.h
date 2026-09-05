@@ -66,7 +66,13 @@ namespace Physica {
     template<class T, size_t Length, class Allocator>
     __host__ __device__ void Array<T, Length, Allocator>::zeros() noexcept {
         static_assert(std::is_trivially_copyable<T>::value, "[Error]: zeros() does not apply to non-trivial type");
-        memset(arr.data(), 0, Length * sizeof(T));
+        memset(data(), 0, Length * sizeof(T));
+    }
+
+    template<class T, size_t Length, class Allocator>
+    __host__ __device__ void Array<T, Length, Allocator>::junk() noexcept {
+        static_assert(std::is_trivially_copyable<T>::value, "[Error]: junk() does not apply to non-trivial type");
+        memset(data(), Base::Poison, Length * sizeof(T));
     }
 
     template<class T, size_t Length, class Allocator>
@@ -86,7 +92,7 @@ namespace Physica {
         static_assert(std::is_trivially_copyable<T>::value, "[Error]: C type must be trivial");
         assert(p != nullptr);
         This result(Length);
-        std::memcpy(result.arr.data(), p, Length * sizeof(T));
+        std::memcpy(result.data(), p, Length * sizeof(T));
         return result;
     }
     /**
@@ -275,6 +281,12 @@ namespace Physica {
     void Array<T, Dynamic, Allocator>::zeros() noexcept {
         static_assert(std::is_trivially_copyable<T>::value, "[Error]: zeros() does not apply to non-trivial type");
         memset(arr, 0, length * sizeof(T));
+    }
+
+    template<class T, class Allocator>
+    void Array<T, Dynamic, Allocator>::junk() noexcept {
+        static_assert(std::is_trivially_copyable<T>::value, "[Error]: junk() does not apply to non-trivial type");
+        memset(data(), Base::Poison, length * sizeof(T));
     }
     /**
      * Helper function that communicates with C libraries.

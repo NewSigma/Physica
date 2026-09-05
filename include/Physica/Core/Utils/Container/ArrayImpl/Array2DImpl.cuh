@@ -103,6 +103,11 @@ namespace Physica {
     }
 
     template<tparams>
+    void device_obj<Array2D>::junk() {
+        asArray().junk();
+    }
+
+    template<tparams>
     void device_obj<Array2D>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         arr.swap(obj.arr);

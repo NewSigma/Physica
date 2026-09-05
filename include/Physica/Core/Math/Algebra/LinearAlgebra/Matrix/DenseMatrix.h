@@ -76,6 +76,7 @@ namespace Physica {
 
         using Base::read;
         void zeros(this auto&) noexcept;
+        void junk(this auto&) noexcept;
         void swap_row(this auto&, size_t r1, size_t r2) noexcept;
         void swap_col(this auto&, size_t c1, size_t c2) noexcept;
         void swap(This& __restrict obj) noexcept;
@@ -92,6 +93,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
         [[nodiscard]] static This zeros(size_t order) { return zeros(order, order); }
         [[nodiscard]] static This zeros(size_t row, size_t col);
+        [[nodiscard]] static This junk(size_t order) { return junk(order, order); }
+        [[nodiscard]] static This junk(size_t row, size_t col);
         [[nodiscard]] static This identity(size_t order);
         template<RNG R>
         [[nodiscard]] static This random_uniform(size_t order) { return random_uniform<R>(order, order); }

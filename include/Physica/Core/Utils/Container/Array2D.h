@@ -81,6 +81,7 @@ namespace Physica {
         [[nodiscard]] auto col(size_t c) const noexcept;
 
         void zeros() noexcept;
+        void junk() noexcept;
         void read(const T* __restrict p) noexcept;
         void swap(This& __restrict obj) noexcept;
         void swap_row(size_t r1, size_t r2) noexcept;

@@ -59,11 +59,6 @@ namespace Physica {
     }
 
     template<tparams>
-    void device_obj<DenseMatrix>::zero_grad(this auto& self) {
-        self.g.zeros();
-    }
-
-    template<tparams>
     __host__ __device__ void device_obj<DenseMatrix>::resize(this auto& self, size_t row, size_t col, auto&&... args) {
         static_assert(sizeof...(args) == 0, "[Error]: Not well defined");
         self.v.resize(row, col);
@@ -118,6 +113,17 @@ namespace Physica {
     template<RNG R>
     void device_obj<DenseMatrix>::random_any(this auto& self, auto& distribution) {
         self = random_any<R>(self.getRow(), self.getCol(), distribution);
+    }
+
+    template<tparams>
+    void device_obj<DenseMatrix>::zero_grad(this auto& self) {
+        self.g.zeros();
+    }
+
+    template<tparams>
+    void device_obj<DenseMatrix>::junk(this auto& self) {
+        self.v.junk();
+        self.g.junk();
     }
 
     template<tparams>

@@ -130,6 +130,11 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
+    void DenseVector<T, Length, Allocator>::junk(this auto& self) noexcept {
+        self.storage.junk();
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
     void DenseVector<T, Length, Allocator>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         storage.swap(obj.storage);
@@ -144,6 +149,13 @@ namespace Physica {
     auto DenseVector<T, Length, Allocator>::zeros(size_t len) -> This {
         This result(len);
         result.zeros();
+        return result;
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    auto DenseVector<T, Length, Allocator>::junk(size_t len) -> This {
+        This result(len);
+        result.junk();
         return result;
     }
 

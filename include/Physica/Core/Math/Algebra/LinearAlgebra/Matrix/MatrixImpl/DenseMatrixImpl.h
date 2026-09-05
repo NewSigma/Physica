@@ -86,6 +86,11 @@ namespace Physica {
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    void DenseMatrix<T, Major, Row, Col, Allocator>::junk(this auto& self) noexcept {
+        self.storage.junk();
+    }
+
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     void DenseMatrix<T, Major, Row, Col, Allocator>::swap_row(this auto& self, size_t r1, size_t r2) noexcept {
         self.storage.swap_row(r1, r2);
     }
@@ -130,6 +135,13 @@ namespace Physica {
     auto DenseMatrix<T, Major, Row, Col, Allocator>::zeros(size_t row, size_t col) -> This {
         DenseMatrix result(row, col);
         result.zeros();
+        return result;
+    }
+
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    auto DenseMatrix<T, Major, Row, Col, Allocator>::junk(size_t row, size_t col) -> This {
+        DenseMatrix result(row, col);
+        result.junk();
         return result;
     }
 

@@ -82,6 +82,7 @@ namespace Physica {
         using Base::write;
         void linspace(this auto&, T from, T to);
         void zeros(this auto&) noexcept;
+        void junk(this auto&) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return storage.getLength(); }
@@ -90,6 +91,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         [[nodiscard]] static This zeros(size_t len);
+        [[nodiscard]] static This junk(size_t len);
         template<RNG R>
         [[nodiscard]] static This random_uniform(size_t len);
         template<RNG R>

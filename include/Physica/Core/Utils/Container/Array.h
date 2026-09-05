@@ -68,6 +68,7 @@ namespace Physica {
         __host__ __device__ void resize(size_t length, auto&&... args) noexcept;
         __host__ __device__ void reserve([[maybe_unused]] size_t size) noexcept { assert(size == Length); }
         __host__ __device__ void zeros() noexcept;
+        __host__ __device__ void junk() noexcept;
 
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
@@ -129,6 +130,7 @@ namespace Physica {
         void clear() noexcept;
         [[nodiscard]] T* release() noexcept;
         void zeros() noexcept;
+        void junk() noexcept;
         void read(const T* __restrict p) noexcept;
 
         [[nodiscard]] auto toDevice() const;

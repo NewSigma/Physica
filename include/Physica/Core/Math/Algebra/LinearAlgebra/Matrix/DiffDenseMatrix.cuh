@@ -60,8 +60,6 @@ namespace Physica {
         using Base::operator=;
         using Base::operator[];
         /* Operations */
-        void zero_grad(this auto&);
-
         using Base::resize;
         __host__ __device__ void resize(this auto&, size_t row, size_t col, auto&&... args);
         void reserve(this auto&, size_t size);
@@ -77,6 +75,8 @@ namespace Physica {
         template<RNG R>
         void random_any(this auto&, auto& distribution);
 
+        void zero_grad(this auto&);
+        void junk(this auto&);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto data(this auto&& self) noexcept;

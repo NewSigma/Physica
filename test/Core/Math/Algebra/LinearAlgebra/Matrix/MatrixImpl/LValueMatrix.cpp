@@ -20,8 +20,30 @@
 #include "Test.h"
 
 using namespace Physica;
+using RandomSource = Random<>;
 
 namespace {
+    void assign() {
+        using T = float64;
+        const auto a = MatrixND<T>::random_uniform<RandomSource>(4, 4);
+        /* Whole matrix */ {
+            auto b = MatrixND<T>::junk(4, 4);
+            b = a;
+            expect(matrixNear(a, b, 1E-15));
+        }
+        /* Sub-matrix */ {
+            auto b = MatrixND<T>::junk(4, 4);
+            b.topLeftCorner(2) = a.topLeftCorner(2);
+            expect(matrixNear(a.topLeftCorner(2), b.topLeftCorner(2), 1E-15));
+        }
+        /* Scalar */ {
+            auto b = MatrixND<T>::junk(4, 4);
+            b = T(2);
+            for (auto elem : b.flatten())
+                expect(elem == T(2));
+        }
+    }
+
     void diag() {
         // Test that diag() works for rectangular matrix
         using T = float32;
@@ -45,6 +67,7 @@ namespace {
 }
 
 int main() {
+    assign();
     diag();
     minorDiag();
     return 0;

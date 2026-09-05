@@ -26,13 +26,15 @@ namespace {
         DenseMatrix<float64, MatrixMajor::Col, 3, 3> mat1{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
         DenseMatrix<float32, MatrixMajor::Col, 3, 3> mat2{1, 1, 1, 1, 1, 1, 1, 1, 1};
         {
-            DenseMatrix<float64, MatrixMajor::Row, 3, 3> mat = -(mat1 + mat2);
+            auto mat = DenseMatrix<float64, MatrixMajor::Row, 3, 3>::junk(3, 3);
+            mat = -(mat1 + mat2);
             for (size_t i = 0; i < mat.getRow(); ++i)
                 for (size_t j = 0; j < mat.getCol(); ++j)
                     expect(mat[i, j] == float64(-2));
         }
         {
-            DenseMatrix<float64, MatrixMajor::Row, 3, 3> mat = mat1 * mat2;
+            auto mat = DenseMatrix<float64, MatrixMajor::Row, 3, 3>::junk(3, 3);
+            mat = mat1 * mat2;
             for (size_t i = 0; i < mat.getRow(); ++i)
                 for (size_t j = 0; j < mat.getCol(); ++j)
                     expect(mat[i, j] == float64(3));

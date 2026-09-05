@@ -89,6 +89,11 @@ namespace Physica {
     }
 
     template<tparams>
+    void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::junk(this auto& self) noexcept {
+        self.storage.junk();
+    }
+
+    template<tparams>
     void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         storage.swap(obj.storage);

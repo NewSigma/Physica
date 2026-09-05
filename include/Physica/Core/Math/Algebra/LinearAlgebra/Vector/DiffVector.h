@@ -68,11 +68,13 @@ namespace Physica {
         using Base::resize;
         void resize(this auto&, size_t size);
 
-        void zero_grad(this auto&);
         template<RNG R> void random_uniform(this auto&);
         template<RNG R> void random_normal(this auto&);
         template<RNG R>
         void random_any(this auto&, auto& distribution);
+
+        void zero_grad(this auto&);
+        void junk(this auto&);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
@@ -89,7 +91,8 @@ namespace Physica {
         [[nodiscard]] static This random_normal(size_t len);
         template<RNG R>
         [[nodiscard]] static This random_any(size_t len, auto& distribution);
-        [[nodiscard]] static auto linspace(T from, T to, size_t count);
+        [[nodiscard]] static This linspace(T from, T to, size_t count);
+        [[nodiscard]] static This junk(size_t len);
         /* Friends */
         friend class device_obj<This>;
     };

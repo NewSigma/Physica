@@ -68,13 +68,15 @@ namespace Physica {
         using Base::toHost;
         using Base::toHostAsync;
 
-        void zero_grad(this auto&);
         template<RNG R>
         void random_uniform(this auto&);
         template<RNG R>
         void random_normal(this auto&);
         template<RNG R>
         void random_any(this auto&, auto& distribution);
+
+        void zero_grad(this auto&);
+        void junk(this auto&);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getLength(); }

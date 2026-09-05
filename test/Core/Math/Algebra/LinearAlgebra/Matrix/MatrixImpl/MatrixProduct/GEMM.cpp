@@ -40,7 +40,7 @@ namespace {
         auto b = MatrixND<dfloat>::random_uniform<RandomSource>(4, 4);
         a.grads().random_uniform<RandomSource>();
         b.grads().random_uniform<RandomSource>();
-        auto c = MatrixND<dfloat>::random_uniform<RandomSource>(4, 4); // Fill with gabbage
+        auto c = MatrixND<dfloat>::junk(4, 4);
         c = a * b;
         expect<RandomSource>(matrixNear(c.values(), MatrixND<T>(a.values() * b.values()), 1E-13));
     }

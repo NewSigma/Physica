@@ -99,6 +99,11 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
+    void device_obj<DenseVector<T, Length, Allocator>>::junk(this auto& self) noexcept {
+        self.storage.junk();
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
     void device_obj<DenseVector<T, Length, Allocator>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         storage.swap(obj.storage);

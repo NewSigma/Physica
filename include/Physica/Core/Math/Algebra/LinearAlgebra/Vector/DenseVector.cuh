@@ -74,6 +74,7 @@ namespace Physica {
         using Base::read;
         using Base::write;
         void zeros(this auto&) noexcept;
+        void junk(this auto&) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return storage.getLength(); }

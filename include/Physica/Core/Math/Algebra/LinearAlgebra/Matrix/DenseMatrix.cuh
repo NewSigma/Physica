@@ -74,6 +74,7 @@ namespace Physica {
         using Base::random_any;
 
         void zeros(this auto&) noexcept;
+        void junk(this auto&) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;

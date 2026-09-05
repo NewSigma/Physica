@@ -23,6 +23,8 @@ Inspired by C++ linear algebra libraries such as *Eigen*$^{[1]}$ and *Armadillo*
 
 ## Architecture Design: LValue/RValue Linear Space
 
+> Note: Distinct from the rvalue/lvalue in programming languages, the capitalized and italicized *RValue*/*LValue* in this article refer to a property of linear algebra objects.
+
 Historically, the definitions of lvalue and rvalue in the C language were very simple:
 
 - lvalue: An expression that can appear on the left side of an assignment statement. It represents a named memory location with a fixed address.
@@ -36,8 +38,6 @@ The base classes for linear algebra objects generally fall into the following ca
 - *LValue* objects
 - Strided objects
 - Compact objects
-
-> Note: Distinct from the rvalue/lvalue in programming languages, the capitalized and italicized *RValue*/*LValue* in this article refer to a property of linear algebra objects.
 
 Taking a dense vector as an example, the inheritance hierarchy is: `DenseVector` → `CompactVector` → `StridedVector` → `LValueVector` → `RValueVector`.
 

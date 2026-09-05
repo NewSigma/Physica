@@ -97,11 +97,6 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::zero_grad(this auto& self) {
-        self.g.zeros();
-    }
-
-    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     template<RNG R>
     void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_uniform(this auto& self) {
         self.v.template random_uniform<R>();
@@ -120,6 +115,18 @@ namespace Physica {
     void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_any(this auto& self, auto& distribution) {
         self.v.template random_any<R>(distribution);
         self.zero_grad();
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
+    void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::zero_grad(this auto& self) {
+        self.g.zeros();
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
+    void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::junk(this auto& self) {
+        self.v.junk();
+        if constexpr (isForwardDiff())
+            self.g.junk();
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
@@ -189,7 +196,14 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::linspace(T from, T to, size_t count) {
+    auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::linspace(T from, T to, size_t count) -> This {
         return This(ValueVector::linspace(from, to, count));
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
+    auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::junk(size_t len) -> This {
+        This result(len);
+        result.junk();
+        return result;
     }
 }

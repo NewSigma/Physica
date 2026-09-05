@@ -58,6 +58,7 @@ namespace Physica {
         void toHostAsync(host_obj& obj) const;
 
         void zeros();
+        void junk();
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto&& asArray(this auto&& self) noexcept { return self.arr; }

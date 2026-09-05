@@ -50,6 +50,8 @@ namespace Physica {
 
         using ElemType = Traits<Derived>::ElemType;
         static_assert(std::is_same<value_type, ElemType>::value, "[Error]: Declaration is not self consistent");
+
+        constexpr static int32_t Poison = 0xAA;
     public:
         ~ArrayMixin() = default;
         /* Operators */

@@ -85,11 +85,6 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    void device_obj<DenseVector<Diff<T, Mode, Order>>>::zero_grad(this auto& self) {
-        self.g.zeros();
-    }
-
-    template<Scalar T, DiffMode Mode, int Order>
     template<RNG R>
     void device_obj<DenseVector<Diff<T, Mode, Order>>>::random_uniform(this auto& self) {
         self.v.template random_uniform<R>();
@@ -108,6 +103,17 @@ namespace Physica {
     void device_obj<DenseVector<Diff<T, Mode, Order>>>::random_any(this auto& self, auto& distribution) {
         self.v.template random_any<R>(distribution);
         self.zero_grad();
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::zero_grad(this auto& self) {
+        self.g.zeros();
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::junk(this auto& self) {
+        self.v.junk();
+        self.g.junk();
     }
 
     template<Scalar T, DiffMode Mode, int Order>

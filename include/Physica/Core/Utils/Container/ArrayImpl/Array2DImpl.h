@@ -109,6 +109,11 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
+    void Array2D<T, Major, Row, Col, Allocator>::junk() noexcept {
+        asArray().junk();
+    }
+
+    template<class T, int Major, size_t Row, size_t Col, class Allocator>
     void Array2D<T, Major, Row, Col, Allocator>::read(const T* __restrict p) noexcept {
         arr.read(p);
     }
