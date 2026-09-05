@@ -129,7 +129,6 @@ namespace Physica {
         static_assert(!Diffable<T>, "[Error]: Use diffable vector instead");
     public:
         using ScalarType = T;
-        using ElemType = T;
     };
 }
 

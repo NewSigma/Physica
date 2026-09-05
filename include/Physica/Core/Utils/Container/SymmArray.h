@@ -143,7 +143,7 @@ namespace Physica {
             using Type = Array<T, Length>;
         };
     public:
-        using ElemType = T;
+        using value_type = T;
         using ArrayType = Helper<Scalar<T>, Order * (Order + 1) / 2>::Type;
     };
 }

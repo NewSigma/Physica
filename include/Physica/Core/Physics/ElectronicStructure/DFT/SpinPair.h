@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,7 +21,7 @@
 #include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica {
-    enum class SpinState {
+    enum class SpinState : int8_t {
         Up = 0,
         Down = 1
     };
@@ -31,7 +31,7 @@ namespace Physica {
         using Base = Traits<SpinPair<T, IsSpinPolarized>>::Base;
         constexpr static unsigned char NumSpin = Base::getLength();
     public:
-        using ElemType = T;
+        using value_type = T;
     public:
         explicit SpinPair(auto... args); //TODO: Use auto&&... may lead to incorrect overload
         SpinPair(const SpinPair&) = default;

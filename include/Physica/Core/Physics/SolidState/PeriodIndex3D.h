@@ -26,7 +26,7 @@ namespace Physica {
      */
     class PHYSICA_API PeriodIndex3D {
         using This = PeriodIndex3D;
-        using Index1D = Index3D::ElemType;
+        using Index1D = Index3D::value_type;
 
         Index3D index;
         Index3D shape;

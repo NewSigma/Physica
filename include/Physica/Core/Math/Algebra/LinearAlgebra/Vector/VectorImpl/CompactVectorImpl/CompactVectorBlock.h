@@ -176,6 +176,5 @@ namespace Physica {
     class Traits<CompactVectorBlock<V, Length>> {
     public:
         using ScalarType = std::remove_cvref_t<V>::ScalarType;
-        using ElemType = ScalarType;
     };
 }

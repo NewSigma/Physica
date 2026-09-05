@@ -48,8 +48,7 @@ namespace Physica {
         using reference = lvalue_reference;
         using const_reference = const_lvalue_reference;
 
-        using ElemType = Traits<Derived>::ElemType;
-        static_assert(std::is_same<value_type, ElemType>::value, "[Error]: Declaration is not self consistent");
+        static_assert(std::is_same_v<value_type, typename Traits<Derived>::value_type>, "[Error]: Declaration is not self consistent");
 
         constexpr static int32_t Poison = 0xAA;
     public:
@@ -104,11 +103,11 @@ namespace Physica {
     template<class Container>
     class ArrayMixin<Derived, Allocator>::Iterator {
         using This = Iterator<Container>;
-        using ElemType = Traits<std::remove_const_t<Container>>::ElemType;
+        using Elem = Traits<std::remove_const_t<Container>>::value_type;
         constexpr static bool isConst = std::is_const<Container>::value;
     public:
         using iterator_category = std::contiguous_iterator_tag;
-        using value_type = std::conditional<isConst, const ElemType, ElemType>::type;
+        using value_type = std::conditional<isConst, const Elem, Elem>::type;
         using difference_type = std::ptrdiff_t;
         using pointer = std::add_pointer<value_type>::type;
         using reference = std::add_lvalue_reference<value_type>::type;

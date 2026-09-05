@@ -175,7 +175,7 @@ namespace Physica {
     template<class T, size_t Length, class Allocator>
     class Traits<Array<T, Length, Allocator>> {
     public:
-        using ElemType = T;
+        using value_type = T;
         using AllocatorType = Allocator;
     };
 }

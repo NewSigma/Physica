@@ -27,7 +27,7 @@ namespace {
     consteval void rangeTest() noexcept {
         using I = std::ranges::iterator_t<C>;
         static_assert(std::indirectly_readable<I>);
-        static_assert(std::indirectly_writable<I, typename C::ElemType>);
+        static_assert(std::indirectly_writable<I, typename C::value_type>);
         static_assert(std::incrementable<I>);
         static_assert(std::sized_sentinel_for<I, I>);
         static_assert(std::contiguous_iterator<I>);
