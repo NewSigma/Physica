@@ -56,16 +56,31 @@ namespace Physica {
         [[nodiscard]] static int getNumRank() noexcept;
         [[nodiscard]] static int getRank() noexcept;
 
-        static void send(int to, void* data, int count, dtype_handle dtype, comm_handle comm = World);
-        static void recv(int from, void* data, int count, dtype_handle dtype, comm_handle comm = World);
-        static void pass(int from, int to, void* data, int count, dtype_handle dtype, comm_handle comm = World);
-        static void sendrecv(int send_to, int recv_from, void* data, int count, dtype_handle dtype, comm_handle comm = World);
-        static void bcast(int root, void* data, int count, dtype_handle dtype, comm_handle comm = World);
-        static void reduce(int to, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, ReduceOp op, comm_handle comm = World);
-        static void allreduce(const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, ReduceOp op, comm_handle comm = World);
-        static void gather(int to, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm = World);
-        static void scatter(int from, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm = World);
-        static void allgather(const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm = World);
+        static void send(int to, const std::ranges::contiguous_range auto& buffer, comm_handle comm = World);
+        static void recv(int from, std::ranges::contiguous_range auto& buffer, comm_handle comm = World);
+        static void pass(int from, int to, std::ranges::contiguous_range auto& buffer, comm_handle comm = World);
+        static void sendrecv(int send_to, int recv_from, std::ranges::contiguous_range auto& buffer, comm_handle comm = World);
+        static void bcast(int root, std::ranges::contiguous_range auto& buffer, comm_handle comm = World);
+        static void reduce(int to,
+                           const std::ranges::contiguous_range auto& sendbuf,
+                           std::ranges::contiguous_range auto& recvbuf,
+                           ReduceOp op,
+                           comm_handle comm = World);
+        static void allreduce(const std::ranges::contiguous_range auto& sendbuf,
+                              std::ranges::contiguous_range auto& recvbuf,
+                              ReduceOp op,
+                              comm_handle comm = World);
+        static void gather(int to,
+                           const std::ranges::contiguous_range auto& sendbuf,
+                           std::ranges::contiguous_range auto& recvbuf,
+                           comm_handle comm = World);
+        static void scatter(int from,
+                            const std::ranges::contiguous_range auto& sendbuf,
+                            std::ranges::contiguous_range auto& recvbuf,
+                            comm_handle comm = World);
+        static void allgather(const std::ranges::contiguous_range auto& sendbuf,
+                              std::ranges::contiguous_range auto& recvbuf,
+                              comm_handle comm = World);
         static void wait(comm_handle comm = World);
 
         template<class T>
@@ -74,7 +89,93 @@ namespace Physica {
         MPI() noexcept;
         /* Static memebers */
         [[nodiscard]] static dtype_handle dtype_primitive(PrimitiveType type) noexcept;
+
+        static void send(int to, void* data, int count, dtype_handle dtype, comm_handle comm);
+        static void recv(int from, void* data, int count, dtype_handle dtype, comm_handle comm);
+        static void pass(int from, int to, void* data, int count, dtype_handle dtype, comm_handle comm);
+        static void sendrecv(int send_to, int recv_from, void* data, int count, dtype_handle dtype, comm_handle comm);
+        static void bcast(int root, void* data, int count, dtype_handle dtype, comm_handle comm);
+        static void reduce(int to, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, ReduceOp op, comm_handle comm);
+        static void allreduce(const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, ReduceOp op, comm_handle comm);
+        static void gather(int to, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm);
+        static void scatter(int from, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm);
+        static void allgather(const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm);
     };
+
+    void MPI::send(int to, const std::ranges::contiguous_range auto& buffer, comm_handle comm) {
+        using T = std::ranges::range_value_t<decltype(buffer)>;
+        send(to, std::ranges::data(buffer), std::ranges::size(buffer), dtype<T>(), comm);
+    }
+
+    void MPI::recv(int from, std::ranges::contiguous_range auto& buffer, comm_handle comm) {
+        using T = std::ranges::range_value_t<decltype(buffer)>;
+        recv(from, std::ranges::data(buffer), std::ranges::size(buffer), dtype<T>(), comm);
+    }
+
+    void MPI::pass(int from, int to, std::ranges::contiguous_range auto& buffer, comm_handle comm) {
+        using T = std::ranges::range_value_t<decltype(buffer)>;
+        pass(from, to, std::ranges::data(buffer), std::ranges::size(buffer), dtype<T>(), comm);
+    }
+
+    void MPI::sendrecv(int send_to, int recv_from, std::ranges::contiguous_range auto& buffer, comm_handle comm) {
+        using T = std::ranges::range_value_t<decltype(buffer)>;
+        sendrecv(send_to, recv_from, std::ranges::data(buffer), std::ranges::size(buffer), dtype<T>(), comm);
+    }
+
+    void MPI::bcast(int root, std::ranges::contiguous_range auto& buffer, comm_handle comm) {
+        using T = std::ranges::range_value_t<decltype(buffer)>;
+        bcast(root, std::ranges::data(buffer), std::ranges::size(buffer), dtype<T>(), comm);
+    }
+
+    void MPI::reduce(int to,
+                     const std::ranges::contiguous_range auto& sendbuf,
+                     std::ranges::contiguous_range auto& recvbuf,
+                     ReduceOp op,
+                     comm_handle comm) {
+        using T = std::ranges::range_value_t<decltype(sendbuf)>;
+        using U = std::ranges::range_value_t<decltype(recvbuf)>;
+        static_assert(std::same_as<T, U>, "[Error]: sendbuf and recvbuf must have the same value type");
+        reduce(to, std::ranges::data(sendbuf), std::ranges::data(recvbuf), std::ranges::size(sendbuf), dtype<T>(), op, comm);
+    }
+
+    void MPI::allreduce(const std::ranges::contiguous_range auto& sendbuf,
+                        std::ranges::contiguous_range auto& recvbuf,
+                        ReduceOp op,
+                        comm_handle comm) {
+        using T = std::ranges::range_value_t<decltype(sendbuf)>;
+        using U = std::ranges::range_value_t<decltype(recvbuf)>;
+        static_assert(std::same_as<T, U>, "[Error]: sendbuf and recvbuf must have the same value type");
+        allreduce(std::ranges::data(sendbuf), std::ranges::data(recvbuf), std::ranges::size(sendbuf), dtype<T>(), op, comm);
+    }
+
+    void MPI::gather(int to,
+                     const std::ranges::contiguous_range auto& sendbuf,
+                     std::ranges::contiguous_range auto& recvbuf,
+                     comm_handle comm) {
+        using T = std::ranges::range_value_t<decltype(sendbuf)>;
+        using U = std::ranges::range_value_t<decltype(recvbuf)>;
+        static_assert(std::same_as<T, U>, "[Error]: sendbuf and recvbuf must have the same value type");
+        gather(to, std::ranges::data(sendbuf), std::ranges::data(recvbuf), std::ranges::size(sendbuf), dtype<T>(), comm);
+    }
+
+    void MPI::scatter(int from,
+                      const std::ranges::contiguous_range auto& sendbuf,
+                      std::ranges::contiguous_range auto& recvbuf,
+                      comm_handle comm) {
+        using T = std::ranges::range_value_t<decltype(sendbuf)>;
+        using U = std::ranges::range_value_t<decltype(recvbuf)>;
+        static_assert(std::same_as<T, U>, "[Error]: sendbuf and recvbuf must have the same value type");
+        scatter(from, std::ranges::data(sendbuf), std::ranges::data(recvbuf), std::ranges::size(sendbuf), dtype<T>(), comm);
+    }
+
+    void MPI::allgather(const std::ranges::contiguous_range auto& sendbuf,
+                        std::ranges::contiguous_range auto& recvbuf,
+                        comm_handle comm) {
+        using T = std::ranges::range_value_t<decltype(sendbuf)>;
+        using U = std::ranges::range_value_t<decltype(recvbuf)>;
+        static_assert(std::same_as<T, U>, "[Error]: sendbuf and recvbuf must have the same value type");
+        allgather(std::ranges::data(sendbuf), std::ranges::data(recvbuf), std::ranges::size(sendbuf) / getNumRank(), dtype<T>(), comm);
+    }
 
     template<class T>
     auto MPI::dtype() noexcept -> dtype_handle {

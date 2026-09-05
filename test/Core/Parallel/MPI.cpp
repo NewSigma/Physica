@@ -26,7 +26,7 @@ namespace {
     void send() noexcept {
         const int rank = MPI::getRank();
         Array<int, 1> arr{rank};
-        arr.pass(0, 1);
+        MPI::pass(0, 1, arr);
         expect(arr[0] == 0);
     }
 
@@ -34,25 +34,25 @@ namespace {
         const int rank = MPI::getRank();
         int partner = rank == 0 ? 1 : 0;
         Array<int, 1> arr{rank};
-        arr.sendrecv(partner, partner);
+        MPI::sendrecv(partner, partner, arr);
         expect(arr[0] == partner);
     }
 
     void bcast() noexcept {
         Array<int, 1> arr{MPI::getRank()};
-        arr.bcast(0);
+        MPI::bcast(0, arr);
         expect(arr[0] == 0);
     }
 
     void reduce() noexcept {
         Array<int, 1> arr{MPI::getRank()};
-        arr.reduce(0, MPI::ReduceOp::Sum);
+        MPI::reduce(0, arr, arr, MPI::ReduceOp::Sum);
         expect(arr[0] == 1);
     }
 
     void allreduce() noexcept {
         Array<int, 1> arr{MPI::getRank()};
-        arr.allreduce(MPI::ReduceOp::Sum);
+        MPI::allreduce(arr, arr, MPI::ReduceOp::Sum);
         expect(arr[0] == 1);
     }
 
@@ -60,13 +60,13 @@ namespace {
         const int rank = MPI::getRank();
         if (rank == 0) {
             Array<int, 2> arr{0, 0};
-            arr.gather(0);
+            MPI::gather(0, arr, arr);
             expect(arr[0] == 0);
             expect(arr[1] == 1);
         }
         else {
             Array<int, 1> arr{rank};
-            arr.gather(0);
+            MPI::gather(0, arr, arr);
         }
     }
 
@@ -74,13 +74,13 @@ namespace {
         const int rank = MPI::getRank();
         if (rank == 0) {
             Array<int, 2> src{0, 1};
-            src.scatter(0);
+            MPI::scatter(0, src, src);
             expect(src[0] == 0);
             expect(src[1] == 1);
         }
         else {
             Array<int, 1> dst{100};
-            dst.scatter(0);
+            MPI::scatter(0, dst, dst);
             expect(dst[0] == 1);
         }
     }
@@ -89,7 +89,7 @@ namespace {
         const int rank = MPI::getRank();
         Array<int, 2> arr{0, 0};
         arr[rank] = rank;
-        arr.allgather();
+        MPI::allgather(arr, arr);
         expect(arr[0] == 0);
         expect(arr[1] == 1);
     }

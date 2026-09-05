@@ -23,7 +23,6 @@
 #include <memory>
 #include <type_traits>
 #include "Physica/CRTP.h"
-#include "Physica/Core/Parallel/MPI.h"
 
 namespace Physica {
     /**
@@ -63,15 +62,6 @@ namespace Physica {
 
         template<class R>
         auto& select(this auto&&) noexcept;
-
-        void pass(int from, int to);
-        void sendrecv(int send_to, int recv_from);
-        void bcast(int root);
-        void reduce(int to, MPI::ReduceOp op);
-        void allreduce(MPI::ReduceOp op);
-        void gather(int to);
-        void scatter(int from);
-        void allgather();
 
     #ifdef PHYSICA_HDF5
         void read(this auto&, const auto& loc, const char* name);
@@ -150,6 +140,3 @@ namespace Physica {
 }
 
 #include "ArrayMixinImpl.h"
-#ifdef PHYSICA_MPI
-    #include "ArrayMPI.h"
-#endif
