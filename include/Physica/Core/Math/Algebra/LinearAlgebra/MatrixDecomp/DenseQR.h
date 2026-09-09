@@ -73,6 +73,7 @@ namespace Physica {
         [[nodiscard]] const auto& getTaus() const noexcept { return taus; }
         [[nodiscard]] size_t getRow() const noexcept { return working.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return working.getCol(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return working.getOrder(); }
         [[nodiscard]] MatrixND<T> getMatrixQ() const;
         [[nodiscard]] MatrixND<T> getMatrixQ_mkl() const;
         [[nodiscard]] MatrixND<T> getMatrixQ_base() const;

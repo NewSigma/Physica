@@ -58,14 +58,15 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<RNG R>
-        void step_random();
+        auto step_random();
 
-        template<RNG R>
+        template<RNG R, ExecutePolicy P = Sequential>
         void step();
-        template<RNG R>
+        template<RNG R, ExecutePolicy P = Sequential>
         void step_for(int numStep);
 
-        void calcGreens(int split);
+        template<ExecutePolicy P = Sequential>
+        auto calcGreens(int split);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getParams() const noexcept { return *params; }
@@ -95,18 +96,18 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    void DQMC<T>::step_random() {
+    auto DQMC<T>::step_random() {
         kinetic.template random_uniform<R>();
         productor.invalidates(getAuxField(), params->getAlpha());
-        calcGreens(0);
+        return calcGreens(0);
     }
 
     template<Scalar T>
-    template<RNG R>
+    template<RNG R, ExecutePolicy P>
     void DQMC<T>::step() {
         std::ranges::shuffle(sites, R::getInstance());
         probs.template random_uniform<R>();
-        calcGreens(cursor);
+        calcGreens<P>(cursor);
         for (int i = 0; i < getNumSite(); ++i)
             metropolis(sites[i], cursor, probs[i]);
         productor.invalidate(cursor);
@@ -114,19 +115,20 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RNG R>
+    template<RNG R, ExecutePolicy P>
     void DQMC<T>::step_for(int numStep) {
         assert(numStep >= 0 && "[Error]: Invalid step num");
         for (int _ = 0; _ < numStep; ++_)
-            step<R>();
+            step<R, P>();
 
         numTotal = 0;
         numAccept = 0;
     }
 
     template<Scalar T>
-    void DQMC<T>::calcGreens(int split) {
-        productor.calcGreens(kinetic.getGreens(), split, params->calcBetaMu());
+    template<ExecutePolicy P>
+    auto DQMC<T>::calcGreens(int split) {
+        return productor.template calcGreens<P>(kinetic.getGreens(), split, params->calcBetaMu());
     }
 
     template<Scalar T>
