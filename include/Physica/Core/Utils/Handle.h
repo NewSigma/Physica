@@ -31,11 +31,13 @@ namespace Physica {
         MPI_Dtype,
         MPI_Op,
         MPI_Request,
+        PID, // Unix uses pid_t; Windows differs
     };
     /**
      * \class Handle: A zero-cost wrapper for opaque handles in 3rdparty C libraries, dedicated to provide:
      * 1. Type safety
-     * 2. ABI stability: for example, OpenMPI implement handles using void*, while MPICH uses int
+     * 2. ABI stability across implementations, platforms, etc.
+     *    (For example, OpenMPI implement handles using void*, while MPICH uses int)
      */
     template<HandleType HT>
     class Handle {

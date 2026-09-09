@@ -67,6 +67,8 @@ namespace Physica {
         [[nodiscard]] T trace() const noexcept;
 
         [[nodiscard]] auto values(this auto&&) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
@@ -187,6 +189,25 @@ namespace Physica {
     auto GEMM<M1, M2>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
+    }
+
+    template<Matrix M1, Matrix M2>
+    template<int GradOrder>
+    auto GEMM<M1, M2>::grads(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (Base::isForwardDiff()) {
+            using LHS = std::remove_cvref_t<M1>;
+            using RHS = std::remove_cvref_t<M2>;
+            if constexpr (ForwardDiff<LHS> && ForwardDiff<RHS>)
+                return std::forward<Self>(self).getLHS().template grads<GradOrder>() * std::forward<Self>(self).getRHS().values()
+                     + std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().template grads<GradOrder>();
+            else if constexpr (ForwardDiff<LHS>)
+                return std::forward<Self>(self).getLHS().template grads<GradOrder>() * std::forward<Self>(self).getRHS().values();
+            else
+                return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().template grads<GradOrder>();
+        }
+        else
+            return self.Base::template grads<GradOrder>();
     }
 
     template<Matrix M1, Matrix M2>

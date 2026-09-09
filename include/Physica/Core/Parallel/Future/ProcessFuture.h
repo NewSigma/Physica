@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,35 +18,32 @@
  */
 #pragma once
 
-#include <sys/types.h>
-#ifdef _MSC_VER
-    //#include <io.h>
-    #include <process.h>
-    using pid_t = int;
-#else
-    #include <unistd.h>
-#endif
 #include "Physica/Macro.h"
+#include "Physica/Core/Utils/Handle.h"
 
 namespace Physica {
     class PHYSICA_API ProcessFuture {
-        pid_t pid;
+        using This = ProcessFuture;
+    public:
+        using Handle = Handle<HandleType::PID>;
+    private:
+        Handle pid;
         int error;
         bool finished;
         bool isValid;
     public:
         ProcessFuture();
-        ProcessFuture(pid_t pid_);
-        ProcessFuture(const ProcessFuture&) = default;
-        ProcessFuture(ProcessFuture&&) noexcept = default;
+        ProcessFuture(Handle pid_);
+        ProcessFuture(const This&) = default;
+        ProcessFuture(This&&) noexcept = default;
         ~ProcessFuture() = default;
         /* Operators */
-        ProcessFuture& operator=(ProcessFuture future) noexcept { swap(future); return *this; }
+        This& operator=(This future) noexcept { swap(future); return *this; }
         /* Operations */
         [[nodiscard]] int wait();
-        void swap(ProcessFuture& __restrict future) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] pid_t getPID() const noexcept { return pid; }
+        [[nodiscard]] Handle getPID() const noexcept { return pid; }
         [[nodiscard]] bool valid() const noexcept { return isValid; }
     };
 }

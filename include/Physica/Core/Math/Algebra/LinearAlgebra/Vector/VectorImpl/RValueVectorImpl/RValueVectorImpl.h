@@ -928,7 +928,7 @@ namespace Physica {
                 }
             }
             else {
-                auto future = parallel_for<P>([it](size_t i) {
+                auto task = parallel_for<P>([it](size_t i) {
                     auto [lhs, rhs] = it + i * Size;
                     lhs.store(rhs.template load<Size>());
                 }, to / Size, 0);
@@ -937,7 +937,7 @@ namespace Physica {
                     auto [lhs, rhs] = it + i;
                     *lhs = *rhs;
                 }
-                future.wait();
+                task.wait();
             }
         }
     }

@@ -23,15 +23,17 @@
 #else
     #include <windows.h>
 #endif
-#include <thread>
 #include <mutex>
-#include <queue>
 #include <condition_variable>
 #include <limits>
 #include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica {
     /**
+     * A task-opaque thread pool that supports stealing-based load balancing.
+     *
+     * TODO: Topology sensing
+     *
      * Reference:
      * [1] Eigen; https://eigen.tuxfamily.org
      */

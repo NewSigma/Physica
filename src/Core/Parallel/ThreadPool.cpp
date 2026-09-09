@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Parallel/ThreadPool.h"
+#include <queue>
 #include <xmmintrin.h>
 #ifdef PHYSICA_MKL
     #include <mkl_vml.h>

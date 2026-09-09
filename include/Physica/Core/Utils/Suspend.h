@@ -34,6 +34,16 @@ namespace Physica {
     concept Waitable = requires(std::coroutine_handle<> waitee) {
         { T::on_wait(waitee) } -> std::same_as<void>;
     };
+
+    [[nodiscard]] decltype(auto) toAwaiter(auto&& expr) noexcept {
+        using Expr = decltype(expr);
+        if constexpr (Awaitable<Expr>)
+            return std::forward<Expr>(expr);
+        else
+            return std::forward<Expr>(expr).operator co_await();
+    }
+
+    [[nodiscard]] PHYSICA_API std::coroutine_handle<> noop_coroutine() noexcept;
     // Clang implements await_suspend using an intrinsic. We provide the necessary information to help with optimization.
     template<bool Ready>
     struct StaticSuspend {
@@ -50,14 +60,4 @@ namespace Physica {
 
     using suspend_always = StaticSuspend<false>;
     using suspend_never = StaticSuspend<true>;
-
-    [[nodiscard]] PHYSICA_API std::coroutine_handle<> noop_coroutine() noexcept;
-
-    [[nodiscard]] decltype(auto) toAwaiter(auto&& expr) noexcept {
-        using Expr = decltype(expr);
-        if constexpr (Awaitable<Expr>)
-            return std::forward<Expr>(expr);
-        else
-            return std::forward<Expr>(expr).operator co_await();
-    }
 }

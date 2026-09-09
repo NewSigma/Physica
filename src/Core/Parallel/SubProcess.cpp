@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,16 +23,17 @@
 #include <csignal>
 #include <sys/wait.h>
 #include <sys/prctl.h>
+#include <sys/types.h>
 #include "Physica/Core/Parallel/SubProcess.h"
 #include "Physica/Core/Exception/SystemException.h"
 
 using namespace Physica;
 
 SubProcess::SubProcess()
-        : pid(-1), nice_incr(0) {}
+        : pid(Handle(-1)), nice_incr(0) {}
 
 SubProcess::SubProcess(std::function<void()> task_, int nice_incr_)
-        : task(std::move(task_)), pid(-1), nice_incr(nice_incr_) {}
+        : task(std::move(task_)), pid(Handle(-1)), nice_incr(nice_incr_) {}
 
 SubProcess& SubProcess::operator=(SubProcess process) noexcept {
     swap(process);
@@ -40,10 +41,10 @@ SubProcess& SubProcess::operator=(SubProcess process) noexcept {
 }
 
 ProcessFuture SubProcess::execute() {
-    pid = fork();
-    if (pid == -1)
+    pid = Handle(fork());
+    if (pid_t(pid) == -1)
         throw SystemException();
-    if (pid == 0) {
+    if (pid_t(pid) == 0) {
         prctl(PR_SET_PDEATHSIG, SIGTERM);
         /* Set nice */ {
             errno = 0;
@@ -60,7 +61,7 @@ ProcessFuture SubProcess::execute() {
 void SubProcess::swap(SubProcess& __restrict process) noexcept {
     assert(this != &process && "[Error]: Self swap is likely a bug");
     task.swap(process.task);
-    std::swap(pid, process.pid);
+    pid.swap(process.pid);
     std::swap(nice_incr, process.nice_incr);
 }
 

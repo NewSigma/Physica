@@ -28,7 +28,7 @@ namespace Physica {
     /**
      * \class Task maintains lifetime of async tasks
      */
-    class PHYSICA_API Task final {
+    class [[nodiscard]] PHYSICA_API Task final {
     public:
         class promise_type;
     private:

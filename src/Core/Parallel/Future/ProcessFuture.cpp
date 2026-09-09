@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,11 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <stdexcept>
+#include <print>
 #include <future>
 #include <cassert>
-#include <signal.h>
+#include <csignal>
 #ifdef __linux__
+    #include <sys/types.h>
     #include <sys/wait.h>
  #endif
 #include "Physica/Core/Parallel/Future/ProcessFuture.h"
@@ -30,9 +31,9 @@
 using namespace Physica;
 
 ProcessFuture::ProcessFuture()
-        : error(-1), isValid(false) {}
+        : pid(-1), error(-1), finished(false), isValid(false) {}
 
-ProcessFuture::ProcessFuture(pid_t pid_)
+ProcessFuture::ProcessFuture(Handle pid_)
         : pid(pid_), error(-1), finished(false), isValid(true) {}
 
 int ProcessFuture::wait() {
@@ -42,10 +43,10 @@ int ProcessFuture::wait() {
     if (finished)
         return error;
 #ifdef __linux__
-    int status;
-    pid_t endPid = waitpid(pid, &status, 0);
+    int status{};
+    const auto endPid = waitpid(pid_t(pid), &status, 0);
     if (endPid <= 0) {
-        fprintf(stderr, "[Error]: Failed to wait for chile processes.\n");
+        std::println(stderr, "[Error]: Failed to wait for chile processes.");
         throw SystemException();
     }
     finished = true;
@@ -58,9 +59,9 @@ int ProcessFuture::wait() {
     return error;
 }
 
-void ProcessFuture::swap(ProcessFuture& __restrict obj) noexcept {
+void ProcessFuture::swap(This& __restrict obj) noexcept {
     assert(this != &obj && "[Error]: Self swap is likely a bug");
-    std::swap(pid, obj.pid);
+    pid.swap(obj.pid);
     std::swap(error, obj.error);
     std::swap(finished, obj.finished);
     std::swap(isValid, obj.isValid);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,9 +23,11 @@
 
 namespace Physica {
     class PHYSICA_API SubProcess {
+    public:
+        using Handle = Handle<HandleType::PID>;
     private:
         std::function<void()> task;
-        pid_t pid;
+        Handle pid;
         int nice_incr;
     public:
         SubProcess();
@@ -39,6 +41,6 @@ namespace Physica {
         ProcessFuture execute();
         void swap(SubProcess& __restrict process) noexcept;
         /* Getters */
-        [[nodiscard]] pid_t getPid() const noexcept { return pid; }
+        [[nodiscard]] Handle getPid() const noexcept { return pid; }
     };
 }
