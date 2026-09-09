@@ -133,37 +133,40 @@ int MPI::getRank() noexcept {
 #endif
 }
 
-void MPI::send(int to, void* data, int count, dtype_handle dtype, comm_handle comm) {
+auto MPI::send(int to, const void* data, int count, dtype_handle dtype, comm_handle comm) -> Request {
     checkPID(to);
 #ifdef PHYSICA_MPI
-    check_mpi(MPI_Send(data, count, MPI_Datatype(dtype), to, 0, MPI_Comm(comm)));
+    MPI_Request h = MPI_REQUEST_NULL;
+    check_mpi(MPI_Isend(data, count, MPI_Datatype(dtype), to, 0, MPI_Comm(comm), &h));
+    return request_handle(h);
 #endif
+    return {};
 }
 
-void MPI::recv(int from, void* data, int count, dtype_handle dtype, comm_handle comm) {
+auto MPI::recv(int from, void* data, int count, dtype_handle dtype, comm_handle comm) -> Request {
     checkPID(from);
 #ifdef PHYSICA_MPI
-    MPI_Status status;
-    check_mpi(MPI_Recv(data, count, MPI_Datatype(dtype), from, MPI_ANY_TAG, MPI_Comm(comm), IsDebug() ? &status : MPI_STATUS_IGNORE));
-    if constexpr (IsDebug()) {
-        int recv_count{};
-        MPI_Get_count(&status, MPI_Datatype(dtype), &recv_count);
-        assert(recv_count == count && "[Error]: Recv length do not match");
-    }
+    MPI_Request h = MPI_REQUEST_NULL;
+    check_mpi(MPI_Irecv(data, count, MPI_Datatype(dtype), from, MPI_ANY_TAG, MPI_Comm(comm), &h));
+    return request_handle(h);
 #endif
+    return {};
 }
 /**
  * A paired send-recv, useful for avoiding dead lock
  */
-void MPI::pass(int from, int to, void* data, int count, dtype_handle dtype, comm_handle comm) {
+auto MPI::pass(int from, int to, void* data, int count, dtype_handle dtype, comm_handle comm) -> Request {
     assert(from != to);
     const int rank = MPI::getRank();
     if (rank == from)
-        send(to, data, count, dtype, comm);
-    else if (rank == to)
-        recv(from, data, count, dtype, comm);
+        return send(to, data, count, dtype, comm);
+    if (rank == to)
+        return recv(from, data, count, dtype, comm);
+    return {};
 }
-
+/**
+ * TODO: Update to MPI_Isendrecv once dump to OpenMPI-5
+ */
 void MPI::sendrecv(int send_to, int recv_from, void* data, int count, dtype_handle dtype, comm_handle comm) {
     checkPID(send_to, recv_from);
 #ifdef PHYSICA_MPI
@@ -177,31 +180,40 @@ void MPI::sendrecv(int send_to, int recv_from, void* data, int count, dtype_hand
 #endif
 }
 
-void MPI::bcast(int root, void* data, int count, dtype_handle dtype, comm_handle comm) {
+auto MPI::bcast(int root, void* data, int count, dtype_handle dtype, comm_handle comm) -> Request {
     checkPID(root);
 #ifdef PHYSICA_MPI
-    check_mpi(MPI_Bcast(data, count, MPI_Datatype(dtype), root, MPI_Comm(comm)));
+    MPI_Request h = MPI_REQUEST_NULL;
+    check_mpi(MPI_Ibcast(data, count, MPI_Datatype(dtype), root, MPI_Comm(comm), &h));
+    return request_handle(h);
 #endif
+    return {};
 }
 
-void MPI::reduce(int to, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, ReduceOp op, comm_handle comm) {
+auto MPI::reduce(int to, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, ReduceOp op, comm_handle comm) -> Request {
     checkPID(to);
 #ifdef PHYSICA_MPI
     if (MPI::getRank() == to && sendbuf == recvbuf)
         sendbuf = MPI_IN_PLACE;
-    check_mpi(MPI_Reduce(sendbuf, recvbuf, count, MPI_Datatype(dtype), MPI_Op(toOpHandle(op)), to, MPI_Comm(comm)));
+    MPI_Request h = MPI_REQUEST_NULL;
+    check_mpi(MPI_Ireduce(sendbuf, recvbuf, count, MPI_Datatype(dtype), MPI_Op(toOpHandle(op)), to, MPI_Comm(comm), &h));
+    return request_handle(h);
 #endif
+    return {};
 }
 
-void MPI::allreduce(const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, ReduceOp op, comm_handle comm) {
+auto MPI::allreduce(const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, ReduceOp op, comm_handle comm) -> Request {
 #ifdef PHYSICA_MPI
     if (sendbuf == recvbuf)
         sendbuf = MPI_IN_PLACE;
-    check_mpi(MPI_Allreduce(sendbuf, recvbuf, count, MPI_Datatype(dtype), MPI_Op(toOpHandle(op)), MPI_Comm(comm)));
+    MPI_Request h = MPI_REQUEST_NULL;
+    check_mpi(MPI_Iallreduce(sendbuf, recvbuf, count, MPI_Datatype(dtype), MPI_Op(toOpHandle(op)), MPI_Comm(comm), &h));
+    return request_handle(h);
 #endif
+    return {};
 }
 
-void MPI::gather(int to, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm) {
+auto MPI::gather(int to, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm) -> Request {
     checkPID(to);
     if (to == getRank()) {
         assert(count % getNumRank() == 0);
@@ -210,11 +222,14 @@ void MPI::gather(int to, const void* sendbuf, void* recvbuf, int count, dtype_ha
 #ifdef PHYSICA_MPI
     if (MPI::getRank() == to && sendbuf == recvbuf)
         sendbuf = MPI_IN_PLACE;
-    check_mpi(MPI_Gather(sendbuf, count, MPI_Datatype(dtype), recvbuf, count, MPI_Datatype(dtype), to, MPI_Comm(comm)));
+    MPI_Request h = MPI_REQUEST_NULL;
+    check_mpi(MPI_Igather(sendbuf, count, MPI_Datatype(dtype), recvbuf, count, MPI_Datatype(dtype), to, MPI_Comm(comm), &h));
+    return request_handle(h);
 #endif
+    return {};
 }
 
-void MPI::scatter(int from, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm) {
+auto MPI::scatter(int from, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm) -> Request {
     checkPID(from);
     if (from == getRank()) {
         assert(count % getNumRank() == 0);
@@ -223,16 +238,22 @@ void MPI::scatter(int from, const void* sendbuf, void* recvbuf, int count, dtype
 #ifdef PHYSICA_MPI
     if (MPI::getRank() == from && sendbuf == recvbuf)
         recvbuf = MPI_IN_PLACE;
-    check_mpi(MPI_Scatter(sendbuf, count, MPI_Datatype(dtype), recvbuf, count, MPI_Datatype(dtype), from, MPI_Comm(comm)));
+    MPI_Request h = MPI_REQUEST_NULL;
+    check_mpi(MPI_Iscatter(sendbuf, count, MPI_Datatype(dtype), recvbuf, count, MPI_Datatype(dtype), from, MPI_Comm(comm), &h));
+    return request_handle(h);
 #endif
+    return {};
 }
 
-void MPI::allgather(const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm) {
+auto MPI::allgather(const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm) -> Request {
 #ifdef PHYSICA_MPI
     if (sendbuf == recvbuf)
         sendbuf = MPI_IN_PLACE;
-    check_mpi(MPI_Allgather(sendbuf, count, MPI_Datatype(dtype), recvbuf, count, MPI_Datatype(dtype), MPI_Comm(comm)));
+    MPI_Request h = MPI_REQUEST_NULL;
+    check_mpi(MPI_Iallgather(sendbuf, count, MPI_Datatype(dtype), recvbuf, count, MPI_Datatype(dtype), MPI_Comm(comm), &h));
+    return request_handle(h);
 #endif
+    return {};
 }
 
 void MPI::wait(comm_handle comm) {

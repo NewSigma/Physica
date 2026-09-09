@@ -64,6 +64,10 @@ Template parameters: Encourage the use of abbreviated function templates to elim
 
 ## Formatting
 
+### Function Calls
+
+Use `std::ignore` to discard a return value. Do not use `(void)`.
+
 ### Namespace Formatting
 
 Indent namespace contents. Avoid nesting namespaces more than 2 levels unless absolutely necessary.

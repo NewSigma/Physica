@@ -26,7 +26,7 @@ namespace {
     void send() noexcept {
         const int rank = MPI::getRank();
         Array<int, 1> arr{rank};
-        MPI::pass(0, 1, arr);
+        MPI::pass(0, 1, arr).wait();
         expect(arr[0] == 0);
     }
 
@@ -40,19 +40,19 @@ namespace {
 
     void bcast() noexcept {
         Array<int, 1> arr{MPI::getRank()};
-        MPI::bcast(0, arr);
+        MPI::bcast(0, arr).wait();
         expect(arr[0] == 0);
     }
 
     void reduce() noexcept {
         Array<int, 1> arr{MPI::getRank()};
-        MPI::reduce(0, arr, arr, MPI::ReduceOp::Sum);
+        MPI::reduce(0, arr, arr, MPI::ReduceOp::Sum).wait();
         expect(arr[0] == 1);
     }
 
     void allreduce() noexcept {
         Array<int, 1> arr{MPI::getRank()};
-        MPI::allreduce(arr, arr, MPI::ReduceOp::Sum);
+        MPI::allreduce(arr, arr, MPI::ReduceOp::Sum).wait();
         expect(arr[0] == 1);
     }
 
@@ -60,13 +60,13 @@ namespace {
         const int rank = MPI::getRank();
         if (rank == 0) {
             Array<int, 2> arr{0, 0};
-            MPI::gather(0, arr, arr);
+            MPI::gather(0, arr, arr).wait();
             expect(arr[0] == 0);
             expect(arr[1] == 1);
         }
         else {
             Array<int, 1> arr{rank};
-            MPI::gather(0, arr, arr);
+            MPI::gather(0, arr, arr).wait();
         }
     }
 
@@ -74,13 +74,13 @@ namespace {
         const int rank = MPI::getRank();
         if (rank == 0) {
             Array<int, 2> src{0, 1};
-            MPI::scatter(0, src, src);
+            MPI::scatter(0, src, src).wait();
             expect(src[0] == 0);
             expect(src[1] == 1);
         }
         else {
             Array<int, 1> dst{100};
-            MPI::scatter(0, dst, dst);
+            MPI::scatter(0, dst, dst).wait();
             expect(dst[0] == 1);
         }
     }
@@ -89,7 +89,7 @@ namespace {
         const int rank = MPI::getRank();
         Array<int, 2> arr{0, 0};
         arr[rank] = rank;
-        MPI::allgather(arr, arr);
+        MPI::allgather(arr, arr).wait();
         expect(arr[0] == 0);
         expect(arr[1] == 1);
     }

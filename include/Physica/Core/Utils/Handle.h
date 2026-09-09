@@ -30,6 +30,7 @@ namespace Physica {
         MPI_Comm,
         MPI_Dtype,
         MPI_Op,
+        MPI_Request,
     };
     /**
      * \class Handle: A zero-cost wrapper for opaque handles in 3rdparty C libraries, dedicated to provide:
@@ -49,7 +50,8 @@ namespace Physica {
         constexpr Handle(This&&) noexcept = default;
         constexpr ~Handle() = default;
         /* Operators */
-        constexpr This& operator=(This obj) noexcept;
+        constexpr This& operator=(const This&) = default;
+        constexpr This& operator=(This&&) noexcept = default;
         [[nodiscard]] constexpr bool operator==(const This& other) const noexcept;
         [[nodiscard]] constexpr bool operator!=(const This& other) const noexcept = default;
 
@@ -67,12 +69,6 @@ namespace Physica {
         check<decltype(handle)>();
         opaque.fill(std::byte(0));
         std::ranges::copy(std::bit_cast<std::array<std::byte, sizeof(handle)>>(handle), opaque.begin());
-    }
-
-    template<HandleType HT>
-    constexpr auto Handle<HT>::operator=(This obj) noexcept -> This& {
-        swap(obj);
-        return *this;
     }
 
     template<HandleType HT>

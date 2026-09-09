@@ -1,5 +1,7 @@
 # Install
 
+0. *Physica* currently supports Linux only.
+
 1. We adopt CMake as our building system:
 
 [CMake](https://cmake.org/) Refer CMakeLists.txt for version requirements  
@@ -12,13 +14,14 @@
 
 3. Addtional libraries:
 
-[fftw](http://www.fftw.org)  =3.3.10  
-[HDF5](https://www.hdfgroup.org/solutions/hdf5/)  =1.14.6  (Optional, Recommended data format)  
-[oneMKL](https://www.intel.com/)  >=2024.2 (Optional)  
-[CUDA](https://developer.nvidia.com/cuda-downloads)  =12.8  (Optional)  
+[fftw](http://www.fftw.org) =3.3.10  
+[HDF5](https://www.hdfgroup.org/solutions/hdf5/) =1.14.6 (Optional, Recommended data format)  
+[oneMKL](https://www.intel.com/) >=2024.2 (Optional)  
+[openMPI](https://www.open-mpi.org/) =4.1.6 (Optional)  
+[CUDA](https://developer.nvidia.com/cuda-downloads) =12.8 (Optional)  
 [cuDSS](https://developer.nvidia.com/cudss) >=0.7.1 (Required by CUDA)  
-[Qt](https://www.qt.io/)  =6.5.3  (Optional, Plotting support)  
-[mimalloc](https://github.com/microsoft/mimalloc)  >=3.2.8  (Optional)  
+[Qt](https://www.qt.io/) =6.5.3 (Optional, Plotting support)  
+[mimalloc](https://github.com/microsoft/mimalloc) >=3.2.8 (Optional)  
 [LLVM](https://llvm.org/) The same version as clang (Optional)  
 [vectorclass](https://github.com/vectorclass/version2) (Bundled)  
 

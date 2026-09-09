@@ -3,6 +3,7 @@ Checks: >
   -bugprone-easily-swappable-parameters,
   clang-analyzer-*,
   concurrency-*,
+  -concurrency-mt-unsafe,
   cppcoreguidelines-*,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-avoid-reference-coroutine-parameters,
