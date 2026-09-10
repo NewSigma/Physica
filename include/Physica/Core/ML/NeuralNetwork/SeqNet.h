@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Layer/LayerMixin.h"
+#include "Physica/Core/Parallel/ThreadPool.h"
 
 namespace Physica {
     template<class Derived>

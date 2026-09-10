@@ -19,6 +19,7 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
+#include "Physica/Core/Parallel/Algorithm/Thread.h"
 #include "Benchmark.h"
 
 using namespace Physica;

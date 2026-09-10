@@ -21,6 +21,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/BKSModel.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
+#include "Physica/Core/Parallel/Algorithm/Thread.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;

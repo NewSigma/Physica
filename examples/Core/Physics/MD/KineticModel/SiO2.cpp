@@ -25,6 +25,7 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/Thermostat/Langevin.h"
+#include "Physica/Core/Parallel/Algorithm/Thread.h"
 
 using namespace Physica;
 using ScalarType = float64;

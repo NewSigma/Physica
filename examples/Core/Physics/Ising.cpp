@@ -19,6 +19,7 @@
 #include <QApplication>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Random/Random.h"
+#include "Physica/Core/Parallel/Algorithm/Thread.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;

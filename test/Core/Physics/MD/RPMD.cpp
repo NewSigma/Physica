@@ -20,6 +20,7 @@
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
+#include "Physica/Core/Parallel/Algorithm/Thread.h"
 #include "Test.h"
 
 using namespace Physica;

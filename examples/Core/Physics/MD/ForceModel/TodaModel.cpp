@@ -23,6 +23,7 @@
 #include "Physica/Core/Physics/MD/Thermostat/Langevin.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
 #include "Physica/Core/Physics/MD/ForceModel/TodaModel.h"
+#include "Physica/Core/Parallel/Algorithm/Thread.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;

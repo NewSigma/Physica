@@ -18,10 +18,11 @@
  */
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
-#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
+#include "Physica/Core/Parallel/Algorithm/Thread.h"
 #include "Test.h"
 
 using namespace Physica;

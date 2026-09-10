@@ -23,6 +23,7 @@
 #ifdef PHYSICA_CUDA
     #include <thrust/swap.h>
 #endif
+#include "Physica/Core/Parallel/Algorithm/Sequential.h"
 #include "../Array.h"
 
 namespace Physica {
@@ -137,10 +138,12 @@ namespace Physica {
     }
 
     template<class T, size_t Length, class Allocator>
+    template<ExecutePolicy P>
     auto Array<T, Length, Allocator>::generate(std::invocable<size_t> auto fn) -> This {
         This result{};
-        for (size_t i = 0; i < Length; ++i)
+        parallel_for<P>([&result, fn = std::move(fn)](size_t i) mutable {
             result[i] = fn(i);
+        }, Length).wait();
         return result;
     }
     ///////////////////////////////////////Array<T, Dynamic, Allocator>//////////////////////////////////////////
@@ -323,15 +326,20 @@ namespace Physica {
         return result;
     }
     /**
-     * Reads better and works for non-default-constructable elements
+     * Prettier, parallizable and works for non-default-constructable elements
+     *
+     * TODO: return a async value
      */
     template<class T, class Allocator>
+    template<ExecutePolicy P>
     auto Array<T, Dynamic, Allocator>::generate(std::invocable<size_t> auto fn, size_t length) -> This {
         This result{};
         result.arr = result.get_allocator().allocate(length);
+        result.length = length;
         result.capacity = length;
-        for (auto& i = result.length; i < length; ++i)
-            new (result.arr + i) T(std::move(fn(i)));
+        parallel_for<P>([arr = result.arr, fn = std::move(fn)](size_t i) mutable {
+            new (arr + i) T(fn(i));
+        }, length).wait();
         return result;
     }
 

@@ -24,6 +24,7 @@
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/Analyser/RDF.h"
+#include "Physica/Core/Parallel/Algorithm/Thread.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;

@@ -19,6 +19,7 @@
 #pragma once
 
 #include <array>
+#include "Physica/Core/Parallel/Parallel.h"
 #include "ArrayImpl/ArrayMixin.h"
 #include "Physica/CRCoro.h"
 #include "Physica/Core/Utils/Allocator/HostAllocator.h"
@@ -94,6 +95,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ static This read(size_t length, const T* __restrict p) noexcept;
         [[nodiscard]] static size_t toIndex1D(const IndexType& __restrict shape, const IndexType& __restrict indices) noexcept;
         [[nodiscard]] static IndexType toIndexND(const IndexType& shape, size_t index) noexcept;
+        template<ExecutePolicy P = Sequential>
         [[nodiscard]] static This generate(std::invocable<size_t> auto fn);
     };
 
@@ -152,6 +154,7 @@ namespace Physica {
         [[nodiscard]] auto get_allocator() const noexcept { return alloc; }
         /* Static members */
         [[nodiscard]] static This read(size_t length, const T* __restrict p) noexcept;
+        template<ExecutePolicy P = Sequential>
         [[nodiscard]] static This generate(std::invocable<size_t> auto fn, size_t length);
     private:
         void adjust(size_t size);

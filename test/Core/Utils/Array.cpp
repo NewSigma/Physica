@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Utils/Container/Array.h"
+#include "Physica/Core/Parallel/Algorithm/Thread.h"
 #include <stack>
 #include "Test.h"
 
@@ -53,14 +54,6 @@ namespace {
         expect(copy.getCapacity() == 0);
     }
 
-    void array_read() {
-        Array<int, 3> origin{1, 2, 3};
-        auto fixed = Array<int, 3>::read(origin.data());
-        auto dynamic = Array<int>::read(3, origin.data());
-        expect(fixed == origin);
-        expect(dynamic == Array<int>(origin));
-    }
-
     void makeStack() noexcept {
         // Test that std::stack accepts Array
         std::stack<int, Array<int>> s;
@@ -69,6 +62,40 @@ namespace {
         s.pop();
         expect(s.empty());
     }
+
+    void array_read() {
+        Array<int, 3> origin{1, 2, 3};
+        auto fixed = Array<int, 3>::read(origin.data());
+        auto dynamic = Array<int>::read(3, origin.data());
+        expect(fixed == origin);
+        expect(dynamic == Array<int>(origin));
+    }
+
+    void generate() {
+        constexpr size_t N = 32;
+        /* Empty */ {
+            auto arr = Array<int>::generate([](size_t) { return 0; }, 0);
+            expect(arr.getLength() == 0);
+        }
+        /* Parallizable */ {
+            auto fixed = Array<size_t, 32>::generate<Thread>([](size_t i) { return i; });
+            auto dyn = Array<size_t>::generate<Thread>([](size_t i) { return i; }, N);
+            expect(dyn.getLength() == N);
+            for (size_t i = 0; i < N; ++i)
+                expect(fixed[i] == i && dyn[i] == i);
+        }
+        /* Non-default-constructable */ {
+            struct NoDefault {
+                size_t value;
+
+                explicit NoDefault(size_t value_) : value(value_) {}
+            };
+            auto arr = Array<NoDefault>::generate([](size_t i) { return NoDefault(i); }, N);
+            expect(arr.getLength() == N);
+            for (size_t i = 0; i < N; ++i)
+                expect(arr[i].value == i);
+        }
+    }
 }
 
 int main() {
@@ -76,7 +103,8 @@ int main() {
     rangeTest<Array<long>>();
     structuredBinding();
     emptyCopy();
-    array_read();
     makeStack();
+    array_read();
+    generate();
     return 0;
 }

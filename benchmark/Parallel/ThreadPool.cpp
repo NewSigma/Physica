@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
-#include "Physica/Core/Parallel/ThreadPool.h"
+#include "Physica/Core/Parallel/Algorithm/Thread.h"
 #include "Physica/Core/Utils/Cycler.h"
 #include "Benchmark.h"
 
