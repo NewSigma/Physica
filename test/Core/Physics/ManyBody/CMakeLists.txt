@@ -2,6 +2,7 @@ add_subdirectory(Hamilton)
 
 physica_add_test(ActionMatrix ActionMatrix.cpp)
 physica_add_test(BayesDoping BayesDoping.cpp)
+physica_add_test(CyclicChainQDT CyclicChainQDT.cpp)
 physica_add_test(DQMC DQMC.cpp)
 physica_add_test(FreqDQMC FreqDQMC.cpp)
 physica_add_test(KFermiRepr KFermiRepr.cpp)
