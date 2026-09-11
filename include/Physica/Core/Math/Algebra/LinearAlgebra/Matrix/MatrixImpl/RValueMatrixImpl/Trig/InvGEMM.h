@@ -71,7 +71,7 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2> requires(Internal::isInvTrig<M1>() != Internal::isInvTrig<M2>())
     void GEMM<M1, M2>::assign(Matrix auto& target) const {
-        if constexpr (HasMKL())
+        if constexpr (HasMKL() && !T::isDiffable())
             assign_mkl(target);
         else
             assign_base(target);

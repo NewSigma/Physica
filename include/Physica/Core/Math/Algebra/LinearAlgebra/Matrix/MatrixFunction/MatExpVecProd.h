@@ -175,11 +175,11 @@ namespace Physica {
         }
 
         Array<Trv, MaxNormOrder> powerNorms{};
-        const auto scale = norm1.stripSignificand();
-        const Tr normalizer = reciprocal(scale); // Avoid potential overflow of pow()
+        const Trv scale = norm1.value().stripSignificand();
+        const Trv normalizer = reciprocal(scale); // Avoid potential overflow of pow()
         for (int order = 2; order <= MaxNormOrder + 1; ++order) {
             const Tr pNorm1 = pow(mexp.getMatrix() * normalizer - (traceMu * normalizer) * matI, order).template norm1_power<P>(MaxNormIteration);
-            powerNorms[order - 2] = pow(pNorm1.value(), reciprocal(Trv(order))) * scale.value();
+            powerNorms[order - 2] = pow(pNorm1.value(), reciprocal(Trv(order))) * scale;
         }
 
         for (int order = 2; order <= MaxNormOrder; ++order) {

@@ -16,7 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
+#include "Physica/Core/Math/Transform/DiffFFT.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/ManyBody/DQMC.h"
 #include "Physica/Core/Physics/ManyBody/GreenSampler/ScalarSampler.h"
@@ -80,10 +81,32 @@ namespace {
             for (int j = i + 1; j < N; ++j)
                 expect(scalarNear(kinetics[i], kinetics[j], Prec));
     }
+
+    void forward() {
+        // Test that forward diff compiles
+        using dfloat = Diff<T, DiffMode::Forward>;
+        constexpr double HoppingT = 1;
+        constexpr double RepelU = 8;
+        constexpr double Beta = 8;
+        constexpr int NumSiteX = 4;
+        constexpr int NumSiteY = 4;
+        constexpr int NumSplit = Beta * 8;
+        constexpr int NumSample = 1024;
+
+        const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
+        const HubbardParams<dfloat> params(HoppingT, RepelU, lattice, {Beta, 1}, RepelU * 0.5, NumSplit);
+        auto dqmc = DQMC<dfloat>(params);
+        dqmc.step_random<RandomSource>();
+        for (int i = 0; i < NumSample; ++i) {
+            dqmc.step<RandomSource>();
+            expect<RandomSource>(dqmc.getRSign().isPositive());
+        }
+    }
 }
 
 int main() {
     halfFillTest();
     freeFermion();
+    forward();
     return 0;
 }

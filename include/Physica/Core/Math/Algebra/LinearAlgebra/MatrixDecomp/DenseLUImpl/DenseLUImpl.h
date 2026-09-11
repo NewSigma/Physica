@@ -31,7 +31,7 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     void DenseLU<T, Pivot>::compute() {
-        if constexpr (HasMKL())
+        if constexpr (HasMKL() && !T::isDiffable())
             compute_mkl();
         else
             compute_base();

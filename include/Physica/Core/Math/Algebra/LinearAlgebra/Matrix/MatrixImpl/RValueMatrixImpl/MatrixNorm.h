@@ -77,11 +77,12 @@ namespace Physica {
                 if constexpr (isComplex())
                     return normY;
                 else {
-                    y.linspace(1, 2);
+                    auto& yv = y.values();
+                    yv.linspace(1, 2);
                     for (size_t i = 1; i < length; i += 2)
-                        y[i] = -y[i];
-                    z = m * y;
-                    return std::max(normY, z.norm1() / y.norm1());
+                        yv[i] = -yv[i];
+                    z = m * yv;
+                    return std::max(normY, z.norm1() / yv.norm1());
                 }
             }
 

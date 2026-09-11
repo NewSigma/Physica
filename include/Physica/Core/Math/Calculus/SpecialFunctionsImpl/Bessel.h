@@ -87,8 +87,8 @@ namespace Physica {
 
         const T two_x = T(2) / ax;
         if (ax > T(n)) {
-            T bjm = besselJ0(ax); // Possible to optimize: ax is possitive
-            T result = besselJ1(ax); // Possible to optimize: ax is possitive
+            T bjm = besselJ0(ax); // Possible to optimize: ax is positive
+            T result = besselJ1(ax); // Possible to optimize: ax is positive
             for (Integer i = 1; i < n; ++i) {
                 const T temp = fma(T(i) * two_x, result, -bjm);
                 bjm = std::move(result);

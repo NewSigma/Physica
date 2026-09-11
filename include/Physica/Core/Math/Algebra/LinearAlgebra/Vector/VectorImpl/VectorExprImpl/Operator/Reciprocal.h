@@ -55,7 +55,7 @@ namespace Physica {
     template<int Size>
     auto VectorExpr<ExprID::Reciprocal, V>::operator()(std::random_access_iterator auto input) noexcept -> SIMD<T, Size> {
         auto x = input.template load<Size>();
-        assert(!x.isSubNormal().horizontal_or() && "[Error]: Division overflow");
+        assert(!x.value().isSubNormal().horizontal_or() && "[Error]: Division overflow");
         return reciprocal(x);
     }
 

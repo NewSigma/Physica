@@ -47,6 +47,11 @@ namespace Physica {
     [[nodiscard]] SIMD<T, Size * 2> abs(const SIMD<Complex<T>, Size> x) noexcept {
         return sqrt(x.squaredNorm());
     }
+
+    template<Scalar T, int Size>
+    [[nodiscard]] SIMD<Complex<T>, Size> square(const SIMD<Complex<T>, Size> x) noexcept {
+        return x * x;
+    }
     /**
      * References:
      * [1] add-on; https://github.com/vectorclass/add-on

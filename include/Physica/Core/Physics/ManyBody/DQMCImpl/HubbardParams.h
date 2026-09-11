@@ -29,6 +29,7 @@ namespace Physica {
         using This = HubbardParams<T>;
 
         using Tr = T::RealType;
+        using Trv = Tr::ValueType;
         using Tc = T::ComplexType;
     private:
         MatrixND<T> hoppingMatrix;
@@ -215,7 +216,7 @@ namespace Physica {
         const int numSplit = getNumSplit();
         for (int spinUp = 0; spinUp <= numSplit; ++spinUp) {
             int sumSpin = 2 * spinUp - numSplit;
-            lnSpinWeights[spinUp] = softplus(lncosh(alpha * sumSpin) - lncoshBetaMu);
+            lnSpinWeights[spinUp] = softplus(lncosh(alpha * Trv(sumSpin)) - lncoshBetaMu);
         }
     }
 }

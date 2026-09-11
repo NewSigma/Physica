@@ -45,6 +45,8 @@ namespace Physica {
 
         [[nodiscard]] auto&& transpose(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return mat.getCol(); }
         [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
@@ -80,6 +82,12 @@ namespace Physica {
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
     auto Transpose<M>::values(this auto&& self) noexcept {
         return std::forward<decltype(self)>(self).transpose().values().transpose();
+    }
+
+    template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
+    template<int GradOrder>
+    auto Transpose<M>::grads(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).transpose().template grads<GradOrder>().transpose();
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
@@ -128,6 +136,8 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] auto&& transpose(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] size_t getCol() const noexcept { return vec.getLength(); }
@@ -147,6 +157,12 @@ namespace Physica {
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
     auto Transpose<V>::values(this auto&& self) noexcept {
         return std::forward<decltype(self)>(self).transpose().values().transpose();
+    }
+
+    template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
+    template<int GradOrder>
+    auto Transpose<V>::grads(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).transpose().template grads<GradOrder>().transpose();
     }
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())

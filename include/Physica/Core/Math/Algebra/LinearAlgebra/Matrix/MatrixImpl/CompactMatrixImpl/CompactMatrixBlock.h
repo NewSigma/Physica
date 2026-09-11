@@ -364,7 +364,7 @@ namespace Physica {
 
     template<Matrix M, size_t Row, size_t Col>
     auto CompactMatrixBlock<M, Row, Col>::values(this auto&& self) noexcept {
-        auto&& v = propagate_rvalue_reference<decltype(self), M>(self.mat.values());
+        auto&& v = propagate_rvalue_reference<decltype(self), M>(self.mat).values();
         using M1 = decltype(v);
         return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(v), self.fromRow, self.getRow(), self.fromCol, self.getCol());
     }
@@ -372,7 +372,7 @@ namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
     template<int GradOrder>
     auto CompactMatrixBlock<M, Row, Col>::grads(this auto&& self) noexcept {
-        auto&& g = propagate_rvalue_reference<decltype(self), M>(self.mat.template grads<GradOrder>());
+        auto&& g = propagate_rvalue_reference<decltype(self), M>(self.mat).template grads<GradOrder>();
         using M1 = decltype(g);
         return CompactMatrixBlock<M1, Row, Col>(std::forward<M1>(g), self.fromRow, self.getRow(), self.fromCol, self.getCol());
     }

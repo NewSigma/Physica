@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -43,6 +43,11 @@ namespace {
             const auto result = x / y;
             for (int i = 0; i < Size; ++i)
                 expect(scalarNear(result[i], x[i] / y[i], prec));
+        }
+        /* Square */ {
+            const auto result = square(x);
+            for (int i = 0; i < Size; ++i)
+                expect(scalarNear(result[i], square(x[i]), prec));
         }
         /* Exp */ {
             const auto result = exp(x);

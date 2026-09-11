@@ -100,7 +100,7 @@ namespace Physica {
         assert(getRow() == source.getRow());
         assert(getCol() == source.getCol());
         constexpr bool SmallMatrix = M::getSizeAtCompile() <= Threshold && M::getSizeAtCompile() != Dynamic;
-        if constexpr (HasMKL() && !SmallMatrix) {
+        if constexpr (HasMKL() && !SmallMatrix && !T::isDiffable()) {
             if constexpr (M::getSizeAtCompile() > Threshold) {
                 compute_mkl<M>(source);
                 return;
@@ -129,7 +129,8 @@ namespace Physica {
             bool isFinalColumn = i + 1 >= getCol();
             if (!isFinalColumn)
                 applyHouseholder(buffer, working.bottomRightCorner(i, i + 1));
-            taus[i] = std::exchange(col[i], -norm * sign);
+            taus[i] = col[i];
+            col[i] = -norm * sign;
         }
         // Other LAPACK implementations might modify the final element, so always clear it.
         if (i < taus.getLength())
@@ -208,7 +209,7 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     auto DenseQR<T, Pivot>::getMatrixQ() const -> MatrixND<T> {
-        if constexpr (HasMKL()) {
+        if constexpr (HasMKL() && !T::isDiffable()) {
             if constexpr (isComplex) // Our complex householder is slightly different from MKL, getMatrixQ_base() cannot apply to compute_mkl.
                 return getMatrixQ_mkl();
 

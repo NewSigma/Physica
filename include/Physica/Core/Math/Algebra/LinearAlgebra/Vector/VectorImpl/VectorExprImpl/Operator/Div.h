@@ -143,7 +143,7 @@ namespace Physica {
     template<int Size>
     auto VectorExpr<ExprID::Div, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept -> SIMD<T, Size> {
         auto div = rhs.template load<Size>();
-        assert(!div.isSubNormal().horizontal_or() && "[Error]: Division overflow");
+        assert(!div.value().isSubNormal().horizontal_or() && "[Error]: Division overflow");
         return lhs.template load<Size>() / div;
     }
 
