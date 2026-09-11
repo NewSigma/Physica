@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include <memory>
+#include <utility>
 #include "Physica/CRTP.h"
 #include "Physica/Core/Math/Algebra/Canonicalization.h"
 
@@ -37,6 +39,8 @@ namespace Physica {
         using RealType = TraitsType::RealType;
         using BoolSIMDType = TraitsType::BoolSIMDType;
         using MachineType = TraitsType::MachineType;
+
+        class Iterator;
     public:
         constexpr ~SIMDMixin() = default;
         /* Operations */
@@ -45,6 +49,8 @@ namespace Physica {
         [[nodiscard]] FullRealType gatherRealImag() const noexcept;
         [[nodiscard]] FullRealType scatterRealImag() const noexcept;
         /* Getters */
+        [[nodiscard, gnu::always_inline]] constexpr auto begin(this auto&&) noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr auto end(this auto&&) noexcept;
         [[nodiscard]] constexpr static int size() noexcept { return TraitsType::Size; }
         [[nodiscard]] ValueType value() const noexcept;
         [[nodiscard]] FullRealType asReal() const noexcept;
@@ -133,6 +139,126 @@ namespace Physica {
             return Base::getDerived_host().asReal();
         else
             return Base::getDerived_host();
+    }
+
+    template<class Derived>
+    constexpr auto SIMDMixin<Derived>::begin(this auto&& self) noexcept {
+        return Iterator(std::addressof(self), 0);
+    }
+
+    template<class Derived>
+    constexpr auto SIMDMixin<Derived>::end(this auto&& self) noexcept {
+        return Iterator(std::addressof(self), TraitsType::Size);
+    }
+
+    template<class Derived>
+    class SIMDMixin<Derived>::Iterator {
+        using This = Iterator;
+    public:
+        using iterator_concept = std::random_access_iterator_tag;
+        using difference_type = int;
+        using value_type = typename SIMDMixin::ScalarType;
+        using reference = const value_type;
+        using const_reference = const value_type;
+    private:
+        const Derived* pack = nullptr;
+        difference_type index{};
+    public:
+        constexpr Iterator() = default;
+        [[gnu::always_inline]] constexpr Iterator(const Derived* pack, difference_type index) noexcept;
+        constexpr Iterator(const This&) = default;
+        constexpr Iterator(This&&) noexcept = default;
+        constexpr ~Iterator() = default;
+        /* Operators */
+        constexpr This& operator=(const This&) = default;
+        constexpr This& operator=(This&&) noexcept = default;
+        [[gnu::always_inline]] constexpr This& operator++() noexcept;
+        [[gnu::always_inline]] constexpr This& operator--() noexcept;
+        [[gnu::always_inline]] constexpr This& operator+=(difference_type n) noexcept;
+        [[gnu::always_inline]] constexpr This& operator-=(difference_type n) noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr This operator++(int) noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr This operator--(int) noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr reference operator*() const noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr reference operator[](difference_type n) const noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr bool operator==(const This& other) const noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr auto operator<=>(const This& other) const noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr This operator+(difference_type n) const noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr This operator-(difference_type n) const noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr difference_type operator-(const This& other) const noexcept;
+        /* Friends */
+        [[gnu::always_inline]] friend constexpr This operator+(difference_type n, const This& ite) noexcept { return ite + n; }
+    };
+
+    template<class Derived>
+    constexpr SIMDMixin<Derived>::Iterator::Iterator(const Derived* pack, difference_type index) noexcept : pack(pack), index(index) {}
+
+    template<class Derived>
+    constexpr auto SIMDMixin<Derived>::Iterator::operator++() noexcept -> This& {
+        index += 1;
+        return *this;
+    }
+
+    template<class Derived>
+    constexpr auto SIMDMixin<Derived>::Iterator::operator--() noexcept -> This& {
+        index -= 1;
+        return *this;
+    }
+
+    template<class Derived>
+    constexpr auto SIMDMixin<Derived>::Iterator::operator+=(difference_type n) noexcept -> This& {
+        index += n;
+        return *this;
+    }
+
+    template<class Derived>
+    constexpr auto SIMDMixin<Derived>::Iterator::operator-=(difference_type n) noexcept -> This& {
+        index -= n;
+        return *this;
+    }
+
+    template<class Derived>
+    constexpr auto SIMDMixin<Derived>::Iterator::operator++(int) noexcept -> This {
+        return std::exchange(*this, This(pack, index + 1));
+    }
+
+    template<class Derived>
+    constexpr auto SIMDMixin<Derived>::Iterator::operator--(int) noexcept -> This {
+        return std::exchange(*this, This(pack, index - 1));
+    }
+
+    template<class Derived>
+    constexpr auto SIMDMixin<Derived>::Iterator::operator*() const noexcept -> reference {
+        return (*pack)[index];
+    }
+
+    template<class Derived>
+    constexpr auto SIMDMixin<Derived>::Iterator::operator[](difference_type n) const noexcept -> reference {
+        return (*pack)[index + n];
+    }
+
+    template<class Derived>
+    constexpr bool SIMDMixin<Derived>::Iterator::operator==(const This& other) const noexcept {
+        return index == other.index;
+    }
+
+    template<class Derived>
+    constexpr auto SIMDMixin<Derived>::Iterator::operator<=>(const This& other) const noexcept {
+        return index <=> other.index;
+    }
+
+    template<class Derived>
+    constexpr auto SIMDMixin<Derived>::Iterator::operator+(difference_type n) const noexcept -> This {
+        return This(pack, index + n);
+    }
+
+    template<class Derived>
+    constexpr auto SIMDMixin<Derived>::Iterator::operator-(difference_type n) const noexcept -> This {
+        return This(pack, index - n);
+    }
+
+    template<class Derived>
+    constexpr auto SIMDMixin<Derived>::Iterator::operator-(const This& other) const noexcept -> difference_type {
+        return index - other.index;
     }
 
     [[nodiscard]] auto operator*(const Scalar auto& x, const Packet auto p) noexcept {

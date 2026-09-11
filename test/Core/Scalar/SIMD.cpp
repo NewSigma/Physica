@@ -25,6 +25,17 @@ using RandomSource = Random<MT19937, 10000>;
 
 namespace {
     template<Scalar T, int Size>
+    void range_like() {
+        syntax_only([]() {
+            using Pack = SIMD<T, Size>;
+            static_assert(std::ranges::sized_range<Pack>);
+            static_assert(std::ranges::common_range<Pack>);
+            static_assert(std::ranges::random_access_range<Pack>);
+            static_assert(std::random_access_iterator<std::ranges::iterator_t<Pack>>);
+        });
+    }
+
+    template<Scalar T, int Size>
     void testMath(const SIMD<T, Size> x) {
         constexpr double prec = T::Prec == Float32 ? 1E-6 : 1E-15;
         /* Divide */ {
@@ -78,6 +89,9 @@ namespace {
 
 int main() {
     static_assert(std::formattable<SIMD<float64, 2>, char>);
+    range_like<float32, 4>();
+    range_like<cfloat32, 2>();
+
     test<cfloat32, 2>();
     test<cfloat32, 4>();
     test<cfloat64, 1>();
