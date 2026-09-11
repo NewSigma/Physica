@@ -19,7 +19,7 @@
 #pragma once
 
 #include <type_traits>
-#include "Physica/Core/Scalar/ExprID.h"
+#include "Physica/Core/Math/Algebra/ExprID.h"
 #include "Physica/Core/Scalar/Scalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"

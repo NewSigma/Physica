@@ -18,7 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Scalar/ExprID.h"
+#include "Physica/Core/Math/Algebra/ExprID.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/ExprTraits.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
 
 namespace Physica {
@@ -107,10 +108,10 @@ namespace Physica {
 
         using T1 = std::remove_cvref_t<LHS>::ScalarType;
         using T2 = std::remove_cvref_t<RHS>::ScalarType;
-        using T12 = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
+        using T = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
         static_assert(NDim1 == Dynamic || NDim2 == Dynamic || (NDim1 == NDim2), "[Error]: Tensor dimensions do not match");
     public:
-        using ScalarType = std::conditional<ID == ExprID::Abs, typename T1::RealType, T12>::type;
+        using ScalarType = Internal::UnaryScalarOpRtnTy<ID, T>::Type;
         constexpr static int NDim = NDim1 > NDim2 ? NDim1 : NDim2;
     };
 

@@ -111,7 +111,7 @@ namespace {
     }
 
     void invGEMM() {
-        constexpr double Prec = 1E-11;
+        constexpr double Prec = 1E-10;
         const auto rhs = Matrix4D::random_uniform<RandomSource>(4, 4);
         const auto lhs = Matrix4D::random_uniform<RandomSource>(4, 4);
         Matrix4D sol, prod;

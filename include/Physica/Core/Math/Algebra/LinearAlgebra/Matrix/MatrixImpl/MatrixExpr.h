@@ -18,7 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Scalar/ExprID.h"
+#include "Physica/Core/Math/Algebra/ExprID.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/ExprTraits.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 
 namespace Physica {
@@ -308,10 +309,11 @@ namespace Physica {
     private:
         using LHS1 = std::remove_cvref_t<LHS>;
         using RHS1 = std::remove_cvref_t<RHS>;
-        using ResultType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, typename RHS1::ScalarType>::Type;
-        constexpr static bool IsReal = ID == ExprID::Abs || ID == ExprID::Square;
+        using T1 = LHS1::ScalarType;
+        using T2 = RHS1::ScalarType;
+        using T = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
     public:
-        using ScalarType = std::conditional<IsReal, typename ResultType::RealType, ResultType>::type;
+        using ScalarType = Internal::UnaryScalarOpRtnTy<ID, T>::Type;
     };
 
     template<ExprID ID, Matrix LHS_, Vector RHS_>

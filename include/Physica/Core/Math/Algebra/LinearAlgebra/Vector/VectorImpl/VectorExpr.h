@@ -19,7 +19,8 @@
 #pragma once
 
 #include <cassert>
-#include "Physica/Core/Scalar/ExprID.h"
+#include "Physica/Core/Math/Algebra/ExprID.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/ExprTraits.h"
 #include "Physica/Core/Parallel/Parallel.h"
 #include "RValueVector.h"
 
@@ -232,11 +233,11 @@ namespace Physica {
     private:
         using LHS1 = std::remove_cvref_t<LHS>;
         using RHS1 = std::remove_cvref_t<RHS>;
-        using T = LHS1::ScalarType;
-        using Tr = T::RealType;
-        using T12 = Internal::BinaryScalarOpRtnTy<T, typename RHS1::ScalarType>::Type;
+        using T1 = LHS1::ScalarType;
+        using T2 = RHS1::ScalarType;
+        using T = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, typename RHS1::ScalarType>::Type;
     public:
-        using ScalarType = std::conditional<ID == ExprID::Abs, Tr, T12>::type;
+        using ScalarType = Internal::UnaryScalarOpRtnTy<ID, T>::Type;
     };
 
     template<ExprID ID_, Vector LHS_, Scalar RHS_>

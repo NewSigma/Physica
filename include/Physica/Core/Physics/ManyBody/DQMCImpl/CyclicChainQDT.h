@@ -26,6 +26,8 @@ namespace Physica {
      *
      * Maintains a Sliding Window Aggregation (SWAG) to achieve O(1) amortized update
      * Use QR method to ensure numerical stability
+     *
+     * TODO: Calculating non-equal-time Green's functions requires implementing a lazy segment tree
      */
     template<Scalar T>
     class CyclicChainQDT {
