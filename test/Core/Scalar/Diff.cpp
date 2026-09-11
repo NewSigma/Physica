@@ -26,7 +26,6 @@ using RandomSource = Random<>;
 
 namespace {
     void testForwardFunc() {
-        bool good = true;
         {
             using dfloat = Diff<T, DiffMode::Forward, 1>;
             auto func = [](dfloat x, dfloat y) -> dfloat {
@@ -36,42 +35,86 @@ namespace {
             const T y = 4;
             const dfloat result = func(dfloat(x, 1), dfloat(y, 1));
             const T answer = (x + y - 3.0) * 2.0;
-            good &= scalarNear(result.grad(), answer, 1E-15);
+            expect(scalarNear(result.grad(), answer, 1E-15));
         }
         {
             using dfloat = Diff<T, DiffMode::Forward, 2>;
             dfloat x{3, 1};
             dfloat y = square(x);
-            good &= scalarNear(y.template grad<2>(), float64(2), 1E-15);
+            expect(scalarNear(y.template grad<2>(), float64(2), 1E-15));
         }
-        expect(good);
     }
 
     void testForwardMath() {
-        bool good = true;
+        {
+            using dfloat = Diff<T, DiffMode::Forward, 2>;
+            auto sign = unit(dfloat(T(-3), T(7)));
+            static_assert(!Diffable<decltype(sign)>, "Scalar is truncated into non-differentiable type");
+            expect(sign == T(-1));
+        }
+        {
+            using dfloat = Diff<T, DiffMode::Forward, 2>;
+            auto sign = unit(dfloat(T(-3), T(7)));
+            static_assert(!Diffable<decltype(sign)>, "Scalar is truncated into non-differentiable type");
+            expect(sign == T(-1));
+        }
         {
             using dfloat = Diff<T, DiffMode::Forward, 1>;
             auto result = T(3) / dfloat(T(2), T(4));
-            good &= scalarNear(result.value(), T(1.5), 1E-15);
-            good &= scalarNear(result.grad(), T(-3), 1E-15);
+            expect(scalarNear(result.value(), T(1.5), 1E-15));
+            expect(scalarNear(result.grad(), T(-3), 1E-15));
         }
         {
             using dfloat = Diff<T, DiffMode::Forward, 2>;
             dfloat x(3, 1);
             auto y = reciprocal(x);
-            good &= scalarNear(y.grad().value(), -square(reciprocal(x.value())), 1E-15);
-            good &= scalarNear(y.grad<2>(), pow(reciprocal(x.value()), T(3)) * T(2), 1E-15);
+            expect(scalarNear(y.grad().value(), -square(reciprocal(x.value())), 1E-15));
+            expect(scalarNear(y.grad<2>(), pow(reciprocal(x.value()), T(3)) * T(2), 1E-15));
 
             y = sqrt(x);
-            good &= scalarNear(y.grad().value(), reciprocal(T(2) * sqrt(x.value())), 1E-15);
-            good &= scalarNear(y.grad<2>(), -reciprocal(T(4) * x.value() * sqrt(x.value())), 1E-15);
+            expect(scalarNear(y.grad().value(), reciprocal(T(2) * sqrt(x.value())), 1E-15));
+            expect(scalarNear(y.grad<2>(), -reciprocal(T(4) * x.value() * sqrt(x.value())), 1E-15));
 
             y = expm1(x);
-            good &= scalarNear(y.value(), expm1(x.value()), 1E-15);
-            good &= scalarNear(y.grad().value(), exp(x.value()), 1E-15);
-            good &= scalarNear(y.grad<2>(), exp(x.value()), 1E-15);
+            expect(scalarNear(y.value(), expm1(x.value()), 1E-15));
+            expect(scalarNear(y.grad().value(), exp(x.value()), 1E-15));
+            expect(scalarNear(y.grad<2>(), exp(x.value()), 1E-15));
         }
-        expect(good);
+    }
+
+    void testForwardMixedFMA() {
+        using dfloat1 = Diff<T, DiffMode::Forward, 1>;
+        using dfloat2 = Diff<T, DiffMode::Forward, 2>;
+        const T x = 3;
+        const T y = 4;
+        const T z = 5;
+        {
+            const auto result = fma(dfloat1(x, T(1)), y, z);
+            expect(scalarNear(result.value(), T(x * y + z), 1E-15));
+            expect(scalarNear(result.grad(), T(y), 1E-15));
+        }
+        {
+            const auto result = fma(x, dfloat1(y, T(2)), z);
+            expect(scalarNear(result.value(), T(x * y + z), 1E-15));
+            expect(scalarNear(result.grad(), T(x * 2), 1E-15));
+        }
+        {
+            const auto result = fma(x, y, dfloat1(z, T(7)));
+            expect(scalarNear(result.value(), T(x * y + z), 1E-15));
+            expect(scalarNear(result.grad(), T(7), 1E-15));
+        }
+        {
+            const auto result = fma(dfloat1(x, T(1)), dfloat1(y, T(2)), z);
+            expect(scalarNear(result.value(), T(x * y + z), 1E-15));
+            expect(scalarNear(result.grad(), T(y + x * 2), 1E-15));
+        }
+        {
+            const dfloat2 a(x, dfloat1(T(3), T(2)));
+            const auto result = fma(a, y, z);
+            expect(scalarNear(result.value(), T(x * y + z), 1E-15));
+            expect(scalarNear(result.grad().value(), T(3) * y, 1E-15));
+            expect(scalarNear(result.grad<2>(), T(2) * y, 1E-15));
+        }
     }
 
     void testForwardSIMD() {
@@ -84,32 +127,50 @@ namespace {
         packet.load({
             value.data(), {grad1.data(), grad2.data()}
         });
-
-        bool good = true;
+        /* Unit */ {
+            auto signs = unit(packet);
+            static_assert(!Diffable<decltype(signs)>, "Packet is truncated into non-differentiable type");
+            for (int i = 0; i < 4; ++i)
+                expect(signs[i] == unit(value[i]));
+        }
+        /* Unit */ {
+            auto signs = unit(packet);
+            static_assert(!Diffable<decltype(signs)>, "Packet is truncated into non-differentiable type");
+            for (auto [s, v] : zip(signs, value))
+                expect(s == unit(v));
+        }
+        {
+            const auto result = fma(packet, packet, packet);
+            for (auto [p, r] : zip(packet, result))
+                expect(scalarNear(fma(p, p, p), r, 1E-15));
+            // Mixed FMA
+            const SIMD<T, 4> values{value[0], value[1], value[2], value[3]};
+            const auto mixed = fma(packet, values, packet);
+            for (auto [p, v, r] : zip(packet, values, mixed))
+                expect(scalarNear(fma(p, v, p), r, 1E-15));
+        }
         auto result = abs(packet);
-        for (int i = 0; i < 4; ++i)
-            good &= scalarNear(abs(dfloat(value[i], grad1[i])), result[i], 1E-15);
+        for (auto [p, r] : zip(packet, result))
+            expect(scalarNear(abs(p), r, 1E-15));
 
         result = square(packet);
-        for (int i = 0; i < 4; ++i)
-            good &= scalarNear(square(dfloat(value[i], grad1[i])), result[i], 1E-15);
+        for (auto [p, r] : zip(packet, result))
+            expect(scalarNear(square(p), r, 1E-15));
 
         result = reciprocal(packet);
-        for (int i = 0; i < 4; ++i) {
-            if (value[i].isZero())
+        for (auto [p, v, r] : zip(packet, value, result)) {
+            if (v.isZero())
                 continue;
-            good &= scalarNear(reciprocal(dfloat(value[i], grad1[i])), result[i], 1E-15);
+            expect(scalarNear(reciprocal(p), r, 1E-15));
         }
 
         result = exp(packet);
-        for (int i = 0; i < 4; ++i)
-            good &= scalarNear(exp(dfloat(value[i], grad1[i])), result[i], 1E-15);
+        for (auto [p, r] : zip(packet, result))
+            expect(scalarNear(exp(p), r, 1E-15));
 
         result = expm1(packet);
-        for (int i = 0; i < 4; ++i)
-            good &= scalarNear(expm1(dfloat(value[i], grad1[i])), result[i], 1E-15);
-
-        expect(good);
+        for (auto [p, r] : zip(packet, result))
+            expect(scalarNear(expm1(p), r, 1E-15));
     }
 
     void testReverse() {
@@ -191,6 +252,7 @@ static_assert(std::formattable<DiffCoro<Diff<float64, DiffMode::Reverse>>, char>
 int main() {
     testForwardFunc();
     testForwardMath();
+    testForwardMixedFMA();
     testForwardSIMD();
     testReverse();
     forwardReverseDiv();

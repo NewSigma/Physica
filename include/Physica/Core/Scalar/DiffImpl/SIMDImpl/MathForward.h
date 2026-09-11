@@ -22,12 +22,25 @@
 
 namespace Physica {
     template<Packet T>
-    [[nodiscard]] T fma(const T& a, const T& b, const T& c) noexcept requires(ForwardDiff<T>) {
-        using Grad = T::GradType;
-        auto value = fma(a.value(), b.value(), c.value());
-        auto grad1 = fma(Grad(a), b.grad(), c.grad());
-        auto grad2 = fma(Grad(b), a.grad(), grad1);
-        return T(std::move(value), std::move(grad2));
+    [[nodiscard]] auto unit(const T& x) noexcept requires(ForwardDiff<T>) {
+        static_assert(!T::isComplex(), "[Error]: Not implemented");
+        using ResultType = T::ValueType;
+        return ResultType(unit(x.value()));
+    }
+
+    template<Packet T1, Packet T2, Packet T3>
+    [[nodiscard]] auto fma(const T1 x, const T2 y, const T3 z) noexcept
+            requires((ForwardDiff<T1> || ForwardDiff<T2> || ForwardDiff<T3>)
+                 && !(ReverseDiff<T1> || ReverseDiff<T2> || ReverseDiff<T3>)) {
+        if constexpr (std::same_as<T1, T2> && std::same_as<T2, T3>) {
+            using Grad = T1::GradType;
+            auto value = fma(x.value(), y.value(), z.value());
+            auto grad1 = fma(Grad(x), y.grad(), z.grad());
+            auto grad2 = fma(Grad(y), x.grad(), grad1);
+            return T1(std::move(value), std::move(grad2));
+        }
+        else
+            return x * y + z;
     }
 
     template<Packet T>

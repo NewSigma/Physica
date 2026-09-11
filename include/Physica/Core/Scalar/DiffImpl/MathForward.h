@@ -29,8 +29,18 @@ namespace Physica {
     }
 
     template<Scalar T1, Scalar T2, Scalar T3>
-    [[nodiscard]] __host__ __device__ auto fma(const T1 x, const T2 y, const T3 z) noexcept requires(ForwardDiff<T1> && ForwardDiff<T2> && ForwardDiff<T3>) {
-        return x * y + z;
+    [[nodiscard]] __host__ __device__ auto fma(const T1 x, const T2 y, const T3 z) noexcept
+            requires((ForwardDiff<T1> || ForwardDiff<T2> || ForwardDiff<T3>)
+                 && !(ReverseDiff<T1> || ReverseDiff<T2> || ReverseDiff<T3>)) {
+        if constexpr (std::same_as<T1, T2> && std::same_as<T2, T3>) {
+            constexpr int Order = T1::Order;
+            const auto value = fma(x.value(), y.value(), z.value());
+            const auto grad1 = fma(x.template grad_mask<Order - 1>(), y.grad(), z.grad());
+            const auto grad2 = fma(y.template grad_mask<Order - 1>(), x.grad(), grad1);
+            return T1(std::move(value), std::move(grad2));
+        }
+        else
+            return x * y + z;
     }
 
     template<Scalar T>
