@@ -7,7 +7,7 @@ target_sources(Benchmark PRIVATE Mul.cpp)
 target_sources(Benchmark PRIVATE Square.cpp)
 target_sources(Benchmark PRIVATE Sub.cpp)
 
-if(${PHYSICA_MKL})
+if(${PHYSICA_MKL} AND NOT ${PHYSICA_EmitLLVM})
     add_subdirectory(Dispatch)
     add_subdirectory(MKL)
 endif()

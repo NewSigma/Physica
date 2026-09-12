@@ -12,7 +12,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
     add_definitions(-DNOMINMAX)
 else()
     add_compile_options(-march=${PHYSICA_ARCH})
-    add_compile_options(-Wall -Wfatal-errors -ffunction-sections -fdata-sections -fno-semantic-interposition -fno-plt -fno-rtti)
+    add_compile_options(-Wall -Wfatal-errors -fno-rtti)
+    if(NOT ${PHYSICA_EmitLLVM})
+        # These options leak into the IR.
+        add_compile_options(-ffunction-sections -fdata-sections -fno-semantic-interposition -fno-plt)
+    endif()
     add_compile_options(-fno-math-errno -fno-trapping-math -fno-signed-zeros -fassociative-math)
     add_compile_options(-Werror=literal-conversion)
     add_link_options(-Wl,-O2,-Bsymbolic,--gc-sections)
@@ -51,8 +55,7 @@ else()
             endif()
             add_compile_options(-Xclang=-disable-llvm-passes -S -emit-llvm)
             add_compile_options(-Wno-unused-command-line-argument) # Silent unused '-c'
-            add_link_options(--version)
-            set(CMAKE_CUDA_SEPARABLE_COMPILATION ON) # Workaround to avoid linkage
+            add_link_options(--version) # Hack the linker to skip linking
 
             add_custom_target(EmitLLVM
                               COMMAND python ${CMAKE_SOURCE_DIR}/cmake/EmitLLVM.py ${CMAKE_CUDA_ARCHITECTURES}
@@ -99,6 +102,10 @@ if(${PHYSICA_CUDA})
         set(CMAKE_CUDA_STANDARD ${CMAKE_CXX_STANDARD})
         set(CMAKE_CUDA_FLAGS ${CMAKE_CUDA_FLAGS} -Wno-unknown-cuda-version -fcuda-flush-denormals-to-zero)
     else()
+        if(${PHYSICA_EmitLLVM})
+            message(FATAL_ERROR "EmitLLVM requires Clang as the CUDA compiler")
+        endif()
+
         set(CMAKE_CUDA_STANDARD 20)
         # Disable rdc because clang 22 implementation is buggy. We seldom use it.
         set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)

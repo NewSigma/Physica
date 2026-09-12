@@ -1,6 +1,6 @@
 target_sources(Benchmark PRIVATE GEMV.cpp)
 
-if(${PHYSICA_MKL})
+if(${PHYSICA_MKL} AND NOT ${PHYSICA_EmitLLVM})
     add_subdirectory(Dispatch)
 
     target_sources(Benchmark PRIVATE GEMV_MKL.cpp)

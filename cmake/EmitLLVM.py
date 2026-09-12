@@ -26,21 +26,15 @@ import sys
 from pathlib import Path
 
 def compile(device_only: bool):
-    cuda_flag = ""
-    if device_only:
-        cuda_flag = "--offload-device-only"
-    else:
-        cuda_flag = "--offload-host-only"
+    cuda_flag = "--offload-device-only" if device_only else "--offload-host-only"
 
     subprocess.run(["cmake", f"-DCMAKE_CUDA_FLAGS={cuda_flag}", ".."], stdout=subprocess.DEVNULL, check=True)
-    subprocess.run(["cmake", "--build", ".", "--target=Benchmark"])
+    subprocess.run(["cmake", "--build", ".", "--target=Benchmark"], check=True)
 
 def collect(llvm_dir: Path, device_only: bool, arch: str):
     benchmark_dir = Path(".") / "benchmark"
     for file in benchmark_dir.rglob("*.o"):
-        if "Dispatch" in str(file):
-            continue
-        if "MKL" in str(file):
+        if "Dispatch" in str(file) or "MKL" in str(file):
             continue
 
         if device_only:
@@ -54,14 +48,35 @@ def collect(llvm_dir: Path, device_only: bool, arch: str):
             shutil.move(file, llvm_dir / file.name.replace(".cu.o", "_cu.ll"))
 
 if __name__ == "__main__":
-    arch = ""
-    if len(sys.argv) > 1:
-        arch = sys.argv[1]
-        if not arch.isnumeric():
-            raise ValueError("Bad arch")
+    def get_arch(arch: str) -> str:
+        arch = arch.strip()
+        if arch == "native":
+            def native() -> str:
+                try:
+                    result = subprocess.run(["nvidia-smi", "--query-gpu=compute_cap", "--format=csv,noheader"],
+                                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, check=True)
+                except (OSError, subprocess.CalledProcessError):
+                    return "native"
+
+                result = result.stdout.split()
+                return result[0].replace(".", "") if result else "native"
+            arch = native()
+
+        import re
+        if arch == "" or not re.fullmatch(r"[0-9]+", arch):
+            raise ValueError("Bad arch: {}".format(arch))
+        return arch
+
+    arch = get_arch(sys.argv[1]) if len(sys.argv) > 1 else get_arch("native")
 
     llvm_dir = Path(".") / "llvm"
     llvm_dir.mkdir(parents=True, exist_ok=True)
+
+    def clean(llvm_dir: Path):
+        for file in llvm_dir.glob("*.ll"):
+            file.unlink()
+
+    clean(llvm_dir)
 
     print("Collecting LLVM IR... ", end=" ")
     if arch == "":
