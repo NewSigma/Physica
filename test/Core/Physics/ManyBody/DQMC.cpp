@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/ForwardDenseQR.h"
 #include "Physica/Core/Math/Transform/DiffFFT.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/ManyBody/DQMC.h"

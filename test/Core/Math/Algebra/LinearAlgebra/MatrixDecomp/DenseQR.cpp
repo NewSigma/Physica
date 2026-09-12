@@ -17,10 +17,11 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseQR.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/ForwardDenseQR.h"
 #include "Test.h"
 
 using namespace Physica;
+using RandomSource = Random<>;
 
 namespace {
     template<Scalar T, Matrix M, bool Pivot>
@@ -50,6 +51,40 @@ namespace {
         qr.compute_base(m);
         testQR(qr, m, decompPrec, detPrec);
     }
+
+    template<Scalar T>
+    void forwardFuzzing(size_t order, double prec) {
+        using dfloat = Diff<T, DiffMode::Forward, 1>;
+        using M = DenseMatrix<T>;
+        DenseMatrix<dfloat> m(order, order);
+        m.values().template random_uniform<RandomSource>();
+        m.grads().template random_uniform<RandomSource>();
+
+        DenseQR<dfloat, false> qr(m);
+        const auto q = qr.getMatrixQ();
+        const auto& w = qr.getWorking();
+        const M qv = q.values();
+        const M qg = q.grads();
+        const M rv = w.values().triu();
+        const M rg = w.grads();
+        expect<RandomSource>(matrixNear(M(qv * rv), m.values(), prec));
+        expect<RandomSource>(matrixNear(M(qg * rv + qv * rg), m.grads(), prec));
+
+        const auto det = qr.det();
+        const T detV = m.values().det();
+        expect<RandomSource>(scalarNear(det.value(), detV, prec));
+        if constexpr (!T::isComplex()) {
+            const T detG = detV * (M(m.values().inv()) * m.grads()).trace(); // TODO: Drop the materialization
+            expect<RandomSource>(scalarNear(det.grad(), detG, prec));
+        }
+    }
+
+    void forward() {
+        for (size_t order : {1, 2, 3, 4, 5, 8}) {
+            forwardFuzzing<float64>(order, 1E-11);
+            forwardFuzzing<cfloat64>(order, 1E-11);
+        }
+    }
 }
 
 int main() {
@@ -66,9 +101,9 @@ int main() {
         using T = cfloat64;
         using Matrix3D = DenseMatrix<T, MatrixMajor::Col, 3, 3>;
         const Matrix3D m1{
-                {{0.314168, 0.121569}, {0.542236, 0.789234}, {0.681570, 0.478108}},
-                {{0.912647, 0.227165}, {0.216599, 0.948223}, {0.006347, 0.337121}},
-                {{0.632359, 0.532767}, {0.253040, 0.873016}, {0.218257, 0.103735}}
+            {{0.314168, 0.121569}, {0.542236, 0.789234}, {0.681570, 0.478108}},
+            {{0.912647, 0.227165}, {0.216599, 0.948223}, {0.006347, 0.337121}},
+            {{0.632359, 0.532767}, {0.253040, 0.873016}, {0.218257, 0.103735}}
         };
         testDecomp(m1, 1E-14, 1E-14);
     }
@@ -76,11 +111,12 @@ int main() {
         using T = cfloat32;
         using Matrix43 = DenseMatrix<T, MatrixMajor::Col, 4, 3>;
         Matrix43 m{
-                {  {0.49671415, -0.1382643},   {0.64768854, 1.52302986}, {-0.23415337, -0.23413696},   {1.57921282, 0.76743473}},
-                {{-0.46947439, -0.56228743}, {-0.46341769, -1.91328024},  {-1.02447039, 1.11792545}, {-0.17242821, -0.86175486}},
-                { {-0.86175486, 0.34268051},  {0.24196227, -1.04525372},  {-1.11731035, 0.53277921},   {1.12050268, 0.50288053}}
+            {  {0.49671415, -0.1382643},   {0.64768854, 1.52302986}, {-0.23415337, -0.23413696},   {1.57921282, 0.76743473}},
+            {{-0.46947439, -0.56228743}, {-0.46341769, -1.91328024},  {-1.02447039, 1.11792545}, {-0.17242821, -0.86175486}},
+            { {-0.86175486, 0.34268051},  {0.24196227, -1.04525372},  {-1.11731035, 0.53277921},   {1.12050268, 0.50288053}}
         };
         testDecomp(m, 1E-6, 0);
     }
+    forward();
     return 0;
 }

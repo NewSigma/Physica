@@ -78,7 +78,7 @@ namespace Physica {
     template<Matrix M1, Matrix M2> requires(instanceof_tx<M2, DiagMatrix>)
     auto GEMM<M1, M2>::values(this auto&& self) noexcept {
         using Self = decltype(self);
-        return std::forward<Self>(self).getLHS() * std::forward<Self>(self).getRHS();
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<M2, DiagMatrix>)
@@ -153,7 +153,7 @@ namespace Physica {
     template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, DiagMatrix>)
     auto GEMM<M1, M2>::values(this auto&& self) noexcept {
         using Self = decltype(self);
-        return std::forward<Self>(self).getLHS() * std::forward<Self>(self).getRHS();
+        return std::forward<Self>(self).getLHS().values() * std::forward<Self>(self).getRHS().values();
     }
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, DiagMatrix>)

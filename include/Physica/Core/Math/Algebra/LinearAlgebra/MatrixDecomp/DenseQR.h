@@ -121,6 +121,7 @@ namespace Physica {
         working = source;
 
         size_t i = 0;
+        auto it = taus.view().begin();
         for (; i < taus.getLength() - !working.isOverdetermined(); ++i) {
             auto col = working.col(i);
             auto buffer = col.tail(i);
@@ -129,12 +130,11 @@ namespace Physica {
             bool isFinalColumn = i + 1 >= getCol();
             if (!isFinalColumn)
                 applyHouseholder(buffer, working.bottomRightCorner(i, i + 1));
-            taus[i] = col[i];
-            col[i] = -norm * sign;
+            *(it + i) = std::exchange(col[i], -norm * sign);
         }
         // Other LAPACK implementations might modify the final element, so always clear it.
         if (i < taus.getLength())
-            taus[i] = T(0);
+            *(it + i) = T(0);
     }
 
     template<Scalar T, bool Pivot>

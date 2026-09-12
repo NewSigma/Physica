@@ -49,6 +49,8 @@ namespace Physica {
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
+        void resize(this auto&, size_t order);
+
         [[nodiscard]] Tr lnAbsDet() const;
         [[nodiscard]] T sgndet() const;
 
@@ -56,7 +58,7 @@ namespace Physica {
         [[nodiscard]] auto&& transpose(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) hermite(this auto&&) noexcept;
 
-        void resize(this auto&, size_t order);
+        [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] auto&& diag(this auto&& self) noexcept;
@@ -98,6 +100,11 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
+    void DiagMatrix<T, Order>::resize(this auto& self, size_t order) {
+        self.diags.resize(order);
+    }
+
+    template<Scalar T, size_t Order>
     auto DiagMatrix<T, Order>::lnAbsDet() const -> Tr {
         return ln(abs(diags)).sum();
     }
@@ -123,8 +130,12 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    void DiagMatrix<T, Order>::resize(this auto& self, size_t order) {
-        self.diags.resize(order);
+    decltype(auto) DiagMatrix<T, Order>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (T::isDiffable())
+            return DiagMatrix<Tv, Order>(std::forward<Self>(self).diag().values());
+        else
+            return std::forward<Self>(self);
     }
 
     template<Scalar T, size_t Order>
