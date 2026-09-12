@@ -41,8 +41,9 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
-        [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
+        [[nodiscard]] size_t getRow() const noexcept { return mat1.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return mat2.getCol(); }
+        [[nodiscard]] size_t getOrder() const noexcept;
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
@@ -56,6 +57,12 @@ namespace Physica {
     void GEMM<M1, M2>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < getCol(); ++i)
             target.col(i) = mat1.col(i) * reciprocal(mat2.diag()[i]);
+    }
+
+    template<Matrix M1, Matrix M2> requires(instanceof<M2, Inverse> && instanceof_tx<typename Traits<M2>::ExprType, DiagMatrix>)
+    size_t GEMM<M1, M2>::getOrder() const noexcept {
+        assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
+        return getRow();
     }
 
     template<Matrix M1, Matrix M2> requires(instanceof<M2, Inverse> && instanceof_tx<typename Traits<M2>::ExprType, DiagMatrix>)
@@ -95,8 +102,9 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
-        [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
+        [[nodiscard]] size_t getRow() const noexcept { return mat1.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return mat2.getCol(); }
+        [[nodiscard]] size_t getOrder() const noexcept;
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
@@ -110,6 +118,12 @@ namespace Physica {
     void GEMM<M1, M2>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < getCol(); ++i)
             target.row(i) = reciprocal(mat1.diag()[i]) * mat2.row(i);
+    }
+
+    template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, DiagMatrix>)
+    size_t GEMM<M1, M2>::getOrder() const noexcept {
+        assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
+        return getRow();
     }
 
     template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, DiagMatrix>)

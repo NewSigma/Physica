@@ -59,6 +59,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
+        [[nodiscard]] size_t getOrder() const noexcept;
         [[nodiscard]] size_t getMaxMajor() const noexcept;
         [[nodiscard]] size_t getMaxMinor() const noexcept;
         [[nodiscard]] size_t getNumNonZero() const noexcept { return elements.getLength(); }
@@ -177,6 +178,12 @@ namespace Physica {
     template<Scalar T, int Major>
     size_t SparseMatrix<T, Major>::getCol() const noexcept {
         return MatrixMajor::isColMatrix<This>() ? getMaxMajor() : getMaxMinor();
+    }
+
+    template<Scalar T, int Major>
+    size_t SparseMatrix<T, Major>::getOrder() const noexcept {
+        assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
+        return getMaxMinor();
     }
 
     template<Scalar T, int Major>

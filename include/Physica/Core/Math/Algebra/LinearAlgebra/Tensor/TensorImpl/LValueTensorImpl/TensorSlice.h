@@ -47,6 +47,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return tensor.dim(DimR); }
         [[nodiscard]] size_t getCol() const noexcept { return tensor.dim(DimC); }
+        [[nodiscard]] size_t getOrder() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
@@ -68,6 +69,12 @@ namespace Physica {
     template<Tensor X, int DimR, int DimC>
     void TensorSlice<X, DimR, DimC>::resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
         assert(row == getRow() && col == getCol());
+    }
+
+    template<Tensor X, int DimR, int DimC>
+    size_t TensorSlice<X, DimR, DimC>::getOrder() const noexcept {
+        assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
+        return getRow();
     }
 
     template<Tensor X, int DimR, int DimC>

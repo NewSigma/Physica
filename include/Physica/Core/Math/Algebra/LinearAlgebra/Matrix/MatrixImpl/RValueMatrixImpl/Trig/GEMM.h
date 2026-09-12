@@ -48,8 +48,9 @@ namespace Physica {
         void assign_mkl(Matrix auto& target) const noexcept;
         void assign_base(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return lhs.getRow(); }
-        [[nodiscard]] size_t getCol() const { return rhs.getCol(); }
+        [[nodiscard]] size_t getRow() const noexcept { return lhs.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return rhs.getCol(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */

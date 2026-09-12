@@ -43,8 +43,9 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return trig.getRow(); }
-        [[nodiscard]] size_t getCol() const { return diag.getCol(); }
+        [[nodiscard]] size_t getRow() const noexcept { return trig.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return diag.getCol(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return diag.getOrder(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */

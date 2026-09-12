@@ -47,8 +47,9 @@ namespace Physica {
 
         [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return lhs.getRow(); }
-        [[nodiscard]] size_t getCol() const { return rhs.getCol(); }
+        [[nodiscard]] size_t getRow() const noexcept { return lhs.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return rhs.getCol(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return rhs.getOrder(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
@@ -127,8 +128,9 @@ namespace Physica {
 
         [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return lhs.getRow(); }
-        [[nodiscard]] size_t getCol() const { return rhs.getCol(); }
+        [[nodiscard]] size_t getRow() const noexcept { return lhs.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return rhs.getCol(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return lhs.getOrder(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */

@@ -104,6 +104,7 @@ namespace Physica {
         using Base::getDerived;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
+        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::Row; }
@@ -125,6 +126,12 @@ namespace Physica {
         MatrixBase::assert_assign(data);
         *this = data;
         Base::getDerived().transform();
+    }
+
+    template<class Derived>
+    __host__ __device__ size_t FFTRSpace<Derived, 2>::getOrder() const noexcept {
+        assert(MatrixBase::isSquare() && "[Error]: getOrder() assumes square matrix");
+        return getRow();
     }
 
     template<class Derived>

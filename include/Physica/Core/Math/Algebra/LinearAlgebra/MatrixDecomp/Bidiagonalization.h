@@ -162,6 +162,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return bidiag.working.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return bidiag.working.getCol(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return bidiag.working.getOrder(); }
     };
 
     template<Matrix M>

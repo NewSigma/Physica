@@ -54,8 +54,9 @@ namespace Physica {
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        constexpr static size_t getRow() noexcept { return 2; }
-        constexpr static size_t getCol() noexcept { return 2; }
+        [[nodiscard]] constexpr static size_t getRow() noexcept { return 2; }
+        [[nodiscard]] constexpr static size_t getCol() noexcept { return 2; }
+        [[nodiscard]] constexpr static size_t getOrder() noexcept { return 2; }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return 2; }

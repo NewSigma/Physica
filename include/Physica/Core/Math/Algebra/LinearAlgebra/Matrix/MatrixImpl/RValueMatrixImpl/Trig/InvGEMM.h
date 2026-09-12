@@ -60,6 +60,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return lhs.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return rhs.getCol(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */

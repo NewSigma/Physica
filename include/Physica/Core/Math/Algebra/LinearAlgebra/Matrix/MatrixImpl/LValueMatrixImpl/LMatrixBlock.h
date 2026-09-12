@@ -158,6 +158,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return rowCount; }
         [[nodiscard]] size_t getCol() const noexcept { return colCount; }
+        [[nodiscard]] size_t getOrder() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
@@ -308,6 +309,12 @@ namespace Physica {
             return LMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(v), self.fromRow, self.rowCount, self.fromCol, self.colCount);
         else
             return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(v), self.fromRow, self.rowCount, self.fromCol, self.colCount);
+    }
+
+    template<Matrix M>
+    size_t LMatrixBlock<M, Dynamic, Dynamic>::getOrder() const noexcept {
+        assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
+        return getRow();
     }
 
     template<Matrix M>
