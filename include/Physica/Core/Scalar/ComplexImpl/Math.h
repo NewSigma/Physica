@@ -42,6 +42,11 @@ namespace Physica {
     }
 
     template<Scalar T>
+    [[nodiscard]] __host__ __device__ Complex<T> fma(T x, Complex<T> y, Complex<T> z) noexcept {
+        return fma(y, x, z);
+    }
+
+    template<Scalar T>
     [[nodiscard]] __host__ __device__ T abs(const Complex<T>& c) noexcept {
         return c.norm();
     }

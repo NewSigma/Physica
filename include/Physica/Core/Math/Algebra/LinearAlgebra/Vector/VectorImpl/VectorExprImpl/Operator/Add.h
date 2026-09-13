@@ -53,14 +53,10 @@ namespace Physica {
     template<Vector V, Scalar U>
     auto VectorExpr<ExprID::Add, V, U>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> CoDiff<T> {
         if constexpr (lowerToFMA()) {
-            T a = *(lhs.getLHS());
-            T b;
             if constexpr (Scalar<decltype(lhs.getRHS())>)
-                b = lhs.getRHS();
+                return fma(*(lhs.getLHS()), lhs.getRHS(), rhs);
             else
-                b = *(lhs.getRHS());
-            T c = rhs;
-            return fma(a, b, c);
+                return fma(*(lhs.getLHS()), *(lhs.getRHS()), rhs);
         }
         else
             return *lhs + rhs;
@@ -70,14 +66,10 @@ namespace Physica {
     template<int Size>
     auto VectorExpr<ExprID::Add, V, U>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs) noexcept -> SIMD<T, Size> {
         if constexpr (lowerToFMA()) {
-            SIMD<T, Size> a = lhs.getLHS().template load<Size>();
-            SIMD<T, Size> b;
             if constexpr (Scalar<decltype(lhs.getRHS())>)
-                b = SIMD<T, Size>(lhs.getRHS());
+                return fma(lhs.getLHS().template load<Size>(), SIMD<T, Size>(lhs.getRHS()), SIMD<T, Size>(rhs));
             else
-                b = lhs.getRHS().template load<Size>();
-            auto c = SIMD<T, Size>(rhs);
-            return fma(a, b, c);
+                return fma(lhs.getLHS().template load<Size>(), lhs.getRHS().template load<Size>(), SIMD<T, Size>(rhs));
         }
         else
             return lhs.template load<Size>() + SIMD<T, Size>(rhs);
@@ -87,14 +79,10 @@ namespace Physica {
     template<int Size>
     auto VectorExpr<ExprID::Add, V, U>::operator()(std::random_access_iterator auto lhs, const Scalar auto& rhs, size_t count) noexcept -> SIMD<T, Size> {
         if constexpr (lowerToFMA()) {
-            SIMD<T, Size> a = lhs.getLHS().template load<Size>(count);
-            SIMD<T, Size> b;
             if constexpr (Scalar<decltype(lhs.getRHS())>)
-                b = SIMD<T, Size>(lhs.getRHS());
+                return fma(lhs.getLHS().template load<Size>(count), SIMD<T, Size>(lhs.getRHS()), SIMD<T, Size>(rhs, count));
             else
-                b = lhs.getRHS().template load<Size>(count);
-            auto c = SIMD<T, Size>(rhs, count);
-            return fma(a, b, c);
+                return fma(lhs.getLHS().template load<Size>(count), lhs.getRHS().template load<Size>(count), SIMD<T, Size>(rhs, count));
         }
         else
             return lhs.template load<Size>(count) + SIMD<T, Size>(rhs, count);
@@ -103,14 +91,10 @@ namespace Physica {
     template<Vector V, Scalar U>
     auto VectorExpr<ExprID::Add, V, U>::calc(size_t index) const -> CoDiff<T> {
         if constexpr (lowerToFMA()) {
-            T a = getLHS().getLHS().calc(index);
-            T b;
             if constexpr (Scalar<decltype(getLHS().getRHS())>)
-                b = getLHS().getRHS();
+                return fma(getLHS().getLHS().calc(index), getLHS().getRHS(), getRHS());
             else
-                b = getLHS().getRHS().calc(index);
-            T c = getRHS();
-            return fma(a, b, c);
+                return fma(getLHS().getLHS().calc(index), getLHS().getRHS().calc(index), getRHS());
         }
         else
             return getLHS().calc(index) + getRHS();
@@ -181,14 +165,10 @@ namespace Physica {
     template<Vector V1, Vector V2>
     auto VectorExpr<ExprID::Add, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept -> CoDiff<T> {
         if constexpr (lowerToFMA()) {
-            T a = *(lhs.getLHS());
-            T b;
             if constexpr (Scalar<decltype(lhs.getRHS())>)
-                b = lhs.getRHS();
+                return fma(*(lhs.getLHS()), lhs.getRHS(), *rhs);
             else
-                b = *(lhs.getRHS());
-            T c = *rhs;
-            return fma(a, b, c);
+                return fma(*(lhs.getLHS()), *(lhs.getRHS()), *rhs);
         }
         else
             return *lhs + *rhs;
@@ -198,14 +178,10 @@ namespace Physica {
     template<int Size>
     auto VectorExpr<ExprID::Add, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs) noexcept -> SIMD<T, Size> {
         if constexpr (lowerToFMA()) {
-            SIMD<T, Size> a = lhs.getLHS().template load<Size>();
-            SIMD<T, Size> b;
             if constexpr (Scalar<decltype(lhs.getRHS())>)
-                b = SIMD<T, Size>(lhs.getRHS());
+                return fma(lhs.getLHS().template load<Size>(), SIMD<T, Size>(lhs.getRHS()), rhs.template load<Size>());
             else
-                b = lhs.getRHS().template load<Size>();
-            SIMD<T, Size> c = rhs.template load<Size>();
-            return fma(a, b, c);
+                return fma(lhs.getLHS().template load<Size>(), lhs.getRHS().template load<Size>(), rhs.template load<Size>());
         }
         else
             return lhs.template load<Size>() + rhs.template load<Size>();
@@ -215,14 +191,10 @@ namespace Physica {
     template<int Size>
     auto VectorExpr<ExprID::Add, V1, V2>::operator()(std::random_access_iterator auto lhs, std::random_access_iterator auto rhs, size_t count) noexcept -> SIMD<T, Size> {
         if constexpr (lowerToFMA()) {
-            SIMD<T, Size> a = lhs.getLHS().template load<Size>(count);
-            SIMD<T, Size> b;
             if constexpr (Scalar<decltype(lhs.getRHS())>)
-                b = SIMD<T, Size>(lhs.getRHS());
+                return fma(lhs.getLHS().template load<Size>(count), SIMD<T, Size>(lhs.getRHS()), rhs.template load<Size>(count));
             else
-                b = lhs.getRHS().template load<Size>(count);
-            SIMD<T, Size> c = rhs.template load<Size>(count);
-            return fma(a, b, c);
+                return fma(lhs.getLHS().template load<Size>(count), lhs.getRHS().template load<Size>(count), rhs.template load<Size>(count));
         }
         else
             return lhs.template load<Size>(count) + rhs.template load<Size>(count);
@@ -261,14 +233,10 @@ namespace Physica {
     template<Vector V1, Vector V2>
     auto VectorExpr<ExprID::Add, V1, V2>::calc(size_t index) const -> CoDiff<T> {
         if constexpr (lowerToFMA()) {
-            T a = getLHS().getLHS().calc(index);
-            T b;
             if constexpr (Scalar<decltype(getLHS().getRHS())>)
-                b = getLHS().getRHS();
+                return fma(getLHS().getLHS().calc(index), getLHS().getRHS(), getRHS().calc(index));
             else
-                b = getLHS().getRHS().calc(index);
-            T c = getRHS().calc(index);
-            return fma(a, b, c);
+                return fma(getLHS().getLHS().calc(index), getLHS().getRHS().calc(index), getRHS().calc(index));
         }
         else
             return getLHS().calc(index) + getRHS().calc(index);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,16 +20,22 @@
 #include "Test.h"
 
 using namespace Physica;
-using ScalarType = float64;
-using MatrixType = DenseMatrix<Diff<ScalarType, DiffMode::Reverse, 1>>;
+using T = float64;
 using RandomSource = Random<>;
 
-int main() {
-    MatrixType m = MatrixType::random_uniform<RandomSource>(4, 4);
-    m.sum().reverse();
+namespace {
+    void sum() {
+        using M = DenseMatrix<Diff<T, DiffMode::Reverse, 1>>;
+        M m = M::random_uniform<RandomSource>(4, 4);
+        m.sum().reverse();
 
-    auto v = m.flatten();
-    for (size_t i = 0; i < v.getLength(); ++i)
-        expect(v.calc(i).grad() == ScalarType(1));
+        auto v = m.flatten();
+        for (size_t i = 0; i < v.getLength(); ++i)
+            expect(v.calc(i).grad() == T(1));
+    }
+}
+
+int main() {
+    sum();
     return 0;
 }

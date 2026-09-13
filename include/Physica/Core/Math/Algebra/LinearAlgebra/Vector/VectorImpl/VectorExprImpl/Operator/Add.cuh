@@ -56,14 +56,10 @@ namespace Physica {
         if constexpr (isReverseDiff())
             return Base::getDerived().calc_value(index, block);
         else if constexpr (host_obj::lowerToFMA()) {
-            T a = getLHS().getLHS().calc(index, block);
-            T b;
             if constexpr (Scalar<decltype(getLHS().getRHS())>)
-                b = getLHS().getRHS();
+                return fma(getLHS().getLHS().calc(index, block), getLHS().getRHS(), getRHS());
             else
-                b = getLHS().getRHS().calc(index, block);
-            T c = getRHS();
-            return fma(a, b, c);
+                return fma(getLHS().getLHS().calc(index, block), getLHS().getRHS().calc(index, block), getRHS());
         }
         else
             return Base::getLHS().calc(index, block) + Base::getRHS();
@@ -131,14 +127,10 @@ namespace Physica {
         if constexpr (isReverseDiff())
             return Base::calc_value(index, block);
         else if constexpr (host_obj::lowerToFMA()) {
-            T a = getLHS().getLHS().calc(index, block);
-            T b;
             if constexpr (Scalar<decltype(getLHS().getRHS())>)
-                b = getLHS().getRHS();
+                return fma(getLHS().getLHS().calc(index, block), getLHS().getRHS(), getRHS().calc(index, block));
             else
-                b = getLHS().getRHS().calc(index, block);
-            T c = getRHS().calc(index, block);
-            return fma(a, b, c);
+                return fma(getLHS().getLHS().calc(index, block), getLHS().getRHS().calc(index, block), getRHS().calc(index, block));
         }
         else
             return Base::getLHS().calc(index, block) + Base::getRHS().calc(index, block);

@@ -21,6 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Scalar/Complex.h"
+#include "Physica/Core/Utils/Range.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
 #include "Test.h"
 
@@ -222,6 +223,23 @@ namespace {
         expect(Vector1D<float64>{}.transpose().getOrder() == 1);
         expect(Vector1D<cfloat64>{}.hermite().getOrder() == 1);
     }
+
+    void complex_fma() {
+        // Test that (T, Tc, Tc) and (Tc, T, Tc) works
+        using T = float64;
+        using Tc = cfloat64;
+        constexpr size_t N = 4;
+        auto real = VectorND<T>::random_uniform<RandomSource>(N);
+        auto complex = VectorND<Tc>::random_uniform<RandomSource>(N);
+
+        const Tc scalar(2, -1);
+        const VectorND<Tc> result1 = real * scalar + complex;
+        const VectorND<Tc> result2 = complex * T(2) + complex;
+        for (auto [r1, r2, re, c] : zip(result1, result2, real, complex)) {
+            expect(r1 == T(re) * scalar + c);
+            expect(r2 == c * T(2) + c);
+        }
+    }
 }
 
 int main() {
@@ -240,5 +258,6 @@ int main() {
     testConverts();
     reshape();
     transpose_hermite();
+    complex_fma();
     return 0;
 }
