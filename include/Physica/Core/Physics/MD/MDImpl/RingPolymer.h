@@ -53,6 +53,7 @@ namespace Physica {
         template<class KineticModel> void scaleVelocity(T temperatureT);
         [[nodiscard]] DenseVector<T, Dim> makeDriftMomentum() const;
         void removeDrift();
+
         void toNormalRepr(size_t posID);
         void toBeadRepr(size_t posID);
         void toNormalRepr(size_t posID, const PhaseMatrix& outer_phase);
@@ -113,7 +114,9 @@ namespace Physica {
             }
         }
     }
-
+    /**
+     * Fixed at temperature T in the sense of the thermodynamic limit; we do not make any rescaling for the specific system.
+     */
     template<Scalar T, unsigned int Dim, size_t NumReplica>
     template<class KineticModel, RNG R>
     void RingPolymer<T, Dim, NumReplica>::initMomentum(T temperatureT) {
@@ -142,7 +145,6 @@ namespace Physica {
             for (size_t i = 0; i < getNumParticle(); ++i)
                 phase.rows(i * Dim, Dim) *= sqrt(repBeta * massVec[i]);
         }
-        scaleVelocity<KineticModel>(temperatureT);
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>

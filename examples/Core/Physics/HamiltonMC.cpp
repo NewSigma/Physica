@@ -19,8 +19,9 @@
 #include <QApplication>
 #include <print>
 #include "Physica/Core/Math/Random/Random.h"
+#include "Physica/Core/Math/Statistics/PDF/Normal.h"
 #include "Physica/Core/Physics/MC/HamiltonMC.h"
-#include "Physica/Gui/Plot/Plot.h"
+#include "Physica/Gui/Plot/MultiPlot.h"
 
 using namespace Physica;
 using T = float64;
@@ -49,19 +50,30 @@ namespace {
         /* Static members */
         [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return false; }
     };
+
+    void plotMarginal(Plot& plot, const VectorND<T>& sample, const Normal<T>& pdf, const char* label) {
+        plot.setBox(-4, 4, 0, 0.601, 2, 0.2);
+        plot.getAxisX()->setLabelFormat("%d");
+        plot.getAxisY()->setLabelFormat("%.1f");
+        plot.getAxisX()->setTitleText(label);
+        plot.getAxisY()->setTitleText(std::format("p({})", label).c_str());
+
+        auto& hist = plot.hist(sample, 128, true);
+        hist.setName("HMC");
+        hist.setColor(QColor(51, 102, 204, 120));
+        hist.setBorderColor(QColor(51, 102, 204));
+
+        const auto x = VectorND<T>::linspace(-4, 4, 200);
+        auto& line = plot.line(x, pdf(x));
+        line.setName("Analytic");
+        line.setColor(QColor(204, 51, 51));
+    }
 }
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
-    Plot* plot = new Plot(-4, 4, -4, 4, 2, 2);
-    plot->getLegend().show();
-    plot->getLegend().setAlignment(Qt::AlignRight);
-    plot->getAxisX()->setLabelFormat("%d");
-    plot->getAxisY()->setLabelFormat("%d");
-    plot->getAxisX()->setTitleText("x");
-    plot->getAxisY()->setTitleText("y");
 
-    constexpr int N = 2000;
+    constexpr int N = 8192;
     VectorND<T> x(N), y(N);
     {
         auto hmc = HamiltonMC<T>({1, 1});
@@ -78,11 +90,25 @@ int main(int argc, char** argv) {
         std::ranges::transform(p, x.begin(), [](Vector2D<T> in) { return in[0]; });
         std::ranges::transform(p, y.begin(), [](Vector2D<T> in) { return in[1]; });
     }
-    auto& s = plot->scatter(x, y);
-    s.setBorderColor(s.color());
-    s.setColor(Qt::transparent);
-    s.setMarkerSize(8);
 
-    plot->show();
+    MultiPlot plots(1, 3);
+    {
+        Plot& plot = plots[0, 0];
+        plot.setBox(-6, 6, -3, 3, 2, 2);
+        plot.getLegend().show();
+        plot.getLegend().setAlignment(Qt::AlignRight);
+        plot.getAxisX()->setLabelFormat("%d");
+        plot.getAxisY()->setLabelFormat("%d");
+        plot.getAxisX()->setTitleText("x");
+        plot.getAxisY()->setTitleText("y");
+
+        auto& s = plot.scatter(x, y);
+        s.setBorderColor(s.color());
+        s.setColor(Qt::transparent);
+        s.setMarkerSize(8);
+    }
+    plotMarginal(plots[0, 1], x, Normal<T>(T(0), T(1)), "x");
+    plotMarginal(plots[0, 2], y, Normal<T>(T(0), sqrt(T(0.5))), "y");
+    plots.show();
     return QApplication::exec();
 }

@@ -18,14 +18,38 @@
  */
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/MC/HamiltonMC.h"
+#include "Test.h"
 
 using namespace Physica;
 using T = float64;
 using RandomSource = Random<>;
 
+namespace {
+    void empty() {
+        // Test that HMC does not get stuck on an empty model
+        auto hmc = HamiltonMC<T>({1, 1});
+        hmc.step<RandomSource>(EmptyForceModel<T, 1>{});
+    }
+
+    void initialize() {
+        // Test that temperature is not fixed
+        using KineticModel = OpenModel<T, 1, 1>;
+        constexpr size_t numSample = 1024;
+        auto hmc = HamiltonMC<T>({1, 1});
+        auto& root = hmc.getRoot();
+        T mean = 0;
+        T var = 0;
+        for (size_t i = 0; i < numSample; ++i) {
+            root.template initMomentum<KineticModel, RandomSource>();
+            var.toNextVariance(mean, i, root.template calcTemperature<KineticModel>());
+        }
+        expect<RandomSource>(scalarNear(mean, T(1), 0.1));
+        expect<RandomSource>(var > std::numeric_limits<T>::epsilon());
+    }
+}
+
 int main() {
-    // Test that HMC does not get stuck on an empty model
-    auto hmc = HamiltonMC<T>({1, 1});
-    hmc.step<RandomSource>(EmptyForceModel<T, 1>{});
+    empty();
+    initialize();
     return 0;
 }

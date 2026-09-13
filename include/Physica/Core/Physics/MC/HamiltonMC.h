@@ -68,6 +68,8 @@ namespace Physica {
         VectorND<Trv> warmup(int numWarmup, auto&& forceModel);
         template<RNG R, ExecutePolicy P = Sequential>
         Trv step(auto&& forceModel);
+        template<RNG R, ExecutePolicy P = Sequential>
+        void step_radial(auto&& forceModel, Trv sigmaR);
         /* Getters */
         [[nodiscard]] auto& getRoot() noexcept { return root; }
         [[nodiscard]] size_t getDOF() const noexcept { return root.getDOF(); }
@@ -167,6 +169,32 @@ namespace Physica {
             numAccept += numAccept_;
             iteration += 1;
         }
+    }
+    /**
+     * Additional update strategy for systems with radial-like symmetry.
+     * It facilitates transitions between regions separated by an infinite potential wall and improves ergodicity.
+     *
+     * Typically used in conjunction with DQMC
+     *
+     * Reference:
+     * [1] Phys. Rev. B 112, 045134 (2025); https://doi.org/10.1103/9zst-bvmk
+     */
+    template<Scalar T>
+    template<RNG R, ExecutePolicy P>
+    void HamiltonMC<T>::step_radial(auto&& forceModel, Trv sigmaR) {
+        static_assert(!kinetic.isPeriodBoundary(), "[Error]: Radial update only applies to noncompact system");
+        sample.assign(root.getPhaseMatrix().col(0).tail(getDOF()));
+        const Trv prevE = root.template calcClassicalInternalEnergy<P>(forceModel);
+
+        const Trv gamma = Trv::template random_normal<R>() * sigmaR;
+        const Trv factor = exp(gamma);
+        root.getPhaseMatrix().col(0).tail(getDOF()) *= factor;
+        const Trv curE = root.template calcClassicalInternalEnergy<P>(forceModel);
+
+        const Trv delta = prevE - curE + gamma * Trv(getDOF());
+        bool accept = delta.isPositive() || (Trv::template random_uniform<R>() < exp(delta));
+        if (accept)
+            sample *= factor;
     }
 
     template<Scalar T>

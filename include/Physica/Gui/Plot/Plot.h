@@ -155,55 +155,54 @@ namespace Physica {
     }
 
     QAreaSeries& Plot::hist(const Vector auto& data, size_t binCount, bool density) {
-        double binWidth{};
-        double min{};
+        using T = std::remove_cvref_t<decltype(data)>::ScalarType;
         const size_t length = data.getLength();
-        /* Get binWidth and min */ {
-            auto minimum = data.calc(0);
-            auto maximum = data.calc(0);
+        auto [min, binWidth] = [&data, binCount, length]() noexcept {
+            T minimum = data.calc(0);
+            T maximum = minimum;
             for (size_t i = 1; i < length; ++i) {
-                auto temp = data.calc(i);
+                T temp = data.calc(i);
                 if (temp < minimum)
                     minimum = std::move(temp);
                 else if (temp > maximum)
                     maximum = std::move(temp);
             }
             assert(maximum >= minimum);
-            min = double(minimum);
-            binWidth = double(maximum - minimum + (binCount - 1)) / double(binCount);
-            if (binWidth == 0)
-                binWidth = 1;
-        }
+            T width = (maximum - minimum) / T(binCount);
+            if (width.isZero())
+                width = 1;
+            return std::make_pair(minimum, width);
+        }();
 
         Array<unsigned int> arr(binCount + 1, 0);
-        const double binCountPerUnit = 1 / binWidth;
+        const T binCountPerUnit = reciprocal(binWidth);
         for (size_t i = 0; i < length; ++i) {
-            const auto binIndex = size_t((double(data.calc(i)) - min) * binCountPerUnit);
+            const auto binIndex = size_t(((data.calc(i) - min) * binCountPerUnit).toMachine());
             arr[binIndex]++;
         }
 
         auto* upper_series = new QLineSeries();
-        const double initial_x = min;
-        double current_x = initial_x;
+        const T initial_x = min;
+        double current_x = initial_x.toMachine();
         if (density) {
-            const double density_factor = 1 / (binWidth * length);
+            const T density_factor = reciprocal(binWidth * T(length));
             for (size_t i = 0; i < binCount; ++i) {
-                const double y = arr[i] * density_factor;
+                const double y = arr[i] * density_factor.toMachine();
                 *upper_series << QPointF(current_x, y);
-                current_x += binWidth;
+                current_x += binWidth.toMachine();
                 *upper_series << QPointF(current_x, y);
             }
         }
         else {
             for (size_t i = 0; i < binCount; ++i) {
-                const double y = double(arr[i]);
+                const double y = arr[i];
                 *upper_series << QPointF(current_x, y);
-                current_x += binWidth;
+                current_x += binWidth.toMachine();
                 *upper_series << QPointF(current_x, y);
             }
         }
         auto* lower_series = new QLineSeries();
-        *lower_series << QPointF(initial_x, 0) << QPointF(current_x, 0);
+        *lower_series << QPointF(initial_x.toMachine(), 0) << QPointF(current_x, 0);
 
         auto* series = new QAreaSeries(upper_series, lower_series);
 
