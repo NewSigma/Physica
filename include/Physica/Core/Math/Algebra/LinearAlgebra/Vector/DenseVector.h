@@ -105,7 +105,9 @@ namespace Physica {
         [[nodiscard]] static This read_hdf5(const H5Loc& loc, const char* name);
     #endif
         [[nodiscard]] static This read(size_t length, const T* __restrict p) noexcept;
+        template<ExecutePolicy P = Sequential>
         [[nodiscard]] static This generate(std::invocable<size_t> auto fn);
+        template<ExecutePolicy P = Sequential>
         [[nodiscard]] static This generate(std::invocable<size_t> auto fn, size_t length);
         /* Friends */
         friend class device_obj<This>;

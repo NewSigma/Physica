@@ -100,6 +100,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return Major; }
         [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) noexcept;
+        template<ExecutePolicy P = Sequential>
         [[nodiscard]] static This generate(std::invocable<size_t, size_t> auto fn, size_t row, size_t col);
     private:
         Array2D(ArrayType arr_, IndexType r_) noexcept;

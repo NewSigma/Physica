@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Parallel/Algorithm/Sequential.h"
 #include "../Array2D.h"
 
 namespace Physica {
@@ -245,6 +246,7 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
+    template<ExecutePolicy P>
     auto Array2D<T, Major, Row, Col, Allocator>::generate(std::invocable<size_t, size_t> auto fn, size_t row, size_t col) -> This {
         auto generator = [=](size_t index) {
             if constexpr (isColMajor)
@@ -254,9 +256,9 @@ namespace Physica {
         };
 
         if constexpr (Row == Dynamic || Col == Dynamic)
-            return This(ArrayType::generate(std::move(generator), row * col), row);
+            return This(ArrayType::template generate<P>(std::move(generator), row * col), row);
         else
-            return This(ArrayType::generate(std::move(generator)), row);
+            return This(ArrayType::template generate<P>(std::move(generator)), row);
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>

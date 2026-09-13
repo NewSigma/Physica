@@ -221,13 +221,15 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
+    template<ExecutePolicy P>
     auto DenseVector<T, Length, Allocator>::generate(std::invocable<size_t> auto fn) -> This {
         static_assert(Length != Dynamic, "[Error]: Cannot infer length");
-        return This(Storage::generate(std::move(fn)));
+        return This(Storage::template generate<P>(std::move(fn)));
     }
 
     template<Scalar T, size_t Length, class Allocator>
+    template<ExecutePolicy P>
     auto DenseVector<T, Length, Allocator>::generate(std::invocable<size_t> auto fn, size_t length) -> This {
-        return This(Storage::generate(std::move(fn), length));
+        return This(Storage::template generate<P>(std::move(fn), length));
     }
 }
