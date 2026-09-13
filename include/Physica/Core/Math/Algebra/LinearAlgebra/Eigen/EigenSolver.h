@@ -106,7 +106,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     void EigenSolver<T, Order>::compute(const Matrix auto& source) {
-        if constexpr (HasMKL() && (T::Prec == Float32 || T::Prec == Float64))
+        if constexpr (HasMKL() && !T::isDiffable() && (T::Prec == Float32 || T::Prec == Float64))
             compute_mkl(source);
         else
             compute_base(source);

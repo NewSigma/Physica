@@ -48,6 +48,7 @@ namespace Physica {
         void sample(T data);
         void resample() noexcept { step = 0; }
         [[nodiscard]] VectorND<T> makeCorr(bool removeDrift) const;
+        [[nodiscard]] T calcCorrTime(T factor = 5) const;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -95,6 +96,22 @@ namespace Physica {
         if (removeDrift)
             result -= square(mean);
         return result;
+    }
+    /**
+     * Reference:
+     * [1] Sokal A. Monte Carlo Methods in Statistical Mechanics: Foundations and New Algorithms. In: Functional Integration. 1997:131-192; https://doi.org/10.1007/978-1-4899-0319-8_6
+     */
+    template<Scalar T>
+    T Correlation<T>::calcCorrTime(T factor) const {
+        const T sqmean = square(mean);
+        const T norm = corr[0] - sqmean;
+        T tau = T(0.5);
+        for (size_t i = 1; i < getNumStep(); ++i) {
+            tau += (corr[i] - sqmean) / norm;
+            if (T(i) >= factor * tau)
+                break;
+        }
+        return tau;
     }
 
     template<Scalar T>

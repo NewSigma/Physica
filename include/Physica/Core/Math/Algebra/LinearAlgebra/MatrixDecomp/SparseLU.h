@@ -115,7 +115,7 @@ namespace Physica {
 
     template<Scalar T>
     MatrixND<T> SparseLU<T>::solve(const MatrixND<T>& rhs) {
-        if constexpr (HasMKL())
+        if constexpr (HasMKL() && !T::isDiffable())
             return solve_mkl(rhs);
         else
             noImpl();

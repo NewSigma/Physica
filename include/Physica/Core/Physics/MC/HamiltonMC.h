@@ -69,7 +69,7 @@ namespace Physica {
         template<RNG R, ExecutePolicy P = Sequential>
         Trv step(auto&& forceModel);
         template<RNG R, ExecutePolicy P = Sequential>
-        void step_radial(auto&& forceModel, Trv sigmaR);
+        bool step_radial(auto&& forceModel, Trv sigmaR);
         /* Getters */
         [[nodiscard]] auto& getRoot() noexcept { return root; }
         [[nodiscard]] size_t getDOF() const noexcept { return root.getDOF(); }
@@ -181,8 +181,9 @@ namespace Physica {
      */
     template<Scalar T>
     template<RNG R, ExecutePolicy P>
-    void HamiltonMC<T>::step_radial(auto&& forceModel, Trv sigmaR) {
+    bool HamiltonMC<T>::step_radial(auto&& forceModel, Trv sigmaR) {
         static_assert(!kinetic.isPeriodBoundary(), "[Error]: Radial update only applies to noncompact system");
+        assert(sigmaR.isPositive());
         sample.assign(root.getPhaseMatrix().col(0).tail(getDOF()));
         const Trv prevE = root.template calcClassicalInternalEnergy<P>(forceModel);
 
@@ -195,6 +196,7 @@ namespace Physica {
         bool accept = delta.isPositive() || (Trv::template random_uniform<R>() < exp(delta));
         if (accept)
             sample *= factor;
+        return accept;
     }
 
     template<Scalar T>
