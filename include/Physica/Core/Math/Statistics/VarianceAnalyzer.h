@@ -84,13 +84,13 @@ namespace Physica {
         return T(getTotalNumSample() - 1) / T(getNumGroup() - 1) * calcRelationCoeff();
     }
     /**
-     * Eq. (3.21) of [2]
+     * Add 0.5 to the expression in Eq. (3.21) of [2] to align with the convention of \class Correlation
      *
      * Note: Param R is required to be saturated
      */
     template<Scalar T>
     T VarianceAnalyzer<T>::calcCorrTime() const {
-        return (calcParamR() - 1.0) * 0.5;
+        return calcParamR() * 0.5;
     }
 
     template<Scalar T>

@@ -272,9 +272,10 @@ namespace Physica {
             node.template nve_step_back<P>(kinetic, forceModel);
 
         Trv curE = node.template calcClassicalInternalEnergy<P>(forceModel);
+        Trv diff = prevE - curE;
         return Proposal{
             .sample = node.getPhaseMatrix().col(0).tail(getDOF()),
-            .acceptR = std::min(exp(prevE - curE), Trv(1)),
+            .acceptR = diff.isPositive() ? Trv(1) : exp(prevE - curE),
             .numAccept = curE < upperE,
             .numVisited = 1,
             .stop = (curE >= upperE + maxDelta) || (nodes.size() >= maxTreeDepth)};

@@ -105,6 +105,9 @@ namespace Physica {
     T Correlation<T>::calcCorrTime(T factor) const {
         const T sqmean = square(mean);
         const T norm = corr[0] - sqmean;
+        if (norm.isSubNormal())
+            return std::numeric_limits<T>::infinity();
+
         T tau = T(0.5);
         for (size_t i = 1; i < getNumStep(); ++i) {
             tau += (corr[i] - sqmean) / norm;

@@ -15,5 +15,6 @@ physica_add_test(SteepestDescent Optimization/SteepestDescent.cpp)
 # Statistics
 physica_add_test(LinearFit Statistics/LinearFit.cpp)
 physica_add_test(ProbDistribution Statistics/ProbDistribution.cpp)
+physica_add_test(VarianceAnalyzer Statistics/VarianceAnalyzer.cpp)
 # Transform
 physica_add_test(FFT Transform/FFT.cpp)

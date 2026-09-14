@@ -46,10 +46,32 @@ namespace {
         expect<RandomSource>(scalarNear(mean, T(1), 0.1));
         expect<RandomSource>(var > std::numeric_limits<T>::epsilon());
     }
+
+    class InfiniteWallModel {
+        size_t numCall = 0;
+    public:
+        template<ExecutePolicy P>
+        [[nodiscard]] T potentialV(const MDCell<T, 1>&) {
+            return (numCall++ % 2 == 0) ? T(1E300) : T(0);
+        }
+    };
+
+    void infinity_accept() {
+        // Test that we do not trigger a exp overflow if energy decrease is large
+        auto hmc = HamiltonMC<T>({1, 1});
+        auto& root = hmc.getRoot();
+        root.getPhaseMatrix().col(0).tail(hmc.getDOF()) = T(1);
+
+        InfiniteWallModel wall{};
+        const bool accept = hmc.step_radial<RandomSource>(wall, T(1));
+        expect<RandomSource>(accept);
+        expect<RandomSource>(hmc.getSample().isFinite());
+    }
 }
 
 int main() {
     empty();
     initialize();
+    infinity_accept();
     return 0;
 }
