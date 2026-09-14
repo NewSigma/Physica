@@ -80,8 +80,12 @@ namespace Physica {
     auto ImagKinetic<T>::calcRatio(int site, Vector2D<Tr> deltas) const noexcept -> Vector2D<Tr> {
         assert(site < getNumSite());
         Vector2D<Tr> result = deltas;
-        for (int spin : {0, 1})
-            result[spin] *= Trv(1) - greens[spin][site, site];
+        for (int spin : {0, 1}) {
+            auto g = greens[spin][site, site];
+            [[maybe_unused]] bool isReal = abs(g.imag()) < abs(g.real()) * sqrt(Trv(std::numeric_limits<T>::epsilon()));
+            assert(isReal && "[Error]: Expect charge density is real");
+            result[spin] *= Trv(1) - g.real();
+        }
         result += Trv(1);
         return result; // Eq.(7.36) of [1]
     }

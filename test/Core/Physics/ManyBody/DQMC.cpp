@@ -31,10 +31,8 @@ using RandomSource = Random<>;
 constexpr int Dim = 2;
 
 namespace {
-    /**
-     * Fuzzing test that half filling is free of sign problem
-     */
     void halfFillTest() {
+        // Fuzzing test that half filling is free of sign problem
         constexpr double HoppingT = 1;
         constexpr double RepelU = 8;
         constexpr double Beta = 8;
@@ -52,8 +50,9 @@ namespace {
             expect<RandomSource>(dqmc.getRSign().isPositive());
         }
     }
-    // Test that trotter decomposition does not affect results of free system
+
     void freeFermion() {
+        // Test that trotter decomposition does not affect results of free system
         constexpr static T HoppingT = 1;
         constexpr static T RepelU = 0;
         constexpr static T Beta = 8;
@@ -83,6 +82,25 @@ namespace {
                 expect(scalarNear(kinetics[i], kinetics[j], Prec));
     }
 
+    void complex() {
+        // Test that particle number is real under complex DQMC
+        constexpr double HoppingT = 1;
+        constexpr double RepelU = 8;
+        constexpr double Beta = 4;
+        constexpr int NumSiteX = 4;
+        constexpr int NumSiteY = 4;
+        constexpr int NumSplit = Beta * 8;
+        constexpr int NumSample = 64;
+        const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
+        const HubbardParams<Tc> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, NumSplit);
+        auto dqmc = DQMC<Tc>(params);
+        dqmc.step_random<RandomSource>();
+        dqmc.step_for<RandomSource>(NumSample);
+        for (const auto& green : dqmc.getGreens())
+            for (auto elem : green.diag().view())
+                expect<RandomSource>(scalarNear(elem.imag(), T(0), 1E-10));
+    }
+
     void forward() {
         // Test that forward diff compiles
         using dfloat = Diff<T, DiffMode::Forward>;
@@ -108,6 +126,7 @@ namespace {
 int main() {
     halfFillTest();
     freeFermion();
+    complex();
     forward();
     return 0;
 }

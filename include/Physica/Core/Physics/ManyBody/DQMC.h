@@ -42,7 +42,7 @@ namespace Physica {
         ImagKinetic<T> kinetic;
         GreenProd<T> productor;
 
-        VectorND<Tr> probs;
+        VectorND<Trv> probs;
         Array<int> sites;
         int cursor = 0;
 
@@ -79,7 +79,7 @@ namespace Physica {
         [[nodiscard]] uint64_t getNumAccept() const noexcept { return numAccept; }
     private:
         /* Operations */
-        void metropolis(int site, int split, Tr prob);
+        void metropolis(int site, int split, Trv prob);
     };
 
     template<Scalar T>
@@ -107,7 +107,7 @@ namespace Physica {
     void DQMC<T>::step() {
         std::ranges::shuffle(sites, R::getInstance());
         probs.template random_uniform<R>();
-        calcGreens<P>(cursor);
+        calcGreens<P>(cursor).wait();
         for (int i = 0; i < getNumSite(); ++i)
             metropolis(sites[i], cursor, probs[i]);
         productor.invalidate(cursor);
@@ -142,7 +142,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void DQMC<T>::metropolis(int site, int split, Tr prob) {
+    void DQMC<T>::metropolis(int site, int split, Trv prob) {
         const bool accept = prob < kinetic.calcP(site, split, params->getAlpha());
         if (accept) {
             const Tr x = Tr(2) * params->getAlpha() * getAuxField()[site, split];
