@@ -33,6 +33,7 @@ namespace Physica {
 
         FFT<T, 1> fft;
         VectorND<T> corr;
+        VectorND<T> cross;
         T mean;
         size_t numSample = 0;
         size_t step = 0;
@@ -60,7 +61,8 @@ namespace Physica {
     template<Scalar T>
     Correlation<T>::Correlation(size_t numStep)
             : fft(numStep * 2, PlanFlag::Estimate)
-            , corr(numStep, 0) {
+            , corr(numStep, 0)
+            , cross(numStep, 0) {
         assert(numStep > 1 && "[Error]: Invalid step number");
     }
 
@@ -74,6 +76,14 @@ namespace Physica {
 
         const bool isDataEnough = step == numStep;
         if (isDataEnough) {
+            T sumLeft = head.sum();
+            T sumRight = sumLeft;
+            for (size_t k = 0; k < numStep; ++k) {
+                cross[k].toNextMean(numSample, (sumLeft + sumRight) / T(numStep - k));
+                sumLeft -= head[numStep - 1 - k];
+                sumRight -= head[k];
+            }
+
             rSpace.tail(numStep).zeros();
 
             fft.transform();
@@ -94,7 +104,7 @@ namespace Physica {
     auto Correlation<T>::makeCorr(bool removeDrift) const -> VectorND<T> {
         VectorND<T> result = corr;
         if (removeDrift)
-            result -= square(mean);
+            result += square(mean) - mean * cross;
         return result;
     }
     /**
@@ -104,13 +114,13 @@ namespace Physica {
     template<Scalar T>
     T Correlation<T>::calcCorrTime(T factor) const {
         const T sqmean = square(mean);
-        const T norm = corr[0] - sqmean;
+        const T norm = fma(-mean, cross[0], corr[0] + sqmean);
         if (norm.isSubNormal())
             return std::numeric_limits<T>::infinity();
 
         T tau = T(0.5);
         for (size_t i = 1; i < getNumStep(); ++i) {
-            tau += (corr[i] - sqmean) / norm;
+            tau += fma(-mean, cross[i], corr[i] + sqmean) / norm;
             if (T(i) >= factor * tau)
                 break;
         }
@@ -122,6 +132,7 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         fft.swap(obj.fft);
         corr.swap(obj.corr);
+        cross.swap(obj.cross);
         mean.swap(obj.mean);
         std::swap(numSample, obj.numSample);
         std::swap(step, obj.step);

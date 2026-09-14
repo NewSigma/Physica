@@ -72,6 +72,10 @@ Use `std::ignore` to discard a return value. Do not use `(void)`.
 
 Indent namespace contents. Avoid nesting namespaces more than 2 levels unless absolutely necessary.
 
+## Numerical
+
+Use FMA where possible.
+
 ## Reference
 
 [1] Google C++ Style Guide; <https://google.github.io/styleguide/cppguide.html>  
