@@ -67,10 +67,10 @@ namespace Physica {
 
         const size_t length = row_i.getLength();
         size_t k = 0;
+        auto it = zip(row_i.view(), row_j.view()).begin();
         if constexpr (row_i.isCompact()) {
             using Pack = BestPacket<T, mat.getColAtCompile()>::Type;
             constexpr int Size = Pack::size();
-            auto it = zip(row_i.view(), row_j.view()).begin();
             for (; k < length / Size * Size; k += Size) {
                 auto [it_i, it_j] = it + k;
                 auto pack1 = it_i.template load<Size>();
@@ -81,10 +81,11 @@ namespace Physica {
         }
 
         for (; k < length; ++k) {
-            const T temp1 = row_i[k];
-            const T temp2 = row_j[k];
-            row_i[k] = fma(temp1, cosine, temp2 * sine);
-            row_j[k] = fma(temp2, cosine, temp1 * (-sine.conjugate()));
+            auto [it_i, it_j] = it + k;
+            const T temp1 = *it_i;
+            const T temp2 = *it_j;
+            *it_i = fma(temp1, cosine, temp2 * sine);
+            *it_j = fma(temp2, cosine, temp1 * (-sine.conjugate()));
         }
     }
     /**
@@ -100,10 +101,10 @@ namespace Physica {
 
         const size_t length = col_i.getLength();
         size_t k = 0;
+        auto it = zip(col_i.view(), col_j.view()).begin();
         if constexpr (col_i.isCompact()) {
             using Pack = BestPacket<T, mat.getColAtCompile()>::Type;
             constexpr int Size = Pack::size();
-            auto it = zip(col_i.view(), col_j.view()).begin();
             for (; k < length / Size * Size; k += Size) {
                 auto [it_i, it_j] = it + k;
                 auto pack1 = it_i.template load<Size>();
@@ -114,10 +115,11 @@ namespace Physica {
         }
 
         for (; k < length; ++k) {
-            const T temp1 = col_i[k];
-            const T temp2 = col_j[k];
-            col_i[k] = fma(temp1, cosine, temp2 * (-sine.conjugate()));
-            col_j[k] = fma(temp1, sine, temp2 * cosine);
+            auto [it_i, it_j] = it + k;
+            const T temp1 = *it_i;
+            const T temp2 = *it_j;
+            *it_i = fma(temp1, cosine, temp2 * (-sine.conjugate()));
+            *it_j = fma(temp1, sine, temp2 * cosine);
         }
     }
     /**

@@ -164,8 +164,12 @@ namespace Physica {
     template<Vector LHS, Vector RHS>
     auto Dot<LHS, RHS>::calc_base_fallback() const noexcept -> T {
         auto result = T(0);
-        for(size_t i = 0; i < lhs.getLength(); ++i)
-            result += lhs.calc(i) * rhs.calc(i);
+        auto it = zip(lhs.view(), rhs.view()).begin();
+        const size_t length = lhs.getLength();
+        for (size_t i = 0; i < length; ++i, ++it) {
+            auto [lhs_value, rhs_value] = *it;
+            result += lhs_value * rhs_value;
+        }
         return result;
     }
 
