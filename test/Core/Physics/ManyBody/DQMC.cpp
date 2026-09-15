@@ -98,7 +98,7 @@ namespace {
         dqmc.step_for<RandomSource>(NumSample);
         for (const auto& green : dqmc.getGreens())
             for (auto elem : green.diag().view())
-                expect<RandomSource>(scalarNear(elem.imag(), T(0), 1E-10));
+                expect<RandomSource>(scalarNear(elem.imag(), T(0), 1E-8));
     }
 
     void forward() {

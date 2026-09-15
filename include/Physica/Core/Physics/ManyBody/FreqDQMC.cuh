@@ -141,6 +141,7 @@ namespace Physica {
     template<RNG R, ExecutePolicy P>
     auto device_obj<FreqDQMC<T>>::step() -> Trv {
         Trv acceptR = hmc.template step<R, P>(*this);
+        hmc.template step_radial<R>(*this);
         bool hasAuxField = !getBetaU().isSubNormal();
         if (hasAuxField)
             check(cudaMemcpyAsync(getAuxField().data(), hmc.getSample().data(), sizeof(Tr) * hmc.getDOF(), cudaMemcpyHostToDevice, CUDAContext::getInstance()));

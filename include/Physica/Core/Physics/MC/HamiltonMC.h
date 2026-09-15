@@ -69,6 +69,8 @@ namespace Physica {
         template<RNG R, ExecutePolicy P = Sequential>
         Trv step(auto&& forceModel);
         template<RNG R, ExecutePolicy P = Sequential>
+        bool step_radial(auto&& forceModel);
+        template<RNG R, ExecutePolicy P = Sequential>
         bool step_radial(auto&& forceModel, Trv sigmaR);
         /* Getters */
         [[nodiscard]] auto& getRoot() noexcept { return root; }
@@ -197,6 +199,12 @@ namespace Physica {
         if (accept)
             sample *= factor;
         return accept;
+    }
+
+    template<Scalar T>
+    template<RNG R, ExecutePolicy P>
+    bool HamiltonMC<T>::step_radial(auto&& forceModel) {
+        return step_radial<R, P>(std::forward<decltype(forceModel)>(forceModel), reciprocal(sqrt(T(getDOF()))));
     }
 
     template<Scalar T>

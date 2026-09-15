@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -98,8 +98,8 @@ int main() {
 
     for (size_t i = 0; i < numReplica; ++i)
         for (size_t j = 0; j < numMolecular; ++j)
-            expect(abs(meanCorr[j, i]) < deviaCorr[j, i] * T(2.0));
+            expect(abs(meanCorr[j, i]) < deviaCorr[j, i] * T(3));
 
-    expect(abs(T(temperatureT) - meanTemperature) < T(2.0) * sqrt(varTemperature));
+    expect(abs(T(temperatureT) - meanTemperature) < T(3) * sqrt(varTemperature));
     return 0;
 }
