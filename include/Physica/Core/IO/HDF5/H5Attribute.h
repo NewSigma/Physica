@@ -33,10 +33,23 @@ namespace Physica {
         This& operator=(This obj) noexcept;
         /* Operations */
         void read(const H5Type& dtype, void* buf) const;
+        void read(auto* buf) const;
+
         void write(const H5Type& dtype, const void* buf) const;
+        void write(const auto* buf) const;
         /* Getters */
         void swap(This& obj) noexcept;
         /* Static members */
         [[nodiscard]] constexpr static IdentifierType itype() noexcept { return IdentifierType::Attribute; }
     };
+
+    void H5Attribute::read(auto* buf) const {
+        using T = std::remove_cv_t<std::remove_pointer_t<decltype(buf)>>;
+        read(H5Type::get<T>(), buf);
+    }
+
+    void H5Attribute::write(const auto* buf) const {
+        using T = std::remove_cv_t<std::remove_pointer_t<decltype(buf)>>;
+        write(H5Type::get<T>(), buf);
+    }
 }

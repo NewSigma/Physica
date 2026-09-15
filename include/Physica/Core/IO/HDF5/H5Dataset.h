@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <fstream>
+#include <type_traits>
 #include <vector>
 #include "H5Type.h"
 #include "Mixin/Attributable.h"
@@ -41,9 +42,15 @@ namespace Physica {
         This& operator=(This&&) noexcept = default;
         /* Operations */
         template<class MemSpace, class FileSpace>
+        void read(auto* buf, const MemSpace& mem_space, const FileSpace& file_space) const;
+        void read(auto* buf) const;
+        template<class MemSpace, class FileSpace>
         void read(void* buf, const H5Type& dtype, const MemSpace& mem_space, const FileSpace& file_space) const;
         void read(void* buf, const H5Type& dtype) const;
 
+        template<class MemSpace, class FileSpace>
+        void write(const auto* buf, const MemSpace& mem_space, const FileSpace& file_space) const;
+        void write(const auto* buf) const;
         template<class MemSpace, class FileSpace>
         void write(const void* buf, const H5Type& dtype, const MemSpace& mem_space, const FileSpace& file_space) const;
         void write(const void* buf, const H5Type& dtype) const;
@@ -66,6 +73,19 @@ namespace Physica {
 
     template<size_t Dim>
     template<class MemSpace, class FileSpace>
+    void H5Dataset<Dim>::read(auto* buf, const MemSpace& mem_space, const FileSpace& file_space) const {
+        using T = std::remove_cv_t<std::remove_pointer_t<decltype(buf)>>;
+        read(buf, H5Type::get<T>(), mem_space, file_space);
+    }
+
+    template<size_t Dim>
+    void H5Dataset<Dim>::read(auto* buf) const {
+        using T = std::remove_cv_t<std::remove_pointer_t<decltype(buf)>>;
+        read(buf, H5Type::get<T>());
+    }
+
+    template<size_t Dim>
+    template<class MemSpace, class FileSpace>
     void H5Dataset<Dim>::read(void* buf, const H5Type& dtype, const MemSpace& mem_space, const FileSpace& file_space) const {
         H5Dread(getHID(), dtype.getHID(), mem_space.getHID(), file_space.getHID(), H5P_DEFAULT, buf);
     }
@@ -73,6 +93,19 @@ namespace Physica {
     template<size_t Dim>
     void H5Dataset<Dim>::read(void* buf, const H5Type& dtype) const {
         H5Dread(getHID(), dtype.getHID(), H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    }
+
+    template<size_t Dim>
+    template<class MemSpace, class FileSpace>
+    void H5Dataset<Dim>::write(const auto* buf, const MemSpace& mem_space, const FileSpace& file_space) const {
+        using T = std::remove_cv_t<std::remove_pointer_t<decltype(buf)>>;
+        write(buf, H5Type::get<T>(), mem_space, file_space);
+    }
+
+    template<size_t Dim>
+    void H5Dataset<Dim>::write(const auto* buf) const {
+        using T = std::remove_cv_t<std::remove_pointer_t<decltype(buf)>>;
+        write(buf, H5Type::get<T>());
     }
 
     template<size_t Dim>

@@ -103,11 +103,8 @@ namespace Physica {
             return getPrimitiveType(PrimitiveType::LongDouble);
         else if constexpr (std::is_enum_v<T>)
             return get<std::underlying_type_t<T>>();
-        else {
-            using M = Traits<T>::MachineType;
-            static_assert(!std::is_same_v<T, M>, "[Error]: Bad machine type");
-            return get<M>();
-        }
+        else
+            return T::dtype_hdf5();
     }
 
     template<class T>

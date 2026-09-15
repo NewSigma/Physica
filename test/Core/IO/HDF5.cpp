@@ -62,7 +62,7 @@ namespace {
         {
             auto h5f = H5File::open(temp.getName());
             auto dataset = h5f.createDataSet<1>("/data", H5Type::get<char>(), dataspace);
-            dataset.write(str, H5Type::get<char>());
+            dataset.write(str);
         }
         {
             Array<char, 32> buffer{};
@@ -83,9 +83,9 @@ namespace {
         {
             auto h5f = H5File::open(temp.getName());
             auto dataset = h5f.createDataSet<1>("/data", type, space);
-            dataset.write(&value, type);
+            dataset.write(&value);
             auto attr = h5f.createAttribute("A", type, space);
-            attr.write(type, &value);
+            attr.write(&value);
         }
 
         auto h5f = H5File::open(temp.getName(), H5File::ReadOnly);
@@ -93,8 +93,25 @@ namespace {
         expect_throw([&] { std::ignore = h5f.createDataSet<1>("/new", type, space); });
         expect_throw([&] { std::ignore = h5f.createAttribute("B", type, space); });
         expect_throw([&] { std::ignore = H5Group::create(h5f, "G"); });
-        expect_throw([&] { h5f.openDataSet<1>("/data").write(&value, type); });
-        expect_throw([&] { h5f.openAttribute("A").write(type, &value); });
+        expect_throw([&] { h5f.openDataSet<1>("/data").write(&value); });
+        expect_throw([&] { h5f.openAttribute("A").write(&value); });
+    }
+
+    void attrTypedIO() {
+        TempFile temp("/tmp/tmpXXXXXX");
+        const int value = 42;
+        {
+            auto h5f = H5File::open(temp.getName());
+            auto attr = h5f.createAttribute("A", H5Type::get<int>(), H5DataSpace<1>(1));
+            attr.write(&value);
+        }
+        {
+            int result = 0;
+            auto h5f = H5File::open(temp.getName(), H5File::ReadOnly);
+            auto attr = h5f.openAttribute("A");
+            attr.read(&result);
+            expect(result == value);
+        }
     }
 }
 
@@ -102,5 +119,6 @@ int main() {
     predicates();
     stringIO();
     readOnlyWrite();
+    attrTypedIO();
     return 0;
 }

@@ -77,7 +77,7 @@ namespace Physica {
         if (numParticle != Base::getNumParticle()) [[unlikely]]
             throw BadFileFormatException("[Error]: Bad CrystalCell");
         atomicNumbers.resize(numParticle);
-        dataset.read(atomicNumbers.data(), H5Type::get<AtomicArray::value_type>());
+        dataset.read(atomicNumbers.data());
         return H5Group(group);
     }
 
@@ -87,7 +87,7 @@ namespace Physica {
         const auto space = H5DataSpace<1>(Base::getNumParticle());
         auto dtype = H5Type::get<AtomicArray::value_type>();
         auto dataset = group.template createDataSet<1>("AtomicNumber", dtype, space);
-        dataset.write(atomicNumbers.data(), dtype);
+        dataset.write(atomicNumbers.data());
         return group;
     }
 #endif

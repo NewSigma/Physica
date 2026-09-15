@@ -205,9 +205,9 @@ namespace Physica {
         for (size_t major = 0; major < maxMajor; ++major) {
             fileSpace.selectHyperslab(H5S_SELECT_SET, {1, maxMinor}, {major, 0});
             if constexpr (Derived::isColMatrix())
-                dataset.read(Base::getDerived().col(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
+                dataset.read(Base::getDerived().col(major).data(), memSpace, fileSpace);
             else
-                dataset.read(Base::getDerived().row(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
+                dataset.read(Base::getDerived().row(major).data(), memSpace, fileSpace);
         }
         return dataset;
     }
@@ -228,9 +228,9 @@ namespace Physica {
         for (size_t major = 0; major < maxMajor; ++major) {
             fileSpace.selectHyperslab(H5S_SELECT_SET, {1, maxMinor}, {major, 0});
             if constexpr (Derived::isColMatrix())
-                dataset.write(Base::getDerived().col(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
+                dataset.write(Base::getDerived().col(major).data(), memSpace, fileSpace);
             else
-                dataset.write(Base::getDerived().row(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
+                dataset.write(Base::getDerived().row(major).data(), memSpace, fileSpace);
         }
         return std::cref(dataset);
     }

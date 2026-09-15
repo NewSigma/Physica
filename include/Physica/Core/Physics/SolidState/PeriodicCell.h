@@ -400,7 +400,7 @@ namespace Physica {
         lattice.read(group, "lattice");
         const auto posDataset = pos.read(group, "pos");
         const auto typeAttr = posDataset.openAttribute("Type");
-        typeAttr.read(H5Type::get<decltype(type)>(), &type);
+        typeAttr.read(&type);
         return H5Group(group);
     }
 
@@ -411,7 +411,7 @@ namespace Physica {
         auto posDataset = pos.write(group, "pos");
         auto dtype = H5Type::get<decltype(type)>();
         auto typeAttr = posDataset.createAttribute("Type", dtype, H5DataSpace<1>(1));
-        typeAttr.write(dtype, &type);
+        typeAttr.write(&type);
         return H5Group(group);
     }
 #endif
