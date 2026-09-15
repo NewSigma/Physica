@@ -274,19 +274,38 @@ namespace Physica {
     template<Vector V>
     template<int Size>
     auto StridedVector<Derived>::View<V>::Iterator::load_stride2() const noexcept -> SIMD<value_type, Size> {
-        using Pack = SIMD<value_type, Size>;
-        constexpr int MaxSize = BestPacket<value_type, Dynamic>::Size;
+        using T = value_type;
+        using Tr = T::RealType;
+        using Pack = SIMD<T, Size>;
+        constexpr int MaxSize = BestPacket<T, Dynamic>::Size;
+        auto gatherEvenLanes = [](const auto pack) static noexcept {
+            constexpr int PackSize = pack.size();
+            if constexpr (T::isComplex()) {
+                if constexpr (PackSize == 2)
+                    return pack.getLow();
+                else {
+                    const auto re = pack.real().gatherRealImag().getLow();
+                    const auto im = pack.imag().gatherRealImag().getLow();
+                    return SIMD<T, PackSize / 2>::asComplex(SIMD<Tr, PackSize>(re, im).gatherRealImag());
+                }
+            }
+            else
+                return pack.gatherRealImag().getLow();
+        };
+
         if constexpr (2 * Size <= MaxSize) {
-            SIMD<value_type, 2 * Size> pack2;
+            SIMD<T, 2 * Size> pack2;
             pack2.load(pos);
-            pack2.gatherRealImag();
-            return pack2.getLow();
+            return gatherEvenLanes(pack2);
         }
         else {
             Pack low, high;
             low.load(pos);
-            high.load(pos + Size * getStride());
-            return Pack(low.gatherRealImag().getLow(), high.gatherRealImag().getLow());
+            high.load(pos + Size);
+            if constexpr (T::isComplex())
+                return Pack::asComplex(SIMD<Tr, 2 * Size>(gatherEvenLanes(low).asReal(), gatherEvenLanes(high).asReal()));
+            else
+                return Pack(gatherEvenLanes(low), gatherEvenLanes(high));
         }
     }
 
