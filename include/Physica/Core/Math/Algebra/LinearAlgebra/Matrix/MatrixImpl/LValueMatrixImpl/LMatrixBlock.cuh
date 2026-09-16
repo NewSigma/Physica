@@ -22,7 +22,7 @@
 #include "../LValueMatrix.cuh"
 
 namespace Physica {
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     class device_obj<LMatrixBlock<M, Row, Col>> : public device_obj<LValueVector<LMatrixBlock<M, Row, Col>>> {
         using host_obj = LMatrixBlock<M, Row, Col>;
         using This = device_obj<host_obj>;
@@ -51,7 +51,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t index) noexcept;
     };
 
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     __host__ __device__ device_obj<LMatrixBlock<M, Row, Col>>::device_obj(Ref mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
             : mat(asStruct(mat_))
             , fromRow(fromRow)
@@ -68,12 +68,12 @@ namespace Physica {
             assert(Col == colCount);
     }
 
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     __host__ __device__ void device_obj<LMatrixBlock<M, Row, Col>>::resize(size_t length) {
         assert(length == getLength());
     }
 
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     __host__ __device__ size_t device_obj<LMatrixBlock<M, Row, Col>>::getLength() const noexcept {
         if constexpr (Row == 1) {
             if constexpr (Col == Dynamic)
@@ -89,7 +89,7 @@ namespace Physica {
         }
     }
 
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     __host__ __device__ auto device_obj<LMatrixBlock<M, Row, Col>>::data_ptr(this auto&& self, size_t index) noexcept {
         assert(index < self.getLength());
         if constexpr (Row == 1)

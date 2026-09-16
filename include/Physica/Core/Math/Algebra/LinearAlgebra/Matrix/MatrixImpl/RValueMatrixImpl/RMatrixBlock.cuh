@@ -22,7 +22,7 @@
 #include "Physica/PlainStruct.h"
 
 namespace Physica {
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     class device_obj<RMatrixBlock<M, Row, Col>> : public device_obj<RValueVector<RMatrixBlock<M, Row, Col>>> {
         using host_obj = RMatrixBlock<M, Row, Col>;
         using This = device_obj<host_obj>;
@@ -53,7 +53,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
     };
 
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     __host__ __device__ device_obj<RMatrixBlock<M, Row, Col>>::device_obj(Ref mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
             : mat(asStruct(mat_))
             , fromRow(fromRow)
@@ -70,7 +70,7 @@ namespace Physica {
             assert(Col == colCount);
     }
 
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     __device__ auto device_obj<RMatrixBlock<M, Row, Col>>::calc(size_t index, instanceof_x<ThreadBlock> auto block) const -> T {
         assert(index < getLength());
         if constexpr (Row == 1)
@@ -79,13 +79,13 @@ namespace Physica {
             return mat.getDerived().calc(fromRow + index, fromCol, block);
     }
 
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     __host__ __device__ auto device_obj<RMatrixBlock<M, Row, Col>>::values(this auto&& self) noexcept {
         using M1 = decltype(propagate_rvalue_reference<decltype(self), M>(self.mat.getDerived()).values());
         return RMatrixBlock<M1, Row, Col>(propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived()).values(), self.fromRow, Row == 1 ? 1 : self.getLength(), self.fromCol, Col == 1 ? 1 : self.getLength());
     }
 
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     __host__ __device__ size_t device_obj<RMatrixBlock<M, Row, Col>>::getLength() const noexcept {
         if constexpr (Row == 1) {
             if constexpr (Col == Dynamic)

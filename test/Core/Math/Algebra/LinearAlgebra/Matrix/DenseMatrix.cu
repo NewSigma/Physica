@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -45,10 +45,9 @@ namespace {
         const auto result = d_result.toHost();
         expect(matrixNear(answer, result, 1E-6));
     }
-    /**
-     * A compact matrix is compact either in row or in column.
-     */
-    void CompactRowCol() noexcept {
+
+    void compactRowCol() noexcept {
+        // Test that row/col of a compact matrix is either compact or strided
         constexpr int Size = 8;
         using T = float32;
         auto& rng = RandomSource::getInstance();
@@ -57,12 +56,20 @@ namespace {
         {
             using MatrixType = device_obj<DenseMatrix<T, MatrixMajor::Col>>;
             const auto x = MatrixType(Size, Size);
+            static_assert(x.row(r).isStrided());
+            static_assert(x.col(c).isCompact());
             expect(x.data_ptr(r, c) == x.col(c).data() + r);
+            expect(x.row(r).data_handle() == x.data_ptr(r, 0));
+            expect(x.row(r).getStride() == static_cast<size_t>(Size));
         }
         {
             using MatrixType = device_obj<DenseMatrix<T, MatrixMajor::Row>>;
             const auto x = MatrixType(Size, Size);
+            static_assert(x.row(r).isCompact());
+            static_assert(x.col(c).isStrided());
             expect(x.data_ptr(r, c) == x.row(r).data() + c);
+            expect(x.col(c).data_handle() == x.data_ptr(0, c));
+            expect(x.col(c).getStride() == static_cast<size_t>(Size));
         }
     }
 }
@@ -70,6 +77,6 @@ namespace {
 int main() {
     hostDeviceCopy();
     deviceExprEval();
-    CompactRowCol();
+    compactRowCol();
     return 0;
 }

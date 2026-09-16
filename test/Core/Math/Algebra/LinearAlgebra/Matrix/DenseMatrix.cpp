@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,10 +31,9 @@ namespace {
         MatrixND<float64> x = -MatrixND<float64>::zeros(1, 1);
         expect(std::format("{}", x) == "(0)"); // Signed zero is ignored
     }
-    /**
-     * A compact matrix is compact either in row or in column.
-     */
-    void CompactRowCol() noexcept {
+
+    void compactRowCol() noexcept {
+        // Test that row/col of a compact matrix is either compact or strided
         constexpr int Size = 8;
         using T = float32;
         auto& rng = RandomSource::getInstance();
@@ -43,12 +42,20 @@ namespace {
         {
             using MatrixType = DenseMatrix<T, MatrixMajor::Col>;
             const auto x = MatrixType(Size, Size);
+            static_assert(x.row(r).isStrided());
+            static_assert(x.col(c).isCompact());
             expect(x.data_ptr(r, c) == x.col(c).data() + r);
+            expect(x.row(r).data_handle() == x.data_ptr(r, 0));
+            expect(x.row(r).getStride() == Size);
         }
         {
             using MatrixType = DenseMatrix<T, MatrixMajor::Row>;
             const auto x = MatrixType(Size, Size);
+            static_assert(x.row(r).isCompact());
+            static_assert(x.col(c).isStrided());
             expect(x.data_ptr(r, c) == x.row(r).data() + c);
+            expect(x.col(c).data_handle() == x.data_ptr(0, c));
+            expect(x.col(c).getStride() == Size);
         }
     }
 
@@ -123,7 +130,7 @@ static_assert(MatrixND<float32>{}.transpose().isCompact(), "Transpose of a compa
 
 int main() {
     formatTest();
-    CompactRowCol();
+    compactRowCol();
     testHDF5();
     assign_mkl();
     return 0;

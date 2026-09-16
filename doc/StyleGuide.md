@@ -50,6 +50,10 @@ void T::swap(T& obj) noexcept {
 
 ## Other C++ features
 
+### Ref-qualified Member Functions
+
+Prohibited. Use explicit object parameters instead.
+
 ### RTTI
 
 Prohibited

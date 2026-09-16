@@ -57,20 +57,14 @@ namespace Physica {
     auto CompactMatrix<Derived>::row(this auto&& self, size_t r) noexcept {
         using Self = decltype(self);
         constexpr size_t ColAtCompile = self.getColAtCompile();
-        if constexpr (Derived::isRowMatrix() || ColAtCompile == 1)
-            return CompactMatrixBlock<Self, 1, ColAtCompile>(std::forward<Self>(self), r, 1, 0, self.getCol());
-        else
-            return LMatrixBlock<Self, 1, ColAtCompile>(std::forward<Self>(self), r, 1, 0, self.getCol());
+        return CompactMatrixBlock<Self, 1, ColAtCompile>(std::forward<Self>(self), r, 1, 0, self.getCol());
     }
 
     template<class Derived>
     auto CompactMatrix<Derived>::col(this auto&& self, size_t c) noexcept {
         using Self = decltype(self);
         constexpr size_t RowAtCompile = self.getRowAtCompile();
-        if constexpr (Derived::isColMatrix() || RowAtCompile == 1)
-            return CompactMatrixBlock<Self, RowAtCompile, 1>(std::forward<Self>(self), 0, self.getRow(), c, 1);
-        else
-            return LMatrixBlock<Self, RowAtCompile, 1>(std::forward<Self>(self), 0, self.getRow(), c, 1);
+        return CompactMatrixBlock<Self, RowAtCompile, 1>(std::forward<Self>(self), 0, self.getRow(), c, 1);
     }
 
     template<class Derived>

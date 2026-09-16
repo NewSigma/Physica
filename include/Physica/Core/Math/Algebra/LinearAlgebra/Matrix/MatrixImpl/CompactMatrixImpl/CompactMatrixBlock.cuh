@@ -20,16 +20,15 @@
 
 #include "CompactMatrixBlock.h"
 #include "../CompactMatrix.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/StridedVector.cuh"
 #include "Physica/Core/Utils/Empty.h"
 
 namespace Physica {
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
-    class device_obj<CompactMatrixBlock<M, Row, Col>> : public device_obj<CompactVector<CompactMatrixBlock<M, Row, Col>>> {
-        static_assert((Row == 1 && MatrixMajor::isRowMatrix<M>()) || (Col == 1 && MatrixMajor::isColMatrix<M>()) || (Row == 1 || Col == 1),
-                      "[Error]: The matrix block is not compact");
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    class device_obj<CompactMatrixBlock<M, Row, Col>> : public device_obj<Internal::CompactMatrixBlockBase<M, Row, Col>> {
         using host_obj = CompactMatrixBlock<M, Row, Col>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<CompactVector<host_obj>>;
+        using Base = device_obj<Internal::CompactMatrixBlockBase<M, Row, Col>>;
         using Ref = add_device_obj<M>::type;
         using MaybeRowCount = std::conditional_t<Row == Dynamic, size_t, Empty>;
         using MaybeColCount = std::conditional_t<Col == Dynamic, size_t, Empty>;
@@ -53,10 +52,12 @@ namespace Physica {
         __host__ __device__ void resize(size_t length);
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getStride() const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle(this auto&& self) noexcept;
         [[nodiscard]] __host__ __device__ auto data(this auto&& self) noexcept;
     };
 
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     __host__ __device__ device_obj<CompactMatrixBlock<M, Row, Col>>::device_obj(Ref mat, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
             : mat(asStruct(mat))
             , fromRow(fromRow)
@@ -73,23 +74,23 @@ namespace Physica {
             assert(Col == colCount);
     }
 
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     auto device_obj<CompactMatrixBlock<M, Row, Col>>::operator=(const This& m) -> This& {
         Base::operator=(m);
         return *this;
     }
 
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     auto device_obj<CompactMatrixBlock<M, Row, Col>>::operator=(This&& m) -> This& {
         return *this = m;
     }
 
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     __host__ __device__ void device_obj<CompactMatrixBlock<M, Row, Col>>::resize([[maybe_unused]] size_t length) {
         assert(length == getLength());
     }
 
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     __host__ __device__ size_t device_obj<CompactMatrixBlock<M, Row, Col>>::getLength() const noexcept {
         if constexpr (Row == 1) {
             if constexpr (Col == Dynamic)
@@ -105,9 +106,22 @@ namespace Physica {
         }
     }
 
-    template<Matrix M, size_t Row, size_t Col> requires (Row == 1 || Col == 1)
-    __host__ __device__ auto device_obj<CompactMatrixBlock<M, Row, Col>>::data(this auto&& self) noexcept {
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    __host__ __device__ constexpr size_t device_obj<CompactMatrixBlock<M, Row, Col>>::getStride() const noexcept {
+        if constexpr (Internal::isCompactMatrixBlock<M, Row, Col>())
+            return Base::getStride();
+        else
+            return Row == 1 ? mat.getDerived().getColStride() : mat.getDerived().getRowStride();
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    __host__ __device__ auto device_obj<CompactMatrixBlock<M, Row, Col>>::data_handle(this auto&& self) noexcept {
         return self.mat.getDerived().data_ptr(self.fromRow, self.fromCol);
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    __host__ __device__ auto device_obj<CompactMatrixBlock<M, Row, Col>>::data(this auto&& self) noexcept {
+        return self.data_handle();
     }
 
     template<Matrix M, size_t Row, size_t Col>
@@ -193,19 +207,13 @@ namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
     __host__ __device__ auto device_obj<CompactMatrixBlock<M, Row, Col>>::row(this auto&& self, size_t r) noexcept {
         assert(r < self.getRow());
-        if constexpr (MatrixMajor::isRowMatrix<M>())
-            return device_obj<CompactMatrixBlock<M, 1, Col>>(self.mat, self.fromRow + r, 1, self.fromCol, self.getCol());
-        else
-            return device_obj<LMatrixBlock<M, 1, Col>>(self.mat, self.fromRow + r, 1, self.fromCol, self.getCol());
+        return device_obj<CompactMatrixBlock<M, 1, Col>>(self.mat, self.fromRow + r, 1, self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
     __host__ __device__ auto device_obj<CompactMatrixBlock<M, Row, Col>>::col(this auto&& self, size_t c) noexcept {
         assert(c < self.getCol());
-        if constexpr (MatrixMajor::isColMatrix<M>())
-            return device_obj<CompactMatrixBlock<M, Row, 1>>(self.mat, self.fromRow, self.getRow(), self.fromCol + c, 1);
-        else
-            return device_obj<LMatrixBlock<M, Row, 1>>(self.mat, self.fromRow, self.getRow(), self.fromCol + c, 1);
+        return device_obj<CompactMatrixBlock<M, Row, 1>>(self.mat, self.fromRow, self.getRow(), self.fromCol + c, 1);
     }
 
     template<Matrix M, size_t Row, size_t Col>

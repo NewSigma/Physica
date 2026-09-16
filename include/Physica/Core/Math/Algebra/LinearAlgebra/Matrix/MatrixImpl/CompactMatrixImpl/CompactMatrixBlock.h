@@ -19,17 +19,34 @@
 #pragma once
 
 #include "../CompactMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/StridedVector.h"
 #include "Physica/Core/Utils/Empty.h"
 
 namespace Physica {
     template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class CompactMatrixBlock;
 
+    namespace Internal {
+        template<class M, size_t Row, size_t Col>
+        __host__ __device__ consteval bool isCompactMatrixBlock() noexcept {
+            using M1 = std::remove_cvref_t<M>;
+            if constexpr (Row == 1 && Col == 1)
+                return true;
+            else if constexpr (Row == 1)
+                return MatrixMajor::isRowMatrix<M1>() || M1::getRowAtCompile() == 1;
+            else
+                return MatrixMajor::isColMatrix<M1>() || M1::getColAtCompile() == 1;
+        }
+
+        template<class M, size_t Row, size_t Col>
+        using CompactMatrixBlockBase = std::conditional_t<isCompactMatrixBlock<M, Row, Col>(),
+                                                          CompactVector<CompactMatrixBlock<M, Row, Col>>,
+                                                          StridedVector<CompactMatrixBlock<M, Row, Col>>>;
+    }
+
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
-    class CompactMatrixBlock<M, Row, Col> : public CompactVector<CompactMatrixBlock<M, Row, Col>> {
-        static_assert((Row == 1 && MatrixMajor::isRowMatrix<M>()) || (Col == 1 && MatrixMajor::isColMatrix<M>()) || (Row == 1 || Col == 1),
-                      "[Error]: The matrix block is not compact");
+    class CompactMatrixBlock<M, Row, Col> : public Internal::CompactMatrixBlockBase<M, Row, Col> {
         using This = CompactMatrixBlock<M, Row, Col>;
-        using Base = CompactVector<This>;
+        using Base = Internal::CompactMatrixBlockBase<M, Row, Col>;
         using MaybeRowCount = std::conditional_t<Row == Dynamic, size_t, Empty>;
         using MaybeColCount = std::conditional_t<Col == Dynamic, size_t, Empty>;
     private:
@@ -59,9 +76,12 @@ namespace Physica {
         [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr size_t getLength() const noexcept;
+        [[nodiscard]] constexpr size_t getStride() const noexcept;
+        [[nodiscard]] auto data_handle(this auto&& self) noexcept;
         [[nodiscard]] auto data(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept;
     };
 
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
@@ -141,13 +161,36 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
-    auto CompactMatrixBlock<M, Row, Col>::data(this auto&& self) noexcept {
+    constexpr size_t CompactMatrixBlock<M, Row, Col>::getStride() const noexcept {
+        if constexpr (Internal::isCompactMatrixBlock<M, Row, Col>())
+            return Base::getStride();
+        else
+            return Row == 1 ? mat.getColStride() : mat.getRowStride();
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    auto CompactMatrixBlock<M, Row, Col>::data_handle(this auto&& self) noexcept {
         return self.mat.data_ptr(self.fromRow, self.fromCol);
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    auto CompactMatrixBlock<M, Row, Col>::data(this auto&& self) noexcept {
+        return self.data_handle();
     }
 
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     __host__ __device__ consteval size_t CompactMatrixBlock<M, Row, Col>::getSizeAtCompile() noexcept {
         return Row == 1 ? Col : Row;
+    }
+
+    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
+    __host__ __device__ consteval size_t CompactMatrixBlock<M, Row, Col>::getStrideAtCompile() noexcept {
+        if constexpr (Internal::isCompactMatrixBlock<M, Row, Col>())
+            return Base::getStrideAtCompile();
+        else {
+            using M1 = std::remove_cvref_t<M>;
+            return Row == 1 ? M1::getColStrideAtCompile() : M1::getRowStrideAtCompile();
+        }
     }
 
     template<Matrix M, size_t Row, size_t Col>
@@ -241,10 +284,7 @@ namespace Physica {
         assert(r < self.getRow());
         auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        if constexpr (MatrixMajor::isRowMatrix<M>())
-            return CompactMatrixBlock<M1, 1, Col>(std::forward<M1>(m), self.fromRow + r, 1, self.fromCol, self.getCol());
-        else
-            return LMatrixBlock<M1, 1, Col>(std::forward<M1>(m), self.fromRow + r, 1, self.fromCol, self.getCol());
+        return CompactMatrixBlock<M1, 1, Col>(std::forward<M1>(m), self.fromRow + r, 1, self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
@@ -252,10 +292,7 @@ namespace Physica {
         assert(c < self.getCol());
         auto&& m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        if constexpr (MatrixMajor::isColMatrix<M>())
-            return CompactMatrixBlock<M1, Row, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c, 1);
-        else
-            return LMatrixBlock<M1, Row, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c, 1);
+        return CompactMatrixBlock<M1, Row, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c, 1);
     }
 
     template<Matrix M, size_t Row, size_t Col>
