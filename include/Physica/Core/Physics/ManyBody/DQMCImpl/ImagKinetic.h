@@ -82,7 +82,7 @@ namespace Physica {
         Vector2D<Tr> result = deltas;
         for (int spin : {0, 1}) {
             auto g = greens[spin][site, site];
-            [[maybe_unused]] bool isReal = abs(g.imag()) < abs(g.real()) * sqrt(Trv(std::numeric_limits<T>::epsilon()));
+            [[maybe_unused]] bool isReal = abs(g.imag()) < sqrt(Trv(std::numeric_limits<T>::epsilon()));
             assert(isReal && "[Error]: Expect charge density is real");
             result[spin] *= Trv(1) - g.real();
         }
