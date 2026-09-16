@@ -113,6 +113,28 @@ namespace {
             expect(result == value);
         }
     }
+
+    void close() {
+        // Test that H5File is recursively closed and flushed
+        TempFile temp("/tmp/tmpXXXXXX");
+        const int value = 42;
+
+        H5Dataset<1> dataset;
+        {
+            auto h5f = H5File::open(temp.getName());
+            dataset = h5f.createDataSet<1>("/data", H5Type::get<int>(), H5DataSpace<1>(1));
+            dataset.write(&value);
+        }
+        expect(!dataset.isValid());
+        expect(H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_FILE) == 0);
+        {
+            int result = 0;
+            auto h5f = H5File::open(temp.getName(), H5File::ReadOnly);
+            auto reopen = h5f.openDataSet<1>("/data");
+            reopen.read(&result);
+            expect(result == value);
+        }
+    }
 }
 
 int main() {
@@ -120,5 +142,6 @@ int main() {
     stringIO();
     readOnlyWrite();
     attrTypedIO();
+    close();
     return 0;
 }
