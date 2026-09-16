@@ -132,7 +132,7 @@ namespace Physica {
         action.template random_normal<R>();
 
         VectorND<Tr> init(getAuxField().getSize() * 2);
-        check(cudaMemcpyAsync(init.data(), getAuxField().data(), sizeof(Tr) * init.getLength(), cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
+        init.read(getAuxField());
         CUDAExecutor::wait();
         hmc.setInitPosition(std::move(init));
     }
@@ -144,7 +144,7 @@ namespace Physica {
         hmc.template step_radial<R>(*this);
         bool hasAuxField = !getBetaU().isSubNormal();
         if (hasAuxField)
-            check(cudaMemcpyAsync(getAuxField().data(), hmc.getSample().data(), sizeof(Tr) * hmc.getDOF(), cudaMemcpyHostToDevice, CUDAContext::getInstance()));
+            getAuxField().read(hmc.getSample());
         else
             getAuxField().zeros();
 
@@ -166,7 +166,7 @@ namespace Physica {
     template<ExecutePolicy P>
     auto device_obj<FreqDQMC<T>>::potentialV(const Vector auto& pos) -> Trv {
         assert(pos.getLength() == getAuxField().getSize() * 2 && "[Error]: Real matrix contains 2x number of elements of complex matrix");
-        check(cudaMemcpyAsync(getAuxField().data(), pos.data(), sizeof(Tr) * pos.getLength(), cudaMemcpyHostToDevice, CUDAContext::getInstance()));
+        getAuxField().read(pos);
         bool noAuxField = getBetaU().isSubNormal();
         if (noAuxField)
             return -calcDet()[0];
@@ -192,7 +192,7 @@ namespace Physica {
     void device_obj<FreqDQMC<T>>::forceAsync(const Vector auto& pos, Vector auto& result) {
         assert(result.getLength() == pos.getLength());
         assert(result.getLength() == getAuxField().getSize() * 2);
-        check(cudaMemcpyAsync(getAuxField().data(), pos.data(), sizeof(Tr) * pos.getLength(), cudaMemcpyHostToDevice, CUDAContext::getInstance()));
+        getAuxField().read(pos);
 
         forceBuffer.zeros();
         for (int spin : {0, 1}) {

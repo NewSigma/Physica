@@ -19,6 +19,8 @@
 #pragma once
 
 #include "../CompactVector.h"
+#include "Physica/Core/Exception/CUDA/CUDA.cuh"
+#include "Physica/Core/Parallel/CUDAContext.cuh"
 
 namespace Physica {
     template<class Derived>
@@ -90,14 +92,22 @@ namespace Physica {
      * E.g. In optimization problems, we convert between complex vectors and real vectors.
      */
     template<class Derived>
-    void CompactVector<Derived>::read(const auto& obj) noexcept {
+    void CompactVector<Derived>::read(const auto& obj) {
         using O = decltype(obj);
+        using U = std::remove_cvref_t<O>::ScalarType;
+        static_assert(T::Prec == U::Prec);
         if constexpr (Vector<O>) {
-            using U = std::remove_cvref_t<O>::ScalarType;
-            static_assert(T::Prec == U::Prec);
-            size_t size = Base::getLength() * sizeof(T);
+            const size_t size = Base::getLength() * sizeof(T);
             assert(size <= obj.getLength() * sizeof(U));
-            memcpy(data(), obj.data(), size);
+            if constexpr (is_device_obj_v<O>) {
+                #ifdef PHYSICA_CUDA
+                    check(cudaMemcpyAsync(data(), obj.data(), size, cudaMemcpyKind::cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
+                #else
+                    static_assert(!is_device_obj_v<O>, "[Error]: CUDA is required to read from device memory");
+                #endif
+            }
+            else
+                memcpy(data(), obj.data(), size);
         }
         else {
             static_assert(Matrix<O>, "[Error]: Unexpected type");

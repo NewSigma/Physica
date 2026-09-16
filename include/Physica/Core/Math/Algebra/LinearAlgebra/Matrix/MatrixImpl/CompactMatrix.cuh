@@ -79,6 +79,8 @@ namespace Physica {
         void random_uniform();
         template<RNG R>
         void random_normal();
+
+        void read(const auto& obj);
         /* Getters */
         [[nodiscard]] __host__ __device__ auto data() noexcept;
         [[nodiscard]] __host__ __device__ auto data() const noexcept;

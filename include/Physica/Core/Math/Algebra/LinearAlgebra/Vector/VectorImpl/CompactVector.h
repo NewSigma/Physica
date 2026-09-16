@@ -61,7 +61,7 @@ namespace Physica {
         template<size_t Length = Dynamic>
         [[nodiscard]] auto segment(this auto&&, size_t from, size_t to) noexcept;
 
-        void read(const auto& obj) noexcept;
+        void read(const auto& obj);
         const DataSetType read(const H5Loc& loc, const char* name);
         DataSetType write(H5Loc& loc, const char* name) const;
         /* Getters */

@@ -136,6 +136,23 @@ namespace Physica {
         return device_obj<CompactVectorBlock<V, Length>>(std::forward<Self>(self), from, to);
     }
 
+    template<class Derived>
+    void device_obj<CompactVector<Derived>>::read(const auto& obj) {
+        using O = decltype(obj);
+        using U = std::remove_cvref_t<O>::ScalarType;
+        static_assert(T::Prec == U::Prec);
+        if constexpr (Vector<O>) {
+            const size_t size = Base::getLength() * sizeof(T);
+            assert(size <= obj.getLength() * sizeof(U));
+            constexpr auto kind = is_device_obj_v<O> ? cudaMemcpyKind::cudaMemcpyDeviceToDevice : cudaMemcpyKind::cudaMemcpyHostToDevice;
+            check(cudaMemcpyAsync(data(), obj.data(), size, kind, CUDAContext::getInstance()));
+        }
+        else {
+            static_assert(Matrix<O>, "[Error]: Unexpected type");
+            read(obj.flatten());
+        }
+    }
+
 #ifdef PHYSICA_HDF5
     template<class Derived>
     auto device_obj<CompactVector<Derived>>::read(const H5Loc& loc, const char* name) -> const DataSetType {

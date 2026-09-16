@@ -46,6 +46,17 @@ namespace Physica {
     }
 
     template<class Derived>
+    void device_obj<CompactMatrix<Derived>>::read(const auto& obj) {
+        using O = decltype(obj);
+        if constexpr (Vector<O>)
+            Base::getDerived().flatten().read(obj);
+        else {
+            static_assert(Matrix<O>, "[Error]: Unexpected type");
+            read(obj.flatten());
+        }
+    }
+
+    template<class Derived>
     __host__ __device__ auto device_obj<CompactMatrix<Derived>>::row(this auto&& self, size_t r) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
