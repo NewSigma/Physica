@@ -54,6 +54,8 @@ namespace Physica {
         int maxTreeDepth;
 
         VectorND<T> sample;
+        Trv energyF;
+        Trv energyR;
         Trv upperE;
     public:
         HamiltonMC(VectorND<T> mass, Trv targetAcceptRate = 0.65, Trv maxDelta = 1000, int maxTreeDepth = 10); // Default value from [1]
@@ -151,8 +153,8 @@ namespace Physica {
         root.template updateForce<P>(forceModel);
         nodeF = root;
         nodeR = root;
-        upperE = root.template calcClassicalInternalEnergy<P>(forceModel)
-               - ln(Trv::template random_uniform<R>() + std::numeric_limits<T>::min());
+        energyF = energyR = root.template calcClassicalInternalEnergy<P>(forceModel);
+        upperE = energyF - ln(Trv::template random_uniform<R>() + std::numeric_limits<T>::min());
 
         int iteration = 0;
         int numAccept = 1;
@@ -273,13 +275,13 @@ namespace Physica {
     template<ExecutePolicy P>
     auto HamiltonMC<T>::visitLeaf(bool forward, auto& forceModel) -> Proposal {
         auto& node = forward ? nodeF : nodeR;
-        Trv prevE = node.template calcClassicalInternalEnergy<P>(forceModel);
         if (forward)
             node.template nve_step<P>(kinetic, forceModel);
         else
             node.template nve_step_back<P>(kinetic, forceModel);
 
         Trv curE = node.template calcClassicalInternalEnergy<P>(forceModel);
+        Trv prevE = std::exchange(forward ? energyF : energyR, curE);
         Trv diff = prevE - curE;
         return Proposal{
             .sample = node.getPhaseMatrix().col(0).tail(getDOF()),
