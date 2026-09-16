@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#ifdef PHYSICA_LLVM
 #include <llvm/Support/Error.h>
 
 namespace Physica {
@@ -45,3 +46,4 @@ namespace Physica {
         return *E;
     }
 }
+#endif

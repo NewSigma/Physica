@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,8 +19,10 @@
 #pragma once
 
 #include <system_error>
-#include <cublas_v2.h>
 #include "Physica/Macro.h"
+
+#ifdef PHYSICA_CUDA
+#include <cublas_v2.h>
 
 namespace Physica {
     class PHYSICA_API cuBLASException : public std::system_error {
@@ -33,3 +35,4 @@ namespace Physica {
             throw cuBLASException(err);
     }
 }
+#endif

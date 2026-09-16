@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,6 +21,7 @@
 #include <system_error>
 #include "Physica/Macro.h"
 
+#ifdef PHYSICA_CUDA
 namespace Physica {
     class PHYSICA_API CUDAException : public std::system_error {
         using Base = std::system_error;
@@ -40,3 +41,4 @@ namespace Physica {
         }
     }
 }
+#endif

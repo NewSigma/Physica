@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,8 +19,10 @@
 #pragma once
 
 #include <system_error>
-#include <cusolverDn.h>
 #include "Physica/Macro.h"
+
+#ifdef PHYSICA_CUDA
+#include <cusolverDn.h>
 
 namespace Physica {
     class PHYSICA_API cuSolverException : public std::system_error {
@@ -33,3 +35,4 @@ namespace Physica {
             throw cuSolverException(err);
     }
 }
+#endif

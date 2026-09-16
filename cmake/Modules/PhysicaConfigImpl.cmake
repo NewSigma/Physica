@@ -205,4 +205,5 @@ endif()
 
 if(${PHYSICA_LLVM})
     find_package(LLVM REQUIRED CONFIG)
+    add_definitions(-DPHYSICA_LLVM)
 endif()
