@@ -80,7 +80,7 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle(this auto&&) noexcept;
 
         [[nodiscard]] __host__ __device__ auto&& values(this auto&&) noexcept;
         template<int GradOrder = 1>

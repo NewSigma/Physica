@@ -34,28 +34,30 @@ namespace Physica {
             getLHS().assign(v);
 
         const size_t n = Base::getLength();
+        void* y = v.data_handle();
+        const int inc = static_cast<int>(v.getStride());
         if constexpr (isComplex()) {
             if constexpr (U::isComplex()) {
                 const auto a = T(Base::getRHS()).toMachine();
                 if constexpr (T::Prec == Float32)
-                    cblas_cscal_64(n, &a, v.data(), 1);
+                    cblas_cscal_64(n, &a, y, inc);
                 else
-                    cblas_zscal_64(n, &a, v.data(), 1);
+                    cblas_zscal_64(n, &a, y, inc);
             }
             else {
                 const auto a = Base::getRHS().toMachine();
                 if constexpr (T::Prec == Float32)
-                    cblas_csscal_64(n, a, v.data(), 1);
+                    cblas_csscal_64(n, a, y, inc);
                 else
-                    cblas_zdscal_64(n, a, v.data(), 1);
+                    cblas_zdscal_64(n, a, y, inc);
             }
         }
         else {
             const auto a = Base::getRHS().toMachine();
             if constexpr (T::Prec == Float32)
-                cblas_sscal_64(n, a, reinterpret_cast<float*>(v.data()), 1);
+                cblas_sscal_64(n, a, reinterpret_cast<float*>(y), inc);
             else
-                cblas_dscal_64(n, a, reinterpret_cast<double*>(v.data()), 1);
+                cblas_dscal_64(n, a, reinterpret_cast<double*>(y), inc);
         }
     }
 
@@ -65,18 +67,21 @@ namespace Physica {
 
         const size_t n = Base::getLength();
         const auto alpha = Base::getRHS().toMachine();
-        const void* x = Base::getLHS().data();
+        const void* x = Base::getLHS().data_handle();
+        void* y = v.data_handle();
+        const int incX = static_cast<int>(Base::getLHS().getStride());
+        const int incY = static_cast<int>(v.getStride());
         if constexpr (isComplex()) {
             if constexpr (T::Prec == Float32)
-                cblas_caxpy_64(n, &alpha, x, 1, v.data(), 1);
+                cblas_caxpy_64(n, &alpha, x, incX, y, incY);
             else
-                cblas_zaxpy_64(n, &alpha, x, 1, v.data(), 1);
+                cblas_zaxpy_64(n, &alpha, x, incX, y, incY);
         }
         else {
             if constexpr (T::Prec == Float32)
-                cblas_saxpy_64(n, alpha, static_cast<const float*>(x), 1, reinterpret_cast<float*>(v.data()), 1);
+                cblas_saxpy_64(n, alpha, static_cast<const float*>(x), incX, static_cast<float*>(y), incY);
             else
-                cblas_daxpy_64(n, alpha, static_cast<const double*>(x), 1, reinterpret_cast<double*>(v.data()), 1);
+                cblas_daxpy_64(n, alpha, static_cast<const double*>(x), incX, static_cast<double*>(y), incY);
         }
     }
 

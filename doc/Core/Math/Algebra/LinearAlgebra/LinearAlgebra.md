@@ -85,17 +85,16 @@ Scalar* StridedVector::data_ptr(this auto&& self, size_t index) {
 
 **Compact object**:
 
-The only core operation on compact objects:
-
-``` C++
-Scalar* CompactVector::data() { ... }
-```
-
 A compact object is one whose elements are continuously distributed in memory:
 
 ``` C++
-Scalar* CompactVector::data_handle() { return data(); }
 size_t CompactVector::getStride() { return 1; }
+```
+
+Syntactic sugar `data` is provided. However, derived classes must override `data_handle`, which is more general, instead of `data`.
+
+``` C++
+Scalar* CompactVector::data() { return data_handle(); }
 ```
 
 ## Concept

@@ -50,7 +50,7 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
         [[nodiscard]] size_t getOrder() const noexcept;
-        [[nodiscard]] auto data(this auto&&) noexcept;
+        [[nodiscard]] auto data_handle(this auto&&) noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor; }
@@ -90,8 +90,8 @@ namespace Physica {
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isCompact())
-    auto ReshapedVector<V, MatrixMajor, Row, Col>::data(this auto&& self) noexcept {
-        return std::forward<decltype(self)>(self).v.data();
+    auto ReshapedVector<V, MatrixMajor, Row, Col>::data_handle(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).v.data_handle();
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isCompact())

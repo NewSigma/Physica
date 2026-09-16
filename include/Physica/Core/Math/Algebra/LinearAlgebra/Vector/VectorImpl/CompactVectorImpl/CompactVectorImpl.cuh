@@ -171,18 +171,18 @@ namespace Physica {
 #endif
 
     template<class Derived>
-    __host__ __device__ auto device_obj<CompactVector<Derived>>::data() noexcept {
-        return Base::getDerived().data();
+    __host__ __device__ auto device_obj<CompactVector<Derived>>::data(this auto&& self) noexcept {
+        return self.data_handle();
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<CompactVector<Derived>>::data() const noexcept {
-        return Base::getDerived().data();
+    __host__ __device__ auto device_obj<CompactVector<Derived>>::data_handle() noexcept {
+        return Base::getDerived().data_handle();
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<CompactVector<Derived>>::data_handle(this auto&& self) noexcept {
-        return self.data();
+    __host__ __device__ auto device_obj<CompactVector<Derived>>::data_handle() const noexcept {
+        return Base::getDerived().data_handle();
     }
 
     template<class Derived>

@@ -89,7 +89,7 @@ namespace Physica {
         void swap_row(this auto&, size_t r1, size_t r2) noexcept;
         void swap_col(this auto&, size_t c1, size_t c2) noexcept;
         /* Getters */
-        [[nodiscard]] auto data(this auto&&) noexcept;
+        [[nodiscard]] auto data_handle(this auto&&) noexcept;
         [[nodiscard]] size_t getCol() const noexcept { return v.getCol(); }
         [[nodiscard]] size_t getRow() const noexcept { return v.getRow(); }
         [[nodiscard]] size_t getOrder() const noexcept { return v.getOrder(); }

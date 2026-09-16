@@ -48,7 +48,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return transpose().getCol(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return transpose().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return transpose().getOrder(); }
-        [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle(this auto&&) noexcept;
     };
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
@@ -62,8 +62,8 @@ namespace Physica {
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
-    __host__ __device__ auto device_obj<Transpose<M>>::data(this auto&& self) noexcept {
-        return self.mat.getDerived().data();
+    __host__ __device__ auto device_obj<Transpose<M>>::data_handle(this auto&& self) noexcept {
+        return self.mat.getDerived().data_handle();
     }
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
@@ -92,7 +92,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return vec.getDerived().getLength(); }
         [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept;
-        [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle(this auto&&) noexcept;
     };
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
@@ -106,8 +106,8 @@ namespace Physica {
     }
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
-    __host__ __device__ auto device_obj<Transpose<V>>::data(this auto&& self) noexcept {
-        return self.vec.getDerived().data();
+    __host__ __device__ auto device_obj<Transpose<V>>::data_handle(this auto&& self) noexcept {
+        return self.vec.getDerived().data_handle();
     }
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())

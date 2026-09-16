@@ -134,7 +134,7 @@ namespace Physica {
     }
 
     template<tparams>
-    __host__ __device__ auto device_obj<DenseMatrix>::data(this auto&& self) noexcept {
+    __host__ __device__ auto device_obj<DenseMatrix>::data_handle(this auto&& self) noexcept {
         constexpr bool IsConst = std::is_const<std::remove_reference_t<decltype(self)>>::value;
         using U = Diff<T, Mode, Order>;
         using RetTy = std::conditional<IsConst, typename U::ConstPtrTy, typename U::PtrTy>::type;

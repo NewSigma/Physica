@@ -51,7 +51,7 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept { return mat.getCol(); }
         [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
         [[nodiscard]] size_t getOrder() const noexcept { return mat.getOrder(); }
-        [[nodiscard]] auto data(this auto&& self) noexcept;
+        [[nodiscard]] auto data_handle(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
@@ -91,8 +91,8 @@ namespace Physica {
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
-    auto Transpose<M>::data(this auto&& self) noexcept {
-        return self.mat.data();
+    auto Transpose<M>::data_handle(this auto&& self) noexcept {
+        return self.mat.data_handle();
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
@@ -142,7 +142,7 @@ namespace Physica {
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] size_t getCol() const noexcept { return vec.getLength(); }
         [[nodiscard]] size_t getOrder() const noexcept;
-        [[nodiscard]] auto data(this auto&& self) noexcept;
+        [[nodiscard]] auto data_handle(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
@@ -172,8 +172,8 @@ namespace Physica {
     }
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
-    auto Transpose<V>::data(this auto&& self) noexcept {
-        return self.vec.data();
+    auto Transpose<V>::data_handle(this auto&& self) noexcept {
+        return self.vec.data_handle();
     }
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())

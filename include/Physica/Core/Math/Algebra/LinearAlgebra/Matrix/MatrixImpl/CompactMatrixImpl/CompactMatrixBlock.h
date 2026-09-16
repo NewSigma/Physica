@@ -78,7 +78,6 @@ namespace Physica {
         [[nodiscard]] constexpr size_t getLength() const noexcept;
         [[nodiscard]] constexpr size_t getStride() const noexcept;
         [[nodiscard]] auto data_handle(this auto&& self) noexcept;
-        [[nodiscard]] auto data(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept;
@@ -171,11 +170,6 @@ namespace Physica {
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     auto CompactMatrixBlock<M, Row, Col>::data_handle(this auto&& self) noexcept {
         return self.mat.data_ptr(self.fromRow, self.fromCol);
-    }
-
-    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
-    auto CompactMatrixBlock<M, Row, Col>::data(this auto&& self) noexcept {
-        return self.data_handle();
     }
 
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)

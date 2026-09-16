@@ -231,18 +231,18 @@ namespace Physica {
 #endif
 
     template<class Derived>
-    auto CompactMatrix<Derived>::data() noexcept {
-        return Base::getDerived().data();
+    auto CompactMatrix<Derived>::data(this auto&& self) noexcept {
+        return self.data_handle();
     }
 
     template<class Derived>
-    auto CompactMatrix<Derived>::data() const noexcept {
-        return Base::getDerived().data();
+    auto CompactMatrix<Derived>::data_handle() noexcept {
+        return Base::getDerived().data_handle();
     }
 
     template<class Derived>
-    auto CompactMatrix<Derived>::data_handle(this auto&& self) noexcept {
-        return self.data();
+    auto CompactMatrix<Derived>::data_handle() const noexcept {
+        return Base::getDerived().data_handle();
     }
 
     template<class Derived>

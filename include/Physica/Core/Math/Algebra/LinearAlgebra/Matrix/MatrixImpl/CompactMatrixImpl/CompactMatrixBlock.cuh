@@ -54,7 +54,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
         [[nodiscard]] __host__ __device__ constexpr size_t getStride() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_handle(this auto&& self) noexcept;
-        [[nodiscard]] __host__ __device__ auto data(this auto&& self) noexcept;
     };
 
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
@@ -117,11 +116,6 @@ namespace Physica {
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
     __host__ __device__ auto device_obj<CompactMatrixBlock<M, Row, Col>>::data_handle(this auto&& self) noexcept {
         return self.mat.getDerived().data_ptr(self.fromRow, self.fromCol);
-    }
-
-    template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
-    __host__ __device__ auto device_obj<CompactMatrixBlock<M, Row, Col>>::data(this auto&& self) noexcept {
-        return self.data_handle();
     }
 
     template<Matrix M, size_t Row, size_t Col>

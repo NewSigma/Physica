@@ -41,11 +41,11 @@ namespace Physica {
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
-        [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle(this auto&&) noexcept;
     };
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
-    __host__ __device__ auto device_obj<Flatten<M>>::data(this auto&& self) noexcept {
-        return self.mat.data();
+    __host__ __device__ auto device_obj<Flatten<M>>::data_handle(this auto&& self) noexcept {
+        return self.mat.data_handle();
     }
 }

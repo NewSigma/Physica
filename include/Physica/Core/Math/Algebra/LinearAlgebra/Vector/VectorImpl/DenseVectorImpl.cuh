@@ -110,7 +110,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    __host__ __device__ auto* device_obj<DenseVector<T, Length, Allocator>>::data(this auto&& self) noexcept {
+    __host__ __device__ auto* device_obj<DenseVector<T, Length, Allocator>>::data_handle(this auto&& self) noexcept {
         return self.storage.data();
     }
 

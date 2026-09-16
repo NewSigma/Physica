@@ -65,9 +65,9 @@ namespace Physica {
         const DataSetType read(const H5Loc& loc, const char* name);
         DataSetType write(H5Loc& loc, const char* name) const;
         /* Getters */
-        [[nodiscard]] auto data() noexcept;
-        [[nodiscard]] auto data() const noexcept;
-        [[nodiscard]] auto data_handle(this auto&&) noexcept;
+        [[nodiscard]] auto data(this auto&&) noexcept;
+        [[nodiscard]] auto data_handle() noexcept;
+        [[nodiscard]] auto data_handle() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept { return 1; }
     protected:

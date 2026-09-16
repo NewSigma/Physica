@@ -107,7 +107,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    auto DenseMatrix<T, Major, Row, Col, Allocator>::data(this auto&& self) noexcept {
+    auto DenseMatrix<T, Major, Row, Col, Allocator>::data_handle(this auto&& self) noexcept {
         return self.storage.data();
     }
 

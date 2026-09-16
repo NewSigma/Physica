@@ -160,7 +160,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    auto* DenseVector<T, Length, Allocator>::data(this auto&& self) noexcept {
+    auto* DenseVector<T, Length, Allocator>::data_handle(this auto&& self) noexcept {
         return self.storage.data();
     }
 

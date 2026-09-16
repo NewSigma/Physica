@@ -66,9 +66,9 @@ namespace Physica {
         const DataSetType read(const H5Loc& loc, const char* name);
         DataSetType write(H5Loc& loc, const char* name) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ auto data() noexcept;
-        [[nodiscard]] __host__ __device__ auto data() const noexcept;
-        [[nodiscard]] __host__ __device__ auto data_handle(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle() noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle() const noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

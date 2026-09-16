@@ -62,7 +62,7 @@ namespace Physica {
         [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept;
-        [[nodiscard]] auto data(this auto&&) noexcept;
+        [[nodiscard]] auto data_handle(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
@@ -161,7 +161,7 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    auto CompactVectorBlock<V, Length>::data(this auto&& self) noexcept {
+    auto CompactVectorBlock<V, Length>::data_handle(this auto&& self) noexcept {
         return self.vec.data() + self.from;
     }
 

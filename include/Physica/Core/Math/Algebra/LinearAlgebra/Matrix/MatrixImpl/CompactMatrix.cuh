@@ -82,9 +82,9 @@ namespace Physica {
 
         void read(const auto& obj);
         /* Getters */
-        [[nodiscard]] __host__ __device__ auto data() noexcept;
-        [[nodiscard]] __host__ __device__ auto data() const noexcept;
-        [[nodiscard]] __host__ __device__ auto data_handle(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle() noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle() const noexcept;
         [[nodiscard]] __host__ __device__ constexpr size_t getRowStride() const noexcept;
         [[nodiscard]] __host__ __device__ constexpr size_t getColStride() const noexcept;
     protected:

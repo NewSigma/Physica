@@ -87,7 +87,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return storage.getLength(); }
         [[nodiscard]] size_t getCapacity() const noexcept { return storage.getCapacity(); }
-        [[nodiscard]] auto* data(this auto&&) noexcept;
+        [[nodiscard]] auto* data_handle(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         [[nodiscard]] static This zeros(size_t len);

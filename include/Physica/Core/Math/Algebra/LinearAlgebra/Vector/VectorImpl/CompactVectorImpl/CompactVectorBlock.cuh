@@ -58,7 +58,7 @@ namespace Physica {
         [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
-        [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle(this auto&&) noexcept;
     };
 
     template<Vector V, size_t Length>
@@ -127,7 +127,7 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    __host__ __device__ auto device_obj<CompactVectorBlock<V, Length>>::data(this auto&& self) noexcept {
+    __host__ __device__ auto device_obj<CompactVectorBlock<V, Length>>::data_handle(this auto&& self) noexcept {
         return self.vec.getDerived().data() + self.from;
     }
 }

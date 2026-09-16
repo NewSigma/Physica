@@ -48,7 +48,7 @@ namespace Physica {
         using Base::getDerived;
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getRSpaceSize(); }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getLength(); }
-        [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     protected:
@@ -72,7 +72,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTRSpace<Derived, 1>::data(this auto&& self) noexcept {
+    __host__ __device__ auto FFTRSpace<Derived, 1>::data_handle(this auto&& self) noexcept {
         if constexpr (isComplex())
             return self.getDerived().asComplexBuffer();
         else

@@ -78,7 +78,7 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] auto data(this auto&&) noexcept;
+        [[nodiscard]] auto data_handle(this auto&&) noexcept;
 
         [[nodiscard]] auto&& values(this auto&&) noexcept;
         template<int GradOrder = 1>

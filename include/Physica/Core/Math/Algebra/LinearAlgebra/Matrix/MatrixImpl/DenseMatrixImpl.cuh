@@ -100,7 +100,7 @@ namespace Physica {
     }
 
     template<tparams>
-    __host__ __device__ auto device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::data(this auto&& self) noexcept {
+    __host__ __device__ auto device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::data_handle(this auto&& self) noexcept {
         return self.storage.data();
     }
 

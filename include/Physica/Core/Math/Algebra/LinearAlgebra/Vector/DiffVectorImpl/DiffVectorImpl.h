@@ -137,7 +137,7 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::data(this auto&& self) noexcept {
+    auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::data_handle(this auto&& self) noexcept {
         constexpr bool IsConst = std::is_const<std::remove_reference_t<decltype(self)>>::value;
         using U = Diff<T, Mode, Order>;
         using RetTy = std::conditional<IsConst, typename U::ConstPtrTy, typename U::PtrTy>::type;

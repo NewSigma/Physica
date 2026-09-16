@@ -90,9 +90,9 @@ namespace Physica {
         const H5Dataset<2> read(const H5Loc& loc, const char* name);
         H5Dataset<2> write(H5Loc& loc, const char* name) const;
         /* Getters */
-        [[nodiscard]] auto data() noexcept;
-        [[nodiscard]] auto data() const noexcept;
-        [[nodiscard]] auto data_handle(this auto&&) noexcept;
+        [[nodiscard]] auto data(this auto&&) noexcept;
+        [[nodiscard]] auto data_handle() noexcept;
+        [[nodiscard]] auto data_handle() const noexcept;
         [[nodiscard]] constexpr size_t getRowStride() const noexcept;
         [[nodiscard]] constexpr size_t getColStride() const noexcept;
         /* Static members */

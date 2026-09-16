@@ -81,7 +81,7 @@ namespace Physica {
         void swap_col(this auto&, size_t c1, size_t c2) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] auto data(this auto&&) noexcept;
+        [[nodiscard]] auto data_handle(this auto&&) noexcept;
         [[nodiscard]] size_t getRow() const noexcept { return storage.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return storage.getCol(); }
         [[nodiscard]] size_t getSize() const noexcept { return storage.getSize(); }

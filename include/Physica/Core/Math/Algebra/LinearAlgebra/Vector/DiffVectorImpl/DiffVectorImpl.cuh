@@ -124,12 +124,11 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ auto device_obj<DenseVector<Diff<T, Mode, Order>>>::data_ptr(this auto&& self, size_t index) noexcept {
-        assert(index < self.getLength() && "[Error]: Index out of range");
+    __host__ __device__ auto device_obj<DenseVector<Diff<T, Mode, Order>>>::data_handle(this auto&& self) noexcept {
         constexpr bool IsConst = std::is_const<std::remove_reference_t<decltype(self)>>::value;
         using U = Diff<T, Mode, Order>;
         using RetTy = std::conditional<IsConst, typename U::ConstPtrTy, typename U::PtrTy>::type;
-        return RetTy(self.v.data_ptr(index), self.g.data_ptr(index));
+        return RetTy(self.v.data(), self.g.data());
     }
 
     template<Scalar T, DiffMode Mode, int Order>

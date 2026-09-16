@@ -43,7 +43,7 @@ namespace Physica {
         [[nodiscard]] decltype(auto) grads(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getSize(); }
-        [[nodiscard]] auto data(this auto&& self) noexcept;
+        [[nodiscard]] auto data_handle(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
@@ -59,8 +59,8 @@ namespace Physica {
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
-    auto Flatten<M>::data(this auto&& self) noexcept {
-        return self.mat.data();
+    auto Flatten<M>::data_handle(this auto&& self) noexcept {
+        return self.mat.data_handle();
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
