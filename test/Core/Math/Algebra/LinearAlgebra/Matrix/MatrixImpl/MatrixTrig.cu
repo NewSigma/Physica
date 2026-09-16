@@ -73,6 +73,28 @@ namespace {
         expect<RandomSource>(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), Prec));
     }
 
+    void invGEMV() noexcept {
+        constexpr double Prec = 1E-4;
+        using Vector = device_obj<VectorND<T>>;
+        const M data = device_obj<IdentityMatrix<T, 4>>{} + M::random_uniform<RandomSource>(4, 4);
+        const Vector v = VectorND<T>::random_uniform<RandomSource>(4).toDevice();
+        Vector sol;
+        const auto check = [&](const Matrix auto& trig) {
+            sol = trig.inv() * v;
+            const Vector prod = trig * sol;
+            expect<RandomSource>(vectorNear(prod.toHost(), v.toHost(), Prec));
+        };
+
+        check(data.tril());
+        check(data.tril_unit());
+        check(data.triu());
+        check(data.triu_unit());
+        check(data.transpose().tril());
+        check(data.transpose().triu());
+        check(data.transpose().tril_unit());
+        check(data.transpose().triu_unit());
+    }
+
     void invGEMM() noexcept {
         constexpr double Prec = 1E-4;
         const M rhs = M::random_uniform<RandomSource>(4, 4);
@@ -104,6 +126,7 @@ namespace {
 int main() {
     gemm();
     inverse();
+    invGEMV();
     invGEMM();
     return 0;
 }

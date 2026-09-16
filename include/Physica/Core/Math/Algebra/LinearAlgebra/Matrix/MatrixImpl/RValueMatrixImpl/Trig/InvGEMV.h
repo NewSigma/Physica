@@ -44,6 +44,8 @@ namespace Physica {
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto& target) const;
+        void assign_base(Vector auto& target) const;
+        void assign_mkl(Vector auto& target) const;
         /* Getters */
         [[nodiscard]] size_t getLength() const { return rhs.getLength(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
@@ -58,6 +60,14 @@ namespace Physica {
     template<Matrix M, Vector V> requires(instanceof<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, MatrixTrig>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
+        if constexpr (HasMKL() && Internal::EnableLAPACK<V, decltype(target)>::value)
+            assign_mkl(target);
+        else
+            assign_base(target);
+    }
+
+    template<Matrix M, Vector V> requires(instanceof<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, MatrixTrig>)
+    void GEMV<M, V>::assign_base(Vector auto& target) const {
         using Expr = std::remove_cvref<M>::type;
         constexpr bool Unit = Traits<Expr>::Unit;
         rhs.assign(target);
@@ -110,3 +120,7 @@ namespace Physica {
         return std::max(std::remove_cvref_t<M>::getRowAtCompile(), std::remove_cvref_t<V>::getSizeAtCompile());
     }
 }
+
+#ifdef PHYSICA_MKL
+    #include "InvGEMV_MKL.h"
+#endif

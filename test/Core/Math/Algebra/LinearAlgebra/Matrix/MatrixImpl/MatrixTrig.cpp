@@ -94,20 +94,28 @@ namespace {
     }
 
     void invGEMV() {
-        constexpr double Prec = 1E-12;
-        auto m = Matrix4D::random_uniform<RandomSource>(4, 4);
-        auto v = Vector4D<T>::random_uniform<RandomSource>(4);
-        Vector4D<T> sol = m.tril().inv() * v;
-        expect<RandomSource>(vectorNear(m.tril() * sol, v, Prec));
+        constexpr double Prec = 1E-10;
+        const auto m = Matrix4D::random_uniform<RandomSource>(4, 4);
+        const auto v = Vector4D<T>::random_uniform<RandomSource>(4);
+        Vector4D<T> sol;
+        const auto check = [&](const Matrix auto& trig) {
+            (trig.inv() * v).assign_base(sol);
+            expect<RandomSource>(vectorNear(trig * sol, v, Prec));
 
-        sol = m.tril_unit().inv() * v;
-        expect<RandomSource>(vectorNear(m.tril_unit() * sol, v, Prec));
+            if constexpr (HasMKL()) {
+                (trig.inv() * v).assign_mkl(sol);
+                expect<RandomSource>(vectorNear(trig * sol, v, Prec));
+            }
+        };
 
-        sol = m.triu().inv() * v;
-        expect<RandomSource>(vectorNear(m.triu() * sol, v, Prec));
-
-        sol = m.triu_unit().inv() * v;
-        expect<RandomSource>(vectorNear(m.triu_unit() * sol, v, Prec));
+        check(m.tril());
+        check(m.tril_unit());
+        check(m.triu());
+        check(m.triu_unit());
+        check(m.transpose().tril());
+        check(m.transpose().triu());
+        check(m.transpose().tril_unit());
+        check(m.transpose().triu_unit());
     }
 
     void invGEMM() {
