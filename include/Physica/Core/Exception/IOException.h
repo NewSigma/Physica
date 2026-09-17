@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,11 +19,13 @@
 #pragma once
 
 #include <stdexcept>
+#include <string>
 #include "Physica/Macro.h"
 
 namespace Physica {
     class PHYSICA_API IOException : public std::runtime_error {
     public:
         IOException(const char* msg) : std::runtime_error(msg) {}
+        IOException(const std::string& msg) : std::runtime_error(msg) {}
     };
 }

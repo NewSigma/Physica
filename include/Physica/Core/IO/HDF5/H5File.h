@@ -47,7 +47,7 @@ namespace Physica {
         [[nodiscard]] static H5File open(const char* name, unsigned int openflag = ReadWrite);
         [[nodiscard]] constexpr static IdentifierType itype() noexcept { return IdentifierType::File; }
     private:
-        H5File(H5ID id_) noexcept;
+        H5File(H5ID id_);
 
         friend class H5ID;
     };

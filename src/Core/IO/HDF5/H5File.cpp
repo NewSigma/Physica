@@ -36,11 +36,17 @@ namespace {
 }
 
 FileProperty::FileProperty() : id(H5Pcreate(H5P_FILE_ACCESS)) {
-    std::ignore = H5Pset_fclose_degree(id.getHID(), H5F_CLOSE_STRONG);
+    auto hid = id.getHID();
+    std::ignore = H5Pset_fclose_degree(hid, H5F_CLOSE_STRONG);
+    if constexpr (HasMPI()) {
+        // MPI might fork process and hold the lock; disable locking to avoid leaking.
+        std::ignore = H5Pset_file_locking(hid, false, true);
+    }
 }
 
-H5File::H5File(H5ID id_) noexcept : H5Loc(std::move(id_)) {
-    assert(Base::isa<H5File>());
+H5File::H5File(H5ID id_) : H5Loc(std::move(id_)) {
+    if (!(Base::isValid() && Base::isa<H5File>()))
+        throw IOException("[Error]: Failed to open HDF5 file; May be locked by another process?");
 }
 
 bool H5File::isReadOnly() const noexcept {
