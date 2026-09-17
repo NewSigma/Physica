@@ -42,6 +42,7 @@ namespace Physica {
         device_obj<ActionMatrix<T>> action;
         device_obj<MatrixND<T>> forceBuffer;
         device_obj<MatrixND<T>> solBuffer;
+        Array<device_obj<MatrixND<T>>, 2> invBlockBuffer;
         HamiltonMC<Tr> hmc;
         Trv correction;
 
@@ -92,6 +93,7 @@ namespace Physica {
     private:
         [[nodiscard]] Vector2D<Trv> calcDet();
         void calcGreen();
+        void calcInvBlock(const device_obj<DenseLU<T, false>>& lu, size_t offset, size_t size);
         /* Getters */
         [[nodiscard]] Trv getBetaU() const noexcept;
     };
@@ -109,6 +111,10 @@ namespace Physica {
             spinLU.resize(size);
         forceBuffer.resize(getAuxField());
         solBuffer.resize(size);
+
+        const size_t maxWidth = std::max(size_t(getNumSite()), size_t(2 * getNumFreq()));
+        for (auto& buffer : invBlockBuffer)
+            buffer.resize(size, maxWidth);
     }
 
     template<Scalar T>
@@ -124,6 +130,10 @@ namespace Physica {
             spinLU.resize(size);
         forceBuffer.resize(getAuxField());
         solBuffer.resize(size);
+
+        const size_t maxWidth = std::max(size_t(getNumSite()), size_t(2 * getNumFreq()));
+        for (auto& buffer : invBlockBuffer)
+            buffer.resize(size, maxWidth);
     }
 
     template<Scalar T>
@@ -198,16 +208,19 @@ namespace Physica {
         for (int spin : {0, 1}) {
             auto& spinLU = lu[spin];
             spinLU.compute(action);
-            solBuffer = spinLU.inv();
 
             int numSite = getNumSite();
+            int numFreq2 = getNumFreq() * 2;
+            for (int site = 0; site < numSite; ++site)
+                calcInvBlock(spinLU, size_t(site) * numFreq2, numFreq2);
+
             int numThread = std::min<int>(numSite, CUDADevAttr::DefaultThreadsPerBlock);
             int numBlockX = getMaxBoson();
             CUDAExecutor::launch([spinF_ = asStruct(forceBuffer),
-                                 inv_ = asStruct(solBuffer),
-                                 factor = Trv(spin == 0 ? 1 : -1),
-                                 numSite,
-                                 numFreq2 = getNumFreq() * 2] __device__() mutable {
+                                  inv_ = asStruct(solBuffer),
+                                  factor = Trv(spin == 0 ? 1 : -1),
+                                  numSite,
+                                  numFreq2] __device__() mutable {
                 const auto invT = inv_.getDerived().transpose();
                 auto& spinF = spinF_.getDerived();
                 const int freq = int(blockIdx.x);
@@ -286,13 +299,16 @@ namespace Physica {
 
     template<Scalar T>
     void device_obj<FreqDQMC<T>>::calcGreen() {
+        const int numSite = getNumSite();
         for (int spin : {0, 1}) {
-            solBuffer = lu[spin].inv();
+            for (int i = 0, offset = 0; i < 2 * getNumFreq(); ++i, offset += numSite)
+                calcInvBlock(lu[spin], offset, numSite);
+
             auto kernel = [solBuffer_ = asStruct(solBuffer),
-                        green_ = asStruct(greensD[spin]),
-                        numSite = getNumSite(),
-                        size = 2 * getNumFreq(),
-                        correction = correction] __device__() mutable {
+                           green_ = asStruct(greensD[spin]),
+                           numSite,
+                           size = 2 * getNumFreq(),
+                           correction = correction] __device__() mutable {
                 const auto& solBuffer = solBuffer_.getDerived();
                 auto& green = green_.getDerived();
                 unsigned int row = blockIdx.x * blockDim.x + threadIdx.x;
@@ -312,7 +328,6 @@ namespace Physica {
                 green[row, col] = elem;
             };
 
-            int numSite = getNumSite();
             uint32_t numThread = std::min<uint32_t>(numSite, CUDADevAttr::WarpSize);
             uint32_t numBlockX = (numSite + numThread - 1) / numThread;
             uint32_t numBlockY = numSite;
@@ -321,6 +336,24 @@ namespace Physica {
             greensD[spin].toHostAsync(greensH[spin]);
         }
         CUDAExecutor::wait();
+    }
+
+    template<Scalar T>
+    void device_obj<FreqDQMC<T>>::calcInvBlock(const device_obj<DenseLU<T, false>>& lu, size_t offset, size_t size) {
+        assert(offset + size <= lu.getOrder());
+        const size_t order = lu.getOrder();
+        const size_t coorder = order - offset;
+        const auto block = lu.getMatrixLU().block(offset, coorder, offset, coorder);
+
+        auto rhs = invBlockBuffer[0].block(0, coorder, 0, size);
+        rhs.zeros();
+        rhs.diag() = T(1);
+
+        auto temp = invBlockBuffer[1].block(0, coorder, 0, size);
+        temp = block.tril_unit().inv() * rhs;
+        rhs = block.triu().inv() * temp;
+
+        solBuffer.block(offset, size, offset, size) = invBlockBuffer[0].block(0, size, 0, size);
     }
 
     template<Scalar T>

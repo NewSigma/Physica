@@ -163,6 +163,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
+        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept;
         [[nodiscard]] __host__ __device__ constexpr size_t getRowStride() const noexcept;
         [[nodiscard]] __host__ __device__ constexpr size_t getColStride() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_handle(this auto&& self) noexcept;
@@ -302,6 +303,12 @@ namespace Physica {
             return colCount;
         else
             return Col;
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ size_t device_obj<CompactMatrixBlock<M, Row, Col>>::getOrder() const noexcept {
+        assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
+        return getRow();
     }
 
     template<Matrix M, size_t Row, size_t Col>

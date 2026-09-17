@@ -409,6 +409,22 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col>
+    size_t CompactMatrixBlock<M, Row, Col>::getRow() const noexcept {
+        if constexpr (Row == Dynamic)
+            return rowCount;
+        else
+            return Row;
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    size_t CompactMatrixBlock<M, Row, Col>::getCol() const noexcept {
+        if constexpr (Col == Dynamic)
+            return colCount;
+        else
+            return Col;
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
     size_t CompactMatrixBlock<M, Row, Col>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return getRow();
@@ -437,22 +453,6 @@ namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
     __host__ __device__ consteval size_t CompactMatrixBlock<M, Row, Col>::getColAtCompile() noexcept {
         return Col;
-    }
-
-    template<Matrix M, size_t Row, size_t Col>
-    size_t CompactMatrixBlock<M, Row, Col>::getRow() const noexcept {
-        if constexpr (Row == Dynamic)
-            return rowCount;
-        else
-            return Row;
-    }
-
-    template<Matrix M, size_t Row, size_t Col>
-    size_t CompactMatrixBlock<M, Row, Col>::getCol() const noexcept {
-        if constexpr (Col == Dynamic)
-            return colCount;
-        else
-            return Col;
     }
 
     template<Matrix M, size_t Row, size_t Col>

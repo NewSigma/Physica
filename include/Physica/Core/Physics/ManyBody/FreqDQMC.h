@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
 #include "Physica/Core/Physics/MC/HamiltonMC.h"
 #include "DQMCImpl/ActionMatrix.h"
 #include "ElasticDQMC.h"
@@ -89,6 +90,7 @@ namespace Physica {
         [[nodiscard]] Trv getBetaU() const noexcept;
         /* Static members */
         [[nodiscard]] static VectorND<Trv> makeDefaultMass(const Matrix auto& auxField);
+        [[nodiscard]] static MatrixND<T> calcInvBlock(const DenseLU<T, false>& lu, size_t offset, size_t size);
         /* Friends */
         friend class device_obj<This>;
     };
@@ -188,7 +190,6 @@ namespace Physica {
         auto task = parallel_for<P>([this, &spinFs](size_t spin) {
             auto& spinLU = lu[spin];
             spinLU.compute();
-            const MatrixND<T> inv = spinLU.inv();
 
             auto& spinF = spinFs[spin];
             spinF.resize(getAuxField());
@@ -197,7 +198,7 @@ namespace Physica {
             const Trv factor = spin == 0 ? 1 : -1;
             const int numFreq2 = getNumFreq() * 2;
             for (int site = 0; site < getNumSite(); ++site) {
-                const auto block = inv.transpose().block(site * numFreq2, numFreq2, site * numFreq2, numFreq2);
+                const MatrixND<T> block = calcInvBlock(spinLU, size_t(site) * numFreq2, numFreq2).transpose();
                 for (int freq = 0; freq < getMaxBoson(); ++freq) {
                     if (freq == 0)
                         spinF[freq, site] = block.diag().sum().real() * factor;
@@ -271,14 +272,11 @@ namespace Physica {
     template<ExecutePolicy P>
     auto FreqDQMC<T>::calcGreen() {
         return parallel_for<P>([this](size_t spin) {
-            auto& spinLU = lu[spin];
-            MatrixND<T> inv = spinLU.inv();
-
             const int numSite = getNumSite();
             auto& green = greens[spin];
             green.zeros();
             for (int _ = 0, offset = 0; _ < 2 * getNumFreq(); ++_) {
-                green += inv.block(offset, numSite, offset, numSite).reals();
+                green += calcInvBlock(lu[spin], offset, numSite).reals();
                 offset += numSite;
             }
             green.diag() += Trv(0.5) + correction;
@@ -297,5 +295,22 @@ namespace Physica {
         auto mat = result.template reshape<Major>(auxField.getRow(), auxField.getCol() * 2);
         mat.bottomRows(1) *= Trv(2);
         return result;
+    }
+
+    template<Scalar T>
+    auto FreqDQMC<T>::calcInvBlock(const DenseLU<T, false>& lu, size_t offset, size_t size) -> MatrixND<T> {
+        assert(offset + size <= lu.getOrder());
+        const size_t order = lu.getOrder();
+        const size_t coorder = order - offset;
+        const auto block = lu.getMatrixLU().block(offset, coorder, offset, coorder);
+
+        MatrixND<T> rhs(coorder, size);
+        rhs.zeros();
+        for (size_t i = 0; i < size; ++i)
+            rhs[i, i] = T(1);
+
+        MatrixND<T> temp = block.tril_unit().inv() * rhs;
+        MatrixND<T> result = block.triu().inv() * temp;
+        return result.topRows(size);
     }
 }
