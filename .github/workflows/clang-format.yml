@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  format:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -20,10 +20,18 @@ jobs:
       with:
         fetch-depth: 2
 
-    - name: Install
+    - name: Install conda
+      uses: conda-incubator/setup-miniconda@v4.0.1
+      with:
+        activate-environment: base
+        channels: conda-forge
+
+    - name: Install clang-format
+      shell: bash -el {0}
       run: |
-        sudo apt-get install -y clang-format-20
+        conda install -y clang-tools=23.1.1
 
     - name: Run clang-format
+      shell: bash -el {0}
       run: |
-        git clang-format-20 HEAD^ --diff --binary=`which clang-format-20`
+        git clang-format HEAD^ --diff --binary="$(which clang-format-23)"
