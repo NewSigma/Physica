@@ -33,6 +33,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tr;
         using typename Base::Tv;
+        using typename Base::Trv;
     public:
         /* Operators */
         This& operator=(const This& m) = delete;
@@ -74,7 +75,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto bottomRightCorner(this auto&&, size_t from) noexcept;
         [[nodiscard]] __host__ __device__ auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
 
-        void zero_grad() noexcept;
+        __host__ __device__ void zeros() noexcept;
+        __host__ __device__ void zero_grad() noexcept;
         template<RNG R>
         void random_uniform();
         template<RNG R>

@@ -48,61 +48,8 @@ namespace Physica {
         StridedMatrix(const This&) = default;
         StridedMatrix(This&&) noexcept = default;
     };
-
-    template<class Derived>
-    constexpr size_t StridedMatrix<Derived>::getRowStride() const noexcept {
-        if constexpr (Derived::getRowStrideAtCompile() != Dynamic)
-            return Derived::getRowStrideAtCompile();
-        else
-            return Base::getDerived().getRowStride();
-    }
-
-    template<class Derived>
-    constexpr size_t StridedMatrix<Derived>::getColStride() const noexcept {
-        if constexpr (Derived::getColStrideAtCompile() != Dynamic)
-            return Derived::getColStrideAtCompile();
-        else
-            return Base::getDerived().getColStride();
-    }
-
-    template<class Derived>
-    constexpr size_t StridedMatrix<Derived>::getMajorStride() const noexcept {
-        if constexpr (Derived::isRowMatrix())
-            return getRowStride();
-        else
-            return getColStride();
-    }
-
-    template<class Derived>
-    constexpr size_t StridedMatrix<Derived>::getMinorStride() const noexcept {
-        if constexpr (Derived::isRowMatrix())
-            return getColStride();
-        else
-            return getRowStride();
-    }
-
-    template<class Derived>
-    auto StridedMatrix<Derived>::data_handle() noexcept {
-        return Base::getDerived().data_handle();
-    }
-
-    template<class Derived>
-    auto StridedMatrix<Derived>::data_handle() const noexcept {
-        return Base::getDerived().data_handle();
-    }
-
-    template<class Derived>
-    auto StridedMatrix<Derived>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
-        assert(row < self.getRow());
-        assert(col < self.getCol());
-        return self.data_handle() + row * self.getRowStride() + col * self.getColStride();
-    }
-
-    template<class Derived>
-    StridedMatrix<Derived>::StridedMatrix() {
-        static_assert(Derived::isRowMatrix() || Derived::isColMatrix(), "[Error]: StridedMatrix requires a known major");
-    }
 }
 
+#include "StridedMatrixImpl/StridedMatrixImpl.h"
 #include "StridedMatrixImpl/MainDiag.h"
 #include "StridedMatrixImpl/OffsetDiag.h"

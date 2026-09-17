@@ -216,7 +216,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    void device_obj<LValueMatrix<Derived>>::zero_grad() noexcept {
+    __host__ __device__ void device_obj<LValueMatrix<Derived>>::zeros() noexcept {
+        operator=(Trv(0));
+    }
+
+    template<class Derived>
+    __host__ __device__ void device_obj<LValueMatrix<Derived>>::zero_grad() noexcept {
         Base::getDerived().grads().zeros();
     }
 

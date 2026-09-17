@@ -49,56 +49,8 @@ namespace Physica {
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
     };
-
-    template<class Derived>
-    __host__ __device__ constexpr size_t device_obj<StridedMatrix<Derived>>::getRowStride() const noexcept {
-        if constexpr (Derived::getRowStrideAtCompile() != Dynamic)
-            return Derived::getRowStrideAtCompile();
-        else
-            return Base::getDerived().getRowStride();
-    }
-
-    template<class Derived>
-    __host__ __device__ constexpr size_t device_obj<StridedMatrix<Derived>>::getColStride() const noexcept {
-        if constexpr (Derived::getColStrideAtCompile() != Dynamic)
-            return Derived::getColStrideAtCompile();
-        else
-            return Base::getDerived().getColStride();
-    }
-
-    template<class Derived>
-    __host__ __device__ constexpr size_t device_obj<StridedMatrix<Derived>>::getMajorStride() const noexcept {
-        if constexpr (Derived::isRowMatrix())
-            return getRowStride();
-        else
-            return getColStride();
-    }
-
-    template<class Derived>
-    __host__ __device__ constexpr size_t device_obj<StridedMatrix<Derived>>::getMinorStride() const noexcept {
-        if constexpr (Derived::isRowMatrix())
-            return getColStride();
-        else
-            return getRowStride();
-    }
-
-    template<class Derived>
-    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::data_handle() noexcept {
-        return Base::getDerived().data_handle();
-    }
-
-    template<class Derived>
-    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::data_handle() const noexcept {
-        return Base::getDerived().data_handle();
-    }
-
-    template<class Derived>
-    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
-        assert(row < self.getRow());
-        assert(col < self.getCol());
-        return self.data_handle() + row * self.getRowStride() + col * self.getColStride();
-    }
 }
 
+#include "StridedMatrixImpl/StridedMatrixImpl.cuh"
 #include "StridedMatrixImpl/MainDiag.cuh"
 #include "StridedMatrixImpl/OffsetDiag.cuh"
