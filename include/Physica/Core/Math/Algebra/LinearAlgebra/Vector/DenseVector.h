@@ -52,7 +52,6 @@ namespace Physica {
         ~DenseVector() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] bool operator==(const This& other) const noexcept;
         using Base::operator=;
         /* Operations */
         template<size_t I>

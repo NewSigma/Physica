@@ -39,6 +39,28 @@ namespace {
         expect<RandomSource>(x.min() == x[x.argmin()]);
     }
 
+    void equality() {
+        {
+            VectorND<float64> a = {1, 2, 3, 4};
+            VectorND<float64> expected = {2, 4, 6, 8};
+            auto expr = a * float64(2);
+            expect(expr == expected);
+            expect(a != expr);
+        }
+        using dfloat = Diff<float64, DiffMode::Forward, 1>;
+        VectorND<dfloat> a = VectorND<float64>{1, 2, 3};
+        VectorND<dfloat> b = a;
+        expect(a == b);
+
+        a.grads() = b.grads() = VectorND<float64>{4, 5, 6};
+        expect(a == b);
+        expect(a.head<2>() == b.head<2>());
+
+        b.grads() = VectorND<float64>{4, 5, 7};
+        expect(a != b);
+        expect(a.head<2>() == b.head<2>());
+    }
+
     void reshape() {
         using T = float32;
         auto id = IdentityMatrix<T>(3);
@@ -91,6 +113,7 @@ int main() {
 
     sum();
     argminTest();
+    equality();
     reshape();
     dot_reverse();
     transpose_hermite();

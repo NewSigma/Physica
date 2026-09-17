@@ -67,11 +67,6 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    bool DenseVector<Diff<T, Mode, Order>, Length, Allocator>::operator==(const This& other) const {
-        return v == other.v && g == other.g;
-    }
-
-    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     template<size_t I>
     constexpr auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::get(this auto&& self) noexcept {
         return self[I];

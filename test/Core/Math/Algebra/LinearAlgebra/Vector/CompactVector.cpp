@@ -36,9 +36,29 @@ namespace {
         result.read(raw);
         expect(result == complex);
     }
+
+    void equality() {
+        VectorND<float64> a = {1, 2, 3, 4};
+        VectorND<float64> b = a;
+        VectorND<float64> c = {1, 2, 3, 5};
+        expect(a == b);
+        expect(a != c);
+        expect(a != b.head<2>());
+        expect(a.segment<2>(1, 3) == b.segment<2>(1, 3));
+
+        a.reserve(64);
+        expect(a == b);
+
+        VectorND<cfloat64> x = {cfloat64(1.0, 2.0), cfloat64(3.0, 4.0)};
+        VectorND<cfloat64> y = x;
+        VectorND<cfloat64> z = {cfloat64(1.0, 2.0), cfloat64(3.0, 5.0)};
+        expect(x == y);
+        expect(x != z);
+    }
 }
 
 int main() {
     read();
+    equality();
     return 0;
 }

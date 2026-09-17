@@ -43,6 +43,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This& v) = delete;
         This& operator=(This&& v) noexcept = delete;
+        [[nodiscard]] bool operator==(this const auto& self, const Vector auto& other) noexcept;
         using Base::operator=;
         /* Operations */
         template<int Size> [[nodiscard]] SIMD<T, Size> packet(size_t index) const noexcept;

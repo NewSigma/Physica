@@ -23,8 +23,18 @@
 
 namespace Physica {
     template<class Derived, Scalar ScalarT>
-    bool RValueVector<Derived, ScalarT>::operator!=(this const auto& self, const Vector auto& other) noexcept {
-        return !(self == other);
+    bool RValueVector<Derived, ScalarT>::operator==(this const auto& self, const Vector auto& other) noexcept {
+        if constexpr (self.isDiffable() && other.isDiffable())
+            return self.values() == other.values() && self.grads() == other.grads();
+        else {
+            if (self.getLength() != other.getLength())
+                return false;
+
+            for (size_t i = 0; i < self.getLength(); ++i)
+                if (self.calc(i) != other.calc(i))
+                    return false;
+            return true;
+        }
     }
 
     template<class Derived, Scalar ScalarT>

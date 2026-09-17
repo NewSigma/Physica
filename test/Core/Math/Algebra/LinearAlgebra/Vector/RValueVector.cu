@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.cuh"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Test.h"
 
@@ -49,11 +50,41 @@ namespace {
         expect(device_obj<Vector1D<float32>>{}.transpose().getOrder() == 1);
         expect(device_obj<Vector1D<cfloat32>>{}.hermite().getOrder() == 1);
     }
+
+    void equality() {
+        {
+            VectorND<float64> a = {1, 2, 3, 4};
+            VectorND<float64> expected = {2, 4, 6, 8};
+            const auto d_a = a.toDevice();
+            const auto d_expected = expected.toDevice();
+            const auto expr = d_a * float64(2);
+            expect(expr == d_expected);
+            expect(d_a != expr);
+        }
+        {
+            const auto big = VectorND<float64>::random_uniform<RandomSource>(1024 + 1);
+            const auto d_big = big.toDevice();
+            const auto copy = d_big;
+            expect(d_big == copy);
+            expect(d_big != copy * float64(2));
+        }
+        using dfloat = Diff<float64, DiffMode::Forward, 1>;
+        using DiffDevice = device_obj<VectorND<dfloat>>;
+        const DiffDevice d_a(3, float64(0));
+        DiffDevice d_b(3, float64(0));
+        expect(d_a == d_b);
+        expect(d_a.values() == d_b.values());
+
+        d_b.grads() = float64(1);
+        expect(d_a != d_b);
+        expect(d_a.values() == d_b.values());
+    }
 }
 
 int main() {
     host_dev_dot();
     cooperative_dot();
     transpose_hermite();
+    equality();
     return 0;
 }

@@ -18,11 +18,24 @@
  */
 #pragma once
 
+#include <cstring>
 #include "../CompactVector.h"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "Physica/Core/Parallel/CUDAContext.cuh"
 
 namespace Physica {
+    template<class Derived>
+    bool CompactVector<Derived>::operator==(this const auto& self, const Vector auto& other) noexcept {
+        using U = std::remove_cvref_t<decltype(other)>::ScalarType;
+        if constexpr (self.isDiffable() || !other.isCompact() || !std::same_as<T, U> || !std::is_trivially_copyable_v<T>)
+            return self.RValueVector<Derived>::operator==(other);
+        else {
+            if (self.getLength() != other.getLength())
+                return false;
+            return std::memcmp(self.data(), other.data(), self.getLength() * sizeof(T)) == 0;
+        }
+    }
+
     template<class Derived>
     template<int Size>
     auto CompactVector<Derived>::packet(size_t index) const noexcept -> SIMD<T, Size> {

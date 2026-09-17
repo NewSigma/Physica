@@ -41,11 +41,6 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    bool DenseVector<T, Length, Allocator>::operator==(const This& other) const noexcept {
-        return storage == other.storage;
-    }
-
-    template<Scalar T, size_t Length, class Allocator>
     template<size_t I>
     constexpr auto&& DenseVector<T, Length, Allocator>::get(this auto&& self) noexcept {
         return forward_like<decltype(self)>(self.storage).template get<I>();

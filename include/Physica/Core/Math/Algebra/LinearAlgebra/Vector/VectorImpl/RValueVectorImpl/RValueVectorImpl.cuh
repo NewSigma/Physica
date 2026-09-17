@@ -24,6 +24,41 @@
 
 namespace Physica {
     template<class Derived, Scalar ScalarT>
+    __host__ __device__ bool device_obj<RValueVector<Derived, ScalarT>>::operator==(this const auto& self, const Vector auto& other) noexcept {
+        if constexpr (self.isDiffable() && other.isDiffable())
+            return self.values() == other.values() && self.grads() == other.grads();
+        else {
+            if (self.getLength() != other.getLength())
+                return false;
+
+            if (IsHost()) {
+                auto kernel = [self_ = asStruct(self), other_ = asStruct(other)] __device__() {
+                    const auto& self = self_.getDerived();
+                    const auto& other = other_.getDerived();
+                    ThreadBlock<CUDADevAttr::DefaultThreadsPerBlock> block{};
+                    const size_t numThread = block.getNumThread();
+                    const size_t length = self.getLength();
+                    const size_t numIter = (length + numThread - 1) / numThread;
+                    for (size_t iter = 0; iter < numIter; ++iter) {
+                        const size_t i = iter * numThread + block.tid();
+                        if (block.sync_or((i < length) && (self.calc(i) != other.calc(i))))
+                            return false;
+                    }
+                    return true;
+                };
+                return CUDAExecutor::launch(kernel, KernelConfig(1, CUDADevAttr::DefaultThreadsPerBlock));
+            }
+
+            if constexpr (IsDevice()) {
+                for (size_t i = 0; i < self.getLength(); ++i)
+                    if (self.calc(i) != other.calc(i))
+                        return false;
+                return true;
+            }
+        }
+    }
+
+    template<class Derived, Scalar ScalarT>
     __host__ __device__ auto device_obj<RValueVector<Derived, ScalarT>>::operator*(this auto&& self, Scalar auto&& x) noexcept {
         using V = decltype(self);
         using U = decltype(x);
