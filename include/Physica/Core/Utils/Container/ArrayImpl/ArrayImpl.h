@@ -106,7 +106,7 @@ namespace Physica {
     }
 
     template<class T, size_t Length, class Allocator>
-    size_t Array<T, Length, Allocator>::toIndex1D(const IndexType& __restrict shape, const IndexType& __restrict indices) noexcept {
+    __host__ __device__ size_t Array<T, Length, Allocator>::toIndex1D(const IndexType& __restrict shape, const IndexType& __restrict indices) noexcept {
         size_t index = 0;
         size_t stride = 1;
         for (int i = static_cast<int>(shape.getLength()) - 1; i >= 0; --i) {
@@ -118,7 +118,7 @@ namespace Physica {
     }
 
     template<class T, size_t Length, class Allocator>
-    auto Array<T, Length, Allocator>::toIndexND(const IndexType& shape, size_t index) noexcept -> IndexType {
+    __host__ __device__ auto Array<T, Length, Allocator>::toIndexND(const IndexType& shape, size_t index) noexcept -> IndexType {
         constexpr int Dim = shape.getLength();
         Array<size_t, Dim> strides{};
         size_t stride = 1;

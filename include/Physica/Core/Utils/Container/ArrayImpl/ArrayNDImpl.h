@@ -52,7 +52,8 @@ namespace Physica {
 
     template<class T, int... Dims>
     void ArrayND<T, Dims...>::resize(std::integral auto... dims) {
-        resize(IndexType({static_cast<size_t>(dims)...}));
+        static_assert(sizeof...(dims) == NDim, "[Error]: NDim is not consistent");
+        resize(IndexType{static_cast<size_t>(dims)...});
     }
 
     template<class T, int... Dims>
@@ -89,6 +90,11 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
+    void ArrayND<T, Dims...>::junk() noexcept {
+        arr.junk();
+    }
+
+    template<class T, int... Dims>
     void ArrayND<T, Dims...>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         arr.swap(obj.arr);
@@ -109,7 +115,7 @@ namespace Physica {
     template<class T, int... Dims>
     auto ArrayND<T, Dims...>::getShape() const noexcept -> IndexType {
         if constexpr (StaticShape)
-            return IndexType(Dims...);
+            return IndexType({static_cast<size_t>(Dims)...});
         else
             return shape;
     }
@@ -125,7 +131,12 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
-    size_t ArrayND<T, Dims...>::toSize(const IndexType& shape) noexcept {
+    auto&& ArrayND<T, Dims...>::asArray(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), ArrayType&&>(self.arr);
+    }
+
+    template<class T, int... Dims>
+    __host__ __device__ size_t ArrayND<T, Dims...>::toSize(const IndexType& shape) noexcept {
         const int dim = shape.getLength();
         size_t size = shape[0];
         for (int i = 1; i < dim; ++i)

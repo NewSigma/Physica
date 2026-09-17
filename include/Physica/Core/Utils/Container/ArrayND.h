@@ -66,6 +66,11 @@ namespace Physica {
         void resize(std::integral auto... dims);
         void reserve(size_t size) noexcept;
 
+        [[nodiscard]] auto toDevice() const;
+        [[nodiscard]] auto toDeviceAsync() const;
+        void toDevice(device_obj<This>& obj) const;
+        void toDeviceAsync(device_obj<This>& obj) const;
+
         [[nodiscard]] size_t toIndex1D(const IndexType& indices) const noexcept;
         [[nodiscard]] IndexType toIndexND(size_t index) const noexcept;
 
@@ -73,19 +78,21 @@ namespace Physica {
         void forND(std::invocable<const T&, IndexType> auto func) const;
 
         void zeros() noexcept;
+        void junk() noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr size_t dim(int index) const noexcept;
         [[nodiscard]] IndexType getShape() const noexcept;
         [[nodiscard, gnu::returns_nonnull]] auto* data(this auto&&) noexcept;
         [[nodiscard, gnu::returns_nonnull]] auto* data_ptr(this auto&&, const IndexType& indices) noexcept;
-        [[nodiscard]] auto& asArray() noexcept { return arr; }
-        [[nodiscard]] const auto& asArray() const noexcept { return arr; }
+        [[nodiscard]] auto&& asArray(this auto&&) noexcept;
         [[nodiscard]] size_t getSize() const noexcept { return arr.getLength(); }
         [[nodiscard]] bool empty() const noexcept { return arr.empty(); }
         /* Static members */
         [[nodiscard]] constexpr static int ndim() noexcept { return NDim; }
-        [[nodiscard]] static size_t toSize(const IndexType& shape) noexcept;
+        [[nodiscard]] __host__ __device__ static size_t toSize(const IndexType& shape) noexcept;
+        /* Friends */
+        friend class device_obj<This>;
     };
 
     template<size_t Dim, class Functor>
