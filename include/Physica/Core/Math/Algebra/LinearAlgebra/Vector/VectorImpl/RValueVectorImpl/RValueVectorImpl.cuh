@@ -377,7 +377,7 @@ namespace Physica {
         T local = std::numeric_limits<T>::lowest();
         for (int i = block.tid(); i < self.getLength(); i += numThread)
             local = std::max(local, self.calc(i));
-        return block.max(local);
+        return block.sync_max(local);
     }
 
     template<class Derived, Scalar ScalarT>
@@ -387,7 +387,7 @@ namespace Physica {
         T local = std::numeric_limits<T>::max();
         for (int i = block.tid(); i < self.getLength(); i += numThread)
             local = std::min(local, self.calc(i));
-        return block.min(local);
+        return block.sync_min(local);
     }
 
     template<class Derived, Scalar ScalarT>
@@ -397,7 +397,7 @@ namespace Physica {
         T local = 0;
         for (int i = block.tid(); i < self.getLength(); i += numThread)
             local += self.calc(i);
-        return block.sum(local);
+        return block.sync_sum(local);
     }
 
     template<class Derived, Scalar ScalarT>

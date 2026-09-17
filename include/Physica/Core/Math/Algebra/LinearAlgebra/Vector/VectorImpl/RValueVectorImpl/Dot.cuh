@@ -70,7 +70,7 @@ namespace Physica {
                     else
                         local += lhs.calc(i) * rhs.calc(i);
                 }
-                return block.sum(local);
+                return block.sync_sum(local);
             };
             return CUDAExecutor::launch(kernel, KernelConfig(1, CUDADevAttr::DefaultThreadsPerBlock));
         }
@@ -89,7 +89,7 @@ namespace Physica {
             else
                 dot += getLHS().calc(i) * getRHS().calc(i);
         }
-        return block.sum(dot);
+        return block.sync_sum(dot);
     }
 
     template<Vector LHS, Vector RHS>

@@ -44,13 +44,19 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         __device__ void sync() const noexcept;
-        __device__ auto max(Scalar auto x) const;
-        __device__ auto min(Scalar auto x) const;
-        __device__ auto sum(Scalar auto x) const;
+        [[nodiscard]] __device__ auto sync_max(Scalar auto x) const;
+        [[nodiscard]] __device__ auto sync_min(Scalar auto x) const;
+        [[nodiscard]] __device__ auto sync_sum(Scalar auto x) const;
+        __device__ bool sync_and(bool x) const;
+        __device__ bool sync_or(bool x) const;
+        __device__ bool sync_xor(bool x) const;
         /* Static members */
         [[nodiscard]] __device__ constexpr static int tid() noexcept;
         [[nodiscard]] __device__ constexpr static int getNumThread() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getNumThreadAtCompile() noexcept;
+    private:
+        template<class T>
+        __device__ T sync_reduce(T x, std::invocable<T, T> auto reducer) const;
     };
 
     template<int NumThread>
@@ -63,60 +69,33 @@ namespace Physica {
     }
 
     template<int NumThread>
-    __device__ auto ThreadBlock<NumThread>::max(Scalar auto x) const {
-        using T = decltype(x);
-        if constexpr (NumThread == 1)
-            return x;
-        else {
-            static_assert(NumThread != Dynamic, "NoImpl");
-            __shared__ std::array<T, NumThread> buffer;
-            buffer[tid()] = x;
-            const int numThread = getNumThread();
-            for (int i = (numThread + 1) / 2; i > 0; i /= 2) {
-                if ((tid() < i) && (tid() + i < numThread))
-                    buffer[tid()] = std::max(buffer[tid()], buffer[tid() + i]);
-                sync();
-            }
-            return buffer[0];
-        }
+    __device__ auto ThreadBlock<NumThread>::sync_max(Scalar auto x) const {
+        return sync_reduce(x, [](auto lhs, auto rhs) static { return std::max(lhs, rhs); });
     }
 
     template<int NumThread>
-    __device__ auto ThreadBlock<NumThread>::min(Scalar auto x) const {
-        using T = decltype(x);
-        if constexpr (NumThread == 1)
-            return x;
-        else {
-            static_assert(NumThread != Dynamic, "NoImpl");
-            __shared__ std::array<T, NumThread> buffer;
-            buffer[tid()] = x;
-            const int numThread = getNumThread();
-            for (int i = (numThread + 1) / 2; i > 0; i /= 2) {
-                if ((tid() < i) && (tid() + i < numThread))
-                    buffer[tid()] = std::min(buffer[tid()], buffer[tid() + i]);
-                sync();
-            }
-            return buffer[0];
-        }
+    __device__ auto ThreadBlock<NumThread>::sync_min(Scalar auto x) const {
+        return sync_reduce(x, [](auto lhs, auto rhs) static { return std::min(lhs, rhs); });
     }
 
     template<int NumThread>
-    __device__ auto ThreadBlock<NumThread>::sum(Scalar auto x) const {
-        using T = decltype(x);
-        if constexpr (NumThread == 1)
-            return x;
-        else {
-            static_assert(NumThread != Dynamic, "NoImpl");
-            __shared__ std::array<T, NumThread> buffer;
-            buffer[tid()] = x;
-            const int numThread = getNumThread();
-            for (int i = (numThread + 1) / 2; i > 0; i /= 2) {
-                if ((tid() < i) && (tid() + i < numThread))
-                    buffer[tid()] += buffer[tid() + i];
-                sync();
-            }
-            return buffer[0];
-        }
+    __device__ auto ThreadBlock<NumThread>::sync_sum(Scalar auto x) const {
+        return sync_reduce(x, [](auto lhs, auto rhs) static { return lhs + rhs; });
+    }
+
+    template<int NumThread>
+    __device__ bool ThreadBlock<NumThread>::sync_and(bool x) const {
+        return sync_reduce(x, [](bool lhs, bool rhs) static { return lhs && rhs; });
+    }
+
+    template<int NumThread>
+    __device__ bool ThreadBlock<NumThread>::sync_or(bool x) const {
+        return sync_reduce(x, [](bool lhs, bool rhs) static { return lhs || rhs; });
+    }
+
+    template<int NumThread>
+    __device__ bool ThreadBlock<NumThread>::sync_xor(bool x) const {
+        return sync_reduce(x, [](bool lhs, bool rhs) static { return lhs != rhs; });
     }
 
     template<int NumThread>
@@ -136,5 +115,24 @@ namespace Physica {
     template<int NumThread>
     __host__ __device__ consteval int ThreadBlock<NumThread>::getNumThreadAtCompile() noexcept {
         return NumThread;
+    }
+
+    template<int NumThread>
+    template<class T>
+    __device__ T ThreadBlock<NumThread>::sync_reduce(T x, std::invocable<T, T> auto reducer) const {
+        if constexpr (NumThread == 1)
+            return x;
+        else {
+            static_assert(NumThread != Dynamic, "NoImpl");
+            __shared__ std::array<T, NumThread> buffer;
+            buffer[tid()] = x;
+            const int numThread = getNumThread();
+            for (int stride = 1; stride < numThread; stride *= 2) {
+                if ((tid() % (stride * 2) == 0) && (tid() + stride < numThread))
+                    buffer[tid()] = reducer(buffer[tid()], buffer[tid() + stride]);
+                sync();
+            }
+            return buffer[0];
+        }
     }
 }
