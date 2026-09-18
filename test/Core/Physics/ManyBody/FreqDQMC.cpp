@@ -54,6 +54,27 @@ namespace {
         expect<RandomSource>(scalarNear(prevE, curE, 2E-4)); // Energe conserves
     }
 
+    void elastic() {
+        // ElasticDQMC is exact for the U = 0
+        constexpr T HoppingT = 1;
+        constexpr T RepelU = 0;
+        constexpr T Beta = 4;
+        constexpr int NumSite = 3;
+        constexpr int FreqDensity = 1;
+        const T chemMu = T::random_uniform<RandomSource>() * 2 - 1;
+
+        const SquareLattice<Dim> lattice({NumSite}, 1);
+        const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, chemMu, 1);
+        auto dqmc = FreqDQMC<Tc>(params, FreqDensity);
+        dqmc.step_random<RandomSource>();
+        dqmc.step<RandomSource>();
+
+        ElasticDQMC<T> exact(params, FreqDensity);
+        exact.step_random<RandomSource>();
+        for (int spin : {0, 1})
+            expect<RandomSource>(matrixNear(dqmc.getGreens()[spin], exact.getGreens()[spin], 1E-10));
+    }
+
     void berry() {
         const SquareLattice<Dim> lattice({2}, 1);
         {
@@ -88,6 +109,7 @@ namespace {
 
 int main() {
     conserve();
+    elastic();
     berry();
     return 0;
 }

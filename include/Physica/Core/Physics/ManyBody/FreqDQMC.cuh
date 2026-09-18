@@ -312,14 +312,12 @@ namespace Physica {
     template<Scalar T>
     void device_obj<FreqDQMC<T>>::calcGreen() {
         const int numSite = getNumSite();
+        const int numFreq2 = 2 * getNumFreq();
         for (int spin : {0, 1}) {
-            for (int i = 0, offset = 0; i < 2 * getNumFreq(); ++i, offset += numSite)
-                calcInvBlock(lu[spin], offset, numSite);
-
+            solBuffer = lu[spin].inv();
             auto kernel = [solBuffer_ = asStruct(solBuffer),
                            green_ = asStruct(greensD[spin]),
-                           numSite,
-                           size = 2 * getNumFreq(),
+                           numFreq2,
                            correction = correction] __device__() mutable {
                 const auto& solBuffer = solBuffer_.getDerived();
                 auto& green = green_.getDerived();
@@ -329,10 +327,9 @@ namespace Physica {
                     return;
 
                 Tr elem = 0;
-                for (int i = 0, offset = 0; i < size; ++i) {
-                    elem += solBuffer[offset + row, offset + col].real();
-                    offset += numSite;
-                }
+                for (int freq = 0; freq < numFreq2; ++freq)
+                    for (int freq2 = 0; freq2 < numFreq2; ++freq2)
+                        elem += solBuffer[row * numFreq2 + freq, col * numFreq2 + freq2].real();
 
                 if (row == col)
                     elem += Tr(0.5) + correction;

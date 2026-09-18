@@ -24,15 +24,15 @@ using namespace Physica;
 using T = float32;
 using Tc = cfloat32;
 using RandomSource = Random<>;
-constexpr T HoppingT = 1;
-constexpr T RepelU = MathConst<T>::pi;
-constexpr T Beta = MathConst<T>::e;
 constexpr int Dim = 1;
 constexpr T StepSize = 1E-3;
 constexpr T Duration = 1; // Smaller than host as it too slow
 
 namespace {
     void hostDeviceCross() {
+        constexpr T HoppingT = 1;
+        constexpr T RepelU = MathConst<T>::pi;
+        constexpr T Beta = MathConst<T>::e;
         const size_t numSite = Array<int, 2>{2, 3}.select<RandomSource>();
         const int freqDensity = Array<int, 2>{0, 1}.select<RandomSource>();
 
@@ -60,6 +60,9 @@ namespace {
     }
 
     void conserve() {
+        constexpr T HoppingT = 1;
+        constexpr T RepelU = MathConst<T>::pi;
+        constexpr T Beta = MathConst<T>::e;
         const size_t numSite = Array<int, 2>{2, 3}.select<RandomSource>();
         const int freqDensity = Array<int, 2>{0, 1}.select<RandomSource>();
 
@@ -79,6 +82,27 @@ namespace {
         engine.nve_step_for(Duration, kinetic, dqmc);
         const T curE = engine.calcClassicalInternalEnergy(dqmc);
         expect<RandomSource>(scalarNear(prevE, curE, 1E-4)); // Energe conserves
+    }
+
+    void elastic() {
+        // ElasticDQMC is exact for the U = 0
+        constexpr T HoppingT = 1;
+        constexpr T RepelU = 0;
+        constexpr T Beta = MathConst<T>::e;
+        constexpr int NumSite = 3;
+        constexpr int FreqDensity = 1;
+        const T chemMu = T::random_uniform<RandomSource>() * 2 - 1;
+
+        const SquareLattice<Dim> lattice({NumSite}, 1);
+        const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, chemMu, 1);
+        auto dqmc = device_obj<FreqDQMC<Tc>>(params, FreqDensity);
+        dqmc.step_random<RandomSource>();
+        dqmc.step<RandomSource>();
+
+        ElasticDQMC<T> exact(params, FreqDensity);
+        exact.step_random<RandomSource>();
+        for (int spin : {0, 1})
+            expect<RandomSource>(matrixNear(dqmc.getGreens()[spin], exact.getGreens()[spin], 1E-3));
     }
 
     void berry() {
@@ -116,6 +140,7 @@ namespace {
 int main() {
     hostDeviceCross();
     conserve();
+    elastic();
     berry();
     return 0;
 }

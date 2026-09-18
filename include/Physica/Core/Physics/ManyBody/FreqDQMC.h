@@ -283,12 +283,15 @@ namespace Physica {
     auto FreqDQMC<T>::calcGreen() {
         return parallel_for<P>([this](size_t spin) {
             const int numSite = getNumSite();
+            const int numFreq2 = 2 * getNumFreq();
             auto& green = greens[spin];
+
+            MatrixND<T> inv(lu[spin].getOrder());
+            inv = lu[spin].inv();
             green.zeros();
-            for (int _ = 0, offset = 0; _ < 2 * getNumFreq(); ++_) {
-                green += calcInvBlock(lu[spin], offset, numSite).reals();
-                offset += numSite;
-            }
+            for (int site1 = 0; site1 < numSite; ++site1)
+                for (int site2 = 0; site2 < numSite; ++site2)
+                    green[site1, site2] = inv.block(site1 * numFreq2, numFreq2, site2 * numFreq2, numFreq2).reals().sum();
             green.diag() += Trv(0.5) + correction;
         }, 2);
     }
