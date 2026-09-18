@@ -38,6 +38,7 @@ namespace Physica {
         Array<DenseLU<T, false>, 2> lu;
         ActionMatrix<T> action;
         HamiltonMC<Tr> hmc;
+        VectorND<Tr> luPos;
         Trv correction;
 
         GreenPair greens;
@@ -83,6 +84,7 @@ namespace Physica {
         [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return false; }
     private:
         template<ExecutePolicy P>
+        void updateLU(const Vector auto& pos);
         [[nodiscard]] Vector2D<Trv> calcDet();
         template<ExecutePolicy P>
         auto calcGreen();
@@ -123,6 +125,7 @@ namespace Physica {
     template<RNG R>
     void FreqDQMC<T>::step_random() {
         action.template random_normal<R>();
+        luPos.resize(0);
 
         VectorND<Tr> init(getAuxField().getSize() * 2);
         init.read(getAuxField());
@@ -135,12 +138,16 @@ namespace Physica {
         Trv acceptR = hmc.template step<R, P>(*this);
         hmc.template step_radial<R>(*this);
         bool hasAuxField = !getBetaU().isSubNormal();
-        if (hasAuxField)
+        if (hasAuxField) {
             getAuxField().read(hmc.getSample());
-        else
+            updateLU<P>(hmc.getSample());
+        }
+        else {
             getAuxField().zeros();
+            updateLU<P>(VectorND<Tr>(getAuxField().getSize() * 2, Tr(0)));
+        }
 
-        auto [lnAD, sgnD] = calcDet<P>();
+        auto [lnAD, sgnD] = calcDet();
         lnWeight = lnAD;
         sign = sgnD;
         calcGreen<P>();
@@ -159,14 +166,16 @@ namespace Physica {
     auto FreqDQMC<T>::potentialV(const Vector auto& pos) -> Trv {
         assert(pos.getLength() == getAuxField().getSize() * 2 && "[Error]: Real matrix contains 2x number of elements of complex matrix");
         getAuxField().read(pos);
+        updateLU<P>(pos);
+
         bool noAuxField = getBetaU().isSubNormal();
         if (noAuxField)
-            return -calcDet<P>()[0];
+            return -calcDet()[0];
 
         MatrixND<Tr> buffer = getAuxField().squaredNorms();
         buffer *= reciprocal(getBetaU());
         buffer.row(0) *= Trv(0.5);
-        return buffer.sum() - calcDet<P>()[0];
+        return buffer.sum() - calcDet()[0];
     }
 
     template<Scalar T>
@@ -181,16 +190,11 @@ namespace Physica {
         assert(result.getLength() == pos.getLength());
         assert(result.getLength() == getAuxField().getSize() * 2);
         getAuxField().read(pos);
-        for (auto& spinLU : lu) {
-            action.assign(spinLU.getMatrixLU());
-            action.flip();
-        }
+        updateLU<P>(pos);
 
         Array<MatrixND<T>, 2> spinFs{};
         auto task = parallel_for<P>([this, &spinFs](size_t spin) {
             auto& spinLU = lu[spin];
-            spinLU.compute();
-
             auto& spinF = spinFs[spin];
             spinF.resize(getAuxField());
             spinF.zeros();
@@ -250,16 +254,22 @@ namespace Physica {
 
     template<Scalar T>
     template<ExecutePolicy P>
-    auto FreqDQMC<T>::calcDet() -> Vector2D<Trv> {
-        for (auto& spinLU : lu) {
-            action.assign(spinLU.getMatrixLU());
-            action.flip();
+    void FreqDQMC<T>::updateLU(const Vector auto& pos) {
+        if (pos != luPos) {
+            for (auto& spinLU : lu) {
+                action.assign(spinLU.getMatrixLU());
+                action.flip();
+            }
+
+            parallel_for<P>([this](size_t spin) {
+                lu[spin].compute();
+            }, 2).wait();
+            luPos = pos;
         }
+    }
 
-        parallel_for<P>([this](size_t spin) {
-            lu[spin].compute();
-        }, 2).wait();
-
+    template<Scalar T>
+    auto FreqDQMC<T>::calcDet() -> Vector2D<Trv> {
         Trv lnAD = 0, sgnD = 1;
         for (auto& spinLU : lu) {
             lnAD += spinLU.lnAbsDet();

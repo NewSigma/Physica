@@ -44,6 +44,7 @@ namespace Physica {
         device_obj<MatrixND<T>> solBuffer;
         Array<device_obj<MatrixND<T>>, 2> invBlockBuffer;
         HamiltonMC<Tr> hmc;
+        VectorND<Tr> luPos;
         Trv correction;
 
         Array<device_obj<MatrixND<Tr>>, 2> greensD;
@@ -91,6 +92,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] consteval static bool isPeriodBoundary() noexcept { return host_obj::isPeriodBoundary(); }
     private:
+        void updateLU(const Vector auto& pos);
         [[nodiscard]] Vector2D<Trv> calcDet();
         void calcGreen();
         void calcInvBlock(const device_obj<DenseLU<T, false>>& lu, size_t offset, size_t size);
@@ -140,6 +142,7 @@ namespace Physica {
     template<RNG R>
     void device_obj<FreqDQMC<T>>::step_random() {
         action.template random_normal<R>();
+        luPos.resize(0);
 
         VectorND<Tr> init(getAuxField().getSize() * 2);
         init.read(getAuxField());
@@ -153,10 +156,14 @@ namespace Physica {
         Trv acceptR = hmc.template step<R, P>(*this);
         hmc.template step_radial<R>(*this);
         bool hasAuxField = !getBetaU().isSubNormal();
-        if (hasAuxField)
+        if (hasAuxField) {
             getAuxField().read(hmc.getSample());
-        else
+            updateLU(hmc.getSample());
+        }
+        else {
             getAuxField().zeros();
+            updateLU(VectorND<Tr>(getAuxField().getSize() * 2, Tr(0)));
+        }
 
         auto [lnAD, sgnD] = calcDet();
         lnWeight = lnAD;
@@ -177,6 +184,8 @@ namespace Physica {
     auto device_obj<FreqDQMC<T>>::potentialV(const Vector auto& pos) -> Trv {
         assert(pos.getLength() == getAuxField().getSize() * 2 && "[Error]: Real matrix contains 2x number of elements of complex matrix");
         getAuxField().read(pos);
+        updateLU(pos);
+
         bool noAuxField = getBetaU().isSubNormal();
         if (noAuxField)
             return -calcDet()[0];
@@ -203,12 +212,11 @@ namespace Physica {
         assert(result.getLength() == pos.getLength());
         assert(result.getLength() == getAuxField().getSize() * 2);
         getAuxField().read(pos);
+        updateLU(pos);
 
         forceBuffer.zeros();
         for (int spin : {0, 1}) {
             auto& spinLU = lu[spin];
-            spinLU.compute(action);
-
             int numSite = getNumSite();
             int numFreq2 = getNumFreq() * 2;
             for (int site = 0; site < numSite; ++site)
@@ -232,7 +240,6 @@ namespace Physica {
                         spinF[freq, site] += (block.diag(freq).sum() + block.diag(-freq).conjugate().sum()) * factor;
                 }
             }, KernelConfig(numBlockX, numThread));
-            action.flip();
         }
 
         MatrixND<T> force(getAuxField().getRow(), getAuxField().getCol());
@@ -281,14 +288,19 @@ namespace Physica {
         const Tr background = reciprocal(Trv(1) + square(divide(params.calcBetaMu(), action.getMatsubara().diag().head(getNumFreq())))).sum() * (4 * numSite);
         return result - background;
     }
+    template<Scalar T>
+    void device_obj<FreqDQMC<T>>::updateLU(const Vector auto& pos) {
+        if (pos != luPos) {
+            lu[0].compute(action);
+            action.flip();
+            lu[1].compute(action);
+            action.flip();
+            luPos = pos;
+        }
+    }
 
     template<Scalar T>
     auto device_obj<FreqDQMC<T>>::calcDet() -> Vector2D<Trv> {
-        lu[0].compute(action);
-
-        action.flip();
-        lu[1].compute(action);
-
         Trv lnAD = 0, sgnD = 1;
         for (auto& spinLU : lu) {
             lnAD += spinLU.lnAbsDet();

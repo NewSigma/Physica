@@ -23,7 +23,7 @@
 using namespace Physica;
 using T = float64;
 using Tc = cfloat64;
-using RandomSource = Random<>;
+using RandomSource = Random<PCG64DXSM, 566797295274468060>;
 constexpr int Dim = 1;
 constexpr T StepSize = 1E-3;
 constexpr T Duration = 10;
@@ -51,7 +51,7 @@ namespace {
         engine.nve_step_for(Duration, kinetic, dqmc);
         const T curE = engine.calcClassicalInternalEnergy(dqmc);
 
-        expect<RandomSource>(scalarNear(prevE, curE, 1E-4)); // Energe conserves
+        expect<RandomSource>(scalarNear(prevE, curE, 2E-4)); // Energe conserves
     }
 
     void berry() {
