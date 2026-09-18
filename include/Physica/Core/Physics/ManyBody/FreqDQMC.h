@@ -192,25 +192,26 @@ namespace Physica {
         getAuxField().read(pos);
         updateLU<P>(pos);
 
-        Array<MatrixND<T>, 2> spinFs{};
-        auto task = parallel_for<P>([this, &spinFs](size_t spin) {
-            auto& spinLU = lu[spin];
-            auto& spinF = spinFs[spin];
-            spinF.resize(getAuxField());
-            spinF.zeros();
+        const int numSite = getNumSite();
+        const int numFreq2 = getNumFreq() * 2;
+        auto spinFs = Array<MatrixND<T>, 2>::generate([this](size_t) {
+            const auto& aux = getAuxField();
+            return MatrixND<T>::zeros(aux.getRow(), aux.getCol());
+        });
 
+        auto task = parallel_for<P>([this, &spinFs, numFreq2](size_t index) {
+            const size_t spin = index % 2;
+            const size_t site = index / 2;
             const Trv factor = spin == 0 ? 1 : -1;
-            const int numFreq2 = getNumFreq() * 2;
-            for (int site = 0; site < getNumSite(); ++site) {
-                const MatrixND<T> block = calcInvBlock(spinLU, size_t(site) * numFreq2, numFreq2).transpose();
-                for (int freq = 0; freq < getMaxBoson(); ++freq) {
-                    if (freq == 0)
-                        spinF[freq, site] = block.diag().sum().real() * factor;
-                    else
-                        spinF[freq, site] = (block.diag(freq).sum() + block.diag(-freq).conjugate().sum()) * factor;
-                }
+            auto& spinF = spinFs[spin];
+            const MatrixND<T> block = calcInvBlock(lu[spin], size_t(site) * numFreq2, numFreq2).transpose();
+            for (int freq = 0; freq < getMaxBoson(); ++freq) {
+                if (freq == 0)
+                    spinF[freq, site] = block.diag().sum().real() * factor;
+                else
+                    spinF[freq, site] = (block.diag(freq).sum() + block.diag(-freq).conjugate().sum()) * factor;
             }
-        }, 2);
+        }, 2 * numSite);
 
         MatrixND<T> force(getAuxField().getRow(), getAuxField().getCol());
         bool noAuxField = getBetaU().isSubNormal();
