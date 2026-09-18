@@ -19,18 +19,18 @@
 #pragma once
 
 #include "Physica/Core/Utils/Container/ArrayND.cuh"
-#include "TensorImpl/LValueTensor.cuh"
+#include "TensorImpl/CompactTensor.cuh"
 #include "DenseTensor.h"
 
 namespace Physica {
     template<Scalar T, int... Dims>
     class device_obj<DenseTensor<T, Dims...>>
-            : public device_obj<LValueTensor<DenseTensor<T, Dims...>>>
+            : public device_obj<CompactTensor<DenseTensor<T, Dims...>>>
             , public CRCoro<device_obj<DenseTensor<T, Dims...>>> {
         static_assert(!Diffable<T>, "[Error]: Use diffable tensor instead");
         using host_obj = DenseTensor<T, Dims...>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<LValueTensor<host_obj>>;
+        using Base = device_obj<CompactTensor<host_obj>>;
         using Coro = CRCoro<This>;
         using Storage = device_obj<ArrayND<T, Dims...>>;
     public:
@@ -69,11 +69,11 @@ namespace Physica {
         void junk(this auto&) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ constexpr size_t dim(int index) const noexcept { return storage.dim(index); }
-        [[nodiscard]] __host__ __device__ IndexType getShape() const noexcept { return storage.getShape(); }
-        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, const IndexType& indices) noexcept { return self.storage.data_ptr(indices); }
-        [[nodiscard]] __host__ __device__ auto&& asArray(this auto&& self) noexcept { return self.storage.asArray(); }
-        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return storage.getSize(); }
+        [[nodiscard]] __host__ __device__ auto data_handle(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ IndexType getShape() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t dim(int index) const noexcept;
+        [[nodiscard]] __host__ __device__ auto&& asArray(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
         /* Static members */
         template<RNG R>
         [[nodiscard]] static This random_uniform(IndexType shape);

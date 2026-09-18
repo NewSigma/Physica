@@ -102,6 +102,14 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
+    auto ArrayND<T, Dims...>::getShape() const noexcept -> IndexType {
+        if constexpr (StaticShape)
+            return IndexType({static_cast<size_t>(Dims)...});
+        else
+            return shape;
+    }
+
+    template<class T, int... Dims>
     constexpr size_t ArrayND<T, Dims...>::dim(int index) const noexcept {
         assert(0 <= index && index < NDim);
         if constexpr (StaticShape) {
@@ -110,14 +118,6 @@ namespace Physica {
         }
         else
             return shape[index];
-    }
-
-    template<class T, int... Dims>
-    auto ArrayND<T, Dims...>::getShape() const noexcept -> IndexType {
-        if constexpr (StaticShape)
-            return IndexType({static_cast<size_t>(Dims)...});
-        else
-            return shape;
     }
 
     template<class T, int... Dims>

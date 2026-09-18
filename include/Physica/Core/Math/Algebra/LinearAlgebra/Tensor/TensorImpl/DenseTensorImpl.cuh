@@ -87,6 +87,31 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
+    __host__ __device__ auto device_obj<DenseTensor<T, Dims...>>::data_handle(this auto&& self) noexcept {
+        return self.storage.data();
+    }
+
+    template<Scalar T, int... Dims>
+    __host__ __device__ auto device_obj<DenseTensor<T, Dims...>>::getShape() const noexcept -> IndexType {
+        return storage.getShape();
+    }
+
+    template<Scalar T, int... Dims>
+    __host__ __device__ constexpr size_t device_obj<DenseTensor<T, Dims...>>::dim(int index) const noexcept {
+        return storage.dim(index);
+    }
+
+    template<Scalar T, int... Dims>
+    __host__ __device__ auto&& device_obj<DenseTensor<T, Dims...>>::asArray(this auto&& self) noexcept {
+        return self.storage.asArray();
+    }
+
+    template<Scalar T, int... Dims>
+    __host__ __device__ size_t device_obj<DenseTensor<T, Dims...>>::getSize() const noexcept {
+        return storage.getSize();
+    }
+
+    template<Scalar T, int... Dims>
     template<RNG R>
     auto device_obj<DenseTensor<T, Dims...>>::random_uniform(IndexType shape) -> This {
         return host_obj::template random_uniform<R>(std::move(shape)).toDevice();

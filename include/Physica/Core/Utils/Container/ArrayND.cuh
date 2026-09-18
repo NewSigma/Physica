@@ -70,8 +70,8 @@ namespace Physica {
         void junk();
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ constexpr size_t dim(int index) const noexcept;
         [[nodiscard]] __host__ __device__ IndexType getShape() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t dim(int index) const noexcept;
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data(this auto&&) noexcept;
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data_ptr(this auto&&, const IndexType& indices) noexcept;
         [[nodiscard]] __host__ __device__ auto&& asArray(this auto&&) noexcept;

@@ -52,13 +52,28 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
-    auto DenseTensor<T, Dims...>::data_ptr(this auto&& self, const IndexType& indices) noexcept {
-        return self.storage.data_ptr(indices);
+    auto DenseTensor<T, Dims...>::data_handle(this auto&& self) noexcept {
+        return self.storage.data();
+    }
+
+    template<Scalar T, int... Dims>
+    auto DenseTensor<T, Dims...>::getShape() const noexcept -> IndexType {
+        return storage.getShape();
+    }
+
+    template<Scalar T, int... Dims>
+    constexpr size_t DenseTensor<T, Dims...>::dim(int index) const noexcept {
+        return storage.dim(index);
     }
 
     template<Scalar T, int... Dims>
     auto&& DenseTensor<T, Dims...>::asArray(this auto&& self) noexcept {
         return self.storage.asArray();
+    }
+
+    template<Scalar T, int... Dims>
+    size_t DenseTensor<T, Dims...>::getSize() const noexcept {
+        return storage.getSize();
     }
 
     template<Scalar T, int... Dims>

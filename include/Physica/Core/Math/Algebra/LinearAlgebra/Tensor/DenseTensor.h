@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "TensorImpl/LValueTensor.h"
+#include "TensorImpl/CompactTensor.h"
 
 namespace Physica {
     template<Scalar T, int... Dims>
-    class DenseTensor : public LValueTensor<DenseTensor<T, Dims...>> {
+    class DenseTensor : public CompactTensor<DenseTensor<T, Dims...>> {
         using This = DenseTensor<T, Dims...>;
-        using Base = LValueTensor<This>;
+        using Base = CompactTensor<This>;
     public:
         using Base::NDim;
         using typename Base::IndexType;
@@ -55,11 +55,11 @@ namespace Physica {
         using Base::random_normal;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] constexpr size_t dim(int index) const noexcept { return storage.dim(index); }
-        [[nodiscard]] IndexType getShape() const noexcept { return storage.getShape(); }
-        [[nodiscard]] auto data_ptr(this auto&&, const IndexType& indices) noexcept;
+        [[nodiscard]] auto data_handle(this auto&&) noexcept;
+        [[nodiscard]] IndexType getShape() const noexcept;
+        [[nodiscard]] constexpr size_t dim(int index) const noexcept;
         [[nodiscard]] auto&& asArray(this auto&&) noexcept;
-        [[nodiscard]] size_t getSize() const noexcept { return storage.getSize(); }
+        [[nodiscard]] size_t getSize() const noexcept;
         /* Static members */
         template<RNG R>
         static DenseTensor random_uniform(IndexType shape);

@@ -46,6 +46,8 @@ namespace {
     }
 }
 
+static_assert(DeviceTensor::isCompact(), "DenseTensor is a compact object");
+
 int main() {
     hostDeviceCopy();
     deviceExprEval();
