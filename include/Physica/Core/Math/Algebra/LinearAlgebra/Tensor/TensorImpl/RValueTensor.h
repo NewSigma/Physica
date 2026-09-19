@@ -39,9 +39,8 @@ namespace Physica {
         using This = RValueTensor<Derived, ScalarT>;
         using Base = CRTP<This>;
     public:
-        using ScalarType = ScalarT;
         constexpr static int NDim = Traits<Derived>::NDim;
-
+        using ScalarType = ScalarT;
         using IndexType = Array<size_t, NDim>;
     protected:
         using T = ScalarType;
@@ -54,8 +53,8 @@ namespace Physica {
         void assign(Tensor auto& x) const;
         void assert_assign(const Tensor auto& source) const noexcept;
 
+        [[nodiscard]] decltype(auto) calc(IndexType indices) const;
         [[nodiscard]] decltype(auto) calc(std::integral auto... dims) const;
-        [[nodiscard]] decltype(auto) calc(IndexType index) const;
         [[nodiscard]] size_t toIndex1D(const IndexType& indices) const noexcept;
         [[nodiscard]] IndexType toIndexND(size_t index) const noexcept;
         void forND(std::invocable<T, IndexType> auto fn) const;

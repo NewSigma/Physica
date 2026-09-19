@@ -47,10 +47,11 @@ namespace Physica {
         void operator+=(const Tensor auto& x);
         void operator-=(const Tensor auto& x);
 
-        [[nodiscard]] decltype(auto) operator[](this auto&&, size_t x, size_t y, size_t z);
-        [[nodiscard]] decltype(auto) operator[](this auto&&, Index3D index);
+        [[nodiscard]] decltype(auto) operator[](this auto&&, const IndexType& index);
+        [[nodiscard]] decltype(auto) operator[](this auto&&, std::integral auto... dims);
         /* Operations */
-        [[nodiscard]] decltype(auto) calc(Index3D index) const { return operator[](index); }
+        [[nodiscard]] decltype(auto) calc(const IndexType& index) const { return operator[](index); }
+        [[nodiscard]] decltype(auto) calc(std::integral auto... dims) const { return operator[](dims...); }
 
         void forND(std::invocable<T&, IndexType> auto fn);
         void forND(std::invocable<const T&, IndexType> auto fn) const;
@@ -65,7 +66,8 @@ namespace Physica {
         template<RNG R> void random_uniform();
         template<RNG R> void random_normal();
         /* Getters */
-        [[nodiscard]] auto data_ptr(this auto&&, Index3D index) noexcept;
+        [[nodiscard]] auto data_ptr(this auto&&, const IndexType& index) noexcept;
+        [[nodiscard]] auto data_ptr(this auto&&, std::integral auto... dims) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isLValueTensor() noexcept { return true; }
     protected:

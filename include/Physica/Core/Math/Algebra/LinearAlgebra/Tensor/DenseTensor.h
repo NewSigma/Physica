@@ -32,8 +32,10 @@ namespace Physica {
         ArrayND<T, Dims...> storage;
     public:
         DenseTensor() = default;
-        DenseTensor(std::integral auto... dims);
+        explicit DenseTensor(ArrayND<T, Dims...> storage) noexcept;
         DenseTensor(IndexType shape, auto&&... args);
+        DenseTensor(std::integral auto... dims);
+        DenseTensor(const Tensor auto& x);
         DenseTensor(const This&) = default;
         DenseTensor(This&&) noexcept = default;
         ~DenseTensor() = default;
@@ -44,6 +46,11 @@ namespace Physica {
         using Base::resize;
         void resize(this auto&, IndexType shape);
         void reserve(this auto&, size_t size) noexcept;
+
+        [[nodiscard]] auto toDevice() const;
+        [[nodiscard]] auto toDeviceAsync() const;
+        void toDevice(device_obj<This>& obj) const;
+        void toDeviceAsync(device_obj<This>& obj) const;
 
         using Base::random_normal;
         void swap(This& __restrict obj) noexcept;
@@ -58,6 +65,8 @@ namespace Physica {
         static DenseTensor random_uniform(IndexType shape);
         template<RNG R>
         static DenseTensor random_normal(IndexType shape);
+        /* Friends */
+        friend class device_obj<This>;
     };
 
     template<Scalar T, int... Dims>

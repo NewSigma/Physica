@@ -42,16 +42,18 @@ namespace Physica {
     void RValueTensor<Derived, ScalarT>::assert_assign(const Tensor auto& source) const noexcept {
         if constexpr (std::is_same<Derived, std::remove_cvref_t<decltype(source)>>::value)
             assert(this != &source && "[Error]: Self assign is likely a bug");
+        assert(getShape() == source.getShape() && "[Error]: Shape mismatch between two tensors");
+    }
+
+    template<class Derived, Scalar ScalarT>
+    decltype(auto) RValueTensor<Derived, ScalarT>::calc(IndexType indices) const {
+        return Base::getDerived().calc(indices);
     }
 
     template<class Derived, Scalar ScalarT>
     decltype(auto) RValueTensor<Derived, ScalarT>::calc(std::integral auto... dims) const {
-        return Base::getDerived().calc(dims...);
-    }
-
-    template<class Derived, Scalar ScalarT>
-    decltype(auto) RValueTensor<Derived, ScalarT>::calc(IndexType index) const {
-        return Base::getDerived().calc(index);
+        static_assert(sizeof...(dims) == NDim, "[Error]: NDim is not consistent");
+        return calc(IndexType({static_cast<size_t>(dims)...}));
     }
 
     template<class Derived, Scalar ScalarT>
@@ -78,7 +80,8 @@ namespace Physica {
 
     template<class Derived, Scalar ScalarT>
     auto RValueTensor<Derived, ScalarT>::resize(this auto& self, std::integral auto... dims) {
-        return self.resize(dims...);
+        static_assert(sizeof...(dims) == NDim, "[Error]: NDim is not consistent");
+        return self.resize(IndexType({static_cast<size_t>(dims)...}));
     }
 
     template<class Derived, Scalar ScalarT>

@@ -81,7 +81,6 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const Vector auto& v) {
         auto& x = Base::getDerived();
-        x.assert_assign(v);
         x.resize(v);
         v.assign(x);
         return x;

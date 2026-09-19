@@ -22,12 +22,18 @@
 
 namespace Physica {
     template<Scalar T, int... Dims>
-    DenseTensor<T, Dims...>::DenseTensor(std::integral auto... dims) : storage(dims...) {
-        static_assert(sizeof...(dims) == NDim, "[Error]: NDim is not consistent");
-    }
+    DenseTensor<T, Dims...>::DenseTensor(ArrayND<T, Dims...> storage) noexcept : storage(std::move(storage)) {}
 
     template<Scalar T, int... Dims>
     DenseTensor<T, Dims...>::DenseTensor(IndexType shape, auto&&... args) : storage(std::move(shape), std::forward<decltype(args)>(args)...) {}
+
+    template<Scalar T, int... Dims>
+    DenseTensor<T, Dims...>::DenseTensor(std::integral auto... dims) : storage(dims...) {}
+
+    template<Scalar T, int... Dims>
+    DenseTensor<T, Dims...>::DenseTensor(const Tensor auto& x) : This(x.getShape()) {
+        x.assign(*this);
+    }
 
     template<Scalar T, int... Dims>
     void DenseTensor<T, Dims...>::resize(this auto& self, IndexType shape) {

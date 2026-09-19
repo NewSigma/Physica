@@ -72,13 +72,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    decltype(auto) LValueTensor<Derived>::operator[](this auto&& self, size_t x, size_t y, size_t z) {
-        return *self.data_ptr({x, y, z});
+    decltype(auto) LValueTensor<Derived>::operator[](this auto&& self, const IndexType& index) {
+        return *self.data_ptr(index);
     }
 
     template<class Derived>
-    decltype(auto) LValueTensor<Derived>::operator[](this auto&& self, Index3D index) {
-        return *self.data_ptr(index);
+    decltype(auto) LValueTensor<Derived>::operator[](this auto&& self, std::integral auto... dims) {
+        static_assert(sizeof...(dims) == Base::NDim, "[Error]: NDim is not consistent");
+        return self[IndexType({static_cast<size_t>(dims)...})];
     }
 
     template<class Derived>
@@ -139,8 +140,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueTensor<Derived>::data_ptr(this auto&& self, Index3D index) noexcept {
+    auto LValueTensor<Derived>::data_ptr(this auto&& self, const IndexType& index) noexcept {
         return self.getDerived().data_ptr(index);
+    }
+
+    template<class Derived>
+    auto LValueTensor<Derived>::data_ptr(this auto&& self, std::integral auto... dims) noexcept {
+        static_assert(sizeof...(dims) == Base::NDim, "[Error]: NDim is not consistent");
+        return self.data_ptr(IndexType({static_cast<size_t>(dims)...}));
     }
 
     template<class Derived>

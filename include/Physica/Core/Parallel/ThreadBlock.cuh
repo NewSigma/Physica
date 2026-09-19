@@ -127,6 +127,7 @@ namespace Physica {
             __shared__ std::array<T, NumThread> buffer;
             buffer[tid()] = x;
             const int numThread = getNumThread();
+            sync();
             for (int stride = 1; stride < numThread; stride *= 2) {
                 if ((tid() % (stride * 2) == 0) && (tid() + stride < numThread))
                     buffer[tid()] = reducer(buffer[tid()], buffer[tid() + stride]);

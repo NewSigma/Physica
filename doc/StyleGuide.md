@@ -64,7 +64,14 @@ In function definitions, it is recommended to use trailing return type declarati
 
 ## Naming
 
-Template parameters: Encourage the use of abbreviated function templates to eliminate placeholders.
+Template parameters: Encourage the use of abbreviated function templates to eliminate placeholders, for example:
+
+``` C++
+void good(std::same_as<bool> auto x) { ... }
+
+template<std::same_as<bool> X>
+void bad(X x) { ... }
+```
 
 ## Formatting
 

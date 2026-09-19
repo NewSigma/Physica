@@ -8,6 +8,10 @@ add_subdirectory(Matrix)
 add_subdirectory(MatrixDecomp)
 add_subdirectory(Vector)
 
+if(${PHYSICA_CUDA})
+    physica_add_test(DenseTensor_cuda Tensor/DenseTensor.cu)
+endif()
+
 physica_add_test(GMRES GMRES.cpp)
 
 if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")

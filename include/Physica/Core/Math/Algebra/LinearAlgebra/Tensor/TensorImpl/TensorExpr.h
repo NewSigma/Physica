@@ -45,24 +45,24 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] size_t dim(int index) const noexcept;
         [[nodiscard]] decltype(auto) getShape() const noexcept;
-        [[nodiscard]] int getDim() const;
-        [[nodiscard]] size_t getSize() const noexcept;
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
     };
 
     template<ExprID ID, class LHS, class RHS>
     BinaryTensorExpr<ID, LHS, RHS>::BinaryTensorExpr(LHS&& lhs_, RHS&& rhs_) noexcept : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
         if constexpr (Tensor<LHS> && Tensor<RHS>)
-            assert(lhs->getShape() == rhs->getShape());
+            assert(lhs.getShape() == rhs.getShape());
     }
 
     template<ExprID ID, class LHS, class RHS>
     size_t BinaryTensorExpr<ID, LHS, RHS>::dim(int index) const noexcept {
         if constexpr (Tensor<LHS>)
-            return getLHS().getShape(index);
+            return getLHS().dim(index);
         else
-            return getRHS().getShape(index);
+            return getRHS().dim(index);
     }
 
     template<ExprID ID, class LHS, class RHS>
@@ -71,22 +71,6 @@ namespace Physica {
             return getLHS().getShape();
         else
             return getRHS().getShape();
-    }
-
-    template<ExprID ID, class LHS, class RHS>
-    int BinaryTensorExpr<ID, LHS, RHS>::getDim() const {
-        if constexpr (Tensor<LHS>)
-            return getLHS().getDim();
-        else
-            return getRHS().getDim();
-    }
-
-    template<ExprID ID, class LHS, class RHS>
-    size_t BinaryTensorExpr<ID, LHS, RHS>::getSize() const noexcept {
-        if constexpr (Tensor<LHS>)
-            return getLHS().getSize();
-        else
-            return getRHS().getSize();
     }
 
     template<ExprID ID, class LHS, class RHS>

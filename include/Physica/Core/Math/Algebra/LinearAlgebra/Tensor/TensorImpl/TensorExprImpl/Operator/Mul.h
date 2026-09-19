@@ -74,17 +74,17 @@ namespace Physica {
     };
 
     template<Tensor X, Scalar U>
-    [[nodiscard, gnu::always_inline]] auto operator*(X&& x, U&& y) noexcept {
+    [[nodiscard, gnu::always_inline]] auto operator*(X&& x, U&& y) noexcept requires(!DeviceObj<X>) {
         return TensorExpr<ExprID::Mul, X&&, U&&>(std::forward<X>(x), std::forward<U>(y));
     }
 
     template<Tensor X, Scalar U>
-    [[nodiscard, gnu::always_inline]] auto operator*(U&& y, X&& x) noexcept {
+    [[nodiscard, gnu::always_inline]] auto operator*(U&& y, X&& x) noexcept requires(!DeviceObj<X>) {
         return std::forward<X>(x) * std::forward<U>(y);
     }
 
     template<Tensor X, Tensor Y>
-    [[nodiscard, gnu::always_inline]] auto hadamard(X&& x, Y&& y) noexcept {
+    [[nodiscard, gnu::always_inline]] auto hadamard(X&& x, Y&& y) noexcept requires(!DeviceObj<X> && !DeviceObj<Y>) {
         if constexpr (!canonicalized(x, y))
             return hadamard(std::forward<Y>(y), std::forward<X>(x));
         else
