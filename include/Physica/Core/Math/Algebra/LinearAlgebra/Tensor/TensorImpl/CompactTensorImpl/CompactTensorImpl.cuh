@@ -37,13 +37,22 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<CompactTensor<Derived>>::data_ptr(this auto&& self, const IndexType& index) noexcept {
-        return self.data_handle() + self.toIndex1D(index);
-    }
+    __host__ __device__ constexpr auto device_obj<CompactTensor<Derived>>::getStrides() const noexcept {
+        constexpr bool KnownAtCompile = std::ranges::none_of(Derived::getStrideAtCompile(), [](size_t stride) consteval static {
+            return stride == Dynamic;
+        });
 
-    template<class Derived>
-    __host__ __device__ auto device_obj<CompactTensor<Derived>>::data_ptr(this auto&& self, std::integral auto... dims) noexcept {
-        static_assert(sizeof...(dims) == Base::NDim, "[Error]: NDim is not consistent");
-        return self.data_ptr(IndexType({static_cast<size_t>(dims)...}));
+        if constexpr (KnownAtCompile)
+            return Derived::getStrideAtCompile();
+        else {
+            IndexType strides = Derived::getStrideAtCompile();
+            size_t stride = 1;
+            for (int i = Base::NDim - 1; i >= 0; --i) {
+                if (strides[i] == Dynamic)
+                    strides[i] = stride;
+                stride *= Base::getDerived().dim(i);
+            }
+            return strides;
+        }
     }
 }

@@ -22,15 +22,19 @@
 
 using namespace Physica;
 using T = float64;
-using TensorType = Tensor3D<T>;
+using Tensor4x4x4 = DenseTensor<T, 4, 4, 4>;
 using RandomSource = Random<>;
 
 namespace {
     void compact() {
-        const TensorType x = TensorType::random_uniform<RandomSource>({4, 4, 4});
+        const Tensor3D<T> x = Tensor3D<T>::random_uniform<RandomSource>({4, 4, 4});
         expect(x.data() == x.asArray().data());
         expect(x.data() == x.data_handle());
         expect(x.data_ptr({1, 2, 3}) == x.data() + x.toIndex1D({1, 2, 3}));
+
+        expect(x.getStride(0) == 16);
+        expect(x.getStride(1) == 4);
+        expect(x.getStride(2) == 1);
 
         for (size_t i = 0; i < x.dim(0); ++i)
             for (size_t j = 0; j < x.dim(1); ++j)
@@ -39,7 +43,19 @@ namespace {
     }
 }
 
-static_assert(TensorType::isCompact(), "DenseTensor is a compact object");
+static_assert(Tensor3D<T>::isCompact(), "DenseTensor is a compact object");
+static_assert(Tensor3D<T>::isStrided(), "DenseTensor is a strided object");
+static_assert(Tensor3D<T>::getStrideAtCompile()[0] == Dynamic, "Dynamic shape strides are unknown at compile time");
+static_assert(Tensor3D<T>::getStrideAtCompile()[2] == 1, "DenseTensor is row-major");
+static_assert(Tensor4x4x4::getStrideAtCompile()[0] == 16);
+static_assert(Tensor4x4x4::getStrideAtCompile()[1] == 4);
+static_assert(Tensor4x4x4::getStrideAtCompile()[2] == 1);
+
+static_assert(Tensor3D<T>::getStrideAtCompile(0) == Tensor3D<T>::getStrideAtCompile()[0]);
+static_assert(Tensor3D<T>::getStrideAtCompile(2) == Tensor3D<T>::getStrideAtCompile()[2]);
+static_assert(Tensor4x4x4::getStrideAtCompile(0) == Tensor4x4x4::getStrideAtCompile()[0]);
+static_assert(Tensor4x4x4::getStrideAtCompile(1) == Tensor4x4x4::getStrideAtCompile()[1]);
+static_assert(Tensor4x4x4::getStrideAtCompile(2) == Tensor4x4x4::getStrideAtCompile()[2]);
 
 int main() {
     compact();

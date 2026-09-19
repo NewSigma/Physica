@@ -68,6 +68,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isDiffable() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isComplex() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isLValueTensor() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isStrided() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
     protected:

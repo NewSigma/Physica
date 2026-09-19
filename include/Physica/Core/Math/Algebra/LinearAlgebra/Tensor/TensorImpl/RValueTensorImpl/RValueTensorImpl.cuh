@@ -144,6 +144,11 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueTensor<Derived, ScalarT>>::isStrided() noexcept {
+        return Derived::isStrided();
+    }
+
+    template<class Derived, Scalar ScalarT>
     __host__ __device__ consteval bool device_obj<RValueTensor<Derived, ScalarT>>::isCompact() noexcept {
         return Derived::isCompact();
     }

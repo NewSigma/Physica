@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include "LValueTensor.h"
+#include "StridedTensor.h"
 
 namespace Physica {
     template<class Derived>
-    class CompactTensor : public LValueTensor<Derived> {
-        using Base = LValueTensor<Derived>;
+    class CompactTensor : public StridedTensor<Derived> {
+        using Base = StridedTensor<Derived>;
         using This = CompactTensor<Derived>;
     public:
         using typename Base::IndexType;
@@ -37,8 +37,7 @@ namespace Physica {
         [[nodiscard]] auto data(this auto&& self) noexcept;
         [[nodiscard]] auto data_handle() noexcept;
         [[nodiscard]] auto data_handle() const noexcept;
-        [[nodiscard]] auto data_ptr(this auto&& self, const IndexType& index) noexcept;
-        [[nodiscard]] auto data_ptr(this auto&& self, std::integral auto... dims) noexcept;
+        [[nodiscard]] constexpr auto getStrides() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept { return true; }
     protected:

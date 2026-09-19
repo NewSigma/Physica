@@ -23,7 +23,7 @@
 
 using namespace Physica;
 using T = float32;
-using DeviceTensor = device_obj<Tensor3D<T>>;
+using DTensor3D = device_obj<Tensor3D<T>>;
 using RandomSource = Random<>;
 
 namespace {
@@ -46,7 +46,12 @@ namespace {
     }
 }
 
-static_assert(DeviceTensor::isCompact(), "DenseTensor is a compact object");
+static_assert(DTensor3D::isCompact(), "DenseTensor is a compact object");
+static_assert(DTensor3D::isStrided(), "DenseTensor is a strided object");
+static_assert(DTensor3D::getStrideAtCompile()[0] == Dynamic, "Dynamic shape strides are unknown at compile time");
+static_assert(DTensor3D::getStrideAtCompile()[2] == 1, "DenseTensor is row-major");
+static_assert(DTensor3D::getStrideAtCompile(0) == DTensor3D::getStrideAtCompile()[0]);
+static_assert(DTensor3D::getStrideAtCompile(2) == DTensor3D::getStrideAtCompile()[2]);
 
 int main() {
     hostDeviceCopy();

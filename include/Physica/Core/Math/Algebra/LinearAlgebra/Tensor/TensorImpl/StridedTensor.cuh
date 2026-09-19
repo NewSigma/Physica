@@ -18,28 +18,33 @@
  */
 #pragma once
 
-#include "StridedTensor.cuh"
-#include "CompactTensor.h"
+#include "LValueTensor.cuh"
+#include "StridedTensor.h"
 
 namespace Physica {
     template<class Derived>
-    class device_obj<CompactTensor<Derived>> : public device_obj<StridedTensor<Derived>> {
-        using host_obj = CompactTensor<Derived>;
+    class device_obj<StridedTensor<Derived>> : public device_obj<LValueTensor<Derived>> {
+        using host_obj = StridedTensor<Derived>;
+        using Base = device_obj<LValueTensor<Derived>>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<StridedTensor<Derived>>;
     public:
         using typename Base::IndexType;
     public:
         ~device_obj() = default;
         /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
+        This& operator=(const This& obj) = delete;
+        This& operator=(This&& obj) noexcept = delete;
         using Base::operator=;
         /* Getters */
-        [[nodiscard]] __host__ __device__ auto data(this auto&& self) noexcept;
+        [[nodiscard]] __host__ __device__ auto getStrides() const noexcept;
+        [[nodiscard]] __host__ __device__ size_t getStride(size_t dim) const noexcept;
         [[nodiscard]] __host__ __device__ auto data_handle() noexcept;
         [[nodiscard]] __host__ __device__ auto data_handle() const noexcept;
-        [[nodiscard]] __host__ __device__ constexpr auto getStrides() const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, const IndexType& index) noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, std::integral auto... dims) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static IndexType getStrideAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile(size_t dim) noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;
@@ -47,4 +52,4 @@ namespace Physica {
     };
 }
 
-#include "CompactTensorImpl/CompactTensorImpl.cuh"
+#include "StridedTensorImpl/StridedTensorImpl.cuh"

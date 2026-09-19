@@ -77,6 +77,29 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
+    __host__ __device__ consteval auto DenseTensor<T, Dims...>::getStrideAtCompile() noexcept -> IndexType {
+        IndexType result{};
+        if constexpr (sizeof...(Dims) == 1) {
+            for (int i = 0; i < NDim - 1; ++i)
+                result[i] = Dynamic;
+            result[NDim - 1] = 1;
+        }
+        else {
+            constexpr std::array<int, NDim> dims{Dims...};
+            size_t stride = 1;
+            bool known = true;
+            for (int i = NDim - 1; i >= 0; --i) {
+                result[i] = known ? stride : Dynamic;
+                if (dims[i] == Dynamic)
+                    known = false;
+                else
+                    stride *= static_cast<size_t>(dims[i]);
+            }
+        }
+        return result;
+    }
+
+    template<Scalar T, int... Dims>
     template<RNG R>
     auto DenseTensor<T, Dims...>::random_uniform(IndexType shape) -> This {
         auto result = This(std::move(shape));
