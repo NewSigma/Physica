@@ -38,6 +38,7 @@ namespace Physica {
         using Trv = Tr::ValueType;
         struct Proposal {
             VectorND<T> sample;
+            Trv potential;
             Trv acceptR; // Averaged acceptance rate during visit
             int numAccept;
             int numVisited;
@@ -54,6 +55,7 @@ namespace Physica {
         int maxTreeDepth;
 
         VectorND<T> sample;
+        Trv samplePot = Trv::nan();
         Trv energyF;
         Trv energyR;
         Trv upperE;
@@ -153,18 +155,22 @@ namespace Physica {
         root.template updateForce<P>(forceModel);
         nodeF = root;
         nodeR = root;
-        energyF = energyR = root.template calcClassicalInternalEnergy<P>(forceModel);
+        if (!samplePot.isFinite())
+            samplePot = root.template calcPotentialClassical<P>(forceModel);
+        energyF = energyR = root.calcKineticClassical() + samplePot;
         upperE = energyF - ln(Trv::template random_uniform<R>() + std::numeric_limits<T>::min());
 
         int iteration = 0;
         int numAccept = 1;
         while (true) {
-            auto [sample_, acceptR, numAccept_, _, stop] = visit<R, P>(iteration, forceModel);
+            auto [sample_, pot, acceptR, numAccept_, _, stop] = visit<R, P>(iteration, forceModel);
             if (!stop && (numAccept_ > 0)) {
                 Trv prob = Trv(numAccept_) / Trv(numAccept);
                 bool accept = Trv::template random_uniform<R>() < prob;
-                if (accept)
+                if (accept) {
                     sample = std::move(sample_);
+                    samplePot = pot;
+                }
             }
 
             if (stop || !canProgress(nodeF, nodeR))
@@ -189,17 +195,20 @@ namespace Physica {
         static_assert(!kinetic.isPeriodBoundary(), "[Error]: Radial update only applies to noncompact system");
         assert(sigmaR.isPositive());
         sample.assign(root.getPhaseMatrix().col(0).tail(getDOF()));
-        const Trv prevE = root.template calcClassicalInternalEnergy<P>(forceModel);
+        if (!samplePot.isFinite())
+            samplePot = root.template calcPotentialClassical<P>(forceModel);
 
         const Trv gamma = Trv::template random_normal<R>() * sigmaR;
         const Trv factor = exp(gamma);
         root.getPhaseMatrix().col(0).tail(getDOF()) *= factor;
-        const Trv curE = root.template calcClassicalInternalEnergy<P>(forceModel);
+        const Trv curP = root.template calcPotentialClassical<P>(forceModel);
 
-        const Trv delta = prevE - curE + gamma * Trv(getDOF());
+        const Trv delta = samplePot - curP + gamma * Trv(getDOF());
         bool accept = delta.isPositive() || (Trv::template random_uniform<R>() < exp(delta));
-        if (accept)
+        if (accept) {
             sample *= factor;
+            samplePot = curP;
+        }
         return accept;
     }
 
@@ -213,6 +222,7 @@ namespace Physica {
     void HamiltonMC<T>::setInitPosition(VectorND<T> init) noexcept {
         assert(getDOF() == init.getLength());
         sample = std::move(init);
+        samplePot = Trv::nan();
     }
 
     template<Scalar T>
@@ -280,11 +290,13 @@ namespace Physica {
         else
             node.template nve_step_back<P>(kinetic, forceModel);
 
-        Trv curE = node.template calcClassicalInternalEnergy<P>(forceModel);
+        Trv curP = node.template calcPotentialClassical<P>(forceModel);
+        Trv curE = node.calcKineticClassical() + curP;
         Trv prevE = std::exchange(forward ? energyF : energyR, curE);
         Trv diff = prevE - curE;
         return Proposal{
             .sample = node.getPhaseMatrix().col(0).tail(getDOF()),
+            .potential = curP,
             .acceptR = diff.isPositive() ? Trv(1) : exp(prevE - curE),
             .numAccept = curE < upperE,
             .numVisited = 1,
@@ -300,13 +312,15 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     void HamiltonMC<T>::metropolis(Proposal& lhs, const Proposal& rhs, bool process) noexcept {
-        auto& [sample1, acceptR1, numAccept1, numVisited1, stop1] = lhs;
-        const auto& [sample2, acceptR2, numAccept2, numVisited2, stop2] = rhs;
+        auto& [sample1, pot1, acceptR1, numAccept1, numVisited1, stop1] = lhs;
+        const auto& [sample2, pot2, acceptR2, numAccept2, numVisited2, stop2] = rhs;
         if (numAccept2 > 0) {
             Trv prob = Trv(numAccept2) / Trv(numAccept1 + numAccept2);
             bool accept = Trv::template random_uniform<R>() < prob;
-            if (accept)
+            if (accept) {
                 sample1 = std::move(sample2);
+                pot1 = pot2;
+            }
         }
         numAccept1 += numAccept2;
         stop1 = stop2 || !process;
