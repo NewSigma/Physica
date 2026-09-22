@@ -131,15 +131,15 @@ namespace Physica {
         template<class Tuple, std::ranges::view... Vs>
         constexpr auto common_zip_iterator<Tuple, Vs...>::operator*() const noexcept {
             return std::apply([](auto&... ites) static noexcept {
-                return std::make_tuple(*ites...);
+                return std::tuple<decltype(*ites)...>(*ites...);
             }, current);
         }
 
         template<class Tuple, std::ranges::view... Vs>
         constexpr auto common_zip_iterator<Tuple, Vs...>::operator[](difference_type n) const noexcept {
             static_assert(std::random_access_iterator<StdIterator>, "[Error]: Unavailable");
-            return std::apply([n](auto&... ites) -> decltype(auto) {
-                return std::make_tuple(ites[n]...);
+            return std::apply([n](auto&... ites) {
+                return std::tuple<decltype(ites[n])...>(ites[n]...);
             }, current);
         }
 

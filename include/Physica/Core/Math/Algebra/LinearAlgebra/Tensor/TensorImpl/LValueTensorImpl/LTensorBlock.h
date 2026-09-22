@@ -30,12 +30,14 @@ namespace Physica {
         using Base = LValueTensor<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::IndexType;
+        using Base::NDim;
     private:
         decay_rvalue_t<X> grid;
-        Index3D from;
-        Index3D count;
+        IndexType from;
+        IndexType shape;
     public:
-        LTensorBlock(X&& grid_, Index3D from, Index3D count);
+        LTensorBlock(X&& grid_, IndexType from, IndexType count);
         LTensorBlock(const LTensorBlock&) = delete;
         LTensorBlock(LTensorBlock&&) noexcept = delete;
         ~LTensorBlock() = default;
@@ -44,37 +46,44 @@ namespace Physica {
         LTensorBlock& operator=(const LTensorBlock& b) { Base::operator=(static_cast<const Base::Base&>(b)); return *this; }
         LTensorBlock& operator=(LTensorBlock&& b) noexcept { Base::operator=(static_cast<const Base::Base&>(b)); return *this; }
         /* Operations */
-        void resize([[maybe_unused]] Index3D size) { assert(size == count && "[Error]: Resize part of a grid is not allowed"); }
+        using Base::resize;
+        void resize(IndexType size);
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getDimX() const noexcept { return count[0]; }
-        [[nodiscard]] size_t getDimY() const noexcept { return count[1]; }
-        [[nodiscard]] size_t getDimZ() const noexcept { return count[2]; }
-        [[nodiscard]] auto data_ptr(this auto&&, Index3D index) noexcept;
+        [[nodiscard]] IndexType getShape() const noexcept { return shape; }
+        [[nodiscard]] auto data_ptr(this auto&&, const IndexType& index) noexcept;
     };
 
     template<Tensor X>
-    LTensorBlock<X>::LTensorBlock(X&& grid_, Index3D from, Index3D count)
+    LTensorBlock<X>::LTensorBlock(X&& grid_, IndexType from, IndexType count)
             : grid(std::forward<X>(grid_))
-            , from(from)
-            , count(count) {
-        for (int i = 0; i < 3; ++i) {
-            assert(from[i] < grid.getDim()[i]);
-            assert(from[i] + count[i] <= grid.getDim()[i]);
+            , from(std::move(from))
+            , shape(std::move(count)) {
+        for (int i = 0; i < NDim; ++i) {
+            assert(from[i] < grid.dim(i));
+            assert(from[i] + count[i] <= grid.dim(i));
         }
     }
 
     template<Tensor X>
-    auto LTensorBlock<X>::data_ptr(this auto&& self, Index3D index) noexcept {
-        return self.grid.data_ptr({self.from[0] + index[0], self.from[1] + index[1], self.from[2] + index[2]});
+    void LTensorBlock<X>::resize([[maybe_unused]] IndexType size) {
+        assert(size == shape && "[Error]: Resize part of a grid is not allowed");
+    }
+
+    template<Tensor X>
+    auto LTensorBlock<X>::data_ptr(this auto&& self, const IndexType& index) noexcept {
+        IndexType global{};
+        for (auto&& [g, f, i] : zip(global, self.from, index))
+            g = f + i;
+        return self.grid.data_ptr(global);
     }
 
     template<Tensor X>
     auto LTensorBlock<X>::values(this auto&& self) noexcept {
         auto&& v = propagate_rvalue_reference<decltype(self), X>(self.grid).values();
         using X1 = decltype(v);
-        return LTensorBlock<X1>(std::forward<X1>(v), self.from, self.count);
+        return LTensorBlock<X1>(std::forward<X1>(v), self.from, self.shape);
     }
 }
 
@@ -84,5 +93,6 @@ namespace Physica {
         static_assert(std::remove_cvref_t<X>::isLValueTensor());
     public:
         using ScalarType = std::remove_cvref_t<X>::ScalarType;
+        constexpr static int NDim = std::remove_cvref_t<X>::NDim;
     };
 }

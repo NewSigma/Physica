@@ -41,11 +41,37 @@ namespace {
         MatrixND<float64> m = slice;
         expect(m == slice);
     }
+
+    template<Tensor X>
+    void block(const X& x, typename X::IndexType from, typename X::IndexType count) {
+        auto b = x.block(from, count);
+        expect(b.getShape() == count);
+        for (int i = 0; i < X::ndim(); ++i)
+            expect(b.dim(i) == count[i]);
+
+        for (size_t i = 0; i < b.getSize(); ++i) {
+            const auto local = b.toIndexND(i);
+            auto global = local;
+            for (auto&& [g, f] : zip(global, from))
+                g += f;
+            expect(x[global] == b[local]);
+        }
+
+        X copy = b;
+        for (size_t i = 0; i < b.getSize(); ++i) {
+            const auto idx = b.toIndexND(i);
+            expect(copy[idx] == b[idx]);
+        }
+    }
 }
 
 int main() {
     auto x = DenseTensor<float64, 3>::random_uniform<Random<>>({4, 4, 4});
     fiber(x);
     slice(x);
+    block(x, Index3D{1, 0, 2}, Index3D{2, 3, 1});
+
+    auto x4 = DenseTensor<float64, 4>::random_uniform<Random<>>({4, 2, 3, 2});
+    block(x4, Index4D{1, 0, 2, 0}, Index4D{2, 1, 1, 2});
     return 0;
 }

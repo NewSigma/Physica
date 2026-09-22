@@ -111,9 +111,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueTensor<Derived>::block(this auto&& self, Index3D from, Index3D count) noexcept {
+    auto LValueTensor<Derived>::block(this auto&& self, IndexType from, IndexType count) noexcept {
         using Self = decltype(self);
-        return LTensorBlock<Self>(std::forward<Self>(self), from, count);
+        return LTensorBlock<Self>(std::forward<Self>(self), std::move(from), std::move(count));
     }
 
     template<class Derived>

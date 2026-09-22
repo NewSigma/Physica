@@ -127,7 +127,7 @@ namespace Physica {
 
     template<class Derived, Scalar ScalarT>
     size_t RValueTensor<Derived, ScalarT>::dim(int index) const noexcept {
-        return Base::getDerived().dim(index);
+        return getShape()[index];
     }
 
     template<class Derived, Scalar ScalarT>
