@@ -19,8 +19,16 @@
 #pragma once
 
 #include "../CompactTensor.h"
+#include "TensorFiber.h"
 
 namespace Physica {
+    template<class Derived>
+    auto CompactTensor<Derived>::fiber(this auto&& self, IndexVar auto... indices) noexcept {
+        using Self = decltype(self);
+        constexpr int Dim = Base::template calcFiberDim<decltype(indices)...>();
+        return TensorFiber<Self, Dim>(std::forward<Self>(self), indices...);
+    }
+
     template<class Derived>
     auto CompactTensor<Derived>::data(this auto&& self) noexcept {
         return self.data_handle();

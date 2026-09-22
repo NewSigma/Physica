@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,13 +18,22 @@
  */
 #pragma once
 
-#include "../LValueTensor.h"
+#include "../CompactTensor.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/CompactVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/StridedVector.h"
 
 namespace Physica {
-    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())
-    class TensorFiber<X, Dim> : public LValueVector<TensorFiber<X, Dim>> {
+    namespace Internal {
+        template<class X, int Dim>
+        using TensorFiberBase = std::conditional_t<std::remove_cvref_t<X>::getStrideAtCompile()[Dim] == 1,
+                                                   CompactVector<TensorFiber<X, Dim>>,
+                                                   StridedVector<TensorFiber<X, Dim>>>;
+    }
+
+    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isCompact())
+    class TensorFiber<X, Dim> : public Internal::TensorFiberBase<X, Dim> {
         using This = TensorFiber<X, Dim>;
-        using Base = LValueVector<TensorFiber<X, Dim>>;
+        using Base = Internal::TensorFiberBase<X, Dim>;
         using IndexType = std::remove_cvref_t<X>::IndexType;
 
         static_assert(Dim < std::remove_cvref_t<X>::ndim());
@@ -43,12 +52,14 @@ namespace Physica {
         void resize(size_t length);
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return tensor.dim(Dim); }
-        [[nodiscard]] auto data_ptr(this auto&& self, size_t i) noexcept;
+        [[nodiscard]] constexpr size_t getStride() const noexcept;
+        [[nodiscard]] auto data_handle(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept;
     };
 
-    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())
+    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isCompact())
     TensorFiber<X, Dim>::TensorFiber(X&& tensor, IndexVar auto... indices) : tensor(std::forward<X>(tensor)) {
         size_t i = 0;
         ([&]() {
@@ -60,23 +71,25 @@ namespace Physica {
         }(), ...);
     }
 
-    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())
+    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isCompact())
     void TensorFiber<X, Dim>::resize([[maybe_unused]] size_t length) {
         assert(length == getLength());
     }
 
-    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())
-    auto TensorFiber<X, Dim>::data_ptr(this auto&& self, size_t i) noexcept {
+    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isCompact())
+    constexpr size_t TensorFiber<X, Dim>::getStride() const noexcept {
+        return tensor.getStride(Dim);
+    }
+
+    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isCompact())
+    auto TensorFiber<X, Dim>::data_handle(this auto&& self) noexcept {
         auto idx = self.index;
-        idx[Dim] = i;
+        idx[Dim] = 0;
         return self.tensor.data_ptr(idx);
     }
-}
 
-namespace Physica {
-    template<Tensor X, int Dim>
-    class Traits<TensorFiber<X, Dim>> {
-    public:
-        using ScalarType = std::remove_cvref_t<X>::ScalarType;
-    };
+    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isCompact())
+    __host__ __device__ consteval size_t TensorFiber<X, Dim>::getStrideAtCompile() noexcept {
+        return std::remove_cvref_t<X>::getStrideAtCompile()[Dim];
+    }
 }

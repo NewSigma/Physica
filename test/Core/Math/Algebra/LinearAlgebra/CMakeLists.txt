@@ -3,7 +3,8 @@ physica_add_test(JacobiDavidson Eigen/JacobiDavidson.cpp)
 physica_add_test(SymmEigenSolver Eigen/SymmEigenSolver.cpp)
 
 physica_add_test(DenseTensor Tensor/DenseTensor.cpp)
-physica_add_test(TensorBlock Tensor/TensorBlock.cpp)
+physica_add_test(LValueTensor Tensor/LValueTensor.cpp)
+physica_add_test(CompactTensor Tensor/CompactTensor.cpp)
 
 add_subdirectory(Matrix)
 add_subdirectory(MatrixDecomp)

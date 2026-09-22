@@ -36,7 +36,7 @@ namespace {
         auto slice = x.slice(1, var(), var());
         for (int r = 0; r < x.dim(1); ++r)
             for (int c = 0; c < x.dim(2); ++c)
-            expect(x[1, r, c] == slice[r, c]);
+                expect(x[1, r, c] == slice[r, c]);
 
         MatrixND<float64> m = slice;
         expect(m == slice);

@@ -33,6 +33,10 @@ namespace Physica {
     template<class T> class ValueTensor;
     template<class T, int GradOrder> class GradTensor;
 
+    template<class, int> class TensorFiber;
+    template<class, int, int> class TensorSlice;
+    template<class> class TensorBlock;
+
     template<class Derived, Scalar ScalarT>
     class RValueTensor : public CRTP<RValueTensor<Derived, ScalarT>> {
         static_assert(!DeviceObj<Derived>, "[Error]: device_obj<> must be outside RValueTensor<>");

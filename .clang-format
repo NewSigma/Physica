@@ -196,7 +196,7 @@ ShortNamespaceLines: 1
 SkipMacroDefinitionBody: true
 SortIncludes: Never
 SortJavaStaticImport: Before
-SortUsingDeclarations: LexicographicNumeric
+SortUsingDeclarations: Never
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: false

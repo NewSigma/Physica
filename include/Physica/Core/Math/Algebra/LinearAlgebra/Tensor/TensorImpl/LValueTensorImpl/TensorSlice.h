@@ -23,7 +23,7 @@
 
 namespace Physica {
     template<Tensor X, int DimR, int DimC>
-    class TensorSlice : public LValueMatrix<TensorSlice<X, DimR, DimC>> {
+    class TensorSlice<X, DimR, DimC> : public LValueMatrix<TensorSlice<X, DimR, DimC>> {
         using This = TensorSlice<X, DimR, DimC>;
         using Base = LValueMatrix<TensorSlice<X, DimR, DimC>>;
         using IndexType = std::remove_cvref_t<X>::IndexType;
