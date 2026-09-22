@@ -35,8 +35,6 @@ namespace Physica {
         MatrixND<T> expT;
         Array<CyclicChainQDT<T>, 2> chains;
         Array<DenseQR<T>, 2> qrs;
-        Array<DiagMatrix<Tr>, 2> diagBs;
-        Array<DiagMatrix<Tr>, 2> diagSs;
         Array<MatrixND<T>, 2> buffers;
     public:
         GreenProd() = delete;
@@ -58,7 +56,6 @@ namespace Physica {
         [[nodiscard]] int getNumSite() const noexcept { return qrs.front().getOrder(); }
         [[nodiscard]] int getNumSplit() const noexcept { return chains.front().getNumSplit(); }
     private:
-        void splitDiag(const QDTDecomp<T>& qdt, Tr betaMu, int spin) noexcept;
         void calcGreen(const QDTDecomp<T>& qdt, MatrixND<T>& green, Tr betaMu, int spin);
         [[nodiscard]] std::pair<Tr, Tv> calcDetGreen(const QDTDecomp<T>& qdt, MatrixND<T>& green, Tr betaMu, int spin);
     };
@@ -68,8 +65,6 @@ namespace Physica {
             : expT(params.getExpT())
             , chains(2, params.getNumSplit())
             , qrs(2, params.getNumSite(), params.getNumSite())
-            , diagBs(2, params.getNumSite())
-            , diagSs(2, params.getNumSite())
             , buffers(2, params.getNumSite()) {}
 
     template<Scalar T>
@@ -116,50 +111,28 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         chains.swap(obj.chains);
         qrs.swap(obj.qrs);
-        diagBs.swap(obj.diagBs);
-        diagSs.swap(obj.diagSs);
         buffers.swap(obj.buffers);
     }
 
     template<Scalar T>
-    void GreenProd<T>::splitDiag(const QDTDecomp<T>& qdt, Tr betaMu, int spin) noexcept {
-        const auto& diagD = qdt.getMatrixD().diag();
-        const Tr expBetaMu = exp(betaMu);
-        auto& diagB = diagBs[spin];
-        auto& diagS = diagSs[spin];
-        for (int i = 0; i < getNumSite(); ++i) {
-            const Tr expBetaMuD = expBetaMu * diagD[i];
-            const Tr absBetaMuD = abs(expBetaMuD);
-            const Tr halfAbs = sqrt(absBetaMuD);
-            bool isSubNormal = halfAbs.isSubNormal();
-            diagB.diag()[i] = isSubNormal ? Tr(1) : halfAbs;
-            diagS.diag()[i] = isSubNormal ? Tr(0) : expBetaMuD / halfAbs;
-        }
-    }
-
-    template<Scalar T>
     void GreenProd<T>::calcGreen(const QDTDecomp<T>& qdt, MatrixND<T>& green, Tr betaMu, int spin) {
-        splitDiag(qdt, betaMu, spin);
-
-        auto& diagB = diagBs[spin];
-        auto& diagS = diagSs[spin];
         auto& buffer = buffers[spin];
         auto& qr = qrs[spin];
-        buffer = qdt.getMatrixQ() * diagB.inv();
-        qr.compute(buffer.hermite() + diagS * qdt.getMatrixT());
+        buffer = qdt.getMatrixD() * qdt.getMatrixT();
+        buffer *= exp(betaMu);
+        qr.compute(qdt.getMatrixQ().hermite() + buffer);
         qr.getWorking().diag() += Tr(std::numeric_limits<T>::min()); // Handle potential underflow
 
-        MatrixND<T> temp = buffer * qr.getMatrixQ();
-        green = qr.getMatrixR().inv() * temp.hermite();
+        buffer = qdt.getMatrixQ() * qr.getMatrixQ();
+        green = qr.getMatrixR().inv() * buffer.hermite();
     }
 
     template<Scalar T>
     auto GreenProd<T>::calcDetGreen(const QDTDecomp<T>& qdt, MatrixND<T>& green, Tr betaMu, int spin) -> std::pair<Tr, Tv> {
         calcGreen(qdt, green, betaMu, spin);
 
-        auto& diagB = diagBs[spin];
         auto& qr = qrs[spin];
-        Tr lnAD = diagB.lnAbsDet() + qr.getMatrixR().lnAbsDet();
+        Tr lnAD = qr.getMatrixR().lnAbsDet();
         Tv sgnD = qdt.calcDetQ() * qr.calcDetQ() * unit(qr.getMatrixR().diag().reals()).prod();
         assert(T::isComplex() || abs(sgnD) == Trv(1) && "[Error]: Bad sign");
         return {lnAD, sgnD};
