@@ -52,7 +52,7 @@
 #define MAX_VECTOR_SIZE 512
 #endif
 
-#define VCL_NAMESPACE Physica
+#define VCL_NAMESPACE Physica::VCL
 
 #include "instrset.h"
 #include "scalar.h"

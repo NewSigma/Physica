@@ -152,20 +152,20 @@ namespace Physica {
         static_assert(!T::isDiffable(), "[Error]: The main template targets on plain scalar");
         static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");
 
-        using Size2Type = std::conditional<isFloat32, void, Vec2d>::type;
-        using Size4Type = std::conditional<isFloat32, Vec4f, Vec4d>::type;
-        using Size8Type = std::conditional<isFloat32, Vec8f, Vec8d>::type;
-        using Size16Type = std::conditional<isFloat32, Vec16f, void>::type;
+        using Size2Type = std::conditional<isFloat32, void, VCL::Vec2d>::type;
+        using Size4Type = std::conditional<isFloat32, VCL::Vec4f, VCL::Vec4d>::type;
+        using Size8Type = std::conditional<isFloat32, VCL::Vec8f, VCL::Vec8d>::type;
+        using Size16Type = std::conditional<isFloat32, VCL::Vec16f, void>::type;
         using Pack1 = std::conditional<Size == 2, Size2Type, Size4Type>::type;
         using Pack2 = std::conditional<Size == 8, Size8Type, Size16Type>::type;
 
         template<class, int I = 0> struct MachineTypeHelper; // We have to use specialization to avoid discarding type attribute
-        template<int I> struct MachineTypeHelper<Vec4f, I> { using Type = __m128; };
-        template<int I> struct MachineTypeHelper<Vec8f, I> { using Type = __m256; };
-        template<int I> struct MachineTypeHelper<Vec16f, I> { using Type = __m512; };
-        template<int I> struct MachineTypeHelper<Vec2d, I> { using Type = __m128d; };
-        template<int I> struct MachineTypeHelper<Vec4d, I> { using Type = __m256d; };
-        template<int I> struct MachineTypeHelper<Vec8d, I> { using Type = __m512d; };
+        template<int I> struct MachineTypeHelper<VCL::Vec4f, I> { using Type = __m128; };
+        template<int I> struct MachineTypeHelper<VCL::Vec8f, I> { using Type = __m256; };
+        template<int I> struct MachineTypeHelper<VCL::Vec16f, I> { using Type = __m512; };
+        template<int I> struct MachineTypeHelper<VCL::Vec2d, I> { using Type = __m128d; };
+        template<int I> struct MachineTypeHelper<VCL::Vec4d, I> { using Type = __m256d; };
+        template<int I> struct MachineTypeHelper<VCL::Vec8d, I> { using Type = __m512d; };
     public:
         using Pack = std::conditional<Size <= 4, Pack1, Pack2>::type;
 
@@ -194,7 +194,7 @@ namespace std {
             return PacketType(values, GradPacket::select(values == a.value(), a.grad(), b.grad()));
         }
         else
-            return Physica::max(a.toMachine(), b.toMachine());
+            return Physica::VCL::max(a.toMachine(), b.toMachine());
     }
 
     template<Physica::Scalar T, int Size>
@@ -206,7 +206,7 @@ namespace std {
             return PacketType(values, GradPacket::select(values == a.value(), a.grad(), b.grad()));
         }
         else
-            return Physica::min(a.toMachine(), b.toMachine());
+            return Physica::VCL::min(a.toMachine(), b.toMachine());
     }
 
     template<Physica::Scalar T, int Size>

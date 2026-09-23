@@ -181,21 +181,21 @@ void SIMD<T, Size>::store(T* p, int n) const noexcept {
     }
 }
 
-#if INSTRSET >= 2
+#if defined(__SSE2__) || defined(__x86_64__)
 template void SIMD<float32, 4>::load(const float32*, int) & noexcept;
 template void SIMD<float64, 2>::load(const float64*, int) & noexcept;
 template void SIMD<float32, 4>::store(float32*, int) const noexcept;
 template void SIMD<float64, 2>::store(float64*, int) const noexcept;
 #endif
 
-#if INSTRSET >= 7
+#if defined(__AVX__)
 template void SIMD<float32, 8>::load(const float32*, int) & noexcept;
 template void SIMD<float64, 4>::load(const float64*, int) & noexcept;
 template void SIMD<float32, 8>::store(float32*, int) const noexcept;
 template void SIMD<float64, 4>::store(float64*, int) const noexcept;
 #endif
 
-#if INSTRSET >= 9
+#if defined(__AVX512F__) || defined(__AVX512__)
 template void SIMD<float32, 16>::load(const float32*, int) & noexcept;
 template void SIMD<float64, 8>::load(const float64*, int) & noexcept;
 template void SIMD<float32, 16>::store(float32*, int) const noexcept;

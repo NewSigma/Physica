@@ -208,21 +208,21 @@ namespace Physica {
     SIMD<T, Size> SIMD<T, Size>::permute() const {
         static_assert(sizeof...(Order) == Size, "[Error]: Size of Order do not match the packet");
         if constexpr (Size == 2)
-            return Physica::permute2<Order...>(toMachine());
+            return VCL::permute2<Order...>(toMachine());
         else if constexpr (Size == 4)
-            return Physica::permute4<Order...>(toMachine());
+            return VCL::permute4<Order...>(toMachine());
         else if constexpr (Size == 8)
-            return Physica::permute8<Order...>(toMachine());
+            return VCL::permute8<Order...>(toMachine());
         else {
             static_assert(Size == 16, "[Error]: Unexpected size");
-            return Physica::permute16<Order...>(toMachine());
+            return VCL::permute16<Order...>(toMachine());
         }
     }
 
     template<Scalar T, int Size>
     template<int... Flags>
     SIMD<T, Size> SIMD<T, Size>::change_sign() const {
-        return Physica::change_sign<Flags...>(toMachine());
+        return VCL::change_sign<Flags...>(toMachine());
     }
 
     template<Scalar T, int Size>
@@ -234,17 +234,17 @@ namespace Physica {
 
     template<Scalar T, int Size>
     T SIMD<T, Size>::sum() const {
-        return Physica::horizontal_add(toMachine());
+        return VCL::horizontal_add(toMachine());
     }
 
     template<Scalar T, int Size>
     T SIMD<T, Size>::max() const {
-        return Physica::horizontal_max1(toMachine());
+        return VCL::horizontal_max1(toMachine());
     }
 
     template<Scalar T, int Size>
     T SIMD<T, Size>::min() const {
-        return Physica::horizontal_min1(toMachine());
+        return VCL::horizontal_min1(toMachine());
     }
 
     template<Scalar T, int Size>
@@ -254,7 +254,7 @@ namespace Physica {
 
     template<Scalar T, int Size>
     auto SIMD<T, Size>::isSubNormal() const noexcept -> BoolSIMDType {
-        return BoolSIMDType(Physica::is_zero_or_subnormal(pack));
+        return BoolSIMDType(VCL::is_zero_or_subnormal(pack));
     }
 
     template<Scalar T, int Size>
@@ -276,22 +276,22 @@ namespace Physica {
     auto SIMD<T, Size>::inf() noexcept -> SIMD {
         if constexpr (T::Prec == Float32) {
             if constexpr (Size == 4)
-                return reinterpret_f(Vec4i(0x7F800000));
+                return VCL::reinterpret_f(VCL::Vec4i(0x7F800000));
             else if constexpr (Size == 8)
-                return reinterpret_f(Vec8i(0x7F800000));
+                return VCL::reinterpret_f(VCL::Vec8i(0x7F800000));
             else {
                 static_assert(Size == 16);
-                return reinterpret_f(Vec16i(0x7F800000));
+                return VCL::reinterpret_f(VCL::Vec16i(0x7F800000));
             }
         }
         else {
             if constexpr (Size == 2)
-                return reinterpret_d(Vec2q(0x7FF0000000000000));
+                return VCL::reinterpret_d(VCL::Vec2q(0x7FF0000000000000));
             else if constexpr (Size == 4)
-                return reinterpret_d(Vec4q(0x7FF0000000000000));
+                return VCL::reinterpret_d(VCL::Vec4q(0x7FF0000000000000));
             else {
                 static_assert(Size == 8);
-                return reinterpret_d(Vec8q(0x7FF0000000000000));
+                return VCL::reinterpret_d(VCL::Vec8q(0x7FF0000000000000));
             }
         }
     }
@@ -301,14 +301,14 @@ namespace Physica {
     SIMD<T, Size> SIMD<T, Size>::blend(const SIMD x, const SIMD y) {
         static_assert(sizeof...(Order) == Size, "[Error]: Size of Order do not match the packet");
         if constexpr (Size == 2)
-            return Physica::blend2<Order...>(x.toMachine(), y.toMachine());
+            return VCL::blend2<Order...>(x.toMachine(), y.toMachine());
         else if constexpr (Size == 4)
-            return Physica::blend4<Order...>(x.toMachine(), y.toMachine());
+            return VCL::blend4<Order...>(x.toMachine(), y.toMachine());
         else if constexpr (Size == 8)
-            return Physica::blend8<Order...>(x.toMachine(), y.toMachine());
+            return VCL::blend8<Order...>(x.toMachine(), y.toMachine());
         else {
             static_assert(Size == 16, "[Error]: Unexpected size");
-            return Physica::blend16<Order...>(x.toMachine(), y.toMachine());
+            return VCL::blend16<Order...>(x.toMachine(), y.toMachine());
         }
     }
 
@@ -370,7 +370,7 @@ namespace Physica {
 
     template<Scalar T, int Size>
     SIMD<T, Size> SIMD<T, Size>::select(BoolSIMDType flags, const SIMD x, const SIMD y) {
-        return SIMD(Physica::select(flags.toMachine(), x.toMachine(), y.toMachine()));
+        return SIMD(VCL::select(flags.toMachine(), x.toMachine(), y.toMachine()));
     }
 
     template<Scalar T, int Size>

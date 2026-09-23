@@ -71,12 +71,12 @@ namespace Physica {
 
     template<Scalar T, int Size>
     bool BoolSIMD<T, Size>::horizontal_and() const {
-        return Physica::horizontal_and(toMachine());
+        return VCL::horizontal_and(toMachine());
     }
 
     template<Scalar T, int Size>
     bool BoolSIMD<T, Size>::horizontal_or() const {
-        return Physica::horizontal_or(toMachine());
+        return VCL::horizontal_or(toMachine());
     }
 
     template<Scalar T>
@@ -109,10 +109,10 @@ namespace Physica {
     private:
         constexpr static bool isSinglePrec = ScalarType::Prec == Float;
 
-        using Size2Type = std::conditional<isSinglePrec, void, Vec2db>::type;
-        using Size4Type = std::conditional<isSinglePrec, Vec4fb, Vec4db>::type;
-        using Size8Type = std::conditional<isSinglePrec, Vec8fb, Vec8db>::type;
-        using Size16Type = std::conditional<isSinglePrec, Vec16fb, void>::type;
+        using Size2Type = std::conditional<isSinglePrec, void, VCL::Vec2db>::type;
+        using Size4Type = std::conditional<isSinglePrec, VCL::Vec4fb, VCL::Vec4db>::type;
+        using Size8Type = std::conditional<isSinglePrec, VCL::Vec8fb, VCL::Vec8db>::type;
+        using Size16Type = std::conditional<isSinglePrec, VCL::Vec16fb, void>::type;
         using Type1 = std::conditional<Size == 2, Size2Type, Size4Type>::type;
         using Type2 = std::conditional<Size == 8, Size8Type, Size16Type>::type;
     public:
