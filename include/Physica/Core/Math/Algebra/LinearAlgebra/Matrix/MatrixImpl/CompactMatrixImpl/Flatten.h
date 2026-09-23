@@ -36,6 +36,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        using Base::operator=;
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
 

@@ -77,11 +77,16 @@ namespace Physica {
         else {
             target.assert_assign(Base::getDerived());
 
-            const size_t maxMajor = target.getMaxMajor();
-            const size_t maxMinor = target.getMaxMinor();
-            for (size_t i = 0; i < maxMajor; ++i)
-                for (size_t j = 0; j < maxMinor; ++j)
-                    target.refFromMajorMinor(i, j) = calc(target.rowFromMajorMinor(i, j), target.colFromMajorMinor(i, j));
+            using Target = std::remove_cvref_t<decltype(target)>;
+            if constexpr (MatrixMajor::isSameMajor<Derived, Target>() && !Target::isCompact())
+                Base::getDerived().flatten().template assign<P>(target.flatten());
+            else {
+                const size_t maxMajor = target.getMaxMajor();
+                const size_t maxMinor = target.getMaxMinor();
+                for (size_t i = 0; i < maxMajor; ++i)
+                    for (size_t j = 0; j < maxMinor; ++j)
+                        target.refFromMajorMinor(i, j) = calc(target.rowFromMajorMinor(i, j), target.colFromMajorMinor(i, j));
+            }
         }
     }
 
@@ -99,11 +104,16 @@ namespace Physica {
         else {
             target.assert_assign(Base::getDerived());
 
-            const size_t maxMajor = target.getMaxMajor();
-            const size_t maxMinor = target.getMaxMinor();
-            for (size_t i = 0; i < maxMajor; ++i)
-                for (size_t j = 0; j < maxMinor; ++j)
-                    target.refFromMajorMinor(i, j) += calc(target.rowFromMajorMinor(i, j), target.colFromMajorMinor(i, j));
+            using Target = std::remove_cvref_t<decltype(target)>;
+            if constexpr (MatrixMajor::isSameMajor<Derived, Target>() && !Target::isCompact())
+                Base::getDerived().flatten().template assign_add<P>(target.flatten());
+            else {
+                const size_t maxMajor = target.getMaxMajor();
+                const size_t maxMinor = target.getMaxMinor();
+                for (size_t i = 0; i < maxMajor; ++i)
+                    for (size_t j = 0; j < maxMinor; ++j)
+                        target.refFromMajorMinor(i, j) += calc(target.rowFromMajorMinor(i, j), target.colFromMajorMinor(i, j));
+            }
         }
     }
 
@@ -154,11 +164,15 @@ namespace Physica {
     void RValueMatrix<Derived, ScalarT>::reverse(this const auto& self, const Matrix auto& grad) noexcept {
         static_assert(isReverseDiff());
         self.grads().assert_assign(grad);
-        for (size_t major = 0; major < self.getMaxMajor(); ++major) {
-            for (size_t minor = 0; minor < self.getMaxMinor(); ++minor) {
-                size_t r = rowFromMajorMinor(major, minor);
-                size_t c = colFromMajorMinor(major, minor);
-                self.calc(major, minor).reverse(grad.calc(r, c));
+        if constexpr (MatrixMajor::isSameMajor<decltype(self), decltype(grad)>())
+            self.flatten().reverse(grad.flatten());
+        else {
+            for (size_t major = 0; major < self.getMaxMajor(); ++major) {
+                for (size_t minor = 0; minor < self.getMaxMinor(); ++minor) {
+                    size_t r = rowFromMajorMinor(major, minor);
+                    size_t c = colFromMajorMinor(major, minor);
+                    self.calc(major, minor).reverse(grad.calc(r, c));
+                }
             }
         }
     }
@@ -344,46 +358,12 @@ namespace Physica {
 
     template<class Derived, Scalar ScalarT>
     auto RValueMatrix<Derived, ScalarT>::max() const -> T {
-        T result;
-        if constexpr (Derived::isColMatrix()) {
-            result = Base::getDerived().col(0).max();
-            for (size_t i = 1; i < getCol(); ++i) {
-                T temp = Base::getDerived().col(i).max();
-                if (temp > result)
-                    result = temp;
-            }
-        }
-        else {
-            result = Base::getDerived().row(0).max();
-            for (size_t i = 1; i < getRow(); ++i) {
-                T temp = Base::getDerived().row(i).max();
-                if (temp > result)
-                    result = temp;
-            }
-        }
-        return result;
+        return Base::getDerived().flatten().max();
     }
 
     template<class Derived, Scalar ScalarT>
     auto RValueMatrix<Derived, ScalarT>::min() const -> T {
-        T result;
-        if constexpr (Derived::isColMatrix()) {
-            result = Base::getDerived().col(0).min();
-            for (size_t i = 1; i < getCol(); ++i) {
-                T temp = Base::getDerived().col(i).min();
-                if (temp < result)
-                    result = temp;
-            }
-        }
-        else {
-            result = row(0).min();
-            for (size_t i = 1; i < getRow(); ++i) {
-                T temp = Base::getDerived().row(i).min();
-                if (temp < result)
-                    result = temp;
-            }
-        }
-        return result;
+        return Base::getDerived().flatten().min();
     }
 
     template<class Derived, Scalar ScalarT>
@@ -393,12 +373,8 @@ namespace Physica {
             auto& result = co_yield x.values().sum();
             x.reverse(result.grad());
         }
-        else {
-            T result = 0;
-            for (size_t major = 0; major < getMaxMajor(); ++major)
-                result += MatrixMajor::isColMatrix<Derived>() ? x.col(major).sum() : x.row(major).sum();
-            co_return std::move(result);
-        }
+        else
+            co_return x.flatten().sum();
     }
 
     template<class Derived, Scalar ScalarT>

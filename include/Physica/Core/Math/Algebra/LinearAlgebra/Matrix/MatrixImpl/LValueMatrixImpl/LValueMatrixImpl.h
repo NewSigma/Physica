@@ -25,11 +25,7 @@ namespace Physica {
     template<class Derived>
     auto LValueMatrix<Derived>::operator=(Scalar auto x) noexcept -> Derived& {
         Base::static_assert_assign(x);
-        const size_t maxMajor = Base::getMaxMajor();
-        const size_t maxMinor = Base::getMaxMinor();
-        for (size_t i = 0; i < maxMajor; ++i)
-            for (size_t j = 0; j < maxMinor; ++j)
-                    refFromMajorMinor(i, j) = x;
+        Base::getDerived().flatten() = x;
         return Base::getDerived();
     }
 
@@ -339,31 +335,19 @@ namespace Physica {
     template<class Derived>
     template<RNG R>
     void LValueMatrix<Derived>::random_uniform() {
-        const size_t maxMajor = Base::getMaxMajor();
-        const size_t maxMinor = Base::getMaxMinor();
-        for (size_t major = 0; major < maxMajor; ++major)
-            for (size_t minor = 0; minor < maxMinor; ++minor)
-                refFromMajorMinor(major, minor) = ScalarType::template random_uniform<R>();
+        Base::getDerived().flatten().template random_uniform<R>();
     }
 
     template<class Derived>
     template<RNG R>
     void LValueMatrix<Derived>::random_normal() {
-        const size_t maxMajor = Base::getMaxMajor();
-        const size_t maxMinor = Base::getMaxMinor();
-        for (size_t major = 0; major < maxMajor; ++major)
-            for (size_t minor = 0; minor < maxMinor; ++minor)
-                refFromMajorMinor(major, minor) = ScalarType::template random_normal<R>();
+        Base::getDerived().flatten().template random_normal<R>();
     }
 
     template<class Derived>
     template<RNG R>
     void LValueMatrix<Derived>::random_any(auto& distribution) {
-        const size_t maxMajor = Base::getMaxMajor();
-        const size_t maxMinor = Base::getMaxMinor();
-        for (size_t major = 0; major < maxMajor; ++major)
-            for (size_t minor = 0; minor < maxMinor; ++minor)
-                refFromMajorMinor(major, minor) = ScalarType::template random_any<R>(distribution);
+        Base::getDerived().flatten().template random_any<R>(distribution);
     }
 
     template<class Derived>

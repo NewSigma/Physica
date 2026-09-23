@@ -44,7 +44,7 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign_add(Vector auto&& v) const noexcept;
 
-        [[nodiscard]] T calc(size_t index) const;
+        [[nodiscard]] decltype(auto) calc(size_t index) const;
 
         [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) grads(this auto&& self) noexcept;
@@ -73,6 +73,13 @@ namespace Physica {
     }
 
     template<Matrix M>
+    decltype(auto) Flatten<M>::calc(size_t index) const {
+        const size_t major = index / mat.getMaxMinor();
+        const size_t minor = index % mat.getMaxMinor();
+        return mat.calcFromMajorMinor(major, minor);
+    }
+
+    template<Matrix M>
     decltype(auto) Flatten<M>::values(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat).values().flatten();
     }
@@ -80,13 +87,6 @@ namespace Physica {
     template<Matrix M>
     decltype(auto) Flatten<M>::grads(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat).grads().flatten();
-    }
-
-    template<Matrix M>
-    auto Flatten<M>::calc(size_t index) const -> T {
-        const size_t major = index / mat.getMaxMinor();
-        const size_t minor = index % mat.getMaxMinor();
-        return mat.calcFromMajorMinor(major, minor);
     }
 
     template<Matrix M>
