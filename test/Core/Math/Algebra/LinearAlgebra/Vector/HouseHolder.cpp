@@ -23,28 +23,31 @@
 #include "Test.h"
 
 using namespace Physica;
-using T = float64;
-using RandomSource = Random<MT19937, 10000>;
+using RandomSource = Random<>;
 
 namespace {
+    /**
+     * All checks are normalized by ||x|| so that they remain meaningful when ||x|| overflows or underflows the naive sum of squares.
+     */
     template<Vector V>
-    void reflectTest(const V& x, double prec) noexcept {
+    void reflect(const V& x, double prec) noexcept {
         using T = V::ScalarType;
+        using Tr = T::RealType;
         const size_t rank = x.getLength();
         V v(rank);
-        const T norm = x.householder(v);
+        const Tr norm = x.householder(v);
         const T tau = v[0];
         const T beta = -norm * unit(x[0]);
-        v[0] = 1;
+        v[0] = T(1);
 
-        V result = x - tau * (v.hermite() * x) * v;
-        expect(scalarNear(result[0], beta, prec));
-
+        const V result = x - tau * (v.hermite() * x) * v;
+        expect<RandomSource>(scalarNear(result[0] / norm, beta / norm, prec));
         for (size_t i = 1; i < rank; ++i)
-            expect(scalarNear(result[i], T(0), prec));
+            expect<RandomSource>(abs(result[i]) <= Tr(prec) * norm);
     }
 
-    void emptyVectorTest() noexcept {
+    void empty() noexcept {
+        using T = float64;
         using VectorType = Vector4D<T>;
         VectorType x{0, 0, 0, 0};
         x.householder();
@@ -52,7 +55,8 @@ namespace {
             expect(elem.isZero());
     }
 
-    void emptyComplexVectorTest() noexcept {
+    void empty_complex() noexcept {
+        using T = float64;
         using ComplexType = Complex<T>;
         using ComplexVector = Vector4D<ComplexType>;
         const ComplexVector x = Vector4D<T>{0, 0, 1, 0};
@@ -69,7 +73,8 @@ namespace {
             expect(scalarNear(result[i], ComplexType(0), 1E-15));
     }
 
-    void realApplyTest() noexcept {
+    void apply() noexcept {
+        using T = float64;
         using VectorType = Vector4D<T>;
         const VectorType x{2, 3, 4, 5};
         const size_t rank = x.getLength();
@@ -90,10 +95,11 @@ namespace {
         expect(matrixNear(r_result, r_answer, 1E-5));
     }
 
-    void complexApplyTest() noexcept {
-        using ScalarType = Complex<T>;
-        using VectorType = Vector2D<ScalarType>;
-        using MatrixType = DenseMatrix<ScalarType, MatrixMajor::Col, 2, 2>;
+    void apply_complex() noexcept {
+        using T = float64;
+        using Tc = Complex<T>;
+        using VectorType = Vector2D<Tc>;
+        using MatrixType = DenseMatrix<Tc, MatrixMajor::Col, 2, 2>;
 
         const VectorType x{{1, 1}, {3, -5}};
         const size_t rank = x.getLength();
@@ -122,12 +128,24 @@ namespace {
 }
 
 int main() {
-    reflectTest(Vector4D<T>{2, 3, 4, 5}, 1E-14); //In debug mode, precision can reach 10^-15
-    reflectTest(VectorND<T>::random_uniform<RandomSource>(32), 1E-14);
-    reflectTest(VectorND<Complex<T>>::random_uniform<RandomSource>(32), 1E-14);
-    realApplyTest();
-    complexApplyTest();
-    emptyVectorTest();
-    emptyComplexVectorTest();
+    using T = float64;
+    // Real
+    reflect(Vector4D<T>{2, 3, 4, 5}, 1E-14); // In debug mode, precision can reach 10^-15
+    reflect(VectorND<T>::random_uniform<RandomSource>(32), 1E-14);
+    reflect(VectorND<Complex<T>>::random_uniform<RandomSource>(32), 1E-14);
+    // Extreme magnitude
+    reflect(VectorND<T>{1E-300, 1E-200, 1E-150, 1, 1E150, 1E200, 1E300}, 1E-14);
+    // Mixed magnitude
+    reflect(Vector4D<T>{T(1E200), T(1E-200), T(1), T(0)}, 1E-14);
+    reflect(Vector4D<T>{T(1E-200), T(1E200), T(1E-200), T(1)}, 1E-14);
+    // Corner cases
+    reflect(Vector4D<T>{5, 0, 0, 0}, 1E-14); // Zero tail
+    reflect(Vector4D<T>{0, 3, 4, 5}, 1E-14); // Zero leading element
+    reflect(Vector4D<T>{-2, 3, -4, 5}, 1E-14); // Mixed signs
+
+    apply();
+    apply_complex();
+    empty();
+    empty_complex();
     return 0;
 }

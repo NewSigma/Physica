@@ -718,24 +718,21 @@ namespace Physica {
         assert(getLength() == target.getLength());
         assert(getLength() > 1 && "[Error]: Unnecessary householder call");
 
+        const auto tail = Base::getDerived().template tail<TailLength>(1);
         const T v0 = calc(0);
-        const Tr sourceNorm0 = v0.squaredNorm();
-        const Tr squaredTailNorm = Base::getDerived().template tail<TailLength>(1).squaredNorm();
-        if (!squaredTailNorm.isSubNormal()) [[likely]] {
-            const Tr norm = sqrt(squaredTailNorm + sourceNorm0);
-            target[0] = Tr(1) + abs(v0) / norm;
-            target.template tail<TailLength>(1) = Base::getDerived().template tail<TailLength>(1) * reciprocal(fma(unit(v0.value()), norm, v0));
-            return norm;
-        }
-
-        const bool isZeroVector = sourceNorm0.isSubNormal();
-        if (isZeroVector) {
+        const Trv maxabs = std::max(abs(v0.value()), abs(tail.values()).max());
+        if (maxabs.isZero()) {
             target.zeros();
             return Trv(0);
         }
-        target[0] = Trv(2);
-        target.template tail<TailLength>(1).zeros();
-        return sqrt(sourceNorm0);
+        const Trv scale = maxabs.stripSignificand();
+        const Trv invScale = reciprocal(scale);
+        const T v1 = v0 * invScale;
+        const auto tailScaled = tail * invScale;
+        const Tr normScaled = sqrt(v1.squaredNorm() + tailScaled.squaredNorm());
+        target[0] = Tr(1) + abs(v1) / normScaled;
+        target.template tail<TailLength>(1) = tailScaled * reciprocal(fma(unit(v0.value()), normScaled, v1));
+        return normScaled * scale;
     }
 
     template<class Derived, Scalar ScalarT>
