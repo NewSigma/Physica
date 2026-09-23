@@ -51,7 +51,7 @@ namespace Physica {
     template<FloatPrec Prec>
     [[nodiscard]] __host__ __device__ Real<Prec> reciprocal(const Real<Prec>& x) noexcept {
         using T = Real<Prec>;
-        assert(!x.isSubNormal() && "[Error]: Division overflow");
+        assert((!x.isSubNormal() || x.isInfinity()) && "[Error]: Division overflow");
         return T(1) / x;
     }
 

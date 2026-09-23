@@ -113,6 +113,7 @@ namespace Physica {
         [[nodiscard]] MachineType toMachine() const noexcept { return double(*this); }
         [[nodiscard]] bool isZero() const { return byte[getSize() - 1] == 0; }
         [[nodiscard]] constexpr static bool isSubNormal() noexcept { return false; }
+        [[nodiscard]] constexpr static bool isInfinity() noexcept { return false; }
         [[nodiscard]] bool isPositive() const { return !isZero() && length > 0; }
         [[nodiscard]] bool isNegative() const { return !isZero() && length < 0; }
         [[nodiscard]] bool isInteger() const { return getSize() - 1 == power; }

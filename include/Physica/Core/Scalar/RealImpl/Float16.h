@@ -84,9 +84,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr half toMachine() const noexcept { return h; }
         [[nodiscard]] __host__ __device__ constexpr bool isZero() const noexcept { return h == half(0); }
-        [[nodiscard]] __host__ __device__ inline bool isSubNormal() const noexcept;
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return h > half(0); }
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return h < half(0); }
+        [[nodiscard]] __host__ __device__ inline bool isSubNormal() const noexcept;
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return !__hisinf(h); }
         [[nodiscard]] __host__ __device__ bool isInfinity() const noexcept { return __hisinf(h); }
         /* Static members */

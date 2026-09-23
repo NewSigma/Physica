@@ -724,7 +724,7 @@ namespace Physica {
         if (!squaredTailNorm.isSubNormal()) [[likely]] {
             const Tr norm = sqrt(squaredTailNorm + sourceNorm0);
             target[0] = Tr(1) + abs(v0) / norm;
-            target.template tail<TailLength>(1) = Base::getDerived().template tail<TailLength>(1) * reciprocal(v0 + unit(v0.value()) * norm);
+            target.template tail<TailLength>(1) = Base::getDerived().template tail<TailLength>(1) * reciprocal(fma(unit(v0.value()), norm, v0));
             return norm;
         }
 

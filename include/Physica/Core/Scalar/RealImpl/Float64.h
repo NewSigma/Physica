@@ -96,11 +96,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr double toMKL() const noexcept { return toMachine(); }
         [[nodiscard]] __host__ __device__ constexpr double toCUDA() const noexcept { return toMachine(); }
         [[nodiscard]] __host__ __device__ constexpr bool isZero() const noexcept{ return d == 0; }
+        [[nodiscard]] __host__ __device__ constexpr bool isPositive() const noexcept { return d > 0; }
+        [[nodiscard]] __host__ __device__ constexpr bool isNegative() const noexcept { return d < 0; }
         [[nodiscard]] __host__ __device__ constexpr bool isSubNormal() const noexcept;
-        [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return d > 0; }
-        [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return d < 0; }
-        [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
-        [[nodiscard]] __host__ __device__ inline bool isInfinity() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr bool isFinite() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr bool isInfinity() const noexcept;
         /* Static Members */
         [[nodiscard]] constexpr static Real nan() noexcept;
         template<RNG R>
@@ -144,7 +144,9 @@ namespace Physica {
     }
 
     __host__ __device__ constexpr auto Real<Float64>::operator/(const This& x) const noexcept -> Real {
-        assert((!x.isSubNormal() || x.isInfinity()) && "[Error]: Division overflow");
+        if !consteval {
+            assert((!x.isSubNormal() || x.isInfinity()) && "[Error]: Division overflow");
+        }
         return Real(d / x.d);
     }
 
@@ -154,14 +156,14 @@ namespace Physica {
     }
 
     [[clang::no_sanitize("numerical")]] __host__ __device__ constexpr bool Real<Float64>::isSubNormal() const noexcept{
-        return !__builtin_isnormal(d); // Use builtin to help no_sanitize
+        return isFinite() && !__builtin_isnormal(d); // Use builtin to help no_sanitize
     }
 
-    __host__ __device__ inline bool Real<Float64>::isFinite() const noexcept {
+    __host__ __device__ constexpr bool Real<Float64>::isFinite() const noexcept {
         return std::isfinite(d);
     }
 
-    __host__ __device__ inline bool Real<Float64>::isInfinity() const noexcept {
+    __host__ __device__ constexpr bool Real<Float64>::isInfinity() const noexcept {
         return std::isinf(d);
     }
 

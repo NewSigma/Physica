@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <limits>
 #include "Physica/Core/Scalar/Real.h"
 #include "Test.h"
 
@@ -50,6 +51,26 @@ namespace {
         expect<RandomSource>(scalarNear(T(1) + square(tanpi(x)), square(secpi(x)), ULP));
         expect<RandomSource>(scalarNear(T(1) + square(cotpi(x)), square(cscpi(x)), ULP));
     }
+
+    template<FloatPrec Prec>
+    void subnormal() {
+        using T = Real<Prec>;
+        expect(T(std::numeric_limits<T>::denorm_min()).isSubNormal());
+        expect(T(0).isSubNormal());
+        expect(!T(1).isSubNormal());
+        expect(!T(-1).isSubNormal());
+        expect(!T(std::numeric_limits<T>::infinity()).isSubNormal());
+        expect(!T(-std::numeric_limits<T>::infinity()).isSubNormal());
+        expect(!T::nan().isSubNormal());
+    }
+
+    template<FloatPrec Prec>
+    void repinf() {
+        using T = Real<Prec>;
+        const T inf = std::numeric_limits<T>::infinity();
+        expect(reciprocal(inf).isZero());
+        expect(reciprocal(-inf).isZero());
+    }
 }
 
 int main() {
@@ -59,5 +80,9 @@ int main() {
     infiniteCompare(float32(0), float64(0)); // Always x = y = 0, we make it a function to silent useless comparison warning
     real();
     trig();
+    subnormal<Float32>();
+    subnormal<Float64>();
+    repinf<Float32>();
+    repinf<Float64>();
     return 0;
 }
