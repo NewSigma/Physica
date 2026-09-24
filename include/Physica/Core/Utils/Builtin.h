@@ -51,7 +51,7 @@ namespace Physica {
 
     template<class T>
     void memswap(T* a, T* b) noexcept {
-        // FIXME: static_assert trivially_relocatable once we dump to CXX26
+        // FIXME: static_assert trivially_relocatable once we bump to CXX26
         assert(a != b && "[Error]: Self swap is likely a bug");
         alignas(T) std::array<std::byte, sizeof(T)> buffer;
         memcpy(buffer.data(), (void*)a, buffer.size());

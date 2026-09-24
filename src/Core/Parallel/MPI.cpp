@@ -165,7 +165,7 @@ auto MPI::pass(int from, int to, void* data, int count, dtype_handle dtype, comm
     return {};
 }
 /**
- * TODO: Update to MPI_Isendrecv once dump to OpenMPI-5
+ * TODO: Update to MPI_Isendrecv once bump to OpenMPI-5
  */
 void MPI::sendrecv(int send_to, int recv_from, void* data, int count, dtype_handle dtype, comm_handle comm) {
     checkPID(send_to, recv_from);

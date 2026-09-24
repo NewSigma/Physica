@@ -13,9 +13,9 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 """
 # Project information
 project = 'Physica'
-copyright = '2021-2024, Weibo He'
+release = '2026'
 author = 'Weibo He'
-release = '0.0.1'
+copyright = f'2021-{release}, {author}'
 
 # General
 extensions = ['myst_parser']
