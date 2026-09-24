@@ -109,8 +109,17 @@ namespace Physica {
         return ResultType(ln1p(x.value()), x.grad() / (Tv(1) + x.template grad_mask<GradOrder>()));
     }
 
-    //template<Scalar T>
-    //[[nodiscard]] auto log(const T& x, const T& a) noexcept requires(ForwardDiff<T>);
+    template<Scalar T, Scalar U>
+    [[nodiscard]] auto log(const T& x, const U& a) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        const auto lna = ln(a.value());
+        auto grad = x.grad() / (x1 * lna);
+        if constexpr (Diffable<U>)
+            grad = grad - ln(x1) * a.grad() / (a.template grad_mask<GradOrder>() * square(lna));
+        return ResultType(log(x.value(), a.value()), std::move(grad));
+    }
 
     template<Scalar T>
     [[nodiscard]] __host__ __device__ auto exp(const T& x) noexcept requires(ForwardDiff<T>) {
@@ -135,8 +144,15 @@ namespace Physica {
         return ResultType(y.value(), x.grad() * y / x.template grad_mask<GradOrder>() * a);
     }
 
-    //template<Scalar T>
-    //[[nodiscard]] auto pow(const T& x, const T& n) noexcept requires(ForwardDiff<T>);
+    template<Scalar T, Scalar U>
+    [[nodiscard]] auto pow(const T& x, const U& n) noexcept requires(ForwardDiff<T> && ForwardDiff<U>) {
+        using ResultType = T::ScalarType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        const auto n1 = n.template grad_mask<GradOrder>();
+        const auto y = pow(x1, n1);
+        return ResultType(y.value(), x.grad() * y / x1 * n1 + y * ln(x1) * n.grad());
+    }
 
     template<Scalar T>
     [[nodiscard]] __host__ __device__ auto cos(const T& x) noexcept requires(ForwardDiff<T>) {
@@ -195,29 +211,60 @@ namespace Physica {
     }
 
     template<Scalar T>
-    [[nodiscard]] auto arccos(const T& x) noexcept {
+    [[nodiscard]] auto arccos(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
+        using Tv = T::ValueType;
         constexpr int GradOrder = T::GradType::Order;
-        return ResultType(arccos(x.value()), -x.grad() / sqrt(T(1) - square(x.template grad_mask<GradOrder>())));
+        return ResultType(arccos(x.value()), -x.grad() / sqrt(Tv(1) - square(x.template grad_mask<GradOrder>())));
     }
 
-    /*
-    //!Domain of definition: [-Pi / 2, Pi / 2]
     template<Scalar T>
-    [[nodiscard]] auto arcsin(const T& x) noexcept requires(ForwardDiff<T>);
-    //!Domain of definition: [-Pi / 2, Pi / 2]
-    template<Scalar T>
-    [[nodiscard]] auto arctan(const T& x) noexcept requires(ForwardDiff<T>);
+    [[nodiscard]] auto arcsin(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        using Tv = T::ValueType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        return ResultType(arcsin(x.value()), x.grad() / sqrt(Tv(1) - square(x1)));
+    }
+
 
     template<Scalar T>
-    [[nodiscard]] auto arcsec(const T& x) noexcept requires(ForwardDiff<T>);
+    [[nodiscard]] auto arctan(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        using Tv = T::ValueType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        return ResultType(arctan(x.value()), x.grad() / (Tv(1) + square(x1)));
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arccsc(const T& x) noexcept requires(ForwardDiff<T>);
+    [[nodiscard]] auto arcsec(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        using Tv = T::ValueType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        const auto u = reciprocal(x1);
+        return ResultType(arcsec(x.value()), x.grad() / (square(x1) * sqrt(Tv(1) - square(u))));
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arccot(const T& x) noexcept requires(ForwardDiff<T>);
-    */
+    [[nodiscard]] auto arccsc(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        using Tv = T::ValueType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        const auto u = reciprocal(x1);
+        return ResultType(arccsc(x.value()), -x.grad() / (square(x1) * sqrt(Tv(1) - square(u))));
+    }
+
+    template<Scalar T>
+    [[nodiscard]] auto arccot(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        using Tv = T::ValueType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        return ResultType(arccot(x.value()), -x.grad() / (Tv(1) + square(x1)));
+    }
 
     template<Scalar T>
     [[nodiscard]] __host__ __device__ auto cosh(const T& x) noexcept requires(ForwardDiff<T>) {
@@ -242,34 +289,85 @@ namespace Physica {
         return ResultType(v.value(), (Tv(1) - square(v)) * x.grad());
     }
 
-    /*
     template<Scalar T>
-    [[nodiscard]] auto sech(const T& x) noexcept requires(ForwardDiff<T>);
+    [[nodiscard]] auto sech(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        return ResultType(sech(x.value()), -sech(x1) * tanh(x1) * x.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto csch(const T& x) noexcept requires(ForwardDiff<T>);
+    [[nodiscard]] auto csch(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        return ResultType(csch(x.value()), -csch(x1) * coth(x1) * x.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto coth(const T& x) noexcept requires(ForwardDiff<T>);
+    [[nodiscard]] auto coth(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        return ResultType(coth(x.value()), -square(csch(x1)) * x.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arccosh(const T& x) noexcept requires(ForwardDiff<T>);
+    [[nodiscard]] auto arccosh(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        using Tv = T::ValueType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        return ResultType(arccosh(x.value()), x.grad() / sqrt(square(x1) - Tv(1)));
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arcsinh(const T& x) noexcept requires(ForwardDiff<T>);
+    [[nodiscard]] auto arcsinh(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        using Tv = T::ValueType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        return ResultType(arcsinh(x.value()), x.grad() / sqrt(square(x1) + Tv(1)));
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arctanh(const T& x) noexcept requires(ForwardDiff<T>);
+    [[nodiscard]] auto arctanh(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        using Tv = T::ValueType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        return ResultType(arctanh(x.value()), x.grad() / (Tv(1) - square(x1)));
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arcsech(const T& x) noexcept requires(ForwardDiff<T>);
+    [[nodiscard]] auto arcsech(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        using Tv = T::ValueType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        const auto u = reciprocal(x1);
+        return ResultType(arcsech(x.value()), -x.grad() / (square(x1) * sqrt(square(u) - Tv(1))));
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arccsch(const T& x) noexcept requires(ForwardDiff<T>);
+    [[nodiscard]] auto arccsch(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        using Tv = T::ValueType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        const auto u = reciprocal(x1);
+        return ResultType(arccsch(x.value()), -x.grad() / (square(x1) * sqrt(square(u) + Tv(1))));
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arccoth(const T& x) noexcept requires(ForwardDiff<T>);
-    */
+    [[nodiscard]] auto arccoth(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        using Tv = T::ValueType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template grad_mask<GradOrder>();
+        return ResultType(arccoth(x.value()), x.grad() / (Tv(1) - square(x1)));
+    }
 
     template<Scalar T>
     [[nodiscard]] __host__ __device__ auto lncosh(const T& x) noexcept requires(ForwardDiff<T>) {

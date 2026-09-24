@@ -86,8 +86,17 @@ namespace Physica {
         x_.reverse(y.grad() / (x_.value() + 1.0));
     }
 
-    template<Scalar T>
-    [[nodiscard]] auto log(const T& x, const T& a) noexcept requires(ReverseDiff<T>);
+    template<Scalar T, Scalar U>
+    [[nodiscard]] CoDiff<T> log(T&& x, U&& a) noexcept requires(ReverseDiff<T>) {
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        decltype(auto) a_ = decay_rvalue(std::forward<U>(a));
+        auto& y = co_yield log(x_.value(), a_.value());
+        const auto lna = ln(a_.value());
+        const auto& g = y.grad();
+        x_.reverse(reciprocal(x_.value() * lna), g);
+        if constexpr (ReverseDiff<U>)
+            a_.reverse(-ln(x_.value()) / (a_.value() * square(lna)), g);
+    }
 
     template<Scalar T>
     [[nodiscard]] CoDiff<T> exp(T&& x) noexcept requires(ReverseDiff<T>) {
@@ -111,8 +120,16 @@ namespace Physica {
         x_.reverse(y.value() * a_ / x_.value(), y.grad());
     }
 
-    template<Scalar T>
-    [[nodiscard]] auto pow(const T& x, const T& n) noexcept requires(ReverseDiff<T>);
+    template<Scalar T, Scalar U>
+    [[nodiscard]] CoDiff<T> pow(T&& x, U&& n) noexcept requires(ReverseDiff<T>) {
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        decltype(auto) n_ = decay_rvalue(std::forward<U>(n));
+        auto& y = co_yield pow(x_.value(), n_.value());
+        const auto& g = y.grad();
+        x_.reverse(y.value() * n_.value() / x_.value(), g);
+        if constexpr (ReverseDiff<U>)
+            n_.reverse(y.value() * ln(x_.value()), g);
+    }
 
     template<Scalar T>
     [[nodiscard]] CoDiff<T> cos(T&& x) noexcept requires(ReverseDiff<T>) {
@@ -145,35 +162,84 @@ namespace Physica {
     }
 
     template<Scalar T>
-    [[nodiscard]] auto tan(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> tan(T&& x) noexcept requires(ReverseDiff<T>) {
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield tan(x_.value());
+        x_.reverse(square(sec(x_.value())), y.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto sec(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> sec(T&& x) noexcept requires(ReverseDiff<T>) {
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield sec(x_.value());
+        x_.reverse(sec(x_.value()) * tan(x_.value()), y.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto csc(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> csc(T&& x) noexcept requires(ReverseDiff<T>) {
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield csc(x_.value());
+        x_.reverse(-csc(x_.value()) * cot(x_.value()), y.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto cot(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> cot(T&& x) noexcept requires(ReverseDiff<T>) {
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield cot(x_.value());
+        x_.reverse(-square(csc(x_.value())), y.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arccos(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> arccos(T&& x) noexcept requires(ReverseDiff<T>) {
+        using Tv = std::remove_reference_t<T>::ValueType;
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield arccos(x_.value());
+        x_.reverse(-reciprocal(sqrt(Tv(1) - square(x_.value()))), y.grad());
+    }
 
     //!Domain of definition: [-Pi / 2, Pi / 2]
     template<Scalar T>
-    [[nodiscard]] auto arcsin(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> arcsin(T&& x) noexcept requires(ReverseDiff<T>) {
+        using Tv = std::remove_reference_t<T>::ValueType;
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield arcsin(x_.value());
+        x_.reverse(reciprocal(sqrt(Tv(1) - square(x_.value()))), y.grad());
+    }
+
     //!Domain of definition: [-Pi / 2, Pi / 2]
     template<Scalar T>
-    [[nodiscard]] auto arctan(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> arctan(T&& x) noexcept requires(ReverseDiff<T>) {
+        using Tv = std::remove_reference_t<T>::ValueType;
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield arctan(x_.value());
+        x_.reverse(reciprocal(Tv(1) + square(x_.value())), y.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arcsec(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> arcsec(T&& x) noexcept requires(ReverseDiff<T>) {
+        using Tv = std::remove_reference_t<T>::ValueType;
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield arcsec(x_.value());
+        const auto u = reciprocal(x_.value());
+        x_.reverse(reciprocal(square(x_.value()) * sqrt(Tv(1) - square(u))), y.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arccsc(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> arccsc(T&& x) noexcept requires(ReverseDiff<T>) {
+        using Tv = std::remove_reference_t<T>::ValueType;
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield arccsc(x_.value());
+        const auto u = reciprocal(x_.value());
+        x_.reverse(-reciprocal(square(x_.value()) * sqrt(Tv(1) - square(u))), y.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arccot(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> arccot(T&& x) noexcept requires(ReverseDiff<T>) {
+        using Tv = std::remove_reference_t<T>::ValueType;
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield arccot(x_.value());
+        x_.reverse(-reciprocal(Tv(1) + square(x_.value())), y.grad());
+    }
 
     template<Scalar T>
     [[nodiscard]] CoDiff<T> cosh(T&& x) noexcept requires(ReverseDiff<T>) {
@@ -198,31 +264,75 @@ namespace Physica {
     }
 
     template<Scalar T>
-    [[nodiscard]] auto sech(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> sech(T&& x) noexcept requires(ReverseDiff<T>) {
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield sech(x_.value());
+        x_.reverse(-sech(x_.value()) * tanh(x_.value()), y.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto csch(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> csch(T&& x) noexcept requires(ReverseDiff<T>) {
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield csch(x_.value());
+        x_.reverse(-csch(x_.value()) * coth(x_.value()), y.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto coth(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> coth(T&& x) noexcept requires(ReverseDiff<T>) {
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield coth(x_.value());
+        x_.reverse(-square(csch(x_.value())), y.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arccosh(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> arccosh(T&& x) noexcept requires(ReverseDiff<T>) {
+        using Tv = std::remove_reference_t<T>::ValueType;
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield arccosh(x_.value());
+        x_.reverse(reciprocal(sqrt(square(x_.value()) - Tv(1))), y.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arcsinh(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> arcsinh(T&& x) noexcept requires(ReverseDiff<T>) {
+        using Tv = std::remove_reference_t<T>::ValueType;
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield arcsinh(x_.value());
+        x_.reverse(reciprocal(sqrt(square(x_.value()) + Tv(1))), y.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arctanh(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> arctanh(T&& x) noexcept requires(ReverseDiff<T>) {
+        using Tv = std::remove_reference_t<T>::ValueType;
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield arctanh(x_.value());
+        x_.reverse(reciprocal(Tv(1) - square(x_.value())), y.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arcsech(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> arcsech(T&& x) noexcept requires(ReverseDiff<T>) {
+        using Tv = std::remove_reference_t<T>::ValueType;
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield arcsech(x_.value());
+        const auto u = reciprocal(x_.value());
+        x_.reverse(-reciprocal(square(x_.value()) * sqrt(square(u) - Tv(1))), y.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arccsch(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> arccsch(T&& x) noexcept requires(ReverseDiff<T>) {
+        using Tv = std::remove_reference_t<T>::ValueType;
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield arccsch(x_.value());
+        const auto u = reciprocal(x_.value());
+        x_.reverse(-reciprocal(square(x_.value()) * sqrt(square(u) + Tv(1))), y.grad());
+    }
 
     template<Scalar T>
-    [[nodiscard]] auto arccoth(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] CoDiff<T> arccoth(T&& x) noexcept requires(ReverseDiff<T>) {
+        using Tv = std::remove_reference_t<T>::ValueType;
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield arccoth(x_.value());
+        x_.reverse(reciprocal(Tv(1) - square(x_.value())), y.grad());
+    }
 
     template<Scalar T>
     [[nodiscard]] CoDiff<T> lncosh(T&& x) noexcept requires(ReverseDiff<T>) {
@@ -239,8 +349,12 @@ namespace Physica {
     }
 
     template<Scalar T>
-    [[nodiscard]] T floor(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] T floor(const T& x) noexcept requires(ReverseDiff<T>) {
+        return T(floor(x.value()));
+    }
 
     template<Scalar T>
-    [[nodiscard]] T ceil(const T& x) noexcept requires(ReverseDiff<T>);
+    [[nodiscard]] T ceil(const T& x) noexcept requires(ReverseDiff<T>) {
+        return T(ceil(x.value()));
+    }
 }
