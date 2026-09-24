@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 
 namespace Physica {
-    template<Tensor X, int DimR, int DimC>
+    template<Tensor X, int DimR, int DimC> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())
     class TensorSlice<X, DimR, DimC> : public LValueMatrix<TensorSlice<X, DimR, DimC>> {
         using This = TensorSlice<X, DimR, DimC>;
         using Base = LValueMatrix<TensorSlice<X, DimR, DimC>>;
@@ -53,7 +53,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
 
-    template<Tensor X, int DimR, int DimC>
+    template<Tensor X, int DimR, int DimC> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())
     TensorSlice<X, DimR, DimC>::TensorSlice(X&& tensor, IndexVar auto... indices)
             : tensor(std::forward<X>(tensor)) {
         size_t i = 0;
@@ -66,18 +66,18 @@ namespace Physica {
         }(), ...);
     }
 
-    template<Tensor X, int DimR, int DimC>
+    template<Tensor X, int DimR, int DimC> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())
     void TensorSlice<X, DimR, DimC>::resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
         assert(row == getRow() && col == getCol());
     }
 
-    template<Tensor X, int DimR, int DimC>
+    template<Tensor X, int DimR, int DimC> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())
     size_t TensorSlice<X, DimR, DimC>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return getRow();
     }
 
-    template<Tensor X, int DimR, int DimC>
+    template<Tensor X, int DimR, int DimC> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())
     auto TensorSlice<X, DimR, DimC>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
         auto idx = self.index;
         idx[DimR] = row;

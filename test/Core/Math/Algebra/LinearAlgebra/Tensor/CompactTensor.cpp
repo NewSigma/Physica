@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
 #include "Test.h"
 
@@ -35,9 +36,23 @@ namespace {
         for (int i = 0; i < fiber.getLength(); ++i)
             expect(x[1, i, 2] == fiber[i]);
     }
+
+    void slice() {
+        auto x = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
+        auto slice = x.slice(1, var(), var());
+        static_assert(slice.isCompact());
+        static_assert(slice.getMajor() == MatrixMajor::Row);
+        for (int r = 0; r < 4; ++r)
+            for (int c = 0; c < 4; ++c)
+                expect(x[1, r, c] == slice[r, c]);
+
+        MatrixND<T> m = slice;
+        expect(m == slice);
+    }
 }
 
 int main() {
     fiber();
+    slice();
     return 0;
 }

@@ -20,6 +20,7 @@
 
 #include "../CompactTensor.h"
 #include "TensorFiber.h"
+#include "TensorSlice.h"
 
 namespace Physica {
     template<class Derived>
@@ -27,6 +28,13 @@ namespace Physica {
         using Self = decltype(self);
         constexpr int Dim = Base::template calcFiberDim<decltype(indices)...>();
         return TensorFiber<Self, Dim>(std::forward<Self>(self), indices...);
+    }
+
+    template<class Derived>
+    auto CompactTensor<Derived>::slice(this auto&& self, IndexVar auto... indices) noexcept {
+        using Self = decltype(self);
+        constexpr auto Dim = Base::template calcSliceDim<decltype(indices)...>();
+        return TensorSlice<Self, Dim[0], Dim[1]>(std::forward<Self>(self), indices...);
     }
 
     template<class Derived>
