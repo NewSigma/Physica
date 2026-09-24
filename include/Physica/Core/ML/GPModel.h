@@ -75,17 +75,8 @@ namespace Physica {
         auto& covars = covarLU.getMatrixLU();
         const Tv var = kernel.getVar();
         assert(!var.isNegative());
-        for (size_t major = 0; major < covars.getMaxMajor(); ++major) {
-            for (size_t minor = 0; minor < covars.getMaxMinor(); ++minor) {
-                bool diag = major == minor;
-                if constexpr (Scalar<decltype(uncertainty)>)
-                    covars.refFromMajorMinor(major, minor) = diag ? (var + uncertainty) : kernel.calc_value(major, minor);
-                else {
-                    static_assert(Vector<decltype(uncertainty)>, "[Error]: Unexpected uncertainty type");
-                    covars.refFromMajorMinor(major, minor) = diag ? (var + uncertainty.calc(major)) : kernel.calc_value(major, minor);
-                }
-            }
-        }
+        covars.flatten() = kernel.values().flatten();
+        covars.diag() = var + uncertainty;
         covarLU.compute();
         coeffs = covarLU.inv() * sampleY;
         const Tv likelihood = Tv(-0.5) * (sampleY * coeffs + covarLU.lnAbsDet() + ln(Tv(2) * MathConst<Tv>::pi));

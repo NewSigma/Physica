@@ -125,7 +125,7 @@ namespace {
     void stability() {
         // Test that the Green's function's values have a manageable dynamic range
         constexpr static T StabilityMagnitudeLimit = T(1E100);
-        constexpr int NumSite = 4;
+        constexpr int NumSite = 8;
         constexpr T RepelU = 10;
         constexpr T Beta = 60;
 
@@ -137,7 +137,7 @@ namespace {
         const HubbardParams<T> params(1, RepelU, lattice, Beta, RepelU * T(0.5), numSplit);
         auto dqmc = DQMC<T>(params);
         dqmc.step_random<RandomSource>();
-        dqmc.step_for<RandomSource>(NumSite * NumSite * numSplit);
+        dqmc.step_for<RandomSource>(numSplit);
         expect<RandomSource>(std::ranges::all_of(dqmc.getGreens(), [](const auto& green) {
             return green.isFinite() && (abs_elem(green).max() < StabilityMagnitudeLimit);
         }));

@@ -61,15 +61,14 @@ namespace Physica {
             , coeffs(lRange_ + rRange_ + 1, order + 1)
             , inv(order + 1, order + 1)
             , delta(delta_) {
-        for (size_t major = 0; major < coeffs.getMaxMajor(); ++major) {
-            for (size_t minor = 0; minor < coeffs.getMaxMinor(); ++minor) {
-                if (major == 0 && minor == 0)
-                    coeffs.refFromMajorMinor(0, 0) = 1;
-                const size_t row = MatrixMajor::rowFromMajorMinor<MatrixType>(major, minor);
-                const size_t col = MatrixMajor::colFromMajorMinor<MatrixType>(major, minor);
-                const int i = int(row) - int(lRange);
-                coeffs.refFromMajorMinor(major, minor) = pow(delta * i, T(col));
-            }
+        const size_t maxMinor = coeffs.getMaxMinor();
+        auto flat = coeffs.flatten();
+        for (size_t index = 0; index < flat.getLength(); ++index) {
+            const size_t major = index / maxMinor;
+            const size_t minor = index % maxMinor;
+            const size_t row = MatrixMajor::rowFromMajorMinor<MatrixType>(major, minor);
+            const size_t col = MatrixMajor::colFromMajorMinor<MatrixType>(major, minor);
+            flat[index] = pow0(delta * (int(row) - int(lRange)), T(col));
         }
 
         inv = coeffs.transpose() * coeffs;

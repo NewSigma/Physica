@@ -80,28 +80,27 @@ namespace Physica {
     }
 
     template<Scalar T>
-    PhononPlot3D<T>::BandArray PhononPlot3D<T>::calcBands(
-            const PhononType& ph, const KSpaceFCGrid& forceConstants, const MeshType& mesh) {
+    auto PhononPlot3D<T>::calcBands(const PhononType& ph, const KSpaceFCGrid& forceConstants, const MeshType& mesh) -> BandArray {
         using namespace Physica;
         const MatrixType& meshX = mesh.first;
         const MatrixType& meshY = mesh.second;
         BandArray result(ph.getNumBand(), meshX.getRow(), meshX.getCol());
         T minFreq = Base::getMinZ();
         T maxFreq = Base::getMaxZ();
-        for (size_t major = 0; major < meshX.getMaxMajor(); ++major) {
-            for (size_t minor = 0; minor < meshX.getMaxMinor(); ++minor) {
-                const Vector3D qPoint{meshX.calcFromMajorMinor(major, minor), meshY.calcFromMajorMinor(major, minor), 0};
-                auto fcMatrix = ph.interpolatePoint(qPoint, forceConstants);
-                ph.toDynamicMatrix(fcMatrix);
-                auto eigen = PhononType::diagonalize(fcMatrix);
-                auto freq = ph.makeFreq(eigen);
-                freq *= T(PhyConst<AU>::freqToTHz(1));
+        size_t index = 0;
+        for (auto [x, y] : zip(meshX.flatten().view(), meshY.flatten().view())) {
+            const Vector3D qPoint{x, y, 0};
+            auto fcMatrix = ph.interpolatePoint(qPoint, forceConstants);
+            ph.toDynamicMatrix(fcMatrix);
+            auto eigen = PhononType::diagonalize(fcMatrix);
+            auto freq = ph.makeFreq(eigen);
+            freq *= T(PhyConst<AU>::freqToTHz(1));
 
-                minFreq = std::min(minFreq, freq.min());
-                maxFreq = std::max(maxFreq, freq.max());
-                for (size_t i = 0; i < result.getLength(); ++i)
-                    result[i].refFromMajorMinor(major, minor) = freq[i];
-            }
+            minFreq = std::min(minFreq, freq.min());
+            maxFreq = std::max(maxFreq, freq.max());
+            for (auto&& [band, f] : zip(result, freq))
+                band.flatten()[index] = f;
+            ++index;
         }
         Base::setMinZ(float(minFreq));
         Base::setMaxZ(float(maxFreq));

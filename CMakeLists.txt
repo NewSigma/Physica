@@ -35,7 +35,9 @@ option(PHYSICA_CCACHE "" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
-set(PHYSICA_TRANSFORMS ${PHYSICA_TRANSFORMS} AND NOT ${CMAKE_BUILD_TYPE} MATCHES Debug CACHE BOOL "" FORCE)
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    set(PHYSICA_TRANSFORMS OFF CACHE BOOL "Enable custom LLVM passes" FORCE)
+endif()
 include(PhysicaConfigImpl)
 
 if(${RUN_CHECKS})
