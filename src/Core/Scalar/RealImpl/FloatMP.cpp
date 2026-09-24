@@ -19,6 +19,7 @@
 #include <print>
 #include "Physica/Core/Scalar/Real.h"
 #include "Physica/Core/Scalar/ScalarImpl/ArrayArithmetic.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
 using namespace Physica;
 
@@ -137,16 +138,15 @@ Real<FloatMP>::Real(const char* s) : Real(strtod(s, nullptr)) {}
  */
 Real<FloatMP>::Real(const wchar_t* s) {
     size_t size = wcslen(s);
-    char* str = new char[size + 1];
+    Array<char> str(size + 1);
     str[size] = '\0';
     for (size_t i = 0; i < size; ++i)
         str[i] = (char)s[i];
-    Real<FloatMP> temp(str);
+    Real<FloatMP> temp(str.data());
     byte = temp.byte;
     temp.byte = nullptr;
     length = temp.length;
     power = temp.power;
-    delete[] str;
 }
 
 Real<FloatMP>::Real(const Real<FloatMP>& s)
@@ -162,7 +162,7 @@ Real<FloatMP>::Real(Real<FloatMP>&& s) noexcept
 }
 
 Real<FloatMP>::~Real() {
-    delete[] byte;
+    HostAllocator<MPUnit>{}.deallocate(byte, getSize());
 }
 
 MPUnit Real<FloatMP>::operator[](unsigned int index) const {
@@ -558,7 +558,7 @@ Real<FloatMP> Real<FloatMP>::sub(const Real<FloatMP>& s1, const Real<FloatMP>& s
                 big = small;
                 small = temp;
                 changeSign = !changeSign;
-                delete[] byte;
+                HostAllocator<MPUnit>{}.deallocate(byte, length);
                 goto redo;
             }
             Real<FloatMP> result(byte, changeSign ? -length : length, big->power);
@@ -648,8 +648,8 @@ Real<FloatMP> Real<FloatMP>::div(const Real<FloatMP>& s1, const Real<FloatMP>& s
                 arr1[arr2_len] -= mulSubArrByWord(arr1, arr2, arr2_len, byte[i]);
                 byteLeftShiftEq(arr1, arr1_len, MPUnitWidth);
             }
-            delete[] arr1;
-            delete[] arr2;
+            HostAllocator<MPUnit>{}.deallocate(arr1, arr1_len);
+            HostAllocator<MPUnit>{}.deallocate(arr2, arr2_len);
             ////////////////////////////////////Out put////////////////////////////////////////
             return Real<FloatMP>(byte, matchSign(s1, s2) ? length : -length, s1.getPower() - s2.getPower() - 1) >> (s1_shift - s2_shift);
         }
@@ -672,7 +672,7 @@ bool Real<FloatMP>::cutLength(Real<FloatMP>& s) {
         int cutFrom = size - GlobalPrecision;
         auto new_byte = HostAllocator<MPUnit>{}.allocate(GlobalPrecision);
         memcpy(new_byte, s.byte + cutFrom, GlobalPrecision * sizeof(MPUnit));
-        delete[] s.byte;
+        HostAllocator<MPUnit>{}.deallocate(s.byte, size);
         s.byte = new_byte;
         s.length = s.length > 0 ? GlobalPrecision : -GlobalPrecision;
     }

@@ -44,7 +44,7 @@ Integer::Integer(This&& obj) noexcept
 }
 
 Integer::~Integer() {
-    delete[] byte;
+    HostAllocator<MPUnit>{}.deallocate(byte, getSize());
 }
 
 Integer& Integer::operator=(Integer obj) noexcept {
@@ -159,8 +159,8 @@ Integer Integer::operator/(const Integer& i) const {
         arr1[arr2_len] -= mulSubArrByWord(arr1, arr2, arr2_len, byte[j]);
         byteLeftShiftEq(arr1, arr1_len, MPUnitWidth);
     }
-    delete[] arr1;
-    delete[] arr2;
+    HostAllocator<MPUnit>{}.deallocate(arr1, arr1_len);
+    HostAllocator<MPUnit>{}.deallocate(arr2, arr2_len);
     ////////////////////////////////////Out put////////////////////////////////////////
     Integer temp(resultByte, matchSign(*this, i) ? resultLength : -resultLength);
     return temp >> ((i1_blank - i2_blank) * static_cast<int>(MPUnitWidth) + (i1_shift - i2_shift));

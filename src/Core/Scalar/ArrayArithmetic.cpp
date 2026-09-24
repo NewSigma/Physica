@@ -316,23 +316,23 @@ MPUnit Physica::divArrByFullArrWith1Word(const MPUnit* __restrict dividend, cons
             break;
         }
     }
-    delete[] n;
+    HostAllocator<MPUnit>{}.deallocate(n, len + 1);
     return carry ? (q - 1) : q;
 }
 
-std::unique_ptr<MPUnit[]> Physica::byteLeftShift(const MPUnit* __restrict byte, unsigned int length, unsigned int shift) noexcept {
+Array<MPUnit> Physica::byteLeftShift(const MPUnit* __restrict byte, unsigned int length, unsigned int shift) noexcept {
     const unsigned int quotient = shift / MPUnitWidth;
-    auto result = std::unique_ptr<MPUnit[]>(HostAllocator<MPUnit>{}.allocate(length));
+    Array<MPUnit> result(length);
     if (quotient < length) {
         if (quotient != 0) {
-            memcpy(result.get() + quotient, byte, (length - quotient) * sizeof(MPUnit));
-            memset(result.get(), 0, quotient * sizeof(MPUnit));
+            memcpy(result.data() + quotient, byte, (length - quotient) * sizeof(MPUnit));
+            memset(result.data(), 0, quotient * sizeof(MPUnit));
             shift -= quotient * MPUnitWidth;
         }
         if (shift != 0) {
-            MPUnit carry = 0, temp;
+            MPUnit carry = 0;
             for (unsigned int i = quotient; i < length - 1; ++i) {
-                temp = result[i] >> (MPUnitWidth - shift);
+                auto temp = result[i] >> (MPUnitWidth - shift);
                 result[i] <<= shift;
                 result[i] |= carry;
                 carry = temp;
@@ -344,20 +344,20 @@ std::unique_ptr<MPUnit[]> Physica::byteLeftShift(const MPUnit* __restrict byte, 
     return result;
 }
 
-std::unique_ptr<MPUnit[]> Physica::byteRightShift(const MPUnit* __restrict byte, size_t length, size_t shift) noexcept {
+Array<MPUnit> Physica::byteRightShift(const MPUnit* __restrict byte, size_t length, size_t shift) noexcept {
     const size_t quotient = shift / MPUnitWidth;
-    auto result = std::unique_ptr<MPUnit[]>(HostAllocator<MPUnit>{}.allocate(length));
+    Array<MPUnit> result(length);
     if (quotient < length) {
         auto bufferSize = length - quotient;
         if (quotient != 0) {
-            memcpy(result.get(), byte + quotient, (length - quotient) * sizeof(MPUnit));
-            memset(result.get() + bufferSize, 0, quotient * sizeof(MPUnit));
+            memcpy(result.data(), byte + quotient, (length - quotient) * sizeof(MPUnit));
+            memset(result.data() + bufferSize, 0, quotient * sizeof(MPUnit));
             shift -= quotient * MPUnitWidth;
         }
         if (shift != 0) {
-            MPUnit carry = 0, temp;
+            MPUnit carry = 0;
             for (size_t i = bufferSize - 1; i > 0; --i) {
-                temp = result[i] << (MPUnitWidth - shift);
+                auto temp = result[i] << (MPUnitWidth - shift);
                 result[i] >>= shift;
                 result[i] |= carry;
                 carry = temp;

@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <memory>
 #include "Physica/Core/Scalar/Scalar.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica {
     /**
@@ -105,9 +105,9 @@ namespace Physica {
      */
     PHYSICA_API MPUnit divArrByFullArrWith1Word(const MPUnit* __restrict dividend, const MPUnit* __restrict divisor, size_t len) noexcept;
     // operator<<
-    [[nodiscard]] PHYSICA_API std::unique_ptr<MPUnit[]> byteLeftShift(const MPUnit* __restrict byte, unsigned int length, unsigned int shift) noexcept;
+    [[nodiscard]] PHYSICA_API Array<MPUnit> byteLeftShift(const MPUnit* __restrict byte, unsigned int length, unsigned int shift) noexcept;
     // operator>>
-    [[nodiscard]] PHYSICA_API std::unique_ptr<MPUnit[]> byteRightShift(const MPUnit* __restrict byte, size_t length, size_t shift) noexcept;
+    [[nodiscard]] PHYSICA_API Array<MPUnit> byteRightShift(const MPUnit* __restrict byte, size_t length, size_t shift) noexcept;
     // operator<<=
     PHYSICA_API void byteLeftShiftEq(MPUnit* __restrict byte, unsigned int length, unsigned int shift) noexcept;
     // operator>>=

@@ -133,7 +133,7 @@ namespace Physica {
          * this constructor should only be called by add(), sub() and etc.
          *
          * \param byte
-         * byte must be allocated by new
+         * byte must be allocated by HostAllocator<MPUnit>
          */
         Real(MPUnit* byte_, int length_, int power_) : byte(byte_), length(length_), power(power_) {}
         /* Operations */
