@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,6 +34,7 @@ namespace Physica {
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
+        using MaybeScore = std::conditional_t<T::isDiffable(), Trv, Empty>;
 
         constexpr static bool isComplex = T::isComplex();
         static_assert(T::Prec == Float64, "[Warn]: It is highly recommended to use high-precision floats");
@@ -46,6 +47,7 @@ namespace Physica {
         Array<int> sites;
         int cursor = 0;
 
+        [[no_unique_address]] Trv score = 0;
         uint64_t numTotal = 0;
         uint64_t numAccept = 0;
     public:
@@ -74,7 +76,7 @@ namespace Physica {
         [[nodiscard]] int getNumSplit() const noexcept { return kinetic.getNumSplit(); }
         [[nodiscard]] const auto& getAuxField() const noexcept { return kinetic.getAuxField(); }
         [[nodiscard]] const auto& getGreens() noexcept { return kinetic.getGreens(); }
-        [[nodiscard]] Tv getRSign() const noexcept { return kinetic.getRSign(); }
+        [[nodiscard]] T getRSign() const noexcept;
         [[nodiscard]] uint64_t getNumTotal() const noexcept { return numTotal; }
         [[nodiscard]] uint64_t getNumAccept() const noexcept { return numAccept; }
     private:
@@ -99,6 +101,7 @@ namespace Physica {
     auto DQMC<T>::step_random() {
         kinetic.template random_uniform<R>();
         productor.invalidates(getAuxField(), params->getAlpha());
+        cursor = 0;
         return calcGreens(0);
     }
 
@@ -107,11 +110,12 @@ namespace Physica {
     void DQMC<T>::step() {
         std::ranges::shuffle(sites, R::getInstance());
         probs.template random_uniform<R>();
-        calcGreens<P>(cursor).wait();
         for (int i = 0; i < getNumSite(); ++i)
             metropolis(sites[i], cursor, probs[i]);
         productor.invalidate(cursor);
         cursor = (cursor + 1) % getNumSplit();
+
+        calcGreens<P>(cursor);
     }
 
     template<Scalar T>
@@ -128,7 +132,12 @@ namespace Physica {
     template<Scalar T>
     template<ExecutePolicy P>
     auto DQMC<T>::calcGreens(int split) {
-        return productor.template calcGreens<P>(kinetic.getGreens(), split, params->calcBetaMu());
+        if constexpr (T::isDiffable()) {
+            const auto [lnAbsDet, _] = productor.template calcDetGreens<P>(kinetic.getGreens(), split, params->calcBetaMu());
+            score = lnAbsDet.grad();
+        }
+        else
+            return productor.template calcGreens<P>(kinetic.getGreens(), split, params->calcBetaMu()).wait();
     }
 
     template<Scalar T>
@@ -138,7 +147,18 @@ namespace Physica {
         kinetic.swap(obj.kinetic);
         productor.swap(obj.productor);
         sites.swap(obj.sites);
+        std::swap(score, obj.score);
         std::swap(cursor, obj.cursor);
+    }
+
+    template<Scalar T>
+    T DQMC<T>::getRSign() const noexcept {
+        if constexpr (T::isDiffable()) {
+            const Tv rsign = kinetic.getRSign();
+            return T(rsign, rsign * score);
+        }
+        else
+            return kinetic.getRSign();
     }
 
     template<Scalar T>

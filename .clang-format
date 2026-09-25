@@ -51,7 +51,7 @@ BraceWrapping:
   AfterFunction:   false
   AfterNamespace:  false
   AfterObjCDeclaration: false
-  AfterRequiresExpression: false
+# AfterRequiresExpression: false
   AfterStruct:     false
   AfterUnion:      false
   BeforeCatch:     true

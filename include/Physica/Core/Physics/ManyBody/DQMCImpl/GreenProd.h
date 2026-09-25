@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -51,6 +51,8 @@ namespace Physica {
         void single_flip(int site, int split, Vector2D<Tr> factors) noexcept;
         template<ExecutePolicy P = Sequential>
         auto calcGreens(GreenPair& greens, int split, Tr betaMu);
+        template<ExecutePolicy P = Sequential>
+        auto calcDetGreens(GreenPair& greens, int split, Tr betaMu) -> std::pair<Tr, Tv>;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] int getNumSite() const noexcept { return qrs.front().getOrder(); }
@@ -107,6 +109,23 @@ namespace Physica {
     }
 
     template<Scalar T>
+    template<ExecutePolicy P>
+    auto GreenProd<T>::calcDetGreens(GreenPair& greens, int split, Tr betaMu) -> std::pair<Tr, Tv> {
+        const int numSplit = getNumSplit();
+        const int from = (split + 1) % numSplit;
+        const int to = (numSplit + split) % numSplit;
+        Vector2D<Tr> lnAbsDets;
+        Vector2D<Tv> signs;
+        parallel_for<P>([this, &greens, &lnAbsDets, &signs, from, to, betaMu](int spin) {
+            const auto& qdt = chains[spin].multiply(from, to);
+            const auto [lnAbsDet, sign] = calcDetGreen(qdt, greens[spin], betaMu, spin);
+            lnAbsDets[spin] = lnAbsDet;
+            signs[spin] = sign;
+        }, 2).wait();
+        return {lnAbsDets.sum(), signs.prod()};
+    }
+
+    template<Scalar T>
     void GreenProd<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         chains.swap(obj.chains);
@@ -133,7 +152,7 @@ namespace Physica {
 
         auto& qr = qrs[spin];
         Tr lnAD = qr.getMatrixR().lnAbsDet();
-        Tv sgnD = qdt.calcDetQ() * qr.calcDetQ() * unit(qr.getMatrixR().diag().reals()).prod();
+        Tv sgnD = qdt.calcDetQ() * qr.calcDetQ() * unit(qr.getMatrixR().values().diag().reals()).prod();
         assert(T::isComplex() || abs(sgnD) == Trv(1) && "[Error]: Bad sign");
         return {lnAD, sgnD};
     }

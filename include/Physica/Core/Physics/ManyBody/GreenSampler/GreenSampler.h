@@ -31,7 +31,7 @@ namespace Physica {
 
         const HubbardParams<T>& params;
     private:
-        VectorND<Tv> rsigns;
+        VectorND<T> rsigns;
         size_t cursor = 0;
     public:
         GreenSampler(const HubbardParams<T>& params, size_t numSample);
@@ -42,8 +42,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] Tv calcSign() const noexcept;
-        [[nodiscard]] Tv calcRSign() const noexcept;
+        [[nodiscard]] T calcSign() const noexcept;
+        [[nodiscard]] T calcRSign() const noexcept;
 
         void reset() { cursor = 0; }
         /* Getters */
@@ -59,23 +59,28 @@ namespace Physica {
         void sample(T rsign) noexcept;
         [[nodiscard]] T calcDensityCorr(const MatrixND<T>& green, int siteA, int siteB) const noexcept;
         [[nodiscard]] T calcDensityCorr(const MatrixND<T>& greenA, int siteA, const MatrixND<T>& greenB, int siteB) const noexcept;
+        [[nodiscard]] T calcGradScore(T result) const noexcept;
     };
 
     template<Scalar T>
-    GreenSampler<T>::GreenSampler(const HubbardParams<T>& params, size_t numSample) : params(params), rsigns(numSample) {
+    GreenSampler<T>::GreenSampler(const HubbardParams<T>& params, size_t numSample)
+            : params(params), rsigns(numSample) {
         assert(numSample > 0);
     }
 
     template<Scalar T>
-    auto GreenSampler<T>::calcSign() const noexcept -> Tv {
+    auto GreenSampler<T>::calcSign() const noexcept -> T {
         // DQMC returns relative sign, we do not care about it
         return abs(calcRSign());
     }
 
     template<Scalar T>
-    auto GreenSampler<T>::calcRSign() const noexcept -> Tv {
+    auto GreenSampler<T>::calcRSign() const noexcept -> T {
         assert(cursor == 0 && "[Error]: Samples are not fully initialized!");
-        return rsigns.mean();
+        if constexpr (T::isDiffable())
+            return calcGradScore(rsigns.mean());
+        else
+            return rsigns.mean();
     }
 
     template<Scalar T>
@@ -104,5 +109,17 @@ namespace Physica {
         assert(siteA < getNumSite());
         assert(siteB < getNumSite());
         return (Trv(1) - greenA[siteA, siteA]) * (Trv(1) - greenB[siteB, siteB]);
+    }
+    /**
+     * Calculate grad using score-function approach
+     */
+    template<Scalar T>
+    T GreenSampler<T>::calcGradScore(T result) const noexcept {
+        if constexpr (T::isDiffable()) {
+            const Trv mean = hadamard(rsigns.values(), rsigns.grads()).mean();
+            return T(result.value(), result.grad() - result.value() * mean);
+        }
+        else
+            return result;
     }
 }

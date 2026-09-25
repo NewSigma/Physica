@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Scalar/Diff.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "GreenSampler.h"
 #include "Physica/Core/Physics/ManyBody/DQMCImpl/ImagKinetic.h"
 
@@ -81,7 +83,10 @@ namespace Physica {
 
     template<Scalar T>
     T ScalarSampler<T>::calcRawMean() const {
-        return observes.mean();
+        if constexpr (T::isDiffable())
+            return Base::calcGradScore(observes.mean());
+        else
+            return observes.mean();
     }
 
     template<Scalar T>
