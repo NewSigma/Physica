@@ -36,8 +36,8 @@ namespace Physica {
         decay_rvalue_t<RHS> rhs;
     public:
         BinaryTensorExpr(LHS&& lhs_, RHS&& rhs_) noexcept;
-        BinaryTensorExpr(const This&) = delete;
-        BinaryTensorExpr(This&&) noexcept requires(isReverseDiff()) = default;
+        BinaryTensorExpr(const This&) = default;
+        BinaryTensorExpr(This&&) noexcept = default;
         ~BinaryTensorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;

@@ -19,6 +19,8 @@
 #pragma once
 
 #include "../RValueTensor.h"
+#include "TensorFiber.h"
+#include "TensorSlice.h"
 #include "Physica/Core/Utils/Container/ArrayND.h"
 
 namespace Physica {
@@ -71,6 +73,20 @@ namespace Physica {
         Physica::forND(getShape(), [this, fn](const IndexType& index) {
             fn(calc(index), index);
         });
+    }
+
+    template<class Derived, Scalar ScalarT>
+    auto RValueTensor<Derived, ScalarT>::fiber(this auto&& self, IndexVar auto... indices) noexcept {
+        using Self = decltype(self);
+        constexpr int Dim = calcFiberDim<decltype(indices)...>();
+        return TensorFiber<Self, Dim>(std::forward<Self>(self), indices...);
+    }
+
+    template<class Derived, Scalar ScalarT>
+    auto RValueTensor<Derived, ScalarT>::slice(this auto&& self, IndexVar auto... indices) noexcept {
+        using Self = decltype(self);
+        constexpr auto Dim = calcSliceDim<decltype(indices)...>();
+        return TensorSlice<Self, Dim[0], Dim[1]>(std::forward<Self>(self), indices...);
     }
 
     template<class Derived, Scalar ScalarT>

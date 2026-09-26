@@ -33,9 +33,6 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         using Base::operator=;
-        /* Operations */
-        [[nodiscard]] auto fiber(this auto&&, IndexVar auto...) noexcept;
-        [[nodiscard]] auto slice(this auto&&, IndexVar auto...) noexcept;
         /* Getters */
         [[nodiscard]] auto data(this auto&& self) noexcept;
         [[nodiscard]] auto data_handle() noexcept;

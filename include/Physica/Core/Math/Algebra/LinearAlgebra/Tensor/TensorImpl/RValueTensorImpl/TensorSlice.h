@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,19 +18,19 @@
  */
 #pragma once
 
-#include "../LValueTensor.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
+#include "../RValueTensor.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 
 namespace Physica {
-    template<Tensor X, int DimR, int DimC> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())
-    class TensorSlice<X, DimR, DimC> : public LValueMatrix<TensorSlice<X, DimR, DimC>> {
+    template<class X, int DimR, int DimC>
+    class TensorSlice : public RValueMatrix<TensorSlice<X, DimR, DimC>> {
         using This = TensorSlice<X, DimR, DimC>;
-        using Base = LValueMatrix<TensorSlice<X, DimR, DimC>>;
+        using Base = RValueMatrix<This>;
         using IndexType = std::remove_cvref_t<X>::IndexType;
 
         static_assert(DimR != DimC, "[Error]: DimR and DimC must be different");
-        static_assert(DimR < std::remove_cvref_t<X>::ndim());
-        static_assert(DimC < std::remove_cvref_t<X>::ndim());
+    protected:
+        using typename Base::T;
     private:
         decay_rvalue_t<X> tensor;
         IndexType index;
@@ -40,22 +40,20 @@ namespace Physica {
         TensorSlice(This&&) noexcept = default;
         ~TensorSlice() = default;
         /* Operators */
-        using Base::operator=;
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
-        using Base::resize;
-        void resize(size_t row, size_t col);
+        [[nodiscard]] T calc(size_t row, size_t col) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return tensor.dim(DimR); }
         [[nodiscard]] size_t getCol() const noexcept { return tensor.dim(DimC); }
         [[nodiscard]] size_t getOrder() const noexcept;
-        [[nodiscard]] auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
         /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
+        [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return DimR < DimC ? MatrixMajor::Row : MatrixMajor::Col; }
     };
 
-    template<Tensor X, int DimR, int DimC> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())
-    TensorSlice<X, DimR, DimC>::TensorSlice(X&& tensor, IndexVar auto... indices)
-            : tensor(std::forward<X>(tensor)) {
+    template<class X, int DimR, int DimC>
+    TensorSlice<X, DimR, DimC>::TensorSlice(X&& tensor_, IndexVar auto... indices) : tensor(std::forward<X>(tensor_)) {
         size_t i = 0;
         ([&]() {
             if constexpr (std::integral<decltype(indices)>) {
@@ -66,22 +64,27 @@ namespace Physica {
         }(), ...);
     }
 
-    template<Tensor X, int DimR, int DimC> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())
-    void TensorSlice<X, DimR, DimC>::resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
-        assert(row == getRow() && col == getCol());
+    template<class X, int DimR, int DimC>
+    auto TensorSlice<X, DimR, DimC>::calc(size_t row, size_t col) const -> T {
+        assert(row < getRow());
+        assert(col < getCol());
+        auto idx = index;
+        idx[DimR] = row;
+        idx[DimC] = col;
+        return tensor.calc(idx);
     }
 
-    template<Tensor X, int DimR, int DimC> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())
+    template<class X, int DimR, int DimC>
     size_t TensorSlice<X, DimR, DimC>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return getRow();
     }
+}
 
-    template<Tensor X, int DimR, int DimC> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())
-    auto TensorSlice<X, DimR, DimC>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
-        auto idx = self.index;
-        idx[DimR] = row;
-        idx[DimC] = col;
-        return self.tensor.data_ptr(idx);
-    }
+namespace Physica {
+    template<class X, int DimR, int DimC>
+    class Traits<TensorSlice<X, DimR, DimC>> {
+    public:
+        using ScalarType = std::remove_cvref_t<X>::ScalarType;
+    };
 }

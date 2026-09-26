@@ -63,6 +63,9 @@ namespace Physica {
         [[nodiscard]] IndexType toIndexND(size_t index) const noexcept;
         void forND(std::invocable<T, IndexType> auto fn) const;
 
+        [[nodiscard]] auto fiber(this auto&&, IndexVar auto...) noexcept;
+        [[nodiscard]] auto slice(this auto&&, IndexVar auto...) noexcept;
+
         void resize(this auto&, const Tensor auto& x);
         auto resize(this auto&, std::integral auto... dims);
         auto resize(this auto&, IndexType shape);
@@ -92,6 +95,7 @@ namespace Physica {
         RValueTensor() = default;
         RValueTensor(const This&) = default;
         RValueTensor(This&&) noexcept = default;
+    private:
         /* Static members */
         template<IndexVar... Ts>
         __host__ __device__ consteval static int calcFiberDim() noexcept;
