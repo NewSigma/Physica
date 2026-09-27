@@ -90,6 +90,12 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    auto RValueTensor<Derived, ScalarT>::flatten(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return Flatten<Self>(std::forward<Self>(self));
+    }
+
+    template<class Derived, Scalar ScalarT>
     void RValueTensor<Derived, ScalarT>::resize(this auto& self, const Tensor auto& x) {
         self.resize(x.getShape());
     }
@@ -200,6 +206,11 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval size_t RValueTensor<Derived, ScalarT>::getSizeAtCompile() noexcept {
+        return Dynamic;
+    }
+
+    template<class Derived, Scalar ScalarT>
     template<IndexVar... Ts>
     __host__ __device__ consteval int RValueTensor<Derived, ScalarT>::calcFiberDim() noexcept {
         constexpr IndexVarInfo<Ts...> info{};
@@ -221,3 +232,5 @@ namespace Physica {
         return result;
     }
 }
+
+#include "Flatten.h"

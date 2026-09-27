@@ -100,6 +100,11 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
+    __host__ __device__ consteval size_t DenseTensor<T, Dims...>::getSizeAtCompile() noexcept {
+        return ArrayND<T, Dims...>::SizeAtCompile;
+    }
+
+    template<Scalar T, int... Dims>
     template<RNG R>
     auto DenseTensor<T, Dims...>::random_uniform(IndexType shape) -> This {
         auto result = This(std::move(shape));

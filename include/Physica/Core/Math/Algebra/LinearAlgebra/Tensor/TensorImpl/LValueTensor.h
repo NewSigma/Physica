@@ -58,8 +58,6 @@ namespace Physica {
 
         [[nodiscard]] auto block(this auto&&, IndexType from, IndexType count) noexcept;
 
-        [[nodiscard]] auto flatten(this auto&&);
-
         void zero_grad() noexcept;
         template<RNG R> void random_uniform();
         template<RNG R> void random_normal();

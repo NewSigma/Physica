@@ -63,6 +63,7 @@ namespace Physica {
         /* Static members */
         using Base::getStrideAtCompile;
         [[nodiscard]] __host__ __device__ consteval static IndexType getStrideAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         template<RNG R>
         static DenseTensor random_uniform(IndexType shape);
         template<RNG R>

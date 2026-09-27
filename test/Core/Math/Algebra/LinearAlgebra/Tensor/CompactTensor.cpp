@@ -49,10 +49,25 @@ namespace {
         MatrixND<T> m = slice;
         expect(m == slice);
     }
+
+    void flatten() {
+        auto x = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
+        auto flat = x.flatten();
+        static_assert(flat.isCompact());
+
+        expect(flat.getLength() == x.getSize());
+        for (size_t i = 0; i < flat.getLength(); ++i)
+            expect(flat[i] == x.calc(x.toIndexND(i)));
+
+        flat = T(1);
+        for (size_t i = 0; i < x.getSize(); ++i)
+            expect(x.calc(x.toIndexND(i)) == T(1));
+    }
 }
 
 int main() {
     fiber();
     slice();
+    flatten();
     return 0;
 }

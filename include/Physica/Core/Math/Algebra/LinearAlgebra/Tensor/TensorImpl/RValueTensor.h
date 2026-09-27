@@ -65,6 +65,7 @@ namespace Physica {
 
         [[nodiscard]] auto fiber(this auto&&, IndexVar auto...) noexcept;
         [[nodiscard]] auto slice(this auto&&, IndexVar auto...) noexcept;
+        [[nodiscard]] auto flatten(this auto&&) noexcept;
 
         void resize(this auto&, const Tensor auto& x);
         auto resize(this auto&, std::integral auto... dims);
@@ -91,6 +92,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isStrided() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     protected:
         RValueTensor() = default;
         RValueTensor(const This&) = default;

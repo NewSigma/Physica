@@ -57,6 +57,11 @@ static_assert(Tensor4x4x4::getStrideAtCompile(0) == Tensor4x4x4::getStrideAtComp
 static_assert(Tensor4x4x4::getStrideAtCompile(1) == Tensor4x4x4::getStrideAtCompile()[1]);
 static_assert(Tensor4x4x4::getStrideAtCompile(2) == Tensor4x4x4::getStrideAtCompile()[2]);
 
+static_assert(Tensor3D<T>::getSizeAtCompile() == Dynamic, "Dynamic shape size is unknown at compile time");
+static_assert(decltype(std::declval<Tensor3D<T>>().flatten())::getSizeAtCompile() == Dynamic);
+static_assert(Tensor4x4x4::getSizeAtCompile() == 64, "Static shape size is known at compile time");
+static_assert(decltype(std::declval<Tensor4x4x4>().flatten())::getSizeAtCompile() == 64);
+
 int main() {
     compact();
     return 0;

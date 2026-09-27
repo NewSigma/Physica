@@ -25,7 +25,7 @@
 namespace Physica {
     template<class Derived>
     auto LValueTensor<Derived>::operator=(Scalar auto x) noexcept -> Derived& {
-        flatten() = x;
+        Base::getDerived().flatten() = x;
         return Base::getDerived();
     }
 
@@ -103,12 +103,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueTensor<Derived>::flatten(this auto&& self) {
-        using Self = decltype(self);
-        return Flatten<Self>(std::forward<Self>(self));
-    }
-
-    template<class Derived>
     void LValueTensor<Derived>::zero_grad() noexcept {
         Base::getDerived().grads().zeros();
     }
@@ -116,13 +110,13 @@ namespace Physica {
     template<class Derived>
     template<RNG R>
     void LValueTensor<Derived>::random_uniform() {
-        flatten().template random_uniform<R>();
+        Base::getDerived().flatten().template random_uniform<R>();
     }
 
     template<class Derived>
     template<RNG R>
     void LValueTensor<Derived>::random_normal() {
-        flatten().template random_normal<R>();
+        Base::getDerived().flatten().template random_normal<R>();
     }
 
     template<class Derived>

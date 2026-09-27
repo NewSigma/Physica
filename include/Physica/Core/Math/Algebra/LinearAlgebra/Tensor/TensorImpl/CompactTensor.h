@@ -53,3 +53,4 @@ namespace Physica {
 }
 
 #include "CompactTensorImpl/CompactTensorImpl.h"
+#include "CompactTensorImpl/Flatten.h"
