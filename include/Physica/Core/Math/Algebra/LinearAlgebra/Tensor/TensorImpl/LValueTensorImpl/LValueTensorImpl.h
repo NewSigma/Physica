@@ -108,6 +108,21 @@ namespace Physica {
     }
 
     template<class Derived>
+    void LValueTensor<Derived>::zeros() noexcept {
+        Base::getDerived().flatten().zeros();
+    }
+
+    template<class Derived>
+    void LValueTensor<Derived>::clamp_min(Tv minimum) {
+        Base::getDerived().flatten().clamp_min(minimum);
+    }
+
+    template<class Derived>
+    void LValueTensor<Derived>::clamp_max(Tv maximum) {
+        Base::getDerived().flatten().clamp_max(maximum);
+    }
+
+    template<class Derived>
     template<RNG R>
     void LValueTensor<Derived>::random_uniform() {
         Base::getDerived().flatten().template random_uniform<R>();
@@ -117,6 +132,12 @@ namespace Physica {
     template<RNG R>
     void LValueTensor<Derived>::random_normal() {
         Base::getDerived().flatten().template random_normal<R>();
+    }
+
+    template<class Derived>
+    template<RNG R>
+    void LValueTensor<Derived>::random_any(auto& distribution) {
+        Base::getDerived().flatten().template random_any<R>(distribution);
     }
 
     template<class Derived>

@@ -166,6 +166,19 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    bool RValueTensor<Derived, ScalarT>::empty() const noexcept {
+        return Base::getDerived().getSize() == 0;
+    }
+
+    template<class Derived, Scalar ScalarT>
+    bool RValueTensor<Derived, ScalarT>::isFinite() const noexcept {
+        for (size_t i = 0; i < getSize(); ++i)
+            if (!calc(toIndexND(i)).isFinite())
+                return false;
+        return true;
+    }
+
+    template<class Derived, Scalar ScalarT>
     __host__ __device__ consteval bool RValueTensor<Derived, ScalarT>::isForwardDiff() noexcept {
         return ScalarType::isForwardDiff();
     }
@@ -208,6 +221,22 @@ namespace Physica {
     template<class Derived, Scalar ScalarT>
     __host__ __device__ consteval size_t RValueTensor<Derived, ScalarT>::getSizeAtCompile() noexcept {
         return Dynamic;
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval void RValueTensor<Derived, ScalarT>::static_assert_assign(const Scalar auto& source) noexcept {
+        using U = std::remove_cvref_t<decltype(source)>;
+        T::template static_assert_assign<U>();
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval void RValueTensor<Derived, ScalarT>::static_assert_assign(const Tensor auto& source) noexcept {
+        constexpr size_t S1 = Derived::getSizeAtCompile();
+        constexpr size_t S2 = source.getSizeAtCompile();
+        static_assert(S1 == S2 || S1 == Dynamic || S2 == Dynamic, "[Error]: Size mismatch between two tensors");
+
+        using U = std::remove_cvref_t<decltype(source)>::ScalarType;
+        T::template static_assert_assign<U>();
     }
 
     template<class Derived, Scalar ScalarT>

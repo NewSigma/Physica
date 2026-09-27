@@ -91,6 +91,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] constexpr static int ndim() noexcept { return NDim; }
         [[nodiscard]] __host__ __device__ static size_t toSize(const IndexType& shape) noexcept;
+        [[nodiscard]] static This read(IndexType shape, const T* __restrict p) noexcept;
         /* Friends */
         friend class device_obj<This>;
     };

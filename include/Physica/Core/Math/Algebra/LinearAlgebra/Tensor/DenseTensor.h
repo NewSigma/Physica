@@ -53,6 +53,10 @@ namespace Physica {
         void toDeviceAsync(device_obj<This>& obj) const;
 
         using Base::random_normal;
+        using Base::random_uniform;
+        using Base::random_any;
+        using Base::zeros;
+        void junk(this auto&) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] auto data_handle(this auto&&) noexcept;
@@ -64,10 +68,23 @@ namespace Physica {
         using Base::getStrideAtCompile;
         [[nodiscard]] __host__ __device__ consteval static IndexType getStrideAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
+        [[nodiscard]] static This zeros(IndexType shape);
+        [[nodiscard]] static This zeros(std::integral auto... dims);
+        [[nodiscard]] static This junk(IndexType shape);
+        [[nodiscard]] static This junk(std::integral auto... dims);
         template<RNG R>
         static DenseTensor random_uniform(IndexType shape);
         template<RNG R>
+        static DenseTensor random_uniform(std::integral auto... dims);
+        template<RNG R>
         static DenseTensor random_normal(IndexType shape);
+        template<RNG R>
+        static DenseTensor random_normal(std::integral auto... dims);
+        template<RNG R>
+        [[nodiscard]] static This random_any(IndexType shape, auto& distribution);
+        [[nodiscard]] static This generate(std::invocable<IndexType> auto fn, IndexType shape);
+        [[nodiscard]] static This generate(std::invocable<IndexType> auto fn, std::integral auto... dims);
+        [[nodiscard]] static This read(IndexType shape, const T* __restrict p) noexcept;
         /* Friends */
         friend class device_obj<This>;
     };

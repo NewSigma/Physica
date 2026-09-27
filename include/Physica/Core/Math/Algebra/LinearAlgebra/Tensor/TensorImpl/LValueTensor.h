@@ -31,6 +31,7 @@ namespace Physica {
         using Base::isReverseDiff;
     protected:
         using typename Base::T;
+        using typename Base::Tv;
     public:
         ~LValueTensor() = default;
         /* Operators */
@@ -59,8 +60,12 @@ namespace Physica {
         [[nodiscard]] auto block(this auto&&, IndexType from, IndexType count) noexcept;
 
         void zero_grad() noexcept;
+        void zeros() noexcept;
+        void clamp_min(Tv minimum);
+        void clamp_max(Tv maximum);
         template<RNG R> void random_uniform();
         template<RNG R> void random_normal();
+        template<RNG R> void random_any(auto& distribution);
         /* Getters */
         [[nodiscard]] auto data_ptr(this auto&&, const IndexType& index) noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, std::integral auto... dims) noexcept;

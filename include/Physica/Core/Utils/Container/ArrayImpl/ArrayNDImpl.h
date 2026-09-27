@@ -143,4 +143,13 @@ namespace Physica {
             size *= shape[i];
         return size;
     }
+
+    template<class T, int... Dims>
+    auto ArrayND<T, Dims...>::read(IndexType shape_, const T* __restrict p) noexcept -> This {
+        This result;
+        if constexpr (!StaticShape)
+            result.shape = std::move(shape_);
+        result.arr = ArrayType::read(toSize(result.getShape()), p);
+        return result;
+    }
 }

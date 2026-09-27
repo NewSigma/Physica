@@ -119,4 +119,75 @@ namespace Physica {
         result.asArray().template random_normal<R>();
         return result;
     }
+
+    template<Scalar T, int... Dims>
+    void DenseTensor<T, Dims...>::junk(this auto& self) noexcept {
+        self.storage.junk();
+    }
+
+    template<Scalar T, int... Dims>
+    auto DenseTensor<T, Dims...>::zeros(IndexType shape) -> This {
+        auto result = This(std::move(shape));
+        result.zeros();
+        return result;
+    }
+
+    template<Scalar T, int... Dims>
+    auto DenseTensor<T, Dims...>::zeros(std::integral auto... dims) -> This {
+        static_assert(1 + sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
+        return zeros(IndexType({dims...}));
+    }
+
+    template<Scalar T, int... Dims>
+    auto DenseTensor<T, Dims...>::junk(IndexType shape) -> This {
+        auto result = This(std::move(shape));
+        result.junk();
+        return result;
+    }
+
+    template<Scalar T, int... Dims>
+    auto DenseTensor<T, Dims...>::junk(std::integral auto... dims) -> This {
+        static_assert(1 + sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
+        return junk(IndexType({dims...}));
+    }
+
+    template<Scalar T, int... Dims>
+    template<RNG R>
+    auto DenseTensor<T, Dims...>::random_uniform(std::integral auto... dims) -> This {
+        static_assert(1 + sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
+        return random_uniform<R>(IndexType({dims...}));
+    }
+
+    template<Scalar T, int... Dims>
+    template<RNG R>
+    auto DenseTensor<T, Dims...>::random_normal(std::integral auto... dims) -> This {
+        static_assert(1 + sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
+        return random_normal<R>(IndexType({dims...}));
+    }
+
+    template<Scalar T, int... Dims>
+    template<RNG R>
+    auto DenseTensor<T, Dims...>::random_any(IndexType shape, auto& distribution) -> This {
+        auto result = This(std::move(shape));
+        result.asArray().template random_any<R>(distribution);
+        return result;
+    }
+
+    template<Scalar T, int... Dims>
+    auto DenseTensor<T, Dims...>::generate(std::invocable<IndexType> auto fn, IndexType shape) -> This {
+        auto result = This(std::move(shape));
+        result.forND([&fn](T& value, IndexType index) { value = fn(index); });
+        return result;
+    }
+
+    template<Scalar T, int... Dims>
+    auto DenseTensor<T, Dims...>::generate(std::invocable<IndexType> auto fn, std::integral auto... dims) -> This {
+        static_assert(1 + sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
+        return generate(std::move(fn), IndexType({dims...}));
+    }
+
+    template<Scalar T, int... Dims>
+    auto DenseTensor<T, Dims...>::read(IndexType shape, const T* __restrict p) noexcept -> This {
+        return This(ArrayND<T, Dims...>::read(std::move(shape), p));
+    }
 }

@@ -48,6 +48,7 @@ namespace Physica {
         using IndexType = Array<size_t, NDim>;
     protected:
         using T = ScalarType;
+        using Tv = T::ValueType;
     public:
         ~RValueTensor() = default;
         /* Operators */
@@ -82,6 +83,8 @@ namespace Physica {
         [[nodiscard]] size_t dim(int index) const noexcept;
         [[nodiscard]] IndexType getShape() const noexcept;
         [[nodiscard]] size_t getSize() const noexcept;
+        [[nodiscard]] bool empty() const noexcept;
+        [[nodiscard]] bool isFinite() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int ndim() noexcept { return NDim; }
         [[nodiscard]] __host__ __device__ consteval static bool isForwardDiff() noexcept;
@@ -93,6 +96,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
+        __host__ __device__ consteval static void static_assert_assign(const Scalar auto& source) noexcept;
+        __host__ __device__ consteval static void static_assert_assign(const Tensor auto& source) noexcept;
     protected:
         RValueTensor() = default;
         RValueTensor(const This&) = default;
