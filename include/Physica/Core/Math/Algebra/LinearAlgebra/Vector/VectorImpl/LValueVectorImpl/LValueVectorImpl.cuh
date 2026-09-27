@@ -155,6 +155,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ void device_obj<LValueVector<Derived>>::zeros() noexcept {
+        operator=(Trv(0));
+    }
+
+    template<class Derived>
     void device_obj<LValueVector<Derived>>::zero_grad() noexcept {
         Base::getDerived().grads().zeros();
     }

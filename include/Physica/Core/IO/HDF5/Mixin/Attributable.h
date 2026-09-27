@@ -33,7 +33,7 @@ namespace Physica {
         [[nodiscard]] H5Attribute createAttribute(this const auto&, const char* name, const H5Type& dtype, const auto& space);
 
         void readAttr(this const auto&, const char* name, auto& value);
-        void writeAttr(this auto&& self, const char* name, auto value);
+        void writeAttr(this auto&& self, const char* name, const auto& value);
         /* Getters */
         [[nodiscard]] bool attrExists(this const auto&, const char* name) noexcept;
     protected:
@@ -70,8 +70,8 @@ namespace Physica {
         attr.read(type, &value);
     }
 
-    void Attributable::writeAttr(this auto&& self, const char* name, auto value) {
-        using T = decltype(value);
+    void Attributable::writeAttr(this auto&& self, const char* name, const auto& value) {
+        using T = std::remove_cvref_t<decltype(value)>;
         const auto type = H5Type::get<T>();
         const auto space = H5DataSpace<1>(calcNumElem<T>());
         H5Attribute attr;

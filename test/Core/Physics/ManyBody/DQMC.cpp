@@ -158,7 +158,7 @@ namespace {
         const T doubleOccupy = e2 / z;
         const T ddoubleOccupy = -Beta * e2 * (T(1) + T(2) * e1) / square(z);
 
-        const dfloat sign = densitySampler.calcRSign();
+        const dfloat sign = densitySampler.calcSign();
         expect(sign.value() == T(1));
         expect<RandomSource>(scalarNear(sign.grad(), T(0), 1E-8));
 

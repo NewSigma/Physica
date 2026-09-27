@@ -31,6 +31,7 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
+        using typename Base::Trv;
     public:
         ~device_obj() = default;
         /* Operators */
@@ -68,6 +69,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto reshape_col(this auto&& self, size_t row, size_t col) noexcept;
         [[nodiscard]] __host__ __device__ auto reshape_like(this auto&& self, const Matrix auto& mat) noexcept;
 
+        __host__ __device__ void zeros() noexcept;
         void zero_grad() noexcept;
         template<RNG R>
         void random_uniform();

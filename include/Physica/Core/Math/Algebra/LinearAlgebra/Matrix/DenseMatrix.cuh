@@ -68,11 +68,9 @@ namespace Physica {
         using Base::transpose;
         [[nodiscard]] auto&& flatten(this auto&&) noexcept;
 
-        using Base::zeros;
         using Base::random_uniform;
         using Base::random_normal;
         using Base::random_any;
-
         void zeros(this auto&) noexcept;
         void junk(this auto&) noexcept;
         void swap(This& __restrict obj) noexcept;

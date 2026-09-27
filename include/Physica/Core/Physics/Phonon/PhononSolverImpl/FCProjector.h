@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Utils/Container/ArrayND.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
 #include "FCSwapVector.h"
 
 namespace Physica {
@@ -36,7 +36,7 @@ namespace Physica {
         constexpr static unsigned int Dim = 3;
         using VectorType = VectorND<T>;
         using RSpaceFCMat = DenseMatrix<T>;
-        using RSpaceFCGrid = ArrayND<RSpaceFCMat, 3>;
+        using RSpaceFCGrid = DenseTensor<T, 5>;
     protected:
         Index3D superSize;
         size_t numDOF;
@@ -113,28 +113,18 @@ namespace Physica {
     }
 
     template<Scalar T>
-    FCProjector<T>::VectorType FCProjector<T>::toVector(const RSpaceFCGrid& fcGrid) const {
+    auto FCProjector<T>::toVector(const RSpaceFCGrid& fcGrid) const -> VectorType {
         assert(fcGrid.getShape() == superSize && "[Error]: Cell sizes do not match");
-        assert((fcGrid[0, 0, 0].getRow() == numDOF) && "[Error]: DOFs do not match");
-        VectorType result(getNumForceConsts());
-        for (size_t i = 0; i < result.getLength(); ++i) {
-            const auto index5D = FCSwapVector<T>::index1DTo5D(numDOF, superSize, i);
-            const Index3D cellIndex{index5D[0], index5D[1], index5D[2]};
-            result[i] = fcGrid[cellIndex].calcFromMajorMinor(index5D[3], index5D[4]);
-        }
-        return result;
+        assert(fcGrid.dim(3) == numDOF && fcGrid.dim(4) == numDOF && "[Error]: DOFs do not match");
+        return fcGrid.flatten();
     }
 
     template<Scalar T>
     void FCProjector<T>::toGrid(const VectorType& fcVector, RSpaceFCGrid& fcGrid) const {
         assert(fcVector.getLength() == getNumForceConsts() && "[Error]: This is not a force constants vector");
         assert(fcGrid.getShape() == superSize && "[Error]: Cell sizes do not match");
-        assert((fcGrid[0, 0, 0].getRow() == numDOF) && "[Error]: DOFs do not match");
-        for (size_t i = 0; i < fcVector.getLength(); ++i) {
-            const auto index5D = FCSwapVector<T>::index1DTo5D(numDOF, superSize, i);
-            const Index3D cellIndex{index5D[0], index5D[1], index5D[2]};
-            fcGrid[cellIndex].refFromMajorMinor(index5D[3], index5D[4]) = fcVector[i];
-        }
+        assert(fcGrid.dim(3) == numDOF && fcGrid.dim(4) == numDOF && "[Error]: DOFs do not match");
+        fcGrid.flatten() = fcVector;
     }
 
     template<Scalar T>

@@ -1,5 +1,5 @@
 <!--
-Copyright 2025 Weibo He.
+Copyright 2025-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -20,6 +20,18 @@ We apply the $\Delta$ matrix from the right, so the update formulas differ sligh
 $$R = 1 + (1 - G_{ii})\Delta_{ii}$$
 
 $$G \to G - \frac{1}{R}(I - G)\Delta G$$
+
+## Relative sign
+
+In quantum Monte Carlo, the expectation value of an observable $\hat A$ is calculated using absolute-value reweighting:
+
+$$\braket{\hat A} = \frac{\sum_i A_i |w_i| s_i}{\sum_i |w_i| s_i},$$
+
+where $\sum_i$ runs over all possible configurations, and $w_i = |w_i| s_i$ is the weight of configuration $i$. In DQMC, $s_i$ may be obtained from a recursive relation $s_{i + 1} = f(s_i)$, which is cheaper than computing it from scratch, while the approach still requires knowing $s_0$. Note that the numerator and denominator may differ by a coefficient without changing $\braket{\hat A}$. Let **relative sign** $r_i = \frac{s_i}{s_0} $. Obviously, $r_0 = 1$, and the recursive relation still holds. We obtain
+
+$$\braket{\hat A} = \frac{\sum_i A_i |w_i| s_0 r_i}{\sum_i |w_i| s_0 r_i} = \frac{\sum_i A_i |w_i| r_i}{\sum_i |w_i| r_i}.$$
+
+Thus we avoid computing $s_0$ if we do not actually need it.
 
 ## Reference
 

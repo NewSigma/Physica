@@ -64,7 +64,6 @@ namespace Physica {
 
         using Base::random_normal;
         using Base::random_uniform;
-
         void zeros(this auto&) noexcept;
         void junk(this auto&) noexcept;
         void swap(This& __restrict obj) noexcept;

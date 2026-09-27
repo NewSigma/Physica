@@ -68,7 +68,7 @@ namespace Physica {
         static void write(const RSpaceFCGrid& rSpaceFC, H5Loc& loc, const char* name);
     private:
         PositionMatrix makeWignerSeitzRadius() const;
-        ArrayND<DenseMatrix<T>, 3> makeWignerSeitzWeights() const;
+        DenseTensor<T, 5> makeWignerSeitzWeights() const;
         T calcWignerSeitzWeight(const Vector3D<T> r, const PositionMatrix& wignerSeitzRadius) const;
     };
 
@@ -89,7 +89,7 @@ namespace Physica {
         const Index3D superSize = Base::getSuperSize();
         const MDCellType superCell = Base::getUnitCell().template makeSuperCell<ExtendCellOption::CellMajor>(superSize);
 
-        RSpaceFCGrid result(getSuperSize(), unitCellDOF, unitCellDOF, T(0));
+        auto result = RSpaceFCGrid::zeros(superSize[0], superSize[1], superSize[2], unitCellDOF, unitCellDOF);
         PositionMatrix pos = superCell.getPos();
         for (size_t major = 0; major < unitCellDOF; ++major) {
             T& toDisplace = pos[major / Dim, major % Dim];
@@ -101,8 +101,8 @@ namespace Physica {
 
             for (size_t cell = 0; cell < getNumCell(); ++cell) {
                 const Index3D index = PeriodIndex3D(cell, superSize);
-                for (size_t minor = 0; minor < unitCellDOF; ++minor)
-                    result[index].refFromMajorMinor(major, minor) = forceConst[cell * unitCellDOF + minor];
+                auto slice = result.slice(index[0], index[1], index[2], var(), var());
+                slice.row(major) = forceConst.segment(cell * unitCellDOF, (cell + 1) * unitCellDOF);
             }
         }
         return result;
@@ -119,7 +119,7 @@ namespace Physica {
         assert(minFreq.isPositive() && "[Error]: Min frequency must be positive");
         for (unsigned int step = 0; step < maxNumStep; ++step) {
             const auto fcMatrixes = makeForceConstants(superCellModel);
-            auto fcMatrix = fcMatrixes[0, 0, 0];
+            auto fcMatrix = fcMatrixes.slice(0, 0, 0, var(), var());
             Base::toDynamicMatrix(fcMatrix);
             const auto eigen = Base::diagonalize(fcMatrix);
             const T freq = Base::makeFreq(eigen)[0];
@@ -178,9 +178,8 @@ namespace Physica {
         unsigned char superSize[Dim];
         auto attr = group.openAttribute("SuperSize");
         attr.read(superSize);
-        const auto gridDim = Index3D{superSize[0], superSize[1], superSize[2]};
+        const Index3D gridDim{superSize[0], superSize[1], superSize[2]};
         rSpaceFC.resize(gridDim);
-
         rSpaceFC.forND([&group](RSpaceFCMat& fc, Index3D index) {
             fc.read(group, std::format("{}_{}_{}", index[0], index[1], index[2]).c_str());
         });
@@ -205,23 +204,23 @@ namespace Physica {
     }
 #endif
     template<Scalar T>
-    ArrayND<DenseMatrix<T>, 3> FrozenPhonon<T>::makeWignerSeitzWeights() const {
+    auto FrozenPhonon<T>::makeWignerSeitzWeights() const -> DenseTensor<T, 5> {
         const auto wignerSeitzRadius = makeWignerSeitzRadius();
         const Index3D superSize = Base::getSuperSize();
         const Index3D gridDim{4 * superSize[0] + 1, 4 * superSize[1] + 1, 4 * superSize[2] + 1};
         const size_t numAtom = getNumUnitCellAtom();
-        ArrayND<DenseMatrix<T>, 3> result(gridDim, numAtom, numAtom);
+        DenseTensor<T, 5> result(gridDim[0], gridDim[1], gridDim[2], numAtom, numAtom);
         forND(gridDim, [this, superSize, numAtom, &result, &wignerSeitzRadius](Index3D index) {
             const auto& unitCell = Base::getUnitCell();
             const Vector3D<T> factor{T(index[0]) - T(2 * superSize[0]),
                                   T(index[1]) - T(2 * superSize[1]),
                                   T(index[2]) - T(2 * superSize[2])};
             const Vector3D<T> r0 = unitCell.getLattice().transpose() * factor;
-            auto& mat = result[index];
-            for (size_t c = 0; c < result.getCol(); ++c) {
-                for (size_t r = 0; r < result.getRow(); ++r) {
+            auto block = result.slice(index[0], index[1], index[2], var(), var());
+            for (size_t c = 0; c < numAtom; ++c) {
+                for (size_t r = 0; r < numAtom; ++r) {
                     const Vector3D<T> r1 = r0 + unitCell.getPos().row(r) - unitCell.getPos().row(c);
-                    mat[r, c] = calcWignerSeitzWeight(r1, wignerSeitzRadius);
+                    block[r, c] = calcWignerSeitzWeight(r1, wignerSeitzRadius);
                 }
             }
         });

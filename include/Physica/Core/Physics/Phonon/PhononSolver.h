@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "PhononSolverImpl/BHProjector.h"
@@ -35,7 +36,7 @@ namespace Physica {
         using RSpaceFCMat = FCProjector<T>::RSpaceFCMat;
         using RSpaceFCGrid = FCProjector<T>::RSpaceFCGrid;
         using KSpaceFCMat = DenseMatrix<Tc>;
-        using KSpaceFCGrid = ArrayND<KSpaceFCMat, 3>;
+        using KSpaceFCGrid = DenseTensor<Tc, 5>;
         using EigenSolverType = EigenSolver<Tc>;
         using QPointGrid = ArrayND<EigenSolverType, 3>;
         using BornChargeArray = RSpaceEwald<T, true>::BornChargeArray;
@@ -108,7 +109,7 @@ namespace Physica {
         assert(translationPrec.isPositive() && "[Error]: Invalid param");
         assert(maxIteration > 0 && "[Error]: Zero max iteration does nothing");
         const size_t unitCellDOF = getUnitCellDOF();
-        auto& fcMatrixes = forceConstants.asArray();
+        const Index3D kSize = getForceConstantsGridSize();
         FFT3D fft(superSize, PlanFlag::Estimate);
         auto rSpace = fft.getRSpace().flatten();
         auto kSpace = fft.getKSpace().flatten();
@@ -124,10 +125,9 @@ namespace Physica {
 
             for (size_t row = 0; row < unitCellDOF; ++row) {
                 for (size_t col = 0; col < unitCellDOF; ++col) {
-                    for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
-                        auto& fcMatrix = fcMatrixes[i];
-                        kSpace[i] = fcMatrix[row, col];
-                    }
+                    forND(kSize, [&forceConstants, &kSpace, kSize, row, col](Index3D index) {
+                        kSpace[Index3D::toIndex1D(kSize, index)] = forceConstants[index[0], index[1], index[2], col, row];
+                    });
                     fft.invTransform();
 
                     const size_t shift = unitCellDOF;
@@ -142,18 +142,17 @@ namespace Physica {
                         rSpace[cell] = forceConst[col + cell * shift];
                     fft.transform();
 
-                    for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
-                        auto& fcMatrix = fcMatrixes[i];
-                        fcMatrix[row, col] = kSpace[i];
-                    }
+                    forND(kSize, [&forceConstants, &kSpace, kSize, row, col](Index3D index) {
+                        forceConstants[index[0], index[1], index[2], col, row] = kSpace[Index3D::toIndex1D(kSize, index)];
+                    });
                 }
             }
 
-            for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
-                auto& fcMatrix = fcMatrixes[i];
+            forND(kSize, [&forceConstants, &temp](Index3D index) {
+                auto fcMatrix = forceConstants.slice(index[0], index[1], index[2], var(), var());
                 temp = (fcMatrix + fcMatrix.hermite()) * T(0.5);
                 fcMatrix = temp;
-            }
+            });
         }
     }
 
@@ -217,19 +216,20 @@ namespace Physica {
     template<Scalar T>
     auto PhononSolver<T>::toKSpace(const RSpaceFCGrid& rSpaceGrid) const -> KSpaceFCGrid {
         assert(superSize == rSpaceGrid.getShape() && "[Error]: Super sizes do not match");
-        assert((getUnitCellDOF() == rSpaceGrid[0, 0, 0].getRow()) && "[Error]: DOF do not match");
+        assert((getUnitCellDOF() == rSpaceGrid.dim(3)) && "[Error]: DOF do not match");
         const size_t unitCellDOF = getUnitCellDOF();
-        KSpaceFCGrid kSpaceGrid(getForceConstantsGridSize(), unitCellDOF, unitCellDOF);
+        const Index3D kSize = getForceConstantsGridSize();
+        KSpaceFCGrid kSpaceGrid(kSize[0], kSize[1], kSize[2], unitCellDOF, unitCellDOF);
         FFT3D fft(superSize, PlanFlag::Estimate);
         for (size_t major = 0; major < unitCellDOF; ++major) {
             for (size_t minor = 0; minor < unitCellDOF; ++minor) {
                 fft.getRSpace().forND([major, minor, &rSpaceGrid](T& elem, Index3D index) {
-                    elem = rSpaceGrid[index].calcFromMajorMinor(major, minor);
+                    elem = rSpaceGrid[index[0], index[1], index[2], major, minor];
                 });
                 fft.transform();
 
                 fft.getKSpace().forND([major, minor, &kSpaceGrid](const Tc& elem, Index3D index) {
-                    kSpaceGrid[index].refFromMajorMinor(major, minor) = elem;
+                    kSpaceGrid[index[0], index[1], index[2], major, minor] = elem;
                 });
             }
         }
@@ -246,7 +246,7 @@ namespace Physica {
             for (size_t minor = major; minor < unitCellDOF; ++minor) {
                 auto& kSpace = fft.getKSpace();
                 kSpace.forND([major, minor, &forceConstants](Tc& elem, Index3D index) {
-                    elem = forceConstants[index].calcFromMajorMinor(major, minor);
+                    elem = forceConstants[index[0], index[1], index[2], major, minor];
                 });
                 fft.invTransform();
 
@@ -281,7 +281,7 @@ namespace Physica {
     void PhononSolver<T>::applyNAC(RSpaceFCGrid& rSpaceGrid, const BornChargeArray& born) const {
         const T factor = reciprocal(unitCell.getVolume() * T(getNumCell() * PhyConst<AU>::vacuumDielectric));
         const auto repLatt = unitCell.makeRepLattice();
-        rSpaceGrid.forND([this, factor, &repLatt, &born](T& rSpaceFC, Index3D index) {
+        forND(superSize, [this, factor, &repLatt, &born, &rSpaceGrid](Index3D index) {
             const bool isGammaPoint = index[0] == 0 && index[1] == 0 && index[2] == 0;
             Vector3D<T> qVector{};
             if (isGammaPoint)
@@ -304,9 +304,9 @@ namespace Physica {
                     const size_t dir2 = minor % Dim;
                     const T projCharge2 = (born[atom2] * qVector).calc(dir2);
                     const T correction = factor * (projCharge1 * projCharge2);
-                    rSpaceFC.refFromMajorMinor(major, minor) += correction;
+                    rSpaceGrid[index[0], index[1], index[2], major, minor] += correction;
                     if (minor != major)
-                        rSpaceFC.refFromMajorMinor(minor, major) += correction;
+                        rSpaceGrid[index[0], index[1], index[2], minor, major] += correction;
                 }
             }
         });
@@ -330,7 +330,7 @@ namespace Physica {
     template<Scalar T>
     void PhononSolver<T>::toDynamicMatrix(KSpaceFCGrid& forceConstants) const {
         const size_t unitCellDOF = getUnitCellDOF();
-        auto& fcMatrixes = forceConstants.flatten();
+        const Index3D kSize = getForceConstantsGridSize();
         for (size_t row = 0; row < unitCellDOF; ++row) {
             const size_t atom1 = row / Dim;
             const T mass1 = unitCell.getMass(atom1);
@@ -339,10 +339,9 @@ namespace Physica {
                 const T mass2 = unitCell.getMass(atom2);
                 const T repMass = reciprocal(sqrt(mass1 * mass2));
 
-                for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
-                    auto& fcMatrix = fcMatrixes[i];
-                    fcMatrix[row, col] *= repMass;
-                }
+                forND(kSize, [&forceConstants, row, col, repMass](Index3D index) {
+                    forceConstants[index[0], index[1], index[2], col, row] *= repMass;
+                });
             }
         }
     }
@@ -363,9 +362,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    DenseMatrix<T> PhononSolver<T>::makeEigenVectors(
-            const QPointGrid& qPoints, Index3D qIndex) const {
-        return makeEigenVectors(qPoints(qIndex));
+    DenseMatrix<T> PhononSolver<T>::makeEigenVectors(const QPointGrid& qPoints, Index3D qIndex) const {
+        return makeEigenVectors(qPoints[qIndex]);
     }
 
     template<Scalar T>
@@ -393,14 +391,14 @@ namespace Physica {
 
     template<Scalar T>
     auto PhononSolver<T>::diagonalize(const KSpaceFCGrid& dynamicMatrixes) -> QPointGrid {
-        const auto& matrixes = dynamicMatrixes.flatten();
-        const size_t unitCellDOF = matrixes[0].getRow();
-        QPointGrid qPoints(dynamicMatrixes.getShape(), unitCellDOF);
-        for (size_t i = 0; i < matrixes.getLength(); ++i) {
-            auto& eigen = qPoints.flatten()[i];
-            eigen.compute(matrixes[i], true);
+        const Index3D kSize{dynamicMatrixes.dim(0), dynamicMatrixes.dim(1), dynamicMatrixes.dim(2)};
+        const size_t unitCellDOF = dynamicMatrixes.dim(3);
+        QPointGrid qPoints(kSize, unitCellDOF, true);
+        forND(kSize, [&dynamicMatrixes, &qPoints](Index3D index) {
+            auto& eigen = qPoints[index];
+            eigen.compute(dynamicMatrixes.slice(index[0], index[1], index[2], var(), var()));
             eigen.sort();
-        }
+        });
         return qPoints;
     }
 
@@ -418,7 +416,7 @@ namespace Physica {
 
     template<Scalar T>
     VectorND<T> PhononSolver<T>::makeFreq(const QPointGrid& qPoints, Index3D qIndex) {
-        return makeFreq(qPoints(qIndex));
+        return makeFreq(qPoints[qIndex]);
     }
 
     template<Scalar T>

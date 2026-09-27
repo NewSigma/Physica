@@ -121,6 +121,11 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
+    void DenseTensor<T, Dims...>::zeros(this auto& self) noexcept {
+        self.storage.zeros();
+    }
+
+    template<Scalar T, int... Dims>
     void DenseTensor<T, Dims...>::junk(this auto& self) noexcept {
         self.storage.junk();
     }

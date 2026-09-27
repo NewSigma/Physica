@@ -96,13 +96,19 @@ namespace Physica {
         friend class device_obj<This>;
     };
 
-    template<size_t Dim, class Functor>
-    void forND(const Array<size_t, Dim>& shape, Functor func) {
-        static_assert(Dim == 3, "[Error]: Not implemented");
-        for (size_t x = 0; x < shape[0]; ++x)
-            for (size_t y = 0; y < shape[1]; ++y)
-                for (size_t z = 0; z < shape[2]; ++z)
-                    func(Index3D{x, y, z});
+    template<size_t Dim>
+    void forND(const Array<size_t, Dim>& shape, std::invocable<Array<size_t, Dim>> auto func) {
+        Array<size_t, Dim> index(shape.getLength(), 0);
+        [&](this auto&& self, size_t dim) -> void {
+            if (dim == shape.getLength())
+                func(index);
+            else {
+                for (size_t i = 0; i < shape[dim]; ++i) {
+                    index[dim] = i;
+                    self(dim + 1);
+                }
+            }
+        }(0);
     }
 }
 
