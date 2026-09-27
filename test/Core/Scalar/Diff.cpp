@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Scalar/Diff.h"
+#include "Physica/Core/Scalar/Complex.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Test.h"
 
@@ -79,6 +80,35 @@ namespace {
             expect(scalarNear(y.value(), expm1(x.value()), 1E-15));
             expect(scalarNear(y.grad().value(), exp(x.value()), 1E-15));
             expect(scalarNear(y.grad<2>(), exp(x.value()), 1E-15));
+        }
+    }
+
+    void squaredNorm() {
+        {
+            using dfloat = Diff<T, DiffMode::Forward, 2>;
+            const dfloat x(3, 1);
+            const auto y = x.squaredNorm();
+            expect(scalarNear(y.value(), T(9), 1E-15));
+            expect(scalarNear(y.grad().value(), T(6), 1E-15));
+            expect(scalarNear(y.grad<2>(), T(2), 1E-15));
+        }
+        {
+            using dfloat = Diff<T, DiffMode::Forward, 3>;
+            const dfloat x(2, {1, {0.5, 0.25}});
+            const auto y = x.squaredNorm();
+            expect(scalarNear(y.value(), T(4), 1E-15));
+            expect(scalarNear(y.grad().value(), T(4), 1E-15));
+            expect(scalarNear(y.grad<2>().value(), T(4), 1E-15));
+            expect(scalarNear(y.grad<3>(), T(4), 1E-15));
+        }
+        {
+            using Tc = Complex<T>;
+            using cfloat = Diff<Tc, DiffMode::Forward, 2>;
+            const cfloat x(Tc(1, 2), Tc(3, 4));
+            const auto y = x.squaredNorm();
+            expect(scalarNear(y.value(), Tc(5, 0), 1E-15));
+            expect(scalarNear(y.grad().value(), Tc(22, 0), 1E-15));
+            expect(scalarNear(y.grad<2>(), Tc(50, 0), 1E-15));
         }
     }
 
@@ -252,6 +282,7 @@ static_assert(std::formattable<DiffCoro<Diff<float64, DiffMode::Reverse>>, char>
 int main() {
     testForwardFunc();
     testForwardMath();
+    squaredNorm();
     testForwardMixedFMA();
     testForwardSIMD();
     testReverse();

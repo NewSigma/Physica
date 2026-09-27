@@ -75,7 +75,7 @@ namespace Physica {
             reverse(T(2) * v, y.grad());
         }
         else
-            co_return This(v.squaredNorm(), T(2) * v * g);
+            co_return conjugate() * (*this);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
