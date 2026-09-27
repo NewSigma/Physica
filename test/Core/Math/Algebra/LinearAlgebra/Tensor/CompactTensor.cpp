@@ -50,6 +50,18 @@ namespace {
         expect(m == slice);
     }
 
+    void block() {
+        auto x = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
+        const Index3D from{1, 0, 2};
+        const Index3D count{2, 3, 1};
+        auto b = x.block(from, count);
+        static_assert(b.isStrided());
+
+        expect(b.getShape() == count);
+        expect(b.getStrides() == x.getStrides());
+        expect(b.data_handle() == &x[1, 0, 2]);
+    }
+
     void flatten() {
         auto x = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
         auto flat = x.flatten();
@@ -68,6 +80,7 @@ namespace {
 int main() {
     fiber();
     slice();
+    block();
     flatten();
     return 0;
 }

@@ -19,6 +19,7 @@
 #pragma once
 
 #include "../CompactTensor.h"
+#include "TensorBlock.h"
 #include "TensorFiber.h"
 #include "TensorSlice.h"
 

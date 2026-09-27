@@ -41,6 +41,20 @@ namespace {
                 for (size_t k = 0; k < x.dim(2); ++k)
                     expect(x.data_ptr({i, j, k}) == &x[i, j, k]);
     }
+
+    void equality() {
+        const Tensor3D<T> x = Tensor3D<T>::random_uniform<RandomSource>({4, 4, 4});
+        Tensor3D<T> y = x;
+        expect(x == y);
+
+        y[0, 0, 0] += T(1);
+        expect(x != y);
+        expect(x + y == x + y);
+
+        Tensor3D<T> z = x;
+        z.resize(2, 2, 2);
+        expect(x != z);
+    }
 }
 
 static_assert(Tensor3D<T>::isCompact(), "DenseTensor is a compact object");
@@ -64,5 +78,6 @@ static_assert(decltype(std::declval<Tensor4x4x4>().flatten())::getSizeAtCompile(
 
 int main() {
     compact();
+    equality();
     return 0;
 }

@@ -19,11 +19,23 @@
 #pragma once
 
 #include "../RValueTensor.h"
+#include "TensorBlock.h"
 #include "TensorFiber.h"
 #include "TensorSlice.h"
 #include "Physica/Core/Utils/Container/ArrayND.h"
 
 namespace Physica {
+    template<class Derived, Scalar ScalarT>
+    bool RValueTensor<Derived, ScalarT>::operator==(this const auto& self, const Tensor auto& other) noexcept {
+        if constexpr (self.isDiffable() && other.isDiffable())
+            return self.values() == other.values() && self.grads() == other.grads();
+        else {
+            if (self.getShape() != other.getShape())
+                return false;
+            return self.flatten() == other.flatten();
+        }
+    }
+
     template<class Derived, Scalar ScalarT>
     void RValueTensor<Derived, ScalarT>::assign(Tensor auto& x) const {
         x.assert_assign(Base::getDerived());
@@ -93,6 +105,12 @@ namespace Physica {
     auto RValueTensor<Derived, ScalarT>::flatten(this auto&& self) noexcept {
         using Self = decltype(self);
         return Flatten<Self>(std::forward<Self>(self));
+    }
+
+    template<class Derived, Scalar ScalarT>
+    auto RValueTensor<Derived, ScalarT>::block(this auto&& self, IndexType from, IndexType count) noexcept {
+        using Self = decltype(self);
+        return TensorBlock<Self>(std::forward<Self>(self), std::move(from), std::move(count));
     }
 
     template<class Derived, Scalar ScalarT>

@@ -54,6 +54,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        [[nodiscard]] bool operator==(this const auto& self, const Tensor auto& other) noexcept;
         /* Operations */
         void assign(Tensor auto& x) const;
         void assert_assign(const Tensor auto& source) const noexcept;
@@ -67,6 +68,7 @@ namespace Physica {
         [[nodiscard]] auto fiber(this auto&&, IndexVar auto...) noexcept;
         [[nodiscard]] auto slice(this auto&&, IndexVar auto...) noexcept;
         [[nodiscard]] auto flatten(this auto&&) noexcept;
+        [[nodiscard]] auto block(this auto&&, IndexType from, IndexType count) noexcept;
 
         void resize(this auto&, const Tensor auto& x);
         auto resize(this auto&, std::integral auto... dims);

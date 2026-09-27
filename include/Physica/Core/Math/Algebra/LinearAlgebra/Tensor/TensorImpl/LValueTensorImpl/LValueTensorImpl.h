@@ -19,6 +19,7 @@
 #pragma once
 
 #include "../LValueTensor.h"
+#include "TensorBlock.h"
 #include "TensorFiber.h"
 #include "TensorSlice.h"
 
@@ -94,12 +95,6 @@ namespace Physica {
         Physica::forND(Base::getShape(), [this, fn](const IndexType& index) {
             fn(operator[](index), index);
         });
-    }
-
-    template<class Derived>
-    auto LValueTensor<Derived>::block(this auto&& self, IndexType from, IndexType count) noexcept {
-        using Self = decltype(self);
-        return LTensorBlock<Self>(std::forward<Self>(self), std::move(from), std::move(count));
     }
 
     template<class Derived>

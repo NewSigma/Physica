@@ -43,10 +43,21 @@ namespace {
         static_assert(!slice.isLValueMatrix());
         expect(MatrixND<T>(slice) == slice);
     }
+
+    void block() {
+        const auto x = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
+        const auto y = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
+        const Index3D from{1, 0, 2};
+        const Index3D count{2, 3, 1};
+        auto b = (x + y).block(from, count);
+        static_assert(!b.isLValueTensor());
+        expect(b == x.block(from, count) + y.block(from, count));
+    }
 }
 
 int main() {
     fiber();
     slice();
+    block();
     return 0;
 }

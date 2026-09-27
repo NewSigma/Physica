@@ -19,7 +19,6 @@
 #pragma once
 
 #include "RValueTensor.h"
-#include "LValueTensorImpl/LTensorBlock.h"
 
 namespace Physica {
     template<class Derived>
@@ -56,8 +55,6 @@ namespace Physica {
 
         void forND(std::invocable<T&, IndexType> auto fn);
         void forND(std::invocable<const T&, IndexType> auto fn) const;
-
-        [[nodiscard]] auto block(this auto&&, IndexType from, IndexType count) noexcept;
 
         void zero_grad() noexcept;
         void zeros() noexcept;
