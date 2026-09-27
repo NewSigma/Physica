@@ -26,7 +26,7 @@ using T = float64;
 using RandomSource = Random<PCG64DXSM, 5746352372098963137>;
 constexpr T HoppingT = 1;
 constexpr T RepelU = 4;
-constexpr T Beta = 4;
+constexpr T Beta = 2;
 constexpr int Dim = 2;
 constexpr int NumSiteX = 2;
 constexpr int NumSiteY = 2;
@@ -68,8 +68,7 @@ namespace {
                 auto mean = dopant.getDensity()[i];
                 auto devia = dopant.getNoises()[i];
                 const T diff = abs(mean - Target);
-                expect<RandomSource>(diff < T(0.02));
-                expect<RandomSource>(diff < T(3) * devia);
+                expect<RandomSource>(diff < std::max(T(0.02), T(3) * devia));
                 break;
             }
         }

@@ -30,9 +30,11 @@ namespace {
         std::println("          func: {}", loc.function_name());
         if (seed != 0)
             std::println("          seed: {}", seed);
+        std::fflush(nullptr);
+
     #ifdef PHYSICA_MPI
         using namespace Physica;
-        if (MPI::initialized())
+        if (MPI::initialized() && MPI::getRank() > 1)
             MPI_Abort(MPI_Comm(MPI::World), EXIT_FAILURE);
     #endif
         exit(EXIT_FAILURE);
