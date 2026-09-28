@@ -58,6 +58,7 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ auto fiber(this auto&&, IndexVar auto...) noexcept;
         [[nodiscard]] __host__ __device__ auto slice(this auto&&, IndexVar auto...) noexcept;
+        [[nodiscard]] __host__ __device__ auto block(this auto&&, IndexVar auto...) noexcept;
         [[nodiscard]] __host__ __device__ auto block(this auto&&, IndexType from, IndexType count) noexcept;
         [[nodiscard]] __host__ __device__ auto flatten(this auto&&) noexcept;
 

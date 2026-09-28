@@ -45,13 +45,23 @@ namespace {
     }
 
     void block() {
-        const auto x = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
-        const auto y = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
-        const Index3D from{1, 0, 2};
-        const Index3D count{2, 3, 1};
-        auto b = (x + y).block(from, count);
-        static_assert(!b.isLValueTensor());
-        expect(b == x.block(from, count) + y.block(from, count));
+        {
+            const auto x = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
+            const auto y = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
+            const Index3D from{1, 0, 2};
+            const Index3D count{2, 3, 1};
+            auto b = (x + y).block(from, count);
+            static_assert(!b.isLValueTensor());
+            expect(b == x.block(from, count) + y.block(from, count));
+        }
+        {
+            const auto x = Tensor4D<T>::random_uniform<Random<>>({2, 3, 4, 5});
+            const auto y = Tensor4D<T>::random_uniform<Random<>>({2, 3, 4, 5});
+            auto b = (x + y).block(1, var(), var(), var());
+            static_assert(!b.isLValueTensor());
+            static_assert(decltype(b)::ndim() == 4);
+            expect(Tensor4D<T>(b) == Tensor4D<T>(x.block(1, var(), var(), var()) + y.block(1, var(), var(), var())));
+        }
     }
 
     void flatten() {

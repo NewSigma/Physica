@@ -8,5 +8,5 @@
 ## Constraints
 
 - `find /` and any other full-disk or large-scale scanning commands must not be used:
-    1. The location should preferably be obtained from build/link commands, build system caches, package managers, environment variables, etc.
+    1. The location should preferably be obtained from build system caches, package managers, IDE configurations, environment variables, etc.
     2. Only when all of the above have failed and the target directory is already known may a scope-limited search be performed within a specific directory.

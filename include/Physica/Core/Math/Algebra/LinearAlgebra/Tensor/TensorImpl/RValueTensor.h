@@ -67,6 +67,7 @@ namespace Physica {
 
         [[nodiscard]] auto fiber(this auto&&, IndexVar auto...) noexcept;
         [[nodiscard]] auto slice(this auto&&, IndexVar auto...) noexcept;
+        [[nodiscard]] auto block(this auto&&, IndexVar auto...) noexcept;
         [[nodiscard]] auto block(this auto&&, IndexType from, IndexType count) noexcept;
         [[nodiscard]] auto flatten(this auto&&) noexcept;
 

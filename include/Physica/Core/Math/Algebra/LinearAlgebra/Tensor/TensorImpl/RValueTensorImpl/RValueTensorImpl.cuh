@@ -128,6 +128,30 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueTensor<Derived, ScalarT>>::block(this auto&& self, IndexVar auto... indices) noexcept {
+        using Self = decltype(self);
+        using X = remove_device_obj_t<Self>;
+        static_assert(sizeof...(indices) == NDim, "[Error]: NDim is not consistent");
+        constexpr IndexVarInfo<decltype(indices)...> info{};
+        static_assert(info.getNumAnonymous() >= 3, "[Error]: Block requires at least 3 anonymous var");
+        IndexType from{};
+        IndexType count{};
+        size_t i = 0;
+        ([&]() {
+            if constexpr (std::integral<decltype(indices)>) {
+                from[i] = indices;
+                count[i] = 1;
+            }
+            else {
+                from[i] = 0;
+                count[i] = self.dim(i);
+            }
+            i += 1;
+        }(), ...);
+        return device_obj<TensorBlock<X>>(std::forward<Self>(self), std::move(from), std::move(count));
+    }
+
+    template<class Derived, Scalar ScalarT>
     __host__ __device__ auto device_obj<RValueTensor<Derived, ScalarT>>::block(this auto&& self, IndexType from, IndexType count) noexcept {
         using Self = decltype(self);
         using X = remove_device_obj_t<Self>;

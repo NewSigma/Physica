@@ -52,16 +52,28 @@ namespace {
     }
 
     void block() {
-        const auto x = Tensor3D<T>::random_uniform<RandomSource>({4, 4, 4});
-        const auto y = Tensor3D<T>::random_uniform<RandomSource>({4, 4, 4});
-        const auto d_x = x.toDevice();
-        const auto d_y = y.toDevice();
+        {
+            const auto x = Tensor3D<T>::random_uniform<RandomSource>({4, 4, 4});
+            const auto y = Tensor3D<T>::random_uniform<RandomSource>({4, 4, 4});
+            const auto d_x = x.toDevice();
+            const auto d_y = y.toDevice();
 
-        const Index3D from{1, 0, 2};
-        const Index3D count{2, 3, 1};
-        const Tensor3D<T> answer((x + y).block(from, count));
-        device_obj<Tensor3D<T>> result = (d_x + d_y).block(from, count);
-        expect(tensorNear(result.toHost(), answer, 1E-6));
+            const Index3D from{1, 0, 2};
+            const Index3D count{2, 3, 1};
+            const Tensor3D<T> answer((x + y).block(from, count));
+            device_obj<Tensor3D<T>> result = (d_x + d_y).block(from, count);
+            expect(tensorNear(result.toHost(), answer, 1E-6));
+        }
+        {
+            const auto x = Tensor4D<T>::random_uniform<RandomSource>({2, 3, 4, 5});
+            const auto y = Tensor4D<T>::random_uniform<RandomSource>({2, 3, 4, 5});
+            const auto d_x = x.toDevice();
+            const auto d_y = y.toDevice();
+
+            const Tensor4D<T> answer((x + y).block(1, var(), var(), var()));
+            device_obj<Tensor4D<T>> result = (d_x + d_y).block(1, var(), var(), var());
+            expect(tensorNear(result.toHost(), answer, 1E-6));
+        }
     }
 
     void flatten() {
