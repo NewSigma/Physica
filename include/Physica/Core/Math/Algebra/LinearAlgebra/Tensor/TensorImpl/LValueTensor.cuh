@@ -78,3 +78,7 @@ namespace Physica {
 }
 
 #include "LValueTensorImpl/LValueTensorImpl.cuh"
+#include "LValueTensorImpl/Flatten.cuh"
+#include "LValueTensorImpl/TensorFiber.cuh"
+#include "LValueTensorImpl/TensorSlice.cuh"
+#include "LValueTensorImpl/TensorBlock.cuh"
