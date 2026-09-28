@@ -377,6 +377,14 @@ namespace Physica {
     }
 
     template<Scalar T>
+    [[nodiscard]] auto sigmoid(const T& x) noexcept requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        constexpr int GradOrder = T::GradType::Order;
+        const auto v = sigmoid(x.template grad_mask<GradOrder>());
+        return ResultType(v.value(), (v - square(v)) * x.grad());
+    }
+
+    template<Scalar T>
     [[nodiscard]] auto softplus(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         constexpr int GradOrder = T::GradType::Order;

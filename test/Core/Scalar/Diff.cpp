@@ -240,6 +240,12 @@ namespace {
             expm1(x).reverse();
             expect(scalarNear(x.grad(), exp(x.value()), 1E-15));
         }
+        /* Test sigmoid */ {
+            x.zero_grad();
+            sigmoid(x).reverse();
+            const auto s = sigmoid(x.value());
+            expect(scalarNear(x.grad(), s * (T(1) - s), 1E-15));
+        }
     }
 
     void forwardReverseDiv() {

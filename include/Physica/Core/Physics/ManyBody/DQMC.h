@@ -34,7 +34,7 @@ namespace Physica {
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
-        using MaybeScore = std::conditional_t<T::isDiffable(), Trv, Empty>;
+        using MaybeScore = std::conditional_t<T::isDiffable(), typename T::GradType, Empty>;
 
         constexpr static bool isComplex = T::isComplex();
         static_assert(T::Prec == Float64, "[Warn]: It is highly recommended to use high-precision floats");
@@ -47,7 +47,7 @@ namespace Physica {
         Array<int> sites;
         int cursor = 0;
 
-        [[no_unique_address]] Trv score = 0;
+        [[no_unique_address]] MaybeScore score = 0;
         uint64_t numTotal = 0;
         uint64_t numAccept = 0;
     public:
@@ -155,7 +155,7 @@ namespace Physica {
     T DQMC<T>::getRSign() const noexcept {
         if constexpr (T::isDiffable()) {
             const Tv rsign = kinetic.getRSign();
-            return T(rsign, rsign * score);
+            return rsign * exp(T(Tv(0), score));
         }
         else
             return kinetic.getRSign();

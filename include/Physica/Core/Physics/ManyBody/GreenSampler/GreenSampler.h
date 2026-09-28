@@ -115,10 +115,8 @@ namespace Physica {
      */
     template<Scalar T>
     T GreenSampler<T>::calcGradScore(T result) const noexcept {
-        if constexpr (T::isDiffable()) {
-            const Trv mean = hadamard(rsigns.values(), rsigns.grads()).mean();
-            return T(result.value(), result.grad() - result.value() * mean);
-        }
+        if constexpr (T::isDiffable())
+            return result / T(Tv(1), hadamard(rsigns.values(), rsigns.grads()).mean());
         else
             return result;
     }

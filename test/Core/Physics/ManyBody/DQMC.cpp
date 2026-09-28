@@ -126,7 +126,7 @@ namespace {
     void forward() {
         // Test differentiable samplers against the exact atomic limit,
         // where the Trotter decomposition is exact and the single-site solution is analytic
-        using dfloat = Diff<T, DiffMode::Forward>;
+        using dfloat = Diff<T, DiffMode::Forward, 2>;
         constexpr T RepelU = 2;
         constexpr T Beta = 2;
         constexpr T ChemMu = 1.5;
@@ -134,8 +134,7 @@ namespace {
         constexpr int NumSplit = 2;
         constexpr int NumWarmup = 256;
         constexpr int NumSample = NumWarmup * 16;
-        constexpr double ValuePrec = 5E-2;
-        constexpr double GradPrec = 5E-2;
+        constexpr double Prec = 5E-2;
 
         const HubbardParams<dfloat> params(MatrixND<T>::zeros(NumSite), dfloat(RepelU, 1), Beta, ChemMu, NumSplit);
         auto dqmc = DQMC<dfloat>(params);
@@ -155,26 +154,33 @@ namespace {
         const T z = T(1) + T(2) * e1 + e2;
         const T density = T(2) * (e1 + e2) / z;
         const T ddensity = -T(2) * Beta * e2 * (T(1) + e1) / square(z);
+        const T d2density = T(2) * square(Beta) * e2 * (T(1) + e1) * (T(1) + T(2) * e1 - e2) / pow(z, T(3));
         const T doubleOccupy = e2 / z;
         const T ddoubleOccupy = -Beta * e2 * (T(1) + T(2) * e1) / square(z);
+        const T d2doubleOccupy = square(Beta) * e2 * (T(1) + T(2) * e1) * (T(1) + T(2) * e1 - e2) / pow(z, T(3));
 
         const dfloat sign = densitySampler.calcSign();
         expect(sign.value() == T(1));
-        expect<RandomSource>(scalarNear(sign.grad(), T(0), 1E-8));
+        expect<RandomSource>(scalarNear(sign.grad().value(), T(0), 1E-8));
+        expect<RandomSource>(scalarNear(sign.template grad<2>(), T(0), 1E-8));
 
         const dfloat rawRho = densitySampler.calcRawMean();
         const dfloat meanRho = densitySampler.calcMean();
-        expect<RandomSource>(scalarNear(rawRho.value(), T(density), ValuePrec));
-        expect<RandomSource>(scalarNear(rawRho.grad(), T(ddensity), GradPrec));
-        expect<RandomSource>(scalarNear(meanRho.value(), T(density), ValuePrec));
-        expect<RandomSource>(scalarNear(meanRho.grad(), T(ddensity), GradPrec));
+        expect<RandomSource>(scalarNear(rawRho.value(), T(density), Prec));
+        expect<RandomSource>(scalarNear(rawRho.grad().value(), T(ddensity), Prec));
+        expect<RandomSource>(scalarNear(rawRho.template grad<2>(), T(d2density), Prec));
+        expect<RandomSource>(scalarNear(meanRho.value(), T(density), Prec));
+        expect<RandomSource>(scalarNear(meanRho.grad().value(), T(ddensity), Prec));
+        expect<RandomSource>(scalarNear(meanRho.template grad<2>(), T(d2density), Prec));
 
         const dfloat rawOcc = doubleSampler.calcRawMean();
         const dfloat meanOcc = doubleSampler.calcMean();
-        expect<RandomSource>(scalarNear(rawOcc.value(), T(doubleOccupy), ValuePrec));
-        expect<RandomSource>(scalarNear(rawOcc.grad(), T(ddoubleOccupy), GradPrec));
-        expect<RandomSource>(scalarNear(meanOcc.value(), T(doubleOccupy), ValuePrec));
-        expect<RandomSource>(scalarNear(meanOcc.grad(), T(ddoubleOccupy), GradPrec));
+        expect<RandomSource>(scalarNear(rawOcc.value(), T(doubleOccupy), Prec));
+        expect<RandomSource>(scalarNear(rawOcc.grad().value(), T(ddoubleOccupy), Prec));
+        expect<RandomSource>(scalarNear(rawOcc.template grad<2>(), T(d2doubleOccupy), Prec));
+        expect<RandomSource>(scalarNear(meanOcc.value(), T(doubleOccupy), Prec));
+        expect<RandomSource>(scalarNear(meanOcc.grad().value(), T(ddoubleOccupy), Prec));
+        expect<RandomSource>(scalarNear(meanOcc.template grad<2>(), T(d2doubleOccupy), Prec));
     }
 }
 

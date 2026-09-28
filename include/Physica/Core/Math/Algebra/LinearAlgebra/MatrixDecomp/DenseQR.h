@@ -130,7 +130,14 @@ namespace Physica {
             bool isFinalColumn = i + 1 >= getCol();
             if (!isFinalColumn)
                 applyHouseholder(buffer, working.bottomRightCorner(i, i + 1));
-            *(it + i) = std::exchange(col[i], -norm * sign);
+
+            if constexpr (T::isDiffable()) {
+                const T temp = col[i];
+                col[i] = -norm * sign;
+                *(it + i) = temp;
+            }
+            else
+                *(it + i) = std::exchange(col[i], -norm * sign);
         }
         // Other LAPACK implementations might modify the final element, so always clear it.
         if (i < taus.getLength())

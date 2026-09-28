@@ -342,6 +342,14 @@ namespace Physica {
     }
 
     template<Scalar T>
+    [[nodiscard]] CoDiff<T> sigmoid(T&& x) noexcept requires(ReverseDiff<T>) {
+        using Tv = std::remove_reference_t<T>::ValueType;
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        auto& y = co_yield sigmoid(x_.value());
+        x_.reverse(y.value() * (Tv(1) - y.value()), y.grad());
+    }
+
+    template<Scalar T>
     [[nodiscard]] CoDiff<T> softplus(T&& x) noexcept requires(ReverseDiff<T>) {
         decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
         auto& y = co_yield softplus(x_.value());
