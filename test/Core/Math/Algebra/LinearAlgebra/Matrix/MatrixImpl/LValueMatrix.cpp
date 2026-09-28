@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 #include "Test.h"
 
 using namespace Physica;
@@ -64,11 +65,31 @@ namespace {
         for (int i = 0; i < 3; ++i)
             expect(corner.diag(0)[i] == compact.diag()[i]);
     }
+
+    void view() {
+        auto m = MatrixND<float32>::random_uniform<Random<>>(5, 6);
+        static_assert(m.row(0).isLValueVector());
+        static_assert(m.col(0).isLValueVector());
+        static_assert(m.rows(1, 2).isLValueMatrix());
+        static_assert(m.topRows(2).isLValueMatrix());
+        static_assert(m.bottomRows(1).isLValueMatrix());
+        static_assert(m.cols(1, 2).isLValueMatrix());
+        static_assert(m.leftCols(2).isLValueMatrix());
+        static_assert(m.rightCols(1).isLValueMatrix());
+        static_assert(m.topLeftCorner(1, 2).isLValueMatrix());
+        static_assert(m.topLeftCorner(2).isLValueMatrix());
+        static_assert(m.topRightCorner(2, 1).isLValueMatrix());
+        static_assert(m.bottomLeftCorner(1, 2).isLValueMatrix());
+        static_assert(m.bottomRightCorner(1, 2).isLValueMatrix());
+        static_assert(m.bottomRightCorner(1).isLValueMatrix());
+        static_assert(m.block(1, 1, 1, 1).isLValueMatrix());
+    }
 }
 
 int main() {
     assign();
     diag();
     minorDiag();
+    view();
     return 0;
 }

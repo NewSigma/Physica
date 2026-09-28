@@ -128,91 +128,91 @@ namespace Physica {
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), fromRow, rowCount, 0, self.getCol());
+        return device_obj<LMatrixBlock<M>>(std::forward<Self>(self), fromRow, rowCount, 0, self.getCol());
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::topRows(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), 0, to, 0, self.getCol());
+        return device_obj<LMatrixBlock<M>>(std::forward<Self>(self), 0, to, 0, self.getCol());
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::bottomRows(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), from, self.getRow() - from, 0, self.getCol());
+        return device_obj<LMatrixBlock<M>>(std::forward<Self>(self), from, self.getRow() - from, 0, self.getCol());
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), 0, self.getRow(), fromCol, colCount);
+        return device_obj<LMatrixBlock<M>>(std::forward<Self>(self), 0, self.getRow(), fromCol, colCount);
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::leftCols(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), 0, self.getRow(), 0, to);
+        return device_obj<LMatrixBlock<M>>(std::forward<Self>(self), 0, self.getRow(), 0, to);
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::rightCols(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), 0, self.getRow(), from, self.getCol() - from);
+        return device_obj<LMatrixBlock<M>>(std::forward<Self>(self), 0, self.getRow(), from, self.getCol() - from);
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), 0, toRow, 0, toCol);
+        return device_obj<LMatrixBlock<M>>(std::forward<Self>(self), 0, toRow, 0, toCol);
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::topLeftCorner(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), 0, to, 0, to);
+        return device_obj<LMatrixBlock<M>>(std::forward<Self>(self), 0, to, 0, to);
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), 0, toRow, fromCol, self.getRow() - fromCol);
+        return device_obj<LMatrixBlock<M>>(std::forward<Self>(self), 0, toRow, fromCol, self.getRow() - fromCol);
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, 0, toCol);
+        return device_obj<LMatrixBlock<M>>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, 0, toCol);
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
+        return device_obj<LMatrixBlock<M>>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::bottomRightCorner(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), from, self.getRow() - from, from, self.getCol() - from);
+        return device_obj<LMatrixBlock<M>>(std::forward<Self>(self), from, self.getRow() - from, from, self.getCol() - from);
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<RMatrixBlock<M>>(std::forward<Self>(self), fromRow, rowCount, fromCol, colCount);
+        return device_obj<LMatrixBlock<M>>(std::forward<Self>(self), fromRow, rowCount, fromCol, colCount);
     }
 
     template<class Derived>
