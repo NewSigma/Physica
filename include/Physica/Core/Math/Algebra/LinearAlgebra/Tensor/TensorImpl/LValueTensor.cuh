@@ -30,6 +30,7 @@ namespace Physica {
         using typename Base::IndexType;
     protected:
         using typename Base::T;
+        using typename Base::Tv;
         using typename Base::Trv;
     public:
         ~device_obj() = default;
@@ -53,10 +54,17 @@ namespace Physica {
         [[nodiscard]] __device__ decltype(auto) calc(const IndexType& index) const { return operator[](index); }
         [[nodiscard]] __device__ decltype(auto) calc(std::integral auto... dims) const { return operator[](dims...); }
 
+        __device__ void forND(std::invocable<T&, IndexType> auto fn);
+        __device__ void forND(std::invocable<const T&, IndexType> auto fn) const;
+
+        __host__ __device__ void zero_grad() noexcept;
+        __host__ __device__ void zeros() noexcept;
         template<RNG R>
         void random_uniform();
         template<RNG R>
         void random_normal();
+        template<RNG R>
+        void random_any(auto& distribution);
         /* Getters */
         [[nodiscard]] __device__ auto data_ptr(this auto&&, const IndexType& index) noexcept;
         [[nodiscard]] __device__ auto data_ptr(this auto&&, std::integral auto... dims) noexcept;

@@ -13,6 +13,7 @@ add_subdirectory(Vector)
 
 if(${PHYSICA_CUDA})
     physica_add_test(DenseTensor_cuda Tensor/DenseTensor.cu)
+    physica_add_test(RValueTensor_cuda Tensor/RValueTensor.cu)
 endif()
 
 physica_add_test(GMRES GMRES.cpp)

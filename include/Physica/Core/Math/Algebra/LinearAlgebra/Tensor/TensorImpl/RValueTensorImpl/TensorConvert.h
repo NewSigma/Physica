@@ -21,110 +21,217 @@
 #include "../RValueTensor.h"
 
 namespace Physica {
-    template<class TensorType, Scalar> class RValueTensor;
+    template<class X>
+    class RealTensor : public RValueTensor<RealTensor<X>> {
+        using This = RealTensor<X>;
+        using Base = RValueTensor<This>;
+        using IndexType = std::remove_cvref_t<X>::IndexType;
+    protected:
+        using typename Base::T;
+    private:
+        decay_rvalue_t<X> tensor;
+    public:
+        explicit RealTensor(X&& tensor_) : tensor(std::forward<X>(tensor_)) {}
+        RealTensor(const This&) = default;
+        RealTensor(This&&) noexcept = default;
+        ~RealTensor() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] decltype(auto) calc(const IndexType& index) const { return tensor.calc(index).real(); }
 
-    template<class T>
-    class RealTensor : public RValueTensor<RealTensor<T>> {
-        using Base = RValueTensor<RealTensor<T>>;
-        const T& g;
-    public:
-        using typename Base::ScalarType;
-    public:
-        explicit RealTensor(const T& g_) : g(g_) {}
+        [[nodiscard]] decltype(auto) values(this auto&& self) noexcept;
         /* Getters */
-        [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).real(); }
-        [[nodiscard]] size_t getDimX() const noexcept { return g.getDimX(); }
-        [[nodiscard]] size_t getDimY() const noexcept { return g.getDimY(); }
-        [[nodiscard]] size_t getDimZ() const noexcept { return g.getDimZ(); }
+        [[nodiscard]] IndexType getShape() const noexcept { return tensor.getShape(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<X>::getSizeAtCompile(); }
     };
 
-    template<class T>
-    class ImagTensor : public RValueTensor<ImagTensor<T>> {
-        using Base = RValueTensor<ImagTensor<T>>;
-        const T& g;
+    template<class X>
+    decltype(auto) RealTensor<X>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), X>(self.tensor).values().reals();
+    }
+
+    template<class X>
+    class ImagTensor : public RValueTensor<ImagTensor<X>> {
+        using This = ImagTensor<X>;
+        using Base = RValueTensor<This>;
+        using IndexType = std::remove_cvref_t<X>::IndexType;
+    protected:
+        using typename Base::T;
+    private:
+        decay_rvalue_t<X> tensor;
     public:
-        using typename Base::ScalarType;
-    public:
-        explicit ImagTensor(const T& g_) : g(g_) {}
+        explicit ImagTensor(X&& tensor_) : tensor(std::forward<X>(tensor_)) {}
+        ImagTensor(const This&) = default;
+        ImagTensor(This&&) noexcept = default;
+        ~ImagTensor() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] decltype(auto) calc(const IndexType& index) const { return tensor.calc(index).imag(); }
+
+        [[nodiscard]] decltype(auto) values(this auto&& self) noexcept;
         /* Getters */
-        [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).imag(); }
-        [[nodiscard]] size_t getDimX() const noexcept { return g.getDimX(); }
-        [[nodiscard]] size_t getDimY() const noexcept { return g.getDimY(); }
-        [[nodiscard]] size_t getDimZ() const noexcept { return g.getDimZ(); }
+        [[nodiscard]] IndexType getShape() const noexcept { return tensor.getShape(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<X>::getSizeAtCompile(); }
     };
 
-    template<class T>
-    class NormTensor : public RValueTensor<NormTensor<T>> {
-        using Base = RValueTensor<NormTensor<T>>;
-        const T& g;
+    template<class X>
+    decltype(auto) ImagTensor<X>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), X>(self.tensor).values().imags();
+    }
+
+    template<class X>
+    class SquaredNormTensor : public RValueTensor<SquaredNormTensor<X>> {
+        using This = SquaredNormTensor<X>;
+        using Base = RValueTensor<This>;
+        using IndexType = std::remove_cvref_t<X>::IndexType;
+    protected:
+        using typename Base::T;
+    private:
+        decay_rvalue_t<X> tensor;
     public:
-        using typename Base::ScalarType;
-    public:
-        explicit NormTensor(const T& g_) : g(g_) {}
+        explicit SquaredNormTensor(X&& tensor_) : tensor(std::forward<X>(tensor_)) {}
+        SquaredNormTensor(const This&) = default;
+        SquaredNormTensor(This&&) noexcept = default;
+        ~SquaredNormTensor() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] decltype(auto) calc(const IndexType& index) const { return tensor.calc(index).squaredNorm(); }
+
+        [[nodiscard]] decltype(auto) values(this auto&& self) noexcept;
         /* Getters */
-        [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).norm(); }
-        [[nodiscard]] size_t getDimX() const noexcept { return g.getDimX(); }
-        [[nodiscard]] size_t getDimY() const noexcept { return g.getDimY(); }
-        [[nodiscard]] size_t getDimZ() const noexcept { return g.getDimZ(); }
+        [[nodiscard]] IndexType getShape() const noexcept { return tensor.getShape(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<X>::getSizeAtCompile(); }
     };
 
-    template<class T>
-    class ValueTensor : public RValueTensor<ValueTensor<T>> {
-        using Base = RValueTensor<ValueTensor<T>>;
-        const T& g;
+    template<class X>
+    decltype(auto) SquaredNormTensor<X>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), X>(self.tensor).values().squaredNorms();
+    }
+
+    template<class X>
+    class NormTensor : public RValueTensor<NormTensor<X>> {
+        using This = NormTensor<X>;
+        using Base = RValueTensor<This>;
+        using IndexType = std::remove_cvref_t<X>::IndexType;
+    protected:
+        using typename Base::T;
+    private:
+        decay_rvalue_t<X> tensor;
     public:
-        using typename Base::ScalarType;
-    public:
-        explicit ValueTensor(const T& g_) : g(g_) {}
+        explicit NormTensor(X&& tensor_) : tensor(std::forward<X>(tensor_)) {}
+        NormTensor(const This&) = default;
+        NormTensor(This&&) noexcept = default;
+        ~NormTensor() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] decltype(auto) calc(const IndexType& index) const { return tensor.calc(index).norm(); }
+
+        [[nodiscard]] decltype(auto) values(this auto&& self) noexcept;
         /* Getters */
-        [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).value(); }
-        [[nodiscard]] size_t getDimX() const noexcept { return g.getDimX(); }
-        [[nodiscard]] size_t getDimY() const noexcept { return g.getDimY(); }
-        [[nodiscard]] size_t getDimZ() const noexcept { return g.getDimZ(); }
+        [[nodiscard]] IndexType getShape() const noexcept { return tensor.getShape(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<X>::getSizeAtCompile(); }
     };
 
-    template<class T, int GradOrder>
-    class GradTensor : public RValueTensor<GradTensor<T, GradOrder>> {
-        using Base = RValueTensor<GradTensor<T, GradOrder>>;
-        const T& g;
+    template<class X>
+    decltype(auto) NormTensor<X>::values(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), X>(self.tensor).values().norms();
+    }
+
+    template<class X>
+    class ValueTensor : public RValueTensor<ValueTensor<X>> {
+        using This = ValueTensor<X>;
+        using Base = RValueTensor<This>;
+        using IndexType = std::remove_cvref_t<X>::IndexType;
+    protected:
+        using typename Base::T;
+    private:
+        decay_rvalue_t<X> tensor;
     public:
-        using typename Base::ScalarType;
-    public:
-        explicit GradTensor(const T& g_) : g(g_) {}
+        explicit ValueTensor(X&& tensor_) : tensor(std::forward<X>(tensor_)) {}
+        ValueTensor(const This&) = default;
+        ValueTensor(This&&) noexcept = default;
+        ~ValueTensor() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] decltype(auto) calc(const IndexType& index) const { return tensor.calc(index).value(); }
         /* Getters */
-        [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).template grad<GradOrder>(); }
-        [[nodiscard]] size_t getDimX() const noexcept { return g.getDimX(); }
-        [[nodiscard]] size_t getDimY() const noexcept { return g.getDimY(); }
-        [[nodiscard]] size_t getDimZ() const noexcept { return g.getDimZ(); }
+        [[nodiscard]] IndexType getShape() const noexcept { return tensor.getShape(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<X>::getSizeAtCompile(); }
+    };
+
+    template<class X, int GradOrder>
+    class GradTensor : public RValueTensor<GradTensor<X, GradOrder>> {
+        using This = GradTensor<X, GradOrder>;
+        using Base = RValueTensor<This>;
+        using IndexType = std::remove_cvref_t<X>::IndexType;
+    protected:
+        using typename Base::T;
+    private:
+        decay_rvalue_t<X> tensor;
+    public:
+        explicit GradTensor(X&& tensor_) : tensor(std::forward<X>(tensor_)) {}
+        GradTensor(const This&) = default;
+        GradTensor(This&&) noexcept = default;
+        ~GradTensor() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] decltype(auto) calc(const IndexType& index) const { return tensor.calc(index).template grad<GradOrder>(); }
+        /* Getters */
+        [[nodiscard]] IndexType getShape() const noexcept { return tensor.getShape(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<X>::getSizeAtCompile(); }
     };
 }
 
 namespace Physica {
-    template<class T>
-    class Traits<RealTensor<T>> {
+    template<class X>
+    class Traits<RealTensor<X>> {
+        using X1 = std::remove_cvref_t<X>;
     public:
-        using ScalarType = T::ScalarType::RealType;
-        constexpr static int Dim = T::Dim;
+        using ScalarType = X1::ScalarType::RealType;
+        constexpr static int NDim = X1::NDim;
     };
 
-    template<class T>
-    class Traits<ImagTensor<T>> : public Traits<RealTensor<T>> {};
+    template<class X>
+    class Traits<ImagTensor<X>> : public Traits<RealTensor<X>> {};
 
-    template<class T>
-    class Traits<NormTensor<T>> : public Traits<RealTensor<T>> {};
+    template<class X>
+    class Traits<SquaredNormTensor<X>> : public Traits<RealTensor<X>> {};
 
-    template<class T>
-    class Traits<ValueTensor<T>> {
+    template<class X>
+    class Traits<NormTensor<X>> : public Traits<RealTensor<X>> {};
+
+    template<class X>
+    class Traits<ValueTensor<X>> {
+        using X1 = std::remove_cvref_t<X>;
     public:
-        using ScalarType = T::ScalarType::ValueType;
-        constexpr static int Dim = T::Dim;
+        using ScalarType = X1::ScalarType::ValueType;
+        constexpr static int NDim = X1::NDim;
     };
 
-    template<class T, int GradOrder>
-    class Traits<GradTensor<T, GradOrder>> {
-        static_assert(T::isDiffable(), "[Error]: Redundant GradTensor");
+    template<class X, int GradOrder>
+    class Traits<GradTensor<X, GradOrder>> {
+        using X1 = std::remove_cvref_t<X>;
+        static_assert(X1::isDiffable(), "[Error]: Redundant GradTensor");
     public:
-        using ScalarType = T::ScalarType::template GradWithOrder<GradOrder>;
-        constexpr static int Dim = T::Dim;
+        using ScalarType = X1::ScalarType::template GradWithOrder<GradOrder>;
+        constexpr static int NDim = X1::NDim;
     };
 }

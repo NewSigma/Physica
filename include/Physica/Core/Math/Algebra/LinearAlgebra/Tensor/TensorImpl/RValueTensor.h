@@ -67,17 +67,17 @@ namespace Physica {
 
         [[nodiscard]] auto fiber(this auto&&, IndexVar auto...) noexcept;
         [[nodiscard]] auto slice(this auto&&, IndexVar auto...) noexcept;
-        [[nodiscard]] auto flatten(this auto&&) noexcept;
         [[nodiscard]] auto block(this auto&&, IndexType from, IndexType count) noexcept;
+        [[nodiscard]] auto flatten(this auto&&) noexcept;
 
         void resize(this auto&, const Tensor auto& x);
         auto resize(this auto&, std::integral auto... dims);
         auto resize(this auto&, IndexType shape);
 
-        [[nodiscard]] auto reals() const noexcept;
-        [[nodiscard]] auto imags() const noexcept;
-        [[nodiscard]] auto squaredNorms() const noexcept;
-        [[nodiscard]] auto norms() const noexcept;
+        [[nodiscard]] decltype(auto) reals(this auto&&) noexcept;
+        [[nodiscard]] auto imags(this auto&&) noexcept;
+        [[nodiscard]] auto squaredNorms(this auto&&) noexcept;
+        [[nodiscard]] auto norms(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] auto grads(this auto&& self) noexcept;
@@ -110,7 +110,33 @@ namespace Physica {
         __host__ __device__ consteval static int calcFiberDim() noexcept;
         template<IndexVar... Ts>
         __host__ __device__ consteval static Array<int, 2> calcSliceDim() noexcept;
+        /* Friends */
+        friend class device_obj<This>;
     };
+
+    template<Tensor X1, Tensor X2>
+    bool tensorNear(const X1& t1, const X2& t2, double precision) noexcept {
+        using T = Internal::BinaryScalarOpRtnTy<typename X1::ScalarType, typename X2::ScalarType>::Type;
+        assert(t1.getShape() == t2.getShape());
+        for (size_t i = 0; i < t1.getSize(); ++i) {
+            const auto indices = t1.toIndexND(i);
+            if (!scalarNear(T(t1.calc(indices)), T(t2.calc(indices)), precision))
+                return false;
+        }
+        return true;
+    }
+
+    template<Tensor X1, Tensor X2>
+    bool tensorNear(const X1& t1, const X2& t2, uint64_t ulp) noexcept {
+        using T = Internal::BinaryScalarOpRtnTy<typename X1::ScalarType, typename X2::ScalarType>::Type;
+        assert(t1.getShape() == t2.getShape());
+        for (size_t i = 0; i < t1.getSize(); ++i) {
+            const auto indices = t1.toIndexND(i);
+            if (!scalarNear(T(t1.calc(indices)), T(t2.calc(indices)), ulp))
+                return false;
+        }
+        return true;
+    }
 }
 
 namespace Physica {

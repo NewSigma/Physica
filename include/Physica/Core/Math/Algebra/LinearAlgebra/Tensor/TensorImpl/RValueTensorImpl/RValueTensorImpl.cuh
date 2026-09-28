@@ -23,6 +23,17 @@
 
 namespace Physica {
     template<class Derived, Scalar ScalarT>
+    __host__ __device__ bool device_obj<RValueTensor<Derived, ScalarT>>::operator==(this const auto& self, const Tensor auto& other) noexcept {
+        if constexpr (self.isDiffable() && other.isDiffable())
+            return self.values() == other.values() && self.grads() == other.grads();
+        else {
+            if (self.getShape() != other.getShape())
+                return false;
+            return self.flatten() == other.flatten();
+        }
+    }
+
+    template<class Derived, Scalar ScalarT>
     __host__ __device__ void device_obj<RValueTensor<Derived, ScalarT>>::assign(this const auto& self, Tensor auto&& target) {
         target.assert_assign(self);
         if (IsHost()) {
@@ -85,6 +96,45 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    __device__ void device_obj<RValueTensor<Derived, ScalarT>>::forND(std::invocable<T, IndexType> auto fn) const {
+        const size_t size = getSize();
+        for (size_t i = 0; i < size; ++i) {
+            const auto indices = toIndexND(i);
+            fn(calc(indices), indices);
+        }
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueTensor<Derived, ScalarT>>::fiber(this auto&& self, IndexVar auto... indices) noexcept {
+        using Self = decltype(self);
+        using X = remove_device_obj_t<Self>;
+        constexpr int Dim = host_obj::template calcFiberDim<decltype(indices)...>();
+        return device_obj<TensorFiber<X, Dim>>(std::forward<Self>(self), indices...);
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueTensor<Derived, ScalarT>>::slice(this auto&& self, IndexVar auto... indices) noexcept {
+        using Self = decltype(self);
+        using X = remove_device_obj_t<Self>;
+        constexpr auto Dim = host_obj::template calcSliceDim<decltype(indices)...>();
+        return device_obj<TensorSlice<X, Dim[0], Dim[1]>>(std::forward<Self>(self), indices...);
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueTensor<Derived, ScalarT>>::flatten(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using X = remove_device_obj_t<Self>;
+        return device_obj<Flatten<X>>(std::forward<Self>(self));
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueTensor<Derived, ScalarT>>::block(this auto&& self, IndexType from, IndexType count) noexcept {
+        using Self = decltype(self);
+        using X = remove_device_obj_t<Self>;
+        return device_obj<TensorBlock<X>>(std::forward<Self>(self), std::move(from), std::move(count));
+    }
+
+    template<class Derived, Scalar ScalarT>
     __host__ __device__ void device_obj<RValueTensor<Derived, ScalarT>>::resize(this auto& self, const Tensor auto& x) {
         self.resize(x.getShape());
     }
@@ -98,6 +148,55 @@ namespace Physica {
     template<class Derived, Scalar ScalarT>
     __host__ __device__ auto device_obj<RValueTensor<Derived, ScalarT>>::resize(this auto& self, IndexType shape) {
         return self.resize(std::move(shape));
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ decltype(auto) device_obj<RValueTensor<Derived, ScalarT>>::reals(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using X = remove_device_obj_t<Self>;
+        if constexpr (isComplex())
+            return device_obj<RealTensor<X>>(std::forward<Self>(self));
+        else
+            return std::forward<Self>(self);
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueTensor<Derived, ScalarT>>::imags(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using X = remove_device_obj_t<Self>;
+        return device_obj<ImagTensor<X>>(std::forward<Self>(self));
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueTensor<Derived, ScalarT>>::squaredNorms(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using X = remove_device_obj_t<Self>;
+        return device_obj<SquaredNormTensor<X>>(std::forward<Self>(self));
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueTensor<Derived, ScalarT>>::norms(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using X = remove_device_obj_t<Self>;
+        return device_obj<NormTensor<X>>(std::forward<Self>(self));
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ decltype(auto) device_obj<RValueTensor<Derived, ScalarT>>::values(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using X = remove_device_obj_t<Self>;
+        if constexpr (isDiffable())
+            return device_obj<ValueTensor<X>>(std::forward<Self>(self));
+        else
+            return std::forward<Self>(self);
+    }
+
+    template<class Derived, Scalar ScalarT>
+    template<int GradOrder>
+    __host__ __device__ auto device_obj<RValueTensor<Derived, ScalarT>>::grads(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using X = remove_device_obj_t<Self>;
+        return device_obj<GradTensor<X, GradOrder>>(std::forward<Self>(self));
     }
 
     template<class Derived, Scalar ScalarT>
@@ -116,6 +215,20 @@ namespace Physica {
         for (int i = 1; i < NDim; ++i)
             size *= dim(i);
         return size;
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ bool device_obj<RValueTensor<Derived, ScalarT>>::empty() const noexcept {
+        return getSize() == 0;
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __device__ bool device_obj<RValueTensor<Derived, ScalarT>>::isFinite() const noexcept {
+        const size_t size = getSize();
+        for (size_t i = 0; i < size; ++i)
+            if (!calc(toIndexND(i)).isFinite())
+                return false;
+        return true;
     }
 
     template<class Derived, Scalar ScalarT>
@@ -156,5 +269,21 @@ namespace Physica {
     template<class Derived, Scalar ScalarT>
     __host__ __device__ consteval bool device_obj<RValueTensor<Derived, ScalarT>>::isSparse() noexcept {
         return Derived::isSparse();
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval size_t device_obj<RValueTensor<Derived, ScalarT>>::getSizeAtCompile() noexcept {
+        return Derived::getSizeAtCompile();
+    }
+    // Redeclare to expose it to derived classes
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval void device_obj<RValueTensor<Derived, ScalarT>>::static_assert_assign(const Scalar auto& source) noexcept {
+        Derived::static_assert_assign(source);
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval void device_obj<RValueTensor<Derived, ScalarT>>::static_assert_assign(const Tensor auto& source) noexcept {
+        static_assert(getSizeAtCompile() != Dynamic || DeviceObj<decltype(source)>, "[Error]: Host object cannot be assigned to dynamic device object");
+        Derived::static_assert_assign(source);
     }
 }

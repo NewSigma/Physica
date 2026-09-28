@@ -33,7 +33,7 @@ namespace {
 
         auto fiber = (x + y).fiber(1, var(), 2);
         static_assert(!fiber.isLValueVector());
-        expect(VectorND<T>(fiber) == fiber);
+        expect(VectorND<T>(fiber) == x.fiber(1, var(), 2) + y.fiber(1, var(), 2));
     }
 
     void slice() {
@@ -41,7 +41,7 @@ namespace {
         const auto y = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
         auto slice = (x + y).slice(1, var(), var());
         static_assert(!slice.isLValueMatrix());
-        expect(MatrixND<T>(slice) == slice);
+        expect(MatrixND<T>(slice) == x.slice(1, var(), var()) + y.slice(1, var(), var()));
     }
 
     void block() {
@@ -53,11 +53,20 @@ namespace {
         static_assert(!b.isLValueTensor());
         expect(b == x.block(from, count) + y.block(from, count));
     }
+
+    void flatten() {
+        const auto x = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
+        const auto y = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
+        auto flat = (x + y).flatten();
+        static_assert(!flat.isLValueVector());
+        expect(VectorND<T>(flat) == x.flatten() + y.flatten());
+    }
 }
 
 int main() {
     fiber();
     slice();
     block();
+    flatten();
     return 0;
 }

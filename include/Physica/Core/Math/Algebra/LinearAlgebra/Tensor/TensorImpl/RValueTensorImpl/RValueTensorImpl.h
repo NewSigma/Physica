@@ -102,15 +102,15 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueTensor<Derived, ScalarT>::flatten(this auto&& self) noexcept {
-        using Self = decltype(self);
-        return Flatten<Self>(std::forward<Self>(self));
-    }
-
-    template<class Derived, Scalar ScalarT>
     auto RValueTensor<Derived, ScalarT>::block(this auto&& self, IndexType from, IndexType count) noexcept {
         using Self = decltype(self);
         return TensorBlock<Self>(std::forward<Self>(self), std::move(from), std::move(count));
+    }
+
+    template<class Derived, Scalar ScalarT>
+    auto RValueTensor<Derived, ScalarT>::flatten(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return Flatten<Self>(std::forward<Self>(self));
     }
 
     template<class Derived, Scalar ScalarT>
@@ -130,23 +130,30 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueTensor<Derived, ScalarT>::reals() const noexcept {
-        return RealTensor<Derived>(Base::getDerived());
+    decltype(auto) RValueTensor<Derived, ScalarT>::reals(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (isComplex())
+            return RealTensor<Self>(std::forward<Self>(self));
+        else
+            return std::forward<Self>(self);
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueTensor<Derived, ScalarT>::imags() const noexcept {
-        return ImagTensor<Derived>(Base::getDerived());
+    auto RValueTensor<Derived, ScalarT>::imags(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return ImagTensor<Self>(std::forward<Self>(self));
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueTensor<Derived, ScalarT>::squaredNorms() const noexcept {
-        return SquaredNormTensor<Derived>(Base::getDerived());
+    auto RValueTensor<Derived, ScalarT>::squaredNorms(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return SquaredNormTensor<Self>(std::forward<Self>(self));
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueTensor<Derived, ScalarT>::norms() const noexcept {
-        return NormTensor<Derived>(Base::getDerived());
+    auto RValueTensor<Derived, ScalarT>::norms(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return NormTensor<Self>(std::forward<Self>(self));
     }
 
     template<class Derived, Scalar ScalarT>

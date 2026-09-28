@@ -102,6 +102,36 @@ namespace Physica {
     }
 
     template<class Derived>
+    __device__ void device_obj<LValueTensor<Derived>>::forND(std::invocable<T&, IndexType> auto fn) {
+        auto& t = Base::getDerived();
+        const size_t size = t.getSize();
+        for (size_t i = 0; i < size; ++i) {
+            const auto index = t.toIndexND(i);
+            fn(t[index], index);
+        }
+    }
+
+    template<class Derived>
+    __device__ void device_obj<LValueTensor<Derived>>::forND(std::invocable<const T&, IndexType> auto fn) const {
+        const auto& t = Base::getDerived();
+        const size_t size = t.getSize();
+        for (size_t i = 0; i < size; ++i) {
+            const auto index = t.toIndexND(i);
+            fn(t[index], index);
+        }
+    }
+
+    template<class Derived>
+    __host__ __device__ void device_obj<LValueTensor<Derived>>::zeros() noexcept {
+        operator=(Trv(0));
+    }
+
+    template<class Derived>
+    __host__ __device__ void device_obj<LValueTensor<Derived>>::zero_grad() noexcept {
+        Base::getDerived().grads().zeros();
+    }
+
+    template<class Derived>
     template<RNG R>
     void device_obj<LValueTensor<Derived>>::random_uniform() {
         Derived::template random_uniform<R>(Base::getDerived().getShape()).toDeviceAsync(Base::getDerived());
@@ -111,6 +141,12 @@ namespace Physica {
     template<RNG R>
     void device_obj<LValueTensor<Derived>>::random_normal() {
         Derived::template random_normal<R>(Base::getDerived().getShape()).toDeviceAsync(Base::getDerived());
+    }
+
+    template<class Derived>
+    template<RNG R>
+    void device_obj<LValueTensor<Derived>>::random_any(auto& distribution) {
+        Derived::template random_any<R>(Base::getDerived().getShape(), distribution).toDeviceAsync(Base::getDerived());
     }
 
     template<class Derived>

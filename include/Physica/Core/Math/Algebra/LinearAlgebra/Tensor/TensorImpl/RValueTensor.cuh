@@ -44,6 +44,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        [[nodiscard]] __host__ __device__ bool operator==(this const auto& self, const Tensor auto& other) noexcept;
         /* Operations */
         __host__ __device__ void assign(this const auto& self, Tensor auto&& target);
         __host__ __device__ void assert_assign(const Tensor auto& source) const noexcept;
@@ -53,14 +54,30 @@ namespace Physica {
         [[nodiscard]] __device__ decltype(auto) calc(std::integral auto... dims) const;
         [[nodiscard]] __host__ __device__ auto toIndex1D(const IndexType& indices) const noexcept;
         [[nodiscard]] __host__ __device__ auto toIndexND(size_t index) const noexcept;
+        __device__ void forND(std::invocable<T, IndexType> auto fn) const;
+
+        [[nodiscard]] __host__ __device__ auto fiber(this auto&&, IndexVar auto...) noexcept;
+        [[nodiscard]] __host__ __device__ auto slice(this auto&&, IndexVar auto...) noexcept;
+        [[nodiscard]] __host__ __device__ auto block(this auto&&, IndexType from, IndexType count) noexcept;
+        [[nodiscard]] __host__ __device__ auto flatten(this auto&&) noexcept;
 
         __host__ __device__ void resize(this auto&, const Tensor auto& x);
         __host__ __device__ auto resize(this auto&, std::integral auto... dims);
         __host__ __device__ auto resize(this auto&, IndexType shape);
+
+        [[nodiscard]] __host__ __device__ decltype(auto) reals(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto imags(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto squaredNorms(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto norms(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] __host__ __device__ auto grads(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t dim(int index) const noexcept;
         [[nodiscard]] __host__ __device__ IndexType getShape() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
+        [[nodiscard]] __host__ __device__ bool empty() const noexcept;
+        [[nodiscard]] __device__ bool isFinite() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int ndim() noexcept { return NDim; }
         [[nodiscard]] __host__ __device__ consteval static bool isForwardDiff() noexcept;
@@ -71,6 +88,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isStrided() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
+        __host__ __device__ consteval static void static_assert_assign(const Scalar auto& source) noexcept;
+        __host__ __device__ consteval static void static_assert_assign(const Tensor auto& source) noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;
@@ -87,4 +107,9 @@ namespace Physica {
 }
 
 #include "RValueTensorImpl/RValueTensorImpl.cuh"
+#include "RValueTensorImpl/Flatten.cuh"
+#include "RValueTensorImpl/TensorFiber.cuh"
+#include "RValueTensorImpl/TensorSlice.cuh"
+#include "RValueTensorImpl/TensorBlock.cuh"
+#include "RValueTensorImpl/TensorConvert.cuh"
 #include "TensorExpr.cuh" // IWYU pragma: export
