@@ -81,7 +81,7 @@ namespace {
         const T prevE = engine.calcClassicalInternalEnergy(dqmc);
         engine.nve_step_for(Duration, kinetic, dqmc);
         const T curE = engine.calcClassicalInternalEnergy(dqmc);
-        expect<RandomSource>(scalarNear(prevE, curE, 1E-4)); // Energe conserves
+        expect<RandomSource>(scalarNear(prevE, curE, 1E-4)); // Energy conserves
     }
 
     void elastic() {

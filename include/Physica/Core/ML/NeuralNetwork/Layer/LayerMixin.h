@@ -61,7 +61,7 @@ namespace Physica {
         return Base::getDerived().reverse(other);
     }
     /**
-     * Deep Neutral Network
+     * Deep Neural Network
      */
     template<class T>
     concept DNN = std::derived_from<T, LayerMixin<T>>;

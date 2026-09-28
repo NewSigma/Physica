@@ -38,21 +38,6 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ constexpr auto device_obj<CompactTensor<Derived>>::getStrides() const noexcept {
-        constexpr bool KnownAtCompile = std::ranges::none_of(Derived::getStrideAtCompile(), [](size_t stride) consteval static {
-            return stride == Dynamic;
-        });
-
-        if constexpr (KnownAtCompile)
-            return Derived::getStrideAtCompile();
-        else {
-            IndexType strides = Derived::getStrideAtCompile();
-            size_t stride = 1;
-            for (int i = Base::NDim - 1; i >= 0; --i) {
-                if (strides[i] == Dynamic)
-                    strides[i] = stride;
-                stride *= Base::getDerived().dim(i);
-            }
-            return strides;
-        }
+        return host_obj::getStridesImpl(Base::getDerived().getShape());
     }
 }

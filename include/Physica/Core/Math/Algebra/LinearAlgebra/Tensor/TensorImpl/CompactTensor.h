@@ -44,6 +44,11 @@ namespace Physica {
         CompactTensor() = default;
         CompactTensor(const This&) = default;
         CompactTensor(This&&) noexcept = default;
+    private:
+        /* Static members */
+        [[nodiscard]] __host__ __device__ constexpr static IndexType getStridesImpl(const IndexType& shape) noexcept;
+        /* Friends */
+        friend class device_obj<This>;
     };
 }
 

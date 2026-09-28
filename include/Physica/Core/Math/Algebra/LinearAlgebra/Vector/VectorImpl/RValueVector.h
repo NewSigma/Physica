@@ -55,8 +55,8 @@ namespace Physica {
         class EnableSIMD {
             using U1 = std::remove_cvref<V1>::type;
             using U2 = std::remove_cvref<V2>::type;
-            using T1 = typename U1::ScalarType;
-            using T2 = typename U2::ScalarType;
+            using T1 = U1::ScalarType;
+            using T2 = U2::ScalarType;
         public:
             constexpr static size_t SizeAtCompile = std::max(U1::getSizeAtCompile(), U2::getSizeAtCompile());
             using ResultType = BinaryScalarOpRtnTy<T1, T2>::Type;

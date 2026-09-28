@@ -218,7 +218,7 @@ namespace Physica {
 
     template<Scalar T, Scalar U>
     [[nodiscard]] __host__ __device__ auto operator*(const T& x, const U& y) noexcept requires(ForwardDiff<T>) {
-        using ResultType = typename Internal::BinaryScalarOpRtnTy<T, U>::Type;
+        using ResultType = Internal::BinaryScalarOpRtnTy<T, U>::Type;
         if constexpr (Diffable<U>) {
             using GradType = ResultType::GradType;
             constexpr int GradOrder = GradType::Order;
@@ -242,7 +242,7 @@ namespace Physica {
 
     template<Scalar T, Scalar U>
     [[nodiscard]] __host__ __device__ auto operator/(const T& x, const U& y) noexcept requires(ForwardDiff<T>) {
-        using ResultType = typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type;
+        using ResultType = Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type;
         if constexpr (Diffable<U>) {
             using GradType = ResultType::GradType;
             constexpr int GradOrder = GradType::Order;

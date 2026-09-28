@@ -157,7 +157,7 @@ namespace Physica {
     public:
         using iterator_concept = std::random_access_iterator_tag;
         using difference_type = int;
-        using value_type = typename SIMDMixin::ScalarType;
+        using value_type = SIMDMixin::ScalarType;
         using reference = const value_type;
         using const_reference = const value_type;
     private:

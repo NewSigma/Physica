@@ -108,7 +108,7 @@ namespace Physica {
     /**
      * Solve the second order ODE that has form: y''(x) = f(x) * y(x).
      *
-     * Less computational effert and better precision rank than Runge-Kutta4.
+     * Less computational effort and better precision rank than Runge-Kutta4.
      *
      * \param func
      * The function object of f(x)

@@ -182,7 +182,7 @@ namespace Physica {
             return Threshold < getSizeAtCompile();
     }
     /**
-     * \returns a Dot object with proper canonicalization, while operator* is syntactic suger for it
+     * \returns a Dot object with proper canonicalization, while operator* is syntactic sugar for it
      */
     template<Vector LHS, Vector RHS>
     [[nodiscard]] auto dot(LHS&& lhs, RHS&& rhs) noexcept requires(!DeviceObj<LHS> && !DeviceObj<RHS>) {

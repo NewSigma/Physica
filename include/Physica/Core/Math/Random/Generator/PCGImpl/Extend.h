@@ -50,8 +50,8 @@ namespace Physica::Internal {
     struct inside_out : private baseclass {
         inside_out() = delete;
 
-        using result_type = typename baseclass::result_type;
-        using state_type = typename baseclass::state_type;
+        using result_type = baseclass::result_type;
+        using state_type = baseclass::state_type;
         static_assert(sizeof(result_type) == sizeof(state_type),
                       "Require a RNG whose output function is a permutation");
 
@@ -88,8 +88,8 @@ namespace Physica::Internal {
     class extended : public baseclass {
         using This = extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>;
     public:
-        using state_type = typename baseclass::state_type;
-        using result_type = typename baseclass::result_type;
+        using state_type = baseclass::state_type;
+        using result_type = baseclass::result_type;
         using insideout = inside_out<extvalclass>;
     private:
         constexpr static uint8_t rtypebits = sizeof(result_type) * 8;
@@ -352,8 +352,8 @@ namespace Physica::Internal {
     template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
     void extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::advance_table(
             state_type delta, bool isForwards) {
-        using base_state_t = typename baseclass::state_type;
-        using ext_state_t = typename extvalclass::state_type;
+        using base_state_t = baseclass::state_type;
+        using ext_state_t = extvalclass::state_type;
         constexpr uint8_t basebits = sizeof(base_state_t) * 8;
         constexpr uint8_t extbits = sizeof(ext_state_t) * 8;
         static_assert(basebits <= extbits || advance_pow2 > 0,

@@ -29,7 +29,7 @@ namespace Physica {
         using Base = device_obj<RValueTensor<host_obj>>;
         using Ref = add_device_obj_t<X>;
     public:
-        using IndexType = typename std::remove_cvref_t<X>::IndexType;
+        using IndexType = std::remove_cvref_t<X>::IndexType;
     protected:
         using typename Base::T;
     private:

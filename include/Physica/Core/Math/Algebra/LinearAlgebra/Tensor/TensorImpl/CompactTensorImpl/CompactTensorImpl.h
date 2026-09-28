@@ -41,6 +41,11 @@ namespace Physica {
 
     template<class Derived>
     constexpr auto CompactTensor<Derived>::getStrides() const noexcept {
+        return getStridesImpl(Base::getDerived().getShape());
+    }
+
+    template<class Derived>
+    __host__ __device__ constexpr auto CompactTensor<Derived>::getStridesImpl(const IndexType& shape) noexcept -> IndexType {
         constexpr bool KnownAtCompile = std::ranges::none_of(Derived::getStrideAtCompile(), [](size_t stride) consteval static {
             return stride == Dynamic;
         });
@@ -53,7 +58,7 @@ namespace Physica {
             for (int i = Base::NDim - 1; i >= 0; --i) {
                 if (strides[i] == Dynamic)
                     strides[i] = stride;
-                stride *= Base::getDerived().dim(i);
+                stride *= shape[i];
             }
             return strides;
         }

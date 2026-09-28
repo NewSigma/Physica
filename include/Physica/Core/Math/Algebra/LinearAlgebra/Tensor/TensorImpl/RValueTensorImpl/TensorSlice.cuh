@@ -31,7 +31,7 @@ namespace Physica {
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
         using Ref = add_device_obj_t<X>;
-        using IndexType = typename std::remove_cvref_t<X>::IndexType;
+        using IndexType = std::remove_cvref_t<X>::IndexType;
     protected:
         using typename Base::T;
     private:

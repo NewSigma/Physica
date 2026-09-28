@@ -133,7 +133,7 @@ namespace Physica {
     template<class Derived, Scalar ScalarT>
     template<int Size>
     auto RValueVector<Derived, ScalarT>::packet(size_t index) const noexcept -> SIMD<T, Size> {
-        using U = typename Derived::ScalarType;
+        using U = Derived::ScalarType;
         assert(index + Size <= getLength() && "[Error]: Index out of range");
         if constexpr (Diffable<U>) {
             if constexpr (isForwardDiff()) {
@@ -165,7 +165,7 @@ namespace Physica {
     template<class Derived, Scalar ScalarT>
     template<int Size>
     auto RValueVector<Derived, ScalarT>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
-        using U = typename Derived::ScalarType;
+        using U = Derived::ScalarType;
         assert(index + count <= getLength() && "[Error]: Index out of range");
         if constexpr (Diffable<U>) {
             if constexpr (isForwardDiff()) {

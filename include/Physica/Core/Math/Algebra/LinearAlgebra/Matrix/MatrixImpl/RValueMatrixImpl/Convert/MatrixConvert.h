@@ -251,7 +251,7 @@ namespace Physica {
     class Traits<RealMatrix<M>> {
         using M1 = std::remove_cvref_t<M>;
     public:
-        using ScalarType = typename M1::ScalarType::RealType;
+        using ScalarType = M1::ScalarType::RealType;
     };
 
     template<class M>
@@ -267,7 +267,7 @@ namespace Physica {
     class Traits<ValueMatrix<M>> {
         using M1 = std::remove_cvref_t<M>;
     public:
-        using ScalarType = typename M1::ScalarType::ValueType;
+        using ScalarType = M1::ScalarType::ValueType;
     };
 
     template<class M, int GradOrder>
