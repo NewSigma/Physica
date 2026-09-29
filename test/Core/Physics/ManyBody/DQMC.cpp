@@ -84,22 +84,21 @@ namespace {
     }
 
     void complex() {
-        // Test that particle number is real under complex DQMC
+        // Trotter decomposition breaks time-reversal symmetry and introduces complex weights; test that we correctly handle it.
         constexpr double HoppingT = 1;
-        constexpr double RepelU = 8;
-        constexpr double Beta = 4;
+        constexpr double RepelU = 6;
+        constexpr double Beta = 5;
         constexpr int NumSiteX = 4;
         constexpr int NumSiteY = 4;
         constexpr int NumSplit = Beta * 8;
-        constexpr int NumSample = 64;
-        const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
+        const SquareLattice<Dim, BoundaryCond::TBC> lattice({NumSiteX, NumSiteY}, 1, {0.5, 0.5});
         const HubbardParams<Tc> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, NumSplit);
         auto dqmc = DQMC<Tc>(params);
         dqmc.step_random<RandomSource>();
-        dqmc.step_for<RandomSource>(NumSample);
+        dqmc.step_for<RandomSource>(NumSplit);
         for (const auto& green : dqmc.getGreens())
-            for (auto elem : green.diag().view())
-                expect<RandomSource>(scalarNear(elem.imag(), T(0), 1E-8));
+            expect<RandomSource>(green.isFinite());
+        expect<RandomSource>(scalarNear(abs(dqmc.getRSign()), T(1), 1E-10));
     }
 
     void stability() {

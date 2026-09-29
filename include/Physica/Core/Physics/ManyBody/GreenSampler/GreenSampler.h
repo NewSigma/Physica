@@ -77,10 +77,13 @@ namespace Physica {
     template<Scalar T>
     auto GreenSampler<T>::calcRSign() const noexcept -> T {
         assert(cursor == 0 && "[Error]: Samples are not fully initialized!");
+
+        auto rsign = rsigns.mean();
+        assert(!rsign.isSubNormal());
         if constexpr (T::isDiffable())
-            return calcGradScore(rsigns.mean());
+            return calcGradScore(rsign);
         else
-            return rsigns.mean();
+            return rsign;
     }
 
     template<Scalar T>

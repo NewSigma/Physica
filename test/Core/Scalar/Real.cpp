@@ -42,14 +42,14 @@ namespace {
 
     void trig() {
         using T = float64;
-        constexpr uint64_t ULP = 3;
+        constexpr double Prec = 1E-15;
         auto x = T::random_uniform<RandomSource>();
-        expect<RandomSource>(scalarNear(square(cos(x)) + square(sin(x)), T(1), ULP));
-        expect<RandomSource>(scalarNear(T(1) + square(tan(x)), square(sec(x)), ULP));
-        expect<RandomSource>(scalarNear(T(1) + square(cot(x)), square(csc(x)), ULP));
-        expect<RandomSource>(scalarNear(square(cospi(x)) + square(sinpi(x)), T(1), ULP));
-        expect<RandomSource>(scalarNear(T(1) + square(tanpi(x)), square(secpi(x)), ULP));
-        expect<RandomSource>(scalarNear(T(1) + square(cotpi(x)), square(cscpi(x)), ULP));
+        expect<RandomSource>(scalarNear(square(cos(x)) + square(sin(x)), T(1), Prec));
+        expect<RandomSource>(scalarNear(T(1) + square(tan(x)), square(sec(x)), Prec));
+        expect<RandomSource>(scalarNear(T(1) + square(cot(x)), square(csc(x)), Prec));
+        expect<RandomSource>(scalarNear(square(cospi(x)) + square(sinpi(x)), T(1), Prec));
+        expect<RandomSource>(scalarNear(T(1) + square(tanpi(x)), square(secpi(x)), Prec));
+        expect<RandomSource>(scalarNear(T(1) + square(cotpi(x)), square(cscpi(x)), Prec));
     }
 
     template<FloatPrec Prec>

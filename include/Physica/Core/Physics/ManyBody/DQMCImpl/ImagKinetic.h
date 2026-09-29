@@ -31,13 +31,14 @@ namespace Physica {
         using This = ImagKinetic<T>;
 
         using Tr = T::RealType;
+        using Tv = T::ValueType;
         using Trv = Tr::ValueType;
     public:
         using GreenPair = Array<MatrixND<T>, 2>;
     private:
         MatrixND<Trv> aux;
         GreenPair greens;
-        Trv rsign = 1;
+        Tv rsign = 1;
     public:
         ImagKinetic(int numSite, int numSplit);
         ImagKinetic(const This&) = default;
@@ -47,7 +48,7 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         Vector2D<Tr> calcDelta(int site, int split, Tr alpha) const noexcept;
-        Vector2D<Tr> calcRatio(int site, Vector2D<Tr> deltas) const noexcept;
+        Vector2D<T> calcRatio(int site, Vector2D<Tr> deltas) const noexcept;
         [[nodiscard]] Trv calcP(int site, int split, Tr alpha) const noexcept;
         void single_flip(int site, int split) noexcept;
         void single_flip(int site, int split, Tr alpha) noexcept;
@@ -60,9 +61,9 @@ namespace Physica {
         [[nodiscard]] int getNumSite() const noexcept { return aux.getRow(); }
         [[nodiscard]] int getNumSplit() const noexcept { return aux.getCol(); }
         [[nodiscard]] auto& getGreens() noexcept { return greens; }
-        [[nodiscard]] auto getRSign() const noexcept;
+        [[nodiscard]] Tv getRSign() const noexcept;
     private:
-        void flipGreens(int site, Vector2D<Tr> deltaRatios);
+        void flipGreens(int site, Vector2D<T> deltaRatios);
     };
 
     template<Scalar T>
@@ -77,15 +78,11 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto ImagKinetic<T>::calcRatio(int site, Vector2D<Tr> deltas) const noexcept -> Vector2D<Tr> {
+    auto ImagKinetic<T>::calcRatio(int site, Vector2D<Tr> deltas) const noexcept -> Vector2D<T> {
         assert(site < getNumSite());
-        Vector2D<Tr> result = deltas;
-        for (int spin : {0, 1}) {
-            auto g = greens[spin][site, site];
-            [[maybe_unused]] bool isReal = abs(g.imag()) < sqrt(Trv(std::numeric_limits<T>::epsilon()));
-            assert(isReal && "[Error]: Expect charge density is real");
-            result[spin] *= Trv(1) - g.real();
-        }
+        Vector2D<T> result = deltas;
+        for (int spin : {0, 1})
+            result[spin] *= Trv(1) - greens[spin][site, site];
         result += Trv(1);
         return result; // Eq.(7.36) of [1]
     }
@@ -131,12 +128,12 @@ namespace Physica {
      * Note that observable is <A> = <As>/<s> and signs may differ a factor. We are interested in relative sign only.
      */
     template<Scalar T>
-    auto ImagKinetic<T>::getRSign() const noexcept {
+    auto ImagKinetic<T>::getRSign() const noexcept -> Tv {
         return rsign;
     }
 
     template<Scalar T>
-    void ImagKinetic<T>::flipGreens(int site, Vector2D<Tr> deltaRatios) {
+    void ImagKinetic<T>::flipGreens(int site, Vector2D<T> deltaRatios) {
         // Eq. (7.44) of [1]
         const int numSite = getNumSite();
         VectorND<T> vc(numSite);
