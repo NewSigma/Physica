@@ -52,8 +52,8 @@ namespace Physica {
         void compute(const M& source);
 
         [[nodiscard]] Tv calcDetQ() const noexcept;
-        void toQDT(VectorND<Tr>& diagD) noexcept;
-        [[nodiscard]] VectorND<Tr> toQDT();
+        void toQDT(VectorND<T>& diagD) noexcept;
+        [[nodiscard]] VectorND<T> toQDT();
 
         [[nodiscard]] T det() const noexcept;
 
@@ -124,7 +124,7 @@ namespace Physica {
     }
 
     template<Scalar Tv, bool Pivot>
-    void DenseQR<Diff<Tv, DiffMode::Forward, 1>, Pivot>::toQDT(VectorND<Tr>& diagD) noexcept {
+    void DenseQR<Diff<Tv, DiffMode::Forward, 1>, Pivot>::toQDT(VectorND<T>& diagD) noexcept {
         const size_t length = taus.getLength();
         assert(diagD.getLength() == length);
         for (size_t i = 0; i < length; ++i) {
@@ -132,19 +132,15 @@ namespace Physica {
                 diagD[i] = 1;
                 continue;
             }
-            if constexpr (isComplex) {
-                [[maybe_unused]] bool isReal = abs(working[i, i].imag()) < abs(working[i, i].real()) * sqrt(Trv(std::numeric_limits<T>::epsilon()));
-                assert(isReal && "[Error]: Householder QR should have real diagonals");
-            }
-            diagD[i] = working[i, i].real();
+            diagD[i] = working[i, i];
             working.row(i).tail(i) *= reciprocal(diagD[i]);
         }
         working.grads().diag().zeros();
     }
 
     template<Scalar Tv, bool Pivot>
-    auto DenseQR<Diff<Tv, DiffMode::Forward, 1>, Pivot>::toQDT() -> VectorND<Tr> {
-        VectorND<Tr> vecD(taus.getLength());
+    auto DenseQR<Diff<Tv, DiffMode::Forward, 1>, Pivot>::toQDT() -> VectorND<T> {
+        VectorND<T> vecD(taus.getLength());
         toQDT(vecD);
         return vecD;
     }

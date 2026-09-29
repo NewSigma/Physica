@@ -32,7 +32,7 @@ namespace Physica {
         using Trv = Tr::ValueType;
 
         MatrixND<T> matrixQ;
-        DiagMatrix<Tr> matrixD; // matrixD suffers from over/underflow
+        DiagMatrix<T> matrixD; // matrixD suffers from over/underflow
         DenseQR<T> qr;
         Tv detQ;
     public:
@@ -98,7 +98,7 @@ namespace Physica {
         buffer = result.getMatrixT() * other.getMatrixT();
         buffer.swap(result.qr.getWorking());
 
-        result.detQ = detQ * result.qr.calcDetQ();
+        result.detQ = detQ * result.detQ;
         return result;
     }
 

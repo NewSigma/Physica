@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/ForwardDenseQR.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagMatrix.h"
 #include "Test.h"
 
 using namespace Physica;
@@ -85,6 +86,19 @@ namespace {
             forwardFuzzing<cfloat64>(order, 1E-11);
         }
     }
+
+    template<Scalar T>
+    void qdt(size_t order, double prec) {
+        auto answer = DenseMatrix<T>::template random_uniform<RandomSource>(order);
+        DenseQR<T, false> qr(answer);
+
+        DiagMatrix<T> matrixD(order);
+        qr.toQDT(matrixD.diag());
+
+        MatrixND<T> result = qr.getMatrixQ() * matrixD * qr.getMatrixR();
+        expect(matrixNear(result, answer, prec));
+        expect(matrixNear(qr.getMatrixR(), qr.getWorking().triu_unit(), prec));
+    }
 }
 
 int main() {
@@ -118,5 +132,7 @@ int main() {
         testDecomp(m, 1E-6, 0);
     }
     forward();
+    qdt<float64>(4, 1E-13);
+    qdt<cfloat64>(4, 1E-13);
     return 0;
 }

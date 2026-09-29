@@ -61,8 +61,8 @@ namespace Physica {
         void compute_mkl(const Matrix auto& source);
 
         [[nodiscard]] Tv calcDetQ() const noexcept;
-        void toQDT(VectorND<Tr>& diagD) noexcept;
-        [[nodiscard]] VectorND<Tr> toQDT();
+        void toQDT(VectorND<T>& diagD) noexcept;
+        [[nodiscard]] VectorND<T> toQDT();
 
         [[nodiscard]] T det() const noexcept;
 
@@ -160,7 +160,7 @@ namespace Physica {
      * Decompose matrix like A = QDT(no pivoting), or A = QDTP(poviting), where D is diagonal
      */
     template<Scalar T, bool Pivot>
-    void DenseQR<T, Pivot>::toQDT(VectorND<Tr>& diagD) noexcept {
+    void DenseQR<T, Pivot>::toQDT(VectorND<T>& diagD) noexcept {
         const size_t length = taus.getLength();
         assert(diagD.getLength() == length);
         for (size_t i = 0; i < length; ++i) {
@@ -168,18 +168,14 @@ namespace Physica {
                 diagD[i] = 1;
                 continue;
             }
-            if constexpr (isComplex) {
-                [[maybe_unused]] bool isReal = abs(working[i, i].imag()) < abs(working[i, i].real()) * sqrt(Trv(std::numeric_limits<T>::epsilon()));
-                assert(isReal && "[Error]: Householder QR should have real diagonals");
-            }
-            diagD[i] = working[i, i].real();
+            diagD[i] = working[i, i];
             working.row(i).tail(i) *= reciprocal(diagD[i]);
         }
     }
 
     template<Scalar T, bool Pivot>
-    auto DenseQR<T, Pivot>::toQDT() -> VectorND<Tr> {
-        VectorND<Tr> vecD(taus.getLength());
+    auto DenseQR<T, Pivot>::toQDT() -> VectorND<T> {
+        VectorND<T> vecD(taus.getLength());
         toQDT(vecD);
         return vecD;
     }
