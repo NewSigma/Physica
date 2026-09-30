@@ -51,8 +51,8 @@ namespace Physica {
         [[nodiscard]] __device__ decltype(auto) operator[](this auto&&, const IndexType& index);
         [[nodiscard]] __device__ decltype(auto) operator[](this auto&&, std::integral auto... dims);
         /* Operations */
-        [[nodiscard]] __device__ decltype(auto) calc(const IndexType& index) const { return operator[](index); }
-        [[nodiscard]] __device__ decltype(auto) calc(std::integral auto... dims) const { return operator[](dims...); }
+        [[nodiscard]] __device__ auto calc(const IndexType& index) const -> T;
+        [[nodiscard]] __device__ auto calc(std::integral auto... dims) const -> T;
 
         __device__ void forND(std::invocable<T&, IndexType> auto fn);
         __device__ void forND(std::invocable<const T&, IndexType> auto fn) const;

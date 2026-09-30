@@ -105,7 +105,11 @@ namespace Physica {
 
     template<class Derived>
     __device__ auto device_obj<LValueVector<Derived>>::calc(size_t index) const -> T {
-        return operator[](index);
+        using Tm = typename T::MachineType;
+        if constexpr (std::is_fundamental_v<Tm>)
+            return T(__ldg(reinterpret_cast<const Tm*>(this->data_ptr(index))));
+        else
+            return operator[](index);
     }
 
     template<class Derived>

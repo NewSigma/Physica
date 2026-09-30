@@ -102,6 +102,20 @@ namespace Physica {
     }
 
     template<class Derived>
+    __device__ auto device_obj<LValueTensor<Derived>>::calc(const IndexType& index) const -> T {
+        using Tm = typename T::MachineType;
+        if constexpr (std::is_fundamental_v<Tm>)
+            return T(__ldg(reinterpret_cast<const Tm*>(this->data_ptr(index))));
+        else
+            return operator[](index);
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<LValueTensor<Derived>>::calc(std::integral auto... dims) const -> T {
+        return calc(IndexType({static_cast<size_t>(dims)...}));
+    }
+
+    template<class Derived>
     __device__ void device_obj<LValueTensor<Derived>>::forND(std::invocable<T&, IndexType> auto fn) {
         auto& t = Base::getDerived();
         const size_t size = t.getSize();
