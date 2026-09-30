@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <cmath>
 #include <QSvgGenerator>
 #include "Physica/Gui/Plot/Plot.h"
 
@@ -138,17 +139,37 @@ void Plot::toSvg(const char* path, int width, int height, int resolution) {
     chart.setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 }
 
-void Plot::setBox(float64 minX, float64 maxX, float64 minY, float64 maxY, float64 deltaX, float64 deltaY) {
-    assert(deltaX.isPositive());
-    assert(deltaY.isPositive());
-    axisX->setTickInterval((double)deltaX);
+void Plot::setBox(float64 minX, float64 maxX, float64 minY, float64 maxY, float64 deltaX_, float64 deltaY_) {
+    assert(deltaX_.isPositive());
+    assert(deltaY_.isPositive());
     axisX->setRange((double)minX, (double)maxX);
-    axisY->setTickInterval((double)deltaY);
-    axisY->setRange((double)minY, (double)maxY);
-    axisTop->setTickInterval((double)deltaX);
     axisTop->setRange((double)minX, (double)maxX);
-    axisRight->setTickInterval((double)deltaY);
+    axisY->setRange((double)minY, (double)maxY);
     axisRight->setRange((double)minY, (double)maxY);
+    deltaX = deltaX_;
+    deltaY = deltaY_;
+    updateNumTick();
+}
+
+void Plot::updateNumTick() noexcept {
+    constexpr int MaxNumTick = 32; // Limits the number of ticks. A large value may exhaust memory
+    auto limit = [](QValueAxis* axis, QValueAxis* mirror, float64 delta) noexcept {
+        double min = axis->min();
+        double max = axis->max();
+        if (!std::isfinite(min) || !std::isfinite(max) || max <= min) {
+            min = 0;
+            max = 1;
+            axis->setRange(min, max);
+            mirror->setRange(min, max);
+        }
+        const double interval = delta.isPositive() ? delta.toMachine() : (max - min) / double(MaxNumTick - 1);
+        const bool tooMany = (max - min) / interval > double(MaxNumTick - 1);
+        const double safeInterval = tooMany ? (max - min) / double(MaxNumTick - 1) : interval;
+        axis->setTickInterval(safeInterval);
+        mirror->setTickInterval(safeInterval);
+    };
+    limit(axisX, axisTop, deltaX);
+    limit(axisY, axisRight, deltaY);
 }
 
 void Plot::setTickDirection(QAbstractAxis::TickDirection d) {

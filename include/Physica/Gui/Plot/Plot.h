@@ -32,11 +32,12 @@
 namespace Physica {
     class PHYSICA_API Plot : public ChartView {
         using Base = ChartView;
-
         QValueAxis* axisX;
         QValueAxis* axisY;
         QValueAxis* axisTop;
         QValueAxis* axisRight;
+        float64 deltaX = 1;
+        float64 deltaY = 1;
     public:
         Plot(QWidget* parent = nullptr);
         Plot(float64 minX, float64 maxX, float64 minY, float64 maxY, float64 deltaX, float64 deltaY, QWidget* parent = nullptr);
@@ -101,6 +102,7 @@ namespace Physica {
     private:
         QBoxSet* setFromVector(const Vector auto& v);
         double findMedian(const Vector auto& sorted_v, size_t from, size_t to);
+        void updateNumTick() noexcept;
     };
 
     QLineSeries& Plot::line(const Vector auto& y) {
@@ -348,40 +350,46 @@ namespace Physica {
     inline void Plot::setMinX(double value) noexcept {
         axisX->setMin(value);
         axisTop->setMin(value);
+        updateNumTick();
     }
 
     inline void Plot::setMaxX(double value) noexcept {
         axisX->setMax(value);
         axisTop->setMax(value);
+        updateNumTick();
     }
 
     inline void Plot::setRangeX(double minX, double maxX) {
-        setMinX(minX);
-        setMaxX(maxX);
+        axisX->setRange(minX, maxX);
+        axisTop->setRange(minX, maxX);
+        updateNumTick();
     }
 
     inline void Plot::setMinY(double value) noexcept {
         axisY->setMin(value);
         axisRight->setMin(value);
+        updateNumTick();
     }
 
     inline void Plot::setMaxY(double value) noexcept {
         axisY->setMax(value);
         axisRight->setMax(value);
+        updateNumTick();
     }
 
     inline void Plot::setRangeY(double minY, double maxY) {
-        setMinY(minY);
-        setMaxY(maxY);
+        axisY->setRange(minY, maxY);
+        axisRight->setRange(minY, maxY);
+        updateNumTick();
     }
 
     inline void Plot::setDeltaX(double value) noexcept {
-        axisX->setTickInterval(value);
-        axisTop->setTickInterval(value);
+        deltaX = value;
+        updateNumTick();
     }
 
     inline void Plot::setDeltaY(double value) noexcept {
-        axisY->setTickInterval(value);
-        axisRight->setTickInterval(value);
+        deltaY = value;
+        updateNumTick();
     }
 }
