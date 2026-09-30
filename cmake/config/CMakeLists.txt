@@ -33,15 +33,9 @@ physica_try_compile(RDRAND HostDevAttr/RDRAND.cpp)
 string(TOLOWER ${COMPILE_RESULT_VAR} HasRDRAND)
 
 if(${PHYSICA_CUDA})
-    # WarpSize
-    physica_try_run(WarpSize CUDADevAttr/WarpSize.cpp)
-    set(WarpSize ${RUN_RESULT_VAR})
-    # FullUnifiedSupport
-    physica_try_run(FullUnifiedSupport CUDADevAttr/FullUnifiedSupport.cpp)
-    string(TOLOWER ${COMPILE_RESULT_VAR} FullUnifiedSupport)
-    # MemoryPoolsSupported
-    physica_try_run(MemoryPoolsSupported CUDADevAttr/MemoryPoolsSupported.cpp)
-    string(TOLOWER ${COMPILE_RESULT_VAR} MemoryPoolsSupported)
+    physica_cuda_probe(WarpSize)
+    physica_cuda_probe(FullUnifiedSupport BOOL)
+    physica_cuda_probe(MemoryPoolsSupported BOOL)
 endif()
 
 message(STATUS)
