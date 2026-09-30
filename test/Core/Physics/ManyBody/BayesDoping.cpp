@@ -45,6 +45,20 @@ namespace {
         expect<RandomSource>(optimal.isZero());
     }
 
+    void complex() {
+        // Test that BayesDoping works for complex numbers
+        using T = float64;
+        using Tc = cfloat64;
+        constexpr int BayesIter = 4;
+        const SquareLattice<Dim, BoundaryCond::TBC> lattice({NumSiteX, NumSiteY}, 1, {0.5, 0.5});
+        HubbardParams<Tc> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, NumSplit);
+        auto dqmc = DQMC<Tc>(params);
+        auto dopant = BayesDoping<Tc>(Vegas<T, true>({T(-1), T(1)}, 10, 10), BayesIter, 1, 0, 4, 0);
+        const T optimal = dopant.template solve<RandomSource>(T(1), params, dqmc);
+        expect<RandomSource>(dopant.getNumSamples() == BayesIter + 1);
+        expect<RandomSource>(T(-1) <= optimal && optimal <= T(1));
+    }
+
     void doping() {
         constexpr T From = -4;
         constexpr T To = 0;
@@ -77,6 +91,7 @@ namespace {
 
 int main() {
     halfFilling();
+    complex();
     doping();
     return 0;
 }

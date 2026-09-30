@@ -30,9 +30,10 @@ namespace Physica {
     template<Scalar T>
     class BayesDoping {
         using This = BayesDoping<T>;
-        using Tv = T::ValueType;
+        using Tr = T::RealType;
+        using Trv = Tr::ValueType;
 
-        using GlobalOpt = Vegas<Tv, true>;
+        using GlobalOpt = Vegas<Trv, true>;
     private:
         GlobalOpt vegas;
         int numBayesIter;
@@ -41,11 +42,11 @@ namespace Physica {
         int numSampleDQMC;
         int numStepSGD;
 
-        GPModel<Diff<T, DiffMode::Reverse>> model;
-        Adadelta<T> opt;
-        VectorND<T> mus;
-        VectorND<T> rhos;
-        VectorND<T> noises;
+        GPModel<Diff<Tr, DiffMode::Reverse>> model;
+        Adadelta<Tr> opt;
+        VectorND<Tr> mus;
+        VectorND<Tr> rhos;
+        VectorND<Tr> noises;
     public:
         BayesDoping(GlobalOpt vegas_, int numBayesIter, int numVegasIter, int numWarmupDQMC, int numSampleDQMC, int numStepSGD);
         BayesDoping(const This&) = default;
@@ -56,7 +57,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = default;
         /* Operations */
         template<RNG R>
-        [[nodiscard]] T solve(T target, HubbardParams<T>& params, auto& dqmc, auto&&... args);
+        [[nodiscard]] Tr solve(Tr target, HubbardParams<T>& params, auto& dqmc, auto&&... args);
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -66,7 +67,7 @@ namespace Physica {
         [[nodiscard]] const auto& getNoises() const noexcept { return noises; }
         [[nodiscard]] size_t getNumSamples() const noexcept { return mus.getLength(); }
     private:
-        static T likelyhood(T x, T y) noexcept { return -square(x - y); }
+        static Tr likelyhood(Tr x, Tr y) noexcept { return -square(x - y); }
     };
 
     template<Scalar T>
@@ -85,15 +86,15 @@ namespace Physica {
         noises.reserve(numBayesIter + 1);
 
         mus.append(0);
-        rhos.append(T(1));
+        rhos.append(Tr(1));
         noises.append(0);
     }
 
     template<Scalar T>
     template<RNG R>
-    auto BayesDoping<T>::solve(T target, HubbardParams<T>& params, auto& dqmc, auto&&... args) -> T {
-        assert(T(0) <= target && target <= T(2) && "[Error]: Invalid density");
-        const auto runDQMC = [&](T mu) {
+    auto BayesDoping<T>::solve(Tr target, HubbardParams<T>& params, auto& dqmc, auto&&... args) -> Tr {
+        assert(Tr(0) <= target && target <= Tr(2) && "[Error]: Invalid density");
+        const auto runDQMC = [&](Tr mu) {
             params.setChemMu(mu + params.getRepelU() * 0.5);
             dqmc.template step_random<R>();
             for (int i = 0; i < numWarmupDQMC; ++i)
@@ -104,17 +105,17 @@ namespace Physica {
                 dqmc.template step<R>(std::forward<decltype(args)>(args)...);
                 sampler.sample(dqmc.getGreens(), dqmc.getRSign(), ScalarSampler<T>::Density);
             }
-            const T rho = sampler.calcMean();
-            const T devia = sampler.getObserves().deviation() / sqrt(T(numSampleDQMC));
-            return std::pair<T, T>{rho, devia};
+            const Tr rho = sampler.calcMean().real();
+            const Tr devia = sampler.getObserves().deviation().real() / sqrt(Trv(numSampleDQMC));
+            return std::pair<Tr, Tr>{rho, devia};
         };
 
-        auto likelyhoods = VectorND<T>::generate([this, target](size_t i) {
+        auto likelyhoods = VectorND<Tr>::generate([this, target](size_t i) {
             return likelyhood(rhos[i], target);
         }, mus.getLength());
 
         const size_t argmax = likelyhoods.argmax();
-        BayesOpt<T> bayes(GlobalOpt(vegas), {mus[argmax]}, likelyhoods[argmax]);
+        BayesOpt<Tr> bayes(GlobalOpt(vegas), {mus[argmax]}, likelyhoods[argmax]);
         for (int i = 0; i < numBayesIter; ++i) {
             for (int _ = 0; _ < numStepSGD; ++_) {
                 model.regression(mus.transpose(), likelyhoods, square(noises)).reverse(-1);
@@ -122,7 +123,7 @@ namespace Physica {
                 model.zero_grad();
             }
 
-            auto [mu, _] = bayes.template propose<R>([&](const VectorND<T>& x) -> T {
+            auto [mu, _] = bayes.template propose<R>([&](const VectorND<Tr>& x) -> Tr {
                 const auto [rho, devia] = runDQMC(x.front());
                 auto l = likelyhood(rho, target);
                 rhos.append(rho);
