@@ -56,6 +56,7 @@ namespace Physica {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
         /* Operations */
+        void priori(Tr chemMu, Tr density, Tr noise);
         template<RNG R>
         [[nodiscard]] Tr solve(Tr target, HubbardParams<T>& params, auto& dqmc, auto&&... args);
 
@@ -84,16 +85,20 @@ namespace Physica {
         mus.reserve(numBayesIter + 1);
         rhos.reserve(numBayesIter + 1);
         noises.reserve(numBayesIter + 1);
+    }
 
-        mus.append(0);
-        rhos.append(Tr(1));
-        noises.append(0);
+    template<Scalar T>
+    void BayesDoping<T>::priori(Tr chemMu, Tr density, Tr noise) {
+        mus.append(chemMu);
+        rhos.append(density);
+        noises.append(noise);
     }
 
     template<Scalar T>
     template<RNG R>
     auto BayesDoping<T>::solve(Tr target, HubbardParams<T>& params, auto& dqmc, auto&&... args) -> Tr {
         assert(Tr(0) <= target && target <= Tr(2) && "[Error]: Invalid density");
+        assert(getNumSamples() > 0 && "[Error]: At least one priori must be injected");
         const auto runDQMC = [&](Tr mu) {
             params.setChemMu(mu + params.getRepelU() * 0.5);
             dqmc.template step_random<R>();

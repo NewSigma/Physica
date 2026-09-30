@@ -40,6 +40,7 @@ namespace {
         HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, NumSplit);
         auto dqmc = DQMC<T>(params);
         auto dopant = BayesDoping<T>(Vegas<T, true>({T(-1), T(1)}, 10, 10), BayesIter, 1, 0, 4, 0);
+        dopant.priori(T(0), T(1), T(0));
         const T optimal = dopant.template solve<RandomSource>(T(1), params, dqmc);
         expect<RandomSource>(dopant.getNumSamples() == BayesIter + 1);
         expect<RandomSource>(optimal.isZero());
@@ -54,6 +55,7 @@ namespace {
         HubbardParams<Tc> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, NumSplit);
         auto dqmc = DQMC<Tc>(params);
         auto dopant = BayesDoping<Tc>(Vegas<T, true>({T(-1), T(1)}, 10, 10), BayesIter, 1, 0, 4, 0);
+        dopant.priori(T(0), T(1), T(0));
         const T optimal = dopant.template solve<RandomSource>(T(1), params, dqmc);
         expect<RandomSource>(dopant.getNumSamples() == BayesIter + 1);
         expect<RandomSource>(T(-1) <= optimal && optimal <= T(1));
@@ -73,6 +75,7 @@ namespace {
         HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, NumSplit);
         auto dqmc = DQMC<T>(params);
         auto dopant = BayesDoping<T>(Vegas<T, true>({T(From), T(To)}, NumVegasSample, 30), NumBayesIter, NumVegasIter, NumWarmup, NumSample, NumStepSGD);
+        dopant.priori(T(0), T(1), T(0));
         const T result = dopant.template solve<RandomSource>(Target, params, dqmc);
         expect<RandomSource>(T(From) <= result && result <= T(To));
 
