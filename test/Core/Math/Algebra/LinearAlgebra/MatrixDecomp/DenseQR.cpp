@@ -96,8 +96,8 @@ namespace {
         qr.toQDT(matrixD.diag());
 
         MatrixND<T> result = qr.getMatrixQ() * matrixD * qr.getMatrixR();
-        expect(matrixNear(result, answer, prec));
-        expect(matrixNear(qr.getMatrixR(), qr.getWorking().triu_unit(), prec));
+        expect<RandomSource>(matrixNear(result, answer, prec));
+        expect<RandomSource>(matrixNear(qr.getMatrixR(), qr.getWorking().triu_unit(), prec));
     }
 }
 

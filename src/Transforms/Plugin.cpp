@@ -18,7 +18,7 @@
  */
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Plugins/PassPlugin.h"
-#include "Physica/Transforms/LifetimeMovePass.h"
+#include "LifetimeMovePass.h"
 
 using namespace llvm;
 

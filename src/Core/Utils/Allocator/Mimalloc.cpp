@@ -16,22 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
-
-#include "HostAllocator.h"
+#include <cassert>
 #include <mimalloc.h>
-
-namespace Physica {
-    template<class T, size_t Align>
-    T* HostAllocator<T, Align>::reallocate_mimalloc(T* p, size_t new_size, [[maybe_unused]] size_t old_size) noexcept {
-        assert(new_size > 0 && "[Error]: Reject bad pattern");
-        assert(p != nullptr || old_size == 0); // According to [1], the behavior is well defined now
-        void* new_p{};
-        if constexpr (OverAlign)
-            new_p = mi_realloc_aligned(p, new_size * sizeof(T), Align);
-        else
-            new_p = mi_realloc(p, new_size * sizeof(T));
-        assert(new_p != nullptr);
-        return reinterpret_cast<T*>(new_p);
-    }
+#include "Physica/Core/Utils/Allocator/HostAllocator.h"
+/**
+ * Reference:
+ * [1] N3322; https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3322.pdf
+ */
+void* Physica::Internal::reallocate_mimalloc(void* p, size_t new_size, [[maybe_unused]] size_t old_size, size_t align) noexcept {
+    assert(new_size > 0 && "[Error]: Reject bad pattern");
+    assert(p != nullptr || old_size == 0); // According to [1], the behavior is well defined now
+    void* new_p{};
+    if (align == 0)
+        new_p = mi_realloc(p, new_size);
+    else
+        new_p = mi_realloc_aligned(p, new_size, align);
+    assert(new_p != nullptr);
+    return new_p;
 }

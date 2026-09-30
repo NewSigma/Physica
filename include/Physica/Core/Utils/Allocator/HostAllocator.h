@@ -26,6 +26,9 @@
 #include "Physica/Macro.h"
 
 namespace Physica {
+    namespace Internal {
+        [[nodiscard]] PHYSICA_API void* reallocate_mimalloc(void* p, size_t new_size, size_t old_size, size_t align) noexcept;
+    }
     /**
      * Default allocator in Physica
      */
@@ -48,8 +51,6 @@ namespace Physica {
         [[nodiscard, gnu::returns_nonnull]] static T* allocate(size_t n) noexcept;
         static void deallocate(T* p, size_t n) noexcept;
         [[nodiscard, gnu::returns_nonnull]] static T* reallocate(T* p, size_t new_size, size_t old_size) noexcept;
-    private:
-        static T* reallocate_mimalloc(T* p, size_t new_size, size_t old_size) noexcept;
     };
 
     template<class T, size_t Align>
@@ -71,14 +72,11 @@ namespace Physica {
         else
             ::operator delete(p);
     }
-    /**
-     * Reference:
-     * [1] N3322; https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3322.pdf
-     */
+
     template<class T, size_t Align>
     T* HostAllocator<T, Align>::reallocate(T* p, size_t new_size, size_t old_size) noexcept {
         if constexpr (HasMimalloc())
-            return reallocate_mimalloc(p, new_size, old_size);
+            return static_cast<T*>(Internal::reallocate_mimalloc(p, new_size * sizeof(T), old_size * sizeof(T), OverAlign ? Align : 0));
         else {
             assert(new_size > 0 && "[Error]: Reject bad pattern");
             assert(p != nullptr || old_size == 0); // According to [1], the behavior is well defined now
@@ -143,7 +141,3 @@ namespace std {
         }
     };
 }
-
-#ifdef PHYSICA_MIMALLOC
-    #include "HostAllocator_Mimalloc.h"
-#endif
