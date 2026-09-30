@@ -1,1 +1,4 @@
-target_sources(PhysicaCore PRIVATE FFT.cpp)
+target_sources(PhysicaCore PRIVATE
+    FFTW.cpp
+    FFT.cpp
+)

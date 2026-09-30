@@ -37,7 +37,7 @@ namespace Physica {
             , rSpaceSize(static_cast<int>(rSpaceSize_))
             , planFlag(PlanFlag::Measure) {
         assert(rSpaceSize_ <= static_cast<size_t>(std::numeric_limits<int>::max()));
-        buffer = reinterpret_cast<ComplexTypeFFTW*>(fftw_malloc(getKSpaceSize() * sizeof(ComplexTypeFFTW)));
+        buffer = static_cast<ComplexType*>(Internal::fftw_malloc(getKSpaceSize() * sizeof(ComplexType)));
     }
 
     template<Scalar T>
@@ -57,7 +57,7 @@ namespace Physica {
     FFT<T, 1>::FFT(const FFT& fft)
             : forward_plan(nullptr)
             , backward_plan(nullptr)
-            , buffer(reinterpret_cast<ComplexTypeFFTW*>(fftw_malloc(fft.rSpaceSize * sizeof(ComplexTypeFFTW))))
+            , buffer(static_cast<ComplexType*>(Internal::fftw_malloc(fft.rSpaceSize * sizeof(ComplexType))))
             , rSpaceSize(fft.rSpaceSize)
             , planFlag(fft.planFlag) {
         initializePlan();
@@ -70,23 +70,17 @@ namespace Physica {
             , buffer(fft.buffer)
             , rSpaceSize(fft.rSpaceSize)
             , planFlag(fft.planFlag) {
-        fft.forward_plan = nullptr;
-        fft.backward_plan = nullptr;
+        fft.forward_plan = FFTPlan(nullptr);
+        fft.backward_plan = FFTPlan(nullptr);
         fft.buffer = nullptr;
     }
 
     template<Scalar T>
     FFT<T, 1>::~FFT() noexcept {
         std::unique_lock<std::mutex> locker(Internal::ThreadGuardFFTW::getInstance().globalMutex);
-        if constexpr (isSinglePrec()) {
-            fftwf_destroy_plan(forward_plan);
-            fftwf_destroy_plan(backward_plan);
-        }
-        else {
-            fftw_destroy_plan(forward_plan);
-            fftw_destroy_plan(backward_plan);
-        }
-        fftw_free(buffer);
+        Internal::fftw_destroy_plan<isSinglePrec()>(forward_plan);
+        Internal::fftw_destroy_plan<isSinglePrec()>(backward_plan);
+        Internal::fftw_free(buffer);
     }
 
     template<Scalar T>
@@ -137,42 +131,26 @@ namespace Physica {
     void FFT<T, 1>::transform(const This& planProvider, This& bufferProvider) {
         const auto forward_plan = planProvider.forward_plan;
         const auto buffer = bufferProvider.buffer;
-        assert(forward_plan != nullptr && "[Error]: Bad plan provider or working on a empry fft");
+        assert(forward_plan != FFTPlan(nullptr) && "[Error]: Bad plan provider or working on a empry fft");
         assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
         assert(planProvider.getKSpaceSize() == bufferProvider.getKSpaceSize());
-        if constexpr (isSinglePrec()) {
-            if constexpr (isComplex())
-                fftwf_execute_dft(forward_plan, buffer, buffer);
-            else
-                fftwf_execute_dft_r2c(forward_plan, reinterpret_cast<float*>(buffer), buffer);
-        }
-        else {
-            if constexpr (isComplex())
-                fftw_execute_dft(forward_plan, buffer, buffer);
-            else
-                fftw_execute_dft_r2c(forward_plan, reinterpret_cast<double*>(buffer), buffer);
-        }
+        if constexpr (isComplex())
+            Internal::fftw_execute_dft<isSinglePrec()>(forward_plan, buffer);
+        else
+            Internal::fftw_execute_dft_r2c<isSinglePrec()>(forward_plan, buffer);
     }
 
     template<Scalar T>
     void FFT<T, 1>::rawInvTransform(const This& planProvider, This& bufferProvider) {
         const auto backward_plan = planProvider.backward_plan;
         const auto buffer = bufferProvider.buffer;
-        assert(backward_plan != nullptr);
+        assert(backward_plan != FFTPlan(nullptr));
         assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
         assert(planProvider.getKSpaceSize() == bufferProvider.getKSpaceSize());
-        if constexpr (isSinglePrec()) {
-            if constexpr (isComplex())
-                fftwf_execute_dft(backward_plan, buffer, buffer);
-            else
-                fftwf_execute_dft_c2r(backward_plan, buffer, reinterpret_cast<float*>(buffer));
-        }
-        else {
-            if constexpr (isComplex())
-                fftw_execute_dft(backward_plan, buffer, buffer);
-            else
-                fftw_execute_dft_c2r(backward_plan, buffer, reinterpret_cast<double*>(buffer));
-        }
+        if constexpr (isComplex())
+            Internal::fftw_execute_dft<isSinglePrec()>(backward_plan, buffer);
+        else
+            Internal::fftw_execute_dft_c2r<isSinglePrec()>(backward_plan, buffer);
     }
 
     template<Scalar T>
@@ -184,29 +162,17 @@ namespace Physica {
 
     template<Scalar T>
     void FFT<T, 1>::initializePlan() noexcept {
-        assert(forward_plan == nullptr);
-        assert(backward_plan == nullptr);
+        assert(forward_plan == FFTPlan(nullptr));
+        assert(backward_plan == FFTPlan(nullptr));
         std::unique_lock<std::mutex> locker(Internal::ThreadGuardFFTW::getInstance().globalMutex);
-        const int flag = static_cast<int>(planFlag);
+        const auto dims = Array<int, 1>::generate([this](size_t) { return rSpaceSize; });
         if constexpr (isComplex()) {
-            if constexpr (isSinglePrec()) {
-                forward_plan = fftwf_plan_dft_1d(rSpaceSize, buffer, buffer, FFTW_FORWARD, flag);
-                backward_plan = fftwf_plan_dft_1d(rSpaceSize, buffer, buffer, FFTW_BACKWARD, flag);
-            }
-            else {
-                forward_plan = fftw_plan_dft_1d(rSpaceSize, buffer, buffer, FFTW_FORWARD, flag);
-                backward_plan = fftw_plan_dft_1d(rSpaceSize, buffer, buffer, FFTW_BACKWARD, flag);
-            }
+            forward_plan = Internal::fftw_plan_dft<isSinglePrec()>(1, dims.data(), buffer, true, planFlag);
+            backward_plan = Internal::fftw_plan_dft<isSinglePrec()>(1, dims.data(), buffer, false, planFlag);
         }
         else {
-            if constexpr (isSinglePrec()) {
-                forward_plan = fftwf_plan_dft_r2c_1d(rSpaceSize, (float*)buffer, buffer, flag);
-                backward_plan = fftwf_plan_dft_c2r_1d(rSpaceSize, buffer, (float*)buffer, flag);
-            }
-            else {
-                forward_plan = fftw_plan_dft_r2c_1d(rSpaceSize, (double*)buffer, buffer, flag);
-                backward_plan = fftw_plan_dft_c2r_1d(rSpaceSize, buffer, (double*)buffer, flag);
-            }
+            forward_plan = Internal::fftw_plan_dft_r2c<isSinglePrec()>(1, dims.data(), buffer, planFlag);
+            backward_plan = Internal::fftw_plan_dft_c2r<isSinglePrec()>(1, dims.data(), buffer, planFlag);
         }
     }
 
@@ -230,7 +196,7 @@ namespace Physica {
             rSpaceSize[i] = static_cast<int>(rSpaceSize_[i]);
         kSpaceSize = rSizeToKSize(rSpaceSize);
 
-        buffer = reinterpret_cast<ComplexTypeFFTW*>(fftw_malloc(sumKSpaceSize(0) * sizeof(ComplexTypeFFTW)));
+        buffer = static_cast<ComplexType*>(Internal::fftw_malloc(sumKSpaceSize(0) * sizeof(ComplexType)));
     }
 
     template<Scalar T, size_t Dim>
@@ -244,7 +210,7 @@ namespace Physica {
     FFT<T, Dim>::FFT(const FFT& fft)
             : forward_plan(nullptr)
             , backward_plan(nullptr)
-            , buffer(reinterpret_cast<ComplexTypeFFTW*>(fftw_malloc(fft.sumKSpaceSize(0) * sizeof(ComplexTypeFFTW))))
+            , buffer(static_cast<ComplexType*>(Internal::fftw_malloc(fft.sumKSpaceSize(0) * sizeof(ComplexType))))
             , rSpaceSize(fft.rSpaceSize)
             , kSpaceSize(fft.kSpaceSize)
             , planFlag(fft.planFlag) {
@@ -259,23 +225,17 @@ namespace Physica {
             , rSpaceSize(std::move(fft.rSpaceSize))
             , kSpaceSize(std::move(fft.kSpaceSize))
             , planFlag(fft.planFlag) {
-        fft.forward_plan = nullptr;
-        fft.backward_plan = nullptr;
+        fft.forward_plan = FFTPlan(nullptr);
+        fft.backward_plan = FFTPlan(nullptr);
         fft.buffer = nullptr;
     }
 
     template<Scalar T, size_t Dim>
     FFT<T, Dim>::~FFT() noexcept {
         std::unique_lock<std::mutex> locker(Internal::ThreadGuardFFTW::getInstance().globalMutex);
-        if constexpr (isSinglePrec()) {
-            fftwf_destroy_plan(forward_plan);
-            fftwf_destroy_plan(backward_plan);
-        }
-        else {
-            fftw_destroy_plan(forward_plan);
-            fftw_destroy_plan(backward_plan);
-        }
-        fftw_free(buffer);
+        Internal::fftw_destroy_plan<isSinglePrec()>(forward_plan);
+        Internal::fftw_destroy_plan<isSinglePrec()>(backward_plan);
+        Internal::fftw_free(buffer);
     }
 
     template<Scalar T, size_t Dim>
@@ -331,42 +291,26 @@ namespace Physica {
     void FFT<T, Dim>::transform(const This& planProvider, This& bufferProvider) {
         const auto forward_plan = planProvider.forward_plan;
         const auto buffer = bufferProvider.buffer;
-        assert(forward_plan != nullptr && "[Error]: Bad plan provider or working on a empry fft");
+        assert(forward_plan != FFTPlan(nullptr) && "[Error]: Bad plan provider or working on a empry fft");
         assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
         assert(planProvider.getKSpaceSize() == bufferProvider.getKSpaceSize());
-        if constexpr (isSinglePrec()) {
-            if constexpr (isComplex())
-                fftwf_execute_dft(forward_plan, buffer, buffer);
-            else
-                fftwf_execute_dft_r2c(forward_plan, reinterpret_cast<float*>(buffer), buffer);
-        }
-        else {
-            if constexpr (isComplex())
-                fftw_execute_dft(forward_plan, buffer, buffer);
-            else
-                fftw_execute_dft_r2c(forward_plan, reinterpret_cast<double*>(buffer), buffer);
-        }
+        if constexpr (isComplex())
+            Internal::fftw_execute_dft<isSinglePrec()>(forward_plan, buffer);
+        else
+            Internal::fftw_execute_dft_r2c<isSinglePrec()>(forward_plan, buffer);
     }
 
     template<Scalar T, size_t Dim>
     void FFT<T, Dim>::rawInvTransform(const This& planProvider, This& bufferProvider) {
         const auto backward_plan = planProvider.backward_plan;
         const auto buffer = bufferProvider.buffer;
-        assert(backward_plan != nullptr);
+        assert(backward_plan != FFTPlan(nullptr));
         assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
         assert(planProvider.getKSpaceSize() == bufferProvider.getKSpaceSize());
-        if constexpr (isSinglePrec()) {
-            if constexpr (isComplex())
-                fftwf_execute_dft(backward_plan, buffer, buffer);
-            else
-                fftwf_execute_dft_c2r(backward_plan, buffer, reinterpret_cast<float*>(buffer));
-        }
-        else {
-            if constexpr (isComplex())
-                fftw_execute_dft(backward_plan, buffer, buffer);
-            else
-                fftw_execute_dft_c2r(backward_plan, buffer, reinterpret_cast<double*>(buffer));
-        }
+        if constexpr (isComplex())
+            Internal::fftw_execute_dft<isSinglePrec()>(backward_plan, buffer);
+        else
+            Internal::fftw_execute_dft_c2r<isSinglePrec()>(backward_plan, buffer);
     }
 
     template<Scalar T, size_t Dim>
@@ -378,107 +322,63 @@ namespace Physica {
 
     template<Scalar T, size_t Dim>
     void FFT<T, Dim>::initializePlan() noexcept {
-        assert(forward_plan == nullptr);
-        assert(backward_plan == nullptr);
+        assert(forward_plan == FFTPlan(nullptr));
+        assert(backward_plan == FFTPlan(nullptr));
         std::unique_lock<std::mutex> locker(Internal::ThreadGuardFFTW::getInstance().globalMutex);
         forward_plan = makeForwardPlan();
         backward_plan = makeBackwardPlan();
     }
 
     template<Scalar T, size_t Dim>
-    FFT<T, Dim>::PlanType FFT<T, Dim>::makeForwardPlan() {
-        PlanType plan;
+    FFTPlan FFT<T, Dim>::makeForwardPlan() {
         if constexpr (Dim == 2) {
-            if constexpr (isComplex()) {
-                if constexpr (isSinglePrec())
-                    plan = fftwf_plan_dft_2d(rSpaceSize[0], rSpaceSize[1], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
-                else
-                    plan = fftw_plan_dft_2d(rSpaceSize[0], rSpaceSize[1], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
-            }
-            else {
-                if constexpr (isSinglePrec())
-                    plan = fftwf_plan_dft_r2c_2d(rSpaceSize[0], rSpaceSize[1], reinterpret_cast<float*>(buffer), buffer, FFTW_ESTIMATE);
-                else
-                    plan = fftw_plan_dft_r2c_2d(rSpaceSize[0], rSpaceSize[1], reinterpret_cast<double*>(buffer), buffer, FFTW_ESTIMATE);
-            }
+            const auto dims = Array<int, 2>::generate([this](size_t i) { return static_cast<int>(rSpaceSize[i]); });
+            if constexpr (isComplex())
+                return Internal::fftw_plan_dft<isSinglePrec()>(2, dims.data(), buffer, true, PlanFlag::Estimate);
+            else
+                return Internal::fftw_plan_dft_r2c<isSinglePrec()>(2, dims.data(), buffer, PlanFlag::Estimate);
         }
         else if constexpr (Dim == 3) {
-            if constexpr (isComplex()) {
-                if constexpr (isSinglePrec())
-                    plan = fftwf_plan_dft_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
-                else
-                    plan = fftw_plan_dft_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
-            }
-            else {
-                if constexpr (isSinglePrec())
-                    plan = fftwf_plan_dft_r2c_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], reinterpret_cast<float*>(buffer), buffer, FFTW_ESTIMATE);
-                else
-                    plan = fftw_plan_dft_r2c_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], reinterpret_cast<double*>(buffer), buffer, FFTW_ESTIMATE);
-            }
+            const auto dims = Array<int, 3>::generate([this](size_t i) { return static_cast<int>(rSpaceSize[i]); });
+            if constexpr (isComplex())
+                return Internal::fftw_plan_dft<isSinglePrec()>(3, dims.data(), buffer, true, PlanFlag::Estimate);
+            else
+                return Internal::fftw_plan_dft_r2c<isSinglePrec()>(3, dims.data(), buffer, PlanFlag::Estimate);
         }
         else {
-            if constexpr (isComplex()) {
-                if constexpr (isSinglePrec())
-                    plan = fftwf_plan_dft(getDim(), rSpaceSize.data(), buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
-                else
-                    plan = fftw_plan_dft(getDim(), rSpaceSize.data(), buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
-            }
-            else {
-                if constexpr (isSinglePrec())
-                    plan = fftwf_plan_dft_r2c(getDim(), rSpaceSize.data(), reinterpret_cast<float*>(buffer), buffer, FFTW_ESTIMATE);
-                else
-                    plan = fftw_plan_dft_r2c(getDim(), rSpaceSize.data(), reinterpret_cast<double*>(buffer), buffer, FFTW_ESTIMATE);
-            }
+            const int rank = static_cast<int>(getDim());
+            const auto dims = Array<int, Dynamic>::generate([this](size_t i) { return static_cast<int>(rSpaceSize[i]); }, getDim());
+            if constexpr (isComplex())
+                return Internal::fftw_plan_dft<isSinglePrec()>(rank, dims.data(), buffer, true, PlanFlag::Estimate);
+            else
+                return Internal::fftw_plan_dft_r2c<isSinglePrec()>(rank, dims.data(), buffer, PlanFlag::Estimate);
         }
-        return plan;
     }
 
     template<Scalar T, size_t Dim>
-    FFT<T, Dim>::PlanType FFT<T, Dim>::makeBackwardPlan() {
-        PlanType plan;
+    FFTPlan FFT<T, Dim>::makeBackwardPlan() {
         if constexpr (Dim == 2) {
-            if constexpr (isComplex()) {
-                if constexpr (isSinglePrec())
-                    plan = fftwf_plan_dft_2d(rSpaceSize[0], rSpaceSize[1], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
-                else
-                    plan = fftw_plan_dft_2d(rSpaceSize[0], rSpaceSize[1], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
-            }
-            else {
-                if constexpr (isSinglePrec())
-                    plan = fftwf_plan_dft_c2r_2d(rSpaceSize[0], rSpaceSize[1], buffer, reinterpret_cast<float*>(buffer), FFTW_ESTIMATE);
-                else
-                    plan = fftw_plan_dft_c2r_2d(rSpaceSize[0], rSpaceSize[1], buffer, reinterpret_cast<double*>(buffer), FFTW_ESTIMATE);
-            }
+            const auto dims = Array<int, 2>::generate([this](size_t i) { return static_cast<int>(rSpaceSize[i]); });
+            if constexpr (isComplex())
+                return Internal::fftw_plan_dft<isSinglePrec()>(2, dims.data(), buffer, false, PlanFlag::Estimate);
+            else
+                return Internal::fftw_plan_dft_c2r<isSinglePrec()>(2, dims.data(), buffer, PlanFlag::Estimate);
         }
         else if constexpr (Dim == 3) {
-            if constexpr (isComplex()) {
-                if constexpr (isSinglePrec())
-                    plan = fftwf_plan_dft_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
-                else
-                    plan = fftw_plan_dft_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
-            }
-            else {
-                if constexpr (isSinglePrec())
-                    plan = fftwf_plan_dft_c2r_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, reinterpret_cast<float*>(buffer), FFTW_ESTIMATE);
-                else
-                    plan = fftw_plan_dft_c2r_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, reinterpret_cast<double*>(buffer), FFTW_ESTIMATE);
-            }
+            const auto dims = Array<int, 3>::generate([this](size_t i) { return static_cast<int>(rSpaceSize[i]); });
+            if constexpr (isComplex())
+                return Internal::fftw_plan_dft<isSinglePrec()>(3, dims.data(), buffer, false, PlanFlag::Estimate);
+            else
+                return Internal::fftw_plan_dft_c2r<isSinglePrec()>(3, dims.data(), buffer, PlanFlag::Estimate);
         }
         else {
-            if constexpr (isComplex()) {
-                if constexpr (isSinglePrec())
-                    plan = fftwf_plan_dft(getDim(), rSpaceSize.data(), buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
-                else
-                    plan = fftw_plan_dft(getDim(), rSpaceSize.data(), buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
-            }
-            else {
-                if constexpr (isSinglePrec())
-                    plan = fftwf_plan_dft_c2r(getDim(), rSpaceSize.data(), buffer, reinterpret_cast<float*>(buffer), FFTW_ESTIMATE);
-                else
-                    plan = fftw_plan_dft_c2r(getDim(), rSpaceSize.data(), buffer, reinterpret_cast<double*>(buffer), FFTW_ESTIMATE);
-            }
+            const int rank = static_cast<int>(getDim());
+            const auto dims = Array<int, Dynamic>::generate([this](size_t i) { return static_cast<int>(rSpaceSize[i]); }, getDim());
+            if constexpr (isComplex())
+                return Internal::fftw_plan_dft<isSinglePrec()>(rank, dims.data(), buffer, false, PlanFlag::Estimate);
+            else
+                return Internal::fftw_plan_dft_c2r<isSinglePrec()>(rank, dims.data(), buffer, PlanFlag::Estimate);
         }
-        return plan;
     }
 
     template<Scalar T, size_t Dim>

@@ -18,23 +18,16 @@
  */
 #pragma once
 
-#include <fftw3.h>
 #include "Physica/Core/Scalar/Complex.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/CompactMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/TensorImpl/LValueTensor.h"
+#include "FFTW.h"
 #include "FFTImpl/FFTRSpace.h"
 #include "FFTImpl/FFTKSpace.h"
 
 namespace Physica {
     template<Scalar, size_t Dim = 1> class FFT;
-
-    enum class PlanFlag : char {
-        Measure = FFTW_MEASURE,
-        Estimate = FFTW_ESTIMATE,
-        Patient = FFTW_PATIENT,
-        Exhaustive = FFTW_EXHAUSTIVE
-    };
     /**
      * A FFT transform a tensor in r-space to a tensor in k-space.
      */
@@ -47,17 +40,15 @@ namespace Physica {
         using MachineType = Traits<This>::MachineType;
         using RealType = Traits<This>::RealType;
         using ComplexType = Traits<This>::ComplexType;
-        using PlanType = Traits<This>::PlanType;
-        using ComplexTypeFFTW = Traits<This>::ComplexTypeFFTW;
     public:
         using RSpaceType = FFTRSpace<This, 1>;
         using KSpaceType = FFTKSpace<This, 1>;
 
         using ScalarType = RSpaceType::ScalarType;
     private:
-        PlanType forward_plan;
-        PlanType backward_plan;
-        ComplexTypeFFTW* buffer;
+        FFTPlan forward_plan;
+        FFTPlan backward_plan;
+        ComplexType* buffer;
         int rSpaceSize;
         PlanFlag planFlag;
     public:
@@ -78,8 +69,8 @@ namespace Physica {
         void swap(FFT& __restrict fft) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t getDim() { return 1; }
-        [[nodiscard]] __host__ __device__ ComplexTypeFFTW* getBuffer() { return buffer; }
-        [[nodiscard]] __host__ __device__ const ComplexTypeFFTW* getBuffer() const { return buffer; }
+        [[nodiscard]] __host__ __device__ ComplexType* getBuffer() { return buffer; }
+        [[nodiscard]] __host__ __device__ const ComplexType* getBuffer() const { return buffer; }
         [[nodiscard]] __host__ __device__ size_t getRSpaceSize() const noexcept { return rSpaceSize; }
         [[nodiscard]] __host__ __device__ size_t getKSpaceSize() const noexcept { return getKSpace().getSize(); }
         [[nodiscard]] RealType getRSpaceDelta(RealType kSpaceDelta) const noexcept;
@@ -103,9 +94,9 @@ namespace Physica {
         void initializePlan() noexcept;
         /* Getters */
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ RealType* asRealBuffer() noexcept { return reinterpret_cast<RealType*>(buffer); }
-        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ ComplexType* asComplexBuffer() noexcept { return reinterpret_cast<ComplexType*>(buffer); }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ ComplexType* asComplexBuffer() noexcept { return buffer; }
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ const RealType* asRealBuffer() const noexcept { return reinterpret_cast<const RealType*>(buffer); }
-        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ const ComplexType* asComplexBuffer() const noexcept { return reinterpret_cast<const ComplexType*>(buffer); }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ const ComplexType* asComplexBuffer() const noexcept { return buffer; }
         /* Friends */
         friend class FFTRSpace<This, 1>;
         friend class FFTKSpace<This, 1>;
@@ -119,8 +110,6 @@ namespace Physica {
         using MachineType = Traits<This>::MachineType;
         using RealType = Traits<This>::RealType;
         using ComplexType = Traits<This>::ComplexType;
-        using PlanType = Traits<This>::PlanType;
-        using ComplexTypeFFTW = Traits<This>::ComplexTypeFFTW;
         using IndexArray = Array<size_t, Dim>;
     public:
         using RSpaceType = FFTRSpace<This, Dim>;
@@ -128,9 +117,9 @@ namespace Physica {
 
         using ScalarType = RSpaceType::ScalarType;
     private:
-        PlanType forward_plan;
-        PlanType backward_plan;
-        ComplexTypeFFTW* buffer;
+        FFTPlan forward_plan;
+        FFTPlan backward_plan;
+        ComplexType* buffer;
         IndexArray rSpaceSize;
         IndexArray kSpaceSize;
         PlanFlag planFlag;
@@ -151,8 +140,8 @@ namespace Physica {
         void swap(FFT& __restrict fft) noexcept;
         /* Getters */
         [[nodiscard]] size_t getDim() const noexcept { return Dim == Dynamic ? rSpaceSize.getLength() : Dim; }
-        [[nodiscard]] __host__ __device__ ComplexTypeFFTW* getBuffer() { return buffer; }
-        [[nodiscard]] __host__ __device__ const ComplexTypeFFTW* getBuffer() const { return buffer; }
+        [[nodiscard]] __host__ __device__ ComplexType* getBuffer() { return buffer; }
+        [[nodiscard]] __host__ __device__ const ComplexType* getBuffer() const { return buffer; }
         [[nodiscard]] const auto& getRSpaceSize() const noexcept { return rSpaceSize; }
         [[nodiscard]] const auto& getKSpaceSize() const noexcept { return kSpaceSize; }
         [[nodiscard]] RealType getRSpaceDelta(RealType kSpaceDelta, unsigned int dim) const noexcept;
@@ -174,8 +163,8 @@ namespace Physica {
         FFT(const Array<size_t, Dim>& rSpaceSize_);
         /* Operations */
         void initializePlan() noexcept;
-        PlanType makeForwardPlan();
-        PlanType makeBackwardPlan();
+        FFTPlan makeForwardPlan();
+        FFTPlan makeBackwardPlan();
         size_t sumRSpaceSize(size_t from_dim) const;
         size_t sumKSpaceSize(size_t from_dim) const;
         void normalizeIndexes(Array<ssize_t, Dim>& indexes) const;
@@ -183,9 +172,9 @@ namespace Physica {
         [[nodiscard]] Array<ssize_t, Dim> linearIndexToDim(size_t index) const;
         /* Getters */
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ RealType* asRealBuffer() noexcept { return reinterpret_cast<RealType*>(buffer); }
-        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ ComplexType* asComplexBuffer() noexcept { return reinterpret_cast<ComplexType*>(buffer); }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ ComplexType* asComplexBuffer() noexcept { return buffer; }
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ const RealType* asRealBuffer() const noexcept { return reinterpret_cast<const RealType*>(buffer); }
-        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ const ComplexType* asComplexBuffer() const noexcept { return reinterpret_cast<const ComplexType*>(buffer); }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ const ComplexType* asComplexBuffer() const noexcept { return buffer; }
         /* Static members */
         static bool checkSize(const Array<size_t, Dim>& rSpaceSize);
         /* Friends */
@@ -207,11 +196,8 @@ namespace Physica {
         constexpr static bool isComplex = T::isComplex();
         constexpr static bool isDiffable = T::isDiffable();
         constexpr static bool isSinglePrec = std::is_same<MachineType, float>::value;
-        using PlanType = std::conditional<isSinglePrec, fftwf_plan, fftw_plan>::type;
-        using ComplexTypeFFTW = std::conditional<isSinglePrec, fftwf_complex, fftw_complex>::type;
 
         static_assert(isDiffable || sizeof(RealType) == sizeof(MachineType), "[Error]: Invalid ScalarType");
-        static_assert(isDiffable || sizeof(ComplexType) == sizeof(ComplexTypeFFTW), "[Error]: Invalid ScalarType");
         static_assert(Dim <= 3U, "[Error]: Dimension higher than 3 should be declared as dynamic");
         static_assert(Dim != 0, "[Error]: Not implemented");
     };

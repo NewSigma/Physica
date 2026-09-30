@@ -32,6 +32,7 @@ namespace Physica {
         MPI_Op,
         MPI_Request,
         PID, // Unix uses pid_t; Windows differs
+        FFTW_Plan,
     };
     /**
      * \class Handle: A zero-cost wrapper for opaque handles in 3rdparty C libraries, dedicated to provide:
