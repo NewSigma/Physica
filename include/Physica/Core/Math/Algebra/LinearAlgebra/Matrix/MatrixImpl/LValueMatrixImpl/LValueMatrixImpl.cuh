@@ -92,11 +92,7 @@ namespace Physica {
 
     template<class Derived>
     __device__ auto device_obj<LValueMatrix<Derived>>::calc(size_t row, size_t col) const -> T {
-        using Tm = typename T::MachineType;
-        if constexpr (std::is_fundamental_v<Tm>)
-            return T(__ldg(reinterpret_cast<const Tm*>(this->data_ptr(row, col))));
-        else
-            return operator[](row, col);
+        return operator[](row, col);
     }
 
     template<class Derived>
