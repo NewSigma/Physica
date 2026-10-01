@@ -88,7 +88,8 @@ namespace Physica {
             : Base(std::move(lattice), std::move(charges))
             , samplePool(samplePoolSize, Dim)
             , batchSize(batchSize_) {
-        assert(checkParam(lattice) && "[Error]: Non-orthogonal lattice is not implemented");
+        if (!checkParam(lattice))
+            noImpl("[Error]: Non-orthogonal lattice is not implemented");
         setIntegralLimit();
     }
 

@@ -121,7 +121,8 @@ namespace Physica {
         static_assert(source.isStaticHermite(), "[Error]: Support for complex eigenvalues is not implemented");
         assert(source.getRow() == source.getCol() && "[Error]: Matrix should be square");
         assert(source.getRow() == initial.getLength() && "[Error]: Dimensions do not match");
-        assert(eigenGoal == InvalidGoal && "[Error]: Not implemented");
+        if (eigenGoal != InvalidGoal)
+            noImpl();
         initSearchSpace(source, initial);
 
         VectorND<T> residual(initial.getLength());

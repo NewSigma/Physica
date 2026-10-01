@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,7 @@
 #pragma once
 
 #include "DataSpaceMixin.h"
+#include "Physica/Core/Utils/NoImpl.h"
 
 namespace Physica {
     template<class SpaceType, size_t Dim>
@@ -55,7 +56,9 @@ namespace Physica {
     template<class SpaceType, size_t Dim>
     void SubDataSpace<SpaceType, Dim>::selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start) {
         using ExtendSizeArray = SpaceType::SizeArray;
-        assert((op == H5S_seloper_t::H5S_SELECT_SET) && "[Error]: Not implemented");
+        if (op != H5S_seloper_t::H5S_SELECT_SET)
+            noImpl();
+
         ExtendSizeArray count1 = space.getSelectedCount();
         ExtendSizeArray start1 = space.getSelectedStart();
         for (size_t i = 0; i < getDim(); ++i) {

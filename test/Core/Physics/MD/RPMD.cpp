@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -114,8 +114,8 @@ namespace {
 
 int main() {
     ThreadPool::numThreadRequired = 4;
-    testDriftMomentum(1E-12);
-    testCalcKinetic(1E-14);
+    expect(testDriftMomentum(1E-12));
+    expect(testCalcKinetic(1E-14));
     testMDRun();
     ThreadPool::getInstance().shouldExit();
     return 0;

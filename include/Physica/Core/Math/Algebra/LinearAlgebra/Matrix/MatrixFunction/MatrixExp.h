@@ -90,7 +90,8 @@ namespace Physica {
     template<Matrix M>
     auto MatrixExp<M>::calcTraceMu() const -> Tr {
         const T trace = m.trace();
-        assert(trace.imag().isZero() && "[Error]: Not implemented");
+        if (!trace.imag().isZero())
+            noImpl();
         return trace.real() / Tr(getOrder());
     }
 

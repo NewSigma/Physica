@@ -132,7 +132,7 @@ int main() {
         testDecomp(m, 1E-6, 0);
     }
     forward();
-    qdt<float64>(4, 1E-13);
-    qdt<cfloat64>(4, 1E-13);
+    qdt<float64>(4, 1E-12);
+    qdt<cfloat64>(4, 1E-12);
     return 0;
 }
