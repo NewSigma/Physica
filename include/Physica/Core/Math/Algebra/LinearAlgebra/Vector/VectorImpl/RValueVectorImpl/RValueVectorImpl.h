@@ -849,7 +849,7 @@ namespace Physica {
 
     template<class Derived, Scalar ScalarT>
     __host__ __device__ consteval bool RValueVector<Derived, ScalarT>::isSparse() noexcept {
-        return requires { std::declval<Derived>().getNumNonzero(); };
+        return requires { std::declval<Derived>().getNumNonZero(); };
     }
 
     template<class Derived, Scalar ScalarT>

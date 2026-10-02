@@ -47,6 +47,7 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     void operator+=(V1& v1, const V2& v2) requires(V2::isSparse()) {
+        assert(v1.getLength() == v2.getLength());
         using ResultType = V1::ScalarType;
         for (size_t i = 0; i < v2.getNumNonZero(); ++i) {
             const auto pair = v2.calcNonZero(i);
@@ -56,6 +57,7 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     void operator-=(V1& v1, const V2& v2) requires(V2::isSparse()) {
+        assert(v1.getLength() == v2.getLength());
         using ResultType = V1::ScalarType;
         for (size_t i = 0; i < v2.getNumNonZero(); ++i) {
             const auto pair = v2.calcNonZero(i);
