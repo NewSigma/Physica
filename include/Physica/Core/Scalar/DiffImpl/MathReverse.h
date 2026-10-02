@@ -133,10 +133,8 @@ namespace Physica {
 
     template<Scalar T>
     [[nodiscard]] CoDiff<T> cos(T&& x) noexcept requires(ReverseDiff<T>) {
-        using Tv = std::remove_reference_t<T>::ValueType;
         decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
-        Tv c, s;
-        sincos(x_.value(), s, c);
+        const auto [s, c] = sincos(x_.value());
         auto& y = co_yield c;
         x_.reverse(-s, y.grad());
     }
@@ -144,21 +142,21 @@ namespace Physica {
     template<Scalar T>
     [[nodiscard]] CoDiff<T> sin(T&& x) noexcept requires(ReverseDiff<T>) {
         decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
-        auto [s, c] = sincos(x_.value());
+        const auto [s, c] = sincos(x_.value());
         auto& y = co_yield s;
         x_.reverse(c, y.grad());
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] CoDiff<void> sincos(const T& x, U&& sin_result, U&& cos_result) noexcept requires(ReverseDiff<T> && ReverseDiff<U>) {
-        using Tv = T::ValueType;
-        Tv s, c;
-        sincos(x.value(), s, c);
+    [[nodiscard]] CoDiff<void> sincos(T&& x, U&& sin_result, U&& cos_result) noexcept requires(ReverseDiff<T> && ReverseDiff<U>) {
+        decltype(auto) x_ = decay_rvalue(std::forward<T>(x));
+        const auto [s, c] = sincos(x_.value());
         decltype(auto) sin_ = decay_rvalue(std::forward<U>(sin_result));
         decltype(auto) cos_ = decay_rvalue(std::forward<U>(cos_result));
         sin_ = s;
         cos_ = c;
         co_await suspend_always{};
+        x_.reverse(fma(c, sin_.grad(), -s * cos_.grad()));
     }
 
     template<Scalar T>

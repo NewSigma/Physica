@@ -246,6 +246,28 @@ namespace {
             const auto s = sigmoid(x.value());
             expect(scalarNear(x.grad(), s * (T(1) - s), 1E-15));
         }
+        /* Test sin and cos */ {
+            x.zero_grad();
+            const auto y = sin(x).reverse();
+            expect(scalarNear(y.value(), sin(x.value()), 1E-15));
+            expect(scalarNear(x.grad(), cos(x.value()), 1E-15));
+            x.zero_grad();
+            const auto z = cos(x).reverse();
+            expect(scalarNear(z.value(), cos(x.value()), 1E-15));
+            expect(scalarNear(x.grad(), -sin(x.value()), 1E-15));
+        }
+        /* sincos */ {
+            x.zero_grad();
+            dfloat s(0), c(0);
+            {
+                const auto _ = sincos(x, s, c);
+                expect(scalarNear(s.value(), sin(x.value()), 1E-15));
+                expect(scalarNear(c.value(), cos(x.value()), 1E-15));
+                s.reverse(3);
+                c.reverse(4);
+            }
+            expect(scalarNear(x.grad(), cos(x.value()) * T(3) - sin(x.value()) * T(4), 1E-15));
+        }
     }
 
     void swap_reverse() {
