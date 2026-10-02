@@ -51,6 +51,8 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
     };
 
     template<Matrix M, Vector V> requires(instanceof<M, BlockMatrix>)

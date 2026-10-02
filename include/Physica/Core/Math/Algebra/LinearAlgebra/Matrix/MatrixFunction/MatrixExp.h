@@ -55,6 +55,7 @@ namespace Physica {
         [[nodiscard]] const auto& getMatrix() const noexcept { return m; }
         [[nodiscard]] size_t getOrder() const noexcept { return m.getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
     };
