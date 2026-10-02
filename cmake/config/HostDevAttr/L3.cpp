@@ -16,16 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <sched.h>
-#include <unistd.h>
+#include "CacheInfo.h"
 #include <print>
 
 int main() {
-    cpu_set_t mask;
-    CPU_ZERO(&mask);
-    CPU_SET(1, &mask);
-    sched_setaffinity(0, sizeof(mask), &mask);
-
-    std::print("{}", (int)sysconf(_SC_LEVEL3_CACHE_SIZE));
+    constexpr int CPU = 0;
+    std::print("{}", Physica::readCacheSize(CPU, 3, "Unified"));
     return 0;
 }
