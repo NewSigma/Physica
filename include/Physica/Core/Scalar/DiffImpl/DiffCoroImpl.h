@@ -40,6 +40,7 @@ namespace Physica {
     DiffCoro<T>::DiffCoro(This&& other) noexcept
             : Base(static_cast<T&&>(other))
             , handle(std::exchange(other.handle, nullptr)) {
+        assert(handle != nullptr);
         handle.promise().listen(*this);
     }
 
@@ -66,6 +67,10 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         std::swap(handle, obj.handle);
+        if (handle)
+            handle.promise().listen(*this);
+        if (obj.handle)
+            obj.handle.promise().listen(obj);
     }
 
     template<class T>

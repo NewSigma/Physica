@@ -248,6 +248,25 @@ namespace {
         }
     }
 
+    void swap_reverse() {
+        // Test that swapping re-register the promises
+        using dfloat = Diff<T, DiffMode::Reverse>;
+        dfloat x(2), y(3);
+        auto a = square(x);
+        auto b = square(y);
+        
+        a.swap(b);
+        expect(a.value() == square(y.value()));
+        expect(b.value() == square(x.value()));
+        x.zero_grad();
+        y.zero_grad();
+        a.reverse_final(T(1));
+        expect(x.grad().isZero());
+        expect(y.grad() == T(2) * y.value());
+        b.reverse_final(T(1));
+        expect(x.grad() == T(2) * x.value());
+    }
+
     void forwardReverseDiv() {
         // Regression test that we do not use reciprocal for operator/
         using dfloatF = Diff<T, DiffMode::Forward>;
@@ -292,6 +311,7 @@ int main() {
     testForwardMixedFMA();
     testForwardSIMD();
     testReverse();
+    swap_reverse();
     forwardReverseDiv();
     testCompare();
     return 0;
