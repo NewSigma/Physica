@@ -90,8 +90,8 @@ namespace Physica {
     template<ExprID ID, class LHS, class RHS>
     __host__ __device__ device_obj<BinaryVectorExpr<ID, LHS, RHS>>::device_obj(Ref1 lhs_, Ref2 rhs_) noexcept : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
         if constexpr (Vector<LHS> && Vector<RHS>) {
-            constexpr bool Size1 = getLHS().getSizeAtCompile();
-            constexpr bool Size2 = getRHS().getSizeAtCompile();
+            constexpr size_t Size1 = getLHS().getSizeAtCompile();
+            constexpr size_t Size2 = getRHS().getSizeAtCompile();
             static_assert(Size1 == Size2 || Size1 == Dynamic || Size2 == Dynamic);
             assert(getLHS().getLength() == getRHS().getLength());
         }

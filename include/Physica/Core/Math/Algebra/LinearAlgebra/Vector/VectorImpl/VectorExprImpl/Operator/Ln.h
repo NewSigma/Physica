@@ -74,7 +74,7 @@ namespace Physica {
         static_assert(isReverseDiff());
         const auto& expr = Base::getExpr();
         if constexpr (Scalar<decltype(grad)>)
-            expr.reverse(grad.value() / expr.values());
+            expr.reverse(divide(grad.value(), expr.values()));
         else {
             static_assert(Vector<decltype(grad)>, "[Error]: Unexpected type");
             expr.reverse(divide(grad.values(), expr.values()));

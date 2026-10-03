@@ -41,6 +41,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
 
+        using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
 
         [[nodiscard]] auto values(this auto&&) noexcept;

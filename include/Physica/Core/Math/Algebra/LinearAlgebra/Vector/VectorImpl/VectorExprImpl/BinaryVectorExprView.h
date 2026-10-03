@@ -42,7 +42,7 @@ namespace Physica {
         [[nodiscard, gnu::always_inline]] constexpr auto begin(this auto&&) noexcept;
         [[nodiscard, gnu::always_inline]] constexpr auto end(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard, gnu::always_inline]] constexpr size_t size() const noexcept { return lhs.size(); }
+        [[nodiscard, gnu::always_inline]] constexpr size_t size() const noexcept;
     };
 
     template<ExprID ID, class LHS, class RHS>
@@ -70,6 +70,15 @@ namespace Physica {
             return Iterator(self.lhs.end(), self.rhs);
         else
             return Iterator(self.lhs.end(), self.rhs.end());
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    template<class ViewLHS, class ViewRHS>
+    constexpr size_t BinaryVectorExpr<ID, LHS, RHS>::View<ViewLHS, ViewRHS>::size() const noexcept {
+        if constexpr (Scalar<ViewLHS>)
+            return rhs.size();
+        else
+            return lhs.size();
     }
 }
 

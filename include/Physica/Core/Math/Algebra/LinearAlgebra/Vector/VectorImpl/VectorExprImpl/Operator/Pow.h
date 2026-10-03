@@ -39,7 +39,8 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t i) const;
 
-        void reverse(const Vector auto& grad) const noexcept;
+        using Base::reverse;
+        void reverse(const auto& grad) const noexcept;
 
         [[nodiscard]] auto values(this auto&&) noexcept;
     };
@@ -67,9 +68,23 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
+    void VectorExpr<ExprID::Pow, V, U>::reverse(const auto& grad) const noexcept {
+        static_assert(Base::isReverseDiff());
+        const auto& expr = Base::getLHS();
+        const auto& n = Base::getRHS();
+        const auto factor = n * pow(expr.values(), n - Tv(1));
+        if constexpr (Scalar<decltype(grad)>)
+            expr.reverse(factor * grad.value());
+        else {
+            static_assert(Vector<decltype(grad)>, "[Error]: Unexpected type");
+            expr.reverse(hadamard(factor, grad.values()));
+        }
+    }
+
+    template<Vector V, Scalar U>
     auto VectorExpr<ExprID::Pow, V, U>::values(this auto&& self) noexcept {
         using Self = decltype(self);
-        return pow(std::forward<Self>(self).getLHS().values(), std::forward<Self>(self).getRHS().values());
+        return pow(std::forward<Self>(self).getLHS().values(), std::forward<Self>(self).getRHS().value());
     }
 
     template<Vector V, Scalar U>

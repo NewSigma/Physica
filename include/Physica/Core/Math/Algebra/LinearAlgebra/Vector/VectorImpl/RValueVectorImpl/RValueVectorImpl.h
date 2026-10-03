@@ -200,12 +200,19 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    void RValueVector<Derived, ScalarT>::reverse(this const auto& self, const Vector auto& grad) noexcept {
+    void RValueVector<Derived, ScalarT>::reverse(this const auto& self, const auto& grad) noexcept {
         static_assert(isReverseDiff());
-        self.grads().assert_assign(grad);
         const size_t length = self.getLength();
-        for (size_t i = 0; i < length; ++i)
-            self.calc(i).reverse(grad.calc(i));
+        if constexpr (Scalar<decltype(grad)>) {
+            for (size_t i = 0; i < length; ++i)
+                self.calc(i).reverse(grad);
+        }
+        else {
+            static_assert(Vector<decltype(grad)>, "[Error]: Unexpected type");
+            self.grads().assert_assign(grad);
+            for (size_t i = 0; i < length; ++i)
+                self.calc(i).reverse(grad.calc(i));
+        }
     }
 
     template<class Derived, Scalar ScalarT>
@@ -560,14 +567,14 @@ namespace Physica {
 
     template<class Derived, Scalar ScalarT>
     auto RValueVector<Derived, ScalarT>::mean_stable() const noexcept -> CoDiff<T> {
-        auto result = T(0);
+        Tv result(0);
         const auto& v = Base::getDerived();
         for (size_t i = 0; i < getLength(); ++i)
-            result.toNextMean(i, v.calc(i));
+            result.toNextMean(i, v.calc_value(i));
 
         if constexpr (isReverseDiff()) {
             auto& y = co_yield std::move(result);
-            v.reverse(y.grad());
+            v.reverse(y.grad() / Trv(getLength()));
         }
         else
             co_return std::move(result);

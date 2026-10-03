@@ -27,6 +27,7 @@ namespace Physica {
         static_assert(ReverseDiff<T>, "[Error]: DiffCoro binds compute graph to reverse diffable objects");
         static_assert(!is_codiff<T>::value, "[Error]: Nested DiffCoro is not allowed");
         static_assert(std::is_object<T>::value, "[Error]: Must save the return by value");
+        static_assert(!std::is_const_v<T> && !std::is_volatile_v<T>, "[Error]: DiffCoro must bind to a cv-unqualified object");
         using This = DiffCoro<T>;
         using Base = T;
 

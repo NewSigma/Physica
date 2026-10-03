@@ -59,7 +59,7 @@ namespace Physica {
         using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
 
-        [[nodiscard]] T sum() const { return getLHS().sum() * getRHS(); }
+        [[nodiscard]] CoDiff<T> sum() const { return getLHS().sum() * getRHS(); }
 
         [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
@@ -279,7 +279,7 @@ namespace Physica {
         using Base::reverse;
         void reverse(const auto& grad) const noexcept;
 
-        [[nodiscard]] T sum(this auto&&) noexcept;
+        [[nodiscard]] CoDiff<T> sum(this auto&&) noexcept;
 
         [[nodiscard]] auto values(this auto&& self) noexcept;
         /* Getters */
@@ -381,7 +381,7 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    auto VectorExpr<ExprID::Mul, V1, V2>::sum(this auto&& self) noexcept -> T {
+    auto VectorExpr<ExprID::Mul, V1, V2>::sum(this auto&& self) noexcept -> CoDiff<T> {
         using Self = decltype(self);
         return std::forward<Self>(self).getLHS() * std::forward<Self>(self).getRHS();
     }

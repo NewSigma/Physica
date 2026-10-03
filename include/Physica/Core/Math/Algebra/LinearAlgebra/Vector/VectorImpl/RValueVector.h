@@ -134,7 +134,7 @@ namespace Physica {
         template<int Size>
         [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
         [[nodiscard]] constexpr auto view(this auto&&) noexcept;
-        void reverse(this const auto&, const Vector auto& grad) noexcept;
+        void reverse(this const auto&, const auto& grad) noexcept;
         void reverse(this const auto&, const Vector auto& y, const Vector auto& grad) noexcept;
 
         void resize(this auto&, const Vector auto& x);

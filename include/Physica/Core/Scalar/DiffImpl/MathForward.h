@@ -137,7 +137,7 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] __host__ __device__ auto pow(T&& x, U&& a) noexcept requires(ForwardDiff<T> && !Diffable<U>) {
+    [[nodiscard]] __host__ __device__ auto pow(const T& x, const U& a) noexcept requires(ForwardDiff<T> && !Diffable<U>) {
         using ResultType = T::ScalarType;
         constexpr int GradOrder = T::GradType::Order;
         const auto y = pow(x.template grad_mask<GradOrder>(), a);

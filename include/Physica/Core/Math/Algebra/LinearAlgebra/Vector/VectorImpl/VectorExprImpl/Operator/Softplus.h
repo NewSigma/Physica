@@ -37,7 +37,7 @@ namespace Physica {
         template<int Size>
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
-        [[nodiscard]] T calc(size_t index) const { return softplus(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const { return softplus(Base::getExpr().calc(index)); }
         [[nodiscard]] auto values(this auto&&) noexcept;
     };
 

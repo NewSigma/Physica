@@ -36,17 +36,20 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const;
 
-        [[nodiscard]] T calc(size_t i) const { return Base::getExpr().softmax(i); }
+        [[nodiscard]] CoDiff<T> calc(size_t i) const { return Base::getExpr().softmax(i); }
         [[nodiscard]] Tv calc_value(size_t i) const { return Base::calc_value(i); }
-        [[nodiscard]] T calc(size_t i, T lnsumexp) const;
+        [[nodiscard]] CoDiff<T> calc(size_t i, T lnsumexp) const;
         [[nodiscard]] Tv calc_value(size_t i, Tv lnsumexp) const;
 
+        using Base::reverse;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
+        /* Static members */
+        __host__ __device__ consteval static bool isFastPacket() noexcept { return false; }
     };
 
     template<Vector V>
-    auto VectorExpr<ExprID::Softmax, V>::calc(size_t i, T lnsumexp) const -> T {
+    auto VectorExpr<ExprID::Softmax, V>::calc(size_t i, T lnsumexp) const -> CoDiff<T> {
         return exp(Base::getExpr().calc(i) - lnsumexp);
     }
 

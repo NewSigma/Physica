@@ -126,7 +126,7 @@ namespace Physica {
 
     template<class T>
     using CoDiff = std::conditional<std::is_void_v<T> || ReverseDiff<T>
-                 , DiffCoro<remove_codiff_t<remove_scalar_ref_t<std::remove_cvref_t<T>>>>
+                 , DiffCoro<std::remove_cvref_t<remove_codiff_t<remove_scalar_ref_t<std::remove_cvref_t<T>>>>>
                  , T>::type;
 
     namespace Internal {
