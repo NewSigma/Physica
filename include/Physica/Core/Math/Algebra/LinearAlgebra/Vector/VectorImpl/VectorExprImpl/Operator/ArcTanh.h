@@ -32,6 +32,10 @@ namespace Physica {
         using Base::Base;
         /* Operators */
         [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto input) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return arctanh(Base::getExpr().calc(index)); }
 
@@ -41,6 +45,18 @@ namespace Physica {
     template<Vector V>
     auto VectorExpr<ExprID::ArcTanh, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {
         return arctanh(*input);
+    }
+
+    template<Vector V>
+    template<int Size>
+    auto VectorExpr<ExprID::ArcTanh, V>::operator()(std::random_access_iterator auto input) noexcept -> SIMD<T, Size> {
+        return arctanh(input.template load<Size>());
+    }
+
+    template<Vector V>
+    template<int Size>
+    auto VectorExpr<ExprID::ArcTanh, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept -> SIMD<T, Size> {
+        return arctanh(input.template load<Size>(count));
     }
 
     template<Vector V>

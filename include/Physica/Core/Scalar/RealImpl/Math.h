@@ -21,6 +21,23 @@
 #include "Float64.h"
 
 namespace Physica {
+    namespace Internal {
+        // sinh(x)^2 overflows: float16 = 6.24; float32 = 45.1; float64 = 355.5
+        template<FloatPrec Prec>
+        constexpr int lncosh_threshold() noexcept {
+            switch (Prec) {
+            case Float16:
+                return 6;
+            case Float32:
+                return 40;
+            case Float64:
+                return 355;
+            default:
+                return 0;
+            }
+        }
+    }
+
     template<FloatPrec Prec>
     [[nodiscard]] __host__ __device__ Real<Prec> unit(const Real<Prec>& x) noexcept {
         return Real<Prec>(x.isNegative() ? -1 : 1);
@@ -343,7 +360,9 @@ namespace Physica {
     template<FloatPrec Prec>
     [[nodiscard]] __host__ __device__ Real<Prec> lncosh(const Real<Prec>& x) noexcept {
         using T = Real<Prec>;
-        const auto x1 = abs(x);
+        const T x1 = abs(x);
+        if (x1 <= T(Internal::lncosh_threshold<Prec>()))
+            return T(0.5) * ln1p(square(sinh(x1)));
         return x1 + ln1p(exp(-x1 * T(2))) - T(M_LN2);
     }
 

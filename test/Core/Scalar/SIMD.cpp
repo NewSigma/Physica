@@ -69,6 +69,41 @@ namespace {
             for (int i = 0; i < Size; ++i)
                 expect<RandomSource>(scalarNear(result[i], lncosh(x[i]), prec));
         }
+        if constexpr (!T::isComplex()) {
+            /* Cosh */ {
+                const auto result = cosh(x);
+                for (int i = 0; i < Size; ++i)
+                    expect(scalarNear(result[i], cosh(x[i]), prec));
+            }
+            /* Sinh */ {
+                const auto result = sinh(x);
+                for (int i = 0; i < Size; ++i)
+                    expect(scalarNear(result[i], sinh(x[i]), prec));
+            }
+            /* Sech */
+            {
+                const auto result = sech(x);
+                for (int i = 0; i < Size; ++i)
+                    expect(scalarNear(result[i] * cosh(x[i]), T(1), prec));
+            }
+            /* ArcSinh */ {
+                const auto result = arcsinh(x);
+                for (int i = 0; i < Size; ++i)
+                    expect(scalarNear(sinh(result[i]), x[i], prec));
+            }
+            /* ArcTanh */ {
+                const auto arg = x * T(0.5);
+                const auto result = arctanh(arg);
+                for (int i = 0; i < Size; ++i)
+                    expect(scalarNear(tanh(result[i]), arg[i], prec));
+            }
+            /* Sigmoid */ {
+                const auto arg = x * T(2) - SIMD<T, Size>(T(0.5));
+                const auto result = sigmoid(arg);
+                for (int i = 0; i < Size; ++i)
+                    expect(scalarNear(result[i], sigmoid(arg[i]), prec));
+            }
+        }
     }
 
     template<Scalar T, int Size>
@@ -97,6 +132,10 @@ int main() {
     range_like<float32, 4>();
     range_like<cfloat32, 2>();
 
+    test<float32, 4>();
+    test<float32, 8>();
+    test<float64, 2>();
+    test<float64, 4>();
     test<cfloat32, 2>();
     test<cfloat32, 4>();
     test<cfloat64, 1>();

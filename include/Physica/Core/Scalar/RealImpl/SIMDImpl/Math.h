@@ -120,15 +120,56 @@ namespace Physica {
     }
 
     template<FloatPrec Prec, int Size>
+    [[nodiscard]] auto cosh(SIMD<Real<Prec>, Size> x) noexcept {
+        return SIMD<Real<Prec>, Size>(VCL::cosh(x.toMachine()));
+    }
+
+    template<FloatPrec Prec, int Size>
+    [[nodiscard]] auto sinh(SIMD<Real<Prec>, Size> x) noexcept {
+        return SIMD<Real<Prec>, Size>(VCL::sinh(x.toMachine()));
+    }
+
+    template<FloatPrec Prec, int Size>
     [[nodiscard]] auto tanh(SIMD<Real<Prec>, Size> x) noexcept {
         return SIMD<Real<Prec>, Size>(VCL::tanh(x.toMachine()));
+    }
+
+    template<FloatPrec Prec, int Size>
+    [[nodiscard]] auto sech(SIMD<Real<Prec>, Size> x) noexcept {
+        return reciprocal(cosh(x));
+    }
+
+    template<FloatPrec Prec, int Size>
+    [[nodiscard]] auto arcsinh(SIMD<Real<Prec>, Size> x) noexcept {
+        return SIMD<Real<Prec>, Size>(VCL::asinh(x.toMachine()));
+    }
+
+    template<FloatPrec Prec, int Size>
+    [[nodiscard]] auto arctanh(SIMD<Real<Prec>, Size> x) noexcept {
+        return SIMD<Real<Prec>, Size>(VCL::atanh(x.toMachine()));
     }
 
     template<FloatPrec Prec, int Size>
     [[nodiscard]] SIMD<Real<Prec>, Size> lncosh(SIMD<Real<Prec>, Size> x) noexcept {
         using Pack = SIMD<Real<Prec>, Size>;
         const auto x1 = abs(x);
-        return x1 + ln1p(exp(-x1 * Pack(2))) - Pack(M_LN2);
+        const auto Overflow = x1 > Pack(Internal::lncosh_threshold<Prec>());
+        if (!Overflow.horizontal_or())
+            return Pack(0.5) * ln1p(square(sinh(x1)));
+
+        const Pack large = x1 + ln1p(exp(-x1 * Pack(2))) - Pack(M_LN2);
+        if (Overflow.horizontal_and())
+            return large;
+
+        const Pack small = Pack(0.5) * ln1p(square(sinh(x1)));
+        return Pack::select(Overflow, large, small);
+    }
+
+    template<FloatPrec Prec, int Size>
+    [[nodiscard]] auto sigmoid(SIMD<Real<Prec>, Size> x) noexcept {
+        using Pack = SIMD<Real<Prec>, Size>;
+        const auto y = exp(-abs(x));
+        return Pack::select(x.isPositive(), reciprocal(Pack(1) + y), y / (Pack(1) + y));
     }
 
     template<FloatPrec Prec, int Size>

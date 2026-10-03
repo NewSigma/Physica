@@ -88,6 +88,18 @@ namespace Physica {
     }
 
     template<Packet T>
+    [[nodiscard]] T cosh(const T& x) noexcept requires(ForwardDiff<T>) {
+        using Grad = T::GradType;
+        return T(cosh(x.value()), x.grad() * sinh(Grad(x)));
+    }
+
+    template<Packet T>
+    [[nodiscard]] T sinh(const T& x) noexcept requires(ForwardDiff<T>) {
+        using Grad = T::GradType;
+        return T(sinh(x.value()), x.grad() * cosh(Grad(x)));
+    }
+
+    template<Packet T>
     [[nodiscard]] T tanh(const T& x) noexcept requires(ForwardDiff<T>) {
         using Grad = T::GradType;
         const Grad y = tanh(Grad(x));
@@ -95,8 +107,36 @@ namespace Physica {
     }
 
     template<Packet T>
+    [[nodiscard]] T sech(const T& x) noexcept requires(ForwardDiff<T>) {
+        using Grad = T::GradType;
+        const Grad x1 = Grad(x);
+        return T(sech(x.value()), -sech(x1) * tanh(x1) * x.grad());
+    }
+
+    template<Packet T>
+    [[nodiscard]] T arcsinh(const T& x) noexcept requires(ForwardDiff<T>) {
+        using Grad = T::GradType;
+        const Grad x1 = Grad(x);
+        return T(arcsinh(x.value()), x.grad() / sqrt(square(x1) + Grad(1)));
+    }
+
+    template<Packet T>
+    [[nodiscard]] T arctanh(const T& x) noexcept requires(ForwardDiff<T>) {
+        using Grad = T::GradType;
+        const Grad x1 = Grad(x);
+        return T(arctanh(x.value()), x.grad() / (Grad(1) - square(x1)));
+    }
+
+    template<Packet T>
     [[nodiscard]] T lncosh(const T& x) noexcept requires(ForwardDiff<T>) {
         using Grad = T::GradType;
         return T(lncosh(x.value()), tanh(Grad(x)) * x.grad());
+    }
+
+    template<Packet T>
+    [[nodiscard]] T sigmoid(const T& x) noexcept requires(ForwardDiff<T>) {
+        using Grad = T::GradType;
+        const Grad y = sigmoid(Grad(x));
+        return T(sigmoid(x.value()), (y - square(y)) * x.grad());
     }
 }

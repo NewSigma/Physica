@@ -53,6 +53,11 @@ namespace Physica {
     }
 
     template<>
+    __host__ __device__ inline float16 ln1p(const float16& x) noexcept {
+        return float16(ln1p(float32(x)));
+    }
+
+    template<>
     __host__ __device__ inline float16 exp(const float16& x) noexcept {
         if constexpr (IsHost())
             return float16(exp(float32(x)));
@@ -63,5 +68,10 @@ namespace Physica {
             unreachable();
         #endif
         }
+    }
+
+    template<>
+    __host__ __device__ inline float16 sinh(const float16& x) noexcept {
+        return float16(sinh(float32(x)));
     }
 }

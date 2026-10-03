@@ -166,6 +166,16 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
+    [[nodiscard]] SIMD<Complex<T>, Size> cosh(const SIMD<Complex<T>, Size> x) noexcept {
+        return (exp(x) + exp(-x)) * T(0.5);
+    }
+
+    template<Scalar T, int Size>
+    [[nodiscard]] SIMD<Complex<T>, Size> sinh(const SIMD<Complex<T>, Size> x) noexcept {
+        return (exp(x) - exp(-x)) * T(0.5);
+    }
+
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<Complex<T>, Size> tanh(const SIMD<Complex<T>, Size> x) noexcept {
         using ResultType = SIMD<Complex<T>, Size>;
         std::array<Complex<T>, Size> arr;
@@ -174,6 +184,11 @@ namespace Physica {
         ResultType result{};
         result.load(arr.data());
         return result;
+    }
+
+    template<Scalar T, int Size>
+    [[nodiscard]] SIMD<Complex<T>, Size> sech(const SIMD<Complex<T>, Size> x) noexcept {
+        return T(0.5) / (exp(x) + exp(-x));
     }
 
     template<Scalar T, int Size>

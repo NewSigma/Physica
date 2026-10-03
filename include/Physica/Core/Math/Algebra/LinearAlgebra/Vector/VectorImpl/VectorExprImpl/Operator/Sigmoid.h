@@ -32,6 +32,10 @@ namespace Physica {
         using Base::Base;
         /* Operators */
         [[nodiscard]] static CoDiff<T> operator()(std::random_access_iterator auto input) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input) noexcept;
+        template<int Size>
+        [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto input, size_t count) noexcept;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return sigmoid(Base::getExpr().calc(index)); }
         [[nodiscard]] auto values(this auto&&) noexcept;
@@ -40,6 +44,18 @@ namespace Physica {
     template<Vector V>
     auto VectorExpr<ExprID::Sigmoid, V>::operator()(std::random_access_iterator auto input) noexcept -> CoDiff<T> {
         return sigmoid(*input);
+    }
+
+    template<Vector V>
+    template<int Size>
+    auto VectorExpr<ExprID::Sigmoid, V>::operator()(std::random_access_iterator auto input) noexcept -> SIMD<T, Size> {
+        return sigmoid(input.template load<Size>());
+    }
+
+    template<Vector V>
+    template<int Size>
+    auto VectorExpr<ExprID::Sigmoid, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept -> SIMD<T, Size> {
+        return sigmoid(input.template load<Size>(count)).cutoff(count);
     }
 
     template<Vector V>
