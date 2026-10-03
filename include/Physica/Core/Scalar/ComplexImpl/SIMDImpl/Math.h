@@ -58,60 +58,38 @@ namespace Physica {
         return x * x;
     }
     /**
+     * Mirroring the scalar path
+     *
      * References:
-     * [1] add-on; https://github.com/vectorclass/add-on
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. Numerical Recipes(3rd edition)[M]. London: Cambridge University Press, 2007:226
      */
     template<Scalar T, int Size>
     [[nodiscard]] SIMD<Complex<T>, Size> sqrt(const SIMD<Complex<T>, Size> x) noexcept {
+        using ResultType = SIMD<Complex<T>, Size>;
         using RealPack = SIMD<T, Size * 2>;
-        const RealPack x1 = x.asReal();
-        const RealPack t1 = x1 * x1;
-        RealPack t2;
-        if constexpr (T::Prec == Float32)
-            t2 = t1.template shuffle<1, 0, 3, 2>();
-        else {
-            static_assert(T::Prec == Float64, "[Error]: Not implemented");
-            if constexpr (Size == 1)
-                t2 = t1.template shuffle<1, 0>();
-            else if constexpr (Size == 2)
-                t2 = t1.template shuffle<1, 0, 1, 0>();
-            else {
-                static_assert(Size == 4, "[Error]: Unexpected size");
-                t2 = t1.template shuffle<1, 0, 1, 0, 1, 0, 1, 0>();
-            }
-        }
+        const auto [real, imag] = x.makeFullRealImag();
 
-        const RealPack t3 = sqrt(t1 + t2);
-        RealPack t4;
-        if constexpr (T::Prec == Float32)
-            t4 = x1.template shuffle<0, 0, 2, 2>();
-        else {
-            static_assert(T::Prec == Float64, "[Error]: Not implemented");
-            if constexpr (Size == 1)
-                t4 = x1.template shuffle<0, 0>();
-            else if constexpr (Size == 2)
-                t4 = x1.template shuffle<0, 0, 0, 0>();
-            else {
-                static_assert(Size == 4, "[Error]: Unexpected size");
-                t4 = x1.template shuffle<0, 0, 0, 0, 0, 0, 0, 0>();
-            }
-        }
+        const RealPack abs_real = abs(real);
+        const RealPack norm = sqrt(fma(real, real, square(imag)));
+        const RealPack w = sqrt((abs_real + norm) * T(0.5));
+        const RealPack v = imag / w * T(0.5);
 
-        RealPack signbit;
+        const auto isNeg = real.isNegative();
+        const RealPack result_real = RealPack::select(isNeg, abs(v), w);
+        const RealPack result_imag = RealPack::select(isNeg, RealPack::select(imag.isNegative(), -w, w), v);
+
+        RealPack result;
         if constexpr (Size == 1)
-            signbit = RealPack::template makeSignBits<0, 1>();
+            result = RealPack::template blend<0, 2>(result_real, result_imag);
         else if constexpr (Size == 2)
-            signbit = RealPack::template makeSignBits<0, 1, 0, 1>();
+            result = RealPack::template blend<0, 4, 2, 6>(result_real, result_imag);
         else if constexpr (Size == 4)
-            signbit = RealPack::template makeSignBits<0, 1, 0, 1, 0, 1, 0, 1>();
+            result = RealPack::template blend<0, 8, 2, 10, 4, 12, 6, 14>(result_real, result_imag);
         else {
             static_assert(Size == 8, "[Error]: Unexpected size");
-            signbit = RealPack::template makeSignBits<0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1>();
+            result = RealPack::template blend<0, 16, 2, 18, 4, 20, 6, 22, 8, 24, 10, 26, 12, 28, 14, 30>(result_real, result_imag);
         }
-        const RealPack t5 = t3 + (t4 ^ signbit);
-        const RealPack t6 = sqrt(t5 * T(0.5));
-        const RealPack result = t6 ^ (x1 & signbit);
-        return SIMD<Complex<T>, Size>::asComplex(result);
+        return ResultType::asComplex(RealPack::select(norm.isZero(), RealPack(0), result));
     }
 
     template<Scalar T, int Size>

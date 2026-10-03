@@ -21,7 +21,7 @@
 #include "Test.h"
 
 using namespace Physica;
-using RandomSource = Random<MT19937, 10000>;
+using RandomSource = Random<>;
 
 namespace {
     template<Scalar T, int Size>
@@ -42,32 +42,32 @@ namespace {
             const auto y = SIMD<T, Size>::template random_uniform<RandomSource>() + SIMD<T, Size>(1);
             const auto result = x / y;
             for (int i = 0; i < Size; ++i)
-                expect(scalarNear(result[i], x[i] / y[i], prec));
+                expect<RandomSource>(scalarNear(result[i], x[i] / y[i], prec));
         }
         /* Square */ {
             const auto result = square(x);
             for (int i = 0; i < Size; ++i)
-                expect(scalarNear(result[i], square(x[i]), prec));
+                expect<RandomSource>(scalarNear(result[i], square(x[i]), prec));
         }
         /* Exp */ {
             const auto result = exp(x);
             for (int i = 0; i < Size; ++i)
-                expect(scalarNear(result[i], exp(x[i]), prec));
+                expect<RandomSource>(scalarNear(result[i], exp(x[i]), prec));
         }
         /* ExpM1 */ {
             const auto result = expm1(x);
             for (int i = 0; i < Size; ++i)
-                expect(scalarNear(result[i], expm1(x[i]), prec));
+                expect<RandomSource>(scalarNear(result[i], expm1(x[i]), prec));
         }
         /* Ln */ {
             const auto result = ln(x);
             for (int i = 0; i < Size; ++i)
-                expect(scalarNear(result[i], ln(x[i]), prec));
+                expect<RandomSource>(scalarNear(result[i], ln(x[i]), prec));
         }
         /* LnCosh */ {
             const auto result = lncosh(x);
             for (int i = 0; i < Size; ++i)
-                expect(scalarNear(result[i], lncosh(x[i]), prec));
+                expect<RandomSource>(scalarNear(result[i], lncosh(x[i]), prec));
         }
     }
 
@@ -87,7 +87,7 @@ namespace {
         /* Sqrt */ {
             const auto result = sqrt(x);
             for (int i = 0; i < Size; ++i)
-                expect(scalarNear(result[i], sqrt(x[i]), prec));
+                expect<RandomSource>(scalarNear(result[i], sqrt(x[i]), prec));
         }
     }
 }
