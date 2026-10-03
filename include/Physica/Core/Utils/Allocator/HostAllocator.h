@@ -58,9 +58,9 @@ namespace Physica {
         size_t size = n * sizeof(T);
         void* p{};
         if constexpr (OverAlign)
-            p = ::operator new(size, std::align_val_t(Align), std::nothrow);
+            p = __builtin_operator_new(size, std::align_val_t(Align), std::nothrow);
         else
-            p = ::operator new(size, std::nothrow);
+            p = __builtin_operator_new(size, std::nothrow);
         assert(p != nullptr); // null return value is rare in reality
         return reinterpret_cast<T*>(p);
     }
@@ -68,9 +68,9 @@ namespace Physica {
     template<class T, size_t Align>
     void HostAllocator<T, Align>::deallocate(T* p, size_t) noexcept {
         if constexpr (OverAlign)
-            ::operator delete(p, std::align_val_t(Align));
+            __builtin_operator_delete(p, std::align_val_t(Align));
         else
-            ::operator delete(p);
+            __builtin_operator_delete(p);
     }
 
     template<class T, size_t Align>

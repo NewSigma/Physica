@@ -56,6 +56,26 @@ namespace Physica {
     }
 
     template<class T>
+    void* DiffCoro<T>::Promise::operator new(size_t size) noexcept {
+        return __builtin_operator_new(size, std::nothrow);
+    }
+
+    template<class T>
+    void DiffCoro<T>::Promise::operator delete(void* p) noexcept {
+        __builtin_operator_delete(p);
+    }
+
+    template<class T>
+    void* DiffCoro<T>::Promise::operator new(size_t size, std::align_val_t align) noexcept {
+        return __builtin_operator_new(size, align, std::nothrow);
+    }
+
+    template<class T>
+    void DiffCoro<T>::Promise::operator delete(void* p, std::align_val_t align) noexcept {
+        __builtin_operator_delete(p, align);
+    }
+
+    template<class T>
     void DiffCoro<T>::reverse_final(auto&&... args) noexcept {
         assert(handle != nullptr && "[Error]: Reverse has been finalized");
         Base::reverse(std::forward<decltype(args)>(args)...);
@@ -111,6 +131,22 @@ namespace Physica {
         else
             *pObj = T(std::forward<Arg>(arg).values());
         return *this;
+    }
+
+    inline void* DiffCoro<void>::Promise::operator new(size_t size) noexcept {
+        return __builtin_operator_new(size, std::nothrow);
+    }
+
+    inline void DiffCoro<void>::Promise::operator delete(void* p) noexcept {
+        __builtin_operator_delete(p);
+    }
+
+    inline void* DiffCoro<void>::Promise::operator new(size_t size, std::align_val_t align) noexcept {
+        return __builtin_operator_new(size, align, std::nothrow);
+    }
+
+    inline void DiffCoro<void>::Promise::operator delete(void* p, std::align_val_t align) noexcept {
+        __builtin_operator_delete(p, align);
     }
 
     template<class Predicate, class Operation, class Functor>
