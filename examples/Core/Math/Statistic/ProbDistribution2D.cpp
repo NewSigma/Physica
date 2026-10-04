@@ -19,13 +19,15 @@
 #include <algorithm>
 #include <QApplication>
 #include <QtCharts/QValueAxis>
+#include <Q3DTheme>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Statistics/ProbDistribution2D.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
 #include "Physica/Core/Physics/MD/Thermostat/Langevin.h"
 #include "Physica/Core/Parallel/Parallel.h"
-#include "Physica/Gui/Plot/Plot3D.h"
+
+import Physica.Gui.Plot3D;
 
 using namespace Physica;
 using ScalarType = float64;

@@ -21,7 +21,8 @@
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Math/Statistics/PDF/Normal.h"
 #include "Physica/Core/Physics/MC/HamiltonMC.h"
-#include "Physica/Gui/Plot/MultiPlot.h"
+
+import Physica.Gui.MultiPlot;
 
 using namespace Physica;
 using T = float64;

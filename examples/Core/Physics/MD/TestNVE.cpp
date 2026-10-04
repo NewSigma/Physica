@@ -17,12 +17,14 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <QApplication>
+#include <QtCharts/QLegend>
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/ForceModel/BKSModel.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Parallel/Algorithm/Thread.h"
-#include "Physica/Gui/Plot/Plot.h"
+
+import Physica.Gui.Plot;
 
 using namespace Physica;
 using T = float64;

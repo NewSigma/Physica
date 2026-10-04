@@ -20,7 +20,8 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 #include "Physica/Core/ML/GPModel.h"
 #include "Physica/Core/ML/Optimizer/Adadelta.h"
-#include "Physica/Gui/Plot/MultiPlot.h"
+
+import Physica.Gui.MultiPlot;
 
 using namespace Physica;
 using T = float64;

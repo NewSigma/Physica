@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,8 +17,10 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <QApplication>
+#include <QtCharts/QLegend>
 #include "Physica/Core/Physics/SolidState/QE/PWscfOut.h"
-#include "Physica/Gui/Plot/Plot.h"
+
+import Physica.Gui.Plot;
 
 using namespace Physica;
 using ScalarType = float64;

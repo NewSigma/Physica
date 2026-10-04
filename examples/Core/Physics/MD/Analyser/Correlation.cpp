@@ -17,13 +17,15 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <QApplication>
+#include <QtCharts/QLegend>
 #include "Physica/Core/Math/Statistics/Correlation.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/LJModel1.h"
 #include "Physica/Core/Parallel/Algorithm/Thread.h"
-#include "Physica/Gui/Plot/Plot.h"
+
+import Physica.Gui.Plot;
 
 using namespace Physica;
 using ScalarType = float64;

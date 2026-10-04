@@ -19,7 +19,8 @@
 #include <iostream>
 #include <QtWidgets/QApplication>
 #include "Physica/Core/Math/Geometry/Point.h"
-#include "Physica/Gui/Plot/DensityPlot.h"
+
+import Physica.Gui.DensityPlot;
 
 int main(int argc, char** argv) {
     using namespace Physica;

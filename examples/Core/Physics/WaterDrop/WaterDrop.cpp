@@ -21,7 +21,8 @@
 #include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
 #include "Physica/Core/Math/Calculus/Function/FindRoot/Bisection.h"
 #include "Physica/Core/Parallel/Algorithm/Thread.h"
-#include "Physica/Gui/Plot/Plot.h"
+
+import Physica.Gui.Plot;
 
 using namespace Physica;
 using T = float64;

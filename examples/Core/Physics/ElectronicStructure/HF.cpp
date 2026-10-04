@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,8 @@
 #include <QApplication>
 #include "Physica/Core/Physics/ElectronicStructure/HF/RHFSolver.h"
 #include "Physica/Core/Physics/ElectronicStructure/HF/GTOnG.h"
-#include "Physica/Gui/Plot/Plot.h"
+
+import Physica.Gui.Plot;
 
 using namespace Physica;
 using ScalarType = float64;

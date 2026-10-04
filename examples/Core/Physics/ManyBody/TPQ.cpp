@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,7 +22,8 @@
 #include "Physica/Core/Physics/ManyBody/ReprSpace/FermiRepr.h"
 #include "Physica/Core/Physics/ManyBody/TPQ.h"
 #include "Physica/Core/Utils/Container/SymmArray.h"
-#include "Physica/Gui/Plot/Plot.h"
+
+import Physica.Gui.Plot;
 
 using namespace Physica;
 using T = float64;

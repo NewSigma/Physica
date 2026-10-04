@@ -17,13 +17,15 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <QApplication>
+#include <QtCharts/QLegend>
 #include "Physica/Core/IO/Mnist.h"
 #include "Physica/Core/ML/NeuralNetwork/Layer/LinearLayer.cuh"
 #include "Physica/Core/ML/NeuralNetwork/SeqNet.cuh"
 #include "Physica/Core/ML/NeuralNetwork/SimpleDataset.h"
 #include "Physica/Core/ML/Optimizer/SGD.h"
 #include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Gui/Plot/Plot.h"
+
+import Physica.Gui.Plot;
 
 using namespace Physica;
 constexpr size_t NumEpoch = 10;

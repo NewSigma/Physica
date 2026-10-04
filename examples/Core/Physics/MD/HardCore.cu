@@ -18,11 +18,13 @@
  */
 #include <algorithm>
 #include <QApplication>
+#include <QtCharts/QLegend>
 #include <QtCharts/QValueAxis>
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
 #include "Physica/Core/Parallel/Algorithm/Thread.h"
-#include "Physica/Gui/Plot/Plot.h"
+
+import Physica.Gui.Plot;
 
 using namespace Physica;
 constexpr double timeStep = 0.1;

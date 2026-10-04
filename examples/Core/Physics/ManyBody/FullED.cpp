@@ -22,7 +22,8 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/FermiRepr.h"
-#include "Physica/Gui/Plot/Plot.h"
+
+import Physica.Gui.Plot;
 
 using namespace Physica;
 using T = float64;
