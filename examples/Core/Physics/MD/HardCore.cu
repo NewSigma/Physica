@@ -24,7 +24,7 @@
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
 #include "Physica/Core/Parallel/Algorithm/Thread.h"
 
-import Physica.Gui.Plot;
+import Physica.Gui.Plot; // Blocked: CUDA files are not scaned
 
 using namespace Physica;
 constexpr double timeStep = 0.1;

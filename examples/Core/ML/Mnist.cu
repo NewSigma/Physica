@@ -25,7 +25,7 @@
 #include "Physica/Core/ML/Optimizer/SGD.h"
 #include "Physica/Core/Math/Random/Random.h"
 
-import Physica.Gui.Plot;
+import Physica.Gui.Plot; // Blocked: CUDA files are not scaned
 
 using namespace Physica;
 constexpr size_t NumEpoch = 10;
