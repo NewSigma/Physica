@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,12 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+module;
 
+#include <QSurface3DSeries>
 #include "Physica/Core/Physics/Phonon/FrozenPhonon.h"
-#include "Plot3D.h"
 
-namespace Physica {
+export module Physica.Gui.PhononPlot3D;
+export import Physica.Gui.Plot3D;
+
+export namespace Physica {
     template<Scalar T>
     class PhononPlot3D : public Plot3D {
         using Base = Plot3D;

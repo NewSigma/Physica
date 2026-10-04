@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,9 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+module;
+
 #include <QtGui/QPainter>
 #include <QMouseEvent>
-#include "Physica/Gui/Plot/DensityPlot.h"
+
+module Physica.Gui.DensityPlot;
 
 using namespace Physica;
 

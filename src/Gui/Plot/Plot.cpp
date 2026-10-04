@@ -16,9 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+module;
+
 #include <cmath>
+#include <QWidget>
+#include <QPainter>
 #include <QSvgGenerator>
-#include "Physica/Gui/Plot/Plot.h"
+#include <QtCharts/QChart>
+#include <QtCharts/QValueAxis>
+#include <QtCharts/QScatterSeries>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+
+module Physica.Gui.Plot;
 
 using namespace Physica;
 
@@ -170,6 +179,80 @@ void Plot::updateNumTick() noexcept {
     };
     limit(axisX, axisTop, deltaX);
     limit(axisY, axisRight, deltaY);
+}
+
+void Plot::setAxisX(QValueAxis* axis) {
+    auto* chart = Base::getChart();
+    chart->removeAxis(axisX);
+    chart->addAxis(axis, Qt::AlignBottom);
+    axisX = axis;
+}
+
+void Plot::setAxisY(QValueAxis* axis) {
+    auto* chart = Base::getChart();
+    chart->removeAxis(axisY);
+    chart->addAxis(axis, Qt::AlignLeft);
+    axisY = axis;
+}
+
+void Plot::setAxisTop(QValueAxis* axis) {
+    auto* chart = Base::getChart();
+    chart->removeAxis(axisTop);
+    chart->addAxis(axis, Qt::AlignTop);
+    axisTop = axis;
+}
+
+void Plot::setAxisRight(QValueAxis* axis) {
+    auto* chart = Base::getChart();
+    chart->removeAxis(axisRight);
+    chart->addAxis(axis, Qt::AlignRight);
+    axisRight = axis;
+}
+
+void Plot::setMinX(double value) noexcept {
+    axisX->setMin(value);
+    axisTop->setMin(value);
+    updateNumTick();
+}
+
+void Plot::setMaxX(double value) noexcept {
+    axisX->setMax(value);
+    axisTop->setMax(value);
+    updateNumTick();
+}
+
+void Plot::setRangeX(double minX, double maxX) {
+    setMinX(minX);
+    setMaxX(maxX);
+    updateNumTick();
+}
+
+void Plot::setMinY(double value) noexcept {
+    axisY->setMin(value);
+    axisRight->setMin(value);
+    updateNumTick();
+}
+
+void Plot::setMaxY(double value) noexcept {
+    axisY->setMax(value);
+    axisRight->setMax(value);
+    updateNumTick();
+}
+
+void Plot::setRangeY(double minY, double maxY) {
+    setMinY(minY);
+    setMaxY(maxY);
+    updateNumTick();
+}
+
+void Plot::setDeltaX(double value) noexcept {
+    deltaX = value;
+    updateNumTick();
+}
+
+void Plot::setDeltaY(double value) noexcept {
+    deltaY = value;
+    updateNumTick();
 }
 
 void Plot::setTickDirection(QAbstractAxis::TickDirection d) {

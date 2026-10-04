@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,11 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+module;
 
-#include "Plot.h"
+#include "Physica/Macro.h"
 
-namespace Physica {
+export module Physica.Gui.GaussPlot;
+
+export import Physica.Gui.Plot;
+
+export namespace Physica {
     class PHYSICA_API GaussPlot : public Plot {
         using Base = Plot;
     public:

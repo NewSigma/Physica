@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,14 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+module;
 
 #include <QGraphicsView>
 #include <QChart>
 #include <QRubberBand>
 #include "Physica/Macro.h"
 
-namespace Physica {
+export module Physica.Gui.ChartView;
+
+export namespace Physica {
     class PHYSICA_API ChartView : public QGraphicsView {
         using Base = QGraphicsView;
 

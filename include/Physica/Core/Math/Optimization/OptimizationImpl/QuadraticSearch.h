@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+
 namespace Physica {
     template<Scalar T>
     class QuadraticSearch {

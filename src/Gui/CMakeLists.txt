@@ -10,4 +10,3 @@ set_target_properties(PhysicaGui PROPERTIES
     SOVERSION ${PROJECT_VERSION_MAJOR})
 
 install(TARGETS PhysicaGui DESTINATION lib)
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/Physica/Gui DESTINATION include/Physica)

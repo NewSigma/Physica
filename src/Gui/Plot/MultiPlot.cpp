@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+module;
+
 #include <QSvgGenerator>
-#include "Physica/Gui/Plot/MultiPlot.h"
+#include <QGridLayout>
+
+module Physica.Gui.MultiPlot;
 
 using namespace Physica;
 

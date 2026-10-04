@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,13 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+module;
 
 #include <QtCharts/QCategoryAxis>
 #include "Physica/Core/Physics/Phonon/FrozenPhonon.h"
-#include "Plot.h"
 
-namespace Physica {
+export module Physica.Gui.PhononPlot;
+export import Physica.Gui.Plot;
+
+export namespace Physica {
     template<Scalar T>
     class PhononPlot : public Plot {
     public:

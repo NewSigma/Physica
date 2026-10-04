@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+module;
+
 #include <QtGui/QGuiApplication>
-#include "Physica/Gui/Plot/Plot3D.h"
+#include <QVBoxLayout>
+#include <Q3DSurface>
+
+module Physica.Gui.Plot3D;
 
 using namespace Physica;
 

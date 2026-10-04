@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,12 +16,114 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+module;
 
 #include <QtCharts/QChart>
-#include "ContourSeries.h"
+#include <QtCharts/QLineSeries>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
-namespace Physica {
+export module Physica.Gui.ContourSeries;
+
+export namespace Physica {
+    template<Matrix M>
+    class ContourSeries : public QObject {
+        using ScalarType = M::ScalarType;
+        using ContourLine = std::pair<Array<double>, Array<double>>;
+
+        struct Quad {
+            using Vertex = std::pair<size_t, size_t>;
+
+            size_t row;
+            size_t col;
+
+            Quad(size_t row_, size_t col_) : row(row_), col(col_) {}
+            /* Operators */
+            [[nodiscard]] bool operator==(Quad quad) const noexcept;
+            /* Getters */
+            [[nodiscard]] Vertex getTopLeftVertex() const;
+            [[nodiscard]] Vertex getTopRightVertex() const;
+            [[nodiscard]] Vertex getBottomLeftVertex() const;
+            [[nodiscard]] Vertex getBottomRightVertex() const;
+            [[nodiscard]] Quad topNeigh() const;
+            [[nodiscard]] Quad bottomNeigh() const;
+            [[nodiscard]] Quad leftNeigh() const;
+            [[nodiscard]] Quad rightNeigh() const;
+        };
+
+        struct Edge {
+            using Vertex = Quad::Vertex;
+
+            enum Direction {
+                Top,
+                Bottom,
+                Left,
+                Right
+            };
+
+            Quad quad;
+            Direction dir;
+
+            Edge(Quad quad_, Direction dir_) : quad(quad_), dir(dir_) {}
+            /* Operations */
+            void moveToNextEdge();
+            /* Getters */
+            [[nodiscard]] Vertex getVertex1() const;
+            [[nodiscard]] Vertex getVertex2() const;
+        };
+
+        class Grid {
+            using FlagMatrix = Array<Array<bool>>;
+
+            const M& x;
+            const M& y;
+            const M& z;
+            FlagMatrix flags;
+        public:
+            Grid(const M& x_,
+                 const M& y_,
+                 const M& z_);
+            Grid(const Grid&) = delete;
+            Grid(Grid&&) noexcept = delete;
+            ~Grid() = default;
+            /* Operations */
+            Grid& operator=(const Grid&) = delete;
+            Grid& operator=(Grid&&) noexcept = delete;
+            ContourLine interpolateFromEdge(Edge edge, double level);
+            /* Getters */
+            [[nodiscard]] size_t getRow() const noexcept { assert(x.getRow() > 0); return x.getRow() - 1; }
+            [[nodiscard]] size_t getCol() const noexcept { assert(x.getCol() > 0); return x.getCol() - 1; }
+            [[nodiscard]] bool canInterpolate(Edge edge, double level) const noexcept;
+            [[nodiscard]] bool isBoundary(Edge edge) const noexcept;
+            [[nodiscard]] bool haveVisited(Quad quad) const { return flags[quad.row][quad.col]; }
+            /* Setters */
+            void setVisited(Quad quad) { flags[quad.row][quad.col] = true; }
+        private:
+            void interpolateEdge(Edge edge, double level, ContourLine& line) const;
+        };
+
+        Array<ContourLine> contourLines;
+        Array<QLineSeries*> splines;
+    public:
+        ContourSeries(const M& x,
+                      const M& y,
+                      const M& z,
+                      Array<double> level,
+                      QObject* parent = nullptr);
+        ContourSeries(const ContourSeries&) = delete;
+        ContourSeries(ContourSeries&&) noexcept = delete;
+        ~ContourSeries() = default;
+        /* Operators */
+        ContourSeries& operator=(const ContourSeries&) = delete;
+        ContourSeries& operator=(ContourSeries&&) noexcept = delete;
+        /* Operations */
+        void attachTo(QChart& chart);
+    private:
+        void initContourLine(Grid& grid, double level);
+        void tryInterpolate(Grid& grid, double level, Edge edge);
+    };
+
     template<Matrix M>
     bool ContourSeries<M>::Quad::operator==(Quad quad) const noexcept {
         return row == quad.row && col == quad.col;
