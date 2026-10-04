@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,26 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+module;
 
-#include "AbstractLogger.h"
+#include "Physica/Macro.h"
 
-namespace Physica {
-    /**
-     * The standard logger that links to stdout and stderr,
-     * will be created when LoggerRuntime is initialized.
-     */
-    class StdLogger final : public AbstractLogger {
-        std::ostream& os;
+export module Physica.Logger.FileLogger;
+
+import Physica.Logger.AbstractLogger;
+import Physica.Logger.LogBuffer;
+
+export namespace Physica {
+    class PHYSICA_API FileLogger final : public AbstractLogger {
+        int fd;
     public:
-        StdLogger() = delete;
-        ~StdLogger() override = default;
+        FileLogger(const char* filename, bool trunc);
+        ~FileLogger() override;
         /* Operations */
         void log(LogBuffer& buffer) override final;
-    protected:
-        //StdLogger can be created by LoggerRuntime only.
-        explicit StdLogger(std::ostream& stream);
-
-        friend class LoggerRuntime;
     };
 }

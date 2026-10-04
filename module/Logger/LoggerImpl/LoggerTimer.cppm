@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,13 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+module;
 
 #include <ctime>
 #include <cstdint>
 #include "Physica/Core/Utils/Cycler.h"
 
-namespace Physica {
+export module Physica.Logger.LoggerTimer;
+
+export namespace Physica {
     /**
      * This class handle conversion between cycle at initialize and Unix time.
      */

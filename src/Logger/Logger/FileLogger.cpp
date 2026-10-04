@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,12 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+module;
+
 #include <cstring>
 #include <iostream>
 #include <fcntl.h>
 #include <unistd.h>
 #include "Physica/Core/Exception/IOException.h"
-#include "Physica/Logger/Logger/FileLogger.h"
+
+module Physica.Logger.FileLogger;
 
 using namespace Physica;
 

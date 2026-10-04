@@ -4,7 +4,7 @@ add_subdirectory(Logger)
 
 target_sources(PhysicaLogger PRIVATE
     LogBuffer.cpp
-    LoggerRuntime.cpp
+    Logger.cpp
     LoggerTimer.cpp
 )
 

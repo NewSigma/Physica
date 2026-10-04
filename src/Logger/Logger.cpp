@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,12 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Logger/LoggerRuntime.h"
+module;
+
 #include <csignal>
 #include <cstring>
 #include <iostream>
+#include <memory>
+#include <thread>
+#include <mutex>
 #include <unistd.h>
-#include "Physica/Logger/Logger/StdLogger.h"
+#include "Physica/Core/Utils/Container/RingBuffer.h"
+#include "Physica/Logger/Logger.h"
+
+module Physica.Logger;
+
+import Physica.Logger.StdLogger;
 
 using namespace Physica;
 

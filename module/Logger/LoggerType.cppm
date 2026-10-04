@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+module;
 
-#include <cstdint>
 #include <cstddef>
-#include <array>
 
-namespace Physica {
+export module Physica.Logger.LoggerType;
+
+export namespace Physica {
     /**
      * ArgType indicates the conversion specifier, e.g. c in %c, s in %s.
      */
