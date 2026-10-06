@@ -24,17 +24,11 @@ namespace Physica {
     /**
      * This class helps implementing CRTP(Curiously Recurring Template Pattern).
      * Typically, classes derived from \class CRTP are named with a 'Mixin' suffix", for example \class ScalarMixin, \class LayerMixin.
-     *
-     * Add host version since NVCC does not like SIMD
      */
     template<class T>
     class CRTP {
         using U = Traits<T>::Derived;
     public:
-        [[nodiscard, gnu::always_inline, gnu::nodebug]] constexpr U& getDerived_host() noexcept { return *static_cast<U*>(this); }
-        [[nodiscard, gnu::always_inline, gnu::nodebug]] constexpr const U& getDerived_host() const noexcept { return *static_cast<const U*>(this); }
-        [[nodiscard, gnu::always_inline, gnu::nodebug]] constexpr U& getConstCastDerived_host() const noexcept { return *static_cast<U*>(const_cast<CRTP*>(this)); }
-
         [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ constexpr U& getDerived() noexcept { return *static_cast<U*>(this); }
         [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ constexpr const U& getDerived() const noexcept { return *static_cast<const U*>(this); }
         [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ constexpr U& getConstCastDerived() const noexcept { return *static_cast<U*>(const_cast<CRTP*>(this)); }

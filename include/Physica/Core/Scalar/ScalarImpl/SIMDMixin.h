@@ -128,17 +128,17 @@ namespace Physica {
     template<class Derived>
     auto SIMDMixin<Derived>::value() const noexcept -> ValueType {
         if constexpr (isDiffable())
-            return Base::getDerived_host().value();
+            return Base::getDerived().value();
         else
-            return Base::getDerived_host();
+            return Base::getDerived();
     }
 
     template<class Derived>
     auto SIMDMixin<Derived>::asReal() const noexcept -> FullRealType {
         if constexpr (isComplex())
-            return Base::getDerived_host().asReal();
+            return Base::getDerived().asReal();
         else
-            return Base::getDerived_host();
+            return Base::getDerived();
     }
 
     template<class Derived>

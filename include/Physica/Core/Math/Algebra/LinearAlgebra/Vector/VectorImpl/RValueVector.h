@@ -57,21 +57,17 @@ namespace Physica {
             using U2 = std::remove_cvref<V2>::type;
             using T1 = U1::ScalarType;
             using T2 = U2::ScalarType;
+            constexpr static bool isCUDA = DeviceObj<V1> || DeviceObj<V2>;
         public:
             constexpr static size_t SizeAtCompile = std::max(U1::getSizeAtCompile(), U2::getSizeAtCompile());
             using ResultType = BinaryScalarOpRtnTy<T1, T2>::Type;
-            using PacketType = BestPacket<ResultType, SizeAtCompile>::Type;
+            using PacketType = std::conditional_t<isCUDA, device_obj<BestPacket<ResultType, SizeAtCompile>>, BestPacket<ResultType, SizeAtCompile>>::Type;
 
             constexpr static bool value = []() consteval static noexcept {
                 constexpr bool isSameScalar = std::same_as<typename T1::ValueType, typename T2::ValueType>;
-                constexpr bool isCUDA = DeviceObj<V1> || DeviceObj<V2>;
-                constexpr bool isFloat16 = ResultType::Prec == Float16;
-                // Only use FP16 SIMD for device:
-                // 1. Other packet types do not work for CUDA
-                // 2. Old processors do not have FP16 support
-                constexpr bool UsePacketFP16 = isFloat16 == isCUDA;
+                constexpr bool UsePacket = (ResultType::Prec != Float16) || isCUDA;
                 constexpr bool FastPacket = U1::isFastPacket() && U2::isFastPacket();
-                return isSameScalar && !Scalar<PacketType> && UsePacketFP16 && FastPacket;
+                return isSameScalar && !Scalar<PacketType> && UsePacket && FastPacket;
             }();
         };
 

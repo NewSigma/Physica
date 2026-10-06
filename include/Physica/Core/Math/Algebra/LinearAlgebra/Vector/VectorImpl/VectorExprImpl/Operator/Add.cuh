@@ -38,9 +38,9 @@ namespace Physica {
         [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         template<int Size>
-        [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
+        [[nodiscard]] __device__ device_obj<SIMD<T, Size>> packet(size_t index) const noexcept;
         template<int Size>
-        [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
+        [[nodiscard]] __device__ device_obj<SIMD<T, Size>> packet(size_t index, size_t count) const noexcept;
 
         using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
@@ -67,14 +67,14 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     template<int Size>
-    [[nodiscard]] __device__ auto device_obj<VectorExpr<ExprID::Add, V, U>>::packet(size_t index) const noexcept -> SIMD<T, Size> {
-        return Base::getLHS().template packet<Size>(index) + SIMD<T, Size>(Base::getRHS());
+    [[nodiscard]] __device__ auto device_obj<VectorExpr<ExprID::Add, V, U>>::packet(size_t index) const noexcept -> device_obj<SIMD<T, Size>> {
+        return Base::getLHS().template packet<Size>(index) + device_obj<SIMD<T, Size>>(Base::getRHS());
     }
 
     template<Vector V, Scalar U>
     template<int Size>
-    [[nodiscard]] __device__ auto device_obj<VectorExpr<ExprID::Add, V, U>>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size>{
-        return Base::getLHS().template packet<Size>(index, count) + SIMD<T, Size>(Base::getRHS());
+    [[nodiscard]] __device__ auto device_obj<VectorExpr<ExprID::Add, V, U>>::packet(size_t index, size_t count) const noexcept -> device_obj<SIMD<T, Size>> {
+        return Base::getLHS().template packet<Size>(index, count) + device_obj<SIMD<T, Size>>(Base::getRHS());
     }
 
     template<Vector V, Scalar U>
@@ -110,9 +110,9 @@ namespace Physica {
         [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         template<int Size>
-        [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
+        [[nodiscard]] __device__ device_obj<SIMD<T, Size>> packet(size_t index) const noexcept;
         template<int Size>
-        [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
+        [[nodiscard]] __device__ device_obj<SIMD<T, Size>> packet(size_t index, size_t count) const noexcept;
 
         using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
@@ -138,14 +138,14 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     template<int Size>
-    __device__ auto device_obj<VectorExpr<ExprID::Add, V1, V2>>::packet(size_t index) const noexcept -> SIMD<T, Size> {
+    __device__ auto device_obj<VectorExpr<ExprID::Add, V1, V2>>::packet(size_t index) const noexcept -> device_obj<SIMD<T, Size>> {
         return Base::getLHS().template packet<Size>(index)
              + Base::getRHS().template packet<Size>(index);
     }
 
     template<Vector V1, Vector V2>
     template<int Size>
-    __device__ auto device_obj<VectorExpr<ExprID::Add, V1, V2>>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
+    __device__ auto device_obj<VectorExpr<ExprID::Add, V1, V2>>::packet(size_t index, size_t count) const noexcept -> device_obj<SIMD<T, Size>> {
         return Base::getLHS().template packet<Size>(index, count)
              + Base::getRHS().template packet<Size>(index, count);
     }

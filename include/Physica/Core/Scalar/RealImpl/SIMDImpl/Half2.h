@@ -32,6 +32,7 @@ namespace Physica {
         using FullRealType = RealType;
         using MachineType = __half2;
         using BoolSIMDType = Empty;
+        constexpr static bool isSeparatable = false;
     };
 }
 
@@ -45,9 +46,6 @@ namespace Physica {
         constexpr static int Size = Length == 1 ? 1 : 2;
         using Type = std::conditional<Length == 1, float16, SIMD<float16, 2>>::type;
     };
-
-    template<size_t Length>
-    class device_obj<BestPacket<float16, Length>> : public BestPacket<float16, Length> {};
 
     template<>
     class SIMD<Real<Float16>, 2> : public SIMDMixin<SIMD<Real<Float16>, 2>>, private __half2 {

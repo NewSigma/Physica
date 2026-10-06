@@ -101,7 +101,7 @@ namespace Physica {
     __device__ void device_obj<RValueVector<Derived, ScalarT>>::assign(this const auto& self, Vector auto&& target, instanceof_x<ThreadBlock> auto block) {
         target.assert_assign(self);
         if constexpr (Internal::EnableSIMD<device_obj<Derived>, decltype(target)>::value) {
-            constexpr size_t Length = getSizeAtCompile(target);
+            constexpr size_t Length = std::max(getSizeAtCompile(), target.getSizeAtCompile());
             constexpr int Size = device_obj<BestPacket<T, Length>>::Size;
             if constexpr (Length != Dynamic) {
                 constexpr size_t to = Length / Size * Size;
@@ -193,17 +193,31 @@ namespace Physica {
 
     template<class Derived, Scalar ScalarT>
     template<int Size>
-    __device__ auto device_obj<RValueVector<Derived, ScalarT>>::packet(this const auto& self, size_t index) noexcept -> SIMD<T, Size> {
-        assert(index + Size <= self.getLength());
-        return SIMD<T, Size>(self.calc(index).value(), self.calc(index + 1).value());
+    __device__ auto device_obj<RValueVector<Derived, ScalarT>>::packet(this const auto& self, size_t index) noexcept -> device_obj<SIMD<T, Size>> {
+        assert(index + Size <= self.getLength() && "[Error]: Index out of range");
+        using Pack = device_obj<SIMD<T, Size>>;
+        alignas(Pack) Array<T, Size> buffer{};
+        for (size_t i = 0; i < Size; ++i, ++index)
+            buffer[i] = self.calc(index);
+
+        Pack packet{};
+        packet.load(buffer.data());
+        return packet;
     }
 
     template<class Derived, Scalar ScalarT>
     template<int Size>
-    __device__ auto device_obj<RValueVector<Derived, ScalarT>>::packet(this const auto& self, size_t index, [[maybe_unused]] size_t count) noexcept -> SIMD<T, Size> {
-        assert(index + Size <= self.getLength());
-        assert(count == 1 && "[Error]: No need to call partial version");
-        return SIMD<T, Size>(self.calc(index).value(), 0_HF);
+    __device__ auto device_obj<RValueVector<Derived, ScalarT>>::packet(this const auto& self, size_t index, size_t count) noexcept -> device_obj<SIMD<T, Size>> {
+        using U = ScalarType;
+        assert(index + count <= self.getLength() && "[Error]: Index out of range");
+        using Pack = device_obj<SIMD<T, Size>>;
+        alignas(Pack) Array<T, Size> buffer{};
+        for (size_t i = 0; i < Size; ++i, ++index)
+            buffer[i] = i < count ? self.calc(index) : U(0);
+
+        Pack packet{};
+        packet.load(buffer.data());
+        return packet;
     }
 
     template<class Derived, Scalar ScalarT>

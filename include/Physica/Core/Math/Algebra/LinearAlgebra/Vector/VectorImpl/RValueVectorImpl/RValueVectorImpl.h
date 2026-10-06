@@ -153,7 +153,7 @@ namespace Physica {
             }
         }
         else {
-            Array<U, Size> buffer{};
+            alignas(SIMD<T, Size>) Array<U, Size> buffer{};
             for (size_t i = 0; i < Size; ++i, ++index)
                 buffer[i] = U(calc(index));
             SIMD<T, Size> packet{};
@@ -185,7 +185,7 @@ namespace Physica {
             }
         }
         else {
-            Array<U, Size> buffer{};
+            alignas(SIMD<T, Size>) Array<U, Size> buffer{};
             for (size_t i = 0; i < Size; ++i, ++index)
                 buffer[i] = i < count ? U(calc(index)) : U(0);
             SIMD<T, Size> packet{};

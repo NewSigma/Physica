@@ -45,9 +45,9 @@ namespace Physica {
         using Base::operator+=;
         /* Operations */
         template<int Size>
-        [[nodiscard]] __device__ auto packet(size_t index) const noexcept;
+        [[nodiscard]] __device__ device_obj<SIMD<T, Size>> packet(size_t index) const noexcept;
         template<int Size>
-        [[nodiscard]] __device__ auto packet(size_t index, size_t count) const noexcept;
+        [[nodiscard]] __device__ device_obj<SIMD<T, Size>> packet(size_t index, size_t count) const noexcept;
         __device__ void writePacket(Packet auto packet, size_t index) noexcept;
         __device__ void writePacket(Packet auto packet, size_t index, size_t count) noexcept;
         void reverse(const auto& grad) const noexcept;

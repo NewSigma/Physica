@@ -20,6 +20,7 @@
 
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Core/Parallel/ThreadBlock.cuh"
+#include "Physica/Core/Scalar/RealImpl/SIMD.cuh"
 #include "Physica/Core/Utils/CUDA/device_obj.h"
 #include "RValueVector.h"
 
@@ -61,9 +62,9 @@ namespace Physica {
         [[nodiscard]] __device__ Tv calc_value(size_t index) const;
         [[nodiscard]] __device__ Tv calc_value(size_t index, instanceof_x<ThreadBlock> auto block) const;
         template<int Size>
-        [[nodiscard]] __device__ SIMD<T, Size> packet(this const auto&, size_t index) noexcept;
+        [[nodiscard]] __device__ device_obj<SIMD<T, Size>> packet(this const auto&, size_t index) noexcept;
         template<int Size>
-        [[nodiscard]] __device__ SIMD<T, Size> packet(this const auto&, size_t index, size_t count) noexcept;
+        [[nodiscard]] __device__ device_obj<SIMD<T, Size>> packet(this const auto&, size_t index, size_t count) noexcept;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
 
         __host__ __device__ void resize(this auto&, const Vector auto& x);

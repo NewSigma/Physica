@@ -41,16 +41,16 @@ namespace Physica {
         __host__ __device__ void assign_add(Vector auto&& v) const;
         __host__ __device__ void assign_add_base(Vector auto&& v) const;
         void assign_add_cublas(Vector auto&& v) const noexcept;
-        __device__ void assign_add(Vector auto&& v,  instanceof_x<ThreadBlock> auto block) const;
+        __device__ void assign_add(Vector auto&& v, instanceof_x<ThreadBlock> auto block) const;
         __device__ void assign_add_base(Vector auto&& v, instanceof_x<ThreadBlock> auto block) const;
 
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         template<int Size>
-        [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
+        [[nodiscard]] __device__ device_obj<SIMD<T, Size>> packet(size_t index) const noexcept;
         template<int Size>
-        [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
+        [[nodiscard]] __device__ device_obj<SIMD<T, Size>> packet(size_t index, size_t count) const noexcept;
 
         [[nodiscard]] __host__ __device__ T sum() const { return getLHS().sum() * getRHS(); }
 
@@ -59,8 +59,8 @@ namespace Physica {
         using Base::getLHS;
         using Base::getRHS;
     private:
-        void assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept;
-        __device__ void assign_fma_for(Vector auto&  __restrict v, instanceof_x<ThreadBlock> auto block) const  __restrict noexcept;
+        void assign_fma_for(Vector auto& __restrict v) const __restrict noexcept;
+        __device__ void assign_fma_for(Vector auto& __restrict v, instanceof_x<ThreadBlock> auto block) const __restrict noexcept;
     };
 
     template<Vector V, Scalar U>
@@ -155,14 +155,14 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     template<int Size>
-    __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::packet(size_t index) const noexcept -> SIMD<T, Size> {
-        return getLHS().template packet<Size>(index) * SIMD<T, Size>(getRHS());
+    __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::packet(size_t index) const noexcept -> device_obj<SIMD<T, Size>> {
+        return getLHS().template packet<Size>(index) * device_obj<SIMD<T, Size>>(getRHS());
     }
 
     template<Vector V, Scalar U>
     template<int Size>
-    __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
-            return getLHS().template packet<Size>(index, count) * SIMD<T, Size>(getRHS());
+    __device__ auto device_obj<VectorExpr<ExprID::Mul, V, U>>::packet(size_t index, size_t count) const noexcept -> device_obj<SIMD<T, Size>> {
+        return getLHS().template packet<Size>(index, count) * device_obj<SIMD<T, Size>>(getRHS());
     }
 
     template<Vector V, Scalar U>
@@ -172,7 +172,7 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept {
+    void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_fma_for(Vector auto& __restrict v) const __restrict noexcept {
         auto fn = [source_ = asStruct(*this), target_ = asStruct(v)] __device__() mutable {
             const auto& source = source_.getDerived();
             auto& target = target_.getDerived();
@@ -189,7 +189,7 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    __device__ void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_fma_for(Vector auto&  __restrict v, instanceof_x<ThreadBlock> auto block) const  __restrict noexcept {
+    __device__ void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_fma_for(Vector auto& __restrict v, instanceof_x<ThreadBlock> auto block) const __restrict noexcept {
         size_t length = Base::getLength();
         int delta = block.getNumThread();
         for (size_t i = block.tid(); i < length; i += delta) {
@@ -217,14 +217,14 @@ namespace Physica {
         [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
         template<int Size>
-        [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index) const noexcept;
+        [[nodiscard]] __device__ device_obj<SIMD<T, Size>> packet(size_t index) const noexcept;
         template<int Size>
-        [[nodiscard]] __device__ SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
+        [[nodiscard]] __device__ device_obj<SIMD<T, Size>> packet(size_t index, size_t count) const noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
     private:
-        __host__ __device__ void assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept;
+        __host__ __device__ void assign_fma_for(Vector auto& __restrict v) const __restrict noexcept;
     };
 
     template<Vector V1, Vector V2>
@@ -249,20 +249,20 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     template<int Size>
-    __device__ auto device_obj<VectorExpr<ExprID::Mul, V1, V2>>::packet(size_t index) const noexcept -> SIMD<T, Size> {
+    __device__ auto device_obj<VectorExpr<ExprID::Mul, V1, V2>>::packet(size_t index) const noexcept -> device_obj<SIMD<T, Size>> {
         return Base::getLHS().template packet<Size>(index)
              * Base::getRHS().template packet<Size>(index);
     }
 
     template<Vector V1, Vector V2>
     template<int Size>
-    __device__ auto device_obj<VectorExpr<ExprID::Mul, V1, V2>>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
+    __device__ auto device_obj<VectorExpr<ExprID::Mul, V1, V2>>::packet(size_t index, size_t count) const noexcept -> device_obj<SIMD<T, Size>> {
         return Base::getLHS().template packet<Size>(index, count)
              * Base::getRHS().template packet<Size>(index, count);
     }
 
     template<Vector V1, Vector V2>
-    __host__ __device__ void device_obj<VectorExpr<ExprID::Mul, V1, V2>>::assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept {
+    __host__ __device__ void device_obj<VectorExpr<ExprID::Mul, V1, V2>>::assign_fma_for(Vector auto& __restrict v) const __restrict noexcept {
         if (IsHost()) {
             auto fn = [source_ = asStruct(*this), target_ = asStruct(v)] __device__() mutable {
                 const auto& source = source_.getDerived();
