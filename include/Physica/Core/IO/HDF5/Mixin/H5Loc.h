@@ -65,13 +65,19 @@ namespace Physica {
     H5Dataset<Dim> H5Loc::openDataSet(const char* name) {
         if (!exists(name))
             throw IOException("[Error]: Dataset not found");
-        return H5Dataset<Dim>(H5ID(H5Dopen2(getHID(), name, H5P_DEFAULT)));
+        H5ID id(H5Dopen2(getHID(), name, H5P_DEFAULT));
+        if (!id.isValid())
+            throw IOException("[Error]: Dataset not found");
+        return H5Dataset<Dim>(std::move(id));
     }
 
     template<size_t Dim>
     const H5Dataset<Dim> H5Loc::openDataSet(const char* name) const {
         if (!exists(name))
             throw IOException("[Error]: Dataset not found");
-        return H5Dataset<Dim>(H5ID(H5Dopen2(getHID(), name, H5P_DEFAULT)));
+        H5ID id(H5Dopen2(getHID(), name, H5P_DEFAULT));
+        if (!id.isValid())
+            throw IOException("[Error]: Dataset not found");
+        return H5Dataset<Dim>(std::move(id));
     }
 }

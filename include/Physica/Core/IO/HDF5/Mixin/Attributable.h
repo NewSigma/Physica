@@ -19,7 +19,9 @@
 #pragma once
 
 #include <cassert>
+#include <utility>
 #include <H5Ppublic.h>
+#include "Physica/Core/Exception/IOException.h"
 #include "Physica/Core/IO/HDF5/H5Attribute.h"
 #include "Physica/Core/IO/HDF5/H5DataSpace.h"
 
@@ -29,7 +31,7 @@ namespace Physica {
     public:
         ~Attributable() = default;
         /* Operations */
-        [[nodiscard]] H5Attribute openAttribute(this auto&&, const char* name) noexcept;
+        [[nodiscard]] H5Attribute openAttribute(this auto&&, const char* name);
         [[nodiscard]] H5Attribute createAttribute(this const auto&, const char* name, const H5Type& dtype, const auto& space);
 
         void readAttr(this const auto&, const char* name, auto& value);
@@ -49,8 +51,11 @@ namespace Physica {
         consteval static size_t calcNumElem() noexcept;
     };
 
-    H5Attribute Attributable::openAttribute(this auto&& self, const char* name) noexcept {
-        return H5Attribute(H5ID(H5Aopen(self.getHID(), name, H5P_DEFAULT)));
+    H5Attribute Attributable::openAttribute(this auto&& self, const char* name) {
+        H5ID id(H5Aopen(self.getHID(), name, H5P_DEFAULT));
+        if (!id.isValid())
+            throw IOException("[Error]: Attribute not found");
+        return H5Attribute(std::move(id));
     }
 
     H5Attribute Attributable::createAttribute(this const auto& self, const char* name, const H5Type& dtype, const auto& space) {
@@ -61,13 +66,7 @@ namespace Physica {
     void Attributable::readAttr(this const auto& self, const char* name, auto& value) {
         using T = std::remove_reference_t<decltype(value)>;
         const auto type = H5Type::get<T>();
-        const auto space = H5DataSpace<1>(calcNumElem<T>());
-        H5Attribute attr;
-        if (self.attrExists(name))
-            attr = self.openAttribute(name);
-        else
-            attr = self.createAttribute(name, type, space);
-        attr.read(type, &value);
+        self.openAttribute(name).read(type, &value);
     }
 
     void Attributable::writeAttr(this auto&& self, const char* name, const auto& value) {

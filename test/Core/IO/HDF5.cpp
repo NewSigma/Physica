@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <string_view>
 #include "Physica/Core/IO/HDF5/HDF5.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
 #include "Test.h"
@@ -32,6 +33,17 @@ namespace {
             threw = true;
         }
         expect(threw);
+    }
+
+    void expect_throw_msg(auto&& fn, const char* msg) {
+        bool matched = false;
+        try {
+            fn();
+        }
+        catch (const std::exception& e) {
+            matched = std::string_view(e.what()).contains(msg);
+        }
+        expect(matched);
     }
 
     void predicates() {
@@ -75,26 +87,42 @@ namespace {
         }
     }
 
-    void readOnlyWrite() {
+    void readonly() {
         TempFile temp("/tmp/tmpXXXXXX");
         const auto type = H5Type::get<int>();
         const auto space = H5DataSpace<1>(1);
         const int value = 42;
         {
             auto h5f = H5File::open(temp.getName());
-            auto dataset = h5f.createDataSet<1>("/data", type, space);
+            auto group = h5f.openGroup("G");
+            auto dataset = group.createDataSet<1>("D", type, space);
             dataset.write(&value);
-            auto attr = h5f.createAttribute("A", type, space);
+            auto attr = group.createAttribute("A", type, space);
             attr.write(&value);
         }
 
         auto h5f = H5File::open(temp.getName(), H5File::ReadOnly);
 
+        // A readonly handle still reaches the objects written above.
+        auto group = h5f.openGroup("G");
+        int result = 0;
+        group.readAttr("A", result);
+        expect(result == value);
+
+        // Rejects writes.
         expect_throw([&] { std::ignore = h5f.createDataSet<1>("/new", type, space); });
-        expect_throw([&] { std::ignore = h5f.createAttribute("B", type, space); });
-        expect_throw([&] { std::ignore = H5Group::create(h5f, "G"); });
-        expect_throw([&] { h5f.openDataSet<1>("/data").write(&value); });
-        expect_throw([&] { h5f.openAttribute("A").write(&value); });
+        expect_throw([&] { std::ignore = group.createAttribute("B", type, space); });
+        expect_throw([&] { h5f.openDataSet<1>("/G/D").write(&value); });
+        expect_throw([&] { group.openAttribute("A").write(&value); });
+        expect_throw_msg([&] { std::ignore = H5Group::create(h5f, "G2"); }, "Cannot write a readonly file");
+
+        // Reports a missing object as missing instead of attempting to create it.
+        expect_throw_msg([&] { std::ignore = h5f.openGroup("missing"); }, "Group not found");
+        expect_throw_msg([&] { std::ignore = h5f.openDataSet<1>("missing"); }, "Dataset not found");
+        expect_throw_msg([&] { std::ignore = group.openAttribute("missing"); }, "Attribute not found");
+        expect_throw_msg([&] {
+            group.readAttr("missing", result);
+        }, "Attribute not found");
     }
 
     void attrTypedIO() {
@@ -140,7 +168,7 @@ namespace {
 int main() {
     predicates();
     stringIO();
-    readOnlyWrite();
+    readonly();
     attrTypedIO();
     close();
     return 0;

@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cassert>
+#include <utility>
+#include "Physica/Core/Exception/IOException.h"
 #include "Physica/Core/IO/HDF5/H5Group.h"
 
 using namespace Physica;
@@ -31,5 +33,8 @@ H5Group H5Group::create(const H5Loc& loc, const char* name) {
 }
 
 H5Group H5Group::open(const H5Loc& loc, const char* name) {
-    return H5Group(H5ID(H5Gopen2(loc.getHID(), name, H5P_DEFAULT)));
+    H5ID id(H5Gopen2(loc.getHID(), name, H5P_DEFAULT));
+    if (!id.isValid())
+        throw IOException("[Error]: Group not found");
+    return H5Group(std::move(id));
 }

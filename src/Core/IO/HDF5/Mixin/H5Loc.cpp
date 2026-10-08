@@ -16,6 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <utility>
+#include "Physica/Core/Exception/IOException.h"
 #include "Physica/Core/IO/HDF5/H5Group.h"
 
 using namespace Physica;
@@ -29,6 +31,8 @@ bool H5Loc::exists(const char* name) const {
 H5Group H5Loc::openGroup(const char* name) {
     if (exists(name))
         return H5Group::open(*this, name);
+    if (isReadOnly())
+        throw IOException("[Error]: Group not found");
     return H5Group::create(*this, name);
 }
 
