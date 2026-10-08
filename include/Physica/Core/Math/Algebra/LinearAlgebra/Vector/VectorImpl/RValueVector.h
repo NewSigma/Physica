@@ -64,7 +64,7 @@ namespace Physica {
             using PacketType = std::conditional_t<isCUDA, device_obj<BestPacket<ResultType, SizeAtCompile>>, BestPacket<ResultType, SizeAtCompile>>::Type;
 
             constexpr static bool value = []() consteval static noexcept {
-                constexpr bool isSameScalar = std::same_as<typename T1::ValueType, typename T2::ValueType>;
+                constexpr bool isSameScalar = std::same_as<T1, T2>;
                 constexpr bool UsePacket = (ResultType::Prec != Float16) || isCUDA;
                 constexpr bool FastPacket = U1::isFastPacket() && U2::isFastPacket();
                 return isSameScalar && !Scalar<PacketType> && UsePacket && FastPacket;
