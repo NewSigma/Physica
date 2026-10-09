@@ -221,7 +221,7 @@ namespace Physica {
 
     template<Scalar T, int Size>
     __device__ void device_obj<SIMD<T, Size>>::load(const T* p) noexcept {
-        assert(p % alignof(Pack) == 0 && "[Error]: Unaligned load");
+        assert(std::bit_cast<std::uintptr_t>(p) % alignof(Pack) == 0 && "[Error]: Unaligned load");
         pack = *reinterpret_cast<const Pack*>(p);
     }
 
@@ -235,7 +235,7 @@ namespace Physica {
 
     template<Scalar T, int Size>
     __device__ void device_obj<SIMD<T, Size>>::store(T* p) const noexcept {
-        assert(p % alignof(Pack) == 0 && "[Error]: Unaligned store");
+        assert(std::bit_cast<std::uintptr_t>(p) % alignof(Pack) == 0 && "[Error]: Unaligned store");
         *reinterpret_cast<Pack*>(p) = pack;
     }
 
