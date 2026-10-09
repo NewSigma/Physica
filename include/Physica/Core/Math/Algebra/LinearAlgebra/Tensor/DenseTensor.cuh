@@ -43,7 +43,7 @@ namespace Physica {
         device_obj() = default;
         explicit device_obj(Storage storage) noexcept;
         __host__ __device__ device_obj(IndexType shape, auto&&... args);
-        __host__ __device__ device_obj(std::integral auto... dims);
+        __host__ __device__ device_obj(std::same_as<size_t> auto... dims);
         device_obj(const Tensor auto& x);
         device_obj(const host_obj& obj);
         device_obj(const This&) = default;

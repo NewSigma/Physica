@@ -41,7 +41,7 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept {}
         /* Getters */
         [[nodiscard]] constexpr static int getNumSpin() noexcept { return NumSite; }
-        [[nodiscard]] constexpr static size_t getNumState() noexcept { return size_t(1) << NumSite; }
+        [[nodiscard]] constexpr static size_t getNumState() noexcept { return 1UZ << NumSite; }
     };
 
     template<int Dim, int NumSite>

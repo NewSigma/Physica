@@ -60,7 +60,7 @@ namespace Physica {
         void assert_assign(const Tensor auto& source) const noexcept;
 
         [[nodiscard]] decltype(auto) calc(IndexType indices) const;
-        [[nodiscard]] decltype(auto) calc(std::integral auto... dims) const;
+        [[nodiscard]] decltype(auto) calc(std::same_as<size_t> auto... dims) const;
         [[nodiscard]] size_t toIndex1D(const IndexType& indices) const noexcept;
         [[nodiscard]] IndexType toIndexND(size_t index) const noexcept;
         void forND(std::invocable<T, IndexType> auto fn) const;
@@ -72,7 +72,7 @@ namespace Physica {
         [[nodiscard]] auto flatten(this auto&&) noexcept;
 
         void resize(this auto&, const Tensor auto& x);
-        auto resize(this auto&, std::integral auto... dims);
+        auto resize(this auto&, std::same_as<size_t> auto... dims);
         auto resize(this auto&, IndexType shape);
 
         [[nodiscard]] decltype(auto) reals(this auto&&) noexcept;

@@ -67,9 +67,9 @@ namespace Physica {
         /* Getters */
         using Base::getNumSample;
         [[nodiscard]] const auto& getObserves() const noexcept { return observes; }
-        [[nodiscard]] int getNumSiteX() const noexcept { return lattice.getNumCellX(); }
-        [[nodiscard]] int getNumSiteY() const noexcept { return lattice.getNumCellY(); }
-        [[nodiscard]] int getNumSite() const noexcept { return getNumSiteX() * getNumSiteY(); }
+        [[nodiscard]] size_t getNumSiteX() const noexcept { return lattice.getNumCellX(); }
+        [[nodiscard]] size_t getNumSiteY() const noexcept { return lattice.getNumCellY(); }
+        [[nodiscard]] size_t getNumSite() const noexcept { return getNumSiteX() * getNumSiteY(); }
     private:
         [[nodiscard]] MatrixND<T> calcCorrelation(const MatrixND<T>& greenU, const MatrixND<T>& greenD) const noexcept;
         [[nodiscard]] T calcCorrelation(const MatrixND<T>& greenU, int siteA, const MatrixND<T>& greenD, int siteB) const noexcept;

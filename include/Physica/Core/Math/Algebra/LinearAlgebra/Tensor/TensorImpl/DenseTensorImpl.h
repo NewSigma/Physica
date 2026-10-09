@@ -28,7 +28,7 @@ namespace Physica {
     DenseTensor<T, Dims...>::DenseTensor(IndexType shape, auto&&... args) : storage(std::move(shape), std::forward<decltype(args)>(args)...) {}
 
     template<Scalar T, int... Dims>
-    DenseTensor<T, Dims...>::DenseTensor(std::integral auto... dims) : storage(dims...) {}
+    DenseTensor<T, Dims...>::DenseTensor(std::same_as<size_t> auto... dims) : storage(dims...) {}
 
     template<Scalar T, int... Dims>
     DenseTensor<T, Dims...>::DenseTensor(const Tensor auto& x) : This(x.getShape()) {
@@ -138,8 +138,8 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
-    auto DenseTensor<T, Dims...>::zeros(std::integral auto... dims) -> This {
-        static_assert(1 + sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
+    auto DenseTensor<T, Dims...>::zeros(std::same_as<size_t> auto... dims) -> This {
+        static_assert(sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
         return zeros(IndexType({dims...}));
     }
 
@@ -151,22 +151,22 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
-    auto DenseTensor<T, Dims...>::junk(std::integral auto... dims) -> This {
-        static_assert(1 + sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
+    auto DenseTensor<T, Dims...>::junk(std::same_as<size_t> auto... dims) -> This {
+        static_assert(sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
         return junk(IndexType({dims...}));
     }
 
     template<Scalar T, int... Dims>
     template<RNG R>
-    auto DenseTensor<T, Dims...>::random_uniform(std::integral auto... dims) -> This {
-        static_assert(1 + sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
+    auto DenseTensor<T, Dims...>::random_uniform(std::same_as<size_t> auto... dims) -> This {
+        static_assert(sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
         return random_uniform<R>(IndexType({dims...}));
     }
 
     template<Scalar T, int... Dims>
     template<RNG R>
-    auto DenseTensor<T, Dims...>::random_normal(std::integral auto... dims) -> This {
-        static_assert(1 + sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
+    auto DenseTensor<T, Dims...>::random_normal(std::same_as<size_t> auto... dims) -> This {
+        static_assert(sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
         return random_normal<R>(IndexType({dims...}));
     }
 
@@ -186,8 +186,8 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
-    auto DenseTensor<T, Dims...>::generate(std::invocable<IndexType> auto fn, std::integral auto... dims) -> This {
-        static_assert(1 + sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
+    auto DenseTensor<T, Dims...>::generate(std::invocable<IndexType> auto fn, std::same_as<size_t> auto... dims) -> This {
+        static_assert(sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
         return generate(std::move(fn), IndexType({dims...}));
     }
 

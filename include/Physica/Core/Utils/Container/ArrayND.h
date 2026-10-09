@@ -53,17 +53,17 @@ namespace Physica {
     public:
         ArrayND() = default;
         explicit ArrayND(IndexType shape_, auto&&... args);
-        explicit ArrayND(std::integral auto... dims);
+        explicit ArrayND(std::same_as<size_t> auto... dims);
         ArrayND(const This&) = default;
         ArrayND(This&&) noexcept = default;
         ~ArrayND() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] auto& operator[](this auto&&, const IndexType& indices) noexcept;
-        [[nodiscard]] auto& operator[](this auto&&, std::integral auto... dims) noexcept;
+        [[nodiscard]] auto& operator[](this auto&&, std::same_as<size_t> auto... dims) noexcept;
         /* Operations */
         void resize(IndexType shape_, auto&&... args);
-        void resize(std::integral auto... dims);
+        void resize(std::same_as<size_t> auto... dims);
         void reserve(size_t size) noexcept;
 
         [[nodiscard]] auto toDevice() const;

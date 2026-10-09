@@ -39,7 +39,7 @@ namespace Physica {
         [[nodiscard]] auto data_handle() noexcept;
         [[nodiscard]] auto data_handle() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, const IndexType& index) noexcept;
-        [[nodiscard]] auto data_ptr(this auto&&, std::integral auto... dims) noexcept;
+        [[nodiscard]] auto data_ptr(this auto&&, std::same_as<size_t> auto... dims) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStrided() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static IndexType getStrideAtCompile() noexcept;

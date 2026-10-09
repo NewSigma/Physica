@@ -41,7 +41,7 @@ namespace Physica {
     public:
         device_obj() = default;
         explicit __host__ __device__ device_obj(IndexType shape_, auto&&... args);
-        explicit __host__ __device__ device_obj(std::integral auto... dims);
+        explicit __host__ __device__ device_obj(std::same_as<size_t> auto... dims);
         device_obj(const host_obj& storage);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
@@ -49,10 +49,10 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __device__ auto& operator[](this auto&&, const IndexType& indices) noexcept;
-        [[nodiscard]] __device__ auto& operator[](this auto&&, std::integral auto... dims) noexcept;
+        [[nodiscard]] __device__ auto& operator[](this auto&&, std::same_as<size_t> auto... dims) noexcept;
         /* Operations */
         __host__ __device__ void resize(IndexType shape_, auto&&... args);
-        __host__ __device__ void resize(std::integral auto... dims);
+        __host__ __device__ void resize(std::same_as<size_t> auto... dims);
         void reserve(size_t size);
 
         [[nodiscard]] host_obj toHost() const;

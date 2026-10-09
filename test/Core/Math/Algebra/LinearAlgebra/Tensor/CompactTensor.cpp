@@ -33,8 +33,8 @@ namespace {
         static_assert(!decltype(fiber)::isCompact());
         static_assert(decltype(fiber)::getStrideAtCompile() == Dynamic);
         expect(fiber.getStride() == x.getStride(1));
-        for (int i = 0; i < fiber.getLength(); ++i)
-            expect(x[1, i, 2] == fiber[i]);
+        for (size_t i = 0; i < fiber.getLength(); ++i)
+            expect(x[1UZ, i, 2UZ] == fiber[i]);
     }
 
     void slice() {
@@ -42,9 +42,9 @@ namespace {
         auto slice = x.slice(1, var(), var());
         static_assert(slice.isCompact());
         static_assert(slice.getMajor() == MatrixMajor::Row);
-        for (int r = 0; r < 4; ++r)
-            for (int c = 0; c < 4; ++c)
-                expect(x[1, r, c] == slice[r, c]);
+        for (size_t r = 0; r < 4; ++r)
+            for (size_t c = 0; c < 4; ++c)
+                expect(x[1UZ, r, c] == slice[r, c]);
 
         MatrixND<T> m = slice;
         expect(m == slice);
@@ -59,7 +59,7 @@ namespace {
 
         expect(b.getShape() == count);
         expect(b.getStrides() == x.getStrides());
-        expect(b.data_handle() == &x[1, 0, 2]);
+        expect(b.data_handle() == &x[1UZ, 0UZ, 2UZ]);
     }
 
     void flatten() {

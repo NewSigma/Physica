@@ -157,7 +157,7 @@ namespace Physica {
                 pIndex.normalize();
                 coeff *= fft.getRSpace()[pIndex];
             });
-            baseCoeff[0, 0, 0] = average;
+            baseCoeff[0UZ, 0UZ, 0UZ] = average;
         }
     }
 

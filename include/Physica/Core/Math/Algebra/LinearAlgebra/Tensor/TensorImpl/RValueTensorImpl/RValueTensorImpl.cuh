@@ -80,9 +80,9 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    __device__ decltype(auto) device_obj<RValueTensor<Derived, ScalarT>>::calc(std::integral auto... dims) const {
+    __device__ decltype(auto) device_obj<RValueTensor<Derived, ScalarT>>::calc(std::same_as<size_t> auto... dims) const {
         static_assert(sizeof...(dims) == NDim, "[Error]: NDim is not consistent");
-        return calc(IndexType({static_cast<size_t>(dims)...}));
+        return calc(IndexType({dims...}));
     }
 
     template<class Derived, Scalar ScalarT>
@@ -164,9 +164,9 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    __host__ __device__ auto device_obj<RValueTensor<Derived, ScalarT>>::resize(this auto& self, std::integral auto... dims) {
+    __host__ __device__ auto device_obj<RValueTensor<Derived, ScalarT>>::resize(this auto& self, std::same_as<size_t> auto... dims) {
         static_assert(sizeof...(dims) == NDim, "[Error]: NDim is not consistent");
-        return self.resize(IndexType({static_cast<size_t>(dims)...}));
+        return self.resize(IndexType({dims...}));
     }
 
     template<class Derived, Scalar ScalarT>

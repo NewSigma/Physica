@@ -27,7 +27,7 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
-    ArrayND<T, Dims...>::ArrayND(std::integral auto... dims) {
+    ArrayND<T, Dims...>::ArrayND(std::same_as<size_t> auto... dims) {
         resize(dims...);
     }
 
@@ -37,8 +37,8 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
-    auto& ArrayND<T, Dims...>::operator[](this auto&& self, std::integral auto... dims) noexcept {
-        return self[IndexType({static_cast<size_t>(dims)...})];
+    auto& ArrayND<T, Dims...>::operator[](this auto&& self, std::same_as<size_t> auto... dims) noexcept {
+        return self[IndexType({dims...})];
     }
 
     template<class T, int... Dims>
@@ -51,9 +51,9 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
-    void ArrayND<T, Dims...>::resize(std::integral auto... dims) {
+    void ArrayND<T, Dims...>::resize(std::same_as<size_t> auto... dims) {
         static_assert(sizeof...(dims) == NDim, "[Error]: NDim is not consistent");
-        resize(IndexType{static_cast<size_t>(dims)...});
+        resize(IndexType{dims...});
     }
 
     template<class T, int... Dims>

@@ -247,7 +247,7 @@ namespace Physica {
             const size_t numBin = getNumPoint() - 1;
             const Trv total = accum.back();
             auto oldP = pointGrid.col(dim);
-            auto newP = VectorND<Trv>::generate([&, cur = size_t(0)](size_t i) mutable {
+            auto newP = VectorND<Trv>::generate([&, cur = 0UZ](size_t i) mutable {
                 if (i == 0 || i == numBin)
                     return oldP[i];
 

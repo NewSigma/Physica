@@ -262,9 +262,9 @@ namespace Physica {
         using Internal::doubleFactorial;
         const T temp = T(M_PI_2) / alpha;
         const T factor = temp * sqrt(temp);
-        const T numerator = doubleFactorial<T>(l != 0 ? (2 * l - 1) : size_t(0))
-                          * doubleFactorial<T>(m != 0 ? (2 * m - 1) : size_t(0))
-                          * doubleFactorial<T>(n != 0 ? (2 * n - 1) : size_t(0));
+        const T numerator = doubleFactorial<T>(l != 0 ? (2 * l - 1) : 0UZ)
+                          * doubleFactorial<T>(m != 0 ? (2 * m - 1) : 0UZ)
+                          * doubleFactorial<T>(n != 0 ? (2 * n - 1) : 0UZ);
         const T denominator = pow(T(4) * alpha, T(l + m + n));
         return factor * numerator / denominator;
     }
@@ -275,7 +275,7 @@ namespace Physica {
         T result = T(0);
         T i_float = T(0);
         for (size_t i = 0; i <= (index1 + index2) / 2; ++i) {
-            const T temp = doubleFactorial<T>(i != 0 ? (2 * i - 1) : size_t(0))
+            const T temp = doubleFactorial<T>(i != 0 ? (2 * i - 1) : 0UZ)
                          / pow(T(2) * alpha_sum, i_float);
             const T temp_x = helper_f(2 * i, index1, index2, elemPA, elemPB);
             result += temp_x * temp;
@@ -292,7 +292,7 @@ namespace Physica {
                                      const T& element_pb,
                                      const T& element_cp,
                                      const T& alpha_sum) {
-        const size_t lower = (2 * i > (index1 + index2)) ? (2 * i - index1 - index2) : size_t(0);
+        const size_t lower = (2 * i > (index1 + index2)) ? (2 * i - index1 - index2) : 0UZ;
         const T epsilon = reciprocal(T(4) * alpha_sum);
         T result = T(0);
         for (size_t lambda = lower; lambda <= i; ++lambda)

@@ -51,7 +51,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr KernelConfig makeKernelConfig() const noexcept;
 
         [[nodiscard]] __device__ decltype(auto) calc(const IndexType& indices) const;
-        [[nodiscard]] __device__ decltype(auto) calc(std::integral auto... dims) const;
+        [[nodiscard]] __device__ decltype(auto) calc(std::same_as<size_t> auto... dims) const;
         [[nodiscard]] __host__ __device__ auto toIndex1D(const IndexType& indices) const noexcept;
         [[nodiscard]] __host__ __device__ auto toIndexND(size_t index) const noexcept;
         __device__ void forND(std::invocable<T, IndexType> auto fn) const;
@@ -63,7 +63,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto flatten(this auto&&) noexcept;
 
         __host__ __device__ void resize(this auto&, const Tensor auto& x);
-        __host__ __device__ auto resize(this auto&, std::integral auto... dims);
+        __host__ __device__ auto resize(this auto&, std::same_as<size_t> auto... dims);
         __host__ __device__ auto resize(this auto&, IndexType shape);
 
         [[nodiscard]] __host__ __device__ decltype(auto) reals(this auto&&) noexcept;

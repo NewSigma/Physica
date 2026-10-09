@@ -53,9 +53,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<StridedTensor<Derived>>::data_ptr(this auto&& self, std::integral auto... dims) noexcept {
+    __host__ __device__ auto device_obj<StridedTensor<Derived>>::data_ptr(this auto&& self, std::same_as<size_t> auto... dims) noexcept {
         static_assert(sizeof...(dims) == Base::NDim, "[Error]: NDim is not consistent");
-        return self.data_ptr(IndexType({static_cast<size_t>(dims)...}));
+        return self.data_ptr(IndexType({dims...}));
     }
 
     template<class Derived>

@@ -30,7 +30,7 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
-    __host__ __device__ device_obj<DenseTensor<T, Dims...>>::device_obj(std::integral auto... dims) : storage(dims...) {}
+    __host__ __device__ device_obj<DenseTensor<T, Dims...>>::device_obj(std::same_as<size_t> auto... dims) : storage(dims...) {}
 
     template<Scalar T, int... Dims>
     device_obj<DenseTensor<T, Dims...>>::device_obj(const Tensor auto& x) : This(x.getShape()) {

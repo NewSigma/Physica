@@ -34,7 +34,7 @@ namespace Physica {
         DenseTensor() = default;
         explicit DenseTensor(ArrayND<T, Dims...> storage) noexcept;
         DenseTensor(IndexType shape, auto&&... args);
-        DenseTensor(std::integral auto... dims);
+        DenseTensor(std::same_as<size_t> auto... dims);
         DenseTensor(const Tensor auto& x);
         DenseTensor(const This&) = default;
         DenseTensor(This&&) noexcept = default;
@@ -69,21 +69,21 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static IndexType getStrideAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         [[nodiscard]] static This zeros(IndexType shape);
-        [[nodiscard]] static This zeros(std::integral auto... dims);
+        [[nodiscard]] static This zeros(std::same_as<size_t> auto... dims);
         [[nodiscard]] static This junk(IndexType shape);
-        [[nodiscard]] static This junk(std::integral auto... dims);
+        [[nodiscard]] static This junk(std::same_as<size_t> auto... dims);
         template<RNG R>
         static DenseTensor random_uniform(IndexType shape);
         template<RNG R>
-        static DenseTensor random_uniform(std::integral auto... dims);
+        static DenseTensor random_uniform(std::same_as<size_t> auto... dims);
         template<RNG R>
         static DenseTensor random_normal(IndexType shape);
         template<RNG R>
-        static DenseTensor random_normal(std::integral auto... dims);
+        static DenseTensor random_normal(std::same_as<size_t> auto... dims);
         template<RNG R>
         [[nodiscard]] static This random_any(IndexType shape, auto& distribution);
         [[nodiscard]] static This generate(std::invocable<IndexType> auto fn, IndexType shape);
-        [[nodiscard]] static This generate(std::invocable<IndexType> auto fn, std::integral auto... dims);
+        [[nodiscard]] static This generate(std::invocable<IndexType> auto fn, std::same_as<size_t> auto... dims);
         [[nodiscard]] static This read(IndexType shape, const T* __restrict p) noexcept;
         /* Friends */
         friend class device_obj<This>;

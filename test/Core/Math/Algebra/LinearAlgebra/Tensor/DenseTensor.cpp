@@ -47,12 +47,12 @@ namespace {
         Tensor3D<T> y = x;
         expect(x == y);
 
-        y[0, 0, 0] += T(1);
+        y[0UZ, 0UZ, 0UZ] += T(1);
         expect(x != y);
         expect(x + y == x + y);
 
         Tensor3D<T> z = x;
-        z.resize(2, 2, 2);
+        z.resize(2UZ, 2UZ, 2UZ);
         expect(x != z);
     }
 }
