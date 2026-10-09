@@ -32,6 +32,12 @@
 namespace Physica {
     class PHYSICA_API Plot : public ChartView {
         using Base = ChartView;
+    public:
+        enum class TickDirection : int8_t {
+            Outer,
+            Inner,
+        };
+    private:
         QValueAxis* axisX;
         QValueAxis* axisY;
         QValueAxis* axisTop;
@@ -96,13 +102,20 @@ namespace Physica {
         inline void setDeltaY(double value) noexcept;
         void setBox(float64 minX, float64 maxX, float64 minY, float64 maxY, float64 deltaX, float64 deltaY);
 
-        void setTickDirection(QAbstractAxis::TickDirection d);
+        void setTickDirection(TickDirection d);
         void setFont(const QFont& font);
         void setFontSize(int size);
     private:
         QBoxSet* setFromVector(const Vector auto& v);
         double findMedian(const Vector auto& sorted_v, size_t from, size_t to);
         void updateNumTick() noexcept;
+        /* Static members */
+        // FIXME: The GUI module uses a customized version of QtCharts. (https://gitee.com/newsigma/QtCharts);
+        //        But we have to patch it out so that CI works.
+        template<class T = QBoxPlotSeries>
+        [[nodiscard]] consteval static bool hasCustomizedQtCharts() noexcept {
+            return requires { T::Numeric; };
+        }
     };
 
     QLineSeries& Plot::line(const Vector auto& y) {
@@ -251,10 +264,18 @@ namespace Physica {
     template<Vector V>
     QBoxPlotSeries& Plot::boxWhisker(const V& x, const Array<V>& data) {
         assert(x.getLength() == data.getLength());
-        auto* series = new QBoxPlotSeries(QBoxPlotSeries::Numeric);
+        auto* series = []<class T = QBoxPlotSeries> {
+            if constexpr (hasCustomizedQtCharts())
+                return new T(T::Numeric);
+            else
+                return new T();
+        }();
         for (size_t i = 0; i < x.getLength(); ++i) {
             auto* set = setFromVector(data[i]);
-            set->setX(double(std::move(x.calc(i))));
+            [](auto* set, [[maybe_unused]] double value) {
+                if constexpr (hasCustomizedQtCharts())
+                    set->setX(value);
+            }(set, double(std::move(x.calc(i))));
             series->append(set);
         }
         getChart()->addSeries(series);
@@ -273,7 +294,12 @@ namespace Physica {
 
     QBoxPlotSeries& Plot::errorBar(const Vector auto& x, const Vector auto& mean, const Vector auto& deviation) {
         assert(x.getLength() == mean.getLength() && x.getLength() == deviation.getLength());
-        auto* series = new QBoxPlotSeries(QBoxPlotSeries::Numeric);
+        auto* series = []<class T = QBoxPlotSeries> {
+            if constexpr (hasCustomizedQtCharts())
+                return new T(T::Numeric);
+            else
+                return new T();
+        }();
         for (size_t i = 0; i < x.getLength(); ++i) {
             if (deviation.calc(i).isNegative() || !deviation.calc(i).isFinite())
                 continue;
@@ -285,7 +311,10 @@ namespace Physica {
             set->setValue(QBoxSet::Median, mean_i);
             set->setValue(QBoxSet::LowerQuartile, mean_i);
             set->setValue(QBoxSet::UpperQuartile, mean_i);
-            set->setX(double(x.calc(i)));
+            [](auto* set, [[maybe_unused]] double value) {
+                if constexpr (hasCustomizedQtCharts())
+                    set->setX(value);
+            }(set, double(x.calc(i)));
             series->append(set);
         }
         getChart()->addSeries(series);

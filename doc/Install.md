@@ -20,7 +20,7 @@
 [openMPI](https://www.open-mpi.org/) =4.1.6 (Optional)  
 [CUDA](https://developer.nvidia.com/cuda-downloads) =12.8 (Optional)  
 [cuDSS](https://developer.nvidia.com/cudss) =0.7.1 (Required by CUDA)  
-[Qt](https://www.qt.io/) =6.5.3 (Optional, Plotting support)  
+[Qt](https://www.qt.io/) >=6.5.3 (Optional, Plotting support)  
 [mimalloc](https://github.com/microsoft/mimalloc) >=3.2.8 (Optional)  
 [LLVM](https://llvm.org/) The same version as clang (Optional)  
 [vectorclass](https://github.com/vectorclass/version2) (Bundled)  

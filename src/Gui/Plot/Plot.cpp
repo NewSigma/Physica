@@ -65,7 +65,7 @@ Plot::Plot(QWidget* parent)
         axisRight->setMinorGridLineVisible(false);
         axisRight->setLinePenColor(Qt::black);
 
-        setTickDirection(QAbstractAxis::Inner);
+        setTickDirection(TickDirection::Inner);
         chart.addAxis(axisX, Qt::AlignBottom);
         chart.addAxis(axisY, Qt::AlignLeft);
         chart.addAxis(axisTop, Qt::AlignTop);
@@ -86,7 +86,7 @@ QScatterSeries& Plot::label(double x, double y, QString text) {
     using Vec = Vector1D<float64>;
     auto& result = scatter(Vec{x}, Vec{y});
     result.setPointLabelsVisible(true);
-    result.setPointLabelsFormat(QPointLabelFormat(std::move(text)));
+    result.setPointLabelsFormat(std::move(text));
     result.setMarkerSize(0);
     return result;
 }
@@ -172,11 +172,16 @@ void Plot::updateNumTick() noexcept {
     limit(axisY, axisRight, deltaY);
 }
 
-void Plot::setTickDirection(QAbstractAxis::TickDirection d) {
-    axisX->setTickDirection(d);
-    axisY->setTickDirection(d);
-    axisTop->setTickDirection(d);
-    axisRight->setTickDirection(d);
+void Plot::setTickDirection(TickDirection d) {
+    const auto apply = []<class Axis>(Axis& axis, bool inner) {
+        if constexpr (hasCustomizedQtCharts())
+            axis.setTickDirection(inner ? Axis::Inner : Axis::Outer);
+    };
+    const bool inner = d == TickDirection::Inner;
+    apply(*axisX, inner);
+    apply(*axisY, inner);
+    apply(*axisTop, inner);
+    apply(*axisRight, inner);
 }
 
 void Plot::setFont(const QFont& font) {

@@ -52,7 +52,8 @@ jobs:
           "hdf5=1.14.6=nompi*" \
           mimalloc=3.2.8 \
           mkl-devel=2025.0.1 \
-          benchmark
+          benchmark \
+          qt6-main qt6-charts qt6-datavis3d
 
     - name: Configure
       run: |
@@ -69,6 +70,8 @@ jobs:
           -DPHYSICA_MKL=ON \
           -DPHYSICA_MPI=ON \
           -DPHYSICA_MIMALLOC=ON \
+          -DPHYSICA_GUI=ON \
+          -DBUILD_EXAMPLES=ON \
           -DBUILD_BENCHMARKS=ON
 
     - name: Build

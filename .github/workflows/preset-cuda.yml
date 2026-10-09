@@ -55,7 +55,8 @@ jobs:
           mkl-devel=2025.0.1 \
           benchmark \
           "cuda-toolkit=12.8.1" \
-          "libcudss-dev=0.7.1.*"
+          "libcudss-dev=0.7.1.*" \
+          qt6-main qt6-charts qt6-datavis3d
 
     - name: Configure
       run: |
@@ -78,6 +79,8 @@ jobs:
           -DPHYSICA_MKL=ON \
           -DPHYSICA_MPI=ON \
           -DPHYSICA_MIMALLOC=ON \
+          -DPHYSICA_GUI=ON \
+          -DBUILD_EXAMPLES=ON \
           -DBUILD_BENCHMARKS=ON
 
     - name: Build
