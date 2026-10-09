@@ -88,8 +88,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    decltype(auto) LValueVector<Derived>::operator[](this auto&& self, size_t index) {
-        return *self.data_ptr(index);
+    decltype(auto) LValueVector<Derived>::operator[](this auto&& self, const IndexVar auto& index) {
+        if constexpr (std::integral<std::remove_cvref_t<decltype(index)>>)
+            return *self.data_ptr(index);
+        else
+            return std::forward<decltype(self)>(self).ein(index);
     }
 
     template<class Derived>

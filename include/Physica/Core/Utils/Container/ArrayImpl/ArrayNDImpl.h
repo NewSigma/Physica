@@ -137,11 +137,7 @@ namespace Physica {
 
     template<class T, int... Dims>
     __host__ __device__ size_t ArrayND<T, Dims...>::toSize(const IndexType& shape) noexcept {
-        const int dim = shape.getLength();
-        size_t size = shape[0];
-        for (int i = 1; i < dim; ++i)
-            size *= shape[i];
-        return size;
+        return Array<size_t, NDim>::toSize(shape);
     }
 
     template<class T, int... Dims>

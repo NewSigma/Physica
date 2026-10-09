@@ -19,6 +19,7 @@
 #pragma once
 
 #include "RValueMatrixImpl/RMatrixBlock.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Ein.h"
 
 namespace Physica {
     template<class Derived> class LValueMatrix;
@@ -125,6 +126,7 @@ namespace Physica {
         [[nodiscard]] auto triu_unit(this auto&&) noexcept;
         [[nodiscard]] auto tril(this auto&&) noexcept;
         [[nodiscard]] auto tril_unit(this auto&&) noexcept;
+        [[nodiscard]] auto ein(this auto&&, const IndexVar auto&... indices) noexcept;
 
         [[nodiscard]] Tr norm1() const;
         template<ExecutePolicy P = Sequential>

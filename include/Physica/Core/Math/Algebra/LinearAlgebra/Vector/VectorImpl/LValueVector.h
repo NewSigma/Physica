@@ -59,7 +59,7 @@ namespace Physica {
         void operator-=(const Vector auto& v);
 
         auto operator=(std::ranges::range auto&& r) noexcept -> Derived& requires(!Vector<decltype(r)>);
-        [[nodiscard]] decltype(auto) operator[](this auto&&, size_t index);
+        [[nodiscard]] decltype(auto) operator[](this auto&&, const IndexVar auto& index);
         /* Operations */
         [[nodiscard]] decltype(auto) calc(size_t index) const;
         void writePacket(Packet auto packet, size_t index) noexcept;

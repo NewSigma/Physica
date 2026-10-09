@@ -76,8 +76,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    decltype(auto) LValueMatrix<Derived>::operator[](this auto&& self, size_t row, size_t col) {
-        return *self.data_ptr(row, col);
+    decltype(auto) LValueMatrix<Derived>::operator[](this auto&& self, const IndexVar auto& row, const IndexVar auto& col) {
+        if constexpr (std::integral<std::remove_cvref_t<decltype(row)>> && std::integral<std::remove_cvref_t<decltype(col)>>)
+            return *self.data_ptr(row, col);
+        else
+            return std::forward<decltype(self)>(self).ein(row, col);
     }
 
     template<class Derived>

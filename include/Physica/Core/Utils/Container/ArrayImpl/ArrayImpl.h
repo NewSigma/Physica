@@ -20,6 +20,8 @@
 
 #include <cassert>
 #include <cstring>
+#include <functional>
+#include <numeric>
 #ifdef PHYSICA_CUDA
     #include <thrust/swap.h>
 #endif
@@ -135,6 +137,11 @@ namespace Physica {
             remaining %= strides[i];
         }
         return indices;
+    }
+
+    template<class T, size_t Length, class Allocator>
+    __host__ __device__ size_t Array<T, Length, Allocator>::toSize(const IndexType& shape) noexcept {
+        return std::reduce(shape.begin(), shape.end(), size_t{1}, std::multiplies<>{});
     }
 
     template<class T, size_t Length, class Allocator>

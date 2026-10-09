@@ -70,6 +70,7 @@ namespace Physica {
         [[nodiscard]] auto block(this auto&&, IndexVar auto...) noexcept;
         [[nodiscard]] auto block(this auto&&, IndexType from, IndexType count) noexcept;
         [[nodiscard]] auto flatten(this auto&&) noexcept;
+        [[nodiscard]] auto ein(this auto&&, const IndexVar auto&... indices) noexcept;
 
         void resize(this auto&, const Tensor auto& x);
         auto resize(this auto&, std::same_as<size_t> auto... dims);
@@ -148,6 +149,7 @@ namespace Physica {
     };
 }
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Ein.h"
 #include "RValueTensorImpl/RValueTensorImpl.h"
 #include "RValueTensorImpl/TensorConvert.h"
 #include "TensorExpr.h"

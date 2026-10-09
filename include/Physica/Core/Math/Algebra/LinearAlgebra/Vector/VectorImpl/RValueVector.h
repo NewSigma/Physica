@@ -20,6 +20,7 @@
 
 #include "Physica/CRTP.h"
 #include "Physica/Core/Scalar/Complex.h" // IWYU pragma: export
+#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Parallel/Parallel.h"
 #include "RValueVectorImpl/RVectorBlock.h"
@@ -155,6 +156,7 @@ namespace Physica {
         [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
         [[nodiscard]] auto hermite(this auto&&) noexcept;
         [[nodiscard]] auto format() const;
+        [[nodiscard]] auto ein(this auto&&, const IndexVar auto&... indices) noexcept;
 
         [[nodiscard]] CoDiff<Tr> norm1() const noexcept;
         [[nodiscard]] CoDiff<Tr> norm2() const noexcept;
@@ -275,6 +277,7 @@ namespace Physica {
     };
 }
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Ein.h"
 #include "RValueVectorImpl/RValueVectorImpl.h"
 #include "RValueVectorImpl/View.h"
 #include "RValueVectorImpl/ReversalVector.h"
