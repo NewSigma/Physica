@@ -23,7 +23,7 @@
 #include <ranges>
 #include <type_traits>
 #include <utility>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar/IndexVar.h"
 #include "Physica/Core/Utils/Container/Array.h"
 #include "Physica/Core/Utils/MetaProgramming.h"
 #include "Physica/Core/Utils/Range.h"

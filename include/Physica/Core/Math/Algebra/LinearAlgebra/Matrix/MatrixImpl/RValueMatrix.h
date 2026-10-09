@@ -19,7 +19,7 @@
 #pragma once
 
 #include "RValueMatrixImpl/RMatrixBlock.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Ein.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar/Ein.h"
 
 namespace Physica {
     template<class Derived> class LValueMatrix;

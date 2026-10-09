@@ -20,7 +20,7 @@
 
 #include "Physica/CRTP.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar/IndexVar.h"
 #include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica {
@@ -149,7 +149,7 @@ namespace Physica {
     };
 }
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Ein.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar/Ein.h"
 #include "RValueTensorImpl/RValueTensorImpl.h"
 #include "RValueTensorImpl/TensorConvert.h"
 #include "TensorExpr.h"

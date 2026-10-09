@@ -20,7 +20,7 @@
 
 #include <cassert>
 #include <utility>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar/IndexVar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"

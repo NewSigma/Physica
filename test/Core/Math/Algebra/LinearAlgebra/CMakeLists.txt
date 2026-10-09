@@ -1,4 +1,4 @@
-physica_add_test(Contract Contract.cpp)
+physica_add_test(Contract IndexVar/Contract.cpp)
 
 physica_add_test(EigenSolver Eigen/EigenSolver.cpp)
 physica_add_test(JacobiDavidson Eigen/JacobiDavidson.cpp)
