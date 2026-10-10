@@ -69,7 +69,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
-    __host__ __device__ void device_obj<LMatrixBlock<M, Row, Col>>::resize(size_t length) {
+    __host__ __device__ void device_obj<LMatrixBlock<M, Row, Col>>::resize([[maybe_unused]] size_t length) {
         assert(length == getLength());
     }
 

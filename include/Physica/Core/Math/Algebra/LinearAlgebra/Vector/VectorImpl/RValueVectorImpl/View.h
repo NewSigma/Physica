@@ -195,7 +195,7 @@ namespace Physica {
     template<Vector V>
     template<int Size>
     auto RValueVector<Derived, ScalarT>::View<V>::Iterator::load() const noexcept -> SIMD<value_type, Size> {
-        assert(index + Size <= vec->getLength());
+        assert(static_cast<size_t>(index) + Size <= vec->getLength());
         return vec->template packet<Size>(index);
     }
 

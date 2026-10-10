@@ -299,7 +299,7 @@ namespace Physica {
                 const auto& v = v_.getDerived();
                 auto& buffer = buffer_.getDerived();
                 U local = 0;
-                for (int i = (int)threadIdx.x; i < v.getLength(); i += (int)blockDim.x) {
+                for (size_t i = threadIdx.x; i < v.getLength(); i += blockDim.x) {
                     if constexpr (isReverseDiff())
                         local += v.calc_value(i);
                     else
@@ -393,7 +393,7 @@ namespace Physica {
                 const auto& v = v_.getDerived();
                 auto& buffer = buffer_.getDerived();
                 U local = 1;
-                for (int i = (int)threadIdx.x; i < v.getLength(); i += (int)blockDim.x) {
+                for (size_t i = threadIdx.x; i < v.getLength(); i += blockDim.x) {
                     if constexpr (isReverseDiff())
                         local *= v.calc_value(i);
                     else
@@ -444,7 +444,7 @@ namespace Physica {
         assert(self.getLength() != 0);
         const int numThread = block.getNumThread();
         T local = 0;
-        for (int i = block.tid(); i < self.getLength(); i += numThread)
+        for (size_t i = block.tid(); i < self.getLength(); i += numThread)
             local += self.calc(i);
         return block.sync_sum(local);
     }

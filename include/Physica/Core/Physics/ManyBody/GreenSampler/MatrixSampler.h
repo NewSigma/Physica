@@ -129,10 +129,10 @@ namespace Physica {
     template<Scalar T>
     auto MatrixSampler<T>::calcCorrelation(const MatrixND<T>& greenU, const MatrixND<T>& greenD) const noexcept -> MatrixND<T> {
         MatrixND<T> result(getNumSiteX(), getNumSiteY());
-        for (int siteA = 0; siteA < getNumSite(); ++siteA) {
+        for (size_t siteA = 0; siteA < getNumSite(); ++siteA) {
             const auto indexA = lattice.toIndexND(siteA);
-            for (int x = 0; x < getNumSiteX(); ++x) {
-                for (int y = 0; y < getNumSiteY(); ++y) {
+            for (size_t x = 0; x < getNumSiteX(); ++x) {
+                for (size_t y = 0; y < getNumSiteY(); ++y) {
                     const auto indexB = indexA.shift(0, x, getNumSiteX()).shift(1, y, getNumSiteY());
                     const size_t siteB = lattice.toIndex1D(indexB);
                     result[x, y].toNextMean(siteA, calcCorrelation(greenU, siteA, greenD, siteB));

@@ -70,7 +70,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto CyclicChainQDT<T>::multiply(size_t from, size_t to) noexcept -> const QDTDecomp<T>& {
+    auto CyclicChainQDT<T>::multiply([[maybe_unused]] size_t from, size_t to) noexcept -> const QDTDecomp<T>& {
         assert(from < getNumSplit() && to < getNumSplit());
         assert(from == (to + 1) % getNumSplit() && "[Error]: CyclicChainQDT only supports the full ring product");
         if (rebuild)
@@ -86,7 +86,7 @@ namespace Physica {
 
     template<Scalar T>
     void CyclicChainQDT<T>::single_flip(int site, int split, Tr factor, Tr invfac) noexcept {
-        assert(split < getNumSplit());
+        assert(static_cast<size_t>(split) < getNumSplit());
         assert(!suffix.empty());
         leaves[split].single_flip(site, factor, invfac);
         suffix.back().single_flip(site, factor, invfac);
@@ -94,7 +94,7 @@ namespace Physica {
 
     template<Scalar T>
     void CyclicChainQDT<T>::invalidate(int split) noexcept {
-        assert(split < getNumSplit());
+        assert(static_cast<size_t>(split) < getNumSplit());
         const size_t cursor = (split + 1) % getNumSplit();
         if (prefix.empty())
             transfer(cursor);

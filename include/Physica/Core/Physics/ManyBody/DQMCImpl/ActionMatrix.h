@@ -86,7 +86,7 @@ namespace Physica {
         assert(numFreq > 0);
         assert((1 <= maxBoson) && (maxBoson <= 2 * numFreq) && "[Error]: maxBoson out of range");
         auto& diag = matsubara.diag();
-        for (int k = 0; k < diag.getLength(); ++k) {
+        for (int k = 0; k < static_cast<int>(diag.getLength()); ++k) {
             int m = k - numFreq;
             diag[k] = Trv(2 * m + 1);
         }
@@ -123,7 +123,7 @@ namespace Physica {
     void ActionMatrix<T>::assign_potential(Matrix auto&& target, int site) const {
         const Tr shift = params.getBeta() * fma(params.getRepelU(), Tr(-0.5), params.getChemMu());
         const int numFreq2 = getNumFreq() * 2;
-        assert(target.isSquare() && target.getRow() == numFreq2);
+        assert(target.isSquare() && target.getRow() == static_cast<size_t>(numFreq2));
         for (int r = 0; r < numFreq2; ++r) {
             for (int c = 0; c < r; ++c) {
                 int delta = r - c;
@@ -160,7 +160,7 @@ namespace Physica {
 
         if (diagSite) {
             bool upper = rowFreq > colFreq;
-            auto delta = upper ? (rowFreq - colFreq) : (colFreq - rowFreq);
+            int delta = upper ? (rowFreq - colFreq) : (colFreq - rowFreq);
             if (delta < getMaxBoson()) {
                 T aux = auxField[delta, rowSite];
                 return upper ? aux : aux.conjugate();

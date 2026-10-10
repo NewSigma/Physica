@@ -38,7 +38,7 @@ namespace Physica {
         [[nodiscard]] StateType operator[](size_t index) const noexcept;
         [[nodiscard]] size_t operator[](StateType state) const noexcept;
         /* Operations */
-        void swap(This& __restrict obj) noexcept {}
+        void swap([[maybe_unused]] This& __restrict obj) noexcept {}
         /* Getters */
         [[nodiscard]] constexpr static int getNumSpin() noexcept { return NumSite; }
         [[nodiscard]] constexpr static size_t getNumState() noexcept { return 1UZ << NumSite; }

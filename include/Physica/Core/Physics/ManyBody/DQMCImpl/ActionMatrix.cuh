@@ -85,7 +85,7 @@ namespace Physica {
         assert(numFreq > 0);
         assert((1 <= maxBoson) && (maxBoson <= 2 * numFreq) && "[Error]: maxBoson out of range");
         VectorND<Tr> diag(matsubara.getOrder());
-        for (int k = 0; k < diag.getLength(); ++k) {
+        for (int k = 0; k < static_cast<int>(diag.getLength()); ++k) {
             int m = k - numFreq;
             diag[k] = Trv(2 * m + 1);
         }

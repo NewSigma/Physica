@@ -133,7 +133,7 @@ int MPI::getRank() noexcept {
 #endif
 }
 
-auto MPI::send(int to, const void* data, int count, dtype_handle dtype, comm_handle comm) -> Request {
+auto MPI::send(int to, [[maybe_unused]] const void* data, [[maybe_unused]] int count, [[maybe_unused]] dtype_handle dtype, [[maybe_unused]] comm_handle comm) -> Request {
     checkPID(to);
 #ifdef PHYSICA_MPI
     MPI_Request h = MPI_REQUEST_NULL;
@@ -143,7 +143,7 @@ auto MPI::send(int to, const void* data, int count, dtype_handle dtype, comm_han
     return {};
 }
 
-auto MPI::recv(int from, void* data, int count, dtype_handle dtype, comm_handle comm) -> Request {
+auto MPI::recv(int from, [[maybe_unused]] void* data, [[maybe_unused]] int count, [[maybe_unused]] dtype_handle dtype, [[maybe_unused]] comm_handle comm) -> Request {
     checkPID(from);
 #ifdef PHYSICA_MPI
     MPI_Request h = MPI_REQUEST_NULL;
@@ -167,7 +167,7 @@ auto MPI::pass(int from, int to, void* data, int count, dtype_handle dtype, comm
 /**
  * TODO: Update to MPI_Isendrecv once bump to OpenMPI-5
  */
-void MPI::sendrecv(int send_to, int recv_from, void* data, int count, dtype_handle dtype, comm_handle comm) {
+void MPI::sendrecv(int send_to, int recv_from, [[maybe_unused]] void* data, [[maybe_unused]] int count, [[maybe_unused]] dtype_handle dtype, [[maybe_unused]] comm_handle comm) {
     checkPID(send_to, recv_from);
 #ifdef PHYSICA_MPI
     MPI_Status status;
@@ -180,7 +180,7 @@ void MPI::sendrecv(int send_to, int recv_from, void* data, int count, dtype_hand
 #endif
 }
 
-auto MPI::bcast(int root, void* data, int count, dtype_handle dtype, comm_handle comm) -> Request {
+auto MPI::bcast(int root, [[maybe_unused]] void* data, [[maybe_unused]] int count, [[maybe_unused]] dtype_handle dtype, [[maybe_unused]] comm_handle comm) -> Request {
     checkPID(root);
 #ifdef PHYSICA_MPI
     MPI_Request h = MPI_REQUEST_NULL;
@@ -190,7 +190,7 @@ auto MPI::bcast(int root, void* data, int count, dtype_handle dtype, comm_handle
     return {};
 }
 
-auto MPI::reduce(int to, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, ReduceOp op, comm_handle comm) -> Request {
+auto MPI::reduce(int to, [[maybe_unused]] const void* sendbuf, [[maybe_unused]] void* recvbuf, [[maybe_unused]] int count, [[maybe_unused]] dtype_handle dtype, [[maybe_unused]] ReduceOp op, [[maybe_unused]] comm_handle comm) -> Request {
     checkPID(to);
 #ifdef PHYSICA_MPI
     if (MPI::getRank() == to && sendbuf == recvbuf)
@@ -202,7 +202,7 @@ auto MPI::reduce(int to, const void* sendbuf, void* recvbuf, int count, dtype_ha
     return {};
 }
 
-auto MPI::allreduce(const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, ReduceOp op, comm_handle comm) -> Request {
+auto MPI::allreduce([[maybe_unused]] const void* sendbuf, [[maybe_unused]] void* recvbuf, [[maybe_unused]] int count, [[maybe_unused]] dtype_handle dtype, [[maybe_unused]] ReduceOp op, [[maybe_unused]] comm_handle comm) -> Request {
 #ifdef PHYSICA_MPI
     if (sendbuf == recvbuf)
         sendbuf = MPI_IN_PLACE;
@@ -213,7 +213,7 @@ auto MPI::allreduce(const void* sendbuf, void* recvbuf, int count, dtype_handle 
     return {};
 }
 
-auto MPI::gather(int to, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm) -> Request {
+auto MPI::gather(int to, [[maybe_unused]] const void* sendbuf, [[maybe_unused]] void* recvbuf, int count, [[maybe_unused]] dtype_handle dtype, [[maybe_unused]] comm_handle comm) -> Request {
     checkPID(to);
     if (to == getRank()) {
         assert(count % getNumRank() == 0);
@@ -229,7 +229,7 @@ auto MPI::gather(int to, const void* sendbuf, void* recvbuf, int count, dtype_ha
     return {};
 }
 
-auto MPI::scatter(int from, const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm) -> Request {
+auto MPI::scatter(int from, [[maybe_unused]] const void* sendbuf, [[maybe_unused]] void* recvbuf, int count, [[maybe_unused]] dtype_handle dtype, [[maybe_unused]] comm_handle comm) -> Request {
     checkPID(from);
     if (from == getRank()) {
         assert(count % getNumRank() == 0);
@@ -245,7 +245,7 @@ auto MPI::scatter(int from, const void* sendbuf, void* recvbuf, int count, dtype
     return {};
 }
 
-auto MPI::allgather(const void* sendbuf, void* recvbuf, int count, dtype_handle dtype, comm_handle comm) -> Request {
+auto MPI::allgather([[maybe_unused]] const void* sendbuf, [[maybe_unused]] void* recvbuf, [[maybe_unused]] int count, [[maybe_unused]] dtype_handle dtype, [[maybe_unused]] comm_handle comm) -> Request {
 #ifdef PHYSICA_MPI
     if (sendbuf == recvbuf)
         sendbuf = MPI_IN_PLACE;
@@ -256,7 +256,7 @@ auto MPI::allgather(const void* sendbuf, void* recvbuf, int count, dtype_handle 
     return {};
 }
 
-void MPI::wait(comm_handle comm) {
+void MPI::wait([[maybe_unused]] comm_handle comm) {
 #ifdef PHYSICA_MPI
     check_mpi(MPI_Barrier(MPI_Comm(comm)));
 #endif

@@ -125,7 +125,7 @@ namespace Physica {
     template<size_t Count>
     template<class InputIter>
     void SeedSequence<Count>::seed(InputIter begin, InputIter end) noexcept {
-        assert(std::distance(begin, end) <= Count && "[Error]: Entropy pool size out of range");
+        assert(static_cast<size_t>(std::distance(begin, end)) <= Count && "[Error]: Entropy pool size out of range");
         std::copy(begin, end, inits.begin());
         mix_entropy(begin, end);
 

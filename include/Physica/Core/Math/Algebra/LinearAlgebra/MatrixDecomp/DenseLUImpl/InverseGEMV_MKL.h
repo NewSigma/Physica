@@ -50,7 +50,7 @@ namespace Physica {
         }
         else {
             Array<MKL_INT64> perm(n);
-            for (MKL_INT64 i = 0; i < n; ++i)
+            for (size_t i = 0; i < n; ++i)
                 perm[i] = i + 1;
             auto* ipiv = perm.data();
             if constexpr (Base::isComplex()) {

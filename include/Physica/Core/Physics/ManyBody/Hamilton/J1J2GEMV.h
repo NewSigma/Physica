@@ -27,7 +27,7 @@ namespace Physica {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
         using M1 = std::remove_cvref<M>::type;
-        constexpr static unsigned int NumSite = M1::NumSite;
+        constexpr static int NumSite = M1::NumSite;
     protected:
         using typename Base::T;
         using typename Base::Trv;

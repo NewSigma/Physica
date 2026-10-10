@@ -132,7 +132,7 @@ namespace Physica {
         *reinterpret_cast<uint32_t*>(this) = *reinterpret_cast<const uint32_t*>(p);
     }
 
-    __device__ inline void SIMD<Real<Float16>, 2>::load(const float16* p, int n) noexcept {
+    __device__ inline void SIMD<Real<Float16>, 2>::load(const float16* p, [[maybe_unused]] int n) noexcept {
         assert(n == 1 && "[Error]: Invalid size for partial operation");
         (*this) = SIMD(*p, 0);
     }
@@ -141,7 +141,7 @@ namespace Physica {
         *reinterpret_cast<uint32_t*>(p) = *reinterpret_cast<const uint32_t*>(this);
     }
 
-    __device__ inline void SIMD<Real<Float16>, 2>::store(float16* p, int n) const noexcept {
+    __device__ inline void SIMD<Real<Float16>, 2>::store(float16* p, [[maybe_unused]] int n) const noexcept {
         assert(n == 1 && "[Error]: Invalid size for partial operation");
         *p = operator[](0);
     }

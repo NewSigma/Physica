@@ -27,7 +27,7 @@
 using namespace Physica;
 using T = float64;
 using RandomSource = Random<>;
-constexpr unsigned int NumSite = 4;
+constexpr int NumSite = 4;
 constexpr double HoppingT = 1;
 constexpr double RepelU = 8;
 constexpr double MaxBeta = 16;

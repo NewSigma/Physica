@@ -40,7 +40,7 @@ namespace {
     void fromToMKL() {
         PermMatrix<T> answer({2, 1, 3, 0});
         auto result = PermMatrix<T>::fromMKL(answer.toMKL());
-        for (int i = 0; i < answer.getRow(); ++i)
+        for (size_t i = 0; i < answer.getRow(); ++i)
             expect(result.getIndices()[i] == answer.getIndices()[i]);
     }
 }

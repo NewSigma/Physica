@@ -59,7 +59,7 @@ namespace Physica {
         size_t i = 0;
         ([&]() {
             if constexpr (std::integral<decltype(indices)>) {
-                assert(indices < tensor_.dim(i));
+                assert(static_cast<size_t>(indices) < tensor_.dim(i));
                 index[i] = indices;
             }
             i += 1;

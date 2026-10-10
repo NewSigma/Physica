@@ -30,8 +30,10 @@ namespace Physica {
         using Base = RValueMatrix<This>;
         constexpr static int ThresholdMKL = 32; // Based on benchmark
 
-        enum InnerDim : char {
-            M, K, N
+        enum class InnerDim : char {
+            M,
+            K,
+            N,
         };
     protected:
         using typename Base::T;
@@ -244,7 +246,7 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     void GEMM<M1, M2>::assign_add_blocking(Matrix auto&& target) const noexcept {
-        auto blockingM = [&](int size) noexcept -> bool {
+        auto blockingM = [&](size_t size) noexcept -> bool {
             size_t m = getRow();
             bool success = m > size;
             if (success) {
@@ -255,7 +257,7 @@ namespace Physica {
             return success;
         };
 
-        auto blockingK = [&](int size) noexcept -> bool {
+        auto blockingK = [&](size_t size) noexcept -> bool {
             size_t k = getLHS().getCol();
             bool success = k > size;
             if (success) {
@@ -266,7 +268,7 @@ namespace Physica {
             return success;
         };
 
-        auto blockingN = [&](int size) noexcept -> bool {
+        auto blockingN = [&](size_t size) noexcept -> bool {
             size_t n = getCol();
             bool success = n > size;
             if (success) {

@@ -45,7 +45,7 @@ namespace Physica {
     template<Matrix M>
     OffsetDiag<M>::OffsetDiag(M mat, ssize_t offset) : mat(std::forward<M>(mat)), offset(offset) {
         assert(mat.isSquare());
-        assert(std::abs(offset) < mat.getRow());
+        assert(static_cast<size_t>(std::abs(offset)) < mat.getRow());
     }
 
     template<Matrix M>

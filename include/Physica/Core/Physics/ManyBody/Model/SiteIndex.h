@@ -54,7 +54,7 @@ namespace Physica {
     template<int Dim>
     auto SiteIndex<Dim>::shift(int shiftDim, ssize_t delta, size_t period) const noexcept -> This {
         assert(shiftDim < Dim && "[Error]: Invalid dim");
-        assert(std::abs(delta) < period);
+        assert(static_cast<size_t>(std::abs(delta)) < period);
         This result = *this;
         result[shiftDim] = (result[shiftDim] + (ssize_t(period) + delta)) % period;
         return result;

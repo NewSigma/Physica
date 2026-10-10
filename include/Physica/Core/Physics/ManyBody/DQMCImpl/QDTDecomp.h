@@ -123,7 +123,7 @@ namespace Physica {
         assert(scalarNear(factor * invfac, Tr(1), std::numeric_limits<T>::epsilon() * 10) && "[Error]: Invalid argument");
         if (site > 0) [[likely]]
             getMatrixT().col(site).head(site) *= factor;
-        if (site + 1 < getSize()) [[likely]]
+        if (static_cast<size_t>(site) + 1 < getSize()) [[likely]]
             getMatrixT().row(site).tail(site + 1) *= invfac;
         matrixD.diag()[site] *= factor;
     }

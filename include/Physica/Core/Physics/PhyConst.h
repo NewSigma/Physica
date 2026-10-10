@@ -80,7 +80,7 @@ namespace Physica {
         [[nodiscard]] constexpr static double degreeToRadian(double degree) { return degree / 180 * M_PI; }
         [[nodiscard]] constexpr static double radianToDegree(double radian) { return radian / M_PI * 180; }
         [[nodiscard]] constexpr static double atomMass(int atomicNum) {
-            assert(0 <= atomicNum && atomicNum < relativeAtomMass.size());
+            assert(0 <= atomicNum && atomicNum < static_cast<int>(relativeAtomMass.size()));
             return relativeAtomMass[atomicNum] * atomicMassConst;
         }
         [[nodiscard]] constexpr static double calorieToJoule(double calorie) { return calorie * calorieInJoule; }

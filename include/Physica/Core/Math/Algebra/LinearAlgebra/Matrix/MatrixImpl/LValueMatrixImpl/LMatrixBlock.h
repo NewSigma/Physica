@@ -72,7 +72,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
-    void LMatrixBlock<M, Row, Col>::resize(size_t length) {
+    void LMatrixBlock<M, Row, Col>::resize([[maybe_unused]] size_t length) {
         assert(length == getLength());
     }
 

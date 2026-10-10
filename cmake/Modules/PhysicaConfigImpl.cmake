@@ -12,7 +12,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
     add_definitions(-DNOMINMAX)
 else()
     add_compile_options(-march=${PHYSICA_ARCH})
-    add_compile_options(-Wall -Wfatal-errors -fno-rtti)
+    add_compile_options(-Wall -Wextra -Wfatal-errors -fno-rtti)
     if(NOT ${PHYSICA_EmitLLVM})
         # These options leak into the IR.
         add_compile_options(-ffunction-sections -fdata-sections -fno-semantic-interposition -fno-plt)
@@ -28,7 +28,7 @@ else()
     endif()
 
     if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
-        add_compile_options(-Wextra)
+        # Nothing
     elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
         # Note: We must use "-Xclang=..." instead of "-Xclang ...", otherwise CMake will eliminate duplicate -Xclang
         add_compile_options(-fassume-sane-operator-new -fassume-nothrow-exception-dtor -Xclang=-fexternc-nounwind -fexperimental-new-constant-interpreter)

@@ -51,7 +51,7 @@ namespace Physica {
     template<Matrix M> requires(std::remove_cvref_t<M>::isStrided())
     __host__ __device__ device_obj<OffsetDiag<M>>::device_obj(Ref mat, ssize_t offset) : mat(asStruct(mat)), offset(offset) {
         assert(getExpr().isSquare());
-        assert(std::abs(offset) < getExpr().getRow());
+        assert(static_cast<size_t>(std::abs(offset)) < getExpr().getRow());
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isStrided())

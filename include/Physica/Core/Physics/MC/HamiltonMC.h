@@ -263,7 +263,7 @@ namespace Physica {
     template<RNG R, ExecutePolicy P>
     auto HamiltonMC<T>::visit(int height, auto& forceModel) -> Proposal {
         return [this, forward = R::coin(), height, &forceModel](this const auto& self) noexcept -> Proposal {
-            bool isLeaf = height == nodes.size();
+            bool isLeaf = height == static_cast<int>(nodes.size());
             if (isLeaf)
                 return visitLeaf<P>(forward, forceModel);
 
@@ -300,7 +300,7 @@ namespace Physica {
             .acceptR = diff.isPositive() ? Trv(1) : exp(prevE - curE),
             .numAccept = curE < upperE,
             .numVisited = 1,
-            .stop = (curE >= upperE + maxDelta) || (nodes.size() >= maxTreeDepth)};
+            .stop = (curE >= upperE + maxDelta) || (static_cast<int>(nodes.size()) >= maxTreeDepth)};
     }
 
     template<Scalar T>

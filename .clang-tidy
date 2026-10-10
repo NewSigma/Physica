@@ -19,6 +19,7 @@ Checks: >
   -misc-no-recursion,
   -misc-unconventional-assign-operator,
   modernize-*,
+  -modernize-avoid-c-style-cast,
   -modernize-return-braced-init-list,
   -modernize-type-traits,
   -modernize-use-std-numbers,

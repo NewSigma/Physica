@@ -33,7 +33,7 @@ Real<FloatMP>::Real(int length_, int power_)
 }
 
 Real<FloatMP>::Real(std::initializer_list<MPUnit> bytes_, int length_, int power_) : Real(length_, power_) {
-    assert(bytes_.size() == std::abs(length_));
+    assert(bytes_.size() == static_cast<size_t>(std::abs(length_)));
     auto *p = byte;
     for (auto elem : bytes_){
         *p = elem;

@@ -127,7 +127,7 @@ namespace std {
             p->~T();
         }
 
-        static constexpr size_type max_size(const allocator_type& a) noexcept {
+        static constexpr size_type max_size(const allocator_type&) noexcept {
             return std::numeric_limits<size_type>::max() / sizeof(value_type);
         }
 

@@ -46,7 +46,7 @@ namespace Physica {
     template<Matrix M>
     __host__ __device__ device_obj<OffsetDiag<M>>::device_obj(Ref mat, ssize_t offset) : mat(asStruct(mat)), offset(offset) {
         assert(getExpr().isSquare());
-        assert(std::abs(offset) < getExpr().getCol());
+        assert(static_cast<size_t>(std::abs(offset)) < getExpr().getCol());
     }
 
     template<Matrix M>
