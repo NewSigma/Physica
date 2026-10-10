@@ -20,8 +20,6 @@
 
 #include <cassert>
 #include <cstring>
-#include <functional>
-#include <numeric>
 #ifdef PHYSICA_CUDA
     #include <thrust/swap.h>
 #endif
@@ -105,43 +103,6 @@ namespace Physica {
     __host__ __device__ auto Array<T, Length, Allocator>::read([[maybe_unused]] size_t length, const T* __restrict p) noexcept -> This {
         assert(length == Length && "[Error]: Length do not match");
         return read(p);
-    }
-
-    template<class T, size_t Length, class Allocator>
-    __host__ __device__ size_t Array<T, Length, Allocator>::toIndex1D(const IndexType& __restrict shape, const IndexType& __restrict indices) noexcept {
-        size_t index = 0;
-        size_t stride = 1;
-        for (int i = static_cast<int>(shape.getLength()) - 1; i >= 0; --i) {
-            assert(indices[i] < shape[i] && "[Error]: Index out of range");
-            index += indices[i] * stride;
-            stride *= shape[i];
-        }
-        return index;
-    }
-
-    template<class T, size_t Length, class Allocator>
-    __host__ __device__ auto Array<T, Length, Allocator>::toIndexND(const IndexType& shape, size_t index) noexcept -> IndexType {
-        constexpr int Dim = shape.getLength();
-        Array<size_t, Dim> strides{};
-        size_t stride = 1;
-        for (int i = Dim - 1; i >= 0; --i) {
-            strides[i] = stride;
-            stride *= shape[i];
-        }
-
-        IndexType indices(shape.size());
-        size_t remaining = index;
-        for (int i = 0; i < Dim; ++i) {
-            indices[i] = remaining / strides[i];
-            assert(indices[i] < shape[i] && "[Error]: Index out of range");
-            remaining %= strides[i];
-        }
-        return indices;
-    }
-
-    template<class T, size_t Length, class Allocator>
-    __host__ __device__ size_t Array<T, Length, Allocator>::toSize(const IndexType& shape) noexcept {
-        return std::reduce(shape.begin(), shape.end(), size_t{1}, std::multiplies<>{});
     }
 
     template<class T, size_t Length, class Allocator>

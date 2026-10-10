@@ -74,14 +74,16 @@ namespace Physica {
 
     template<class T, int... Dims>
     void ArrayND<T, Dims...>::forND(std::invocable<T&, IndexType> auto func) {
-        for (size_t i = 0; i < getSize(); ++i)
-            func(arr[i], toIndexND(i));
+        Physica::forND(getShape(), [this, func](const IndexType& index) mutable {
+            func(*data_ptr(index));
+        });
     }
 
     template<class T, int... Dims>
     void ArrayND<T, Dims...>::forND(std::invocable<const T&, IndexType> auto func) const {
-        for (size_t i = 0; i < getSize(); ++i)
-            func(arr[i], toIndexND(i));
+        Physica::forND(getShape(), [this, func](const IndexType& index) mutable {
+            func(*data_ptr(index));
+        });
     }
 
     template<class T, int... Dims>
@@ -137,7 +139,7 @@ namespace Physica {
 
     template<class T, int... Dims>
     __host__ __device__ size_t ArrayND<T, Dims...>::toSize(const IndexType& shape) noexcept {
-        return Array<size_t, NDim>::toSize(shape);
+        return Index<NDim>::toSize(shape);
     }
 
     template<class T, int... Dims>

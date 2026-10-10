@@ -19,7 +19,6 @@
 #pragma once
 
 #include "SiteIndex.h"
-#include "Physica/Core/Utils/Container/ArrayND.h"
 
 namespace Physica {
     enum class BoundaryCond : char {
@@ -34,7 +33,7 @@ namespace Physica {
         static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
         using This = LatticeModel<Dim>;
     public:
-        using DimArray = Array<size_t, Dim>;
+        using DimArray = Index<Dim>;
         using IndexType = SiteIndex<Dim>;
     private:
         DimArray superSize;

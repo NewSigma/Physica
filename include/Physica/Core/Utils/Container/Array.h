@@ -38,7 +38,6 @@ namespace Physica {
             , public CRCoro<Array<T, Length, Allocator>> {
         using This = Array<T, Length, Allocator>;
         using Base = ArrayMixin<This, Allocator>;
-        using IndexType = Array<size_t, Length>;
         static_assert(std::is_default_constructible<T>::value, "[Error]: Expect default constructible T");
         static_assert(!std::same_as<Allocator, PageLockedAllocator<T>>, "[Error]: Page locked array can not have fixed size");
     private:
@@ -93,9 +92,6 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ static This read(const T* __restrict p) noexcept;
         [[nodiscard]] __host__ __device__ static This read(size_t length, const T* __restrict p) noexcept;
-        [[nodiscard]] __host__ __device__ static size_t toIndex1D(const IndexType& __restrict shape, const IndexType& __restrict indices) noexcept;
-        [[nodiscard]] __host__ __device__ static IndexType toIndexND(const IndexType& shape, size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ static size_t toSize(const IndexType& shape) noexcept;
         template<ExecutePolicy P = Sequential>
         [[nodiscard]] static This generate(std::invocable<size_t> auto fn);
     };
@@ -167,12 +163,6 @@ namespace Physica {
     void swap(Array<T, Length, Allocator>& array1, Array<T, Length, Allocator>& array2) noexcept {
         array1.swap(array2);
     }
-
-    using Index2D = Array<size_t, 2>;
-    using Index3D = Array<size_t, 3>;
-    using Index4D = Array<size_t, 4>;
-    using Index5D = Array<size_t, 5>;
-    using IndexND = Array<size_t>;
 }
 
 namespace Physica {

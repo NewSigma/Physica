@@ -186,7 +186,7 @@ namespace Physica {
             , planFlag(PlanFlag::Measure) {}
 
     template<Scalar T, size_t Dim>
-    FFT<T, Dim>::FFT(const Array<size_t, Dim>& rSpaceSize_)
+    FFT<T, Dim>::FFT(const Index<Dim>& rSpaceSize_)
             : forward_plan(nullptr)
             , backward_plan(nullptr)
             , rSpaceSize(rSpaceSize_.getLength())
@@ -200,7 +200,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    FFT<T, Dim>::FFT(const Array<size_t, Dim>& rSpaceSize_, PlanFlag planFlag_)
+    FFT<T, Dim>::FFT(const Index<Dim>& rSpaceSize_, PlanFlag planFlag_)
             : FFT(rSpaceSize_) {
         planFlag = planFlag_;
         initializePlan();
@@ -272,14 +272,13 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    FFT<T, Dim> FFT<T, Dim>::makeEmptyFFT(const Array<size_t, Dim>& rSpaceSize) {
+    FFT<T, Dim> FFT<T, Dim>::makeEmptyFFT(const Index<Dim>& rSpaceSize) {
         return FFT(rSpaceSize);
     }
 
     template<Scalar T, size_t Dim>
-    template<std::integral IndexType>
-    Array<IndexType, Dim> FFT<T, Dim>::rSizeToKSize(const Array<IndexType, Dim>& rSize) {
-        Array<IndexType, Dim> result(rSize.getLength());
+    Index<Dim> FFT<T, Dim>::rSizeToKSize(const Index<Dim>& rSize) {
+        Index<Dim> result(rSize.getLength());
         size_t i = 0;
         for (; i < rSize.getLength() - 1; ++i)
             result[i] = rSize[i];
@@ -446,7 +445,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    bool FFT<T, Dim>::checkSize(const Array<size_t, Dim>& rSpaceSize) {
+    bool FFT<T, Dim>::checkSize(const Index<Dim>& rSpaceSize) {
         return std::all_of(rSpaceSize.begin(), rSpaceSize.end(), [](size_t elem) {
             return elem <= static_cast<size_t>(std::numeric_limits<int>::max());
         });

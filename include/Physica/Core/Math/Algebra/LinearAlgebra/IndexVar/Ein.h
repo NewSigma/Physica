@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <utility>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar/Index.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar/IndexVar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
@@ -44,7 +45,7 @@ namespace Physica {
                 return 1;
             }
         }();
-        using IndexType = Array<size_t, NDim>;
+        using IndexType = Index<NDim>;
     protected:
         using T = std::remove_cvref_t<Expr>::ScalarType;
     public:

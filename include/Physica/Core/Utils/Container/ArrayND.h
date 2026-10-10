@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar/Index.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica {
@@ -44,7 +45,7 @@ namespace Physica {
             using Type = DenseVector<T, SizeAtCompile>;
         };
 
-        using IndexType = Array<size_t, NDim>;
+        using IndexType = Index<NDim>;
         using ArrayType = Helper<T>::Type;
         using ShapeType = std::conditional<StaticShape, Empty, IndexType>::type;
 
@@ -95,21 +96,6 @@ namespace Physica {
         /* Friends */
         friend class device_obj<This>;
     };
-
-    template<size_t Dim>
-    void forND(const Array<size_t, Dim>& shape, std::invocable<Array<size_t, Dim>> auto func) {
-        Array<size_t, Dim> index(shape.getLength(), 0);
-        [&](this auto&& self, size_t dim) -> void {
-            if (dim == shape.getLength())
-                func(index);
-            else {
-                for (size_t i = 0; i < shape[dim]; ++i) {
-                    index[dim] = i;
-                    self(dim + 1);
-                }
-            }
-        }(0);
-    }
 }
 
 #include "ArrayImpl/ArrayNDImpl.h"

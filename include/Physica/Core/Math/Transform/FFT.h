@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Scalar/Complex.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar/Index.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/CompactMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/TensorImpl/LValueTensor.h"
@@ -110,7 +110,7 @@ namespace Physica {
         using MachineType = Traits<This>::MachineType;
         using RealType = Traits<This>::RealType;
         using ComplexType = Traits<This>::ComplexType;
-        using IndexArray = Array<size_t, Dim>;
+        using IndexArray = Index<Dim>;
     public:
         using RSpaceType = FFTRSpace<This, Dim>;
         using KSpaceType = FFTKSpace<This, Dim>;
@@ -125,7 +125,7 @@ namespace Physica {
         PlanFlag planFlag;
     public:
         FFT();
-        FFT(const Array<size_t, Dim>& rSpaceSize_, PlanFlag planFlag_);
+        FFT(const Index<Dim>& rSpaceSize_, PlanFlag planFlag_);
         FFT(const FFT&);
         FFT(FFT&&) noexcept;
         ~FFT() noexcept;
@@ -153,14 +153,13 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isComplex() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSinglePrec() noexcept;
-        [[nodiscard]] static FFT<T, Dim> makeEmptyFFT(const Array<size_t, Dim>& rSpaceSize);
-        template<std::integral IndexType>
-        [[nodiscard]] static Array<IndexType, Dim> rSizeToKSize(const Array<IndexType, Dim>& rSize);
+        [[nodiscard]] static FFT<T, Dim> makeEmptyFFT(const Index<Dim>& rSpaceSize);
+        [[nodiscard]] static Index<Dim> rSizeToKSize(const Index<Dim>& rSize);
         static void transform(const This& planProvider, This& bufferProvider);
         static void rawInvTransform(const This& planProvider, This& bufferProvider);
         static void invTransform(const This& planProvider, This& bufferProvider);
     private:
-        FFT(const Array<size_t, Dim>& rSpaceSize_);
+        FFT(const Index<Dim>& rSpaceSize_);
         /* Operations */
         void initializePlan() noexcept;
         FFTPlan makeForwardPlan();
@@ -176,7 +175,7 @@ namespace Physica {
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ const RealType* asRealBuffer() const noexcept { return reinterpret_cast<const RealType*>(buffer); }
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ const ComplexType* asComplexBuffer() const noexcept { return buffer; }
         /* Static members */
-        static bool checkSize(const Array<size_t, Dim>& rSpaceSize);
+        static bool checkSize(const Index<Dim>& rSpaceSize);
         /* Friends */
         friend class FFTRSpace<This, Dim>;
         friend class FFTKSpace<This, Dim>;

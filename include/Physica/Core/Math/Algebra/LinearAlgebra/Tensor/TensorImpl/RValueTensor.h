@@ -20,8 +20,8 @@
 
 #include "Physica/CRTP.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar/Index.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar/IndexVar.h"
-#include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica {
     template<class Derived> class LValueTensor;
@@ -45,7 +45,7 @@ namespace Physica {
     public:
         constexpr static int NDim = Traits<Derived>::NDim;
         using ScalarType = ScalarT;
-        using IndexType = Array<size_t, NDim>;
+        using IndexType = Index<NDim>;
     protected:
         using T = ScalarType;
         using Tv = T::ValueType;

@@ -23,6 +23,7 @@
 #include <ranges>
 #include <type_traits>
 #include <utility>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar/Index.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar/IndexVar.h"
 #include "Physica/Core/Utils/Container/Array.h"
 #include "Physica/Core/Utils/MetaProgramming.h"
@@ -98,7 +99,7 @@ namespace Physica {
         assert(numFree == NumIndexOut && "[Error]: Number of free indices must match output");
 
         // Resolve the dimension of each index, checking the consistency of repeated ones
-        Array<size_t, NumIndexIn> dims{};
+        Index<NumIndexIn> dims{};
         for (int i = 0; i < NumIndexIn; ++i) {
             const size_t dim = i < NDimLHS ? lhs.dim(i) : rhs.dim(i - NDimLHS);
             if (i == first[i])
@@ -116,16 +117,16 @@ namespace Physica {
             assert(dims[outPos[t]] == target.dim(t) && "[Error]: Output dimension mismatch");
         }
 
-        Array<size_t, NumIndexIn> contractShape;
+        Index<NumIndexIn> contractShape;
         for (auto&& [i, f, dim] : Physica::zip(index, first, dims))
             contractShape[i] = (i == f && count[i] == 2) ? dim : 1;
 
         const auto outShape = target.getShape();
-        const auto sizeOut = Array<size_t, NumIndexOut>::toSize(outShape);
-        const auto sizeContract = Array<size_t, NumIndexIn>::toSize(contractShape);
-        Array<size_t, NumIndexIn> posValue{};
-        Array<size_t, NDimLHS> lhsIndex{};
-        Array<size_t, NDimRHS> rhsIndex{};
+        const auto sizeOut = Index<NumIndexOut>::toSize(outShape);
+        const auto sizeContract = Index<NumIndexIn>::toSize(contractShape);
+        Index<NumIndexIn> posValue{};
+        Index<NDimLHS> lhsIndex{};
+        Index<NDimRHS> rhsIndex{};
         for (size_t n = 0; n < sizeOut; ++n) {
             using OutIndexType = Target::IndexType;
             const auto outIndex = OutIndexType::toIndexND(outShape, n);
@@ -134,7 +135,7 @@ namespace Physica {
 
             T sum{};
             for (size_t c = 0; c < sizeContract; ++c) {
-                const Array<size_t, NumIndexIn> contractIndex = Array<size_t, NumIndexIn>::toIndexND(contractShape, c);
+                const Index<NumIndexIn> contractIndex = Index<NumIndexIn>::toIndexND(contractShape, c);
                 for (auto&& [i, f, n] : Physica::zip(index, first, count))
                     if (i == f && n == 2)
                         posValue[i] = contractIndex[i];
