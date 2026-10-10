@@ -213,7 +213,7 @@ auto MPI::allreduce([[maybe_unused]] const void* sendbuf, [[maybe_unused]] void*
     return {};
 }
 
-auto MPI::gather(int to, [[maybe_unused]] const void* sendbuf, [[maybe_unused]] void* recvbuf, int count, [[maybe_unused]] dtype_handle dtype, [[maybe_unused]] comm_handle comm) -> Request {
+auto MPI::gather(int to, [[maybe_unused]] const void* sendbuf, [[maybe_unused]] void* recvbuf, [[maybe_unused]] int count, [[maybe_unused]] dtype_handle dtype, [[maybe_unused]] comm_handle comm) -> Request {
     checkPID(to);
     if (to == getRank()) {
         assert(count % getNumRank() == 0);
@@ -229,7 +229,7 @@ auto MPI::gather(int to, [[maybe_unused]] const void* sendbuf, [[maybe_unused]] 
     return {};
 }
 
-auto MPI::scatter(int from, [[maybe_unused]] const void* sendbuf, [[maybe_unused]] void* recvbuf, int count, [[maybe_unused]] dtype_handle dtype, [[maybe_unused]] comm_handle comm) -> Request {
+auto MPI::scatter(int from, [[maybe_unused]] const void* sendbuf, [[maybe_unused]] void* recvbuf, [[maybe_unused]] int count, [[maybe_unused]] dtype_handle dtype, [[maybe_unused]] comm_handle comm) -> Request {
     checkPID(from);
     if (from == getRank()) {
         assert(count % getNumRank() == 0);

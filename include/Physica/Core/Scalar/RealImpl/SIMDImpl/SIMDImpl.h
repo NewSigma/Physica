@@ -155,13 +155,13 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    void SIMD<T, Size>::load(const T* p) & noexcept {
-        pack.load(reinterpret_cast<const typename T::MachineType*>(p));
+    void SIMD<T, Size>::load(this This& self, const T* p) noexcept {
+        self.pack.load(reinterpret_cast<const T::MachineType*>(p));
     }
 
     template<Scalar T, int Size>
     void SIMD<T, Size>::store(T* p) const noexcept {
-        pack.store(reinterpret_cast<typename T::MachineType*>(p));
+        pack.store(reinterpret_cast<T::MachineType*>(p));
     }
 
     template<Scalar T, int Size>

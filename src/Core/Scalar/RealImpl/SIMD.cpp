@@ -31,24 +31,24 @@ using namespace Physica;
  * [1] vectorclass2; https://github.com/vectorclass/version2
  */
 template<Scalar T, int Size>
-void SIMD<T, Size>::load(const T* p, int n) & noexcept {
+void SIMD<T, Size>::load(this This& self, const T* p, int n) noexcept {
     assert(0 < n && n < Size && "[Error]: Invalid size for partial operation");
     if constexpr (T::Prec == Float32) {
         if constexpr (Size == 4) {
             if constexpr (Instruset::hasAVX512VL())
-                *this = _mm_maskz_loadu_ps(__mmask8((1U << n) - 1), (float*)p);
+                self = _mm_maskz_loadu_ps(__mmask8((1U << n) - 1), (float*)p);
             else {
                 switch (n) {
                 case 1:
-                    *this = _mm_load_ss((float*)p);
+                    self = _mm_load_ss((float*)p);
                     break;
                 case 2:
-                    *this = _mm_castpd_ps(_mm_load_sd((double*)p));
+                    self = _mm_castpd_ps(_mm_load_sd((double*)p));
                     break;
                 case 3: {
                     auto t1 = _mm_castpd_ps(_mm_load_sd((double*)p));
                     auto t2 = _mm_load_ss((float*)p + 2);
-                    *this = _mm_movelh_ps(t1, t2);
+                    self = _mm_movelh_ps(t1, t2);
                     break;
                 }
                 default:
@@ -58,7 +58,7 @@ void SIMD<T, Size>::load(const T* p, int n) & noexcept {
         }
         else if constexpr (Size == 8) {
             if constexpr (Instruset::hasAVX512VL())
-                *this = _mm256_maskz_loadu_ps(__mmask8((1U << n) - 1), (float*)p);
+                self = _mm256_maskz_loadu_ps(__mmask8((1U << n) - 1), (float*)p);
             else {
                 HalfType low{}, high{};
                 if (n < 4) {
@@ -73,21 +73,21 @@ void SIMD<T, Size>::load(const T* p, int n) & noexcept {
                     low.load(p);
                     high.load(p + 4, n - 4);
                 }
-                *this = This(low, high);
+                self = This(low, high);
             }
         }
         else {
             static_assert(Size == 16, "[Error]: Unexpected size");
-            *this = _mm512_maskz_loadu_ps(__mmask16((1 << n) - 1), (float*)p);
+            self = _mm512_maskz_loadu_ps(__mmask16((1 << n) - 1), (float*)p);
         }
     }
     else {
         static_assert(T::Prec == Float64);
         if constexpr (Size == 2)
-            *this = _mm_load_sd((double*)p);
+            self = _mm_load_sd((double*)p);
         else if constexpr (Size == 4) {
             if constexpr (Instruset::hasAVX512VL())
-                *this = _mm256_maskz_loadu_pd(__mmask8((1U << n) - 1), (double*)p);
+                self = _mm256_maskz_loadu_pd(__mmask8((1U << n) - 1), (double*)p);
             else {
                 HalfType low{}, high{};
                 if (n < 2) {
@@ -102,12 +102,12 @@ void SIMD<T, Size>::load(const T* p, int n) & noexcept {
                     low.load(p);
                     high.load(p + 2, 1);
                 }
-                *this = This(low, high);
+                self = This(low, high);
             }
         }
         else {
             static_assert(Size == 8, "[Error]: Unexpected size");
-            *this = _mm512_maskz_loadu_pd(__mmask16((1 << n) - 1), (double*)p);
+            self = _mm512_maskz_loadu_pd(__mmask16((1 << n) - 1), (double*)p);
         }
     }
 }
@@ -182,22 +182,22 @@ void SIMD<T, Size>::store(T* p, int n) const noexcept {
 }
 
 #if defined(__SSE2__) || defined(__x86_64__)
-template void SIMD<float32, 4>::load(const float32*, int) & noexcept;
-template void SIMD<float64, 2>::load(const float64*, int) & noexcept;
+template void SIMD<float32, 4>::load(this SIMD<float32, 4>&, const float32*, int) noexcept;
+template void SIMD<float64, 2>::load(this SIMD<float64, 2>&, const float64*, int) noexcept;
 template void SIMD<float32, 4>::store(float32*, int) const noexcept;
 template void SIMD<float64, 2>::store(float64*, int) const noexcept;
 #endif
 
-#if defined(__AVX__)
-template void SIMD<float32, 8>::load(const float32*, int) & noexcept;
-template void SIMD<float64, 4>::load(const float64*, int) & noexcept;
+#ifdef __AVX__
+template void SIMD<float32, 8>::load(this SIMD<float32, 8>&, const float32*, int) noexcept;
+template void SIMD<float64, 4>::load(this SIMD<float64, 4>&, const float64*, int) noexcept;
 template void SIMD<float32, 8>::store(float32*, int) const noexcept;
 template void SIMD<float64, 4>::store(float64*, int) const noexcept;
 #endif
 
 #if defined(__AVX512F__) || defined(__AVX512__)
-template void SIMD<float32, 16>::load(const float32*, int) & noexcept;
-template void SIMD<float64, 8>::load(const float64*, int) & noexcept;
+template void SIMD<float32, 16>::load(this SIMD<float32, 16>&, const float32*, int) noexcept;
+template void SIMD<float64, 8>::load(this SIMD<float64, 8>&, const float64*, int) noexcept;
 template void SIMD<float32, 16>::store(float32*, int) const noexcept;
 template void SIMD<float64, 8>::store(float64*, int) const noexcept;
 #endif

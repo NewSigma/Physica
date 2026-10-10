@@ -51,7 +51,7 @@ namespace Physica {
         template<class T>
         [[nodiscard]] bool isa() const noexcept;
         template<class T>
-        [[nodiscard]] T cast() && noexcept;
+        [[nodiscard]] T cast(this H5ID&& self) noexcept;
 
         void checkWrite() const;
         void swap(H5ID& other) noexcept;
@@ -72,8 +72,8 @@ namespace Physica {
     }
 
     template<class T>
-    T H5ID::cast() && noexcept {
-        assert(isa<T>());
-        return T(std::move(*this));
+    T H5ID::cast(this H5ID&& self) noexcept {
+        assert(self.isa<T>());
+        return T(std::move(self));
     }
 }

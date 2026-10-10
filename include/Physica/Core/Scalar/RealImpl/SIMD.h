@@ -89,8 +89,8 @@ namespace Physica {
         [[nodiscard]] auto operator>=(const SIMD other) const { return !(*this < other); }
         [[nodiscard]] auto operator<=(const SIMD other) const { return !(*this > other); }
         /* Operations */
-        void load(const T* p) & noexcept;
-        void load(const T* p, int n) & noexcept;
+        void load(this This& self, const T* p) noexcept;
+        void load(this This& self, const T* p, int n) noexcept;
         void store(T* p) const noexcept;
         void store(T* p, int n) const noexcept;
         void insert(int index, const T& value);
@@ -233,12 +233,12 @@ namespace std {
 #endif
 
 namespace Physica {
-    extern template void SIMD<Real<Float32>, 4>::load(const Real<Float32>*, int) & noexcept;
-    extern template void SIMD<Real<Float32>, 8>::load(const Real<Float32>*, int) & noexcept;
-    extern template void SIMD<Real<Float32>, 16>::load(const Real<Float32>*, int) & noexcept;
-    extern template void SIMD<Real<Float64>, 2>::load(const Real<Float64>*, int) & noexcept;
-    extern template void SIMD<Real<Float64>, 4>::load(const Real<Float64>*, int) & noexcept;
-    extern template void SIMD<Real<Float64>, 8>::load(const Real<Float64>*, int) & noexcept;
+    extern template void SIMD<Real<Float32>, 4>::load(this SIMD<Real<Float32>, 4>&, const Real<Float32>*, int) noexcept;
+    extern template void SIMD<Real<Float32>, 8>::load(this SIMD<Real<Float32>, 8>&, const Real<Float32>*, int) noexcept;
+    extern template void SIMD<Real<Float32>, 16>::load(this SIMD<Real<Float32>, 16>&, const Real<Float32>*, int) noexcept;
+    extern template void SIMD<Real<Float64>, 2>::load(this SIMD<Real<Float64>, 2>&, const Real<Float64>*, int) noexcept;
+    extern template void SIMD<Real<Float64>, 4>::load(this SIMD<Real<Float64>, 4>&, const Real<Float64>*, int) noexcept;
+    extern template void SIMD<Real<Float64>, 8>::load(this SIMD<Real<Float64>, 8>&, const Real<Float64>*, int) noexcept;
 
     extern template void SIMD<Real<Float32>, 4>::store(Real<Float32>*, int) const noexcept;
     extern template void SIMD<Real<Float32>, 8>::store(Real<Float32>*, int) const noexcept;

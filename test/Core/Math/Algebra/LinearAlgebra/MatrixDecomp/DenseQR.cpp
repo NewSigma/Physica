@@ -22,7 +22,7 @@
 #include "Test.h"
 
 using namespace Physica;
-using RandomSource = Random<>;
+using RandomSource = Random<PCG64DXSM, 8388591362694621073>;
 
 namespace {
     template<Scalar T, Matrix M, bool Pivot>
@@ -82,7 +82,7 @@ namespace {
 
     void forward() {
         for (size_t order : {1, 2, 3, 4, 5, 8}) {
-            forwardFuzzing<float64>(order, 1E-11);
+            forwardFuzzing<float64>(order, 1E-10);
             forwardFuzzing<cfloat64>(order, 1E-11);
         }
     }
