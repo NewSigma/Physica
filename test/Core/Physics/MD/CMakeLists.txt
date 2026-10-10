@@ -1,5 +1,7 @@
 physica_add_test(PairModel ForceModel/PairModel.cpp)
 physica_add_test(TodaModel ForceModel/TodaModel.cpp)
+physica_add_test(VASPModel ForceModel/VASPModel.cpp)
+physica_add_test(QEModel ForceModel/QEModel.cpp)
 physica_add_test(MDCell MDCell.cpp)
 if(${PHYSICA_CUDA})
     physica_add_test(RSpaceEwald_cuda ForceModel/Ewald/RSpaceEwald.cu)

@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include <print>
+
 #include "Physica/Core/Physics/SolidState/VASP/Poscar.h"
 #include "Physica/Core/Physics/SolidState/QE/PWscfOut.h"
 #include "Physica/Core/Exception/SystemException.h"
@@ -114,11 +116,11 @@ namespace Physica {
                 throw std::runtime_error("[Error]: QE finished with non zero exit code");
             }
             PWscfOut out_scf(outputTmp.getName(), getNumParticle());
-            result.getDerived() = out_scf.getForce();
+            result = out_scf.getForce();
         }
         catch (std::exception& e) {
-            fprintf(stderr, "%s\n", e.what());
-            exit(EXIT_FAILURE);
+            std::println(stderr, "{}", e.what());
+            std::abort();
         }
     }
 
@@ -134,8 +136,8 @@ namespace Physica {
     template<Scalar T>
     template<size_t N>
     ProcessFuture QEModel<T>::run_qe(TempFile<N>& input, TempFile<N>& output) const {
-        int fd[2];
-        if (pipe(fd) == -1)
+        Array<int, 2> fd{};
+        if (pipe(fd.data()) == -1)
             throw SystemException();
 
         ProcessFuture future;

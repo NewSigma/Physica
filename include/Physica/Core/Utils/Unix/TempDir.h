@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cstdlib>
+#include <filesystem>
 #include <unistd.h>
 #include "Physica/Core/Exception/SystemException.h"
 
@@ -61,7 +62,8 @@ namespace Physica {
     template<size_t N>
     TempDir<N>::~TempDir() {
         if (pName != nullptr) {
-            forceRemoveDir(pName);
+            std::error_code error;
+            std::filesystem::remove_all(pName, error);
             pName = nullptr;
         }
     }

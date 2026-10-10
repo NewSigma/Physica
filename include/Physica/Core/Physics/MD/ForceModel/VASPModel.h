@@ -19,6 +19,8 @@
 #pragma once
 
 #include <fcntl.h>
+#include <filesystem>
+#include <print>
 #include "Physica/Core/Physics/SolidState/VASP/Outcar.h"
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
@@ -71,26 +73,24 @@ namespace Physica {
 
     template<Scalar T>
     VASPModel<T>::VASPModel(std::string pathToVasp_,
-                                     const char* pathToINCAR,
-                                     const char* pathToPOTCAR,
-                                     const char* pathToKPOINTS,
-                                     Array<size_t> numOfEachType_,
-                                     unsigned int numMPIProcess_)
+                            const char* pathToINCAR,
+                            const char* pathToPOTCAR,
+                            const char* pathToKPOINTS,
+                            Array<size_t> numOfEachType_,
+                            unsigned int numMPIProcess_)
             : pathToVasp(std::move(pathToVasp_))
             , workingDir("/tmp/tmpXXXXXX")
             , numOfEachType(std::move(numOfEachType_))
             , numMPIProcess(numMPIProcess_) {
-        auto path = makePath("%s/log", workingDir.getName());
-        logFd = open(path.data(), O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR);
+        const std::filesystem::path workingDirPath = workingDir.getName();
+        logFd = open((workingDirPath / "log").c_str(), O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR);
         if (logFd == -1)
             throw SystemException();
 
-        path = makePath("%s/INCAR", workingDir.getName());
-        copyFile(pathToINCAR, path.data());
-        path = makePath("%s/POTCAR", workingDir.getName());
-        copyFile(pathToPOTCAR, path.data());
-        path = makePath("%s/KPOINTS", workingDir.getName());
-        copyFile(pathToKPOINTS, path.data());
+        constexpr auto Overwrite = std::filesystem::copy_options::overwrite_existing;
+        std::filesystem::copy_file(pathToINCAR, workingDirPath / "INCAR", Overwrite);
+        std::filesystem::copy_file(pathToPOTCAR, workingDirPath / "POTCAR", Overwrite);
+        std::filesystem::copy_file(pathToKPOINTS, workingDirPath / "KPOINTS", Overwrite);
     }
 
     template<Scalar T>
@@ -106,8 +106,8 @@ namespace Physica {
     void VASPModel<T>::forceAsync(const MDCellType& cell, Vector auto& result) const noexcept {
         try {
             /* Make POSCAR */ {
-                const auto path = makePath("%s/POSCAR", workingDir.getName());
-                std::ofstream os(path.data(), std::ios_base::out | std::ios_base::trunc);
+                const std::filesystem::path path = std::filesystem::path(workingDir.getName()) / "POSCAR";
+                std::ofstream os(path, std::ios_base::out | std::ios_base::trunc);
                 os << '\n';
                 os << PhyConst<AU>::bohrToAngstrom(1) << '\n';
                 os << cell.getLattice();
@@ -119,13 +119,13 @@ namespace Physica {
             const int error = run_vasp().wait();
             if (error != 0) [[unlikely]]
                 throw std::runtime_error("[Error]: VASP finished with non zero exit code");
-            const auto path = makePath("%s/OUTCAR", workingDir.getName());
-            const Outcar outcar(path.data(), getNumParticle());
-            result.getDerived() = outcar.getForce();
+            const std::filesystem::path path = std::filesystem::path(workingDir.getName()) / "OUTCAR";
+            const Outcar outcar(path.c_str(), getNumParticle());
+            result = outcar.getForce();
         }
         catch (std::exception& e) {
-            fprintf(stderr, "%s\n", e.what());
-            exit(EXIT_FAILURE);
+            std::println(stderr, "{}", e.what());
+            std::abort();
         }
     }
 
