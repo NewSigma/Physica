@@ -24,7 +24,7 @@ using namespace Physica;
 
 namespace {
     void fiber(const DenseTensor<float64, 3>& x) {
-        auto fiber = x.fiber(1, var(), 2);
+        auto fiber = x.fiber(1UZ, var(), 2UZ);
         for (size_t i = 0; i < fiber.getLength(); ++i)
             expect(x[1UZ, i, 2UZ] == fiber[i]);
 
@@ -33,7 +33,7 @@ namespace {
     }
 
     void slice(const DenseTensor<float64, 3>& x) {
-        auto slice = x.slice(1, var(), var());
+        auto slice = x.slice(1UZ, var(), var());
         for (size_t r = 0; r < x.dim(1); ++r)
             for (size_t c = 0; c < x.dim(2); ++c)
                 expect(x[1UZ, r, c] == slice[r, c]);

@@ -58,7 +58,8 @@ namespace Physica {
         void operator-=(const Matrix auto& m);
         void operator*=(const Matrix auto& m);
 
-        [[nodiscard]] decltype(auto) operator[](this auto&&, const IndexVar auto& row, const IndexVar auto& col);
+        [[nodiscard]] decltype(auto) operator[](this auto&&, size_t row, size_t col);
+        [[nodiscard]] decltype(auto) operator[](this auto&&, const Var& row, const Var& col);
         /* Operations */
         [[nodiscard]] decltype(auto) calc(size_t row, size_t col) const { return operator[](row, col); }
 

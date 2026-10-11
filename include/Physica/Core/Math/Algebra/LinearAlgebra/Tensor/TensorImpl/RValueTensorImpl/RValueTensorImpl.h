@@ -137,9 +137,7 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueTensor<Derived, ScalarT>::ein(this auto&& self, const IndexVar auto&... indices) noexcept {
-        constexpr IndexVarInfo<std::remove_cvref_t<decltype(indices)>...> info{};
-        static_assert(info.getNumNamed() == NDim, "[Error]: Only named Var is allowed in Einstein notation");
+    auto RValueTensor<Derived, ScalarT>::ein(this auto&& self, const std::same_as<Var> auto&... indices) noexcept {
         static_assert(sizeof...(indices) == NDim, "[Error]: Number of indices must match tensor dimension");
         using Self = decltype(self);
         return Ein<Self>(std::forward<Self>(self), Array<const Var*, NDim>{(&indices)...});

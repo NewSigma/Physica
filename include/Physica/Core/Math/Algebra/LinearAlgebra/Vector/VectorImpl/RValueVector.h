@@ -156,7 +156,7 @@ namespace Physica {
         [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
         [[nodiscard]] auto hermite(this auto&&) noexcept;
         [[nodiscard]] auto format() const;
-        [[nodiscard]] auto ein(this auto&&, const IndexVar auto&... indices) noexcept;
+        [[nodiscard]] auto ein(this auto&&, const Var& index) noexcept;
 
         [[nodiscard]] CoDiff<Tr> norm1() const noexcept;
         [[nodiscard]] CoDiff<Tr> norm2() const noexcept;

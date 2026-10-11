@@ -325,12 +325,9 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueMatrix<Derived, ScalarT>::ein(this auto&& self, const IndexVar auto&... indices) noexcept {
-        constexpr IndexVarInfo<std::remove_cvref_t<decltype(indices)>...> info{};
-        static_assert(info.getNumNamed() == 2, "[Error]: Only named Var is allowed in Einstein notation");
-        static_assert(sizeof...(indices) == 2, "[Error]: A matrix has exactly 2 indices");
+    auto RValueMatrix<Derived, ScalarT>::ein(this auto&& self, const Var& row, const Var& col) noexcept {
         using Self = decltype(self);
-        return Ein<Self>(std::forward<Self>(self), Array<const Var*, 2>{(&indices)...});
+        return Ein<Self>(std::forward<Self>(self), Array<const Var*, 2>{&row, &col});
     }
 
     template<class Derived, Scalar ScalarT>

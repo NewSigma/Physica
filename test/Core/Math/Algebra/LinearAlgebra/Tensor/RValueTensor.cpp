@@ -31,17 +31,17 @@ namespace {
         const auto y = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
         static_assert(!(x + y).isLValueTensor());
 
-        auto fiber = (x + y).fiber(1, var(), 2);
+        auto fiber = (x + y).fiber(1UZ, var(), 2UZ);
         static_assert(!fiber.isLValueVector());
-        expect(VectorND<T>(fiber) == x.fiber(1, var(), 2) + y.fiber(1, var(), 2));
+        expect(VectorND<T>(fiber) == x.fiber(1UZ, var(), 2UZ) + y.fiber(1UZ, var(), 2UZ));
     }
 
     void slice() {
         const auto x = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
         const auto y = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
-        auto slice = (x + y).slice(1, var(), var());
+        auto slice = (x + y).slice(1UZ, var(), var());
         static_assert(!slice.isLValueMatrix());
-        expect(MatrixND<T>(slice) == x.slice(1, var(), var()) + y.slice(1, var(), var()));
+        expect(MatrixND<T>(slice) == x.slice(1UZ, var(), var()) + y.slice(1UZ, var(), var()));
     }
 
     void block() {
@@ -57,10 +57,10 @@ namespace {
         {
             const auto x = Tensor4D<T>::random_uniform<Random<>>({2, 3, 4, 5});
             const auto y = Tensor4D<T>::random_uniform<Random<>>({2, 3, 4, 5});
-            auto b = (x + y).block(1, var(), var(), var());
+            auto b = (x + y).block(1UZ, var(), var(), var());
             static_assert(!b.isLValueTensor());
             static_assert(decltype(b)::ndim() == 4);
-            expect(Tensor4D<T>(b) == Tensor4D<T>(x.block(1, var(), var(), var()) + y.block(1, var(), var(), var())));
+            expect(Tensor4D<T>(b) == Tensor4D<T>(x.block(1UZ, var(), var(), var()) + y.block(1UZ, var(), var(), var())));
         }
     }
 

@@ -119,7 +119,7 @@ namespace Physica {
         assert(minFreq.isPositive() && "[Error]: Min frequency must be positive");
         for (unsigned int step = 0; step < maxNumStep; ++step) {
             const auto fcMatrixes = makeForceConstants(superCellModel);
-            auto fcMatrix = fcMatrixes.slice(0, 0, 0, var(), var());
+            auto fcMatrix = fcMatrixes.slice(0UZ, 0UZ, 0UZ, var(), var());
             Base::toDynamicMatrix(fcMatrix);
             const auto eigen = Base::diagonalize(fcMatrix);
             const T freq = Base::makeFreq(eigen)[0];

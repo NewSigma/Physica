@@ -126,7 +126,7 @@ namespace Physica {
         [[nodiscard]] auto triu_unit(this auto&&) noexcept;
         [[nodiscard]] auto tril(this auto&&) noexcept;
         [[nodiscard]] auto tril_unit(this auto&&) noexcept;
-        [[nodiscard]] auto ein(this auto&&, const IndexVar auto&... indices) noexcept;
+        [[nodiscard]] auto ein(this auto&&, const Var& row, const Var& col) noexcept;
 
         [[nodiscard]] Tr norm1() const;
         template<ExecutePolicy P = Sequential>

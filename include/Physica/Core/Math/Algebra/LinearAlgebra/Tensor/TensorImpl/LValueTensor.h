@@ -48,10 +48,11 @@ namespace Physica {
         void operator-=(const Tensor auto& x);
 
         [[nodiscard]] decltype(auto) operator[](this auto&&, const IndexType& index);
-        [[nodiscard]] decltype(auto) operator[](this auto&&, const IndexVar auto&... indices);
+        [[nodiscard]] decltype(auto) operator[](this auto&&, std::same_as<size_t> auto... dims);
+        [[nodiscard]] decltype(auto) operator[](this auto&&, const std::same_as<Var> auto&... vars);
         /* Operations */
         [[nodiscard]] decltype(auto) calc(const IndexType& index) const { return operator[](index); }
-        [[nodiscard]] decltype(auto) calc(const IndexVar auto&... indices) const { return operator[](indices...); }
+        [[nodiscard]] decltype(auto) calc(std::same_as<size_t> auto... dims) const { return operator[](dims...); }
 
         void forND(std::invocable<T&, IndexType> auto fn);
         void forND(std::invocable<const T&, IndexType> auto fn) const;

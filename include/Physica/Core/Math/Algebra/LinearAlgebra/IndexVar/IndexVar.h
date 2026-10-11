@@ -42,7 +42,7 @@ namespace Physica {
     }
 
     template<class T>
-    concept IndexVar = std::integral<T> || std::same_as<T, Var> || std::same_as<T, decltype(var())>;
+    concept IndexVar = std::same_as<T, size_t> || std::same_as<T, Var> || std::same_as<T, decltype(var())>;
 
     template<IndexVar... Ts>
     struct IndexVarInfo {
@@ -70,7 +70,7 @@ namespace Physica {
 
     template<IndexVar... Ts>
     constexpr IndexVarInfo<Ts...>::IndexVarInfo() noexcept
-            : isFree{std::integral<Ts>...}
+            : isFree{std::same_as<Ts, size_t>...}
             , isNamed{std::same_as<Ts, Var>...}
             , isAnonymous{std::same_as<Ts, decltype(var())>...} {
         assert((getNumNamed() == 0 || getNumAnonymous() == 0) && "[Error]: It is undefined to mix named and anonymous vars");

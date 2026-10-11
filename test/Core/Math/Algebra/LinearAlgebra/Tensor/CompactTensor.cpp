@@ -27,9 +27,9 @@ using T = float64;
 namespace {
     void fiber() {
         auto x = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
-        static_assert(x.fiber(1, 2, var()).isCompact());
+        static_assert(x.fiber(1UZ, 2UZ, var()).isCompact());
 
-        auto fiber = x.fiber(1, var(), 2);
+        auto fiber = x.fiber(1UZ, var(), 2UZ);
         static_assert(!decltype(fiber)::isCompact());
         static_assert(decltype(fiber)::getStrideAtCompile() == Dynamic);
         expect(fiber.getStride() == x.getStride(1));
@@ -39,7 +39,7 @@ namespace {
 
     void slice() {
         auto x = Tensor3D<T>::random_uniform<Random<>>({4, 4, 4});
-        auto slice = x.slice(1, var(), var());
+        auto slice = x.slice(1UZ, var(), var());
         static_assert(slice.isCompact());
         static_assert(slice.getMajor() == MatrixMajor::Row);
         for (size_t r = 0; r < 4; ++r)

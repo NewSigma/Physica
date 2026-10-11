@@ -70,7 +70,7 @@ namespace Physica {
         [[nodiscard]] auto block(this auto&&, IndexVar auto...) noexcept;
         [[nodiscard]] auto block(this auto&&, IndexType from, IndexType count) noexcept;
         [[nodiscard]] auto flatten(this auto&&) noexcept;
-        [[nodiscard]] auto ein(this auto&&, const IndexVar auto&... indices) noexcept;
+        [[nodiscard]] auto ein(this auto&&, const std::same_as<Var> auto&... indices) noexcept;
 
         void resize(this auto&, const Tensor auto& x);
         auto resize(this auto&, std::same_as<size_t> auto... dims);

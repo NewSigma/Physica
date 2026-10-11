@@ -35,8 +35,8 @@ namespace {
         const auto d_x = x.toDevice();
         const auto d_y = y.toDevice();
 
-        const VectorND<T> answer = (x + y).fiber(1, var(), 2);
-        device_obj<VectorND<T>> result = (d_x + d_y).fiber(1, var(), 2);
+        const VectorND<T> answer = (x + y).fiber(1UZ, var(), 2UZ);
+        device_obj<VectorND<T>> result = (d_x + d_y).fiber(1UZ, var(), 2UZ);
         expect(vectorNear(result.toHost(), answer, 1E-6));
     }
 
@@ -46,8 +46,8 @@ namespace {
         const auto d_x = x.toDevice();
         const auto d_y = y.toDevice();
 
-        const MatrixND<T> answer = (x + y).slice(1, var(), var());
-        device_obj<MatrixND<T>> result = (d_x + d_y).slice(1, var(), var());
+        const MatrixND<T> answer = (x + y).slice(1UZ, var(), var());
+        device_obj<MatrixND<T>> result = (d_x + d_y).slice(1UZ, var(), var());
         expect(matrixNear(result.toHost(), answer, 1E-6));
     }
 
@@ -70,8 +70,8 @@ namespace {
             const auto d_x = x.toDevice();
             const auto d_y = y.toDevice();
 
-            const Tensor4D<T> answer((x + y).block(1, var(), var(), var()));
-            device_obj<Tensor4D<T>> result = (d_x + d_y).block(1, var(), var(), var());
+            const Tensor4D<T> answer((x + y).block(1UZ, var(), var(), var()));
+            device_obj<Tensor4D<T>> result = (d_x + d_y).block(1UZ, var(), var(), var());
             expect(tensorNear(result.toHost(), answer, 1E-6));
         }
     }
