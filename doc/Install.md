@@ -9,23 +9,25 @@
 2. A C++ compiler that support C++ 23, the following compilers are tested:
 
 [GCC](https://gcc.gnu.org/)  N/A (Bug 104177)  
-[clang](https://clang.llvm.org/)  >=23.0.0  
-[IntelLLVM](https://www.intel.cn/content/www/cn/zh/developer/tools/oneapi/dpc-compiler.html)  >=2025.0  
+[clang](https://clang.llvm.org/) 
+[IntelLLVM](https://www.intel.cn/content/www/cn/zh/developer/tools/oneapi/dpc-compiler.html)
+
+See `.github/workflows/preset-*.yml` for detailed version requirements.
 
 3. Addtional libraries:
 
-[fftw](http://www.fftw.org) =3.3.10  
-[HDF5](https://www.hdfgroup.org/solutions/hdf5/) =1.14.6 (Optional, Recommended data format)  
-[oneMKL](https://www.intel.com/) >=2024.2 (Optional)  
-[openMPI](https://www.open-mpi.org/) =4.1.6 (Optional)  
-[CUDA](https://developer.nvidia.com/cuda-downloads) =12.8 (Optional)  
-[cuDSS](https://developer.nvidia.com/cudss) =0.7.1 (Required by CUDA)  
-[Qt](https://www.qt.io/) >=6.5.3 (Optional, Plotting support)  
-[mimalloc](https://github.com/microsoft/mimalloc) >=3.2.8 (Optional)  
+[fftw](http://www.fftw.org)  
+[HDF5](https://www.hdfgroup.org/solutions/hdf5/) (Optional, Recommended data format)  
+[oneMKL](https://www.intel.com/) (Optional)  
+[openMPI](https://www.open-mpi.org/) (Optional)  
+[CUDA](https://developer.nvidia.com/cuda-downloads) (Optional)  
+[cuDSS](https://developer.nvidia.com/cudss) (Required by CUDA)  
+[Qt](https://www.qt.io/) (Optional, Plotting support)  
+[mimalloc](https://github.com/microsoft/mimalloc) (Optional)  
 [LLVM](https://llvm.org/) The same version as clang (Optional)  
 [vectorclass](https://github.com/vectorclass/version2) (Bundled)  
 
-We recommend incrementally installing them according to your specific requirements.
+See `.github/env/{minimal,full,cuda}.yml` for detailed version requirements. We recommend incrementally installing them according to your specific requirements.
 
 4. Compile *Physica* using the following command:  
 

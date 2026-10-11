@@ -20,7 +20,7 @@
 #include "Physica/Core/Parallel/MPI.h"
 #include <array>
 #include <format>
-#include <mpi/mpi.h>
+#include <mpi.h>
 
 using namespace Physica;
 

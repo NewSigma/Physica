@@ -21,7 +21,7 @@
 #include <print>
 #include "Physica/Core/Parallel/MPI.h"
 #ifdef PHYSICA_MPI
-    #include <mpi/mpi.h>
+    #include <mpi.h>
 #endif
 
 namespace {

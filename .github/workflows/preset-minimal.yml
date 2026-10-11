@@ -42,13 +42,9 @@ jobs:
     - name: Install conda
       uses: conda-incubator/setup-miniconda@v4.0.1
       with:
-        activate-environment: base
+        activate-environment: physica
+        environment-file: .github/env/minimal.yml
         channels: conda-forge
-
-    - name: Install dependency
-      run: |
-        sudo apt-get install libfftw3-dev
-        conda install -y benchmark
 
     - name: Configure
       run: |

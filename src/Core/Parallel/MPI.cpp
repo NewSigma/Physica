@@ -23,7 +23,7 @@
 #include "Physica/Core/Utils/Builtin.h"
 #include "Physica/Core/Utils/NoImpl.h"
 #ifdef PHYSICA_MPI
-    #include <mpi/mpi.h>
+    #include <mpi.h>
 #else
     constexpr static void* MPI_COMM_WORLD = nullptr;
 #endif

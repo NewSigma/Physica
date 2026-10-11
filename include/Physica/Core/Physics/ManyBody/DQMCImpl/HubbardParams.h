@@ -79,7 +79,7 @@ namespace Physica {
         [[nodiscard]] static Tr calcAlpha(Tr beta, Tr repelU, int numSplit) noexcept;
         [[nodiscard]] static Tr calcBetaMu(Tr beta, Tr repelU, Tr chemMu) noexcept;
     private:
-        void makeLnSpinWeights();
+        void makeLnSpinWeights() noexcept;
         /* Friends */
         friend class device_obj<This>;
     };
@@ -211,7 +211,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void HubbardParams<T>::makeLnSpinWeights() {
+    void HubbardParams<T>::makeLnSpinWeights() noexcept {
         const Tr lncoshBetaMu = lncosh(calcBetaMu());
         const int numSplit = getNumSplit();
         for (int spinUp = 0; spinUp <= numSplit; ++spinUp) {

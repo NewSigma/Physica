@@ -1,0 +1,13 @@
+name: physica
+channels:
+  - conda-forge
+dependencies:
+  - fftw=3.3.10=nompi_*
+  - openmpi=4.1.6
+  - hdf5=1.14.6=nompi_*
+  - mimalloc=3.2.8
+  - mkl-devel=2025.0.1
+  - benchmark
+  - qt6-main
+  - qt6-charts
+  - qt6-datavis3d

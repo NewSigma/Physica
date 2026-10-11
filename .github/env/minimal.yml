@@ -1,0 +1,6 @@
+name: physica
+channels:
+  - conda-forge
+dependencies:
+  - fftw=3.3.10=nompi_*
+  - benchmark

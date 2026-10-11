@@ -21,7 +21,7 @@
 #include "Physica/Core/Parallel/MPI/Request.h"
 #include "Physica/Core/Exception/MPIException.h"
 #ifdef PHYSICA_MPI
-    #include <mpi/mpi.h>
+    #include <mpi.h>
 #endif
 
 using namespace Physica;
