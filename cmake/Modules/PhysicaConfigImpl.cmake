@@ -58,7 +58,7 @@ else()
             add_link_options(--version) # Hack the linker to skip linking
 
             add_custom_target(EmitLLVM
-                              COMMAND python ${CMAKE_SOURCE_DIR}/cmake/EmitLLVM.py ${CMAKE_CUDA_ARCHITECTURES}
+                              COMMAND python ${CMAKE_SOURCE_DIR}/cmake/EmitLLVM.py
                               WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                               USES_TERMINAL)
             add_definitions(-DPHYSICA_EmitLLVM)
