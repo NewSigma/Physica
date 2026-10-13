@@ -32,7 +32,7 @@ option(PHYSICA_EmitLLVM "Collect LLVM IR for benchmark" OFF)
 option(PHYSICA_ASAN "Compile with address sanitizer" OFF)
 option(PHYSICA_NSAN "Compile with numerical sanitizer" OFF)
 option(PHYSICA_CCACHE "" OFF)
-option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 if(CMAKE_BUILD_TYPE MATCHES Debug)
