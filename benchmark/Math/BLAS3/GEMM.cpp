@@ -59,6 +59,7 @@ namespace {
 
 using enum MatrixMajor::Option;
 BENCHMARK(gemm<float64, Col, Col, Col>)->Name("GEMM CCC base")
+    ->Args({2, 2, 2})
     ->Args({4, 4, 4})
     ->Args({8, 8, 8})
     ->Args({16, 16, 16})
@@ -66,6 +67,7 @@ BENCHMARK(gemm<float64, Col, Col, Col>)->Name("GEMM CCC base")
     ->Args({256, 256, 256})
     ->Args({1024, 1024, 1024});
 BENCHMARK(gemm<float64, Col, Row, Col>)->Name("GEMM CRC base")
+    ->Args({2, 2, 2})
     ->Args({4, 4, 4})
     ->Args({8, 8, 8})
     ->Args({16, 16, 16})
@@ -73,6 +75,7 @@ BENCHMARK(gemm<float64, Col, Row, Col>)->Name("GEMM CRC base")
     ->Args({256, 256, 256})
     ->Args({1024, 1024, 1024});
 BENCHMARK(gemm<float64, Col, Col, Row>)->Name("GEMM CCR base")
+    ->Args({2, 2, 2})
     ->Args({4, 4, 4})
     ->Args({8, 8, 8})
     ->Args({16, 16, 16})
@@ -80,6 +83,7 @@ BENCHMARK(gemm<float64, Col, Col, Row>)->Name("GEMM CCR base")
     ->Args({256, 256, 256})
     ->Args({1024, 1024, 1024});
 BENCHMARK(gemm<float64, Col, Row, Row>)->Name("GEMM CRR base")
+    ->Args({2, 2, 2})
     ->Args({4, 4, 4})
     ->Args({8, 8, 8})
     ->Args({16, 16, 16})

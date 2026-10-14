@@ -58,8 +58,10 @@ namespace Physica {
         void assign_mkl(Matrix auto&& target) const noexcept;
         template<ExecutePolicy P = Sequential>
         void assign_base(Matrix auto&& target) const noexcept;
+        void assign_micro(Matrix auto&& target) const noexcept;
         template<ExecutePolicy P = Sequential>
         void assign_add(Matrix auto&& target) const noexcept;
+        void assign_add_micro(Matrix auto& target) const noexcept;
         [[nodiscard]] auto compute() const;
 
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
@@ -91,7 +93,8 @@ namespace Physica {
         [[nodiscard]] consteval static InnerDim getInnerDim(Matrix auto&& target) noexcept;
         [[nodiscard]] constexpr static size_t bisection(size_t size) noexcept;
         [[nodiscard]] consteval static bool isStaticGEMM() noexcept;
-        [[nodiscard]] consteval static bool UseMKL(const Matrix auto& target) noexcept;
+        [[nodiscard]] consteval static bool useMicro(const Matrix auto& target) noexcept;
+        [[nodiscard]] consteval static bool useMKL(const Matrix auto& target) noexcept;
         template<Matrix Target, Matrix MaybeTrans>
         consteval static bool MatOrTransUseMKL() noexcept;
         /* Friends */
@@ -118,7 +121,9 @@ namespace Physica {
     template<ExecutePolicy P>
     void GEMM<M1, M2>::assign(Matrix auto&& target) const {
         target.assert_assign(*this);
-        if constexpr (UseMKL(target)) {
+        if constexpr (useMicro(target))
+            assign_micro(target);
+        else if constexpr (useMKL(target)) {
             if (getLHS().getSize() > ThresholdMKL && getRHS().getSize() > ThresholdMKL)
                 assign_mkl(target);
             else
@@ -142,7 +147,9 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     template<ExecutePolicy P>
     void GEMM<M1, M2>::assign_add(Matrix auto&& target) const noexcept {
-        if constexpr (isStaticGEMM())
+        if constexpr (useMicro(target))
+            assign_add_micro(target);
+        else if constexpr (isStaticGEMM())
             Base::assign_add(target);
         else
             assign_add_blocking(target);
@@ -379,7 +386,7 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    consteval bool GEMM<M1, M2>::UseMKL(const Matrix auto& target) noexcept {
+    consteval bool GEMM<M1, M2>::useMKL(const Matrix auto& target) noexcept {
         using M = decltype(target);
         using T1 = std::remove_cvref_t<M1>;
         using T2 = std::remove_cvref_t<M2>;
@@ -413,6 +420,7 @@ namespace Physica {
     };
 }
 
+#include "GEMM_Micro.h"
 #ifdef PHYSICA_MKL
     #include "GEMM_MKL.h"
 #endif
