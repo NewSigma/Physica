@@ -84,6 +84,7 @@ namespace Physica {
         assert((getNumSite() > 1 || params.getHoppingMatrix().norm1().isZero()) && "[Error]: Reject self hopping");
         assert(numFreq > 0);
         assert((1 <= maxBoson) && (maxBoson <= 2 * numFreq) && "[Error]: maxBoson out of range");
+        assert(params.getHoppingMatrix().diag().isZero() && "[Error]: assign_potential() assumes self hopping is impossible");
         VectorND<Tr> diag(matsubara.getOrder());
         for (int k = 0; k < static_cast<int>(diag.getLength()); ++k) {
             int m = k - numFreq;

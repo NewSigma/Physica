@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Physics/ManyBody/FreqDQMC.h"
+#include "Physica/Core/Physics/ManyBody/ElasticDQMC.h"
+#include "Physica/Core/Physics/ManyBody/GreenSampler/ScalarSampler.h"
 #include "Physica/Core/Physics/MC/HamiltonMC.h"
 #include "Test.h"
 
@@ -75,6 +77,40 @@ namespace {
             expect<RandomSource>(matrixNear(dqmc.getGreens()[spin], exact.getGreens()[spin], 1E-10));
     }
 
+    void green() {
+        // Regression test for green's function; verify we fo not mix non-diagonal terms into the equal-time green's function
+        constexpr T HoppingT = 1;
+        constexpr T RepelU = 2;
+        constexpr T Beta = 4;
+        constexpr T ChemMu = RepelU * 0.5;
+        constexpr int NumSiteX = 2;
+        constexpr int NumSiteY = 2;
+        constexpr int FreqDensity = 1;
+        constexpr int NumWarmup = 256;
+        constexpr int NumSample = NumWarmup * 16;
+        constexpr double Prec = 2E-2;
+
+        const SquareLattice<2> lattice({NumSiteX, NumSiteY}, 1);
+        const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, ChemMu, 1);
+        auto calcDoubleOccupy = [&](int maxBoson) {
+            auto dqmc = FreqDQMC<Tc>(params, FreqDensity, maxBoson);
+            dqmc.step_random<RandomSource>();
+            dqmc.step_for<RandomSource>(NumWarmup);
+
+            ScalarSampler<T> density(params, NumSample), doubleOccupy(params, NumSample);
+            for (int i = 0; i < NumSample; ++i) {
+                dqmc.step<RandomSource>();
+                density.sample(dqmc.getGreens(), dqmc.getRSign(), ScalarSampler<T>::Density);
+                doubleOccupy.sample(dqmc.getGreens(), dqmc.getRSign(), ScalarSampler<T>::DoubleOccupy);
+            }
+            expect<RandomSource>(scalarNear(density.calcMean(), T(1), 1E-10));
+            return doubleOccupy.calcMean();
+        };
+        const T elastic = calcDoubleOccupy(1);
+        const T full = calcDoubleOccupy(2 * ElasticDQMC<T>::calcFreqCutoff(Beta, FreqDensity));
+        expect<RandomSource>(scalarNear(elastic, full, Prec));
+    }
+
     void berry() {
         const SquareLattice<Dim> lattice({2}, 1);
         {
@@ -110,6 +146,7 @@ namespace {
 int main() {
     conserve();
     elastic();
+    green();
     berry();
     return 0;
 }

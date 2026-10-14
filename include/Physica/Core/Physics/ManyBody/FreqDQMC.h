@@ -292,7 +292,7 @@ namespace Physica {
             green.zeros();
             for (int site1 = 0; site1 < numSite; ++site1)
                 for (int site2 = 0; site2 < numSite; ++site2)
-                    green[site1, site2] = inv.block(site1 * numFreq2, numFreq2, site2 * numFreq2, numFreq2).reals().sum();
+                    green[site1, site2] = inv.block(site1 * numFreq2, numFreq2, site2 * numFreq2, numFreq2).diag().reals().sum();
             green.diag() += Trv(0.5) + correction;
         }, 2);
     }
@@ -307,7 +307,8 @@ namespace Physica {
         constexpr int Major = auxField.getMajor();
         VectorND<Trv> result(auxField.getSize() * 2, 1);
         auto mat = result.template reshape<Major>(auxField.getRow(), auxField.getCol() * 2);
-        mat.bottomRows(1) *= Trv(2);
+        if (mat.getRow() > 1)
+            mat.bottomRows(1) *= Trv(2);
         return result;
     }
 

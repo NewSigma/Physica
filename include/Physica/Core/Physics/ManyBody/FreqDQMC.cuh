@@ -328,8 +328,7 @@ namespace Physica {
 
                 Tr elem = 0;
                 for (int freq = 0; freq < numFreq2; ++freq)
-                    for (int freq2 = 0; freq2 < numFreq2; ++freq2)
-                        elem += solBuffer[row * numFreq2 + freq, col * numFreq2 + freq2].real();
+                    elem += solBuffer[row * numFreq2 + freq, col * numFreq2 + freq].real();
 
                 if (row == col)
                     elem += Tr(0.5) + correction;
