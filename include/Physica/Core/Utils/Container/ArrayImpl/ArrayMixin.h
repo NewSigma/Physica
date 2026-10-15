@@ -68,9 +68,9 @@ namespace Physica {
         void write(this const auto&, auto& loc, const char* name);
     #endif
         /* Getters */
-        [[nodiscard]] __host__ __device__ auto size() const noexcept { return Base::getDerived().size(); }
-        [[nodiscard]] __host__ __device__ auto getLength() const noexcept { return Base::getDerived().getLength(); }
-        [[nodiscard]] __host__ __device__ auto getCapacity() const noexcept { return Base::getDerived().getCapacity(); }
+        [[nodiscard]] __host__ __device__ constexpr auto size() const noexcept { return Base::getDerived().size(); }
+        [[nodiscard]] __host__ __device__ constexpr auto getLength() const noexcept { return Base::getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr auto getCapacity() const noexcept { return Base::getDerived().getCapacity(); }
         [[nodiscard]] __host__ __device__ bool empty() const noexcept { return getLength() == 0; }
         [[nodiscard]] __host__ __device__ bool full() const noexcept { return getLength() == getCapacity(); }
         [[nodiscard]] __host__ __device__ auto* data(this auto&&) noexcept;

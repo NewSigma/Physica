@@ -22,6 +22,11 @@
 
 namespace Physica {
     template<class Derived>
+    constexpr StridedMatrix<Derived>::StridedMatrix() {
+        static_assert(Derived::isRowMatrix() || Derived::isColMatrix(), "[Error]: StridedMatrix requires a known major");
+    }
+
+    template<class Derived>
     constexpr size_t StridedMatrix<Derived>::getRowStride() const noexcept {
         if constexpr (Derived::getRowStrideAtCompile() != Dynamic)
             return Derived::getRowStrideAtCompile();
@@ -68,10 +73,5 @@ namespace Physica {
         assert(row < self.getRow());
         assert(col < self.getCol());
         return self.data_handle() + row * self.getRowStride() + col * self.getColStride();
-    }
-
-    template<class Derived>
-    StridedMatrix<Derived>::StridedMatrix() {
-        static_assert(Derived::isRowMatrix() || Derived::isColMatrix(), "[Error]: StridedMatrix requires a known major");
     }
 }

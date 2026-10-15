@@ -194,7 +194,7 @@ namespace Physica {
         template<int MaskOrder>
         [[nodiscard]] decltype(auto) grads_mask(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         [[nodiscard]] bool empty() const noexcept { return getLength() == 0; }
         [[nodiscard]] bool isZero() const;
         [[nodiscard]] bool isFinite() const;

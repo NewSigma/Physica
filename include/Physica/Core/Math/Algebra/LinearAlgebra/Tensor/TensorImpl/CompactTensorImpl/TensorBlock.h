@@ -43,7 +43,7 @@ namespace Physica {
         void resize(IndexType size);
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] IndexType getShape() const noexcept { return shape; }
+        [[nodiscard]] constexpr IndexType getShape() const noexcept { return shape; }
         [[nodiscard]] auto getStrides() const noexcept;
         [[nodiscard]] auto data_handle(this auto&&) noexcept;
         /* Static members */

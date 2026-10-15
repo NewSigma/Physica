@@ -46,7 +46,7 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
     template<class V>
@@ -81,7 +81,7 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
     template<class V>
@@ -114,7 +114,7 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
     template<class V>
@@ -146,7 +146,7 @@ namespace Physica {
         [[nodiscard]] __device__ T calc(size_t i, instanceof_x<ThreadBlock> auto block) const { return v.getDerived().calc(i, block).value(); }
         [[nodiscard]] __device__ T calc_value(size_t i) const { return calc(i); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
     template<class V, int GradOrder>
@@ -173,7 +173,7 @@ namespace Physica {
         [[nodiscard]] __device__ T calc(size_t i, instanceof_x<ThreadBlock> auto block) const { return v.getDerived().calc(i, block).template grad<GradOrder>(); }
         [[nodiscard]] __device__ Tv calc_value(size_t i) const { return calc(i).value(); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 }
 

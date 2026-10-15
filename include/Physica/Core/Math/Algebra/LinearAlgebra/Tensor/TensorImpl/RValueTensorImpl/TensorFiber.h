@@ -43,9 +43,9 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t i) const;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return tensor.dim(Dim); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return tensor.dim(Dim); }
         /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<X>::getShapeAtCompile()[Dim]; }
     };
 
     template<class X, int Dim>

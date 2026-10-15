@@ -112,7 +112,7 @@ namespace Physica {
                     target[i] = self.calc(i);
             }
             else {
-                const size_t length = self.getLength();
+                size_t length = self.getLength();
                 const size_t to = length / Size * Size;
                 size_t i = 0;
                 for (; i < to; i += Size)
@@ -123,7 +123,7 @@ namespace Physica {
             }
         }
         else {
-            const size_t length = self.getLength();
+            size_t length = self.getLength();
             for (size_t i = block.tid(); i < length; i += block.getNumThread())
                 target[i] = self.calc(i);
             block.sync();

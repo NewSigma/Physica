@@ -48,7 +48,7 @@ namespace Physica {
         void resize(size_t length);
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept;
+        [[nodiscard]] constexpr size_t getLength() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
@@ -89,7 +89,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
-    size_t LMatrixBlock<M, Row, Col>::getLength() const noexcept {
+    constexpr size_t LMatrixBlock<M, Row, Col>::getLength() const noexcept {
         if constexpr (Row == 1) {
             if constexpr (Col == Dynamic)
                 return colCount;
@@ -156,9 +156,9 @@ namespace Physica {
         [[nodiscard]] auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return rowCount; }
-        [[nodiscard]] size_t getCol() const noexcept { return colCount; }
-        [[nodiscard]] size_t getOrder() const noexcept;
+        [[nodiscard]] constexpr size_t getRow() const noexcept { return rowCount; }
+        [[nodiscard]] constexpr size_t getCol() const noexcept { return colCount; }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
@@ -312,7 +312,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    size_t LMatrixBlock<M, Dynamic, Dynamic>::getOrder() const noexcept {
+    constexpr size_t LMatrixBlock<M, Dynamic, Dynamic>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return getRow();
     }

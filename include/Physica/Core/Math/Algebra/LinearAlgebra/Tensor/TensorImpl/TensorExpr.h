@@ -43,12 +43,14 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] size_t dim(int index) const noexcept;
-        [[nodiscard]] decltype(auto) getShape() const noexcept;
+        [[nodiscard]] constexpr size_t dim(int index) const noexcept;
+        [[nodiscard]] constexpr decltype(auto) getShape() const noexcept;
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticShape() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static auto getShapeAtCompile() noexcept -> typename BinaryTensorExpr<ID, LHS, RHS>::IndexType;
     };
 
     template<ExprID ID, class LHS, class RHS>
@@ -58,7 +60,7 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    size_t BinaryTensorExpr<ID, LHS, RHS>::dim(int index) const noexcept {
+    constexpr size_t BinaryTensorExpr<ID, LHS, RHS>::dim(int index) const noexcept {
         if constexpr (Tensor<LHS>)
             return getLHS().dim(index);
         else
@@ -66,7 +68,7 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    decltype(auto) BinaryTensorExpr<ID, LHS, RHS>::getShape() const noexcept {
+    constexpr decltype(auto) BinaryTensorExpr<ID, LHS, RHS>::getShape() const noexcept {
         if constexpr (Tensor<LHS>)
             return getLHS().getShape();
         else
@@ -81,6 +83,22 @@ namespace Physica {
     template<ExprID ID, class LHS, class RHS>
     auto&& BinaryTensorExpr<ID, LHS, RHS>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), RHS>(self.rhs);
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    __host__ __device__ consteval bool BinaryTensorExpr<ID, LHS, RHS>::isStaticShape() noexcept {
+        if constexpr (Tensor<LHS>)
+            return std::remove_cvref_t<LHS>::isStaticShape();
+        else
+            return std::remove_cvref_t<RHS>::isStaticShape();
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    __host__ __device__ consteval auto BinaryTensorExpr<ID, LHS, RHS>::getShapeAtCompile() noexcept -> typename BinaryTensorExpr<ID, LHS, RHS>::IndexType {
+        if constexpr (Tensor<LHS>)
+            return std::remove_cvref_t<LHS>::getShapeAtCompile();
+        else
+            return std::remove_cvref_t<RHS>::getShapeAtCompile();
     }
 }
 

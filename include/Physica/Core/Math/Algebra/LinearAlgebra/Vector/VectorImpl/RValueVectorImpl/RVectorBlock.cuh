@@ -54,7 +54,7 @@ namespace Physica {
         template<size_t Length_ = Dynamic>
         [[nodiscard]] __host__ __device__ auto segment(this auto&&, size_t from, size_t to) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept;
     };
 
     template<Vector V, size_t Length>
@@ -92,7 +92,7 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    __host__ __device__ size_t device_obj<RVectorBlock<V, Length>>::getLength() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<RVectorBlock<V, Length>>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         return Length;

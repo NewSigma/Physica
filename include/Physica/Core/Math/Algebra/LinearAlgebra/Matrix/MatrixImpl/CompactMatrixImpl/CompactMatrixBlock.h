@@ -232,9 +232,9 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept;
-        [[nodiscard]] size_t getCol() const noexcept;
-        [[nodiscard]] size_t getOrder() const noexcept;
+        [[nodiscard]] constexpr size_t getRow() const noexcept;
+        [[nodiscard]] constexpr size_t getCol() const noexcept;
+        [[nodiscard]] constexpr size_t getOrder() const noexcept;
         [[nodiscard]] constexpr size_t getRowStride() const noexcept;
         [[nodiscard]] constexpr size_t getColStride() const noexcept;
         [[nodiscard]] auto data_handle(this auto&&) noexcept;
@@ -409,7 +409,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    size_t CompactMatrixBlock<M, Row, Col>::getRow() const noexcept {
+    constexpr size_t CompactMatrixBlock<M, Row, Col>::getRow() const noexcept {
         if constexpr (Row == Dynamic)
             return rowCount;
         else
@@ -417,7 +417,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    size_t CompactMatrixBlock<M, Row, Col>::getCol() const noexcept {
+    constexpr size_t CompactMatrixBlock<M, Row, Col>::getCol() const noexcept {
         if constexpr (Col == Dynamic)
             return colCount;
         else
@@ -425,7 +425,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    size_t CompactMatrixBlock<M, Row, Col>::getOrder() const noexcept {
+    constexpr size_t CompactMatrixBlock<M, Row, Col>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return getRow();
     }

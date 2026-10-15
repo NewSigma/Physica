@@ -92,7 +92,7 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
-    __host__ __device__ auto device_obj<DenseTensor<T, Dims...>>::getShape() const noexcept -> IndexType {
+    __host__ __device__ constexpr auto device_obj<DenseTensor<T, Dims...>>::getShape() const noexcept -> IndexType {
         return storage.getShape();
     }
 
@@ -107,7 +107,7 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
-    __host__ __device__ size_t device_obj<DenseTensor<T, Dims...>>::getSize() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<DenseTensor<T, Dims...>>::getSize() const noexcept {
         return storage.getSize();
     }
 

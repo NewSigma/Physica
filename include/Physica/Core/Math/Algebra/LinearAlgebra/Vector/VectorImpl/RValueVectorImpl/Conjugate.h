@@ -53,7 +53,7 @@ namespace Physica {
         [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return vec.getLength(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return vec.getLength(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };

@@ -48,9 +48,9 @@ namespace Physica {
 
         void reverse(const Matrix auto& grad) const noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept;
-        [[nodiscard]] size_t getCol() const noexcept;
-        [[nodiscard]] size_t getOrder() const noexcept;
+        [[nodiscard]] constexpr size_t getRow() const noexcept;
+        [[nodiscard]] constexpr size_t getCol() const noexcept;
+        [[nodiscard]] constexpr size_t getOrder() const noexcept;
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
@@ -136,17 +136,17 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    size_t Kronecker<M1, M2>::getRow() const noexcept {
+    constexpr size_t Kronecker<M1, M2>::getRow() const noexcept {
         return getLHS().getRow() * getRHS().getRow();
     }
 
     template<Matrix M1, Matrix M2>
-    size_t Kronecker<M1, M2>::getCol() const noexcept {
+    constexpr size_t Kronecker<M1, M2>::getCol() const noexcept {
         return getLHS().getCol() * getRHS().getCol();
     }
 
     template<Matrix M1, Matrix M2>
-    size_t Kronecker<M1, M2>::getOrder() const noexcept {
+    constexpr size_t Kronecker<M1, M2>::getOrder() const noexcept {
         return getRow();
     }
 

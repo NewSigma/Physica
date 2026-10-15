@@ -52,7 +52,7 @@ namespace Physica {
         [[nodiscard]] auto&& hermite(this auto&&) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getOrder() const noexcept;
+        [[nodiscard]] constexpr size_t getOrder() const noexcept;
         /* Static members*/
         [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
@@ -124,7 +124,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    size_t IdentityMatrix<T, Order>::getOrder() const noexcept {
+    constexpr size_t IdentityMatrix<T, Order>::getOrder() const noexcept {
         if constexpr (Order == Dynamic)
             return order;
         return Order;

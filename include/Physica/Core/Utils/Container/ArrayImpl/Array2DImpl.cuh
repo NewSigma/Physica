@@ -125,7 +125,7 @@ namespace Physica {
     }
 
     template<tparams>
-    __host__ __device__ size_t device_obj<Array2D>::getRow() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<Array2D>::getRow() const noexcept {
         if constexpr (Row == Dynamic) {
             if constexpr (Col == Dynamic)
                 return r;
@@ -140,7 +140,7 @@ namespace Physica {
     }
 
     template<tparams>
-    __host__ __device__ size_t device_obj<Array2D>::getCol() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<Array2D>::getCol() const noexcept {
         if constexpr (Col == Dynamic) {
             const size_t size = getSize();
             if constexpr (Row == Dynamic) {
@@ -157,12 +157,12 @@ namespace Physica {
     }
 
     template<tparams>
-    __host__ __device__ size_t device_obj<Array2D>::getSize() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<Array2D>::getSize() const noexcept {
         return arr.getLength();
     }
 
     template<tparams>
-    __host__ __device__ size_t device_obj<Array2D>::getOrder() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<Array2D>::getOrder() const noexcept {
         assert(getRow() == getCol() && "[Error]: getOrder() assumes square array");
         if constexpr (Row != Dynamic)
             return Row;

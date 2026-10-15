@@ -39,7 +39,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] decltype(auto) calc(size_t index) const;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return tensor.getSize(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return tensor.getSize(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<T>::getSizeAtCompile(); }
     };

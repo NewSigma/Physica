@@ -60,9 +60,9 @@ namespace Physica {
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return vec.getLength(); }
-        [[nodiscard]] size_t getCol() const { return mat.getCol(); }
-        [[nodiscard]] size_t getOrder() const { return getRow(); }
+        [[nodiscard]] constexpr size_t getRow() const { return vec.getLength(); }
+        [[nodiscard]] constexpr size_t getCol() const { return mat.getCol(); }
+        [[nodiscard]] constexpr size_t getOrder() const { return getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */

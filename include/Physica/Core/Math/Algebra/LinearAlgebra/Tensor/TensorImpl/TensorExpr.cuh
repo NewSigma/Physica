@@ -50,8 +50,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __host__ __device__ size_t dim(int index) const noexcept;
-        [[nodiscard]] __host__ __device__ IndexType getShape() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t dim(int index) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr IndexType getShape() const noexcept;
         [[nodiscard]] __host__ __device__ auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto&& getRHS(this auto&&) noexcept;
         /* Static members */
@@ -66,7 +66,7 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    __host__ __device__ size_t device_obj<BinaryTensorExpr<ID, LHS, RHS>>::dim(int index) const noexcept {
+    __host__ __device__ constexpr size_t device_obj<BinaryTensorExpr<ID, LHS, RHS>>::dim(int index) const noexcept {
         if constexpr (Tensor<LHS>)
             return getLHS().dim(index);
         else
@@ -74,7 +74,7 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    __host__ __device__ auto device_obj<BinaryTensorExpr<ID, LHS, RHS>>::getShape() const noexcept -> IndexType {
+    __host__ __device__ constexpr auto device_obj<BinaryTensorExpr<ID, LHS, RHS>>::getShape() const noexcept -> IndexType {
         if constexpr (Tensor<LHS>)
             return getLHS().getShape();
         else

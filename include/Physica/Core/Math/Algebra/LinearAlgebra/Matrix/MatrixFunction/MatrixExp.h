@@ -50,7 +50,7 @@ namespace Physica {
         [[nodiscard]] Tr calcTraceMu() const;
         /* Getters */
         [[nodiscard]] const auto& getMatrix() const noexcept { return m; }
-        [[nodiscard]] size_t getOrder() const noexcept { return m.getOrder(); }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept { return m.getOrder(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }

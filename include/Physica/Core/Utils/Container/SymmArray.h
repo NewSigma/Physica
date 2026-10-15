@@ -52,11 +52,11 @@ namespace Physica {
         H5Dataset<1> write(H5Loc& loc, const char* name) const;
         /* Getters */
         [[nodiscard]] auto&& asArray(this auto&& self) noexcept { return self.arr; }
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getOrder(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getOrder(); }
-        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return order; }
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return arr.getLength(); }
-        [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return arr.getCapacity(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const noexcept { return getOrder(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const noexcept { return getOrder(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return arr.getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCapacity() const noexcept { return arr.getCapacity(); }
         [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
         [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const noexcept;
@@ -104,6 +104,13 @@ namespace Physica {
         return arr.write(loc, name);
     }
 #endif
+
+    template<class T, size_t Order>
+    __host__ __device__ constexpr size_t SymmArray<T, Order>::getOrder() const noexcept {
+        if constexpr (Order == Dynamic)
+            return order;
+        return Order;
+    }
 
     template<class T, size_t Order>
     __host__ __device__ auto SymmArray<T, Order>::data(this auto&& self) noexcept {

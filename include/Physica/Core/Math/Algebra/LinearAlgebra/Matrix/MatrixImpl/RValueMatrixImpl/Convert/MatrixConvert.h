@@ -43,9 +43,9 @@ namespace Physica {
 
         [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getCol() const { return mat.getCol(); }
-        [[nodiscard]] size_t getOrder() const { return mat.getOrder(); }
+        [[nodiscard]] constexpr size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] constexpr size_t getCol() const { return mat.getCol(); }
+        [[nodiscard]] constexpr size_t getOrder() const { return mat.getOrder(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return std::remove_cvref_t<M>::isStaticSquare(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
@@ -80,9 +80,9 @@ namespace Physica {
 
         [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getCol() const { return mat.getCol(); }
-        [[nodiscard]] size_t getOrder() const { return mat.getOrder(); }
+        [[nodiscard]] constexpr size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] constexpr size_t getCol() const { return mat.getCol(); }
+        [[nodiscard]] constexpr size_t getOrder() const { return mat.getOrder(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return std::remove_cvref_t<M>::isStaticSquare(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
@@ -121,9 +121,9 @@ namespace Physica {
 
         [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getCol() const { return mat.getCol(); }
-        [[nodiscard]] size_t getOrder() const { return mat.getOrder(); }
+        [[nodiscard]] constexpr size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] constexpr size_t getCol() const { return mat.getCol(); }
+        [[nodiscard]] constexpr size_t getOrder() const { return mat.getOrder(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return std::remove_cvref_t<M>::isStaticSquare(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
@@ -169,9 +169,9 @@ namespace Physica {
 
         [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getCol() const { return mat.getCol(); }
-        [[nodiscard]] size_t getOrder() const { return mat.getOrder(); }
+        [[nodiscard]] constexpr size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] constexpr size_t getCol() const { return mat.getCol(); }
+        [[nodiscard]] constexpr size_t getOrder() const { return mat.getOrder(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return std::remove_cvref_t<M>::isStaticSquare(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
@@ -204,9 +204,9 @@ namespace Physica {
         [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc(row, col).value(); }
         [[nodiscard]] T calc_value(size_t row, size_t col) const { return calc(row, col); }
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getCol() const { return mat.getCol(); }
-        [[nodiscard]] size_t getOrder() const { return mat.getOrder(); }
+        [[nodiscard]] constexpr size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] constexpr size_t getCol() const { return mat.getCol(); }
+        [[nodiscard]] constexpr size_t getOrder() const { return mat.getOrder(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return std::remove_cvref_t<M>::isStaticSquare(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }
@@ -235,9 +235,9 @@ namespace Physica {
         [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc(row, col).template grad<GradOrder>(); }
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getCol() const { return mat.getCol(); }
-        [[nodiscard]] size_t getOrder() const { return mat.getOrder(); }
+        [[nodiscard]] constexpr size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] constexpr size_t getCol() const { return mat.getCol(); }
+        [[nodiscard]] constexpr size_t getOrder() const { return mat.getOrder(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return std::remove_cvref_t<M>::isStaticSquare(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<M>::getRowAtCompile(); }

@@ -104,7 +104,7 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ decltype(auto) grads(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isComplex() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isDiffable() noexcept;

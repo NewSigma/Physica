@@ -44,9 +44,9 @@ namespace Physica {
         [[nodiscard]] decltype(auto) transpose(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) hermite(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return getExpr().getRow(); }
-        [[nodiscard]] size_t getCol() const { return getExpr().getCol(); }
-        [[nodiscard]] size_t getOrder() const noexcept { return getExpr().getOrder(); }
+        [[nodiscard]] constexpr size_t getRow() const { return getExpr().getRow(); }
+        [[nodiscard]] constexpr size_t getCol() const { return getExpr().getCol(); }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept { return getExpr().getOrder(); }
         [[nodiscard]] constexpr auto&& getExpr(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
@@ -118,9 +118,9 @@ namespace Physica {
         [[nodiscard]] decltype(auto) transpose(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) hermite(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const;
-        [[nodiscard]] size_t getCol() const;
-        [[nodiscard]] size_t getOrder() const;
+        [[nodiscard]] constexpr size_t getRow() const;
+        [[nodiscard]] constexpr size_t getCol() const;
+        [[nodiscard]] constexpr size_t getOrder() const;
         [[nodiscard]] constexpr auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] constexpr auto&& getRHS(this auto&&) noexcept;
         /* Static members */
@@ -180,7 +180,7 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    size_t BinaryMatrixExpr<ID, LHS, RHS>::getRow() const {
+    constexpr size_t BinaryMatrixExpr<ID, LHS, RHS>::getRow() const {
         if constexpr (Matrix<LHS>)
             return getLHS().getRow();
         else
@@ -188,7 +188,7 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    size_t BinaryMatrixExpr<ID, LHS, RHS>::getCol() const {
+    constexpr size_t BinaryMatrixExpr<ID, LHS, RHS>::getCol() const {
         if constexpr (Matrix<LHS>)
             return getLHS().getCol();
         else
@@ -196,7 +196,7 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    size_t BinaryMatrixExpr<ID, LHS, RHS>::getOrder() const {
+    constexpr size_t BinaryMatrixExpr<ID, LHS, RHS>::getOrder() const {
         if constexpr (Matrix<LHS>)
             return getLHS().getOrder();
         else
@@ -292,7 +292,7 @@ namespace Physica {
             return std::remove_cvref_t<RHS>::getMajor();
         else if constexpr (Scalar<RHS> || Vector<RHS>)
             return std::remove_cvref_t<LHS>::getMajor();
-        else  {
+        else {
             constexpr static bool SameMajor = MatrixMajor::isSameMajor<LHS, RHS>();
             return SameMajor ?  std::remove_cvref_t<LHS>::getMajor() : MatrixMajor::BothMajor;
         }

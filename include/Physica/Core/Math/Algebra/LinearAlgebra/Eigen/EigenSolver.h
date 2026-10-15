@@ -69,7 +69,7 @@ namespace Physica {
         [[nodiscard]] auto reconstruct_hermite() const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getSize() const noexcept { return eigenvalues.getLength(); }
+        [[nodiscard]] constexpr size_t getSize() const noexcept { return eigenvalues.getLength(); }
         [[nodiscard]] auto&& getEigenvalues(this auto&& self) noexcept;
         [[nodiscard]] EigenvectorMatrix getEigenvectors() const;
         [[nodiscard]] const auto& getRawEigenvectors() const noexcept;

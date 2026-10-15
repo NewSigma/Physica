@@ -57,7 +57,7 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_handle(this auto&&) noexcept;
     };
 
@@ -119,7 +119,7 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    __host__ __device__ size_t device_obj<CompactVectorBlock<V, Length>>::getLength() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<CompactVectorBlock<V, Length>>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         else

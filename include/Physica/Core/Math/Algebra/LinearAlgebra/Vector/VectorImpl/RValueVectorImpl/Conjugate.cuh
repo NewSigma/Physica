@@ -47,7 +47,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ decltype(auto) conjugate(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return conjugate().getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return conjugate().getLength(); }
     };
 
     template<Vector V>

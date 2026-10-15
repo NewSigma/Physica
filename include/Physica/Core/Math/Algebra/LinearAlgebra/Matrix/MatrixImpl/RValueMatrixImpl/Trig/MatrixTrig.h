@@ -56,9 +56,9 @@ namespace Physica {
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
-        [[nodiscard]] size_t getRow() const noexcept;
-        [[nodiscard]] size_t getCol() const noexcept;
-        [[nodiscard]] size_t getOrder() const noexcept;
+        [[nodiscard]] constexpr size_t getRow() const noexcept;
+        [[nodiscard]] constexpr size_t getCol() const noexcept;
+        [[nodiscard]] constexpr size_t getOrder() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
@@ -130,7 +130,7 @@ namespace Physica {
     }
 
     template<Matrix M, bool Upper, bool Unit>
-    size_t MatrixTrig<M, Upper, Unit>::getRow() const noexcept {
+    constexpr size_t MatrixTrig<M, Upper, Unit>::getRow() const noexcept {
         if constexpr (Upper)
             return std::min(mat.getRow(), mat.getCol());
         else
@@ -138,7 +138,7 @@ namespace Physica {
     }
 
     template<Matrix M, bool Upper, bool Unit>
-    size_t MatrixTrig<M, Upper, Unit>::getCol() const noexcept {
+    constexpr size_t MatrixTrig<M, Upper, Unit>::getCol() const noexcept {
         if constexpr (Upper)
             return mat.getCol();
         else
@@ -146,7 +146,7 @@ namespace Physica {
     }
 
     template<Matrix M, bool Upper, bool Unit>
-    size_t MatrixTrig<M, Upper, Unit>::getOrder() const noexcept {
+    constexpr size_t MatrixTrig<M, Upper, Unit>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         if constexpr (Upper)
             return mat.getCol();

@@ -49,7 +49,7 @@ namespace Physica {
         void resize(IndexType size);
         [[nodiscard]] T calc(const IndexType& index) const;
         /* Getters */
-        [[nodiscard]] IndexType getShape() const noexcept { return shape; }
+        [[nodiscard]] constexpr IndexType getShape() const noexcept { return shape; }
     };
 
     template<class X>

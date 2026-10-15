@@ -45,7 +45,7 @@ namespace Physica {
         void assign_mkl(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
-        [[nodiscard]] size_t getOrder() const noexcept { return trig.getOrder(); }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept { return trig.getOrder(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;

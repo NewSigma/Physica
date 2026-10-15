@@ -45,7 +45,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto data_handle(this auto&& self) noexcept;
         [[nodiscard]] __host__ __device__ size_t getStride() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept;
     };
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isStrided())
@@ -60,8 +60,8 @@ namespace Physica {
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isStrided())
-    __host__ __device__ size_t device_obj<OffsetDiag<M>>::getLength() const noexcept {
-        return getExpr().getRow() - std::abs(offset);
+    __host__ __device__ constexpr size_t device_obj<OffsetDiag<M>>::getLength() const noexcept {
+        return getExpr().getRow() - (offset < 0 ? -offset : offset);
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isStrided())

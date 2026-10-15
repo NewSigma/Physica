@@ -72,8 +72,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] const Array<const Var*, NDim>& getVars() const noexcept { return vars; }
-        [[nodiscard]] IndexType getShape() const noexcept;
-        [[nodiscard]] size_t dim(int index) const noexcept;
+        [[nodiscard]] constexpr IndexType getShape() const noexcept;
+        [[nodiscard]] constexpr size_t dim(int index) const noexcept;
     };
 
     template<class Expr>
@@ -127,7 +127,7 @@ namespace Physica {
     }
 
     template<class Expr>
-    auto Ein<Expr>::getShape() const noexcept -> IndexType {
+    constexpr auto Ein<Expr>::getShape() const noexcept -> IndexType {
         if constexpr (Vector<Expr>)
             return IndexType{expr.getLength()};
         else if constexpr (Matrix<Expr>)
@@ -137,7 +137,7 @@ namespace Physica {
     }
 
     template<class Expr>
-    size_t Ein<Expr>::dim(int index) const noexcept {
+    constexpr size_t Ein<Expr>::dim(int index) const noexcept {
         if constexpr (Vector<Expr>) {
             assert(index == 0 && "[Error]: A vector has exactly 1 dimension");
             return expr.getLength();

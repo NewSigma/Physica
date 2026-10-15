@@ -30,7 +30,7 @@ namespace Physica {
     public:
         /* Getters */
         [[nodiscard]] NonZeroPair calcNonZero(size_t index) const { return Base::getDerived().calcNonZero(index); }
-        [[nodiscard]] size_t getNumNonZero() const noexcept { return Base::getDerived().getNumNonZero(); }
+        [[nodiscard]] constexpr size_t getNumNonZero() const noexcept { return Base::getDerived().getNumNonZero(); }
     };
 
     template<Vector V1, Vector V2>

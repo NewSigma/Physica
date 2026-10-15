@@ -42,7 +42,7 @@ namespace Physica {
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] auto data_handle(this auto&& self) noexcept;
         [[nodiscard]] size_t getStride() const noexcept;
-        [[nodiscard]] size_t getLength() const noexcept;
+        [[nodiscard]] constexpr size_t getLength() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
@@ -53,7 +53,7 @@ namespace Physica {
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isStrided())
-    size_t MainDiag<M>::getLength() const noexcept {
+    constexpr size_t MainDiag<M>::getLength() const noexcept {
         return std::min(mat.getCol(), mat.getRow());
     }
 
@@ -70,6 +70,6 @@ namespace Physica {
     template<Matrix M> requires(std::remove_cvref_t<M>::isStrided())
     __host__ __device__ consteval size_t MainDiag<M>::getSizeAtCompile() noexcept {
         using Expr = std::remove_cvref<M>::type;
-        return std::max(Expr::getRowAtCompile(), Expr::getColAtCompile());
+        return std::min(Expr::getRowAtCompile(), Expr::getColAtCompile());
     }
 }

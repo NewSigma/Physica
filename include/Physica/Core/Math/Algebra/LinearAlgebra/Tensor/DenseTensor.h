@@ -60,14 +60,16 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] auto data_handle(this auto&&) noexcept;
-        [[nodiscard]] IndexType getShape() const noexcept;
+        [[nodiscard]] constexpr IndexType getShape() const noexcept;
         [[nodiscard]] constexpr size_t dim(int index) const noexcept;
         [[nodiscard]] auto&& asArray(this auto&&) noexcept;
-        [[nodiscard]] size_t getSize() const noexcept;
+        [[nodiscard]] constexpr size_t getSize() const noexcept;
         /* Static members */
         using Base::getStrideAtCompile;
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticShape() noexcept { return ArrayND<T, Dims...>::isStaticShape(); }
         [[nodiscard]] __host__ __device__ consteval static IndexType getStrideAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static auto getShapeAtCompile() noexcept -> IndexType { return ArrayND<T, Dims...>::getShapeAtCompile(); }
         [[nodiscard]] static This zeros(IndexType shape);
         [[nodiscard]] static This zeros(std::same_as<size_t> auto... dims);
         [[nodiscard]] static This junk(IndexType shape);

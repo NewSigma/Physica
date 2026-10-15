@@ -48,8 +48,8 @@ namespace Physica {
             const auto pair = v.calcNonZero(index);
             return std::make_pair(pair.first, ScalarType(pair.second * s));
         }
-        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] size_t getNumNonZero() const noexcept { return v.getNumNonZero(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return v.getLength(); }
+        [[nodiscard]] constexpr size_t getNumNonZero() const noexcept { return v.getNumNonZero(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };

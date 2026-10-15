@@ -175,7 +175,7 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ size_t Array2D<T, Major, Row, Col, Allocator>::getRow() const noexcept {
+    __host__ __device__ constexpr size_t Array2D<T, Major, Row, Col, Allocator>::getRow() const noexcept {
         if constexpr (Row == Dynamic) {
             if constexpr (Col == Dynamic)
                 return r;
@@ -190,7 +190,7 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ size_t Array2D<T, Major, Row, Col, Allocator>::getCol() const noexcept {
+    __host__ __device__ constexpr size_t Array2D<T, Major, Row, Col, Allocator>::getCol() const noexcept {
         if constexpr (Col == Dynamic) {
             const size_t size = getSize();
             if constexpr (Row == Dynamic) {
@@ -207,12 +207,12 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ size_t Array2D<T, Major, Row, Col, Allocator>::getSize() const noexcept {
+    __host__ __device__ constexpr size_t Array2D<T, Major, Row, Col, Allocator>::getSize() const noexcept {
         return arr.getLength();
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ size_t Array2D<T, Major, Row, Col, Allocator>::getOrder() const noexcept {
+    __host__ __device__ constexpr size_t Array2D<T, Major, Row, Col, Allocator>::getOrder() const noexcept {
         assert(getRow() == getCol() && "[Error]: getOrder() assumes square array");
         if constexpr (Row != Dynamic)
             return Row;
@@ -221,12 +221,12 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ size_t Array2D<T, Major, Row, Col, Allocator>::getMaxMajor() const noexcept {
+    __host__ __device__ constexpr size_t Array2D<T, Major, Row, Col, Allocator>::getMaxMajor() const noexcept {
         return isColMajor ? getCol() : getRow();
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ size_t Array2D<T, Major, Row, Col, Allocator>::getMaxMinor() const noexcept {
+    __host__ __device__ constexpr size_t Array2D<T, Major, Row, Col, Allocator>::getMaxMinor() const noexcept {
         return isColMajor ? getRow() : getCol();
     }
 

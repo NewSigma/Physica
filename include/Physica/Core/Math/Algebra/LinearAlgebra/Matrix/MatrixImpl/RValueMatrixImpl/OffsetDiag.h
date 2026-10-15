@@ -37,7 +37,7 @@ namespace Physica {
         [[nodiscard]] decltype(auto) calc(size_t index) const noexcept;
         /* Getters */
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
-        [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() - std::abs(offset); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return mat.getRow() - (offset < 0 ? -offset : offset); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
     };

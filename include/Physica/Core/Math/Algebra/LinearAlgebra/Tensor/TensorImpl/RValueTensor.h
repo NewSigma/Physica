@@ -84,13 +84,14 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] auto grads(this auto&& self) noexcept;
         /* Getters */
-        [[nodiscard]] size_t dim(int index) const noexcept;
-        [[nodiscard]] IndexType getShape() const noexcept;
-        [[nodiscard]] size_t getSize() const noexcept;
+        [[nodiscard]] constexpr size_t dim(int index) const noexcept;
+        [[nodiscard]] constexpr IndexType getShape() const noexcept;
+        [[nodiscard]] constexpr size_t getSize() const noexcept;
         [[nodiscard]] bool empty() const noexcept;
         [[nodiscard]] bool isFinite() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int ndim() noexcept { return NDim; }
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticShape() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isForwardDiff() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isReverseDiff() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isDiffable() noexcept;
@@ -99,6 +100,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isStrided() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static auto getShapeAtCompile() noexcept -> IndexType;
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Scalar auto& source) noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Tensor auto& source) noexcept;

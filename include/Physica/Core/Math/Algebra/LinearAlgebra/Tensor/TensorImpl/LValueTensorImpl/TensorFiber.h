@@ -42,10 +42,10 @@ namespace Physica {
         using Base::resize;
         void resize(size_t length);
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return tensor.dim(Dim); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return tensor.dim(Dim); }
         [[nodiscard]] auto data_ptr(this auto&& self, size_t i) noexcept;
         /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<X>::getShapeAtCompile()[Dim]; }
     };
 
     template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())

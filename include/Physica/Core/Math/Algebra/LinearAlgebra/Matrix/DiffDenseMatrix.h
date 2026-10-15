@@ -90,9 +90,9 @@ namespace Physica {
         void swap_col(this auto&, size_t c1, size_t c2) noexcept;
         /* Getters */
         [[nodiscard]] auto data_handle(this auto&&) noexcept;
-        [[nodiscard]] size_t getCol() const noexcept { return v.getCol(); }
-        [[nodiscard]] size_t getRow() const noexcept { return v.getRow(); }
-        [[nodiscard]] size_t getOrder() const noexcept { return v.getOrder(); }
+        [[nodiscard]] constexpr size_t getCol() const noexcept { return v.getCol(); }
+        [[nodiscard]] constexpr size_t getRow() const noexcept { return v.getRow(); }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept { return v.getOrder(); }
         [[nodiscard]] bool empty() const noexcept { return v.empty(); }
 
         [[nodiscard]] auto&& values(this auto&&) noexcept;

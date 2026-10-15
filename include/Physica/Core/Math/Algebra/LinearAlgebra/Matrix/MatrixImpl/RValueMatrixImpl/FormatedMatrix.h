@@ -48,8 +48,8 @@ namespace Physica {
         This& toFormatMMA();
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return data.calc(row, col); }
-        [[nodiscard]] size_t getRow() const noexcept { return data.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return data.getCol(); }
+        [[nodiscard]] constexpr size_t getRow() const noexcept { return data.getRow(); }
+        [[nodiscard]] constexpr size_t getCol() const noexcept { return data.getCol(); }
         [[nodiscard]] const std::string& getMatPrefix() const noexcept { return matPrefix; }
         [[nodiscard]] const std::string& getMatSuffix() const noexcept { return matSuffix; }
         [[nodiscard]] const std::string& getRowPrefix() const noexcept { return rowPrefix; }

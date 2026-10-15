@@ -41,9 +41,9 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return mat1.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return mat2.getCol(); }
-        [[nodiscard]] size_t getOrder() const noexcept;
+        [[nodiscard]] constexpr size_t getRow() const noexcept { return mat1.getRow(); }
+        [[nodiscard]] constexpr size_t getCol() const noexcept { return mat2.getCol(); }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept;
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
@@ -60,7 +60,7 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2> requires(instanceof<M2, Inverse> && instanceof_tx<typename Traits<M2>::ExprType, DiagMatrix>)
-    size_t GEMM<M1, M2>::getOrder() const noexcept {
+    constexpr size_t GEMM<M1, M2>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return getRow();
     }
@@ -102,9 +102,9 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return mat1.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return mat2.getCol(); }
-        [[nodiscard]] size_t getOrder() const noexcept;
+        [[nodiscard]] constexpr size_t getRow() const noexcept { return mat1.getRow(); }
+        [[nodiscard]] constexpr size_t getCol() const noexcept { return mat2.getCol(); }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept;
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
@@ -121,7 +121,7 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2> requires(instanceof<M1, Inverse> && instanceof_tx<typename Traits<M1>::ExprType, DiagMatrix>)
-    size_t GEMM<M1, M2>::getOrder() const noexcept {
+    constexpr size_t GEMM<M1, M2>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return getRow();
     }

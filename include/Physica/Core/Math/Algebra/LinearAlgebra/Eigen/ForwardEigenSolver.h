@@ -55,7 +55,7 @@ namespace Physica {
         void resize(size_t size, bool needEigenvectors);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getSize() const noexcept { return eigenvalues.getLength(); }
+        [[nodiscard]] constexpr size_t getSize() const noexcept { return eigenvalues.getLength(); }
         [[nodiscard]] auto&& getEigenvalues(this auto&& self) noexcept;
         [[nodiscard]] const auto& getEigenvectors() const;
         [[nodiscard]] bool getNeedEigenvectors() const noexcept { return !eigenvectors.empty(); }

@@ -49,7 +49,7 @@ namespace Physica {
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */

@@ -39,7 +39,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return v.calc(getLength() - index - 1); }
-        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return v.getLength(); }
     };
 
     template<class Derived, Scalar ScalarT>

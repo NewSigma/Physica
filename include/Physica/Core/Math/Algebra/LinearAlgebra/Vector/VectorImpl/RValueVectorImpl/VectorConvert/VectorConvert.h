@@ -43,7 +43,7 @@ namespace Physica {
 
         [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
     };
@@ -75,7 +75,7 @@ namespace Physica {
 
         [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
     };
@@ -105,7 +105,7 @@ namespace Physica {
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).value(); }
         [[nodiscard]] T calc_value(size_t s) const { return calc(s); }
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
     };
@@ -131,7 +131,7 @@ namespace Physica {
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).template grad<GradOrder>(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return calc(s).value(); }
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
     };
@@ -159,7 +159,7 @@ namespace Physica {
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).template grad_mask<MaskOrder>(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s); }
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
     };

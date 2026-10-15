@@ -40,7 +40,7 @@ namespace Physica {
         void resize([[maybe_unused]] size_t size) { assert(getLength() == size); }
         /* Getters */
         [[nodiscard]] auto data_ptr(this auto&& self, size_t index) noexcept;
-        [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() - std::abs(offset); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return mat.getRow() - (offset < 0 ? -offset : offset); } // FIXME: std::abs() is not constexpr, hence manual abs
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }

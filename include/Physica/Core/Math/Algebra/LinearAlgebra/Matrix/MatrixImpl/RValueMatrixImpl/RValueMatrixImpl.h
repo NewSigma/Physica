@@ -533,7 +533,7 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueMatrix<Derived, ScalarT>::getRow() const noexcept {
+    constexpr auto RValueMatrix<Derived, ScalarT>::getRow() const noexcept {
         if constexpr (Derived::isStaticSquare())
             return getOrder();
         else
@@ -541,7 +541,7 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueMatrix<Derived, ScalarT>::getCol() const noexcept {
+    constexpr auto RValueMatrix<Derived, ScalarT>::getCol() const noexcept {
         if constexpr (Derived::isStaticSquare())
             return getOrder();
         else
@@ -549,18 +549,18 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueMatrix<Derived, ScalarT>::getOrder() const noexcept {
+    constexpr auto RValueMatrix<Derived, ScalarT>::getOrder() const noexcept {
         assert(isSquare() && "[Error]: getOrder() assumes square matrix");
         return Base::getDerived().getOrder();
     }
 
     template<class Derived, Scalar ScalarT>
-    size_t RValueMatrix<Derived, ScalarT>::getMaxMajor(this const auto& self) noexcept {
+    constexpr size_t RValueMatrix<Derived, ScalarT>::getMaxMajor(this const auto& self) noexcept {
         return Derived::isColMatrix() ? self.getCol() : self.getRow();
     }
 
     template<class Derived, Scalar ScalarT>
-    size_t RValueMatrix<Derived, ScalarT>::getMaxMinor(this const auto& self) noexcept {
+    constexpr size_t RValueMatrix<Derived, ScalarT>::getMaxMinor(this const auto& self) noexcept {
         return Derived::isColMatrix() ? self.getRow() : self.getCol();
     }
 

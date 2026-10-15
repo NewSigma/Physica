@@ -425,7 +425,7 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::getRow() const noexcept {
+    __host__ __device__ constexpr auto device_obj<RValueMatrix<Derived, ScalarT>>::getRow() const noexcept {
         if constexpr (isStaticSquare())
             return getOrder();
         else
@@ -433,7 +433,7 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::getCol() const noexcept {
+    __host__ __device__ constexpr auto device_obj<RValueMatrix<Derived, ScalarT>>::getCol() const noexcept {
         if constexpr (isStaticSquare())
             return getOrder();
         else
@@ -441,18 +441,18 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::getOrder() const noexcept {
+    __host__ __device__ constexpr auto device_obj<RValueMatrix<Derived, ScalarT>>::getOrder() const noexcept {
         assert(isSquare() && "[Error]: getOrder() assumes square matrix");
         return Base::getDerived().getOrder();
     }
 
     template<class Derived, Scalar ScalarT>
-    __host__ __device__ size_t device_obj<RValueMatrix<Derived, ScalarT>>::getMaxMajor(this const auto& self) noexcept {
+    __host__ __device__ constexpr size_t device_obj<RValueMatrix<Derived, ScalarT>>::getMaxMajor(this const auto& self) noexcept {
         return isColMatrix() ? self.getCol() : self.getRow();
     }
 
     template<class Derived, Scalar ScalarT>
-    __host__ __device__ size_t device_obj<RValueMatrix<Derived, ScalarT>>::getMaxMinor(this const auto& self) noexcept {
+    __host__ __device__ constexpr size_t device_obj<RValueMatrix<Derived, ScalarT>>::getMaxMinor(this const auto& self) noexcept {
         return isColMatrix() ? self.getRow() : self.getCol();
     }
 

@@ -44,7 +44,7 @@ namespace Physica {
 
         [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };

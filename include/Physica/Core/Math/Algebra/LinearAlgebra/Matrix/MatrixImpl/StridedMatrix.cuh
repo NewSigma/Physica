@@ -28,7 +28,7 @@ namespace Physica {
         using Base = device_obj<LValueMatrix<Derived>>;
         using This = device_obj<host_obj>;
     public:
-        ~device_obj() = default;
+        constexpr ~device_obj() = default;
         /* Operators */
         This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) noexcept = delete;
@@ -45,9 +45,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getRowStrideAtCompile() noexcept { return host_obj::getRowStrideAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColStrideAtCompile() noexcept { return host_obj::getColStrideAtCompile(); }
     protected:
-        device_obj() = default;
-        device_obj(const This&) = default;
-        device_obj(This&&) noexcept = default;
+        constexpr device_obj() = default;
+        constexpr device_obj(const This&) = default;
+        constexpr device_obj(This&&) noexcept = default;
     };
 }
 

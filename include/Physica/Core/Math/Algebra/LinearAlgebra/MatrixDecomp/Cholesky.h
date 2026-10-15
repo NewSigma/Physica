@@ -33,7 +33,7 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] size_t getOrder() const noexcept { return source.getOrder(); }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept { return source.getOrder(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;

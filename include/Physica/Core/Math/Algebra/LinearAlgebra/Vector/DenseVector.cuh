@@ -77,7 +77,7 @@ namespace Physica {
         void junk(this auto&) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return storage.getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return storage.getLength(); }
         [[nodiscard]] __host__ __device__ auto* data_handle(this auto&&) noexcept;
         /* Static members */
         template<RNG R>

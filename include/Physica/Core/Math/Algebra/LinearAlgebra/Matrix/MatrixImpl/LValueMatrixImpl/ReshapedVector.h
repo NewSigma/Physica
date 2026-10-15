@@ -47,9 +47,9 @@ namespace Physica {
 
         [[nodiscard]] T sum() const { return v.sum(); }
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept;
-        [[nodiscard]] size_t getCol() const noexcept;
-        [[nodiscard]] size_t getOrder() const noexcept;
+        [[nodiscard]] constexpr size_t getRow() const noexcept;
+        [[nodiscard]] constexpr size_t getCol() const noexcept;
+        [[nodiscard]] constexpr size_t getOrder() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor; }
@@ -71,7 +71,7 @@ namespace Physica {
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
-    size_t ReshapedVector<V, MatrixMajor, Row, Col>::getRow() const noexcept {
+    constexpr size_t ReshapedVector<V, MatrixMajor, Row, Col>::getRow() const noexcept {
         if constexpr (Row != Dynamic)
             return Row;
         else
@@ -79,7 +79,7 @@ namespace Physica {
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
-    size_t ReshapedVector<V, MatrixMajor, Row, Col>::getCol() const noexcept {
+    constexpr size_t ReshapedVector<V, MatrixMajor, Row, Col>::getCol() const noexcept {
         if constexpr (Col != Dynamic)
             return Col;
         else
@@ -96,7 +96,7 @@ namespace Physica {
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
-    size_t ReshapedVector<V, MatrixMajor, Row, Col>::getOrder() const noexcept {
+    constexpr size_t ReshapedVector<V, MatrixMajor, Row, Col>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return getRow();
     }

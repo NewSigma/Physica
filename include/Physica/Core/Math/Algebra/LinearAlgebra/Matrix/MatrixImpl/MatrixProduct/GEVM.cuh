@@ -45,8 +45,8 @@ namespace Physica {
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return vec.getDerived().getLength(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const { return vec.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const { return mat.getDerived().getCol(); }
     };
 
     template<Vector V, Matrix M>

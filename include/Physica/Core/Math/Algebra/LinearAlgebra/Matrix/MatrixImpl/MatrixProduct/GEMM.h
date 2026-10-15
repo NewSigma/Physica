@@ -74,9 +74,9 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
-        [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
-        [[nodiscard]] size_t getOrder() const { return getRow(); }
+        [[nodiscard]] constexpr size_t getRow() const { return mat1.getRow(); }
+        [[nodiscard]] constexpr size_t getCol() const { return mat2.getCol(); }
+        [[nodiscard]] constexpr size_t getOrder() const { return getRow(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */

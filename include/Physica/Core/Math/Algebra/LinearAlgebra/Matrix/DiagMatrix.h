@@ -62,7 +62,7 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] auto&& diag(this auto&& self) noexcept;
-        [[nodiscard]] size_t getOrder() const noexcept;
+        [[nodiscard]] constexpr size_t getOrder() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
@@ -150,7 +150,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    size_t DiagMatrix<T, Order>::getOrder() const noexcept {
+    constexpr size_t DiagMatrix<T, Order>::getOrder() const noexcept {
         if constexpr (Order == Dynamic)
             return diags.getLength();
         return Order;

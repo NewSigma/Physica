@@ -82,15 +82,17 @@ namespace Physica {
         void junk() noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] IndexType getShape() const noexcept;
+        [[nodiscard]] constexpr IndexType getShape() const noexcept;
         [[nodiscard]] constexpr size_t dim(int index) const noexcept;
         [[nodiscard, gnu::returns_nonnull]] auto* data(this auto&&) noexcept;
         [[nodiscard, gnu::returns_nonnull]] auto* data_ptr(this auto&&, const IndexType& indices) noexcept;
         [[nodiscard]] auto&& asArray(this auto&&) noexcept;
-        [[nodiscard]] size_t getSize() const noexcept { return arr.getLength(); }
+        [[nodiscard]] constexpr size_t getSize() const noexcept { return arr.getLength(); }
         [[nodiscard]] bool empty() const noexcept { return arr.empty(); }
         /* Static members */
         [[nodiscard]] constexpr static int ndim() noexcept { return NDim; }
+        [[nodiscard]] consteval static bool isStaticShape() noexcept { return StaticShape; }
+        [[nodiscard]] consteval static IndexType getShapeAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ static size_t toSize(const IndexType& shape) noexcept;
         [[nodiscard]] static This read(IndexType shape, const T* __restrict p) noexcept;
         /* Friends */

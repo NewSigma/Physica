@@ -224,17 +224,17 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    __host__ __device__ size_t device_obj<RValueTensor<Derived, ScalarT>>::dim(int index) const noexcept {
+    __host__ __device__ constexpr size_t device_obj<RValueTensor<Derived, ScalarT>>::dim(int index) const noexcept {
         return Base::getDerived().dim(index);
     }
 
     template<class Derived, Scalar ScalarT>
-    __host__ __device__ auto device_obj<RValueTensor<Derived, ScalarT>>::getShape() const noexcept -> IndexType {
+    __host__ __device__ constexpr auto device_obj<RValueTensor<Derived, ScalarT>>::getShape() const noexcept -> IndexType {
         return Base::getDerived().getShape();
     }
 
     template<class Derived, Scalar ScalarT>
-    __host__ __device__ size_t device_obj<RValueTensor<Derived, ScalarT>>::getSize() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<RValueTensor<Derived, ScalarT>>::getSize() const noexcept {
         size_t size = dim(0);
         for (int i = 1; i < NDim; ++i)
             size *= dim(i);
@@ -296,8 +296,18 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool device_obj<RValueTensor<Derived, ScalarT>>::isStaticShape() noexcept {
+        return Derived::isStaticShape();
+    }
+
+    template<class Derived, Scalar ScalarT>
     __host__ __device__ consteval size_t device_obj<RValueTensor<Derived, ScalarT>>::getSizeAtCompile() noexcept {
         return Derived::getSizeAtCompile();
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval auto device_obj<RValueTensor<Derived, ScalarT>>::getShapeAtCompile() noexcept -> IndexType {
+        return Derived::getShapeAtCompile();
     }
     // Redeclare to expose it to derived classes
     template<class Derived, Scalar ScalarT>

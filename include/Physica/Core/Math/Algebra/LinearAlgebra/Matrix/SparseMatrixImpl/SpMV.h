@@ -37,7 +37,7 @@ namespace Physica {
 
         [[nodiscard]] T calc(size_t index) const;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] const auto& getLHS() const noexcept { return mat; }
         [[nodiscard]] const auto& getRHS() const noexcept { return vec; }
         /* Static members */

@@ -137,7 +137,7 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
-    __host__ __device__ auto device_obj<ArrayND<T, Dims...>>::getShape() const noexcept -> IndexType {
+    __host__ __device__ constexpr auto device_obj<ArrayND<T, Dims...>>::getShape() const noexcept -> IndexType {
         if constexpr (StaticShape)
             return IndexType({static_cast<size_t>(Dims)...});
         else
@@ -171,7 +171,7 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
-    __host__ __device__ size_t device_obj<ArrayND<T, Dims...>>::getSize() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<ArrayND<T, Dims...>>::getSize() const noexcept {
         return arr.getLength();
     }
 

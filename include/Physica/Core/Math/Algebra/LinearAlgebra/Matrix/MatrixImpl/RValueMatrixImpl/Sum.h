@@ -47,7 +47,7 @@ namespace Physica {
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept;
+        [[nodiscard]] constexpr size_t getLength() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
@@ -83,7 +83,7 @@ namespace Physica {
     }
 
     template<class M, bool ReduceCol>
-    size_t MatrixSum<M, ReduceCol>::getLength() const noexcept {
+    constexpr size_t MatrixSum<M, ReduceCol>::getLength() const noexcept {
         if constexpr (ReduceCol)
             return mat.getRow();
         else

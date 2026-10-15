@@ -69,10 +69,10 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto data_handle(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ IndexType getShape() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr IndexType getShape() const noexcept;
         [[nodiscard]] __host__ __device__ constexpr size_t dim(int index) const noexcept;
         [[nodiscard]] __host__ __device__ auto&& asArray(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getSize() const noexcept;
         /* Static members */
         template<RNG R>
         [[nodiscard]] static This random_uniform(IndexType shape);

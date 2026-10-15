@@ -47,7 +47,7 @@ namespace Physica {
         using Base::resize;
         __host__ __device__ void resize(size_t length);
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t index) noexcept;
     };
 
@@ -74,7 +74,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
-    __host__ __device__ size_t device_obj<LMatrixBlock<M, Row, Col>>::getLength() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<LMatrixBlock<M, Row, Col>>::getLength() const noexcept {
         if constexpr (Row == 1) {
             if constexpr (Col == Dynamic)
                 return colCount;
@@ -137,8 +137,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto bottomRightCorner(this auto&&, size_t from) noexcept;
         [[nodiscard]] __host__ __device__ auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return rowCount; }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return colCount; }
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const noexcept { return rowCount; }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const noexcept { return colCount; }
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
     };
 

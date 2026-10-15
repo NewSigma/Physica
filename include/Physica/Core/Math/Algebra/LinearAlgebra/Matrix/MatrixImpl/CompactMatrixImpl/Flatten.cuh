@@ -40,7 +40,7 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
         [[nodiscard]] __host__ __device__ auto data_handle(this auto&&) noexcept;
     };
 

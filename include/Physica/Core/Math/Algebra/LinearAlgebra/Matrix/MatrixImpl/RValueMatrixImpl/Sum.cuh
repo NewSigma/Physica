@@ -48,7 +48,7 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept;
         [[nodiscard]] __host__ __device__ const device_obj<M>& getExpr() const noexcept { return mat.getDerived(); }
     };
 
@@ -76,7 +76,7 @@ namespace Physica {
     }
 
     template<class M, bool ReduceCol>
-    __host__ __device__ size_t device_obj<MatrixSum<M, ReduceCol>>::getLength() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<MatrixSum<M, ReduceCol>>::getLength() const noexcept {
         if constexpr (ReduceCol)
             return mat.getDerived().getRow();
         else

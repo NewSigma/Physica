@@ -56,7 +56,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const This& hermite() const noexcept { return *this; }
         __host__ __device__ void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const noexcept;
     };
 
     template<Scalar T, size_t Order>
@@ -108,7 +108,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    __host__ __device__ size_t device_obj<IdentityMatrix<T, Order>>::getOrder() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<IdentityMatrix<T, Order>>::getOrder() const noexcept {
         if constexpr (Order == Dynamic)
             return order;
         return Order;

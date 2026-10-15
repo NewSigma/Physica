@@ -48,8 +48,8 @@ namespace Physica {
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const noexcept { return getLHS().getRow() * getRHS().getRow(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const noexcept { return getLHS().getCol() * getRHS().getCol(); }
         [[nodiscard]] __host__ __device__ auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto&& getRHS(this auto&&) noexcept;
     private:
@@ -125,17 +125,6 @@ namespace Physica {
         size_t col2 = col % getRHS().getCol();
         return getLHS().calc(row1, col1, block) * getRHS().calc(row2, col2, block);
     }
-
-    template<Matrix M1, Matrix M2>
-    __host__ __device__ size_t device_obj<Kronecker<M1, M2>>::getRow() const noexcept {
-        return getLHS().getRow() * getRHS().getRow();
-    }
-
-    template<Matrix M1, Matrix M2>
-    __host__ __device__ size_t device_obj<Kronecker<M1, M2>>::getCol() const noexcept {
-        return getLHS().getCol() * getRHS().getCol();
-    }
-
     template<Matrix M1, Matrix M2>
     void device_obj<Kronecker<M1, M2>>::assign_identity(Matrix auto&& target) const {
         target.zeros();

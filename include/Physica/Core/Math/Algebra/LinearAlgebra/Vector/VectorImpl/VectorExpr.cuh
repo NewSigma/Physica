@@ -40,7 +40,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return getExpr().getLength(); }
         [[nodiscard]] __host__ __device__ constexpr auto&& getExpr(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
@@ -80,7 +80,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept;
         [[nodiscard]] __host__ __device__ constexpr auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ constexpr auto&& getRHS(this auto&&) noexcept;
         /* Static members */
@@ -98,7 +98,7 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    __host__ __device__ size_t device_obj<BinaryVectorExpr<ID, LHS, RHS>>::getLength() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<BinaryVectorExpr<ID, LHS, RHS>>::getLength() const noexcept {
         if constexpr (Vector<LHS>)
             return getLHS().getLength();
         else

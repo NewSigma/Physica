@@ -43,7 +43,7 @@ namespace Physica {
         [[nodiscard]] T* findValue();
         void append(T value);
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] IndexArray& getIndexes() noexcept { return v.indexes; }
         [[nodiscard]] ElemArray& getElems() noexcept { return v.elems; }
     };

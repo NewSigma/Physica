@@ -52,7 +52,7 @@ namespace Physica {
         using Base::resize;
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept;
     };
 
@@ -99,7 +99,7 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    __host__ __device__ size_t device_obj<LVectorBlock<V, Length>>::getLength() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<LVectorBlock<V, Length>>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         return Length;

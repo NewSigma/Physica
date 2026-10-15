@@ -55,7 +55,7 @@ namespace Physica {
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept;
+        [[nodiscard]] constexpr size_t getLength() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
@@ -102,7 +102,7 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    size_t RVectorBlock<V, Length>::getLength() const noexcept {
+    constexpr size_t RVectorBlock<V, Length>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         else

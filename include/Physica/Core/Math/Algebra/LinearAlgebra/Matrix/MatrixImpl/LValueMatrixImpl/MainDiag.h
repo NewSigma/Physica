@@ -39,7 +39,7 @@ namespace Physica {
         void resize([[maybe_unused]] size_t size) { assert(getLength() == size); }
         /* Getters */
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
-        [[nodiscard]] size_t getLength() const noexcept;
+        [[nodiscard]] constexpr size_t getLength() const noexcept;
         [[nodiscard]] auto data_ptr(this auto&& self, size_t index) noexcept { return self.mat.data_ptr(index, index); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
@@ -51,13 +51,13 @@ namespace Physica {
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isLValueMatrix() && !std::remove_cvref_t<M>::isStrided())
-    size_t MainDiag<M>::getLength() const noexcept {
+    constexpr size_t MainDiag<M>::getLength() const noexcept {
         return std::min(mat.getCol(), mat.getRow());
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isLValueMatrix() && !std::remove_cvref_t<M>::isStrided())
     __host__ __device__ consteval size_t MainDiag<M>::getSizeAtCompile() noexcept {
         using Expr = std::remove_cvref<M>::type;
-        return std::max(Expr::getRowAtCompile(), Expr::getColAtCompile());
+        return std::min(Expr::getRowAtCompile(), Expr::getColAtCompile());
     }
 }

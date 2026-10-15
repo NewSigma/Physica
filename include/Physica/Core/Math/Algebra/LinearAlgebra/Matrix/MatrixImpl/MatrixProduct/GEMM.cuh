@@ -60,8 +60,8 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return getLHS().getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const { return getRHS().getCol(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const { return getLHS().getRow(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const { return getRHS().getCol(); }
         [[nodiscard]] __host__ __device__ auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto&& getRHS(this auto&&) noexcept;
     private:

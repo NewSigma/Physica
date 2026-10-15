@@ -90,12 +90,12 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto&& asArray(this auto&& self) noexcept { return self.arr; }
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data(this auto&&) noexcept;
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data_ptr(this auto&&, size_t row, size_t col) noexcept;
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getMaxMajor() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getSize() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getMaxMajor() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getMaxMinor() const noexcept;
         [[nodiscard]] __host__ __device__ bool empty() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return Major; }

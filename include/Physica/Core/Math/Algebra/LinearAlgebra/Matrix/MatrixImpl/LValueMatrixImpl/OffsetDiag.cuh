@@ -42,7 +42,7 @@ namespace Physica {
         void resize([[maybe_unused]] size_t size) { assert(getLength() == size); }
         /* Getters */
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getRow() - std::abs(offset); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return getExpr().getRow() - (offset < 0 ? -offset : offset); }
         [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
     };
 

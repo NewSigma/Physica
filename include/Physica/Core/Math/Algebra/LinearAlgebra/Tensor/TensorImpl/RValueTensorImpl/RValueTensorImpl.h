@@ -203,17 +203,17 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    size_t RValueTensor<Derived, ScalarT>::dim(int index) const noexcept {
+    constexpr size_t RValueTensor<Derived, ScalarT>::dim(int index) const noexcept {
         return getShape()[index];
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueTensor<Derived, ScalarT>::getShape() const noexcept -> IndexType {
+    constexpr auto RValueTensor<Derived, ScalarT>::getShape() const noexcept -> IndexType {
         return Base::getDerived().getShape();
     }
 
     template<class Derived, Scalar ScalarT>
-    size_t RValueTensor<Derived, ScalarT>::getSize() const noexcept {
+    constexpr size_t RValueTensor<Derived, ScalarT>::getSize() const noexcept {
         size_t size = dim(0);
         for (int i = 1; i < NDim; ++i)
             size *= dim(i);
@@ -274,8 +274,18 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval bool RValueTensor<Derived, ScalarT>::isStaticShape() noexcept {
+        return Derived::isStaticShape();
+    }
+
+    template<class Derived, Scalar ScalarT>
     __host__ __device__ consteval size_t RValueTensor<Derived, ScalarT>::getSizeAtCompile() noexcept {
         return Dynamic;
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval auto RValueTensor<Derived, ScalarT>::getShapeAtCompile() noexcept -> IndexType {
+        return Derived::getShapeAtCompile();
     }
 
     template<class Derived, Scalar ScalarT>

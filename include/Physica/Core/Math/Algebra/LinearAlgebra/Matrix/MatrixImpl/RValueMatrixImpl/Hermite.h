@@ -54,9 +54,9 @@ namespace Physica {
 
         [[nodiscard]] auto&& hermite(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return m.getCol(); }
-        [[nodiscard]] size_t getCol() const noexcept { return m.getRow(); }
-        [[nodiscard]] size_t getOrder() const noexcept { return m.getOrder(); }
+        [[nodiscard]] constexpr size_t getRow() const noexcept { return m.getCol(); }
+        [[nodiscard]] constexpr size_t getCol() const noexcept { return m.getRow(); }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept { return m.getOrder(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
@@ -116,8 +116,8 @@ namespace Physica {
         [[nodiscard]] auto&& hermite(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] size_t getCol() const noexcept { return v.getLength(); }
-        [[nodiscard]] size_t getOrder() const noexcept;
+        [[nodiscard]] constexpr size_t getCol() const noexcept { return v.getLength(); }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
@@ -139,7 +139,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    size_t Hermite<V>::getOrder() const noexcept {
+    constexpr size_t Hermite<V>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return 1;
     }

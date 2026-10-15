@@ -50,8 +50,8 @@ namespace Physica {
         __host__ __device__ void resize(IndexType size);
         [[nodiscard]] __device__ T calc(const IndexType& index) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ IndexType getShape() const noexcept { return shape; }
-        [[nodiscard]] __host__ __device__ size_t dim(int index) const noexcept { return shape[index]; }
+        [[nodiscard]] __host__ __device__ constexpr IndexType getShape() const noexcept { return shape; }
+        [[nodiscard]] __host__ __device__ constexpr size_t dim(int index) const noexcept { return shape[index]; }
         [[nodiscard]] __host__ __device__ auto getStrides() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_handle(this auto&& self) noexcept;
         /* Static members */

@@ -46,8 +46,8 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void resize(size_t row, size_t col);
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
         [[nodiscard]] ScalarType sum() const { return v.getDerived().sum(); }
     };
@@ -68,7 +68,7 @@ namespace Physica {
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
-    __host__ __device__ size_t device_obj<ReshapedVector<V, MatrixMajor, Row, Col>>::getRow() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<ReshapedVector<V, MatrixMajor, Row, Col>>::getRow() const noexcept {
         if constexpr (Row != Dynamic)
             return Row;
         else
@@ -76,7 +76,7 @@ namespace Physica {
     }
 
     template<Vector V, int MatrixMajor, size_t Row, size_t Col> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())
-    __host__ __device__ size_t device_obj<ReshapedVector<V, MatrixMajor, Row, Col>>::getCol() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<ReshapedVector<V, MatrixMajor, Row, Col>>::getCol() const noexcept {
         if constexpr (Col != Dynamic)
             return Col;
         else

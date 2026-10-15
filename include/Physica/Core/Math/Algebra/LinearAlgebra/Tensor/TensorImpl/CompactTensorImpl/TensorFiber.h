@@ -51,11 +51,11 @@ namespace Physica {
         using Base::resize;
         void resize(size_t length);
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return tensor.dim(Dim); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return tensor.dim(Dim); }
         [[nodiscard]] constexpr size_t getStride() const noexcept;
         [[nodiscard]] auto data_handle(this auto&& self) noexcept;
         /* Static members */
-        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<X>::getShapeAtCompile()[Dim]; }
         [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept;
     };
 

@@ -43,7 +43,7 @@ namespace Physica {
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] auto data_handle(this auto&& self) noexcept;
-        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return v.getLength(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept { return 2; }

@@ -48,9 +48,9 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return mat.getCol(); }
-        [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
-        [[nodiscard]] size_t getOrder() const noexcept { return mat.getOrder(); }
+        [[nodiscard]] constexpr size_t getRow() const noexcept { return mat.getCol(); }
+        [[nodiscard]] constexpr size_t getCol() const noexcept { return mat.getRow(); }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept { return mat.getOrder(); }
         [[nodiscard]] auto data_handle(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
@@ -140,8 +140,8 @@ namespace Physica {
         [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] size_t getCol() const noexcept { return vec.getLength(); }
-        [[nodiscard]] size_t getOrder() const noexcept;
+        [[nodiscard]] constexpr size_t getCol() const noexcept { return vec.getLength(); }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept;
         [[nodiscard]] auto data_handle(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
@@ -166,7 +166,7 @@ namespace Physica {
     }
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
-    size_t Transpose<V>::getOrder() const noexcept {
+    constexpr size_t Transpose<V>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return 1;
     }

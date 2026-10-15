@@ -65,7 +65,7 @@ namespace Physica {
         H5Dataset<1> write(H5Loc& loc, const char* name) const;
         /* Getters */
         using Base::getDerived;
-        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return storage.getOrder(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const noexcept { return storage.getOrder(); }
         [[nodiscard]] auto&& asVector(this auto&& self) noexcept { return self.storage.asArray(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }

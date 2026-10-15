@@ -60,7 +60,7 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto&& diag(this auto&& self) noexcept;
-        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const noexcept;
         /* Static members */
         [[nodiscard]] static This identity(size_t order);
     };
@@ -124,7 +124,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    __host__ __device__ size_t device_obj<DiagMatrix<T, Order>>::getOrder() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<DiagMatrix<T, Order>>::getOrder() const noexcept {
         if constexpr (Order == Dynamic)
             return diags.getLength();
         return Order;

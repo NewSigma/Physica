@@ -45,7 +45,7 @@ namespace Physica {
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
     template<class V> requires(std::remove_cvref_t<V>::isLValueVector() && !std::remove_cvref_t<V>::isStrided())

@@ -43,9 +43,11 @@ namespace Physica {
 
         [[nodiscard]] decltype(auto) values(this auto&& self) noexcept;
         /* Getters */
-        [[nodiscard]] IndexType getShape() const noexcept { return tensor.getShape(); }
+        [[nodiscard]] constexpr IndexType getShape() const noexcept { return tensor.getShape(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticShape() noexcept { return std::remove_cvref_t<X>::isStaticShape(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<X>::getSizeAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static auto getShapeAtCompile() noexcept -> IndexType { return std::remove_cvref_t<X>::getShapeAtCompile(); }
     };
 
     template<class X>
@@ -75,9 +77,11 @@ namespace Physica {
 
         [[nodiscard]] decltype(auto) values(this auto&& self) noexcept;
         /* Getters */
-        [[nodiscard]] IndexType getShape() const noexcept { return tensor.getShape(); }
+        [[nodiscard]] constexpr IndexType getShape() const noexcept { return tensor.getShape(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticShape() noexcept { return std::remove_cvref_t<X>::isStaticShape(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<X>::getSizeAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static auto getShapeAtCompile() noexcept -> IndexType { return std::remove_cvref_t<X>::getShapeAtCompile(); }
     };
 
     template<class X>
@@ -107,9 +111,11 @@ namespace Physica {
 
         [[nodiscard]] decltype(auto) values(this auto&& self) noexcept;
         /* Getters */
-        [[nodiscard]] IndexType getShape() const noexcept { return tensor.getShape(); }
+        [[nodiscard]] constexpr IndexType getShape() const noexcept { return tensor.getShape(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticShape() noexcept { return std::remove_cvref_t<X>::isStaticShape(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<X>::getSizeAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static auto getShapeAtCompile() noexcept -> IndexType { return std::remove_cvref_t<X>::getShapeAtCompile(); }
     };
 
     template<class X>
@@ -139,9 +145,11 @@ namespace Physica {
 
         [[nodiscard]] decltype(auto) values(this auto&& self) noexcept;
         /* Getters */
-        [[nodiscard]] IndexType getShape() const noexcept { return tensor.getShape(); }
+        [[nodiscard]] constexpr IndexType getShape() const noexcept { return tensor.getShape(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticShape() noexcept { return std::remove_cvref_t<X>::isStaticShape(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<X>::getSizeAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static auto getShapeAtCompile() noexcept -> IndexType { return std::remove_cvref_t<X>::getShapeAtCompile(); }
     };
 
     template<class X>
@@ -169,9 +177,11 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] decltype(auto) calc(const IndexType& index) const { return tensor.calc(index).value(); }
         /* Getters */
-        [[nodiscard]] IndexType getShape() const noexcept { return tensor.getShape(); }
+        [[nodiscard]] constexpr IndexType getShape() const noexcept { return tensor.getShape(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticShape() noexcept { return std::remove_cvref_t<X>::isStaticShape(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<X>::getSizeAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static auto getShapeAtCompile() noexcept -> IndexType { return std::remove_cvref_t<X>::getShapeAtCompile(); }
     };
 
     template<class X, int GradOrder>
@@ -194,9 +204,11 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] decltype(auto) calc(const IndexType& index) const { return tensor.calc(index).template grad<GradOrder>(); }
         /* Getters */
-        [[nodiscard]] IndexType getShape() const noexcept { return tensor.getShape(); }
+        [[nodiscard]] constexpr IndexType getShape() const noexcept { return tensor.getShape(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticShape() noexcept { return std::remove_cvref_t<X>::isStaticShape(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<X>::getSizeAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static auto getShapeAtCompile() noexcept -> IndexType { return std::remove_cvref_t<X>::getShapeAtCompile(); }
     };
 }
 

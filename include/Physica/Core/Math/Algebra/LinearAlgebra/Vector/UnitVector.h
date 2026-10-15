@@ -41,8 +41,8 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T calc(size_t index) const noexcept;
-        [[nodiscard]] size_t getNonZero() const noexcept { return nonzero; }
-        [[nodiscard]] size_t getLength() const noexcept { return length; }
+        [[nodiscard]] constexpr size_t getNonZero() const noexcept { return nonzero; }
+        [[nodiscard]] constexpr size_t getLength() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Length; }
     };
@@ -62,6 +62,13 @@ namespace Physica {
     template<Scalar T, size_t Length>
     T UnitVector<T, Length>::calc(size_t index) const noexcept {
         return T(index == nonzero ? 1 : 0);
+    }
+
+    template<Scalar T, size_t Length>
+    constexpr size_t UnitVector<T, Length>::getLength() const noexcept {
+        if constexpr (Length == Dynamic)
+            return length;
+        return Length;
     }
 }
 

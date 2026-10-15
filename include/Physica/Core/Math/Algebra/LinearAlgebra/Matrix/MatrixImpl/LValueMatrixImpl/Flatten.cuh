@@ -41,7 +41,7 @@ namespace Physica {
         using Base::resize;
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept;
     };
 

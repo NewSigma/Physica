@@ -40,9 +40,8 @@ namespace Physica {
         [[nodiscard]] __device__ decltype(auto) calc(size_t index, instanceof_x<ThreadBlock> auto block) const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getRow() - std::abs(offset); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return getExpr().getRow() - (offset < 0 ? -offset : offset); }
     };
-
     template<Matrix M>
     __host__ __device__ device_obj<OffsetDiag<M>>::device_obj(Ref mat, ssize_t offset) : mat(asStruct(mat)), offset(offset) {
         assert(getExpr().isSquare());

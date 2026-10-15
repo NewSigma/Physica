@@ -45,7 +45,7 @@ namespace Physica {
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return tensor.getDerived().getSize(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return tensor.getDerived().getSize(); }
     };
 
     template<Tensor X>

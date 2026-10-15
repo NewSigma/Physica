@@ -105,12 +105,12 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ auto grads(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ auto getRow() const noexcept;
-        [[nodiscard]] __host__ __device__ auto getCol() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getRow() * getCol(); }
-        [[nodiscard]] __host__ __device__ auto getOrder() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getMaxMajor(this const auto&) noexcept;
-        [[nodiscard]] __host__ __device__ size_t getMaxMinor(this const auto&) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr auto getRow() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr auto getCol() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getSize() const noexcept { return getRow() * getCol(); }
+        [[nodiscard]] __host__ __device__ constexpr auto getOrder() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getMaxMajor(this const auto&) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getMaxMinor(this const auto&) noexcept;
         [[nodiscard]] __host__ __device__ bool empty() const noexcept { return Base::getDerived().getSize() == 0; }
 
         [[nodiscard]] __host__ __device__ constexpr bool isSquare() const noexcept;

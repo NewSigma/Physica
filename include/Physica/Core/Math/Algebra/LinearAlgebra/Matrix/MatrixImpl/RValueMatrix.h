@@ -165,12 +165,12 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] decltype(auto) grads(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] auto getRow() const noexcept;
-        [[nodiscard]] auto getCol() const noexcept;
-        [[nodiscard]] size_t getSize() const noexcept { return getRow() * getCol(); }
-        [[nodiscard]] auto getOrder() const noexcept;
-        [[nodiscard]] size_t getMaxMajor(this const auto&) noexcept;
-        [[nodiscard]] size_t getMaxMinor(this const auto&) noexcept;
+        [[nodiscard]] constexpr auto getRow() const noexcept;
+        [[nodiscard]] constexpr auto getCol() const noexcept;
+        [[nodiscard]] constexpr size_t getSize() const noexcept { return getRow() * getCol(); }
+        [[nodiscard]] constexpr auto getOrder() const noexcept;
+        [[nodiscard]] constexpr size_t getMaxMajor(this const auto&) noexcept;
+        [[nodiscard]] constexpr size_t getMaxMinor(this const auto&) noexcept;
         [[nodiscard]] bool empty() const noexcept { return Base::getDerived().getSize() == 0; }
 
         [[nodiscard]] constexpr bool isOverdetermined() const noexcept;

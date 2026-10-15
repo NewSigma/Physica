@@ -53,9 +53,9 @@ namespace Physica {
         using Base::resize;
         __host__ __device__ void resize(size_t row, size_t col);
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return tensor.getDerived().dim(DimR); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return tensor.getDerived().dim(DimC); }
-        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const noexcept { return tensor.getDerived().dim(DimR); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const noexcept { return tensor.getDerived().dim(DimC); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const noexcept;
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
     };
 
@@ -77,7 +77,7 @@ namespace Physica {
     }
 
     template<class X, int DimR, int DimC> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isStrided())
-    __host__ __device__ size_t device_obj<TensorSlice<X, DimR, DimC>>::getOrder() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<TensorSlice<X, DimR, DimC>>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return getRow();
     }

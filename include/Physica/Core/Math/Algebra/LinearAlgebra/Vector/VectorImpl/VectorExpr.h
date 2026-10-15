@@ -51,7 +51,7 @@ namespace Physica {
         template<int Size>
         [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return getExpr().getLength(); }
+        [[nodiscard]] constexpr size_t getLength() const noexcept { return getExpr().getLength(); }
         [[nodiscard]] constexpr auto&& getExpr(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
@@ -127,7 +127,7 @@ namespace Physica {
         template<int Size>
         [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept;
+        [[nodiscard]] constexpr size_t getLength() const noexcept;
         [[nodiscard]] constexpr auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] constexpr auto&& getRHS(this auto&&) noexcept;
         /* Static members */
@@ -148,7 +148,7 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    size_t BinaryVectorExpr<ID, LHS, RHS>::getLength() const noexcept {
+    constexpr size_t BinaryVectorExpr<ID, LHS, RHS>::getLength() const noexcept {
         if constexpr (Vector<LHS>)
             return getLHS().getLength();
         else

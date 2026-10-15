@@ -50,7 +50,7 @@ namespace Physica {
         using Base::resize;
         __host__ __device__ void resize([[maybe_unused]] size_t length);
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return tensor.getDerived().dim(Dim); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return tensor.getDerived().dim(Dim); }
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t i) noexcept;
     };
 

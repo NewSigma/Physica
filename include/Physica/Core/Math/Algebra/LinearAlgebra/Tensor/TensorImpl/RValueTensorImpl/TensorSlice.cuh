@@ -49,9 +49,9 @@ namespace Physica {
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return tensor.getDerived().dim(DimR); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return tensor.getDerived().dim(DimC); }
-        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const noexcept { return tensor.getDerived().dim(DimR); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const noexcept { return tensor.getDerived().dim(DimC); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const noexcept;
     };
 
     template<class X, int DimR, int DimC>
@@ -77,7 +77,7 @@ namespace Physica {
     }
 
     template<class X, int DimR, int DimC>
-    __host__ __device__ size_t device_obj<TensorSlice<X, DimR, DimC>>::getOrder() const noexcept {
+    __host__ __device__ constexpr size_t device_obj<TensorSlice<X, DimR, DimC>>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return getRow();
     }

@@ -45,11 +45,13 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return tensor.dim(DimR); }
-        [[nodiscard]] size_t getCol() const noexcept { return tensor.dim(DimC); }
-        [[nodiscard]] size_t getOrder() const noexcept;
+        [[nodiscard]] constexpr size_t getRow() const noexcept { return tensor.dim(DimR); }
+        [[nodiscard]] constexpr size_t getCol() const noexcept { return tensor.dim(DimC); }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return DimR < DimC ? MatrixMajor::Row : MatrixMajor::Col; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept { return std::remove_cvref_t<X>::getShapeAtCompile()[DimR]; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept { return std::remove_cvref_t<X>::getShapeAtCompile()[DimC]; }
     };
 
     template<class X, int DimR, int DimC>
@@ -75,7 +77,7 @@ namespace Physica {
     }
 
     template<class X, int DimR, int DimC>
-    size_t TensorSlice<X, DimR, DimC>::getOrder() const noexcept {
+    constexpr size_t TensorSlice<X, DimR, DimC>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return getRow();
     }

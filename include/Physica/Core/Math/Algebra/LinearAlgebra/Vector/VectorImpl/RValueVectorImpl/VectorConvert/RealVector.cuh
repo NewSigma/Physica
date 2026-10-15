@@ -46,7 +46,7 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
     template<class V>

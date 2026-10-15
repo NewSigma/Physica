@@ -46,9 +46,9 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
-        [[nodiscard]] __host__ __device__ size_t getOrder() const { return mat.getDerived().getOrder(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const { return mat.getDerived().getRow(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const { return mat.getDerived().getCol(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const { return mat.getDerived().getOrder(); }
     };
 
     template<class M>
@@ -81,9 +81,9 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
-        [[nodiscard]] __host__ __device__ size_t getOrder() const { return mat.getDerived().getOrder(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const { return mat.getDerived().getRow(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const { return mat.getDerived().getCol(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const { return mat.getDerived().getOrder(); }
     };
 
     template<class M>
@@ -118,9 +118,9 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
-        [[nodiscard]] __host__ __device__ size_t getOrder() const { return mat.getDerived().getOrder(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const { return mat.getDerived().getRow(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const { return mat.getDerived().getCol(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const { return mat.getDerived().getOrder(); }
     };
 
     template<class M>
@@ -153,9 +153,9 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
-        [[nodiscard]] __host__ __device__ size_t getOrder() const { return mat.getDerived().getOrder(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const { return mat.getDerived().getRow(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const { return mat.getDerived().getCol(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const { return mat.getDerived().getOrder(); }
     };
 
     template<class M>
@@ -186,9 +186,9 @@ namespace Physica {
         [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const { return mat.getDerived().calc(row, col, block).value(); }
         [[nodiscard]] __device__ T calc_value(size_t row, size_t col) const { return calc(row, col); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
-        [[nodiscard]] __host__ __device__ size_t getOrder() const { return mat.getDerived().getOrder(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const { return mat.getDerived().getRow(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const { return mat.getDerived().getCol(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const { return mat.getDerived().getOrder(); }
     };
 
     template<class M, int GradOrder>
@@ -215,9 +215,9 @@ namespace Physica {
         [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const { return mat.getDerived().calc(row, col, block).template grad<GradOrder>(); }
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
-        [[nodiscard]] __host__ __device__ size_t getOrder() const { return mat.getDerived().getOrder(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const { return mat.getDerived().getRow(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const { return mat.getDerived().getCol(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const { return mat.getDerived().getOrder(); }
     };
 }
 

@@ -48,8 +48,8 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t dim(int index) const noexcept { return tensor.getDerived().dim(index); }
-        [[nodiscard]] __host__ __device__ IndexType getShape() const noexcept { return tensor.getDerived().getShape(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t dim(int index) const noexcept { return tensor.getDerived().dim(index); }
+        [[nodiscard]] __host__ __device__ constexpr IndexType getShape() const noexcept { return tensor.getDerived().getShape(); }
     };
 
     template<class V>
@@ -83,8 +83,8 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t dim(int index) const noexcept { return tensor.getDerived().dim(index); }
-        [[nodiscard]] __host__ __device__ IndexType getShape() const noexcept { return tensor.getDerived().getShape(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t dim(int index) const noexcept { return tensor.getDerived().dim(index); }
+        [[nodiscard]] __host__ __device__ constexpr IndexType getShape() const noexcept { return tensor.getDerived().getShape(); }
     };
 
     template<class V>
@@ -118,8 +118,8 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t dim(int index) const noexcept { return tensor.getDerived().dim(index); }
-        [[nodiscard]] __host__ __device__ IndexType getShape() const noexcept { return tensor.getDerived().getShape(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t dim(int index) const noexcept { return tensor.getDerived().dim(index); }
+        [[nodiscard]] __host__ __device__ constexpr IndexType getShape() const noexcept { return tensor.getDerived().getShape(); }
     };
 
     template<class V>
@@ -153,8 +153,8 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t dim(int index) const noexcept { return tensor.getDerived().dim(index); }
-        [[nodiscard]] __host__ __device__ IndexType getShape() const noexcept { return tensor.getDerived().getShape(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t dim(int index) const noexcept { return tensor.getDerived().dim(index); }
+        [[nodiscard]] __host__ __device__ constexpr IndexType getShape() const noexcept { return tensor.getDerived().getShape(); }
     };
 
     template<class V>
@@ -186,8 +186,8 @@ namespace Physica {
         using Base::calc;
         [[nodiscard]] __device__ decltype(auto) calc(const IndexType& index) const { return tensor.getDerived().calc(index).value(); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t dim(int index) const noexcept { return tensor.getDerived().dim(index); }
-        [[nodiscard]] __host__ __device__ IndexType getShape() const noexcept { return tensor.getDerived().getShape(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t dim(int index) const noexcept { return tensor.getDerived().dim(index); }
+        [[nodiscard]] __host__ __device__ constexpr IndexType getShape() const noexcept { return tensor.getDerived().getShape(); }
     };
 
     template<class V, int GradOrder>
@@ -215,8 +215,8 @@ namespace Physica {
         [[nodiscard]] __device__ decltype(auto) calc(const IndexType& index) const { return tensor.getDerived().calc(index).template grad<GradOrder>(); }
         [[nodiscard]] __device__ decltype(auto) calc_value(const IndexType& index) const { return calc(index).value(); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t dim(int index) const noexcept { return tensor.getDerived().dim(index); }
-        [[nodiscard]] __host__ __device__ IndexType getShape() const noexcept { return tensor.getDerived().getShape(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t dim(int index) const noexcept { return tensor.getDerived().dim(index); }
+        [[nodiscard]] __host__ __device__ constexpr IndexType getShape() const noexcept { return tensor.getDerived().getShape(); }
     };
 }
 

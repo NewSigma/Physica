@@ -42,9 +42,9 @@ namespace Physica {
 
         [[nodiscard]] auto&& conjugate(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return m.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return m.getCol(); }
-        [[nodiscard]] size_t getOrder() const noexcept { return m.getOrder(); }
+        [[nodiscard]] constexpr size_t getRow() const noexcept { return m.getRow(); }
+        [[nodiscard]] constexpr size_t getCol() const noexcept { return m.getCol(); }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept { return m.getOrder(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
     };

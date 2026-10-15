@@ -41,8 +41,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ decltype(auto) transpose() const noexcept;
         [[nodiscard]] __host__ __device__ decltype(auto) hermite() const noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return getExpr().getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const { return getExpr().getCol(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const { return getExpr().getRow(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const { return getExpr().getCol(); }
         [[nodiscard]] __host__ __device__ constexpr auto&& getExpr(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
@@ -101,8 +101,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ decltype(auto) transpose() const noexcept;
         [[nodiscard]] __host__ __device__ decltype(auto) hermite() const noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const;
-        [[nodiscard]] __host__ __device__ size_t getCol() const;
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const;
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const;
         [[nodiscard]] __host__ __device__ constexpr auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ constexpr auto&& getRHS(this auto&&) noexcept;
         /* Static members */
@@ -138,7 +138,7 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    __host__ __device__ size_t device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::getRow() const {
+    __host__ __device__ constexpr size_t device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::getRow() const {
         if constexpr (Matrix<LHS>)
             return getLHS().getRow();
         else
@@ -146,7 +146,7 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    __host__ __device__ size_t device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::getCol() const {
+    __host__ __device__ constexpr size_t device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::getCol() const {
         if constexpr (Matrix<LHS>)
             return getLHS().getCol();
         else

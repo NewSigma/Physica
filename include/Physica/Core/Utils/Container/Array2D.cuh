@@ -64,10 +64,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto&& asArray(this auto&& self) noexcept { return self.arr; }
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data(this auto&&) noexcept;
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data_ptr(this auto&&, size_t row, size_t col) noexcept;
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getSize() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const noexcept;
     private:
         [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const;
     };

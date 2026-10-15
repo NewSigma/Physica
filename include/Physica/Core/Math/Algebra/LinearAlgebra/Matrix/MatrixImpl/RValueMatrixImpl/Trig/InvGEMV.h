@@ -47,7 +47,7 @@ namespace Physica {
         void assign_base(Vector auto& target) const;
         void assign_mkl(Vector auto& target) const;
         /* Getters */
-        [[nodiscard]] size_t getLength() const { return rhs.getLength(); }
+        [[nodiscard]] constexpr size_t getLength() const { return rhs.getLength(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */

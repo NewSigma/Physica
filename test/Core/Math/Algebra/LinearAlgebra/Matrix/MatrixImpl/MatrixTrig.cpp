@@ -124,8 +124,8 @@ namespace {
         const auto lhs = Matrix4D::random_uniform<RandomSource>(4, 4);
         Matrix4D sol, prod;
         const auto doubleProd = [&](const Matrix auto& trig) {
-            Matrix4D sol = trig.inv() * rhs;
-            Matrix4D prod = trig * sol;
+            sol = trig.inv() * rhs;
+            prod = trig * sol;
             expect<RandomSource>(matrixNear(prod, rhs, Prec));
 
             sol = lhs * trig.inv();

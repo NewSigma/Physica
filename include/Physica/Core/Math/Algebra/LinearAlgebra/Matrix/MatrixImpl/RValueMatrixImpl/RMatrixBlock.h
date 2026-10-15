@@ -50,7 +50,7 @@ namespace Physica {
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept;
+        [[nodiscard]] constexpr size_t getLength() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
@@ -89,7 +89,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
-    size_t RMatrixBlock<M, Row, Col>::getLength() const noexcept {
+    constexpr size_t RMatrixBlock<M, Row, Col>::getLength() const noexcept {
         if constexpr (Row == 1) {
             if constexpr (Col == Dynamic)
                 return colCount;
@@ -148,9 +148,9 @@ namespace Physica {
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return rowCount; }
-        [[nodiscard]] size_t getCol() const noexcept { return colCount; }
-        [[nodiscard]] size_t getOrder() const noexcept;
+        [[nodiscard]] constexpr size_t getRow() const noexcept { return rowCount; }
+        [[nodiscard]] constexpr size_t getCol() const noexcept { return colCount; }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
@@ -300,7 +300,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    size_t RMatrixBlock<M, Dynamic, Dynamic>::getOrder() const noexcept {
+    constexpr size_t RMatrixBlock<M, Dynamic, Dynamic>::getOrder() const noexcept {
         assert(Base::isSquare() && "[Error]: getOrder() assumes square matrix");
         return getRow();
     }

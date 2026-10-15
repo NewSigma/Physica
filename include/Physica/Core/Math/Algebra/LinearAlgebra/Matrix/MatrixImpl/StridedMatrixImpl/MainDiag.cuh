@@ -44,17 +44,12 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto data_handle(this auto&& self) noexcept;
         [[nodiscard]] __host__ __device__ size_t getStride() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return std::min(getExpr().getCol(), getExpr().getRow()); }
     };
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isStrided())
     __host__ __device__ auto&& device_obj<MainDiag<M>>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived());
-    }
-
-    template<Matrix M> requires(std::remove_cvref_t<M>::isStrided())
-    __host__ __device__ size_t device_obj<MainDiag<M>>::getLength() const noexcept {
-        return std::min(getExpr().getCol(), getExpr().getRow());
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isStrided())

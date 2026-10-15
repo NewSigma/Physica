@@ -47,9 +47,9 @@ namespace Physica {
         void assign(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] const M& getExpr() const noexcept { return mat; }
-        [[nodiscard]] size_t getRow() const noexcept { return mat.getCol(); }
-        [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
-        [[nodiscard]] size_t getOrder() const noexcept { return mat.getOrder(); }
+        [[nodiscard]] constexpr size_t getRow() const noexcept { return mat.getCol(); }
+        [[nodiscard]] constexpr size_t getCol() const noexcept { return mat.getRow(); }
+        [[nodiscard]] constexpr size_t getOrder() const noexcept { return mat.getOrder(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
     };

@@ -26,7 +26,7 @@ namespace Physica {
         using Base = LValueMatrix<Derived>;
         using This = StridedMatrix<Derived>;
     public:
-        ~StridedMatrix() = default;
+        constexpr ~StridedMatrix() = default;
         /* Operators */
         This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) noexcept = delete;
@@ -44,9 +44,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getRowStrideAtCompile() noexcept { return Dynamic; }
         [[nodiscard]] __host__ __device__ consteval static size_t getColStrideAtCompile() noexcept { return Dynamic; }
     protected:
-        StridedMatrix();
-        StridedMatrix(const This&) = default;
-        StridedMatrix(This&&) noexcept = default;
+        constexpr StridedMatrix();
+        constexpr StridedMatrix(const This&) = default;
+        constexpr StridedMatrix(This&&) noexcept = default;
     };
 }
 

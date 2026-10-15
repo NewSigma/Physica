@@ -57,7 +57,7 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
-    auto DenseTensor<T, Dims...>::getShape() const noexcept -> IndexType {
+    constexpr auto DenseTensor<T, Dims...>::getShape() const noexcept -> IndexType {
         return storage.getShape();
     }
 
@@ -72,7 +72,7 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
-    size_t DenseTensor<T, Dims...>::getSize() const noexcept {
+    constexpr size_t DenseTensor<T, Dims...>::getSize() const noexcept {
         return storage.getSize();
     }
 
