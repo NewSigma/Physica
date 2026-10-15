@@ -16,6 +16,8 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      CCACHE_COMPILERCHECK: content
 
     steps:
     - name: Checkout
@@ -46,6 +48,9 @@ jobs:
         environment-file: .github/env/minimal.yml
         channels: conda-forge
 
+    - name: Reset ccache statistics
+      run: ccache -z
+
     - name: Configure
       run: |
         cmake -S . -B build -G Ninja \
@@ -68,3 +73,11 @@ jobs:
       run: |
         cd build/test
         ctest --parallel --output-on-failure .
+
+    - name: Print ccache statistics
+      run: |
+        ccache -s
+        cleanups=$(ccache --print-stats | awk -F'\t' '$1=="cleanups_performed"{print $2}')
+        if [ "${cleanups:-0}" -gt 0 ]; then
+          echo "::warning::ccache hit its size limit and evicted entries (${cleanups} cleanup(s)); consider raising max-size."
+        fi
