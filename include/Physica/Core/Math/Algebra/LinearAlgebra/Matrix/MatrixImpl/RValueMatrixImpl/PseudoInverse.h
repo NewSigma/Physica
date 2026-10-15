@@ -42,7 +42,7 @@ namespace Physica {
         ~PseudoInverse() = default;
         /* Operators */
         This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         void assign(Matrix auto& target) const;
         /* Getters */

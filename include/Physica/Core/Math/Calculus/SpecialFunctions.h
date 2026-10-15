@@ -74,7 +74,7 @@ namespace Physica {
     public:
         HarmonicRotator(const M& axisRotation);
         HarmonicRotator(const HarmonicRotator&) = delete;
-        HarmonicRotator(HarmonicRotator&&) = delete;
+        HarmonicRotator(HarmonicRotator&&) noexcept = delete;
         ~HarmonicRotator() = default;
         /* Operators */
         HarmonicRotator& operator=(const HarmonicRotator&) = delete;

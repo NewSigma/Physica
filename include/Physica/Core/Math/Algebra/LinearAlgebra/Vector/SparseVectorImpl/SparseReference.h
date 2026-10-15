@@ -31,7 +31,7 @@ namespace Physica {
     public:
         SparseReference(VectorType& v_, size_t index_);
         SparseReference(const This&) = delete;
-        SparseReference(This&&) = delete;
+        SparseReference(This&&) noexcept = delete;
         ~SparseReference() = default;
         /* Operators */
         This& operator=(const This&) = delete;

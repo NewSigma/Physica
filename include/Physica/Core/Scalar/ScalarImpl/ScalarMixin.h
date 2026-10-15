@@ -140,7 +140,7 @@ namespace Physica {
     protected:
         constexpr ScalarMixin() = default;
         constexpr ScalarMixin(const This&) = default;
-        constexpr ScalarMixin(This&&) = default;
+        constexpr ScalarMixin(This&&) noexcept = default;
         /* Operators */
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;

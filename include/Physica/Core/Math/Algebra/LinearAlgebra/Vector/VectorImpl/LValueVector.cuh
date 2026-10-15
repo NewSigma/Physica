@@ -36,7 +36,7 @@ namespace Physica {
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This& obj) = delete;
-        This& operator=(This&& obj) = delete;
+        This& operator=(This&& obj) noexcept = delete;
 
         __host__ __device__ auto operator=(Scalar auto x) -> device_obj<Derived>&;
         __host__ __device__ void operator+=(Scalar auto x);

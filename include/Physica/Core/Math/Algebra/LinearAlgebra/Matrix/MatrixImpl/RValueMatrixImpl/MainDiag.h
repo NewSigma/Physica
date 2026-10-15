@@ -32,11 +32,11 @@ namespace Physica {
     public:
         explicit MainDiag(M&& mat) : mat(std::forward<M>(mat)) {}
         MainDiag(const This&) = default;
-        MainDiag(This&&) = default;
+        MainDiag(This&&) noexcept = default;
         ~MainDiag() = default;
         /* Operators */
         This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] T calc(size_t index) const { return mat.calc(index, index); }
         /* Getters */

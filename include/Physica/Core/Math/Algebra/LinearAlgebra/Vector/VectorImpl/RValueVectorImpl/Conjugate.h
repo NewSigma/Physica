@@ -33,7 +33,7 @@ namespace Physica {
     public:
         explicit Conjugate(V&& vec_) : vec(std::forward<V>(vec_)) {}
         Conjugate(const This&) = default;
-        Conjugate(This&&) = default;
+        Conjugate(This&&) noexcept = default;
         ~Conjugate() = default;
         /* Operators */
         This& operator=(const This&) = delete;

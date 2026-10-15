@@ -45,7 +45,7 @@ namespace Physica {
         ~LValueVector() = default;
         /* Operators */
         This& operator=(const This& v) = delete;
-        This& operator=(This&& v) = delete;
+        This& operator=(This&& v) noexcept = delete;
 
         auto operator=(Scalar auto x) noexcept -> Derived&;
         void operator+=(Scalar auto x) noexcept;

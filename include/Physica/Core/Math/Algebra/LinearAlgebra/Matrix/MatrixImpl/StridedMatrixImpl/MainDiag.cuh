@@ -33,7 +33,7 @@ namespace Physica {
     public:
         __host__ __device__ explicit device_obj(Ref mat) : mat(asStruct(mat)) {}
         device_obj(const This&) = default;
-        device_obj(This&&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         using Base::operator=;

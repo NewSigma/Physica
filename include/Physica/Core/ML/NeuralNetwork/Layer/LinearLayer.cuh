@@ -44,7 +44,7 @@ namespace Physica {
         template<Scalar U>
         device_obj(const device_obj<LinearLayer<U, WithBias>>& layer);
         device_obj(const This&) = default;
-        device_obj(This&&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(device_obj obj) noexcept { swap(obj); return *this; }

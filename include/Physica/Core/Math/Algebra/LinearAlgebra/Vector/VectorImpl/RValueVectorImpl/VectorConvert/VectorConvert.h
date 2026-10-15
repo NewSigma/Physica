@@ -37,7 +37,7 @@ namespace Physica {
         ~ImagVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).imag(); }
 
@@ -69,7 +69,7 @@ namespace Physica {
         ~NormVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t s) const { return v.calc(s).norm(); }
 
@@ -100,7 +100,7 @@ namespace Physica {
         ~ValueVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).value(); }
         [[nodiscard]] T calc_value(size_t s) const { return calc(s); }
@@ -126,7 +126,7 @@ namespace Physica {
         ~GradVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).template grad<GradOrder>(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return calc(s).value(); }
@@ -154,7 +154,7 @@ namespace Physica {
         ~GradMaskVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).template grad_mask<MaskOrder>(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s); }

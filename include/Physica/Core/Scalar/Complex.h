@@ -73,7 +73,7 @@ namespace Physica {
         /* Operators */
         using Base::operator=;
         This& operator=(const This&) = default;
-        This& operator=(This&&) = default;
+        This& operator=(This&&) noexcept = default;
         [[nodiscard]] explicit operator MKL_Complex() const noexcept;
         [[nodiscard]] explicit operator cuBLAS_Complex() const noexcept;
         [[nodiscard]] __host__ __device__ bool operator==(const This& other) const;

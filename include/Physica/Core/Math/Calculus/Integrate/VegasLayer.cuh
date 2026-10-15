@@ -39,7 +39,7 @@ namespace Physica {
     public:
         device_obj(int dim_, int numBin);
         device_obj(const This&) = default;
-        device_obj(This&&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }

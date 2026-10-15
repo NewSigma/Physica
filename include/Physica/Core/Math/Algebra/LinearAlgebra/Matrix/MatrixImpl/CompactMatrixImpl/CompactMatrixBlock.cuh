@@ -45,7 +45,7 @@ namespace Physica {
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This& m);
-        This& operator=(This&& m);
+        This& operator=(This&& m) noexcept;
         using Base::operator=;
         /* Operations */
         using Base::resize;
@@ -80,7 +80,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
-    auto device_obj<CompactMatrixBlock<M, Row, Col>>::operator=(This&& m) -> This& {
+    auto device_obj<CompactMatrixBlock<M, Row, Col>>::operator=(This&& m) noexcept -> This& {
         return *this = m;
     }
 
@@ -139,7 +139,7 @@ namespace Physica {
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This& m);
-        This& operator=(This&& m);
+        This& operator=(This&& m) noexcept;
         using Base::operator=;
         /* Operations */
         using Base::resize;
@@ -189,7 +189,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto device_obj<CompactMatrixBlock<M, Row, Col>>::operator=(This&& m) -> This& {
+    auto device_obj<CompactMatrixBlock<M, Row, Col>>::operator=(This&& m) noexcept -> This& {
         return *this = m;
     }
 

@@ -46,7 +46,7 @@ namespace Physica {
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         void assign(Matrix auto& target) const;
         void assign_cusolver(Matrix auto& target) const;

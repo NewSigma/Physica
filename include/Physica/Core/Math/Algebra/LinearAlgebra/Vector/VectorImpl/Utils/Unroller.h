@@ -35,7 +35,7 @@ namespace Physica {
         Unroller();
         explicit Unroller(std::invocable<size_t> auto generator);
         Unroller(const This&) = default;
-        Unroller(This&&) = default;
+        Unroller(This&&) noexcept = default;
         ~Unroller() = default;
         /* Operators */
         This& operator=(const This& v) = default;

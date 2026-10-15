@@ -36,7 +36,7 @@ namespace Physica {
         ~ImagVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
+        This& operator=(This&&) noexcept = delete;
         using Base::operator=;
         /* Operations */
         using Base::resize;

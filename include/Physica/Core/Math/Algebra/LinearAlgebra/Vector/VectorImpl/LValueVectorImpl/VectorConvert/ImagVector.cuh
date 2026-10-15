@@ -38,7 +38,7 @@ namespace Physica {
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
+        This& operator=(This&&) noexcept = delete;
         using Base::operator=;
         /* Operations */
         using Base::resize;

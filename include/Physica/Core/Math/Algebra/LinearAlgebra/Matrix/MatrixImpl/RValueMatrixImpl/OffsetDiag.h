@@ -31,7 +31,7 @@ namespace Physica {
     public:
         OffsetDiag(M mat, ssize_t offset);
         OffsetDiag(const This&) = default;
-        OffsetDiag(This&&) = default;
+        OffsetDiag(This&&) noexcept = default;
         ~OffsetDiag() = default;
         /* Operations */
         [[nodiscard]] decltype(auto) calc(size_t index) const noexcept;

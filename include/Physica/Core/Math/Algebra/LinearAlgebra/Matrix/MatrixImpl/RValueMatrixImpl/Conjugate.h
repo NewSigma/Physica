@@ -32,7 +32,7 @@ namespace Physica {
     public:
         Conjugate(M&& m);
         Conjugate(const This&) = default;
-        Conjugate(This&&) = default;
+        Conjugate(This&&) noexcept = default;
         ~Conjugate() = default;
         /* Operators */
         This& operator=(const This&) = delete;

@@ -39,7 +39,7 @@ namespace Physica {
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t i, instanceof_x<ThreadBlock> auto block) const { return v.getDerived().calc(i, block).real(); }

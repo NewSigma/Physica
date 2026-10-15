@@ -37,7 +37,7 @@ namespace Physica {
     public:
         MatrixPow(M m_, int power_);
         MatrixPow(const This&) = default;
-        MatrixPow(This&&) = default;
+        MatrixPow(This&&) noexcept = default;
         ~MatrixPow() = default;
         /* Operators */
         This& operator=(const This&) = delete;

@@ -38,7 +38,7 @@ namespace Physica {
         ~RealVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).real(); }
 

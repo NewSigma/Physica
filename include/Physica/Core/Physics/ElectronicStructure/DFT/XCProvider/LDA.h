@@ -43,7 +43,7 @@ namespace Physica {
         LDA() = default;
         LDA(size_t bufferSize);
         LDA(const LDA&) = default;
-        LDA(LDA&&) = default;
+        LDA(LDA&&) noexcept = default;
         ~LDA() = default;
         /* Operators */
         LDA& operator=(LDA lda) noexcept;
@@ -157,7 +157,7 @@ namespace Physica {
         LDA() = default;
         LDA(size_t bufferSize);
         LDA(const LDA&) = default;
-        LDA(LDA&&) = default;
+        LDA(LDA&&) noexcept = default;
         ~LDA() = default;
         /* Operators */
         LDA& operator=(LDA lda) noexcept;

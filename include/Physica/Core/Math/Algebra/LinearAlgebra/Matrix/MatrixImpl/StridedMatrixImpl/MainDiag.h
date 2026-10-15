@@ -31,7 +31,7 @@ namespace Physica {
     public:
         explicit MainDiag(M&& mat) : mat(std::forward<M>(mat)) {}
         MainDiag(const This&) = default;
-        MainDiag(This&&) = default;
+        MainDiag(This&&) noexcept = default;
         ~MainDiag() = default;
         /* Operators */
         using Base::operator=;

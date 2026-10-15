@@ -43,7 +43,7 @@ namespace Physica {
         ~SquaredNormVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
+        This& operator=(This&&) noexcept = delete;
         template<int Size>
         [[nodiscard]] static SIMD<T, Size> operator()(std::random_access_iterator auto it) noexcept;
         template<int Size>

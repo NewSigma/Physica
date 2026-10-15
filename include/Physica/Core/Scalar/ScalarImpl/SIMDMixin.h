@@ -60,7 +60,7 @@ namespace Physica {
     protected:
         constexpr SIMDMixin() = default;
         constexpr SIMDMixin(const This&) = default;
-        constexpr SIMDMixin(This&&) = default;
+        constexpr SIMDMixin(This&&) noexcept = default;
         /* Operators */
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
