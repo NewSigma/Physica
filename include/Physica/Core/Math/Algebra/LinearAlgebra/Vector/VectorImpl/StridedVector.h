@@ -114,6 +114,8 @@ namespace Physica {
 
 #include "StridedVectorImpl/StridedVectorImpl.h"
 #include "StridedVectorImpl/View.h"
+#include "StridedVectorImpl/VectorConvert/RealVector.h"
+#include "StridedVectorImpl/VectorConvert/ImagVector.h"
 #ifdef PHYSICA_MKL
     #include "StridedVectorImpl/StridedVector_MKL.h"
 #endif

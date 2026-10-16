@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/CompactVector.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/StridedVector.cuh"
 
 namespace Physica {
-    template<class V> requires(std::remove_cvref_t<V>::isCompact())
-    class device_obj<ImagVector<V>> : public device_obj<StridedVector<ImagVector<V>>> {
-        using host_obj = ImagVector<V>;
+    template<class V> requires(std::remove_cvref_t<V>::isStrided())
+    class device_obj<RealVector<V>> : public device_obj<StridedVector<RealVector<V>>> {
+        using host_obj = RealVector<V>;
         using This = device_obj<host_obj>;
         using Base = device_obj<StridedVector<host_obj>>;
         using Ref = add_device_obj_t<V>;
@@ -46,10 +46,11 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ auto data_handle(this auto&& self) noexcept;
         [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return v.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getStride() const noexcept { return 2 * v.getDerived().getStride(); }
     };
 
-    template<class V> requires(std::remove_cvref_t<V>::isCompact())
-    __host__ __device__ auto device_obj<ImagVector<V>>::data_handle(this auto&& self) noexcept {
-        return self.v.getDerived()[0].imag_ptr();
+    template<class V> requires(std::remove_cvref_t<V>::isStrided())
+    __host__ __device__ auto device_obj<RealVector<V>>::data_handle(this auto&& self) noexcept {
+        return self.v.getDerived()[0].real_ptr();
     }
 }

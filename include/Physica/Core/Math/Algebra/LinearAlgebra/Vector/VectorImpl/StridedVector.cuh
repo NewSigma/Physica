@@ -79,3 +79,5 @@ namespace Physica {
 }
 
 #include "StridedVectorImpl/StridedVectorImpl.cuh"
+#include "StridedVectorImpl/VectorConvert/RealVector.cuh"
+#include "StridedVectorImpl/VectorConvert/ImagVector.cuh"

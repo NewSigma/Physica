@@ -82,5 +82,3 @@ namespace Physica {
 
 #include "CompactVectorImpl/CompactVectorImpl.h"
 #include "CompactVectorImpl/View.h"
-#include "CompactVectorImpl/VectorConvert/RealVector.h"
-#include "CompactVectorImpl/VectorConvert/ImagVector.h"

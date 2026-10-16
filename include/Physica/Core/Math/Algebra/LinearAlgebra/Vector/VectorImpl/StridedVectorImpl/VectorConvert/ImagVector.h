@@ -18,22 +18,22 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/CompactVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/StridedVector.h"
 
 namespace Physica {
-    template<class V> requires(std::remove_cvref_t<V>::isCompact())
-    class RealVector<V> : public StridedVector<RealVector<V>> {
-        using This = RealVector<V>;
+    template<class V> requires(std::remove_cvref_t<V>::isStrided())
+    class ImagVector<V> : public StridedVector<ImagVector<V>> {
+        using This = ImagVector<V>;
         using Base = StridedVector<This>;
     protected:
         using typename Base::T;
     private:
         decay_rvalue_t<V> v;
     public:
-        explicit RealVector(V&& v_) : v(std::forward<V>(v_)) {}
-        RealVector(const This&) = default;
-        RealVector(This&&) noexcept = default;
-        ~RealVector() = default;
+        explicit ImagVector(V&& v_) : v(std::forward<V>(v_)) {}
+        ImagVector(const This&) = default;
+        ImagVector(This&&) noexcept = default;
+        ~ImagVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -44,13 +44,14 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto data_handle(this auto&& self) noexcept;
         [[nodiscard]] constexpr size_t getLength() const noexcept { return v.getLength(); }
+        [[nodiscard]] constexpr size_t getStride() const noexcept { return 2 * v.getStride(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return std::remove_cvref_t<V>::getSizeAtCompile(); }
-        [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept { return 2; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept { return 2 * std::remove_cvref_t<V>::getStrideAtCompile(); }
     };
 
-    template<class V> requires(std::remove_cvref_t<V>::isCompact())
-    auto RealVector<V>::data_handle(this auto&& self) noexcept {
-        return self.v[0].real_ptr();
+    template<class V> requires(std::remove_cvref_t<V>::isStrided())
+    auto ImagVector<V>::data_handle(this auto&& self) noexcept {
+        return self.v[0].imag_ptr();
     }
 }
