@@ -46,21 +46,16 @@ else()
             set(CMAKE_INSTALL_RPATH ${CMAKE_BUILD_RPATH} ${IntelSYCL_LIBRARY_PATH})
         endif()
 
+        add_custom_target(EmitLLVM
+                          COMMAND python ${CMAKE_SOURCE_DIR}/cmake/EmitLLVM.py
+                          USES_TERMINAL)
         if(${PHYSICA_EmitLLVM})
             if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Release")
                 message(FATAL_ERROR "Please enable Release mode for optimizations")
             endif()
-            if(${PHYSICA_TRANSFORMS})
-                message(FATAL_ERROR "EmitLLVM is incompatible with Transforms")
-            endif()
             add_compile_options(-Xclang=-disable-llvm-passes -S -emit-llvm)
             add_compile_options(-Wno-unused-command-line-argument) # Silent unused '-c'
             add_link_options(--version) # Hack the linker to skip linking
-
-            add_custom_target(EmitLLVM
-                              COMMAND python ${CMAKE_SOURCE_DIR}/cmake/EmitLLVM.py
-                              WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-                              USES_TERMINAL)
             add_definitions(-DPHYSICA_EmitLLVM)
         endif()
     else()

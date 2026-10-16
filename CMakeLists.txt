@@ -45,7 +45,7 @@ if(${RUN_CHECKS})
 endif()
 add_subdirectory(cmake/Modules)
 ##############################################Project################################################
-if (${PHYSICA_CCACHE} AND NOT ${PHYSICA_EmitLLVM})
+if(${PHYSICA_CCACHE})
     find_program(CCACHE_PROGRAM ccache)
     if(CCACHE_PROGRAM)
         message(STATUS "Found ccache")

@@ -25,6 +25,7 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
     The only knob is the clang path; `clang++` is taken from the same directory.
 """
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -33,34 +34,88 @@ from pathlib import Path
 
 _SOURCE_DIR = Path(__file__).resolve().parent.parent
 _BUILD_DIR = _SOURCE_DIR / "build"
+_IR_DIR = _BUILD_DIR / "emit-llvm"
+
+_SEED_ALLOW = frozenset({
+    "CMAKE_BUILD_TYPE",
+    "CMAKE_INSTALL_PREFIX",
+    "CMAKE_PREFIX_PATH",
+    "CMAKE_CUDA_ARCHITECTURES",
+    "CMAKE_LINKER_TYPE",
+})
+_COMPILERS = ("CMAKE_C_COMPILER", "CMAKE_CXX_COMPILER", "CMAKE_CUDA_COMPILER")
+_CACHE_ENTRY = re.compile(r"^(?P<name>[^/#:\n][^:\n]*):(?P<type>[^=\n]*)=(?P<value>.*)$")
 
 
-def compile(build_dir: Path, source_dir: Path, clang: Path | None, device_only: bool):
+def read_cache(directory: Path) -> tuple[dict[str, str], dict[str, str]]:
+    assert directory in (_BUILD_DIR, _IR_DIR), directory
+    cache = directory / "CMakeCache.txt"
+    if not cache.is_file():
+        raise FileNotFoundError(
+            "No CMake cache at {}; configure that build tree first.".format(cache))
+
+    options = {}
+    compilers = {}
+    for line in cache.read_text().splitlines():
+        match = _CACHE_ENTRY.match(line)
+        if match is None:
+            continue
+        name, type, value = match.group("name"), match.group("type"), match.group("value")
+        if type in ("INTERNAL", "STATIC"):
+            continue
+        if name in _COMPILERS:
+            compilers[name] = value
+        elif name in _SEED_ALLOW or (not name.startswith("CMAKE_") and type != "UNINITIALIZED"):
+            options[name] = value
+    return options, compilers
+
+
+def init_ir_dir(compilers: dict):
+    if (_IR_DIR / "CMakeCache.txt").is_file():
+        _, cached = read_cache(_IR_DIR)
+
+        def matches(name: str, path: Path) -> bool:
+            return name in cached and os.path.realpath(cached[name]) == os.path.realpath(path)
+
+        if not all(matches(name, path) for name, path in compilers.items()):
+            shutil.rmtree(_IR_DIR)
+
+    _IR_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def cuda_root(options: dict) -> Path | None:
+    for name in ("CUDA_CUDART", "CUDA_cudart_LIBRARY", "CUDA_cudart_static_LIBRARY"):
+        library = options.get(name)
+        if library is None or library.endswith("-NOTFOUND"):
+            continue
+        parent = Path(library).parent
+        if parent.name in ("lib64", "lib"):
+            return parent.parent
+    return None
+
+
+def compile(options: dict, compilers: dict, device_only: bool):
     cuda_flag = "--offload-device-only" if device_only else "--offload-host-only"
-
-    configure = [
-        "cmake",
-        "-G", "Ninja",
+    configure = ["cmake", "-G", "Ninja"]
+    if root := cuda_root(options):
+        configure.append(f"-DCUDAToolkit_ROOT={root}")
+    configure += [f"-D{name}={value}" for name, value in options.items()]
+    configure += [f"-D{name}={value}" for name, value in compilers.items()]
+    configure += [
         "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_BENCHMARKS=ON",
         "-DPHYSICA_EmitLLVM=ON",
         "-DPHYSICA_TRANSFORMS=OFF",
         f"-DCMAKE_CUDA_FLAGS={cuda_flag}",
     ]
-    if clang is not None:
-        clangxx = clang.parent / "clang++"
-        configure += [
-            f"-DCMAKE_C_COMPILER={clang}",
-            f"-DCMAKE_CXX_COMPILER={clangxx}",
-            f"-DCMAKE_CUDA_COMPILER={clangxx}",
-        ]
-    configure.append(str(source_dir.resolve()))
-    subprocess.run(configure, cwd=build_dir, stdout=subprocess.DEVNULL, check=True)
-    subprocess.run(["cmake", "--build", ".", "--target=Benchmark"],
-                   cwd=build_dir, check=True)
+    configure.append(str(_SOURCE_DIR.resolve()))
+    subprocess.run(configure, cwd=_IR_DIR, stdout=subprocess.DEVNULL, check=True)
+
+    subprocess.run(["cmake", "--build", ".", "--target=Benchmark"], cwd=_IR_DIR, check=True)
 
 
-def collect(llvm_dir: Path, build_dir: Path, device_only: bool, arch: str):
-    benchmark_dir = build_dir / "benchmark"
+def collect(llvm_dir: Path, device_only: bool, arch: str):
+    benchmark_dir = _IR_DIR / "benchmark"
     for file in benchmark_dir.rglob("*.o"):
         if "Dispatch" in str(file) or "MKL" in str(file):
             continue
@@ -101,6 +156,7 @@ def main():
                         help="clang path; clang++ is taken from the same directory")
     args = parser.parse_args()
 
+    options, compilers = read_cache(_BUILD_DIR)  # Fail before creating anything if not configured.
     if args.clang is not None:
         clang = args.clang.resolve()
         clangxx = clang.parent / "clang++"
@@ -108,11 +164,17 @@ def main():
             raise FileNotFoundError("clang not found: {}".format(clang))
         if not clangxx.is_file():
             raise FileNotFoundError("clang++ not found: {}".format(clangxx))
+        compilers = {
+            "CMAKE_C_COMPILER": clang,
+            "CMAKE_CXX_COMPILER": clangxx,
+            "CMAKE_CUDA_COMPILER": clangxx,
+        }
     else:
-        clang = None
+        compilers = {name: Path(path) for name, path in compilers.items()}
 
+    init_ir_dir(compilers)
     arch = get_arch("native")
-    llvm_dir = _BUILD_DIR / "llvm"
+    llvm_dir = _IR_DIR / "llvm"
     llvm_dir.mkdir(parents=True, exist_ok=True)
 
     def clean(llvm_dir: Path):
@@ -123,12 +185,12 @@ def main():
 
     print("Collecting LLVM IR... ", end=" ")
     if arch == "":
-        compile(_BUILD_DIR, _SOURCE_DIR, clang, False)
-        collect(llvm_dir, _BUILD_DIR, False, "")
+        compile(options, compilers, False)
+        collect(llvm_dir, False, "")
     else:
         for device_only in (False, True):
-            compile(_BUILD_DIR, _SOURCE_DIR, clang, device_only)
-            collect(llvm_dir, _BUILD_DIR, device_only, arch)
+            compile(options, compilers, device_only)
+            collect(llvm_dir, device_only, arch)
     print("Complete")
 
 
