@@ -28,6 +28,8 @@ namespace Physica {
         using host_obj = CompactMatrix<Derived>;
         using This = device_obj<host_obj>;
         using Base = device_obj<StridedMatrix<Derived>>;
+        template<class Self, size_t Row, size_t Col>
+        using Block = device_obj<typename CompactMatrix<Derived>::template Block<Self, Row, Col>>;
     public:
         using typename Base::ScalarType;
     protected:

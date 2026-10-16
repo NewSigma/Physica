@@ -61,7 +61,7 @@ namespace Physica {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         constexpr size_t ColAtCompile = Derived::getColAtCompile();
-        return device_obj<CompactMatrixBlock<M, 1, ColAtCompile>>(std::forward<Self>(self), r, 1, 0, self.getCol());
+        return Block<M, 1, ColAtCompile>(std::forward<Self>(self), r, 1, 0, self.getCol());
     }
 
     template<class Derived>
@@ -69,7 +69,7 @@ namespace Physica {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         constexpr size_t RowAtCompile = Derived::getRowAtCompile();
-        return device_obj<CompactMatrixBlock<M, RowAtCompile, 1>>(std::forward<Self>(self), 0, self.getRow(), c, 1);
+        return Block<M, RowAtCompile, 1>(std::forward<Self>(self), 0, self.getRow(), c, 1);
     }
 
     template<class Derived>
@@ -77,7 +77,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<CompactMatrix<Derived>>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<CompactMatrixBlock<M, Row, Derived::getColAtCompile()>>(std::forward<Self>(self), fromRow, rowCount, 0, self.getCol());
+        return Block<M, Row, Derived::getColAtCompile()>(std::forward<Self>(self), fromRow, rowCount, 0, self.getCol());
     }
 
     template<class Derived>
@@ -85,7 +85,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<CompactMatrix<Derived>>::topRows(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<CompactMatrixBlock<M, Row, Derived::getColAtCompile()>>(std::forward<Self>(self), 0, to, 0, self.getCol());
+        return Block<M, Row, Derived::getColAtCompile()>(std::forward<Self>(self), 0, to, 0, self.getCol());
     }
 
     template<class Derived>
@@ -93,7 +93,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<CompactMatrix<Derived>>::bottomRows(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<CompactMatrixBlock<M, Row, Derived::getColAtCompile()>>(std::forward<Self>(self), from, self.getRow() - from, 0, self.getCol());
+        return Block<M, Row, Derived::getColAtCompile()>(std::forward<Self>(self), from, self.getRow() - from, 0, self.getCol());
     }
 
     template<class Derived>
@@ -101,7 +101,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<CompactMatrix<Derived>>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<CompactMatrixBlock<M, Derived::getRowAtCompile(), Col>>(std::forward<Self>(self), 0, self.getRow(), fromCol, colCount);
+        return Block<M, Derived::getRowAtCompile(), Col>(std::forward<Self>(self), 0, self.getRow(), fromCol, colCount);
     }
 
     template<class Derived>
@@ -109,7 +109,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<CompactMatrix<Derived>>::leftCols(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<CompactMatrixBlock<M, Derived::getRowAtCompile(), Col>>(std::forward<Self>(self), 0, self.getRow(), 0, to);
+        return Block<M, Derived::getRowAtCompile(), Col>(std::forward<Self>(self), 0, self.getRow(), 0, to);
     }
 
     template<class Derived>
@@ -117,7 +117,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<CompactMatrix<Derived>>::rightCols(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<CompactMatrixBlock<M, Derived::getRowAtCompile(), Col>>(std::forward<Self>(self), 0, self.getRow(), from, self.getCol() - from);
+        return Block<M, Derived::getRowAtCompile(), Col>(std::forward<Self>(self), 0, self.getRow(), from, self.getCol() - from);
     }
 
     template<class Derived>
@@ -125,7 +125,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<CompactMatrix<Derived>>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<CompactMatrixBlock<M, Row, Col>>(std::forward<Self>(self), 0, toRow, 0, toCol);
+        return Block<M, Row, Col>(std::forward<Self>(self), 0, toRow, 0, toCol);
     }
 
     template<class Derived>
@@ -133,7 +133,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<CompactMatrix<Derived>>::topLeftCorner(this auto&& self, size_t to) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<CompactMatrixBlock<M, Row, Col>>(std::forward<Self>(self), 0, to, 0, to);
+        return Block<M, Row, Col>(std::forward<Self>(self), 0, to, 0, to);
     }
 
     template<class Derived>
@@ -141,7 +141,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<CompactMatrix<Derived>>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<CompactMatrixBlock<M, Row, Col>>(std::forward<Self>(self), 0, toRow, fromCol, self.getRow() - fromCol);
+        return Block<M, Row, Col>(std::forward<Self>(self), 0, toRow, fromCol, self.getRow() - fromCol);
     }
 
     template<class Derived>
@@ -149,7 +149,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<CompactMatrix<Derived>>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<CompactMatrixBlock<M, Row, Col>>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, 0, toCol);
+        return Block<M, Row, Col>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, 0, toCol);
     }
 
     template<class Derived>
@@ -157,7 +157,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<CompactMatrix<Derived>>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<CompactMatrixBlock<M, Row, Col>>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
+        return Block<M, Row, Col>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
     }
 
     template<class Derived>
@@ -165,7 +165,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<CompactMatrix<Derived>>::bottomRightCorner(this auto&& self, size_t from) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<CompactMatrixBlock<M, Row, Col>>(std::forward<Self>(self), from, self.getRow() - from, from, self.getCol() - from);
+        return Block<M, Row, Col>(std::forward<Self>(self), from, self.getRow() - from, from, self.getCol() - from);
     }
 
     template<class Derived>
@@ -173,7 +173,7 @@ namespace Physica {
     __host__ __device__ auto device_obj<CompactMatrix<Derived>>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
-        return device_obj<CompactMatrixBlock<M, Row, Col>>(std::forward<Self>(self), fromRow, rowCount, fromCol, colCount);
+        return Block<M, Row, Col>(std::forward<Self>(self), fromRow, rowCount, fromCol, colCount);
     }
 
     template<class Derived>

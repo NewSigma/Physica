@@ -22,6 +22,20 @@
 #include "CompactMatrixImpl/CompactMatrixBlock.h"
 
 namespace Physica {
+    namespace Internal {
+        template<class M, size_t Row, size_t Col>
+        __host__ __device__ consteval bool isCompactMatrixBlock() noexcept {
+            using M1 = std::remove_cvref_t<M>;
+            if constexpr (Row != 1 && Col != 1)
+                return false;
+            else if constexpr (Row == 1 && Col == 1)
+                return true;
+            else if constexpr (Row == 1)
+                return MatrixMajor::isRowMatrix<M1>() || M1::getRowAtCompile() == 1;
+            else
+                return MatrixMajor::isColMatrix<M1>() || M1::getColAtCompile() == 1;
+        }
+    }
     /**
      * \class CompactMatrix has its elements on major direction distributed Compactly.
      */
@@ -29,6 +43,10 @@ namespace Physica {
     class CompactMatrix : public StridedMatrix<Derived> {
         using Base = StridedMatrix<Derived>;
         using This = CompactMatrix<Derived>;
+        template<class Self, size_t Row, size_t Col>
+        using Block = std::conditional_t<Internal::isCompactMatrixBlock<Self, Row, Col>(),
+                                         CompactMatrixBlock<Self, Row, Col>,
+                                         StridedMatrixBlock<Self, Row, Col>>;
     public:
         using typename Base::ScalarType;
         using Base::isComplex;
@@ -103,6 +121,8 @@ namespace Physica {
         CompactMatrix() = default;
         CompactMatrix(const This&) = default;
         CompactMatrix(This&&) noexcept = default;
+        /* Friends */
+        friend class device_obj<CompactMatrix<Derived>>;
     };
 }
 

@@ -579,6 +579,12 @@ namespace Physica {
         static_assert(getSizeAtCompile() != Dynamic || DeviceObj<decltype(source)>, "[Error]: Host object cannot be assigned to dynamic device object");
         Derived::static_assert_assign(source);
     }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ void device_obj<RValueMatrix<Derived, ScalarT>>::checkBlock(
+            const Matrix auto& m, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+        RValueMatrix<Derived, ScalarT>::checkBlock(m, fromRow, rowCount, fromCol, colCount);
+    }
 }
 
 #include "Trig/MatrixTrig.cuh"

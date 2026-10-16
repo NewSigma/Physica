@@ -69,4 +69,122 @@ namespace Physica {
         assert(col < self.getCol());
         return self.data_handle() + row * self.getRowStride() + col * self.getColStride();
     }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::row(this auto&& self, size_t r) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<StridedMatrixBlock<M, 1, Derived::getColAtCompile()>>(std::forward<Self>(self), r, 1, 0, self.getCol());
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::col(this auto&& self, size_t c) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<StridedMatrixBlock<M, Derived::getRowAtCompile(), 1>>(std::forward<Self>(self), 0, self.getRow(), c, 1);
+    }
+
+    template<class Derived>
+    template<size_t Row>
+    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<StridedMatrixBlock<M, Row, Derived::getColAtCompile()>>(std::forward<Self>(self), fromRow, rowCount, 0, self.getCol());
+    }
+
+    template<class Derived>
+    template<size_t Row>
+    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::topRows(this auto&& self, size_t to) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<StridedMatrixBlock<M, Row, Derived::getColAtCompile()>>(std::forward<Self>(self), 0, to, 0, self.getCol());
+    }
+
+    template<class Derived>
+    template<size_t Row>
+    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::bottomRows(this auto&& self, size_t from) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<StridedMatrixBlock<M, Row, Derived::getColAtCompile()>>(std::forward<Self>(self), from, self.getRow() - from, 0, self.getCol());
+    }
+
+    template<class Derived>
+    template<size_t Col>
+    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<StridedMatrixBlock<M, Derived::getRowAtCompile(), Col>>(std::forward<Self>(self), 0, self.getRow(), fromCol, colCount);
+    }
+
+    template<class Derived>
+    template<size_t Col>
+    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::leftCols(this auto&& self, size_t to) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<StridedMatrixBlock<M, Derived::getRowAtCompile(), Col>>(std::forward<Self>(self), 0, self.getRow(), 0, to);
+    }
+
+    template<class Derived>
+    template<size_t Col>
+    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::rightCols(this auto&& self, size_t from) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<StridedMatrixBlock<M, Derived::getRowAtCompile(), Col>>(std::forward<Self>(self), 0, self.getRow(), from, self.getCol() - from);
+    }
+
+    template<class Derived>
+    template<size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<StridedMatrixBlock<M, Row, Col>>(std::forward<Self>(self), 0, toRow, 0, toCol);
+    }
+
+    template<class Derived>
+    template<size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::topLeftCorner(this auto&& self, size_t to) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<StridedMatrixBlock<M, Row, Col>>(std::forward<Self>(self), 0, to, 0, to);
+    }
+
+    template<class Derived>
+    template<size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<StridedMatrixBlock<M, Row, Col>>(std::forward<Self>(self), 0, toRow, fromCol, self.getRow() - fromCol);
+    }
+
+    template<class Derived>
+    template<size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<StridedMatrixBlock<M, Row, Col>>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, 0, toCol);
+    }
+
+    template<class Derived>
+    template<size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<StridedMatrixBlock<M, Row, Col>>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
+    }
+
+    template<class Derived>
+    template<size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::bottomRightCorner(this auto&& self, size_t from) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<StridedMatrixBlock<M, Row, Col>>(std::forward<Self>(self), from, self.getRow() - from, from, self.getCol() - from);
+    }
+
+    template<class Derived>
+    template<size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<StridedMatrix<Derived>>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<StridedMatrixBlock<M, Row, Col>>(std::forward<Self>(self), fromRow, rowCount, fromCol, colCount);
+    }
 }

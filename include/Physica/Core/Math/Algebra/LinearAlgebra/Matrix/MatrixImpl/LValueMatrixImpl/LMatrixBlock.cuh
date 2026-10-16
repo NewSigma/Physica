@@ -150,8 +150,7 @@ namespace Physica {
             , rowCount(rowCount_)
             , fromCol(fromCol_)
             , colCount(colCount_) {
-        assert((fromRow + rowCount) <= mat.getRow());
-        assert((fromCol + colCount) <= mat.getCol());
+        Base::checkBlock(mat_, fromRow_, rowCount_, fromCol_, colCount_);
     }
 
     template<Matrix M>
@@ -168,79 +167,79 @@ namespace Physica {
 
     template<Matrix M>
     __host__ __device__ auto device_obj<LMatrixBlock<M, Dynamic, Dynamic>>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
-        check(self, fromRow, rowCount, 0, self.getCol());
+        Base::checkBlock(self, fromRow, rowCount, 0, self.getCol());
         return device_obj<LMatrixBlock<M, Dynamic, Dynamic>>(self.mat, self.fromRow + fromRow, rowCount, self.fromCol, self.getCol());
     }
 
     template<Matrix M>
     __host__ __device__ auto device_obj<LMatrixBlock<M, Dynamic, Dynamic>>::topRows(this auto&& self, size_t to) noexcept {
-        check(self, 0, to, 0, self.getCol());
+        Base::checkBlock(self, 0, to, 0, self.getCol());
         return device_obj<LMatrixBlock<M, Dynamic, Dynamic>>(self.mat, self.fromRow, to, self.fromCol, self.getCol());
     }
 
     template<Matrix M>
     __host__ __device__ auto device_obj<LMatrixBlock<M, Dynamic, Dynamic>>::bottomRows(this auto&& self, size_t from) noexcept {
-        check(self, from, self.getRow() - from, 0, self.getCol());
+        Base::checkBlock(self, from, self.getRow() - from, 0, self.getCol());
         return device_obj<LMatrixBlock<M, Dynamic, Dynamic>>(self.mat, self.fromRow + from, self.getRow() - from, self.fromCol, self.getCol());
     }
 
     template<Matrix M>
     __host__ __device__ auto device_obj<LMatrixBlock<M, Dynamic, Dynamic>>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
-        check(self, 0, self.getRow(), fromCol, colCount);
+        Base::checkBlock(self, 0, self.getRow(), fromCol, colCount);
         return device_obj<LMatrixBlock<M, Dynamic, Dynamic>>(self.mat, self.fromRow, self.getRow(), self.fromCol + fromCol, colCount);
     }
 
     template<Matrix M>
     __host__ __device__ auto device_obj<LMatrixBlock<M, Dynamic, Dynamic>>::leftCols(this auto&& self, size_t to) noexcept {
-        check(self, 0, self.getRow(), 0, to);
+        Base::checkBlock(self, 0, self.getRow(), 0, to);
         return device_obj<LMatrixBlock<M, Dynamic, Dynamic>>(self.mat, self.fromRow, self.getRow(), self.fromCol, to);
     }
 
     template<Matrix M>
     __host__ __device__ auto device_obj<LMatrixBlock<M, Dynamic, Dynamic>>::rightCols(this auto&& self, size_t from) noexcept {
-        check(self, 0, self.getRow(), from, self.getCol() - from);
+        Base::checkBlock(self, 0, self.getRow(), from, self.getCol() - from);
         return device_obj<LMatrixBlock<M, Dynamic, Dynamic>>(self.mat, self.fromRow, self.getRow(), self.fromCol + from, self.getCol() - from);
     }
 
     template<Matrix M>
     __host__ __device__ auto device_obj<LMatrixBlock<M, Dynamic, Dynamic>>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
-        check(self, 0, toRow, 0, toCol);
+        Base::checkBlock(self, 0, toRow, 0, toCol);
         return device_obj<LMatrixBlock<M, Dynamic, Dynamic>>(self.mat, self.fromRow, toRow, self.fromCol, toCol);
     }
 
     template<Matrix M>
     __host__ __device__ auto device_obj<LMatrixBlock<M, Dynamic, Dynamic>>::topLeftCorner(this auto&& self, size_t to) noexcept {
-        check(self, 0, to, 0, to);
+        Base::checkBlock(self, 0, to, 0, to);
         return device_obj<LMatrixBlock<M, Dynamic, Dynamic>>(self.mat, self.fromRow, to, self.fromCol, to);
     }
 
     template<Matrix M>
     __host__ __device__ auto device_obj<LMatrixBlock<M, Dynamic, Dynamic>>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
-        check(self, 0, toRow, fromCol, self.getCol() - fromCol);
+        Base::checkBlock(self, 0, toRow, fromCol, self.getCol() - fromCol);
         return device_obj<LMatrixBlock<M, Dynamic, Dynamic>>(self.mat, self.fromRow, toRow, self.fromCol + fromCol, self.getCol() - fromCol);
     }
 
     template<Matrix M>
     __host__ __device__ auto device_obj<LMatrixBlock<M, Dynamic, Dynamic>>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
-        check(self, fromRow, self.getRow() - fromRow, 0, toCol);
+        Base::checkBlock(self, fromRow, self.getRow() - fromRow, 0, toCol);
         return device_obj<LMatrixBlock<M, Dynamic, Dynamic>>(self.mat, self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol, toCol);
     }
 
     template<Matrix M>
     __host__ __device__ auto device_obj<LMatrixBlock<M, Dynamic, Dynamic>>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
-        check(self, fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
+        Base::checkBlock(self, fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
         return device_obj<LMatrixBlock<M, Dynamic, Dynamic>>(self.mat, self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol + fromCol, self.getCol() - fromCol);
     }
 
     template<Matrix M>
     __host__ __device__ auto device_obj<LMatrixBlock<M, Dynamic, Dynamic>>::bottomRightCorner(this auto&& self, size_t from) noexcept {
-        check(self, from, self.getRow() - from, from, self.getCol() - from);
+        Base::checkBlock(self, from, self.getRow() - from, from, self.getCol() - from);
         return device_obj<LMatrixBlock<M, Dynamic, Dynamic>>(self.mat, self.fromRow + from, self.getRow() - from, self.fromCol + from, self.getCol() - from);
     }
 
     template<Matrix M>
     __host__ __device__ auto device_obj<LMatrixBlock<M, Dynamic, Dynamic>>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
-        check(self, fromRow, rowCount, fromCol, colCount);
+        Base::checkBlock(self, fromRow, rowCount, fromCol, colCount);
         return device_obj<LMatrixBlock<M, Dynamic, Dynamic>>(self.mat, self.fromRow + fromRow, rowCount, self.fromCol + fromCol, colCount);
     }
 

@@ -33,6 +33,35 @@ namespace Physica {
         This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) noexcept = delete;
         using Base::operator=;
+        /* Operations */
+        [[nodiscard]] __host__ __device__ auto row(this auto&&, size_t r) noexcept;
+        [[nodiscard]] __host__ __device__ auto col(this auto&&, size_t c) noexcept;
+        template<size_t Row = Dynamic>
+        [[nodiscard]] __host__ __device__ auto rows(this auto&&, size_t fromRow, size_t rowCount) noexcept;
+        template<size_t Row = Dynamic>
+        [[nodiscard]] __host__ __device__ auto topRows(this auto&&, size_t to) noexcept;
+        template<size_t Row = Dynamic>
+        [[nodiscard]] __host__ __device__ auto bottomRows(this auto&&, size_t from) noexcept;
+        template<size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ auto cols(this auto&&, size_t fromCol, size_t colCount) noexcept;
+        template<size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ auto leftCols(this auto&&, size_t to) noexcept;
+        template<size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ auto rightCols(this auto&&, size_t from) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ auto topLeftCorner(this auto&&, size_t toRow, size_t toCol) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ auto topLeftCorner(this auto&&, size_t to) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ auto topRightCorner(this auto&&, size_t toRow, size_t fromCol) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ auto bottomLeftCorner(this auto&&, size_t fromRow, size_t toCol) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ auto bottomRightCorner(this auto&&, size_t fromRow, size_t fromCol) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ auto bottomRightCorner(this auto&&, size_t from) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr size_t getRowStride() const noexcept;
         [[nodiscard]] __host__ __device__ constexpr size_t getColStride() const noexcept;
@@ -52,5 +81,6 @@ namespace Physica {
 }
 
 #include "StridedMatrixImpl/StridedMatrixImpl.cuh"
+#include "StridedMatrixImpl/StridedMatrixBlock.cuh"
 #include "StridedMatrixImpl/MainDiag.cuh"
 #include "StridedMatrixImpl/OffsetDiag.cuh"

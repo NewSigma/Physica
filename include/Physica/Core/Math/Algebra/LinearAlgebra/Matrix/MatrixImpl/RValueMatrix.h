@@ -210,6 +210,8 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] consteval static int calcBlockingSize(int CacheSize) noexcept;
         __host__ __device__ static void checkBlock(const Matrix auto& m, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
+        /* Friends */
+        friend class device_obj<RValueMatrix<Derived, ScalarT>>;
     };
 
     template<Matrix M1, Matrix M2>

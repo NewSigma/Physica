@@ -31,6 +31,35 @@ namespace Physica {
         This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) noexcept = delete;
         using Base::operator=;
+        /* Operations */
+        [[nodiscard]] auto row(this auto&&, size_t r) noexcept;
+        [[nodiscard]] auto col(this auto&&, size_t c) noexcept;
+        template<size_t Row = Dynamic>
+        [[nodiscard]] auto rows(this auto&&, size_t fromRow, size_t rowCount) noexcept;
+        template<size_t Row = Dynamic>
+        [[nodiscard]] auto topRows(this auto&&, size_t to) noexcept;
+        template<size_t Row = Dynamic>
+        [[nodiscard]] auto bottomRows(this auto&&, size_t from) noexcept;
+        template<size_t Col = Dynamic>
+        [[nodiscard]] auto cols(this auto&&, size_t fromCol, size_t colCount) noexcept;
+        template<size_t Col = Dynamic>
+        [[nodiscard]] auto leftCols(this auto&&, size_t to) noexcept;
+        template<size_t Col = Dynamic>
+        [[nodiscard]] auto rightCols(this auto&&, size_t from) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] auto topLeftCorner(this auto&&, size_t toRow, size_t toCol) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] auto topLeftCorner(this auto&&, size_t to) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] auto topRightCorner(this auto&&, size_t toRow, size_t fromCol) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] auto bottomLeftCorner(this auto&&, size_t fromRow, size_t toCol) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] auto bottomRightCorner(this auto&&, size_t fromRow, size_t fromCol) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] auto bottomRightCorner(this auto&&, size_t from) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         /* Getters */
         [[nodiscard]] constexpr size_t getRowStride() const noexcept;
         [[nodiscard]] constexpr size_t getColStride() const noexcept;
@@ -50,6 +79,7 @@ namespace Physica {
     };
 }
 
+#include "StridedMatrixImpl/StridedMatrixBlock.h"
 #include "StridedMatrixImpl/StridedMatrixImpl.h"
 #include "StridedMatrixImpl/MainDiag.h"
 #include "StridedMatrixImpl/OffsetDiag.h"
