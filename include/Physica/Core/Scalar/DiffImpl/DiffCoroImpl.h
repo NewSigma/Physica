@@ -54,7 +54,15 @@ namespace Physica {
         swap(obj);
         return *this;
     }
-
+    /**
+     * The combination of __builtin_operator_new/delete with -fassume-sane-operator-new assumes that the return value of operator new is noalias,
+     * which is important because the pointer does not alias with the handles of other coroutines.
+     *
+     * This pattern arises in nested coroutines, and the key point is that the combination can facilitate the HALO optimization.
+     *
+     * Note: Inlining causes the builtin semantics to be lost. Since we consider HALO to be more worthwhile than a function call,
+     * we add noinline to the global operator new/delete replacements.
+     */
     template<class T>
     void* DiffCoro<T>::Promise::operator new(size_t size) noexcept {
         return __builtin_operator_new(size, std::nothrow);
