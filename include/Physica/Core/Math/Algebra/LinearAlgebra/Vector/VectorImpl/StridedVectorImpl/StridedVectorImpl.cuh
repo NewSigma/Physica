@@ -31,6 +31,30 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<size_t Length>
+    __host__ __device__ auto device_obj<StridedVector<Derived>>::head(this auto&& self, size_t to) noexcept {
+        using Self = decltype(self);
+        using V = remove_device_obj<Self>::type;
+        return device_obj<StridedVectorBlock<V, Length>>(std::forward<Self>(self), 0, to);
+    }
+
+    template<class Derived>
+    template<size_t Length>
+    __host__ __device__ auto device_obj<StridedVector<Derived>>::tail(this auto&& self, size_t from) noexcept {
+        using Self = decltype(self);
+        using V = remove_device_obj<Self>::type;
+        return device_obj<StridedVectorBlock<V, Length>>(std::forward<Self>(self), from);
+    }
+
+    template<class Derived>
+    template<size_t Length>
+    __host__ __device__ auto device_obj<StridedVector<Derived>>::segment(this auto&& self, size_t from, size_t to) noexcept {
+        using Self = decltype(self);
+        using V = remove_device_obj<Self>::type;
+        return device_obj<StridedVectorBlock<V, Length>>(std::forward<Self>(self), from, to);
+    }
+
+    template<class Derived>
     void device_obj<StridedVector<Derived>>::zeros() {
         if constexpr (Base::isCompact()) {
             if constexpr (Diffable<T>) {

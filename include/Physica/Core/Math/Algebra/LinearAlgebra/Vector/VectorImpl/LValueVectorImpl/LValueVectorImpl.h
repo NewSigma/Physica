@@ -105,33 +105,14 @@ namespace Physica {
     template<class Derived>
     void LValueVector<Derived>::writePacket(const Packet auto packet, size_t index) noexcept {
         using Pack = std::remove_cvref_t<decltype(packet)>;
-        using U = Traits<Pack>::ScalarType;
-        if constexpr (U::isForwardDiff()) {
-            for (size_t i = 0; i < Pack::size(); ++i, ++index)
-                (*this)[index] = packet[i];
-        }
-        else {
-            Array<U, Pack::size()> buffer{};
-            packet.store(buffer.data());
-            for (size_t i = 0; i < Pack::size(); ++i, ++index)
-                (*this)[index] = buffer[i];
-        }
+        for (size_t i = 0; i < Pack::size(); ++i, ++index)
+            (*this)[index] = packet[i];
     }
 
     template<class Derived>
     void LValueVector<Derived>::writePacket(const Packet auto packet, size_t index, size_t count) noexcept {
-        using Pack = std::remove_cvref_t<decltype(packet)>;
-        using U = Traits<Pack>::ScalarType;
-        if constexpr (U::isForwardDiff()) {
-            for (size_t i = 0; i < count; ++i, ++index)
-                (*this)[index] = packet[i];
-        }
-        else {
-            Array<U, Pack::size()> buffer{};
-            packet.store(buffer.data());
-            for (size_t i = 0; i < count; ++i, ++index)
-                (*this)[index] = buffer[i];
-        }
+        for (size_t i = 0; i < count; ++i, ++index)
+            (*this)[index] = packet[i];
     }
 
     template<class Derived>

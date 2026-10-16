@@ -114,6 +114,21 @@ namespace Physica {
     }
 
     template<class Derived>
+    __device__ void device_obj<LValueVector<Derived>>::writePacket(const Packet auto packet, size_t index) noexcept {
+        auto& self = Base::getDerived();
+        for (size_t i = 0; i < std::remove_cvref_t<decltype(packet)>::size(); ++i, ++index)
+            self[index] = packet[i];
+    }
+
+    template<class Derived>
+    __device__ void device_obj<LValueVector<Derived>>::writePacket(const Packet auto packet, size_t index, size_t count) noexcept {
+        assert(0 < count && count < size_t(std::remove_cvref_t<decltype(packet)>::size()) && "[Error]: Invalid size for partial operation");
+        auto& self = Base::getDerived();
+        for (size_t i = 0; i < count; ++i, ++index)
+            self[index] = packet[i];
+    }
+
+    template<class Derived>
     __host__ __device__ void device_obj<LValueVector<Derived>>::reverse(const auto& grad) const noexcept {
         static_assert(isReverseDiff());
         using U = std::remove_cvref_t<decltype(grad)>;

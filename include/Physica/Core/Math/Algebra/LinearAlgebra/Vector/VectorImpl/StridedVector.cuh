@@ -37,6 +37,13 @@ namespace Physica {
         device_obj<Derived>& operator=(Scalar auto x);
         using Base::operator=;
         /* Operations */
+        template<size_t Length = Dynamic>
+        [[nodiscard]] __host__ __device__ auto head(this auto&&, size_t to = Length) noexcept;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] __host__ __device__ auto tail(this auto&&, size_t from) noexcept;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] __host__ __device__ auto segment(this auto&&, size_t from, size_t to) noexcept;
+
         void zeros();
         template<RNG R>
         void random_uniform();
@@ -79,5 +86,6 @@ namespace Physica {
 }
 
 #include "StridedVectorImpl/StridedVectorImpl.cuh"
+#include "StridedVectorImpl/StridedVectorBlock.cuh"
 #include "StridedVectorImpl/VectorConvert/RealVector.cuh"
 #include "StridedVectorImpl/VectorConvert/ImagVector.cuh"

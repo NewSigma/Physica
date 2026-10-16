@@ -76,19 +76,19 @@ namespace Physica {
     template<Vector V, size_t Length>
     template<size_t Length_>
     __host__ __device__ auto device_obj<RVectorBlock<V, Length>>::head(this auto&& self, size_t to) noexcept {
-        return device_obj<RVectorBlock<V, Length_>>(self.vec, self.from, self.from + to);
+        return device_obj<RVectorBlock<V, Length_>>(self.vec.getDerived(), self.from, self.from + to);
     }
 
     template<Vector V, size_t Length>
     template<size_t Length_>
     __host__ __device__ auto device_obj<RVectorBlock<V, Length>>::tail(this auto&& self, size_t from) noexcept {
-        return device_obj<RVectorBlock<V, Length_>>(self.vec, self.from + from, self.to);
+        return device_obj<RVectorBlock<V, Length_>>(self.vec.getDerived(), self.from + from, self.to);
     }
 
     template<Vector V, size_t Length>
     template<size_t Length_>
     __host__ __device__ auto device_obj<RVectorBlock<V, Length>>::segment(this auto&& self, size_t from, size_t to) noexcept {
-        return device_obj<RVectorBlock<V, Length_>>(self.vec, self.from + from, self.from + to);
+        return device_obj<RVectorBlock<V, Length_>>(self.vec.getDerived(), self.from + from, self.from + to);
     }
 
     template<Vector V, size_t Length>

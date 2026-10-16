@@ -52,6 +52,8 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t index) const;
         [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto) const;
+        __device__ void writePacket(Packet auto packet, size_t index) noexcept;
+        __device__ void writePacket(Packet auto packet, size_t index, size_t count) noexcept;
 
         __host__ __device__ void reverse(const auto& grad) const noexcept;
 

@@ -19,6 +19,7 @@
 #pragma once
 
 #include "LValueVector.h"
+#include "StridedVectorImpl/StridedVectorBlock.h"
 
 namespace Physica {
     template<class Derived>
@@ -43,6 +44,13 @@ namespace Physica {
         void assign_mkl(Vector auto& v) const noexcept;
 
         [[nodiscard]] constexpr auto view(this auto&&) noexcept;
+
+        template<size_t Length = Dynamic>
+        [[nodiscard]] auto head(this auto&&, size_t to = Length) noexcept;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] auto tail(this auto&&, size_t from) noexcept;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] auto segment(this auto&&, size_t from, size_t to) noexcept;
 
         [[nodiscard]] CoDiff<Tr> norm1() const noexcept;
         [[nodiscard]] CoDiff<Tr> norm1_base() const noexcept;

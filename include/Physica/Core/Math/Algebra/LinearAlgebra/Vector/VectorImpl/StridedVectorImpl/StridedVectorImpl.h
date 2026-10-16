@@ -64,6 +64,27 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<size_t Length>
+    auto StridedVector<Derived>::head(this auto&& self, size_t to) noexcept {
+        using Self = decltype(self);
+        return StridedVectorBlock<Self, Length>(std::forward<Self>(self), 0, to);
+    }
+
+    template<class Derived>
+    template<size_t Length>
+    auto StridedVector<Derived>::tail(this auto&& self, size_t from) noexcept {
+        using Self = decltype(self);
+        return StridedVectorBlock<Self, Length>(std::forward<Self>(self), from);
+    }
+
+    template<class Derived>
+    template<size_t Length>
+    auto StridedVector<Derived>::segment(this auto&& self, size_t from, size_t to) noexcept {
+        using Self = decltype(self);
+        return StridedVectorBlock<Self, Length>(std::forward<Self>(self), from, to);
+    }
+
+    template<class Derived>
     auto StridedVector<Derived>::norm1() const noexcept -> CoDiff<Tr> {
         constexpr size_t Size = Base::getSizeAtCompile();
         constexpr bool SmallVector = 0 < Size && Size <= 128;
