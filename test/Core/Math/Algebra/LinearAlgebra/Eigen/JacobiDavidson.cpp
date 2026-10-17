@@ -23,14 +23,13 @@
 #include "Test.h"
 
 using namespace Physica;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<PCG64DXSM, 10000>;
 
 namespace {
     void test1() {
         using MatrixType = DenseMatrix<cfloat64, MatrixMajor::Row>;
         const MatrixType data = MatrixType::random_uniform<RandomSource>(64);
         const DenseHermiteMatrix<cfloat64> hermite = data + data.hermite();
-        RandomSource::getInstance().reseed(std::mt19937::default_seed);
 
         EigenSolver<cfloat64> eig(hermite, false);
         eig.sort();
@@ -48,7 +47,6 @@ namespace {
         constexpr BoundaryCond BC = BoundaryCond::PBC;
         using T = float64;
         using Hamiltonian = TransIsingMatrix<float64, Dim, NumSite, BC>;
-        RandomSource::getInstance().reseed(10000);
 
         auto Js = VectorND<T>::linspace(0, 1, 200);
         SquareLattice<Dim, BC> lattice({NumSite}, 1);
