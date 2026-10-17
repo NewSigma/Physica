@@ -159,8 +159,10 @@ namespace Physica {
         static_assert_assign(source);
         if constexpr (std::same_as<device_obj<Derived>, std::remove_cvref_t<decltype(source)>>)
             assert(this != &source && "[Error]: Self assign is likely a bug");
-        if constexpr (getSizeAtCompile() == Dynamic && source.getSizeAtCompile() == Dynamic)
-            assert(getLength() == source.getLength() && "[Error]: Size mismatch between two vector");
+        if constexpr (getSizeAtCompile() == Dynamic && source.getSizeAtCompile() == Dynamic) {
+            [[maybe_unused]] size_t length = source.getLength();
+            assert(getLength() == length && "[Error]: Size mismatch between two vector");
+        }
     }
 
     template<class Derived, Scalar ScalarT>

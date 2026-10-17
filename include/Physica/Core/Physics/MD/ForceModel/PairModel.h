@@ -373,7 +373,7 @@ namespace Physica {
 
                     for (const size_t atom1 : arr1) {
                         const CoDiff<Vec3D> from = pos.row(atom1) - translate;
-                        Vec3D r, f(Dim, 0);
+                        Vec3D r(Dim, 0);
                         for (const size_t atom2 : arr2) {
                             const auto to = pos.row(atom2);
                             r = to - from;

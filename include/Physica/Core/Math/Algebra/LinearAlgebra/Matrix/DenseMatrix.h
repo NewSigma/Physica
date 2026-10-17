@@ -45,12 +45,12 @@ namespace Physica {
         Storage storage;
     public:
         DenseMatrix() = default;
-        explicit DenseMatrix(Storage storage) noexcept;
-        explicit DenseMatrix(size_t order);
-        DenseMatrix(size_t row, size_t col);
-        DenseMatrix(size_t row, size_t col, T value);
-        DenseMatrix(std::initializer_list<T> list);
-        DenseMatrix(std::initializer_list<VectorIniter> list);
+        constexpr explicit DenseMatrix(Storage storage) noexcept;
+        constexpr explicit DenseMatrix(size_t order);
+        constexpr DenseMatrix(size_t row, size_t col);
+        constexpr DenseMatrix(size_t row, size_t col, T value);
+        constexpr DenseMatrix(std::initializer_list<T> list);
+        constexpr DenseMatrix(std::initializer_list<VectorIniter> list);
         DenseMatrix(const Matrix auto& mat);
         DenseMatrix(const Vector auto& vec);
         DenseMatrix(const This&) = default;
@@ -75,13 +75,13 @@ namespace Physica {
         using Base::random_uniform;
 
         using Base::read;
-        void zeros(this auto&) noexcept;
+        constexpr void zeros(this auto&) noexcept;
         void junk(this auto&) noexcept;
         void swap_row(this auto&, size_t r1, size_t r2) noexcept;
         void swap_col(this auto&, size_t c1, size_t c2) noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] auto data_handle(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto data_handle(this auto&&) noexcept;
         [[nodiscard]] constexpr size_t getRow() const noexcept { return storage.getRow(); }
         [[nodiscard]] constexpr size_t getCol() const noexcept { return storage.getCol(); }
         [[nodiscard]] constexpr size_t getSize() const noexcept { return storage.getSize(); }
@@ -91,8 +91,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
-        [[nodiscard]] static This zeros(size_t order) { return zeros(order, order); }
-        [[nodiscard]] static This zeros(size_t row, size_t col);
+        [[nodiscard]] constexpr static This zeros(size_t order) { return zeros(order, order); }
+        [[nodiscard]] constexpr static This zeros(size_t row, size_t col);
         [[nodiscard]] static This junk(size_t order) { return junk(order, order); }
         [[nodiscard]] static This junk(size_t row, size_t col);
         [[nodiscard]] static This identity(size_t order);

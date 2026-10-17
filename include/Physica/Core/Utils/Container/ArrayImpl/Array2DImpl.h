@@ -23,23 +23,23 @@
 
 namespace Physica {
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    Array2D<T, Major, Row, Col, Allocator>::Array2D(size_t order)
+    constexpr Array2D<T, Major, Row, Col, Allocator>::Array2D(size_t order)
             : Array2D(order, order) {}
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    Array2D<T, Major, Row, Col, Allocator>::Array2D(size_t row, size_t col, auto&&... args) : r(row) {
+    constexpr Array2D<T, Major, Row, Col, Allocator>::Array2D(size_t row, size_t col, auto&&... args)
+            : arr(row * col, std::forward<decltype(args)>(args)...), r(row) {
         if constexpr (Row != Dynamic)
             assert(Row == row);
-        new (&arr) ArrayType(row * col, std::forward<decltype(args)>(args)...);
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    Array2D<T, Major, Row, Col, Allocator>::Array2D(std::initializer_list<T> list) : arr(list) {
+    constexpr Array2D<T, Major, Row, Col, Allocator>::Array2D(std::initializer_list<T> list) : arr(list) {
         static_assert(Row != Dynamic || Col != Dynamic, "[Error]: Either row or col must be given at compile");
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    Array2D<T, Major, Row, Col, Allocator>::Array2D(std::initializer_list<ArrayType> list)
+    constexpr Array2D<T, Major, Row, Col, Allocator>::Array2D(std::initializer_list<ArrayType> list)
             : Array2D(isColMajor ? list.begin()->getLength() : list.size(), isColMajor ? list.size() : list.begin()->getLength()) {
         size_t i = 0;
         for (auto& subarr : list) {
@@ -52,16 +52,16 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    Array2D<T, Major, Row, Col, Allocator>::Array2D(ArrayType arr_, IndexType r_) noexcept : arr(std::move(arr_)), r(r_) {}
+    constexpr Array2D<T, Major, Row, Col, Allocator>::Array2D(ArrayType arr_, IndexType r_) noexcept : arr(std::move(arr_)), r(r_) {}
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    T& Array2D<T, Major, Row, Col, Allocator>::operator[](size_t r, size_t c) {
+    constexpr T& Array2D<T, Major, Row, Col, Allocator>::operator[](size_t r, size_t c) {
         assert(r < getRow() && c < getCol());
         return arr[toIndex1D(r, c)];
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    const T& Array2D<T, Major, Row, Col, Allocator>::operator[](size_t r, size_t c) const {
+    constexpr const T& Array2D<T, Major, Row, Col, Allocator>::operator[](size_t r, size_t c) const {
         return const_cast<This&>(*this).operator[](r, c);
     }
 
@@ -105,7 +105,7 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    void Array2D<T, Major, Row, Col, Allocator>::zeros() noexcept {
+    constexpr void Array2D<T, Major, Row, Col, Allocator>::zeros() noexcept {
         asArray().zeros();
     }
 
@@ -165,12 +165,12 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ auto* Array2D<T, Major, Row, Col, Allocator>::data(this auto&& self) noexcept {
+    __host__ __device__ constexpr auto* Array2D<T, Major, Row, Col, Allocator>::data(this auto&& self) noexcept {
         return self.arr.data();
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ auto* Array2D<T, Major, Row, Col, Allocator>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+    __host__ __device__ constexpr auto* Array2D<T, Major, Row, Col, Allocator>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
         return self.data() + self.toIndex1D(row, col);
     }
 
@@ -262,7 +262,7 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ size_t Array2D<T, Major, Row, Col, Allocator>::toIndex1D(size_t r, size_t c) const noexcept {
+    __host__ __device__ constexpr size_t Array2D<T, Major, Row, Col, Allocator>::toIndex1D(size_t r, size_t c) const noexcept {
         assert(r < getRow());
         assert(c < getCol());
         if constexpr (isColMajor)

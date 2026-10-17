@@ -105,8 +105,10 @@ namespace Physica {
         using M = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename ScalarType::GradType, typename M::ScalarType>, "[Error]: Inconsistent ScalarType");
         static_assert(isReverseDiff());
-        assert(Base::getRow() == grad.getRow());
-        assert(Base::getCol() == grad.getCol());
+        [[maybe_unused]] size_t row = grad.getRow();
+        [[maybe_unused]] size_t col = grad.getCol();
+        assert(Base::getRow() == row);
+        assert(Base::getCol() == col);
         grad.assign_add(Base::getConstCastDerived().grads());
     }
 

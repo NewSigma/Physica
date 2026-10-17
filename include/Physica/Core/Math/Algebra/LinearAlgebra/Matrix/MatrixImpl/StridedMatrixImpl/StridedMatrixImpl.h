@@ -69,20 +69,20 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto StridedMatrix<Derived>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+    constexpr auto StridedMatrix<Derived>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
         assert(row < self.getRow());
         assert(col < self.getCol());
         return self.data_handle() + row * self.getRowStride() + col * self.getColStride();
     }
 
     template<class Derived>
-    auto StridedMatrix<Derived>::row(this auto&& self, size_t r) noexcept {
+    constexpr auto StridedMatrix<Derived>::row(this auto&& self, size_t r) noexcept {
         using Self = decltype(self);
         return StridedMatrixBlock<Self, 1, Derived::getColAtCompile()>(std::forward<Self>(self), r, 1, 0, self.getCol());
     }
 
     template<class Derived>
-    auto StridedMatrix<Derived>::col(this auto&& self, size_t c) noexcept {
+    constexpr auto StridedMatrix<Derived>::col(this auto&& self, size_t c) noexcept {
         using Self = decltype(self);
         return StridedMatrixBlock<Self, Derived::getRowAtCompile(), 1>(std::forward<Self>(self), 0, self.getRow(), c, 1);
     }

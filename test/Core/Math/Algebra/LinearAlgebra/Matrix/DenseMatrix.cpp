@@ -25,6 +25,22 @@ using namespace Physica;
 using RandomSource = Random<>;
 
 namespace {
+    void constant_evaluate() {
+        static_assert([]() consteval {
+            MatrixND<float32> m{
+                {1, 2, 3},
+                {4, 5, 6},
+            };
+            m[0, 0] = float32(7);
+            return m.calc(0, 0) + m.calc(2, 1) + m.transpose().calc(1, 2);
+        }() == float32(7 + 6 + 6));
+        static_assert(MatrixND<float32>::zeros(2, 2).calc(1, 1) == float32(0));
+        static_assert(MatrixND<float32>(2, 2, float32(3)).calc(0, 1) == float32(3));
+        static_assert(MatrixND<float32>(2, 2).getRow() == 2);
+        static_assert(MatrixND<float32>(2, 2).getCol() == 2);
+        static_assert(MatrixND<float32>::getMajor() == MatrixMajor::Col);
+    }
+
     void formatTest() {
         static_assert(std::formattable<MatrixND<float64>, char>);
 
@@ -129,6 +145,7 @@ namespace {
 static_assert(MatrixND<float32>{}.transpose().isCompact(), "Transpose of a compact matrix is a compact matrix");
 
 int main() {
+    constant_evaluate();
     formatTest();
     compactRowCol();
     testHDF5();

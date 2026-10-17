@@ -23,7 +23,7 @@
 
 namespace Physica {
     template<class Derived>
-    auto StridedVector<Derived>::operator=(Scalar auto x) noexcept -> Derived& {
+    constexpr auto StridedVector<Derived>::operator=(Scalar auto x) noexcept -> Derived& {
         if constexpr (isCompact() && Base::getSizeAtCompile() == Dynamic) {
             if (x.isZero())
                 zeros();
@@ -33,7 +33,13 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    void StridedVector<Derived>::assign(Vector auto&& v) const noexcept {
+    constexpr void StridedVector<Derived>::assign(Vector auto&& v) const noexcept {
+        if consteval {
+            const auto& source = Base::getDerived();
+            for (size_t i = 0; i < source.getLength(); ++i)
+                v[i] = source.calc(i);
+            return;
+        }
         using V = std::remove_cvref<decltype(v)>::type;
         constexpr bool SameScalar = std::same_as<T, typename V::ScalarType>;
         constexpr bool Copyable = std::is_trivially_copyable<T>::value;

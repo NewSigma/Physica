@@ -95,7 +95,7 @@ namespace Physica {
         void assert_assign(const Matrix auto& source) const noexcept;
         void assert_assign_lapack(const Matrix auto& source) const noexcept;
 
-        [[nodiscard]] decltype(auto) calc(size_t row, size_t col) const;
+        [[nodiscard]] constexpr decltype(auto) calc(size_t row, size_t col) const;
         [[nodiscard]] decltype(auto) calc_value(size_t row, size_t col) const;
         [[nodiscard]] decltype(auto) calcFromMajorMinor(size_t major, size_t minor) const;
         void reverse(this const auto&, const Matrix auto& grad) noexcept;
@@ -152,7 +152,7 @@ namespace Physica {
         [[nodiscard]] auto format() const noexcept;
         [[nodiscard]] auto inv(this auto&&) noexcept;
         [[nodiscard]] auto pinv() const noexcept;
-        [[nodiscard]] auto transpose(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto transpose(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
         [[nodiscard]] auto hermite(this auto&&) noexcept;
         [[nodiscard]] auto flatten(this auto&&) noexcept;

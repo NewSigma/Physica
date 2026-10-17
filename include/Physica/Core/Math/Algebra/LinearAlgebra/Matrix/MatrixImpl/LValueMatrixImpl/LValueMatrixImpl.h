@@ -76,12 +76,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    decltype(auto) LValueMatrix<Derived>::operator[](this auto&& self, size_t row, size_t col) {
+    constexpr decltype(auto) LValueMatrix<Derived>::operator[](this auto&& self, size_t row, size_t col) {
         return *self.data_ptr(row, col);
     }
 
     template<class Derived>
-    decltype(auto) LValueMatrix<Derived>::operator[](this auto&& self, const Var& row, const Var& col) {
+    constexpr decltype(auto) LValueMatrix<Derived>::operator[](this auto&& self, const Var& row, const Var& col) {
         return std::forward<decltype(self)>(self).ein(row, col);
     }
 
@@ -401,13 +401,13 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+    constexpr auto LValueMatrix<Derived>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
         assert(row < self.getRow() && col < self.getCol());
         return self.getDerived().data_ptr(row, col);
     }
 
     template<class Derived>
-    decltype(auto) LValueMatrix<Derived>::refFromMajorMinor(this auto&& self, size_t major, size_t minor) noexcept {
+    constexpr decltype(auto) LValueMatrix<Derived>::refFromMajorMinor(this auto&& self, size_t major, size_t minor) noexcept {
         const size_t r = MatrixMajor::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixMajor::colFromMajorMinor<Derived>(major, minor);
         assert(r < self.getRow() && c < self.getCol());

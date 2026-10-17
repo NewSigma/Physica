@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<class Derived>
-    auto LValueVector<Derived>::operator=(Scalar auto x) noexcept -> Derived& {
+    constexpr auto LValueVector<Derived>::operator=(Scalar auto x) noexcept -> Derived& {
         Base::static_assert_assign(x);
         if constexpr (!std::same_as<T, std::remove_cvref_t<decltype(x)>>)
             return operator=(T(x));
@@ -59,7 +59,7 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    Derived& LValueVector<Derived>::operator=(const Vector auto& v) {
+    constexpr Derived& LValueVector<Derived>::operator=(const Vector auto& v) {
         Derived& x = Base::getDerived();
         x.resize(v);
         x.assert_assign(v);
@@ -88,17 +88,17 @@ namespace Physica {
     }
 
     template<class Derived>
-    decltype(auto) LValueVector<Derived>::operator[](this auto&& self, size_t index) {
+    constexpr decltype(auto) LValueVector<Derived>::operator[](this auto&& self, size_t index) {
         return *self.data_ptr(index);
     }
 
     template<class Derived>
-    decltype(auto) LValueVector<Derived>::operator[](this auto&& self, const Var& var) {
+    constexpr decltype(auto) LValueVector<Derived>::operator[](this auto&& self, const Var& var) {
         return std::forward<decltype(self)>(self).ein(var);
     }
 
     template<class Derived>
-    decltype(auto) LValueVector<Derived>::calc(size_t index) const {
+    constexpr decltype(auto) LValueVector<Derived>::calc(size_t index) const {
         return operator[](index);
     }
 
@@ -265,7 +265,7 @@ namespace Physica {
      * Add this function because we cannot simply return &(*this)[index], it is invalid to dereference a device pointer on host.
      */
     template<class Derived>
-    auto LValueVector<Derived>::data_ptr(this auto&& self, size_t index) noexcept {
+    constexpr auto LValueVector<Derived>::data_ptr(this auto&& self, size_t index) noexcept {
         assert(index < self.getLength() && "[Error]: Index out of range");
         return self.getDerived().data_ptr(index);
     }

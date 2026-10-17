@@ -31,7 +31,7 @@ namespace Physica {
     private:
         decay_rvalue_t<M> mat;
     public:
-        Transpose(M&& mat_) : mat(std::forward<M>(mat_)) {}
+        constexpr Transpose(M&& mat_) : mat(std::forward<M>(mat_)) {}
         Transpose(const This&) = default;
         Transpose(This&&) noexcept = default;
         ~Transpose() = default;
@@ -43,7 +43,7 @@ namespace Physica {
         void assign(Matrix auto&& target) const;
         void assign_mkl(Matrix auto&& target) const;
 
-        [[nodiscard]] auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto&& transpose(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] auto grads(this auto&&) noexcept;
@@ -51,7 +51,7 @@ namespace Physica {
         [[nodiscard]] constexpr size_t getRow() const noexcept { return mat.getCol(); }
         [[nodiscard]] constexpr size_t getCol() const noexcept { return mat.getRow(); }
         [[nodiscard]] constexpr size_t getOrder() const noexcept { return mat.getOrder(); }
-        [[nodiscard]] auto data_handle(this auto&& self) noexcept;
+        [[nodiscard]] constexpr auto data_handle(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
@@ -75,7 +75,7 @@ namespace Physica {
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
-    auto&& Transpose<M>::transpose(this auto&& self) noexcept {
+    constexpr auto&& Transpose<M>::transpose(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 
@@ -91,7 +91,7 @@ namespace Physica {
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
-    auto Transpose<M>::data_handle(this auto&& self) noexcept {
+    constexpr auto Transpose<M>::data_handle(this auto&& self) noexcept {
         return self.mat.data_handle();
     }
 
@@ -126,7 +126,7 @@ namespace Physica {
     private:
         decay_rvalue_t<V> vec;
     public:
-        explicit Transpose(V&& vec_) : vec(std::forward<V>(vec_)) {}
+        constexpr explicit Transpose(V&& vec_) : vec(std::forward<V>(vec_)) {}
         Transpose(const This&) = default;
         Transpose(This&&) noexcept = default;
         ~Transpose() = default;
@@ -134,7 +134,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto&& transpose(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] auto grads(this auto&&) noexcept;
@@ -142,7 +142,7 @@ namespace Physica {
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] constexpr size_t getCol() const noexcept { return vec.getLength(); }
         [[nodiscard]] constexpr size_t getOrder() const noexcept;
-        [[nodiscard]] auto data_handle(this auto&& self) noexcept;
+        [[nodiscard]] constexpr auto data_handle(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
@@ -150,7 +150,7 @@ namespace Physica {
     };
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
-    auto&& Transpose<V>::transpose(this auto&& self) noexcept {
+    constexpr auto&& Transpose<V>::transpose(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
 
@@ -172,7 +172,7 @@ namespace Physica {
     }
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
-    auto Transpose<V>::data_handle(this auto&& self) noexcept {
+    constexpr auto Transpose<V>::data_handle(this auto&& self) noexcept {
         return self.vec.data_handle();
     }
 

@@ -32,8 +32,8 @@ namespace Physica {
         This& operator=(This&& obj) noexcept = delete;
         using Base::operator=;
         /* Operations */
-        [[nodiscard]] auto row(this auto&&, size_t r) noexcept;
-        [[nodiscard]] auto col(this auto&&, size_t c) noexcept;
+        [[nodiscard]] constexpr auto row(this auto&&, size_t r) noexcept;
+        [[nodiscard]] constexpr auto col(this auto&&, size_t c) noexcept;
         template<size_t Row = Dynamic>
         [[nodiscard]] auto rows(this auto&&, size_t fromRow, size_t rowCount) noexcept;
         template<size_t Row = Dynamic>
@@ -67,7 +67,7 @@ namespace Physica {
         [[nodiscard]] constexpr size_t getMinorStride() const noexcept;
         [[nodiscard]] auto data_handle() noexcept;
         [[nodiscard]] auto data_handle() const noexcept;
-        [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
+        [[nodiscard]] constexpr auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStrided() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowStrideAtCompile() noexcept { return Dynamic; }

@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <memory>
+#include <utility>
 #include <limits>
 #include "Physica/Macro.h"
 
@@ -48,40 +49,57 @@ namespace Physica {
         This& operator=(const This&) noexcept = default;
         This& operator=(This&&) noexcept = default;
         /* Operations */
-        [[nodiscard, gnu::returns_nonnull]] static T* allocate(size_t n) noexcept;
-        static void deallocate(T* p, size_t n) noexcept;
-        [[nodiscard, gnu::returns_nonnull]] static T* reallocate(T* p, size_t new_size, size_t old_size) noexcept;
+        [[nodiscard, gnu::returns_nonnull]] constexpr static T* allocate(size_t n) noexcept;
+        constexpr static void deallocate(T* p, size_t n) noexcept;
+        [[nodiscard, gnu::returns_nonnull]] constexpr static T* reallocate(T* p, size_t new_size, size_t old_size) noexcept;
     };
 
     template<class T, size_t Align>
-    T* HostAllocator<T, Align>::allocate(size_t n) noexcept {
-        size_t size = n * sizeof(T);
-        void* p{};
-        if constexpr (OverAlign)
-            p = __builtin_operator_new(size, std::align_val_t(Align), std::nothrow);
-        else
-            p = __builtin_operator_new(size, std::nothrow);
-        assert(p != nullptr); // null return value is rare in reality
-        return reinterpret_cast<T*>(p);
+    constexpr T* HostAllocator<T, Align>::allocate(size_t n) noexcept {
+        if consteval {
+            return std::allocator<T>().allocate(n);
+        }
+        else {
+            size_t size = n * sizeof(T);
+            void* p{};
+            if constexpr (OverAlign)
+                p = __builtin_operator_new(size, std::align_val_t(Align), std::nothrow);
+            else
+                p = __builtin_operator_new(size, std::nothrow);
+            assert(p != nullptr); // null return value is rare in reality
+            return reinterpret_cast<T*>(p);
+        }
     }
 
     template<class T, size_t Align>
-    void HostAllocator<T, Align>::deallocate(T* p, size_t) noexcept {
-        if constexpr (OverAlign)
-            __builtin_operator_delete(p, std::align_val_t(Align));
-        else
-            __builtin_operator_delete(p);
+    constexpr void HostAllocator<T, Align>::deallocate(T* p, size_t n) noexcept {
+        if consteval {
+            if (p != nullptr)
+                std::allocator<T>().deallocate(p, n);
+        }
+        else {
+            if constexpr (OverAlign)
+                __builtin_operator_delete(p, std::align_val_t(Align));
+            else
+                __builtin_operator_delete(p);
+        }
     }
 
     template<class T, size_t Align>
-    T* HostAllocator<T, Align>::reallocate(T* p, size_t new_size, size_t old_size) noexcept {
+    constexpr T* HostAllocator<T, Align>::reallocate(T* p, size_t new_size, size_t old_size) noexcept {
         if constexpr (HasMimalloc())
             return static_cast<T*>(Internal::reallocate_mimalloc(p, new_size * sizeof(T), old_size * sizeof(T), OverAlign ? Align : 0));
         else {
             assert(new_size > 0 && "[Error]: Reject bad pattern");
             assert(p != nullptr || old_size == 0); // According to [1], the behavior is well defined now
             T* new_p = allocate(new_size);
-            memcpy((void*)new_p, p, std::min(new_size, old_size) * sizeof(T));
+            if consteval {
+                for (size_t i = 0; i < std::min(new_size, old_size); ++i)
+                    std::construct_at(new_p + i, std::move(p[i]));
+            }
+            else {
+                memcpy((void*)new_p, p, std::min(new_size, old_size) * sizeof(T));
+            }
             deallocate(p, old_size);
             return new_p;
         }
@@ -115,20 +133,20 @@ namespace std {
         constexpr static size_t Align = Align_;
         constexpr static bool isPageLocked = false;
     public:
-        [[nodiscard]] static pointer allocate(allocator_type& a, size_type n) {
+        [[nodiscard]] constexpr static pointer allocate(allocator_type& a, size_type n) {
             return a.allocate(n);
         }
 
-        static void deallocate(allocator_type& a, pointer p, size_type n) {
+        constexpr static void deallocate(allocator_type& a, pointer p, size_type n) {
             a.deallocate(p, n);
         }
 
-        static void construct(allocator_type&, T* p, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value) {
-            ::new (static_cast<void*>(p)) T(std::forward<decltype(args)>(args)...);
+        constexpr static void construct(allocator_type&, T* p, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value) {
+            std::construct_at(p, std::forward<decltype(args)>(args)...);
         }
 
-        static void destroy(allocator_type&, T* p) {
-            p->~T();
+        constexpr static void destroy(allocator_type&, T* p) {
+            std::destroy_at(p);
         }
 
         constexpr static size_type max_size(const allocator_type&) noexcept {

@@ -32,8 +32,8 @@ namespace Physica {
         size_t from;
         size_t to;
     public:
-        CompactVectorBlock(V&& vec_, size_t from_, size_t to_);
-        CompactVectorBlock(V&& vec_, size_t from_);
+        constexpr CompactVectorBlock(V&& vec_, size_t from_, size_t to_);
+        constexpr CompactVectorBlock(V&& vec_, size_t from_);
         CompactVectorBlock(const This& block) = default;
         CompactVectorBlock(This&&) noexcept = default;
         ~CompactVectorBlock() = default;
@@ -55,20 +55,20 @@ namespace Physica {
         [[nodiscard]] auto segment(this auto&&, size_t from, size_t to) noexcept;
 
         using Base::resize;
-        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
+        constexpr void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr size_t getLength() const noexcept;
-        [[nodiscard]] auto data_handle(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto data_handle(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
     template<Vector V, size_t Length>
-    CompactVectorBlock<V, Length>::CompactVectorBlock(V&& vec_, size_t from_, size_t to_)
+    constexpr CompactVectorBlock<V, Length>::CompactVectorBlock(V&& vec_, size_t from_, size_t to_)
             : vec(std::forward<V>(vec_)), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
@@ -76,7 +76,7 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    CompactVectorBlock<V, Length>::CompactVectorBlock(V&& vec_, size_t from_)
+    constexpr CompactVectorBlock<V, Length>::CompactVectorBlock(V&& vec_, size_t from_)
             : CompactVectorBlock(std::forward<V>(vec_), from_, vec_.getLength()) {}
 
     template<Vector V, size_t Length>
@@ -161,7 +161,7 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    auto CompactVectorBlock<V, Length>::data_handle(this auto&& self) noexcept {
+    constexpr auto CompactVectorBlock<V, Length>::data_handle(this auto&& self) noexcept {
         return self.vec.data() + self.from;
     }
 

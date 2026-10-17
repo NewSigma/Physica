@@ -22,18 +22,18 @@
 
 namespace Physica {
     template<Scalar T, size_t Length, class Allocator>
-    DenseVector<T, Length, Allocator>::DenseVector(Array<T, Length, Allocator> storage) noexcept : storage(std::move(storage)) {}
+    constexpr DenseVector<T, Length, Allocator>::DenseVector(Array<T, Length, Allocator> storage) noexcept : storage(std::move(storage)) {}
 
     template<Scalar T, size_t Length, class Allocator>
-    DenseVector<T, Length, Allocator>::DenseVector(size_t length) noexcept : storage(length) {}
+    constexpr DenseVector<T, Length, Allocator>::DenseVector(size_t length) noexcept : storage(length) {}
 
     template<Scalar T, size_t Length, class Allocator>
-    DenseVector<T, Length, Allocator>::DenseVector(size_t length, const T& init) : DenseVector(length) {
+    constexpr DenseVector<T, Length, Allocator>::DenseVector(size_t length, const T& init) : DenseVector(length) {
         *this = init;
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    DenseVector<T, Length, Allocator>::DenseVector(std::initializer_list<T> list) : storage(list) {}
+    constexpr DenseVector<T, Length, Allocator>::DenseVector(std::initializer_list<T> list) : storage(list) {}
 
     template<Scalar T, size_t Length, class Allocator>
     DenseVector<T, Length, Allocator>::DenseVector(const Vector auto& v) : storage(v.getLength()) {
@@ -120,7 +120,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    void DenseVector<T, Length, Allocator>::zeros(this auto& self) noexcept {
+    constexpr void DenseVector<T, Length, Allocator>::zeros(this auto& self) noexcept {
         self.storage.zeros();
     }
 
@@ -141,7 +141,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    auto DenseVector<T, Length, Allocator>::zeros(size_t len) -> This {
+    constexpr auto DenseVector<T, Length, Allocator>::zeros(size_t len) -> This {
         This result(len);
         result.zeros();
         return result;
@@ -155,7 +155,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    auto* DenseVector<T, Length, Allocator>::data_handle(this auto&& self) noexcept {
+    constexpr auto* DenseVector<T, Length, Allocator>::data_handle(this auto&& self) noexcept {
         return self.storage.data();
     }
 

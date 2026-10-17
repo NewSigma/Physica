@@ -38,7 +38,7 @@ namespace Physica {
         size_t fromCol;
         [[no_unique_address]] MaybeColCount colCount;
     public:
-        CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
+        constexpr CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         CompactMatrixBlock(const This&) = default;
         CompactMatrixBlock(This&&) noexcept = default;
         ~CompactMatrixBlock() = default;
@@ -48,7 +48,7 @@ namespace Physica {
         using Base::operator=;
         /* Operations */
         using Base::resize;
-        void resize(size_t length);
+        constexpr void resize(size_t length);
 
         [[nodiscard]] auto&& row(this auto&&, size_t r) noexcept requires(Row == 1);
         [[nodiscard]] auto&& col(this auto&&, size_t c) noexcept requires(Col == 1);
@@ -58,13 +58,13 @@ namespace Physica {
         [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr size_t getLength() const noexcept;
-        [[nodiscard]] auto data_handle(this auto&& self) noexcept;
+        [[nodiscard]] constexpr auto data_handle(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
     template<Matrix M, size_t Row, size_t Col>
-    CompactMatrixBlock<M, Row, Col>::CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
+    constexpr CompactMatrixBlock<M, Row, Col>::CompactMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
             : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , rowCount(rowCount)
@@ -92,7 +92,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    void CompactMatrixBlock<M, Row, Col>::resize([[maybe_unused]] size_t length) {
+    constexpr void CompactMatrixBlock<M, Row, Col>::resize([[maybe_unused]] size_t length) {
         assert(length == getLength());
     }
 
@@ -140,7 +140,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto CompactMatrixBlock<M, Row, Col>::data_handle(this auto&& self) noexcept {
+    constexpr auto CompactMatrixBlock<M, Row, Col>::data_handle(this auto&& self) noexcept {
         return self.mat.data_ptr(self.fromRow, self.fromCol);
     }
 

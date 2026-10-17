@@ -32,8 +32,8 @@ namespace Physica {
         size_t from;
         size_t to;
     public:
-        StridedVectorBlock(V&& vec_, size_t from, size_t to);
-        StridedVectorBlock(V&& vec_, size_t from);
+        constexpr StridedVectorBlock(V&& vec_, size_t from, size_t to);
+        constexpr StridedVectorBlock(V&& vec_, size_t from);
         StridedVectorBlock(const This& block) = default;
         StridedVectorBlock(This&&) noexcept = default;
         ~StridedVectorBlock() = default;
@@ -43,20 +43,20 @@ namespace Physica {
         This& operator=(This&& v) noexcept;
         /* Operations */
         using Base::resize;
-        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
+        constexpr void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr size_t getLength() const noexcept;
         [[nodiscard]] constexpr size_t getStride() const noexcept;
-        [[nodiscard]] auto data_handle(this auto&& self) noexcept;
+        [[nodiscard]] constexpr auto data_handle(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept;
     };
 
     template<Vector V, size_t Length>
-    StridedVectorBlock<V, Length>::StridedVectorBlock(V&& vec_, size_t from, size_t to)
+    constexpr StridedVectorBlock<V, Length>::StridedVectorBlock(V&& vec_, size_t from, size_t to)
             : vec(std::forward<V>(vec_)), from(from), to(to) {
         assert(from < to);
         assert(to <= vec.getLength());
@@ -64,7 +64,7 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    StridedVectorBlock<V, Length>::StridedVectorBlock(V&& vec_, size_t from_)
+    constexpr StridedVectorBlock<V, Length>::StridedVectorBlock(V&& vec_, size_t from_)
             : StridedVectorBlock(std::forward<V>(vec_), from_, vec_.getLength()) {}
 
     template<Vector V, size_t Length>
@@ -105,7 +105,7 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    auto StridedVectorBlock<V, Length>::data_handle(this auto&& self) noexcept {
+    constexpr auto StridedVectorBlock<V, Length>::data_handle(this auto&& self) noexcept {
         return self.vec.data_handle() + self.from * self.vec.getStride();
     }
 

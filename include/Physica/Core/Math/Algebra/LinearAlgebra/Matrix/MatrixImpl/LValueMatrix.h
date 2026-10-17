@@ -58,10 +58,10 @@ namespace Physica {
         void operator-=(const Matrix auto& m);
         void operator*=(const Matrix auto& m);
 
-        [[nodiscard]] decltype(auto) operator[](this auto&&, size_t row, size_t col);
-        [[nodiscard]] decltype(auto) operator[](this auto&&, const Var& row, const Var& col);
+        [[nodiscard]] constexpr decltype(auto) operator[](this auto&&, size_t row, size_t col);
+        [[nodiscard]] constexpr decltype(auto) operator[](this auto&&, const Var& row, const Var& col);
         /* Operations */
-        [[nodiscard]] decltype(auto) calc(size_t row, size_t col) const { return operator[](row, col); }
+        [[nodiscard]] constexpr decltype(auto) calc(size_t row, size_t col) const { return operator[](row, col); }
 
         [[nodiscard]] size_t pivotPartial(size_t column) const noexcept;
         [[nodiscard]] size_t pivotComplete(size_t column) const noexcept;
@@ -108,8 +108,8 @@ namespace Physica {
         void toIdentity();
         [[nodiscard]] VectorND<T> balance();
         /* Getters */
-        [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
-        [[nodiscard]] decltype(auto) refFromMajorMinor(this auto&&, size_t major, size_t minor) noexcept;
+        [[nodiscard]] constexpr auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
+        [[nodiscard]] constexpr decltype(auto) refFromMajorMinor(this auto&&, size_t major, size_t minor) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isLValueMatrix() noexcept { return true; }
     protected:

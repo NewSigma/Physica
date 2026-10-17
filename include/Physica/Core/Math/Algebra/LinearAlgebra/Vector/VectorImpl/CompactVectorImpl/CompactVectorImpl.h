@@ -174,7 +174,7 @@ namespace Physica {
 #endif
 
     template<class Derived>
-    auto CompactVector<Derived>::data(this auto&& self) noexcept {
+    constexpr auto CompactVector<Derived>::data(this auto&& self) noexcept {
         return self.data_handle();
     }
 

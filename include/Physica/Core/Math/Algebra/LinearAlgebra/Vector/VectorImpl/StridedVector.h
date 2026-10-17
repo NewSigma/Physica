@@ -36,11 +36,11 @@ namespace Physica {
         /* Operators */
         This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) noexcept = delete;
-        Derived& operator=(Scalar auto x) noexcept;
+        constexpr Derived& operator=(Scalar auto x) noexcept;
         using Base::operator=;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        void assign(Vector auto&& v) const noexcept;
+        constexpr void assign(Vector auto&& v) const noexcept;
         void assign_mkl(Vector auto& v) const noexcept;
 
         [[nodiscard]] constexpr auto view(this auto&&) noexcept;
@@ -68,7 +68,7 @@ namespace Physica {
         [[nodiscard]] constexpr size_t getStride() const noexcept;
         [[nodiscard]] auto data_handle() noexcept;
         [[nodiscard]] auto data_handle() const noexcept;
-        [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
+        [[nodiscard]] constexpr auto data_ptr(this auto&&, size_t index) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStrided() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
@@ -104,7 +104,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto StridedVector<Derived>::data_ptr(this auto&& self, size_t index) noexcept {
+    constexpr auto StridedVector<Derived>::data_ptr(this auto&& self, size_t index) noexcept {
         assert(index < self.getLength());
         return self.data_handle() + index * self.getStride();
     }

@@ -146,7 +146,7 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    decltype(auto) RValueMatrix<Derived, ScalarT>::calc(size_t row, size_t col) const {
+    constexpr decltype(auto) RValueMatrix<Derived, ScalarT>::calc(size_t row, size_t col) const {
         return Base::getDerived().calc(row, col);
     }
 
@@ -460,7 +460,7 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueMatrix<Derived, ScalarT>::transpose(this auto&& self) noexcept {
+    constexpr auto RValueMatrix<Derived, ScalarT>::transpose(this auto&& self) noexcept {
         using Self = decltype(self);
         return Transpose<Self>(std::forward<Self>(self));
     }

@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 #ifdef PHYSICA_CUDA
@@ -116,28 +117,41 @@ namespace Physica {
     }
     ///////////////////////////////////////Array<T, Dynamic, Allocator>//////////////////////////////////////////
     template<class T, class Allocator>
-    Array<T, Dynamic, Allocator>::Array(size_t length_, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value)
+    constexpr Array<T, Dynamic, Allocator>::Array(size_t length_, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value)
             : length(length_), capacity(length_), alloc() {
         assert(capacity > 0);
         arr = alloc.allocate(capacity);
-        if constexpr (!Base::template isTrivialDefaultConstruct<decltype(args)...>()) {
+        if consteval {
             for (size_t i = 0; i < length_; ++i)
                 std::allocator_traits<Allocator>::construct(alloc, arr + i, std::forward<decltype(args)>(args)...);
+        }
+        else {
+            if constexpr (!Base::template isTrivialDefaultConstruct<decltype(args)...>()) {
+                for (size_t i = 0; i < length_; ++i)
+                    std::allocator_traits<Allocator>::construct(alloc, arr + i, std::forward<decltype(args)>(args)...);
+            }
         }
     }
 
     template<class T, class Allocator>
-    Array<T, Dynamic, Allocator>::Array(std::initializer_list<T> list) noexcept : Array(list.size()) {
+    constexpr Array<T, Dynamic, Allocator>::Array(std::initializer_list<T> list) noexcept : Array(list.size()) {
         for (size_t i = 0; i < length; ++i)
             std::allocator_traits<Allocator>::construct(alloc, arr + i, std::move(*(std::data(list) + i)));
     }
 
     template<class T, class Allocator>
     template<size_t Length, class OtherAlloc>
-    Array<T, Dynamic, Allocator>::Array(const Array<T, Length, OtherAlloc>& other) noexcept(std::is_nothrow_copy_assignable<T>::value)
+    constexpr Array<T, Dynamic, Allocator>::Array(const Array<T, Length, OtherAlloc>& other) noexcept(std::is_nothrow_copy_assignable<T>::value)
             : Array(other.getLength()) {
-        if constexpr (std::is_trivially_copyable<T>::value)
-            memcpy(arr, other.data(), other.getLength() * sizeof(T));
+        if constexpr (std::is_trivially_copyable<T>::value) {
+            if consteval {
+                for (size_t i = 0; i < other.getLength(); ++i)
+                    std::allocator_traits<Allocator>::construct(alloc, arr + i, other[i]);
+            }
+            else {
+                memcpy(arr, other.data(), other.getLength() * sizeof(T));
+            }
+        }
         else {
             for (size_t i = 0; i < other.getLength(); ++i)
                 arr[i] = other[i];
@@ -145,18 +159,25 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    Array<T, Dynamic, Allocator>::Array(const This& obj) noexcept(std::is_nothrow_copy_constructible<T>::value)
+    constexpr Array<T, Dynamic, Allocator>::Array(const This& obj) noexcept(std::is_nothrow_copy_constructible<T>::value)
             : length(obj.length), capacity(length), alloc() {
         arr = alloc.allocate(length);
-        if constexpr (std::is_trivially_copyable<T>::value)
-            memcpy(arr, obj.arr, length * sizeof(T));
+        if constexpr (std::is_trivially_copyable<T>::value) {
+            if consteval {
+                for (size_t i = 0; i < length; ++i)
+                    std::allocator_traits<Allocator>::construct(alloc, arr + i, obj[i]);
+            }
+            else {
+                memcpy(arr, obj.arr, length * sizeof(T));
+            }
+        }
         else
             for (size_t i = 0; i < length; ++i)
                 std::allocator_traits<Allocator>::construct(alloc, arr + i, obj[i]);
     }
 
     template<class T, class Allocator>
-    Array<T, Dynamic, Allocator>::Array(This&& obj) noexcept
+    constexpr Array<T, Dynamic, Allocator>::Array(This&& obj) noexcept
             : arr(obj.arr), length(obj.length), capacity(obj.capacity), alloc(std::move(obj.alloc)) {
         obj.arr = nullptr;
         obj.length = 0;
@@ -164,7 +185,7 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    Array<T, Dynamic, Allocator>::~Array() {
+    constexpr Array<T, Dynamic, Allocator>::~Array() {
         if constexpr (!std::is_trivially_destructible<T>::value)
             if (arr != nullptr)
                 for (size_t i = 0; i < length; ++i)
@@ -249,9 +270,9 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::zeros() noexcept {
+    constexpr void Array<T, Dynamic, Allocator>::zeros() noexcept {
         static_assert(std::is_trivially_copyable<T>::value, "[Error]: zeros() does not apply to non-trivial type");
-        memset(arr, 0, length * sizeof(T));
+        std::fill_n(arr, length, T{});
     }
 
     template<class T, class Allocator>
@@ -276,7 +297,7 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    __host__ __device__ auto* Array<T, Dynamic, Allocator>::data(this auto&& self) noexcept {
+    __host__ __device__ constexpr auto* Array<T, Dynamic, Allocator>::data(this auto&& self) noexcept {
         assert(self.arr != nullptr && "[Error]: We assume data() is nonnull");
         constexpr size_t Align = std::allocator_traits<Allocator>::Align;
         if constexpr (Align == Dynamic)

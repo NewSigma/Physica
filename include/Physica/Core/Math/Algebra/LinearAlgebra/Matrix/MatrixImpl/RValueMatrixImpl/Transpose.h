@@ -41,7 +41,7 @@ namespace Physica {
     private:
         decay_rvalue_t<M> mat;
     public:
-        Transpose(M&& mat_) : mat(std::forward<M>(mat_)) {}
+        constexpr Transpose(M&& mat_) : mat(std::forward<M>(mat_)) {}
         Transpose(const This&) = default;
         Transpose(This&&) noexcept = default;
         ~Transpose() = default;
@@ -49,9 +49,9 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] T calc(size_t row, size_t col) const;
+        [[nodiscard]] constexpr T calc(size_t row, size_t col) const;
 
-        [[nodiscard]] auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto&& transpose(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr size_t getRow() const noexcept { return mat.getCol(); }
@@ -65,12 +65,12 @@ namespace Physica {
     };
 
     template<Matrix M>
-    auto Transpose<M>::calc(size_t row, size_t col) const -> T {
+    constexpr auto Transpose<M>::calc(size_t row, size_t col) const -> T {
         return mat.calc(col, row);
     }
 
     template<Matrix M>
-    auto&& Transpose<M>::transpose(this auto&& self) noexcept {
+    constexpr auto&& Transpose<M>::transpose(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 
@@ -110,7 +110,7 @@ namespace Physica {
     private:
         decay_rvalue_t<V> vec;
     public:
-        explicit Transpose(V&& vec_) : vec(std::forward<V>(vec_)) {}
+        constexpr explicit Transpose(V&& vec_) : vec(std::forward<V>(vec_)) {}
         Transpose(const This&) = default;
         Transpose(This&&) noexcept = default;
         ~Transpose() = default;
@@ -118,9 +118,9 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] T calc(size_t row, size_t col) const;
+        [[nodiscard]] constexpr T calc(size_t row, size_t col) const;
 
-        [[nodiscard]] auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto&& transpose(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
@@ -133,13 +133,13 @@ namespace Physica {
     };
 
     template<Vector V>
-    auto Transpose<V>::calc([[maybe_unused]] size_t row, size_t col) const -> T {
+    constexpr auto Transpose<V>::calc([[maybe_unused]] size_t row, size_t col) const -> T {
         assert(row == 0);
         return vec.calc(col);
     }
 
     template<Vector V>
-    auto&& Transpose<V>::transpose(this auto&& self) noexcept {
+    constexpr auto&& Transpose<V>::transpose(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
 

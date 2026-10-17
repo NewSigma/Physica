@@ -104,7 +104,7 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    void RValueVector<Derived, ScalarT>::assert_assign(const Vector auto& source) const noexcept {
+    constexpr void RValueVector<Derived, ScalarT>::assert_assign(const Vector auto& source) const noexcept {
         static_assert_assign(source);
         if constexpr (std::same_as<Derived, std::remove_cvref_t<decltype(source)>>)
             assert(this != &source && "[Error]: Self assign is likely a bug");
@@ -222,12 +222,12 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    void RValueVector<Derived, ScalarT>::resize(this auto& self, const Vector auto& x) {
+    constexpr void RValueVector<Derived, ScalarT>::resize(this auto& self, const Vector auto& x) {
         self.resize(x.getLength());
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueVector<Derived, ScalarT>::resize(this auto& self, size_t length) {
+    constexpr auto RValueVector<Derived, ScalarT>::resize(this auto& self, size_t length) {
         self.resize(length);
     }
 
@@ -278,7 +278,7 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    auto RValueVector<Derived, ScalarT>::transpose(this auto&& self) noexcept {
+    constexpr auto RValueVector<Derived, ScalarT>::transpose(this auto&& self) noexcept {
         using Self = decltype(self);
         return Transpose<Self>(std::forward<Self>(self));
     }

@@ -39,7 +39,7 @@ namespace Physica {
         size_t fromCol;
         [[no_unique_address]] MaybeColCount colCount;
     public:
-        StridedMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
+        constexpr StridedMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         StridedMatrixBlock(const This&) = default;
         StridedMatrixBlock(This&&) noexcept = default;
         ~StridedMatrixBlock() = default;
@@ -49,7 +49,7 @@ namespace Physica {
         using Base::operator=;
         /* Operations */
         using Base::resize;
-        void resize(size_t length);
+        constexpr void resize(size_t length);
 
         [[nodiscard]] auto&& row(this auto&&, size_t r) noexcept requires(Row == 1);
         [[nodiscard]] auto&& col(this auto&&, size_t c) noexcept requires(Col == 1);
@@ -60,14 +60,14 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] constexpr size_t getLength() const noexcept;
         [[nodiscard]] constexpr size_t getStride() const noexcept;
-        [[nodiscard]] auto data_handle(this auto&& self) noexcept;
+        [[nodiscard]] constexpr auto data_handle(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept;
     };
 
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
-    StridedMatrixBlock<M, Row, Col>::StridedMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
+    constexpr StridedMatrixBlock<M, Row, Col>::StridedMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
             : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , rowCount(rowCount)
@@ -95,7 +95,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
-    void StridedMatrixBlock<M, Row, Col>::resize([[maybe_unused]] size_t length) {
+    constexpr void StridedMatrixBlock<M, Row, Col>::resize([[maybe_unused]] size_t length) {
         assert(length == getLength());
     }
 
@@ -148,7 +148,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
-    auto StridedMatrixBlock<M, Row, Col>::data_handle(this auto&& self) noexcept {
+    constexpr auto StridedMatrixBlock<M, Row, Col>::data_handle(this auto&& self) noexcept {
         return self.mat.data_ptr(self.fromRow, self.fromCol);
     }
 
@@ -176,7 +176,7 @@ namespace Physica {
         size_t fromCol;
         [[no_unique_address]] MaybeColCount colCount;
     public:
-        StridedMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
+        constexpr StridedMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         StridedMatrixBlock(const This&) = default;
         StridedMatrixBlock(This&&) noexcept = default;
         ~StridedMatrixBlock() = default;
@@ -186,7 +186,7 @@ namespace Physica {
         using Base::operator=;
         /* Operations */
         using Base::resize;
-        void resize(size_t row, size_t col);
+        constexpr void resize(size_t row, size_t col);
 
         [[nodiscard]] auto row(this auto&&, size_t r) noexcept;
         [[nodiscard]] auto col(this auto&&, size_t c) noexcept;
@@ -213,7 +213,7 @@ namespace Physica {
         [[nodiscard]] constexpr size_t getOrder() const noexcept;
         [[nodiscard]] constexpr size_t getRowStride() const noexcept;
         [[nodiscard]] constexpr size_t getColStride() const noexcept;
-        [[nodiscard]] auto data_handle(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto data_handle(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
@@ -221,7 +221,7 @@ namespace Physica {
     };
 
     template<Matrix M, size_t Row, size_t Col>
-    StridedMatrixBlock<M, Row, Col>::StridedMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
+    constexpr StridedMatrixBlock<M, Row, Col>::StridedMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
             : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , rowCount(rowCount)
@@ -244,7 +244,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    void StridedMatrixBlock<M, Row, Col>::resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
+    constexpr void StridedMatrixBlock<M, Row, Col>::resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
         assert(row == getRow());
         assert(col == getCol());
     }
@@ -417,7 +417,7 @@ namespace Physica {
     }
 
     template<Matrix M, size_t Row, size_t Col>
-    auto StridedMatrixBlock<M, Row, Col>::data_handle(this auto&& self) noexcept {
+    constexpr auto StridedMatrixBlock<M, Row, Col>::data_handle(this auto&& self) noexcept {
         return self.mat.data_ptr(self.fromRow, self.fromCol);
     }
 

@@ -22,24 +22,24 @@
 
 namespace Physica {
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(Storage storage) noexcept : storage(std::move(storage)) {}
+    constexpr DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(Storage storage) noexcept : storage(std::move(storage)) {}
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(size_t order) : DenseMatrix(order, order) {}
+    constexpr DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(size_t order) : DenseMatrix(order, order) {}
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(size_t row, size_t col)
+    constexpr DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(size_t row, size_t col)
             : storage(row, col) {}
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(size_t row, size_t col, T value)
+    constexpr DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(size_t row, size_t col, T value)
             : storage(row, col, std::move(value)) {}
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(std::initializer_list<T> list) : storage(list) {}
+    constexpr DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(std::initializer_list<T> list) : storage(list) {}
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(std::initializer_list<VectorIniter> list)
+    constexpr DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(std::initializer_list<VectorIniter> list)
             : DenseMatrix(MatrixMajor::isColMatrix<This>() ? list.begin()->getLength() : list.size(),
                           MatrixMajor::isColMatrix<This>() ? list.size() : list.begin()->getLength()) {
         size_t major = 0;
@@ -81,7 +81,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    void DenseMatrix<T, Major, Row, Col, Allocator>::zeros(this auto& self) noexcept {
+    constexpr void DenseMatrix<T, Major, Row, Col, Allocator>::zeros(this auto& self) noexcept {
         self.storage.zeros();
     }
 
@@ -107,7 +107,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    auto DenseMatrix<T, Major, Row, Col, Allocator>::data_handle(this auto&& self) noexcept {
+    constexpr auto DenseMatrix<T, Major, Row, Col, Allocator>::data_handle(this auto&& self) noexcept {
         return self.storage.data();
     }
 
@@ -132,7 +132,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    auto DenseMatrix<T, Major, Row, Col, Allocator>::zeros(size_t row, size_t col) -> This {
+    constexpr auto DenseMatrix<T, Major, Row, Col, Allocator>::zeros(size_t row, size_t col) -> This {
         DenseMatrix result(row, col);
         result.zeros();
         return result;

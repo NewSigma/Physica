@@ -52,6 +52,18 @@ namespace {
         expect(z == 3);
     }
 
+    void constant_evaluate() {
+        static_assert([]() consteval {
+            VectorND<float32> v{
+                {1, 2, 3}
+            };
+            v[0] = float32(4);
+            return v.calc(0) + v.calc(1) + v.transpose().calc(0, 2);
+        }() == float32(4 + 2 + 3));
+        static_assert(VectorND<float32>::zeros(2).calc(1) == float32(0));
+        static_assert(VectorND<float32>(3, float32(2)).calc(2) == float32(2));
+    }
+
     void formatTest() {
         static_assert(std::formattable<VectorND<float64>, char>);
 
@@ -246,6 +258,7 @@ int main() {
     rangeTest<Vector4D<float32>>();
     rangeTest<VectorND<float64>>();
     strucBindTest();
+    constant_evaluate();
     formatTest();
 
     reserveTest();

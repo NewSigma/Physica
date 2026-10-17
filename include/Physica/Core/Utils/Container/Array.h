@@ -108,13 +108,13 @@ namespace Physica {
         [[no_unique_address]] Allocator alloc;
     public:
         Array() = default;
-        explicit Array(size_t length_, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value);
-        Array(std::initializer_list<T> list) noexcept;
+        constexpr explicit Array(size_t length_, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value);
+        constexpr Array(std::initializer_list<T> list) noexcept;
         template<size_t Length, class OtherAlloc>
-        Array(const Array<T, Length, OtherAlloc>& other) noexcept(std::is_nothrow_copy_assignable<T>::value);
-        Array(const This& obj) noexcept(std::is_nothrow_copy_constructible<T>::value);
-        Array(This&& obj) noexcept;
-        ~Array();
+        constexpr Array(const Array<T, Length, OtherAlloc>& other) noexcept(std::is_nothrow_copy_assignable<T>::value);
+        constexpr Array(const This& obj) noexcept(std::is_nothrow_copy_constructible<T>::value);
+        constexpr Array(This&& obj) noexcept;
+        constexpr ~Array();
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
@@ -128,7 +128,7 @@ namespace Physica {
         void squeeze() noexcept;
         void clear() noexcept;
         [[nodiscard]] T* release() noexcept;
-        void zeros() noexcept;
+        constexpr void zeros() noexcept;
         void junk() noexcept;
         void read(const T* __restrict p) noexcept;
 
@@ -144,11 +144,11 @@ namespace Physica {
         void swap(This& obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept { return Dynamic; }
-        [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
-        [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
-        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data(this auto&&) noexcept;
-        [[nodiscard]] auto get_allocator() const noexcept { return alloc; }
+        [[nodiscard]] __host__ __device__ constexpr size_t size() const noexcept { return length; }
+        [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return length; }
+        [[nodiscard]] __host__ __device__ constexpr size_t getCapacity() const noexcept { return capacity; }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ constexpr auto* data(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto get_allocator() const noexcept { return alloc; }
         /* Static members */
         [[nodiscard]] static This read(size_t length, const T* __restrict p) noexcept;
         template<ExecutePolicy P = Sequential>

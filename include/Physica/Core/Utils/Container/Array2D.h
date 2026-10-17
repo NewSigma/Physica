@@ -54,17 +54,17 @@ namespace Physica {
         [[no_unique_address]] IndexType r = 0;
     public:
         Array2D() = default;
-        explicit Array2D(size_t order);
-        Array2D(size_t row, size_t col, auto&&... args);
-        Array2D(std::initializer_list<T> list);
-        Array2D(std::initializer_list<ArrayType> list);
+        constexpr explicit Array2D(size_t order);
+        constexpr Array2D(size_t row, size_t col, auto&&... args);
+        constexpr Array2D(std::initializer_list<T> list);
+        constexpr Array2D(std::initializer_list<ArrayType> list);
         Array2D(const This&) = default;
         Array2D(This&&) noexcept = default;
         ~Array2D() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] T& operator[](size_t r, size_t c);
-        [[nodiscard]] const T& operator[](size_t r, size_t c) const;
+        [[nodiscard]] constexpr T& operator[](size_t r, size_t c);
+        [[nodiscard]] constexpr const T& operator[](size_t r, size_t c) const;
         /* Operations */
         void resize(size_t row, size_t col, auto&&... args);
         void resize(size_t order);
@@ -80,16 +80,16 @@ namespace Physica {
         [[nodiscard]] auto row(size_t r) const noexcept;
         [[nodiscard]] auto col(size_t c) const noexcept;
 
-        void zeros() noexcept;
+        constexpr void zeros() noexcept;
         void junk() noexcept;
         void read(const T* __restrict p) noexcept;
         void swap(This& __restrict obj) noexcept;
         void swap_row(size_t r1, size_t r2) noexcept;
         void swap_col(size_t c1, size_t c2) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ auto&& asArray(this auto&& self) noexcept { return self.arr; }
-        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data(this auto&&) noexcept;
-        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data_ptr(this auto&&, size_t row, size_t col) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr auto&& asArray(this auto&& self) noexcept { return self.arr; }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ constexpr auto* data(this auto&&) noexcept;
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ constexpr auto* data_ptr(this auto&&, size_t row, size_t col) noexcept;
         [[nodiscard]] __host__ __device__ constexpr size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ constexpr size_t getCol() const noexcept;
         [[nodiscard]] __host__ __device__ constexpr size_t getSize() const noexcept;
@@ -103,9 +103,9 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         [[nodiscard]] static This generate(std::invocable<size_t, size_t> auto fn, size_t row, size_t col);
     private:
-        Array2D(ArrayType arr_, IndexType r_) noexcept;
+        constexpr Array2D(ArrayType arr_, IndexType r_) noexcept;
 
-        [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t toIndex1D(size_t r, size_t c) const noexcept;
         /* Friends */
         friend class Array2D<T, TransOption, Col, Row, Allocator>;
         friend class device_obj<This>;

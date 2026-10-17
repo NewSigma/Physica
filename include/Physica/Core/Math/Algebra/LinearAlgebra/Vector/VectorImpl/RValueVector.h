@@ -121,7 +121,7 @@ namespace Physica {
         void assign_base(Vector auto&& v) const noexcept;
         template<ExecutePolicy P = Sequential>
         void assign_add(Vector auto&& v) const noexcept;
-        void assert_assign(const Vector auto& source) const noexcept;
+        constexpr void assert_assign(const Vector auto& source) const noexcept;
         void assert_assign_lapack(const Vector auto& source) const noexcept;
 
         [[nodiscard]] decltype(auto) calc(size_t index) const noexcept;
@@ -134,8 +134,8 @@ namespace Physica {
         void reverse(this const auto&, const auto& grad) noexcept;
         void reverse(this const auto&, const Vector auto& y, const Vector auto& grad) noexcept;
 
-        void resize(this auto&, const Vector auto& x);
-        auto resize(this auto&, size_t length);
+        constexpr void resize(this auto&, const Vector auto& x);
+        constexpr auto resize(this auto&, size_t length);
 
         template<size_t Length = Dynamic>
         [[nodiscard]] auto head(this auto&&, size_t to = Length) noexcept;
@@ -152,7 +152,7 @@ namespace Physica {
         [[nodiscard]] auto reshape_like(this auto&&, const Matrix auto& mat) noexcept;
         [[nodiscard]] auto reversal() noexcept;
         [[nodiscard]] const auto reversal() const noexcept;
-        [[nodiscard]] auto transpose(this auto&&) noexcept;
+        [[nodiscard]] constexpr auto transpose(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
         [[nodiscard]] auto hermite(this auto&&) noexcept;
         [[nodiscard]] auto format() const;
@@ -195,7 +195,7 @@ namespace Physica {
         [[nodiscard]] decltype(auto) grads_mask(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr size_t getLength() const noexcept { return Base::getDerived().getLength(); }
-        [[nodiscard]] bool empty() const noexcept { return getLength() == 0; }
+        [[nodiscard]] constexpr bool empty() const noexcept { return getLength() == 0; }
         [[nodiscard]] bool isZero() const;
         [[nodiscard]] bool isFinite() const;
         [[nodiscard]] bool isSubNormal() const;

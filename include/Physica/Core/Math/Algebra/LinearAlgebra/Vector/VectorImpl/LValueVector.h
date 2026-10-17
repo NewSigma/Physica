@@ -47,22 +47,22 @@ namespace Physica {
         This& operator=(const This& v) = delete;
         This& operator=(This&& v) noexcept = delete;
 
-        auto operator=(Scalar auto x) noexcept -> Derived&;
+        constexpr auto operator=(Scalar auto x) noexcept -> Derived&;
         void operator+=(Scalar auto x) noexcept;
         void operator-=(Scalar auto x) noexcept;
         void operator*=(Scalar auto x) noexcept;
         void operator/=(Scalar auto x) noexcept;
 
         template<ExecutePolicy P = Sequential>
-        auto operator=(const Vector auto& v) -> Derived&;
+        constexpr auto operator=(const Vector auto& v) -> Derived&;
         void operator+=(const Vector auto& v);
         void operator-=(const Vector auto& v);
 
         auto operator=(std::ranges::range auto&& r) noexcept -> Derived& requires(!Vector<decltype(r)>);
-        [[nodiscard]] decltype(auto) operator[](this auto&&, size_t index);
-        [[nodiscard]] decltype(auto) operator[](this auto&&, const Var& var);
+        [[nodiscard]] constexpr decltype(auto) operator[](this auto&&, size_t index);
+        [[nodiscard]] constexpr decltype(auto) operator[](this auto&&, const Var& var);
         /* Operations */
-        [[nodiscard]] decltype(auto) calc(size_t index) const;
+        [[nodiscard]] constexpr decltype(auto) calc(size_t index) const;
         void writePacket(Packet auto packet, size_t index) noexcept;
         void writePacket(Packet auto packet, size_t index, size_t count) noexcept;
         [[nodiscard]] constexpr auto view(this auto&&) noexcept;
@@ -91,7 +91,7 @@ namespace Physica {
         template<RNG R> void random_rademacher(this auto&);
         template<RNG R> void random_any(auto& distribution);
         /* Getters */
-        [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
+        [[nodiscard]] constexpr auto data_ptr(this auto&&, size_t index) noexcept;
         [[nodiscard]] auto& front(this auto&&) noexcept;
         [[nodiscard]] auto& back(this auto&&) noexcept;
         /* Static members */
