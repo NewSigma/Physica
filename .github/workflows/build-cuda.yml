@@ -10,10 +10,6 @@ on:
     branches: [ "Physica", "dev" ]
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   debug:
     uses: ./.github/workflows/preset.yml
