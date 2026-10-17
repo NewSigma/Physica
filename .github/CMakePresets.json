@@ -1,0 +1,76 @@
+{
+  "version": 5,
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "displayName": "Base",
+      "description": "Common configuration, not meant to be used directly",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/dist",
+        "CMAKE_C_COMPILER": "clang-23",
+        "CMAKE_CXX_COMPILER": "clang++-23",
+        "CMAKE_LINKER_TYPE": "LLD",
+        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+        "CMAKE_CXX_FLAGS": "-Werror -mrdseed",
+        "PHYSICA_ARCH": "x86-64-v3",
+        "PHYSICA_CCACHE": "ON"
+      }
+    },
+    {
+      "name": "minimal",
+      "inherits": "base",
+      "displayName": "Minimal",
+      "description": "fftw only",
+      "cacheVariables": {
+        "BUILD_BENCHMARKS": "ON"
+      }
+    },
+    {
+      "name": "full",
+      "inherits": "base",
+      "displayName": "Full",
+      "description": "Every optional dependency except CUDA",
+      "cacheVariables": {
+        "PHYSICA_HDF5": "ON",
+        "PHYSICA_MKL": "ON",
+        "PHYSICA_MPI": "ON",
+        "PHYSICA_MIMALLOC": "ON",
+        "PHYSICA_GUI": "ON",
+        "BUILD_EXAMPLES": "ON",
+        "BUILD_BENCHMARKS": "ON"
+      }
+    },
+    {
+      "name": "cuda",
+      "inherits": "full",
+      "displayName": "CUDA",
+      "description": "Every optional dependency",
+      "cacheVariables": {
+        "CMAKE_CUDA_COMPILER": "clang++-23",
+        "CMAKE_CUDA_ARCHITECTURES": "89",
+        "PHYSICA_CUDA": "ON",
+        "WarpSize": "32",
+        "FullUnifiedSupport": "true",
+        "MemoryPoolsSupported": "true"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "minimal",
+      "configurePreset": "minimal"
+    },
+    {
+      "name": "full",
+      "configurePreset": "full"
+    },
+    {
+      "name": "cuda",
+      "configurePreset": "cuda"
+    }
+  ]
+}

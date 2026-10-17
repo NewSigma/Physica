@@ -12,7 +12,7 @@
 [clang](https://clang.llvm.org/) 
 [IntelLLVM](https://www.intel.cn/content/www/cn/zh/developer/tools/oneapi/dpc-compiler.html)
 
-See `.github/workflows/preset-*.yml` for detailed version requirements.
+See `.github/workflows/preset.yml` for detailed version requirements.
 
 3. Addtional libraries:
 

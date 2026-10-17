@@ -16,12 +16,18 @@ concurrency:
 
 jobs:
   debug:
-    uses: ./.github/workflows/preset-cuda.yml
+    uses: ./.github/workflows/preset.yml
     with:
+      preset: cuda
       build_config: Debug
+      test: false
+      install: false
 
   release:
     needs: debug
-    uses: ./.github/workflows/preset-cuda.yml
+    uses: ./.github/workflows/preset.yml
     with:
+      preset: cuda
       build_config: Release
+      test: false
+      install: false

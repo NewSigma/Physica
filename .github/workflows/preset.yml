@@ -1,0 +1,112 @@
+name: Build-Test Preset
+
+on:
+  workflow_call:
+    inputs:
+      preset:
+        required: true
+        type: string
+        description: 'Configure preset to use (minimal, full or cuda)'
+      build_config:
+        required: true
+        type: string
+        description: 'Debug or Release'
+      test:
+        required: true
+        type: boolean
+      install:
+        required: true
+        type: boolean
+    outputs:
+      artifact:
+        value: ${{ jobs.build.outputs.artifact }}
+        description: 'Name of the uploaded artifact'
+
+defaults:
+  run:
+    shell: bash -l {0}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CCACHE_COMPILERCHECK: content
+    outputs:
+      artifact: ${{ format('physica-{0}-{1}', inputs.preset, inputs.build_config) }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7.0.1
+      with:
+        repository: ${{ job.workflow_repository }}
+        ref: ${{ job.workflow_sha }}
+        path: PhysicaSrc
+
+    - name: Print hardware info
+      run: |
+        uname -a
+        lscpu | grep -E 'Vendor ID|Model name|Flags|Hypervisor'
+        echo nproc: `nproc`
+
+    - name: Install ccache
+      uses: hendrikmuhs/ccache-action@v1.2.23
+      with:
+        key: ${{ inputs.preset }}-${{ inputs.build_config }}
+
+    - name: Install clang
+      uses: egor-tensin/setup-clang@v2.3
+      with:
+        version: 23
+        platform: # optional, default is x64
+        cc: # optional, default is 1
+
+    - name: Install conda
+      uses: conda-incubator/setup-miniconda@v4.0.1
+      with:
+        activate-environment: physica
+        environment-file: PhysicaSrc/.github/env/${{ inputs.preset }}.yml
+        channels: conda-forge
+
+    - name: Configure
+      run: >
+        cmake --preset ${{ inputs.preset }} -S PhysicaSrc
+        -DCMAKE_BUILD_TYPE=${{ inputs.build_config }}
+        -DBUILD_TESTS=${{ inputs.test }}
+
+    - name: Reset ccache statistics
+      run: ccache -z
+
+    - name: Build
+      run: cmake --build PhysicaSrc/build/${{ inputs.preset }} --parallel
+
+    - name: Print ccache statistics
+      run: |
+        ccache -s
+        cleanups=$(ccache --print-stats | awk -F'\t' '$1=="cleanups_performed"{print $2}')
+        if [ "${cleanups:-0}" -gt 0 ]; then
+          echo "::warning::ccache hit its size limit and evicted entries (${cleanups} cleanup(s)); consider raising max-size."
+        fi
+
+    - name: Test
+      if: ${{ inputs.test }}
+      working-directory: PhysicaSrc/build/${{ inputs.preset }}/test
+      run: ctest --parallel --output-on-failure .
+
+    - name: Install
+      if: ${{ inputs.install }}
+      run: cmake --install PhysicaSrc/build/${{ inputs.preset }}
+
+    - name: Stage artifact
+      if: ${{ inputs.install }}
+      run: |
+        mkdir -p artifact
+        cp -a PhysicaSrc/dist artifact/dist
+        cp PhysicaSrc/.github/env/${{ inputs.preset }}.yml artifact/physica-env.yml
+
+    - name: Upload artifact
+      if: ${{ inputs.install }}
+      uses: actions/upload-artifact@v7.0.2
+      with:
+        name: ${{ format('physica-{0}-{1}', inputs.preset, inputs.build_config) }}
+        path: artifact

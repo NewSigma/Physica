@@ -16,12 +16,18 @@ concurrency:
 
 jobs:
   debug:
-    uses: ./.github/workflows/preset-minimal.yml
+    uses: ./.github/workflows/preset.yml
     with:
+      preset: minimal
       build_config: Debug
+      test: true
+      install: false
 
   release:
     needs: debug
-    uses: ./.github/workflows/preset-minimal.yml
+    uses: ./.github/workflows/preset.yml
     with:
+      preset: minimal
       build_config: Release
+      test: true
+      install: false

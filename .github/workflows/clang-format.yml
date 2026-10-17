@@ -34,4 +34,4 @@ jobs:
     - name: Run clang-format
       shell: bash -el {0}
       run: |
-        git clang-format HEAD^ --diff --binary="$(which clang-format-23)"
+        git clang-format HEAD^ --diff --binary="$(which clang-format-23)" --extensions=c,cc,cp,cpp,c++,cxx,h,hh,hpp,hxx,inc,ccm,cppm,cxxm,c++m,cu,cuh

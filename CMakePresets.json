@@ -1,0 +1,6 @@
+{
+  "version": 5,
+  "include": [
+    ".github/CMakePresets.json"
+  ]
+}
