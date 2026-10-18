@@ -150,7 +150,7 @@ namespace Physica {
         auto [lnAD, sgnD] = calcDet();
         lnWeight = lnAD;
         sign = sgnD;
-        calcGreen<P>();
+        calcGreen<P>().wait();
         return acceptR;
     }
 

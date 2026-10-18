@@ -75,9 +75,9 @@ namespace Physica {
     template<Scalar T>
     void PairingSampler<T>::sample(const GreenPair& greens, T rsign) {
         auto buffer = MatrixND<T>(corr.getRow(), corr.getCol(), 0);
-        for (int siteI = 0; siteI < getNumSite(); ++siteI) {
+        for (size_t siteI = 0; siteI < getNumSite(); ++siteI) {
             const auto from = lattice.toIndexND(siteI);
-            for (int siteM = 0; siteM < getNumSite(); ++siteM) {
+            for (size_t siteM = 0; siteM < getNumSite(); ++siteM) {
                 const auto to = lattice.toIndexND(siteM);
                 auto dist = to.shift(0, -ssize_t(from[0]), lattice.getNumCellX())
                               .shift(1, -ssize_t(from[1]), lattice.getNumCellY());
@@ -133,7 +133,7 @@ namespace Physica {
         case Dxxyy: {
             Array<int, 4> shiftDims{0, 1, 0, 1};
             Array<int, 4> deltas{1, 1, -1, -1};
-            for (int i = 0; i < shiftDims.size(); ++i) {
+            for (size_t i = 0; i < shiftDims.size(); ++i) {
                 int shiftDim = shiftDims[i];
                 fn(i, center.shift(shiftDim, deltas[i], lattice.getSuperSize()[shiftDim]));
             }

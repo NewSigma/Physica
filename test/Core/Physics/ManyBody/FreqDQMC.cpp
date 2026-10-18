@@ -20,6 +20,7 @@
 #include "Physica/Core/Physics/ManyBody/ElasticDQMC.h"
 #include "Physica/Core/Physics/ManyBody/GreenSampler/ScalarSampler.h"
 #include "Physica/Core/Physics/MC/HamiltonMC.h"
+#include "Physica/Core/Parallel/Algorithm/Thread.h"
 #include "Test.h"
 
 using namespace Physica;
@@ -41,6 +42,7 @@ namespace {
         const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, 1);
         auto dqmc = FreqDQMC<Tc>(params, freqDensity);
         dqmc.step_for<RandomSource>(1);
+        dqmc.step_for<RandomSource, Thread>(1); // Regression test for the Thread executor warnings
 
         auto& engine = dqmc.getHMC().getRoot();
         engine.setTimeStep(StepSize);
