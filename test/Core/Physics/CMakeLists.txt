@@ -7,6 +7,9 @@ add_subdirectory(ManyBody)
 add_subdirectory(MD)
 ### Phonon
 physica_add_test(FCSwapVector Phonon/FCSwapVector.cpp)
+if(${PHYSICA_HDF5})
+    physica_add_test(FrozenPhonon Phonon/FrozenPhonon.cpp)
+endif()
 ### SolidState
 physica_add_test(BrillouInterpolate SolidState/BrillouInterpolate.cpp)
 physica_add_test(CrystalCell SolidState/CrystalCell.cpp)

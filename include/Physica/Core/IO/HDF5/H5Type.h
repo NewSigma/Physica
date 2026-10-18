@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cstdint>
+#include <ranges>
 #include <type_traits>
 #include <H5Tpublic.h>
 #include "Physica/Core/Utils/PrimitiveType.h"
@@ -103,6 +104,8 @@ namespace Physica {
             return getPrimitiveType(PrimitiveType::LongDouble);
         else if constexpr (std::is_enum_v<T>)
             return get<std::underlying_type_t<T>>();
+        else if constexpr (std::ranges::contiguous_range<T>)
+            return H5Type::get<std::ranges::range_value_t<T>>();
         else
             return T::dtype_hdf5();
     }

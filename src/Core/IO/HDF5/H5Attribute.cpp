@@ -20,6 +20,7 @@
 #include <cassert>
 #include <utility>
 #include "H5Apublic.h"
+#include "H5Spublic.h"
 
 using namespace Physica;
 
@@ -39,6 +40,17 @@ void H5Attribute::read(const H5Type& dtype, void* buf) const {
 void H5Attribute::write(const H5Type& dtype, const void* buf) const {
     checkWrite();
     H5Awrite(getHID(), dtype.getHID(), buf);
+}
+
+size_t H5Attribute::getSize() const noexcept {
+    const auto space = H5ID(H5Aget_space(getHID()));
+    const auto dim = H5Sget_simple_extent_ndims(space.getHID());
+    assert(dim >= 0 && "[Error]: Failed to query the attribute space");
+    assert(dim <= 1 && "[Error]: High dim attribute is not supported");
+    hsize_t result = 1;
+    if (dim == 1)
+        H5Sget_simple_extent_dims(space.getHID(), &result, nullptr);
+    return result;
 }
 
 void H5Attribute::swap(H5Attribute& obj) noexcept {

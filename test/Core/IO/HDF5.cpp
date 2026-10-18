@@ -98,7 +98,7 @@ namespace {
             auto dataset = group.createDataSet<1>("D", type, space);
             dataset.write(&value);
             auto attr = group.createAttribute("A", type, space);
-            attr.write(&value);
+            attr.write(value);
         }
 
         auto h5f = H5File::open(temp.getName(), H5File::ReadOnly);
@@ -113,7 +113,7 @@ namespace {
         expect_throw([&] { std::ignore = h5f.createDataSet<1>("/new", type, space); });
         expect_throw([&] { std::ignore = group.createAttribute("B", type, space); });
         expect_throw([&] { h5f.openDataSet<1>("/G/D").write(&value); });
-        expect_throw([&] { group.openAttribute("A").write(&value); });
+        expect_throw([&] { group.openAttribute("A").write(value); });
         expect_throw_msg([&] { std::ignore = H5Group::create(h5f, "G2"); }, "Cannot write a readonly file");
 
         // Reports a missing object as missing instead of attempting to create it.
@@ -131,13 +131,13 @@ namespace {
         {
             auto h5f = H5File::open(temp.getName());
             auto attr = h5f.createAttribute("A", H5Type::get<int>(), H5DataSpace<1>(1));
-            attr.write(&value);
+            attr.write(value);
         }
         {
             int result = 0;
             auto h5f = H5File::open(temp.getName(), H5File::ReadOnly);
             auto attr = h5f.openAttribute("A");
-            attr.read(&result);
+            attr.read(result);
             expect(result == value);
         }
     }

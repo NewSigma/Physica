@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cassert>
+#include <ranges>
 #include <utility>
 #include <H5Ppublic.h>
 #include "Physica/Core/Exception/IOException.h"
@@ -48,7 +49,7 @@ namespace Physica {
     private:
         /* Static members */
         template<class T>
-        consteval static size_t calcNumElem() noexcept;
+        constexpr static size_t calcNumElem(const T& value) noexcept;
     };
 
     H5Attribute Attributable::openAttribute(this auto&& self, const char* name) {
@@ -64,21 +65,19 @@ namespace Physica {
     }
 
     void Attributable::readAttr(this const auto& self, const char* name, auto& value) {
-        using T = std::remove_reference_t<decltype(value)>;
-        const auto type = H5Type::get<T>();
-        self.openAttribute(name).read(type, &value);
+        self.openAttribute(name).read(value);
     }
 
     void Attributable::writeAttr(this auto&& self, const char* name, const auto& value) {
         using T = std::remove_cvref_t<decltype(value)>;
         const auto type = H5Type::get<T>();
-        const auto space = H5DataSpace<1>(calcNumElem<T>());
+        const auto space = H5DataSpace<1>(calcNumElem(value));
         H5Attribute attr;
         if (self.attrExists(name))
             attr = self.openAttribute(name);
         else
             attr = self.createAttribute(name, type, space);
-        attr.write(type, &value);
+        attr.write(value);
     }
 
     bool Attributable::attrExists(this const auto& self, const char* name) noexcept {
@@ -86,11 +85,14 @@ namespace Physica {
     }
 
     template<class T>
-    consteval size_t Attributable::calcNumElem() noexcept {
-        constexpr bool IsArray = std::is_array<T>::value;
-        constexpr size_t NumElem = IsArray ? std::extent<T>::value : 1;
-        static_assert(!IsArray || std::rank<T>::value == 1, "[Error]: High dim array is not supported");
-        static_assert(NumElem > 0, "[Error]: Bad array size");
-        return NumElem;
+    constexpr size_t Attributable::calcNumElem([[maybe_unused]] const T& value) noexcept {
+        if constexpr (std::is_array_v<T>) {
+            static_assert(std::rank_v<T> == 1, "[Error]: High dim array is not supported");
+            return std::extent_v<T>;
+        }
+        else if constexpr (std::ranges::contiguous_range<T>)
+            return std::ranges::size(value);
+        else
+            return 1;
     }
 }

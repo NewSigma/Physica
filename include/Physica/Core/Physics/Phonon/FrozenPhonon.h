@@ -175,22 +175,29 @@ namespace Physica {
     template<Scalar T>
     void FrozenPhonon<T>::read(RSpaceFCGrid& rSpaceFC, const H5Loc& loc, const char* name) {
         const auto group = loc.openGroup(name);
-        unsigned char superSize[Dim];
-        auto attr = group.openAttribute("SuperSize");
-        attr.read(superSize);
-        const Index3D gridDim{superSize[0], superSize[1], superSize[2]};
+        Array<unsigned char, Dim> superSize{};
+        group.readAttr("SuperSize", superSize);
+
+        const auto sample = group.openDataSet<2>("0_0_0");
+        Index<5> gridDim;
+        for (unsigned int i = 0; i < Dim; ++i)
+            gridDim[i] = superSize[i];
+        gridDim[Dim] = sample.getSize(0);
+        gridDim[Dim + 1] = sample.getSize(1);
         rSpaceFC.resize(gridDim);
-        rSpaceFC.forND([&group](RSpaceFCMat& fc, Index3D index) {
-            fc.read(group, std::format("{}_{}_{}", index[0], index[1], index[2]).c_str());
+
+        forND(Index3D{gridDim[0], gridDim[1], gridDim[2]}, [&group, &rSpaceFC](Index3D index) {
+            rSpaceFC.slice(index[0], index[1], index[2], var(), var())
+                    .read(group, std::format("{}_{}_{}", index[0], index[1], index[2]).c_str());
         });
     }
 
     template<Scalar T>
     void FrozenPhonon<T>::write(const RSpaceFCGrid& rSpaceFC, H5Loc& loc, const char* name) {
         auto group = loc.openGroup(name);
+        const auto shape = rSpaceFC.getShape();
         /* Write superSize */ {
-            const auto shape = rSpaceFC.getShape();
-            unsigned char superSize[Dim];
+            Array<unsigned char, Dim> superSize{};
             for (unsigned int i = 0; i < Dim; ++i) {
                 assert(shape[i] <= std::numeric_limits<unsigned char>::max() && "[Error]: Unexpected large super cell");
                 superSize[i] = shape[i];
@@ -198,8 +205,9 @@ namespace Physica {
             group.writeAttr("SuperSize", superSize);
         }
 
-        rSpaceFC.forND([&group, &rSpaceFC](const RSpaceFCMat& fc, Index3D index) {
-            fc.write(group, std::format("{}_{}_{}", index[0], index[1], index[2]).c_str());
+        forND(Index3D{shape[0], shape[1], shape[2]}, [&group, &rSpaceFC](Index3D index) {
+            rSpaceFC.slice(index[0], index[1], index[2], var(), var())
+                    .write(group, std::format("{}_{}_{}", index[0], index[1], index[2]).c_str());
         });
     }
 #endif
