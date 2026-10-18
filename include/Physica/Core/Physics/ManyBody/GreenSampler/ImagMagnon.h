@@ -50,7 +50,7 @@ namespace Physica {
     template<Scalar T>
     ImagMagnon<T>::ImagMagnon(const HubbardParams<T>& params, size_t numSample)
             : Base(params, numSample)
-            , magnons(numSample, params.getNumSite(), FFT<T>::rSizeToKSize(params.getNumSplit()))
+            , magnons(numSample, size_t(params.getNumSite()), size_t(FFT<T>::rSizeToKSize(params.getNumSplit())))
             , fft(params.getNumSplit(), PlanFlag::Estimate) {}
 
     template<Scalar T>

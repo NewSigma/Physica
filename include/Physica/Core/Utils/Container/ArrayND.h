@@ -74,9 +74,7 @@ namespace Physica {
 
         [[nodiscard]] size_t toIndex1D(const IndexType& indices) const noexcept;
         [[nodiscard]] IndexType toIndexND(size_t index) const noexcept;
-
-        void forND(std::invocable<T&, IndexType> auto func);
-        void forND(std::invocable<const T&, IndexType> auto func) const;
+        void forND(this auto&& self, std::invocable<T&, IndexType> auto func);
 
         void zeros() noexcept;
         void junk() noexcept;

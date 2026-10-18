@@ -7,6 +7,7 @@ add_subdirectory(ManyBody)
 add_subdirectory(MD)
 ### Phonon
 physica_add_test(FCSwapVector Phonon/FCSwapVector.cpp)
+physica_add_test(PhononSolver Phonon/PhononSolver.cpp)
 if(${PHYSICA_HDF5})
     physica_add_test(FrozenPhonon Phonon/FrozenPhonon.cpp)
 endif()

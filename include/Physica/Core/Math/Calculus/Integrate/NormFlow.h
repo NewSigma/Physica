@@ -20,6 +20,7 @@
 
 #include "Physica/Core/ML/NeuralNetwork/Layer/LinearLayer.h"
 #include "Physica/Core/Parallel/Parallel.h"
+#include "Physica/Core/Parallel/ThreadPool.h"
 #include "IntegrateImpl/AdaptiveProcess.h"
 
 namespace Physica {

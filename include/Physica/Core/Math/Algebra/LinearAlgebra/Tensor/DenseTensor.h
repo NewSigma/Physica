@@ -71,21 +71,21 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static auto getShapeAtCompile() noexcept -> IndexType { return ArrayND<T, Dims...>::getShapeAtCompile(); }
         [[nodiscard]] static This zeros(IndexType shape);
-        [[nodiscard]] static This zeros(std::same_as<size_t> auto... dims);
+        [[nodiscard]] static This zeros(std::same_as<size_t> auto... dims) requires(sizeof...(dims) > 0);
         [[nodiscard]] static This junk(IndexType shape);
-        [[nodiscard]] static This junk(std::same_as<size_t> auto... dims);
+        [[nodiscard]] static This junk(std::same_as<size_t> auto... dims) requires(sizeof...(dims) > 0);
         template<RNG R>
         static DenseTensor random_uniform(IndexType shape);
         template<RNG R>
-        static DenseTensor random_uniform(std::same_as<size_t> auto... dims);
+        static DenseTensor random_uniform(std::same_as<size_t> auto... dims) requires(sizeof...(dims) > 0);
         template<RNG R>
         static DenseTensor random_normal(IndexType shape);
         template<RNG R>
-        static DenseTensor random_normal(std::same_as<size_t> auto... dims);
+        static DenseTensor random_normal(std::same_as<size_t> auto... dims) requires(sizeof...(dims) > 0);
         template<RNG R>
         [[nodiscard]] static This random_any(IndexType shape, auto& distribution);
         [[nodiscard]] static This generate(std::invocable<IndexType> auto fn, IndexType shape);
-        [[nodiscard]] static This generate(std::invocable<IndexType> auto fn, std::same_as<size_t> auto... dims);
+        [[nodiscard]] static This generate(std::invocable<IndexType> auto fn, std::same_as<size_t> auto... dims) requires(sizeof...(dims) > 0);
         [[nodiscard]] static This read(IndexType shape, const T* __restrict p) noexcept;
         /* Friends */
         friend class device_obj<This>;

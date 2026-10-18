@@ -73,16 +73,9 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
-    void ArrayND<T, Dims...>::forND(std::invocable<T&, IndexType> auto func) {
-        Physica::forND(getShape(), [this, func](const IndexType& index) mutable {
-            func(*data_ptr(index));
-        });
-    }
-
-    template<class T, int... Dims>
-    void ArrayND<T, Dims...>::forND(std::invocable<const T&, IndexType> auto func) const {
-        Physica::forND(getShape(), [this, func](const IndexType& index) mutable {
-            func(*data_ptr(index));
+    void ArrayND<T, Dims...>::forND(this auto&& self, std::invocable<T&, IndexType> auto func) {
+        Physica::forND(self.getShape(), [&self, func](const IndexType& index) mutable {
+            func(*self.data_ptr(index), index);
         });
     }
 

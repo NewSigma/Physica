@@ -47,22 +47,24 @@ namespace Physica {
         [[nodiscard]] constexpr static bool empty() noexcept { return true; }
         [[nodiscard]] constexpr static bool done() noexcept { return true; }
     };
-    
+    /**
+     * FIXME: GPU fallback is deprecated and would be removed in the future
+     */
     template<ExecutePolicy P>
-    [[gnu::always_inline, gnu::nodebug]] EmptyTask schedule(std::invocable<> auto fn) requires(P == Sequential) {
+    [[gnu::always_inline, gnu::nodebug]] EmptyTask schedule(std::invocable<> auto fn) requires(P == Sequential || P == GPU) {
         fn();
         return {};
     }
 
     template<ExecutePolicy P>
-    [[gnu::always_inline, gnu::nodebug]] EmptyTask parallel_for(auto fn, size_t num_loop) requires(P == Sequential) {
+    [[gnu::always_inline, gnu::nodebug]] EmptyTask parallel_for(auto fn, size_t num_loop) requires(P == Sequential || P == GPU) {
         for (size_t i = 0; i < num_loop; ++i)
             fn(i);
         return {};
     }
 
     template<ExecutePolicy P>
-    [[gnu::always_inline, gnu::nodebug]] EmptyTask parallel_for(auto fn, size_t num_loop, size_t) requires(P == Sequential) {
+    [[gnu::always_inline, gnu::nodebug]] EmptyTask parallel_for(auto fn, size_t num_loop, size_t) requires(P == Sequential || P == GPU) {
         for (size_t i = 0; i < num_loop; ++i)
             fn(i);
         return {};

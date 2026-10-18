@@ -138,7 +138,7 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
-    auto DenseTensor<T, Dims...>::zeros(std::same_as<size_t> auto... dims) -> This {
+    auto DenseTensor<T, Dims...>::zeros(std::same_as<size_t> auto... dims) -> This requires(sizeof...(dims) > 0) {
         static_assert(sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
         return zeros(IndexType({dims...}));
     }
@@ -151,21 +151,21 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
-    auto DenseTensor<T, Dims...>::junk(std::same_as<size_t> auto... dims) -> This {
+    auto DenseTensor<T, Dims...>::junk(std::same_as<size_t> auto... dims) -> This requires(sizeof...(dims) > 0) {
         static_assert(sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
         return junk(IndexType({dims...}));
     }
 
     template<Scalar T, int... Dims>
     template<RNG R>
-    auto DenseTensor<T, Dims...>::random_uniform(std::same_as<size_t> auto... dims) -> This {
+    auto DenseTensor<T, Dims...>::random_uniform(std::same_as<size_t> auto... dims) -> This requires(sizeof...(dims) > 0) {
         static_assert(sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
         return random_uniform<R>(IndexType({dims...}));
     }
 
     template<Scalar T, int... Dims>
     template<RNG R>
-    auto DenseTensor<T, Dims...>::random_normal(std::same_as<size_t> auto... dims) -> This {
+    auto DenseTensor<T, Dims...>::random_normal(std::same_as<size_t> auto... dims) -> This requires(sizeof...(dims) > 0) {
         static_assert(sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
         return random_normal<R>(IndexType({dims...}));
     }
@@ -186,7 +186,7 @@ namespace Physica {
     }
 
     template<Scalar T, int... Dims>
-    auto DenseTensor<T, Dims...>::generate(std::invocable<IndexType> auto fn, std::same_as<size_t> auto... dims) -> This {
+    auto DenseTensor<T, Dims...>::generate(std::invocable<IndexType> auto fn, std::same_as<size_t> auto... dims) -> This requires(sizeof...(dims) > 0) {
         static_assert(sizeof...(dims) == ArrayND<T, Dims...>::NDim, "[Error]: NDim is not consistent");
         return generate(std::move(fn), IndexType({dims...}));
     }

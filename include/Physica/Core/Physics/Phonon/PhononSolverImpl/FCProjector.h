@@ -114,7 +114,7 @@ namespace Physica {
 
     template<Scalar T>
     auto FCProjector<T>::toVector(const RSpaceFCGrid& fcGrid) const -> VectorType {
-        assert(fcGrid.getShape() == superSize && "[Error]: Cell sizes do not match");
+        assert((Index3D{fcGrid.dim(0), fcGrid.dim(1), fcGrid.dim(2)} == superSize) && "[Error]: Cell sizes do not match");
         assert(fcGrid.dim(3) == numDOF && fcGrid.dim(4) == numDOF && "[Error]: DOFs do not match");
         return fcGrid.flatten();
     }
@@ -122,7 +122,7 @@ namespace Physica {
     template<Scalar T>
     void FCProjector<T>::toGrid(const VectorType& fcVector, RSpaceFCGrid& fcGrid) const {
         assert(fcVector.getLength() == getNumForceConsts() && "[Error]: This is not a force constants vector");
-        assert(fcGrid.getShape() == superSize && "[Error]: Cell sizes do not match");
+        assert((Index3D{fcGrid.dim(0), fcGrid.dim(1), fcGrid.dim(2)} == superSize) && "[Error]: Cell sizes do not match");
         assert(fcGrid.dim(3) == numDOF && fcGrid.dim(4) == numDOF && "[Error]: DOFs do not match");
         fcGrid.flatten() = fcVector;
     }

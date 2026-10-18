@@ -55,6 +55,39 @@ namespace {
         z.resize(2UZ, 2UZ, 2UZ);
         expect(x != z);
     }
+
+    void factory() {
+        const auto zero = Tensor4x4x4::zeros(4UZ, 4UZ, 4UZ);
+        expect(zero.getSize() == 64);
+        expect(zero[0UZ, 0UZ, 0UZ] == T(0));
+        expect(zero[3UZ, 3UZ, 3UZ] == T(0));
+
+        const auto zeroByShape = Tensor4x4x4::zeros(Index3D{4, 4, 4});
+        expect(zeroByShape == zero);
+
+        auto junked = Tensor4x4x4::junk(4UZ, 4UZ, 4UZ);
+        expect(junked.getSize() == 64);
+        junked.zeros();
+        expect(junked == zero);
+
+        auto uniform = Tensor4x4x4::random_uniform<RandomSource>(4UZ, 4UZ, 4UZ);
+        uniform.zeros();
+        expect(uniform == zero);
+        const auto normal = Tensor4x4x4::random_normal<RandomSource>(4UZ, 4UZ, 4UZ);
+        expect(normal.getSize() == 64);
+
+        const auto generate = Tensor4x4x4::generate([](const Index3D& index) {
+            return T(index[0] + index[1] + index[2]);
+        }, 4UZ, 4UZ, 4UZ);
+        expect(generate.getSize() == 64);
+        expect(generate[1UZ, 2UZ, 3UZ] == T(6));
+
+        // Test that in-place fill in not ambiguous
+        auto inPlace = Tensor3D<T>::zeros(2UZ, 2UZ, 2UZ);
+        inPlace.junk();
+        inPlace.zeros();
+        expect(inPlace == Tensor3D<T>::zeros(2UZ, 2UZ, 2UZ));
+    }
 }
 
 static_assert(Tensor3D<T>::isCompact(), "DenseTensor is a compact object");
@@ -79,5 +112,6 @@ static_assert(decltype(std::declval<Tensor4x4x4>().flatten())::getSizeAtCompile(
 int main() {
     compact();
     equality();
+    factory();
     return 0;
 }

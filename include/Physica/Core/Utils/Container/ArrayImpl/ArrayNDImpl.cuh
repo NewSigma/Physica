@@ -108,15 +108,9 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
-    __device__ void device_obj<ArrayND<T, Dims...>>::forND(std::invocable<T&, IndexType> auto func) {
-        for (size_t i = 0; i < getSize(); ++i)
-            func(arr[i], toIndexND(i));
-    }
-
-    template<class T, int... Dims>
-    __device__ void device_obj<ArrayND<T, Dims...>>::forND(std::invocable<const T&, IndexType> auto func) const {
-        for (size_t i = 0; i < getSize(); ++i)
-            func(arr[i], toIndexND(i));
+    __device__ void device_obj<ArrayND<T, Dims...>>::forND(this auto&& self, std::invocable<T&, IndexType> auto func) {
+        for (size_t i = 0; i < self.getSize(); ++i)
+            func(self.arr[i], self.toIndexND(i));
     }
 
     template<class T, int... Dims>

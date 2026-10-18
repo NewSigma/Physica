@@ -20,6 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Parallel/Parallel.h"
+#include "Physica/Core/Parallel/ThreadPool.h"
 #include "Physica/Core/Utils/CUDA/device_obj.h"
 
 namespace Physica {
