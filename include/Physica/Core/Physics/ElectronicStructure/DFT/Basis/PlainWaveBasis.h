@@ -18,6 +18,10 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/IndexVar/Index.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
+#include "Physica/Core/Physics/PhyConst.h"
+#include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 #include "Physica/Core/Scalar/Complex.h"
 
 namespace Physica {

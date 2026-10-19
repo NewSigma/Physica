@@ -53,6 +53,7 @@ namespace Physica {
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isFastAssign() noexcept { return true; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
     };
 
     template<Matrix M, Vector V> requires(instanceof<M, BlockMatrix>)
@@ -65,7 +66,7 @@ namespace Physica {
     void GEMV<M, V>::assign(Vector auto& target) const {
         assert(getLength() == target.getLength() && "[Error]: Dimensions do not match");
         size_t from = 0;
-        for (size_t i = 0; i < m.getNumBlocks(); ++i) {
+        for (size_t i = 0; i < m.getNumBlock(); ++i) {
             const size_t to = m.getIndexEnds()[i];
             const auto v1 = v.segment(from, to);
             auto target1 = target.segment(from, to);
@@ -88,5 +89,10 @@ namespace Physica {
     template<Matrix M, Vector V> requires(instanceof<M, BlockMatrix>)
     auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v);
+    }
+
+    template<Matrix M, Vector V> requires(instanceof<M, BlockMatrix>)
+    __host__ __device__ consteval size_t GEMV<M, V>::getSizeAtCompile() noexcept {
+        return std::remove_cvref_t<M>::getRowAtCompile();
     }
 }

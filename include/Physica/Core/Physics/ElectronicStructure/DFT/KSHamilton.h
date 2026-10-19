@@ -18,7 +18,10 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
+#include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/PeriodIndex3D.h"
 #include "DensityGrid.h"
 
 namespace Physica {

@@ -11,3 +11,5 @@ set_target_properties(PhysicaGui PROPERTIES
 
 install(TARGETS PhysicaGui DESTINATION lib)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/Physica/Gui DESTINATION include/Physica)
+
+physica_add_header_check(PhysicaGui)

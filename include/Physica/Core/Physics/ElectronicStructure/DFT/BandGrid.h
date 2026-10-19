@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Utils/Container/ArrayND.h"
 #include "KPoint.h"
 

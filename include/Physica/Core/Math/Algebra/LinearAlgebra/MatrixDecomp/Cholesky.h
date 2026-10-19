@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+
 namespace Physica {
     /**
      * Decomposite a symmetrical, positive matrix A into LL^T.

@@ -90,7 +90,7 @@ namespace Physica {
 
     template<Matrix M>
     size_t BlockMatrix<M>::findBlock(size_t globalIndex) const {
-        assert(globalIndex < getRow() && "[Error]: Index out of range");
+        assert(globalIndex < getOrder() && "[Error]: Index out of range");
         for (size_t i = 0; i < getNumBlock(); ++i) {
             const bool inTheBlock = globalIndex < indexEnds[i];
             if (inTheBlock)

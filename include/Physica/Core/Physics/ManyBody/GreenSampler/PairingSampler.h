@@ -135,7 +135,7 @@ namespace Physica {
             Array<int, 4> deltas{1, 1, -1, -1};
             for (size_t i = 0; i < shiftDims.size(); ++i) {
                 int shiftDim = shiftDims[i];
-                fn(i, center.shift(shiftDim, deltas[i], lattice.getSuperSize()[shiftDim]));
+                fn(static_cast<int>(i), center.shift(shiftDim, deltas[i], lattice.getSuperSize()[shiftDim]));
             }
             break;
         }

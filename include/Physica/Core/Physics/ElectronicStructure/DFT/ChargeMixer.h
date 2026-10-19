@@ -99,7 +99,6 @@ namespace Physica {
     template<Scalar T, bool isSpinPolarized>
     void ChargeMixer<T, isSpinPolarized>::mix(size_t iteration, DensityType& result) {
         if (iteration == 0) {
-            using GridType = FFT3D::KSpaceType;
             const auto& deltaRho = residules[0].getTotalDensity();
             fft.getRSpace().flatten() = deltaRho.flatten();
             fft.transform();

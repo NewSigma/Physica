@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <cassert>
 #include "Physica/Core/Math/Calculus/Differential.h"
 #include "Physica/Core/Math/Optimization/SteepestDescent.h"
 #include "MDCell.h"
@@ -85,10 +86,10 @@ namespace Physica {
     template<ExecutePolicy P>
     void EnergyMinimizer<T, Dim>::pre_lattice2D_step(const auto& model, auto& optimizer, T diffStep) {
         assert(cell.getLattice()(0, 1).isZero());
-        assert(cell.getLattice()[0, 2].isZero());
-        assert(cell.getLattice()[1, 2].isZero());
-        assert(cell.getLattice()[2, 0].isZero());
-        assert(cell.getLattice()[2, 1].isZero());
+        assert((cell.getLattice()[0, 2].isZero()));
+        assert((cell.getLattice()[1, 2].isZero()));
+        assert((cell.getLattice()[2, 0].isZero()));
+        assert((cell.getLattice()[2, 1].isZero()));
         const auto func = makeLattice2DStepFunc(model);
         const auto grad = makeLattice2DStepGrad(model, diffStep);
         const auto& lattice = cell.getLattice();

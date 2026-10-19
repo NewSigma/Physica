@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica {

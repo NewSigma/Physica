@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include <array>
+#include <concepts>
 #include "Physica/Macro.h"
 
 namespace Physica {

@@ -20,6 +20,7 @@
 
 #include "DataSpaceImpl/DataSpaceMixin.h"
 #include "DataSpaceImpl/SubDataSpace.h"
+#include "Mixin/H5ID.h"
 
 namespace Physica {
     template<size_t Dim>

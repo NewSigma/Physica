@@ -39,9 +39,9 @@ namespace Physica {
         /* Operations */
         template<RNG R>
         [[nodiscard]] CoDiff<VectorND<T>> forward(const VectorND<T>& x) const;
-        void reverse(const This& __restrict obj) const noexcept {}
+        void reverse([[maybe_unused]] const This& __restrict obj) const noexcept {}
 
-        void step(auto& optimizer) {}
+        void step([[maybe_unused]] auto& optimizer) {}
         void zero_grad() {}
 
         void swap(This& __restrict obj) noexcept;

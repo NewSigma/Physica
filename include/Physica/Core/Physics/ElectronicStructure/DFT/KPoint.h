@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "SpinPair.h"
 
 namespace Physica {

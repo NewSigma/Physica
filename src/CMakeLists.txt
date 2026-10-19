@@ -1,4 +1,5 @@
 include(PhysicaTargets)
+include(HeaderCheck)
 
 add_subdirectory(Core)
 

@@ -16,3 +16,5 @@ set_target_properties(PhysicaLogger PROPERTIES
 
 install(TARGETS PhysicaLogger DESTINATION lib)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/Physica/Logger DESTINATION include/Physica)
+
+physica_add_header_check(PhysicaLogger)

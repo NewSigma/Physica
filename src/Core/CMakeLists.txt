@@ -22,3 +22,5 @@ if(${PHYSICA_MIMALLOC})
     target_sources(PhysicaCore PUBLIC Malloc.cpp) # Declared as PUBLIC, other targets will automatically overload operator new/delete
     install(FILES Malloc.cpp DESTINATION share)
 endif()
+
+physica_add_header_check(PhysicaCore)

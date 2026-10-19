@@ -84,7 +84,7 @@ namespace Physica {
     auto ChebyshevRadial<T, IsSmallCell>::project(const MDCellType& cell) const -> DescriptorArray {
         const size_t numType = massTypeMap.size();
         DescriptorArray result(cell.getNumParticle(), maxOrder, numType, T(0));
-        auto kernel = [this, &cell, &result](size_t i, size_t j, Vector3D<T> r, T norm1, T norm2) {
+        auto kernel = [this, &cell, &result](size_t i, size_t j, [[maybe_unused]] Vector3D<T> r, T norm1, [[maybe_unused]] T norm2) {
             const ParticleType typeI = massTypeMap[cell.getMass(i)];
             const ParticleType typeJ = massTypeMap[cell.getMass(j)];
             auto descriptorDi = result[i].col(typeJ);

@@ -18,6 +18,9 @@
  */
 #pragma once
 
+#include "Physica/Core/Physics/MD/RPMD.h"
+#include "Physica/Core/Scalar/Scalar.h"
+
 namespace Physica {
     /**
      * Fast inertial relaxation engine(FIRE) as introduced in [1, 2]

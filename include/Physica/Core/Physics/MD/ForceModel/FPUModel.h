@@ -19,6 +19,8 @@
 #pragma once
 
 #include "Physica/Core/Parallel/Parallel.h"
+#include "Physica/Core/Physics/MD/MDCell.h"
+#include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica {
     template<Scalar T, bool IsPeriodBoundary, unsigned int Dim>

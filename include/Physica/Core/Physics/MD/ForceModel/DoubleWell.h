@@ -92,17 +92,17 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T DoubleWell<T>::forceConst([[maybe_unused]] const MDCellType& cell, size_t dof1, size_t dof2) const {
+    T DoubleWell<T>::forceConst([[maybe_unused]] const MDCellType& cell, [[maybe_unused]] size_t dof1, [[maybe_unused]] size_t dof2) const {
         noImpl();
     }
 
     template<Scalar T>
-    auto DoubleWell<T>::forceConst(const MDCellType& cell) const -> ForceConstMatrix {
+    auto DoubleWell<T>::forceConst([[maybe_unused]] const MDCellType& cell) const -> ForceConstMatrix {
         noImpl();
     }
 
     template<Scalar T>
-    auto DoubleWell<T>::virial(const MDCellType& cell) const -> LatticeMatrix {
+    auto DoubleWell<T>::virial([[maybe_unused]] const MDCellType& cell) const -> LatticeMatrix {
         noImpl();
     }
 

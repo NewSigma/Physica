@@ -19,6 +19,7 @@
 #pragma once
 
 #include <fstream>
+#include "Physica/Core/Exception/BadFileFormatException.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 
 namespace Physica {
@@ -38,7 +39,7 @@ namespace Physica {
     };
 
     void MatrixMarket::read(const char* path, Matrix auto& target) {
-        using ScalarType = T::ScalarType;
+        using ScalarType = std::remove_cvref_t<decltype(target)>::ScalarType;
         std::ifstream fin(path);
         if (!fin)
             throw IOException("[Error]: No file found");
