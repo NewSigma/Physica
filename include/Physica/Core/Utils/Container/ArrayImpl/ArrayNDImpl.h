@@ -42,6 +42,14 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
+    bool ArrayND<T, Dims...>::operator==(this const This& lhs, const This& rhs) {
+        if constexpr (!StaticShape)
+            if (lhs.shape != rhs.shape)
+                return false;
+        return lhs.arr == rhs.arr;
+    }
+
+    template<class T, int... Dims>
     void ArrayND<T, Dims...>::resize(IndexType shape_, auto&&... args) {
         arr.resize(toSize(shape_), std::forward<decltype(args)>(args)...);
         if constexpr (StaticShape)

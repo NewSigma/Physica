@@ -33,14 +33,17 @@ namespace Physica {
 
     template<class Derived, class Allocator>
     __host__ __device__ bool ArrayMixin<Derived, Allocator>::operator==(this const This& lhs, const This& rhs) {
-        if (lhs.getLength() != rhs.getLength())
+        const size_t length = lhs.getLength();
+        if (length != rhs.getLength())
             return false;
-        if (lhs.getCapacity() != rhs.getCapacity())
-            return false;
-        for (size_t i = 0; i < lhs.getLength(); ++i)
-            if (lhs[i] != rhs[i])
-                return false;
-        return true;
+        if constexpr (std::is_trivially_copyable_v<value_type> && IsHost())
+            return std::memcmp(lhs.data(), rhs.data(), length * sizeof(value_type)) == 0;
+        else {
+            for (size_t i = 0; i < length; ++i)
+                if (lhs[i] != rhs[i])
+                    return false;
+            return true;
+        }
     }
 
     template<class Derived, class Allocator>

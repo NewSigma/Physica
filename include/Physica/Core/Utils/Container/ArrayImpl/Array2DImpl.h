@@ -66,6 +66,14 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
+    bool Array2D<T, Major, Row, Col, Allocator>::operator==(this const This& lhs, const This& rhs) {
+        if constexpr (isDynamicArray)
+            if (lhs.r != rhs.r)
+                return false;
+        return lhs.arr == rhs.arr;
+    }
+
+    template<class T, int Major, size_t Row, size_t Col, class Allocator>
     void Array2D<T, Major, Row, Col, Allocator>::resize(size_t row, size_t col, auto&&... args) {
         assert((Row == row || Row == Dynamic) && "[Error]: Cannot resize a fixed array");
         assert((Col == col || Col == Dynamic) && "[Error]: Cannot resize a fixed array");

@@ -65,6 +65,8 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] constexpr T& operator[](size_t r, size_t c);
         [[nodiscard]] constexpr const T& operator[](size_t r, size_t c) const;
+        [[nodiscard]] bool operator==(this const This& lhs, const This& rhs);
+        [[nodiscard]] bool operator!=(this const This& lhs, const This& rhs) = default;
         /* Operations */
         void resize(size_t row, size_t col, auto&&... args);
         void resize(size_t order);

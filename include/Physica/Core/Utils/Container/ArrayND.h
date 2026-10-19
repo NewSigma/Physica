@@ -62,6 +62,8 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] auto& operator[](this auto&&, const IndexType& indices) noexcept;
         [[nodiscard]] auto& operator[](this auto&&, std::same_as<size_t> auto... dims) noexcept;
+        [[nodiscard]] bool operator==(this const This& lhs, const This& rhs);
+        [[nodiscard]] bool operator!=(this const This& lhs, const This& rhs) = default;
         /* Operations */
         void resize(IndexType shape_, auto&&... args);
         void resize(std::same_as<size_t> auto... dims);
