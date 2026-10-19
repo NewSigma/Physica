@@ -41,22 +41,24 @@ namespace Physica {
             else
                 return mat.data_handle();
         }());
-        const auto* x = reinterpret_cast<const Tm*>(vec.data());
+        const auto* x = reinterpret_cast<const Tm*>(vec.data_handle());
         auto* y = reinterpret_cast<Tm*>(target.data_handle());
+        const int incx = static_cast<int>(vec.getStride());
+        const int incy = static_cast<int>(target.getStride());
         if constexpr (Base::isComplex()) {
             using Tc = T::ComplexType;
             const Tc alpha = 1;
             const Tc beta = 0;
             if constexpr (T::Prec == Float32)
-                cblas_cgemv_64(Layout, Trans, m, n, (Tm*)&alpha, a, lda, x, 1, (Tm*)&beta, y, 1);
+                cblas_cgemv_64(Layout, Trans, m, n, (Tm*)&alpha, a, lda, x, incx, (Tm*)&beta, y, incy);
             else
-                cblas_zgemv_64(Layout, Trans, m, n, (Tm*)&alpha, a, lda, x, 1, (Tm*)&beta, y, 1);
+                cblas_zgemv_64(Layout, Trans, m, n, (Tm*)&alpha, a, lda, x, incx, (Tm*)&beta, y, incy);
         }
         else {
             if constexpr (T::Prec == Float32)
-                cblas_sgemv_64(Layout, Trans, m, n, 1, a, lda, x, 1, 0, y, 1);
+                cblas_sgemv_64(Layout, Trans, m, n, 1, a, lda, x, incx, 0, y, incy);
             else
-                cblas_dgemv_64(Layout, Trans, m, n, 1, a, lda, x, 1, 0, y, 1);
+                cblas_dgemv_64(Layout, Trans, m, n, 1, a, lda, x, incx, 0, y, incy);
         }
     }
 }

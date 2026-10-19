@@ -123,19 +123,21 @@ namespace Physica {
             else
                 return getLHS().data_handle();
         }());
-        const auto* x = reinterpret_cast<const Tm*>(getRHS().data());
+        const auto* x = reinterpret_cast<const Tm*>(getRHS().data_handle());
         auto* y = reinterpret_cast<Tm*>(target.data_handle());
+        const int incx = static_cast<int>(getRHS().getStride());
+        const int incy = static_cast<int>(target.getStride());
         if constexpr (Base::isComplex()) {
             if constexpr (T::Prec == Float32)
-                cublasCgemv_64(ctx, Trans, m, n, &alpha, a, lda, x, 1, &beta, y, 1);
+                cublasCgemv_64(ctx, Trans, m, n, &alpha, a, lda, x, incx, &beta, y, incy);
             else
-                cublasZgemv_64(ctx, Trans, m, n, &alpha, a, lda, x, 1, &beta, y, 1);
+                cublasZgemv_64(ctx, Trans, m, n, &alpha, a, lda, x, incx, &beta, y, incy);
         }
         else {
             if constexpr (T::Prec == Float32)
-                cublasSgemv_64(ctx, Trans, m, n, &alpha, a, lda, x, 1, &beta, y, 1);
+                cublasSgemv_64(ctx, Trans, m, n, &alpha, a, lda, x, incx, &beta, y, incy);
             else
-                cublasDgemv_64(ctx, Trans, m, n, &alpha, a, lda, x, 1, &beta, y, 1);
+                cublasDgemv_64(ctx, Trans, m, n, &alpha, a, lda, x, incx, &beta, y, incy);
         }
     }
 

@@ -109,19 +109,21 @@ namespace Physica {
         ctx.setPointerMode(false);
         const size_t n = Base::getLength();
         const auto alpha = Base::getRHS().toMachine();
-        const auto* x = reinterpret_cast<const Tm*>(Base::getLHS().data());
-        auto* y = reinterpret_cast<Tm*>(v.data());
+        const auto* x = reinterpret_cast<const Tm*>(Base::getLHS().data_handle());
+        auto* y = reinterpret_cast<Tm*>(v.data_handle());
+        const int incX = static_cast<int>(Base::getLHS().getStride());
+        const int incY = static_cast<int>(v.getStride());
         if constexpr (Base::isComplex()) {
             if constexpr (T::Prec == Float32)
-                check(cublasCaxpy_64(ctx, n, &alpha, x, 1, y, 1));
+                check(cublasCaxpy_64(ctx, n, &alpha, x, incX, y, incY));
             else
-                check(cublasZaxpy_64(ctx, n, &alpha, x, 1, y, 1));
+                check(cublasZaxpy_64(ctx, n, &alpha, x, incX, y, incY));
         }
         else {
             if constexpr (T::Prec == Float32)
-                check(cublasSaxpy_64(ctx, n, &alpha, x, 1, y, 1));
+                check(cublasSaxpy_64(ctx, n, &alpha, x, incX, y, incY));
             else
-                check(cublasDaxpy_64(ctx, n, &alpha, x, 1, y, 1));
+                check(cublasDaxpy_64(ctx, n, &alpha, x, incX, y, incY));
         }
     }
 

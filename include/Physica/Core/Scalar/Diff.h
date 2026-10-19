@@ -72,6 +72,7 @@ namespace Physica {
         __host__ __device__ void swap(ScalarRef<This>&& ref) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto real_ptr(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto imag_ptr(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto* value_ptr(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto* grad_ptr(this auto&&) noexcept;
 

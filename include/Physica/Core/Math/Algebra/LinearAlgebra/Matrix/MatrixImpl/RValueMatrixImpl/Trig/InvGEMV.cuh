@@ -77,20 +77,21 @@ namespace Physica {
         const auto* a = reinterpret_cast<const Tm*>(mat.data_handle());
         const size_t lda = mat.getMajorStride();
         auto* x = reinterpret_cast<Tm*>(target.data_handle());
+        const int incx = static_cast<int>(target.getStride());
 
         auto& ctx = CUDAContext::getInstance();
         ctx.setPointerMode(false);
         if constexpr (Base::isComplex()) {
             if constexpr (T::Prec == Float32)
-                check(cublasCtrsv_64(ctx, Uplo, TransA, Diag, n, a, lda, x, 1));
+                check(cublasCtrsv_64(ctx, Uplo, TransA, Diag, n, a, lda, x, incx));
             else
-                check(cublasZtrsv_64(ctx, Uplo, TransA, Diag, n, a, lda, x, 1));
+                check(cublasZtrsv_64(ctx, Uplo, TransA, Diag, n, a, lda, x, incx));
         }
         else {
             if constexpr (T::Prec == Float32)
-                check(cublasStrsv_64(ctx, Uplo, TransA, Diag, n, a, lda, x, 1));
+                check(cublasStrsv_64(ctx, Uplo, TransA, Diag, n, a, lda, x, incx));
             else
-                check(cublasDtrsv_64(ctx, Uplo, TransA, Diag, n, a, lda, x, 1));
+                check(cublasDtrsv_64(ctx, Uplo, TransA, Diag, n, a, lda, x, incx));
         }
     }
 

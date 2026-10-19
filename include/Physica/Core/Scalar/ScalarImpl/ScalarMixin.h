@@ -113,6 +113,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ decltype(auto) imag(this auto&&) noexcept;
 
         [[nodiscard]] __host__ __device__ auto* real_ptr(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto* imag_ptr(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto* value_ptr(this auto&&) noexcept;
         template<int GradOrder>
         [[nodiscard]] __host__ __device__ auto* grad_ptr(this auto&&) noexcept;
@@ -295,6 +296,14 @@ namespace Physica {
             return self.real_ptr();
         else
             return &self;
+    }
+
+    template<class Derived>
+    __host__ __device__ auto* ScalarMixin<Derived>::imag_ptr(this auto&& self) noexcept {
+        if constexpr (isComplex())
+            return self.imag_ptr();
+        else
+            static_assert(isComplex(), "[Error]: Imaginary part is undefined for a non-complex scalar");
     }
 
     template<class Derived>

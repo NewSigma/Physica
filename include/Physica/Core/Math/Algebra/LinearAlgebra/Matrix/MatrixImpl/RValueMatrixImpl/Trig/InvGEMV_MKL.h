@@ -37,17 +37,18 @@ namespace Physica {
         const auto* a = reinterpret_cast<const Tm*>(mat.data_handle());
         const size_t lda = mat.getMajorStride();
         auto* x = reinterpret_cast<Tm*>(target.data_handle());
+        const int incx = static_cast<int>(target.getStride());
         if constexpr (isComplex()) {
             if constexpr (T::Prec == Float32)
-                cblas_ctrsv_64(Layout, Uplo, TransA, Diag, n, reinterpret_cast<const void*>(a), lda, reinterpret_cast<void*>(x), 1);
+                cblas_ctrsv_64(Layout, Uplo, TransA, Diag, n, reinterpret_cast<const void*>(a), lda, reinterpret_cast<void*>(x), incx);
             else
-                cblas_ztrsv_64(Layout, Uplo, TransA, Diag, n, reinterpret_cast<const void*>(a), lda, reinterpret_cast<void*>(x), 1);
+                cblas_ztrsv_64(Layout, Uplo, TransA, Diag, n, reinterpret_cast<const void*>(a), lda, reinterpret_cast<void*>(x), incx);
         }
         else {
             if constexpr (T::Prec == Float32)
-                cblas_strsv_64(Layout, Uplo, TransA, Diag, n, a, lda, x, 1);
+                cblas_strsv_64(Layout, Uplo, TransA, Diag, n, a, lda, x, incx);
             else
-                cblas_dtrsv_64(Layout, Uplo, TransA, Diag, n, a, lda, x, 1);
+                cblas_dtrsv_64(Layout, Uplo, TransA, Diag, n, a, lda, x, incx);
         }
     }
 }

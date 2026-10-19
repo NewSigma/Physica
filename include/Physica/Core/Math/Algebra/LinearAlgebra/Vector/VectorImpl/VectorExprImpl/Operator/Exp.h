@@ -74,7 +74,8 @@ namespace Physica {
         using V1 = std::remove_cvref_t<decltype(v)>;
         constexpr size_t Size = std::max(Base::getSizeAtCompile(), v.getSizeAtCompile());
         constexpr bool SmallVector = 0 < Size && Size <= 32;
-        if constexpr (HasMKL() && Internal::EnableLAPACK<V, V1>::value && !SmallVector && T::Prec == Float64) {
+        constexpr bool isCompact = v.isCompact() && Base::getExpr().isCompact();
+        if constexpr (HasMKL() && Internal::EnableLAPACK<V, V1>::value && !SmallVector && T::Prec == Float64 && isCompact) {
             if (Base::getLength() <= 32)
                 Base::template assign_base<P>(v);
             else

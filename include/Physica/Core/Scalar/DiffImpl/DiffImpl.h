@@ -91,6 +91,11 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ auto Diff<T, Mode, Order>::imag_ptr(this auto&& self) noexcept {
+        return RealType::PtrTy(self.v.imag_ptr(), self.g.imag_ptr());
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ auto* Diff<T, Mode, Order>::value_ptr(this auto&& self) noexcept {
         return &self.v;
     }

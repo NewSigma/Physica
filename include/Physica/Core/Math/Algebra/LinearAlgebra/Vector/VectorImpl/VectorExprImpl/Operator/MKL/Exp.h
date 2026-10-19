@@ -27,8 +27,8 @@ namespace Physica {
         v.assert_assign_lapack(Base::getExpr());
 
         size_t n = Base::getLength();
-        const auto* a = reinterpret_cast<const Tm*>(Base::getExpr().data());
-        auto* y = reinterpret_cast<Tm*>(v.data());
+        const auto* a = reinterpret_cast<const Tm*>(Base::getExpr().data_handle());
+        auto* y = reinterpret_cast<Tm*>(v.data_handle());
         if constexpr (isComplex()) {
             if constexpr (T::Prec == Float32)
                 vcExp_64(n, a, y);

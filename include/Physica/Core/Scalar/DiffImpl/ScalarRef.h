@@ -74,6 +74,7 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ auto grad_ptr() const noexcept;
         [[nodiscard]] __host__ __device__ auto real_ptr(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto imag_ptr(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ decltype(auto) value() const noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ decltype(auto) grad() const noexcept;
@@ -209,6 +210,14 @@ namespace Physica {
             return RetTy(self.value().real_ptr(), self.grad().real_ptr());
         else
             return RetTy(self.ptr);
+    }
+
+    template<Scalar T> requires(instanceof_tx<T, Diff>)
+    __host__ __device__ auto ScalarRef<T>::imag_ptr(this auto&& self) noexcept {
+        constexpr bool ConstPtr = std::is_const_v<std::remove_reference_t<decltype(self)>>;
+        using RetTy = std::conditional<ConstPtr, ScalarPtr<const Tr>, ScalarPtr<Tr>>::type;
+        static_assert(T::isComplex(), "[Error]: Imaginary part is undefined for a non-complex scalar");
+        return RetTy(self.value().imag_ptr(), self.grad().imag_ptr());
     }
 
     template<Scalar T> requires(instanceof_tx<T, Diff>)

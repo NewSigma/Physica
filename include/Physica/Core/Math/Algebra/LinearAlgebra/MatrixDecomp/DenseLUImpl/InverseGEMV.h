@@ -61,7 +61,7 @@ namespace Physica {
     template<Matrix M, Vector V> requires(instanceof_tx<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, DenseLU>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
-        if constexpr (HasMKL() && Internal::EnableLAPACK<V, decltype(target)>::value)
+        if constexpr (HasMKL() && Internal::EnableLAPACK<V, decltype(target)>::value && target.isCompact())
             assign_mkl(target);
         else
             assign_base(target);
