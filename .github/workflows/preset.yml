@@ -22,6 +22,9 @@ on:
         value: ${{ jobs.build.outputs.artifact }}
         description: 'Name of the uploaded artifact'
 
+env:
+  PHYSICA_SRC: physica-src
+
 defaults:
   run:
     shell: bash -l {0}
@@ -41,7 +44,7 @@ jobs:
       with:
         repository: ${{ job.workflow_repository }}
         ref: ${{ job.workflow_sha }}
-        path: PhysicaSrc
+        path: ${{ env.PHYSICA_SRC }}
 
     - name: Print hardware info
       run: |
@@ -65,12 +68,12 @@ jobs:
       uses: conda-incubator/setup-miniconda@v4.0.1
       with:
         activate-environment: physica
-        environment-file: PhysicaSrc/.github/env/${{ inputs.preset }}.yml
+        environment-file: ${{ env.PHYSICA_SRC }}/.github/env/${{ inputs.preset }}.yml
         channels: conda-forge
 
     - name: Configure
       run: >
-        cmake --preset ${{ inputs.preset }} -S PhysicaSrc
+        cmake --preset ${{ inputs.preset }} -S ${{ env.PHYSICA_SRC }}
         -DCMAKE_BUILD_TYPE=${{ inputs.build_config }}
         -DBUILD_TESTS=${{ inputs.test }}
 
@@ -78,7 +81,7 @@ jobs:
       run: ccache -z
 
     - name: Build
-      run: cmake --build PhysicaSrc/build/${{ inputs.preset }} --parallel
+      run: cmake --build ${{ env.PHYSICA_SRC }}/build/${{ inputs.preset }} --parallel
 
     - name: Print ccache statistics
       run: |
@@ -90,23 +93,23 @@ jobs:
 
     - name: Test
       if: ${{ inputs.test }}
-      working-directory: PhysicaSrc/build/${{ inputs.preset }}/test
+      working-directory: ${{ env.PHYSICA_SRC }}/build/${{ inputs.preset }}/test
       run: ctest --parallel --output-on-failure .
 
     - name: Check headers
       run: >
-        cmake --build PhysicaSrc/build/${{ inputs.preset }} --parallel --target HeaderCheck_verify_interface_header_sets
+        cmake --build ${{ env.PHYSICA_SRC }}/build/${{ inputs.preset }} --parallel --target HeaderCheck_verify_interface_header_sets
 
     - name: Install
       if: ${{ inputs.install }}
-      run: cmake --install PhysicaSrc/build/${{ inputs.preset }}
+      run: cmake --install ${{ env.PHYSICA_SRC }}/build/${{ inputs.preset }}
 
     - name: Stage artifact
       if: ${{ inputs.install }}
       run: |
         mkdir -p artifact
-        cp -a PhysicaSrc/dist artifact/dist
-        cp PhysicaSrc/.github/env/${{ inputs.preset }}.yml artifact/physica-env.yml
+        cp -a ${{ env.PHYSICA_SRC }}/dist artifact/dist
+        cp ${{ env.PHYSICA_SRC }}/.github/env/${{ inputs.preset }}.yml artifact/physica-env.yml
 
     - name: Upload artifact
       if: ${{ inputs.install }}
