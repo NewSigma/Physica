@@ -59,6 +59,8 @@ namespace Physica {
         This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) noexcept = delete;
         using Base::operator=;
+
+        [[nodiscard]] bool operator==(this const auto& self, const Matrix auto& other) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Matrix auto&& m) const noexcept;

@@ -272,7 +272,12 @@ namespace Physica {
     template<class T, class Allocator>
     constexpr void Array<T, Dynamic, Allocator>::zeros() noexcept {
         static_assert(std::is_trivially_copyable<T>::value, "[Error]: zeros() does not apply to non-trivial type");
-        std::fill_n(arr, length, T{});
+        if consteval {
+            std::fill_n(arr, length, T{});
+        }
+        else {
+            std::memset(arr, 0, length * sizeof(T));
+        }
     }
 
     template<class T, class Allocator>

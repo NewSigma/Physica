@@ -25,13 +25,20 @@ namespace Physica {
     class StridedMatrix : public LValueMatrix<Derived> {
         using Base = LValueMatrix<Derived>;
         using This = StridedMatrix<Derived>;
+    protected:
+        using typename Base::T;
     public:
         constexpr ~StridedMatrix() = default;
         /* Operators */
         This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) noexcept = delete;
         using Base::operator=;
+
+        [[nodiscard]] bool operator==(this const auto& self, const Matrix auto& other) noexcept;
         /* Operations */
+        template<ExecutePolicy P = Sequential>
+        void assign(Matrix auto&& target) const noexcept;
+
         [[nodiscard]] constexpr auto row(this auto&&, size_t r) noexcept;
         [[nodiscard]] constexpr auto col(this auto&&, size_t c) noexcept;
         template<size_t Row = Dynamic>
@@ -60,6 +67,8 @@ namespace Physica {
         [[nodiscard]] auto bottomRightCorner(this auto&&, size_t from) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
+
+        void zeros() noexcept;
         /* Getters */
         [[nodiscard]] constexpr size_t getRowStride() const noexcept;
         [[nodiscard]] constexpr size_t getColStride() const noexcept;
@@ -72,10 +81,15 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isStrided() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static size_t getRowStrideAtCompile() noexcept { return Dynamic; }
         [[nodiscard]] __host__ __device__ consteval static size_t getColStrideAtCompile() noexcept { return Dynamic; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getMajorStrideAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getMinorStrideAtCompile() noexcept;
     protected:
         constexpr StridedMatrix();
         constexpr StridedMatrix(const This&) = default;
         constexpr StridedMatrix(This&&) noexcept = default;
+    private:
+        template<class M1, class M2>
+        [[nodiscard]] consteval static bool isTrivialMinor() noexcept;
     };
 }
 

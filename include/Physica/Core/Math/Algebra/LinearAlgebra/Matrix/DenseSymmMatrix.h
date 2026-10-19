@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <cstring>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 #include "Physica/Core/Utils/Container/SymmArray.h"
 
@@ -44,6 +45,7 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
 
         auto operator=(Scalar auto x) noexcept -> This&;
+        [[nodiscard]] bool operator==(this const auto& self, const Matrix auto& other) noexcept;
         void operator+=(Scalar auto x) noexcept;
         void operator-=(Scalar auto x) noexcept;
         void operator*=(Scalar auto x) noexcept;
@@ -107,6 +109,21 @@ namespace Physica {
     auto DenseSymmMatrix<T, Order>::operator=(Scalar auto x) noexcept -> This& {
         asVector() = x;
         return *this;
+    }
+
+    template<Scalar T, size_t Order>
+    bool DenseSymmMatrix<T, Order>::operator==(this const auto& self, const Matrix auto& other) noexcept {
+        if constexpr (Base::isDiffable() || !std::is_trivially_copyable_v<T>)
+            return self.LValueMatrix<This>::operator==(other);
+        else if constexpr (std::same_as<std::remove_cvref_t<decltype(other)>, This>) {
+            if (self.getOrder() != other.getOrder())
+                return false;
+            const auto& lhs = self.asVector();
+            const auto& rhs = other.asVector();
+            return std::memcmp(lhs.data(), rhs.data(), lhs.getLength() * sizeof(T)) == 0;
+        }
+        else
+            return self.LValueMatrix<This>::operator==(other);
     }
 
     template<Scalar T, size_t Order>

@@ -81,7 +81,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        [[nodiscard]] bool operator!=(this const auto&, const Matrix auto& other) noexcept;
+        [[nodiscard]] bool operator==(this const auto&, const Matrix auto& other) noexcept;
         [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept;
         [[nodiscard]] auto operator*(this auto&&, Matrix auto&& m) noexcept;
         [[nodiscard, gnu::always_inline]] auto operator-(this auto&&) noexcept;
@@ -235,22 +235,6 @@ namespace Physica {
             for (size_t j = 0; j < m1.getRow(); ++j)
                 if (!scalarNear(T(m1.calc(j, i)), T(m2.calc(j, i)), ulp))
                     return false;
-        return true;
-    }
-
-    bool operator==(const Matrix auto& m1, const Matrix auto& m2) noexcept {
-        if (m1.getRow() != m2.getRow())
-            return false;
-        if (m1.getCol() != m2.getCol())
-            return false;
-        for (size_t major = 0; major < m1.getMaxMajor(); ++major) {
-            for (size_t minor = 0; minor < m1.getMaxMinor(); ++minor) {
-                size_t r = m1.rowFromMajorMinor(major, minor);
-                size_t c = m1.colFromMajorMinor(major, minor);
-                if (m1.calc(r, c) != m2.calc(r, c))
-                    return false;
-            }
-        }
         return true;
     }
 

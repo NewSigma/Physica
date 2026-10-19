@@ -22,6 +22,29 @@
 
 namespace Physica {
     template<class Derived>
+    bool CompactMatrix<Derived>::operator==(this const auto& self, const Matrix auto& other) noexcept {
+        using U1 = std::remove_cvref_t<decltype(self)>;
+        using U2 = std::remove_cvref_t<decltype(other)>;
+        using T1 = U1::ScalarType;
+        using T2 = U2::ScalarType;
+        constexpr bool FastCompare = U1::isCompact() && U2::isCompact()
+                                  && MatrixMajor::isSameMajor<U1, U2>()
+                                  && !U1::isBothMajor() && !U2::isBothMajor()
+                                  && !U1::isDiffable() && !U2::isDiffable()
+                                  && std::same_as<T1, T2>
+                                  && std::is_trivially_copyable_v<T1>;
+        if constexpr (FastCompare) {
+            if (self.getRow() != other.getRow())
+                return false;
+            if (self.getCol() != other.getCol())
+                return false;
+            return std::memcmp(self.data(), other.data(), self.getSize() * sizeof(T)) == 0;
+        }
+        else
+            return self.StridedMatrix<Derived>::operator==(other);
+    }
+
+    template<class Derived>
     template<ExecutePolicy P>
     void CompactMatrix<Derived>::assign(Matrix auto&& m) const noexcept {
         assign_base<P>(m);

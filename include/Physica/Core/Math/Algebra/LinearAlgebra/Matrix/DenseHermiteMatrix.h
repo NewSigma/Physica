@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <cstring>
 #include "Physica/Core/Utils/Container/SymmArray.h"
 #include "MatrixImpl/RValueMatrix.h"
 
@@ -45,6 +46,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         This& operator=(Tr value);
+        [[nodiscard]] bool operator==(this const auto& self, const Matrix auto& other) noexcept;
         [[nodiscard]] decltype(auto) operator[](size_t row, size_t col);
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
@@ -53,6 +55,7 @@ namespace Physica {
 
         void resize(this auto&, size_t order, auto&&... args);
         void swap(This& __restrict m) noexcept;
+        void zeros(this auto&) noexcept;
 
         template<RNG R>
         void random_uniform(this auto&);
@@ -107,6 +110,21 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
+    bool DenseHermiteMatrix<T, Order>::operator==(this const auto& self, const Matrix auto& other) noexcept {
+        if constexpr (Base::isDiffable() || !std::is_trivially_copyable_v<T>)
+            return self.RValueMatrix<This, T>::operator==(other);
+        else if constexpr (std::same_as<std::remove_cvref_t<decltype(other)>, This>) {
+            if (self.getOrder() != other.getOrder())
+                return false;
+            const auto& lhs = self.asVector();
+            const auto& rhs = other.asVector();
+            return std::memcmp(lhs.data(), rhs.data(), lhs.getLength() * sizeof(T)) == 0;
+        }
+        else
+            return self.RValueMatrix<This, T>::operator==(other);
+    }
+
+    template<Scalar T, size_t Order>
     decltype(auto) DenseHermiteMatrix<T, Order>::operator[](size_t row, size_t col) {
         assert(row <= col); // Optimize: possible to make use of this condition
         return storage[row, col];
@@ -116,6 +134,11 @@ namespace Physica {
     T DenseHermiteMatrix<T, Order>::calc(size_t row, size_t col) const {
         T x = storage[row, col];
         return col >= row ? x : x.conjugate();
+    }
+
+    template<Scalar T, size_t Order>
+    void DenseHermiteMatrix<T, Order>::zeros(this auto& self) noexcept {
+        self.storage.zeros();
     }
 
     template<Scalar T, size_t Order>

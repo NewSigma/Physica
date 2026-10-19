@@ -24,8 +24,19 @@
 
 namespace Physica {
     template<class Derived, Scalar ScalarT>
-    bool RValueMatrix<Derived, ScalarT>::operator!=(this const auto& self, const Matrix auto& other) noexcept {
-        return !(self == other);
+    bool RValueMatrix<Derived, ScalarT>::operator==(this const auto& self, const Matrix auto& other) noexcept {
+        if (self.getRow() != other.getRow())
+            return false;
+        if (self.getCol() != other.getCol())
+            return false;
+        for (size_t major = 0; major < self.getMaxMajor(); ++major)
+            for (size_t minor = 0; minor < self.getMaxMinor(); ++minor) {
+                const size_t r = self.rowFromMajorMinor(major, minor);
+                const size_t c = self.colFromMajorMinor(major, minor);
+                if (self.calc(r, c) != other.calc(r, c))
+                    return false;
+            }
+        return true;
     }
 
     template<class Derived, Scalar ScalarT>

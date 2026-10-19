@@ -73,6 +73,8 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static size_t getRowStrideAtCompile() noexcept { return host_obj::getRowStrideAtCompile(); }
         [[nodiscard]] __host__ __device__ consteval static size_t getColStrideAtCompile() noexcept { return host_obj::getColStrideAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static size_t getMajorStrideAtCompile() noexcept { return host_obj::getMajorStrideAtCompile(); }
+        [[nodiscard]] __host__ __device__ consteval static size_t getMinorStrideAtCompile() noexcept { return host_obj::getMinorStrideAtCompile(); }
     protected:
         constexpr device_obj() = default;
         constexpr device_obj(const This&) = default;
