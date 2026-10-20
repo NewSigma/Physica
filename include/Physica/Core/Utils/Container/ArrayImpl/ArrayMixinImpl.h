@@ -37,7 +37,7 @@ namespace Physica {
         if (length != rhs.getLength())
             return false;
         if constexpr (std::is_trivially_copyable_v<value_type> && IsHost())
-            return std::memcmp(lhs.data(), rhs.data(), length * sizeof(value_type)) == 0;
+            return length == 0 || std::memcmp(lhs.data(), rhs.data(), length * sizeof(value_type)) == 0;
         else {
             for (size_t i = 0; i < length; ++i)
                 if (lhs[i] != rhs[i])

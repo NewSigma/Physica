@@ -96,6 +96,11 @@ namespace {
                 expect(arr[i].value == i);
         }
     }
+
+    void compare() {
+        Array<int> a, b;
+        expect(a == b);
+    }
 }
 
 int main() {
@@ -106,5 +111,6 @@ int main() {
     makeStack();
     array_read();
     generate();
+    compare();
     return 0;
 }
