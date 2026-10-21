@@ -218,6 +218,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getRowStrideAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getColStrideAtCompile() noexcept;
     };
 
     template<Matrix M, size_t Row, size_t Col>
@@ -434,6 +436,16 @@ namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
     __host__ __device__ consteval int StridedMatrixBlock<M, Row, Col>::getMajor() noexcept {
         return std::remove_cvref_t<M>::getMajor();
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ consteval size_t StridedMatrixBlock<M, Row, Col>::getRowStrideAtCompile() noexcept {
+        return std::remove_cvref_t<M>::getRowStrideAtCompile();
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ consteval size_t StridedMatrixBlock<M, Row, Col>::getColStrideAtCompile() noexcept {
+        return std::remove_cvref_t<M>::getColStrideAtCompile();
     }
 }
 

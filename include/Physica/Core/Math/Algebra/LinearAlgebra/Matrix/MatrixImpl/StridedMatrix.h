@@ -89,7 +89,7 @@ namespace Physica {
         constexpr StridedMatrix(This&&) noexcept = default;
     private:
         template<class M1, class M2>
-        [[nodiscard]] consteval static bool isTrivialMinor() noexcept;
+        [[nodiscard]] consteval static bool isMinorCompact() noexcept;
     };
 }
 

@@ -29,12 +29,17 @@ namespace Physica {
         using This = device_obj<host_obj>;
     public:
         using typename Base::IndexType;
+    protected:
+        using typename Base::T;
     public:
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) noexcept = delete;
         using Base::operator=;
+        /* Operations */
+        __host__ __device__ void assign(this const auto& self, Tensor auto&& target);
+        __host__ __device__ void zeros() noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto getStrides() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getStride(size_t dim) const noexcept;

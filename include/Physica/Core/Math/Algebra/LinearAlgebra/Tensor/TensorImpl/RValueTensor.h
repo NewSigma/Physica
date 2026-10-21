@@ -56,7 +56,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         [[nodiscard]] bool operator==(this const auto& self, const Tensor auto& other) noexcept;
         /* Operations */
-        void assign(Tensor auto& x) const;
+        void assign(Tensor auto&& target) const noexcept;
         void assert_assign(const Tensor auto& source) const noexcept;
 
         [[nodiscard]] decltype(auto) calc(IndexType indices) const;

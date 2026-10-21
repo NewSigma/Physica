@@ -26,13 +26,21 @@ namespace Physica {
         using Base = LValueTensor<Derived>;
         using This = StridedTensor<Derived>;
     public:
+        using Base::NDim;
         using typename Base::IndexType;
+    protected:
+        using typename Base::T;
     public:
         ~StridedTensor() = default;
         /* Operators */
         This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) noexcept = delete;
         using Base::operator=;
+
+        [[nodiscard]] bool operator==(this const auto& self, const Tensor auto& other) noexcept;
+        /* Operations */
+        void assign(Tensor auto&& target) const noexcept;
+        void zeros() noexcept;
         /* Getters */
         [[nodiscard]] auto getStrides() const noexcept;
         [[nodiscard]] size_t getStride(size_t dim) const noexcept;
@@ -48,6 +56,12 @@ namespace Physica {
         StridedTensor() = default;
         StridedTensor(const This&) = default;
         StridedTensor(This&&) noexcept = default;
+    private:
+        template<class Self, class Other>
+        [[nodiscard]] __host__ __device__ consteval static bool isMinorCompact() noexcept;
+        [[nodiscard]] __host__ __device__ constexpr static size_t getCompactMinorSize(const auto& tensor) noexcept;
+        /* Friends */
+        friend class device_obj<This>;
     };
 }
 

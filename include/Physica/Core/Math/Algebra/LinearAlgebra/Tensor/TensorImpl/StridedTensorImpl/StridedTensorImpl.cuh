@@ -19,8 +19,39 @@
 #pragma once
 
 #include "../StridedTensor.cuh"
+#include "Physica/Core/Exception/CUDA/CUDA.cuh"
+#include "Physica/Core/Parallel/CUDAContext.cuh"
 
 namespace Physica {
+    template<class Derived>
+    __host__ __device__ void device_obj<StridedTensor<Derived>>::assign(this const auto& self, Tensor auto&& target) {
+        using Self = std::remove_cvref_t<decltype(self)>;
+        using Target = std::remove_cvref_t<decltype(target)>;
+        if constexpr (host_obj::template isMinorCompact<Self, Target>() && IsHost()) {
+            const size_t size = self.getSize();
+            const size_t stride = std::min(host_obj::getCompactMinorSize(self), host_obj::getCompactMinorSize(target));
+            for (size_t i = 0; i < size; i += stride) {
+                const auto indices = self.toIndexND(i);
+                check(cudaMemcpyAsync(target.data_ptr(indices), self.data_ptr(indices), stride * sizeof(T), cudaMemcpyKind::cudaMemcpyDeviceToDevice, CUDAContext::getInstance()));
+            }
+        }
+        else
+            self.device_obj<LValueTensor<Derived>>::assign(target);
+    }
+
+    template<class Derived>
+    __host__ __device__ void device_obj<StridedTensor<Derived>>::zeros() noexcept {
+        if constexpr (host_obj::template isMinorCompact<Derived, Derived>() && IsHost()) {
+            auto& self = Base::getDerived();
+            const size_t size = self.getSize();
+            const size_t stride = host_obj::getCompactMinorSize(self);
+            for (size_t i = 0; i < size; i += stride)
+                check(cudaMemsetAsync(self.data_ptr(self.toIndexND(i)), 0, stride * sizeof(T), CUDAContext::getInstance()));
+        }
+        else
+            Base::zeros();
+    }
+
     template<class Derived>
     __host__ __device__ auto device_obj<StridedTensor<Derived>>::getStrides() const noexcept {
         return Base::getDerived().getStrides();

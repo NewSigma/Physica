@@ -35,6 +35,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         using Base::operator=;
+        /* Operations */
+        __host__ __device__ void assign(this const auto& self, Tensor auto&& target);
         /* Getters */
         [[nodiscard]] __host__ __device__ auto data(this auto&& self) noexcept;
         [[nodiscard]] __host__ __device__ auto data_handle() noexcept;

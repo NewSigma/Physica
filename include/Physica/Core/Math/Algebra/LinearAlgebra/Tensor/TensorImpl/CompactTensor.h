@@ -27,12 +27,18 @@ namespace Physica {
         using This = CompactTensor<Derived>;
     public:
         using typename Base::IndexType;
+    protected:
+        using typename Base::T;
     public:
         ~CompactTensor() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         using Base::operator=;
+
+        [[nodiscard]] bool operator==(this const auto& self, const Tensor auto& other) noexcept;
+        /* Operations */
+        void assign(Tensor auto&& target) const noexcept;
         /* Getters */
         [[nodiscard]] auto data(this auto&& self) noexcept;
         [[nodiscard]] auto data_handle() noexcept;

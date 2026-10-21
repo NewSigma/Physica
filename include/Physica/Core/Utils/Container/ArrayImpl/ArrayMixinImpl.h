@@ -124,13 +124,13 @@ namespace Physica {
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ auto& ArrayMixin<Derived, Allocator>::front(this auto&& self) noexcept {
+    __host__ __device__ constexpr auto& ArrayMixin<Derived, Allocator>::front(this auto&& self) noexcept {
         assert(!self.empty());
         return self[0];
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ auto& ArrayMixin<Derived, Allocator>::back(this auto&& self) noexcept {
+    __host__ __device__ constexpr auto& ArrayMixin<Derived, Allocator>::back(this auto&& self) noexcept {
         assert(!self.empty());
         return self[self.getLength() - 1];
     }

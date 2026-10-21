@@ -29,7 +29,7 @@ namespace Physica {
 
     template<class Derived>
     bool StridedMatrix<Derived>::operator==(this const auto& self, const Matrix auto& other) noexcept {
-        if constexpr (isTrivialMinor<decltype(self), decltype(other)>()) {
+        if constexpr (isMinorCompact<decltype(self), decltype(other)>()) {
             if (self.getRow() != other.getRow())
                 return false;
             if (self.getCol() != other.getCol())
@@ -43,13 +43,14 @@ namespace Physica {
             }
             return true;
         }
-        return self.LValueMatrix<Derived>::operator==(other);
+        else
+            return self.LValueMatrix<Derived>::operator==(other);
     }
 
     template<class Derived>
     template<ExecutePolicy P>
     void StridedMatrix<Derived>::assign(Matrix auto&& target) const noexcept {
-        if constexpr (isTrivialMinor<Derived, std::remove_cvref_t<decltype(target)>>()) {
+        if constexpr (isMinorCompact<Derived, std::remove_cvref_t<decltype(target)>>()) {
             const auto& source = Base::getDerived();
             const size_t maxMajor = target.getMaxMajor();
             const size_t maxMinor = target.getMaxMinor();
@@ -58,9 +59,9 @@ namespace Physica {
                 const size_t c = target.colFromMajorMinor(major, 0);
                 std::memcpy(target.data_ptr(r, c), source.data_ptr(r, c), maxMinor * sizeof(typename StridedMatrix<Derived>::ScalarType));
             }
-            return;
         }
-        Base::template assign<P>(target);
+        else
+            Base::template assign<P>(target);
     }
 
     template<class Derived>
@@ -175,7 +176,7 @@ namespace Physica {
 
     template<class Derived>
     void StridedMatrix<Derived>::zeros() noexcept {
-        if constexpr (isTrivialMinor<Derived, Derived>()) {
+        if constexpr (isMinorCompact<Derived, Derived>()) {
             auto& self = Base::getDerived();
             const size_t maxMajor = self.getMaxMajor();
             const size_t maxMinor = self.getMaxMinor();
@@ -184,9 +185,9 @@ namespace Physica {
                 const size_t c = self.colFromMajorMinor(major, 0);
                 std::memset(self.data_ptr(r, c), 0, maxMinor * sizeof(typename Base::ScalarType));
             }
-            return;
         }
-        Base::zeros();
+        else
+            Base::zeros();
     }
 
     template<class Derived>
@@ -243,7 +244,7 @@ namespace Physica {
 
     template<class Derived>
     template<class M1, class M2>
-    consteval bool StridedMatrix<Derived>::isTrivialMinor() noexcept {
+    consteval bool StridedMatrix<Derived>::isMinorCompact() noexcept {
         using U1 = std::remove_cvref_t<M1>;
         using U2 = std::remove_cvref_t<M2>;
         using T1 = U1::ScalarType;

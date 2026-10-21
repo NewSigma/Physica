@@ -75,8 +75,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool full() const noexcept { return getLength() == getCapacity(); }
         [[nodiscard]] __host__ __device__ auto* data(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto* data_ptr(this auto&&, size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ auto& front(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ auto& back(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr auto& front(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr auto& back(this auto&&) noexcept;
         /* Static members */
         template<class... Args>
         [[nodiscard]] __host__ __device__ consteval static bool isTrivialDefaultConstruct() noexcept;

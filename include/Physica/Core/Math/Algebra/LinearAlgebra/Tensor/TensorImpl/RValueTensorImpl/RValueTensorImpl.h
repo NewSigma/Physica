@@ -37,17 +37,17 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    void RValueTensor<Derived, ScalarT>::assign(Tensor auto& x) const {
-        x.assert_assign(Base::getDerived());
-        if constexpr (!isDiffable() && x.isDiffable()) {
-            Base::getDerived().assign(x.values());
-            x.zero_grad();
+    void RValueTensor<Derived, ScalarT>::assign(Tensor auto&& target) const noexcept {
+        target.assert_assign(Base::getDerived());
+        if constexpr (!isDiffable() && target.isDiffable()) {
+            Base::getDerived().assign(target.values());
+            target.zero_grad();
         }
         else {
-            size_t size = Base::getDerived().getSize();
+            const size_t size = Base::getDerived().getSize();
             for (size_t i = 0; i < size; ++i) {
                 const auto indices = toIndexND(i);
-                x[indices] = calc(indices);
+                target[indices] = calc(indices);
             }
         }
     }
