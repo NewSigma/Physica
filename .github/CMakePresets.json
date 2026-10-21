@@ -17,17 +17,16 @@
         "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
         "CMAKE_CXX_FLAGS": "-Werror -mrdseed",
         "PHYSICA_ARCH": "x86-64-v3",
-        "PHYSICA_CCACHE": "ON"
+        "PHYSICA_CCACHE": "ON",
+        "BUILD_BENCHMARKS": "ON",
+        "BUILD_TESTS": "ON"
       }
     },
     {
       "name": "minimal",
       "inherits": "base",
       "displayName": "Minimal",
-      "description": "fftw only",
-      "cacheVariables": {
-        "BUILD_BENCHMARKS": "ON"
-      }
+      "description": "fftw only"
     },
     {
       "name": "full",
@@ -40,8 +39,7 @@
         "PHYSICA_MPI": "ON",
         "PHYSICA_MIMALLOC": "ON",
         "PHYSICA_GUI": "ON",
-        "BUILD_EXAMPLES": "ON",
-        "BUILD_BENCHMARKS": "ON"
+        "BUILD_EXAMPLES": "ON"
       }
     },
     {

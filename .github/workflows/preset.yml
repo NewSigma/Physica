@@ -75,7 +75,6 @@ jobs:
       run: >
         cmake --preset ${{ inputs.preset }} -S ${{ env.PHYSICA_SRC }}
         -DCMAKE_BUILD_TYPE=${{ inputs.build_config }}
-        -DBUILD_TESTS=${{ inputs.test }}
 
     - name: Reset ccache statistics
       run: ccache -z
