@@ -50,11 +50,25 @@ int main() {
 
         const T answer = 1.317363136305819;
         using RandomSource = Random<MT19937, std::mt19937::default_seed>;
-        T result, deviation;
-        result = mc.solve_e<RandomSource>(6, [](Vector2D<T> x) -> T {
-            return reciprocal(sqrt(square(x[0]) + sin(x[1])));
-        }, deviation);
-        expect(answer.isFinite() && deviation.isFinite() && (abs(answer - result) < deviation));
+        {
+            T result, deviation;
+            result = mc.solve_e<RandomSource>(6, [](Vector2D<T> x) -> T {
+                return reciprocal(sqrt(square(x[0]) + sin(x[1])));
+            }, deviation);
+            expect(answer.isFinite() && deviation.isFinite() && (abs(answer - result) < deviation));
+        }
+        /* Test the importance sampling overload */ {
+            auto dist = [](auto&) -> T { return T(0.25); };
+            T deviation;
+            const T result = mc.solve_e<RandomSource>(
+                    4,
+                    [](Vector2D<T> x) -> T { return x[0]; },
+                    [](Vector2D<T>) -> T { return T(1); },
+                    dist,
+                    deviation);
+            expect(scalarNear(result, T(0.25), 1E-15));
+            expect(deviation.isZero());
+        }
     }
     return 0;
 }

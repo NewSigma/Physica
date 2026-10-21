@@ -77,6 +77,27 @@ namespace {
             kinetic2 += rpmd.calcKinetic<KineticModel>(i);
         return scalarNear(kinetic1, kinetic2, precision);
     }
+
+    void normalize_centroid() {
+        auto rpmd = []() {
+            using MDCellType = RPMD<ScalarType>::MDCellType;
+            MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::identity(3);
+            auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
+            for (auto& elem : pos.asArray())
+                elem = elem + ScalarType(2);
+            MDCellType::MassVector massVec(numMolecular, mass);
+            MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
+
+            return RPMD<ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+        }();
+        rpmd.normalizeCentroid();
+
+        auto centroid = rpmd.getRingPolymer().makeCentroidPos();
+        centroid *= rpmd.getInvLattice();
+        expect(std::ranges::all_of(centroid.asArray(), [](ScalarType x) {
+            return ScalarType(0) <= x && x <= ScalarType(1);
+        }));
+    }
     /**
     * Reference:
     * [1] J. Chem. Phys. 122, 184503 (2005); https://doi.org/10.1063/1.1893956
@@ -116,6 +137,7 @@ int main() {
     ThreadPool::numThreadRequired = 4;
     expect(testDriftMomentum(1E-12));
     expect(testCalcKinetic(1E-14));
+    normalize_centroid();
     testMDRun();
     ThreadPool::getInstance().shouldExit();
     return 0;

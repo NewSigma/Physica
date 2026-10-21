@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <limits>
 #include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "Physica/Core/Physics/MD/ForceModel/EmptyForceModel.h"
 #include "Physica/Core/Math/Random/Random.h"
@@ -292,7 +293,7 @@ namespace Physica {
         PositionMatrix centroid = ringPolymer.makeCentroidPos();
         cell.toDirect(centroid);
         size_t index = getDOF();
-        for (const auto elem : centroid) {
+        for (const auto elem : centroid.asArray()) {
             const size_t component = index % Dim;
             const size_t atom_start = index - component;
             const int integer = float(elem);
@@ -808,7 +809,7 @@ namespace Physica {
         PositionMatrix centroid = ringPolymer.makeCentroidPos();
         cell.toDirect(centroid);
         for (auto& elem : centroid)
-            if (!(T(0) <= elem && elem <= T(0)))
+            if (!(T(0) <= elem && elem <= T(1)))
                 return !isGood;
         return isGood;
     }

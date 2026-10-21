@@ -146,7 +146,7 @@ namespace Physica {
         using FloatType = decltype(x.toMachine());
         const auto trivial = x.toMachine();
         FloatType temp = 1;
-        FloatType result = 0;
+        FloatType result = 1;
         while(temp < trivial) {
             temp += 1;
             result *= temp;

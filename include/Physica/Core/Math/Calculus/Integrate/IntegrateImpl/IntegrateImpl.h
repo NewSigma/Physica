@@ -169,13 +169,13 @@ namespace Physica {
             unsigned int numSequence,
             std::invocable<VectorType> auto fn,
             std::invocable<VectorType> auto importance,
-            auto&,
+            auto& distribution,
             T& deviation) const {
         assert(numSequence > 0);
         T mean = 0;
         T variance = 0;
         for (unsigned int i = 0; i < numSequence; ++i)
-            variance.toNextVariance(mean, i, solve(fn, importance));
+            variance.toNextVariance(mean, i, solve<R>(fn, importance, distribution));
         deviation = sqrt(variance);
         return mean;
     }
