@@ -113,9 +113,7 @@ namespace Physica {
             , m(m_)
             , n(n_) {
         assert(alpha.isPositive());
-        /**
-         * Implementation of factorial use tables when index is less than 16, it is considered 16 should be enough.
-         */
+        // High angular momentum is not supported: factorial overflows.
         assert(l < size_t(16));
         assert(m < size_t(16));
         assert(n < size_t(16));
@@ -259,23 +257,21 @@ namespace Physica {
 
     template<Scalar T>
     T GaussBase<T>::squaredNorm() const {
-        using Internal::doubleFactorial;
         const T temp = T(M_PI_2) / alpha;
         const T factor = temp * sqrt(temp);
-        const T numerator = doubleFactorial<T>(l != 0 ? (2 * l - 1) : 0UZ)
-                          * doubleFactorial<T>(m != 0 ? (2 * m - 1) : 0UZ)
-                          * doubleFactorial<T>(n != 0 ? (2 * n - 1) : 0UZ);
+        const T numerator = T(doubleFactorial(l != 0 ? (2 * l - 1) : 0UZ))
+                          * T(doubleFactorial(m != 0 ? (2 * m - 1) : 0UZ))
+                          * T(doubleFactorial(n != 0 ? (2 * n - 1) : 0UZ));
         const T denominator = pow(T(4) * alpha, T(l + m + n));
         return factor * numerator / denominator;
     }
 
     template<Scalar T>
     T GaussBase<T>::overlapImpl(T elemPA, T elemPB, T alpha_sum, size_t index1, size_t index2) {
-        using Internal::doubleFactorial;
         T result = T(0);
         T i_float = T(0);
         for (size_t i = 0; i <= (index1 + index2) / 2; ++i) {
-            const T temp = doubleFactorial<T>(i != 0 ? (2 * i - 1) : 0UZ)
+            const T temp = T(doubleFactorial(i != 0 ? (2 * i - 1) : 0UZ))
                          / pow(T(2) * alpha_sum, i_float);
             const T temp_x = helper_f(2 * i, index1, index2, elemPA, elemPB);
             result += temp_x * temp;
@@ -309,13 +305,12 @@ namespace Physica {
                                       const T& element_pa,
                                       const T& element_pb,
                                       const T& epsilon) {
-        using Internal::factorial;
         T result = T(0);
         for (size_t l = 0; l <= (index1 + index2); ++l) {
-            const T temp = factorial<T>(l) * helper_f(l, index1, index2, element_pa, element_pb);
+            const T temp = T(factorial(l)) * helper_f(l, index1, index2, element_pa, element_pb);
             for (size_t q = 0; q <= l / 2; ++q)
                 if ((l - 2 * q) == L)
-                    result += temp * pow(epsilon, T(q)) / factorial<T>(q);
+                    result += temp * pow(epsilon, T(q)) / T(factorial(q));
         }
         return result;
     }
@@ -330,13 +325,12 @@ namespace Physica {
                                       const T& element_pa,
                                       const T& element_pb,
                                       const T& epsilon) {
-        using Internal::factorial;
         T result = T(0);
         for (size_t L = 0; L <= (index1 + index2); ++L) {
             const T temp = attractionHelperG(L, index1, index2, element_pa, element_pb, epsilon);
             for (size_t t = 0; t <= L / 2; ++t)
                 if ((L - t) == i && (L - 2 * t == lambda))
-                    result += temp * pow(-epsilon, T(t)) / (factorial<T>(t) * factorial<T>(L - 2 * t));
+                    result += temp * pow(-epsilon, T(t)) / (T(factorial(t)) * T(factorial(L - 2 * t)));
         }
         return result;
     }
@@ -355,18 +349,17 @@ namespace Physica {
                                     const T& epsilon1,
                                     const T& epsilon2,
                                     const T& delta) {
-        using Internal::factorial;
         T result = T(0);
         for (size_t L1 = 0; L1 <= index1 + index2; ++L1) {
             const T factor1 = repulsionHelperH(L1, index1, index2, element_pa, element_pb, epsilon1, false);
             for (size_t L2 = 0; L2 <= index3 + index4; ++L2) {
-                const T factor2 = factorial<T>(L1 + L2);
+                const T factor2 = T(factorial(L1 + L2));
                 const T factor3 = repulsionHelperH(L2, index3, index4, element_qc, element_qd, epsilon2, true);
                 for (size_t t = 0; t <= (L1 + L2) / 2; ++t) {
                     if ((L1 + L2 - t) == i) {
                         result += ((t % 2 == 0) ? factor1 : -factor1) * factor2 * factor3
                                 * pow0(element_pq, T(L1 + L2 - 2 * t))
-                                / (factorial<T>(t) * factorial<T>(L1 + L2 - 2 * t) * pow(delta, T(L1 + L2 - t)));
+                                / (T(factorial(t)) * T(factorial(L1 + L2 - 2 * t)) * pow(delta, T(L1 + L2 - t)));
                     }
                 }
             }
@@ -384,16 +377,15 @@ namespace Physica {
                                      const T& element2,
                                      const T& epsilon,
                                      bool type) {
-        using Internal::factorial;
         T result = T(0);
-        const T factor = reciprocal(factorial<T>(L));
+        const T factor = reciprocal(T(factorial(L)));
         for (size_t l = 0; l <= index1 + index2; ++l) {
-            const T temp = factorial<T>(l) * helper_f(l, index1, index2, element1, element2);
+            const T temp = T(factorial(l)) * helper_f(l, index1, index2, element1, element2);
             for (size_t q = 0; q <= l / 2; ++q)
                 if ((l - 2 * q) == L)
                     result += (type || (l % 2 == 0) ? temp : -temp)
                             * pow(epsilon, T(l - q))
-                            / factorial<T>(q);
+                            / T(factorial(q));
         }
         return result * factor;
     }
@@ -401,16 +393,15 @@ namespace Physica {
     template<Scalar T>
     T GaussBase<T>::helper_f(size_t j, size_t l, size_t m, T a, T b) {
         assert(l + m >= j);
-        using Internal::factorial;
         const size_t lower = j > m ? (j - m) : 0;
         const size_t upper = std::min(j, l);
-        const T const_1 = factorial<T>(l) * factorial<T>(m);
+        const T const_1 = T(factorial(l)) * T(factorial(m));
         const T inv_a = a.isZero() ? T(0) : reciprocal(a);
         T result = T(0);
         T temp1 = pow0(a, T(l - lower));
         T temp2 = pow0(b, T(m + lower - j));
         for (size_t i = lower; i <= upper; ++i) {
-            const T temp = const_1 / (factorial<T>(i) * factorial<T>(l - i) * factorial<T>(j - i) * factorial<T>(m + i - j));
+            const T temp = const_1 / (T(factorial(i)) * T(factorial(l - i)) * T(factorial(j - i)) * T(factorial(m + i - j)));
             result += temp * temp1 * temp2;
             temp1 *= inv_a;
             temp2 *= b;

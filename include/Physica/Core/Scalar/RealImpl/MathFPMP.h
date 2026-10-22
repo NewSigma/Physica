@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -83,9 +83,6 @@ namespace Physica {
     inline Real<FloatMP> pow(const Real<FloatMP>& s1, const Real<FloatMP>& s2) noexcept {
         return s1.isInteger() ? powScalar(s1, s2) : exp(ln(s1) * s2);
     }
-
-    template<>
-    PHYSICA_API Real<FloatMP> factorial(const Real<FloatMP>& s) noexcept;
 
     template<>
     PHYSICA_API __host__ __device__ Real<FloatMP> cos(const Real<FloatMP>& s) noexcept;

@@ -105,18 +105,6 @@ namespace Physica {
     Real<FloatMP> pow(const Real<FloatMP>& s1, const Real<FloatMP>& s2) noexcept;
 
     template<>
-    Real<FloatMP> factorial(const Real<FloatMP>& s) noexcept {
-        //Optimize: Unnecessary copy during floor() if s is a integer itself.
-        const Real<FloatMP> integer = floor(s);
-
-        Real<FloatMP> result(SignedMPUnit(1));
-        Real<FloatMP> temp(SignedMPUnit(1));
-        while(temp < integer)
-            result *= ++temp;
-        return result;
-    }
-
-    template<>
     Real<FloatMP> cos(const Real<FloatMP>& s) noexcept {
         Real<FloatMP> result(static_cast<SignedMPUnit>(1));
         if(s == BasicConst::getInstance()._0)

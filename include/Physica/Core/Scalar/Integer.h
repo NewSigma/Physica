@@ -142,3 +142,5 @@ namespace std {
         constexpr static bool is_integer = true;
     };
 }
+
+#include "IntegerImpl/Math.h"

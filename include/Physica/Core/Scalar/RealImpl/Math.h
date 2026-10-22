@@ -135,25 +135,6 @@ namespace Physica {
             return T(1);
         return x.isZero() ? T(0) : pow(x, a);
     }
-    /**
-     * Ignoring error. If x is a float number, use floor() first.
-     * \param x must be positive, or 1 will be returned.
-     *
-     * Fix: Easily overflow.
-     */
-    template<FloatPrec Prec>
-    [[nodiscard]] Real<Prec> factorial(const Real<Prec>& x) noexcept {
-        using FloatType = decltype(x.toMachine());
-        const auto trivial = x.toMachine();
-        FloatType temp = 1;
-        FloatType result = 1;
-        while(temp < trivial) {
-            temp += 1;
-            result *= temp;
-        }
-        return Real<Prec>(result);
-    }
-
     template<FloatPrec Prec>
     [[nodiscard]] __host__ __device__ Real<Prec> cos(const Real<Prec>& x) noexcept {
         Internal::checkTrigonometricParam<false>(x);

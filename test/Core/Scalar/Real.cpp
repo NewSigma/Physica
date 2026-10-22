@@ -71,14 +71,6 @@ namespace {
         expect(reciprocal(inf).isZero());
         expect(reciprocal(-inf).isZero());
     }
-
-    template<FloatPrec Prec>
-    void testFactorial() {
-        using T = Real<Prec>;
-        constexpr static Array<int, 7> result{1, 1, 2, 6, 24, 120, 720};
-        for (auto [i, r] : std::ranges::enumerate_view(result))
-            expect(Physica::factorial(T(i)) == T(r));
-    }
 }
 
 int main() {
@@ -92,7 +84,5 @@ int main() {
     subnormal<Float64>();
     repinf<Float32>();
     repinf<Float64>();
-    testFactorial<Float32>();
-    testFactorial<Float64>();
     return 0;
 }
