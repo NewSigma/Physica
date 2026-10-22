@@ -10,6 +10,9 @@ on:
     branches: [ "Physica", "dev" ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   format:
     runs-on: ubuntu-latest
