@@ -27,6 +27,8 @@ namespace Physica {
         using host_obj = StridedMatrix<Derived>;
         using Base = device_obj<LValueMatrix<Derived>>;
         using This = device_obj<host_obj>;
+    protected:
+        using typename Base::T;
     public:
         constexpr ~device_obj() = default;
         /* Operators */
@@ -34,6 +36,9 @@ namespace Physica {
         This& operator=(This&& obj) noexcept = delete;
         using Base::operator=;
         /* Operations */
+        __host__ __device__ void assign(this const auto& self, Matrix auto&& target);
+        __device__ void assign(this const auto&, Matrix auto&& target, instanceof_x<ThreadBlock> auto block);
+
         [[nodiscard]] __host__ __device__ auto row(this auto&&, size_t r) noexcept;
         [[nodiscard]] __host__ __device__ auto col(this auto&&, size_t c) noexcept;
         template<size_t Row = Dynamic>
@@ -62,6 +67,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto bottomRightCorner(this auto&&, size_t from) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] __host__ __device__ auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
+
+        __host__ __device__ void zeros() noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr size_t getRowStride() const noexcept;
         [[nodiscard]] __host__ __device__ constexpr size_t getColStride() const noexcept;

@@ -90,6 +90,8 @@ namespace Physica {
     private:
         template<class M1, class M2>
         [[nodiscard]] consteval static bool isMinorCompact() noexcept;
+        /* Friends */
+        friend class device_obj<This>;
     };
 }
 

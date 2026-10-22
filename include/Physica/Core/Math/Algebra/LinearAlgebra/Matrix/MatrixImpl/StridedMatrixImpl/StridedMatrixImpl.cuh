@@ -19,8 +19,34 @@
 #pragma once
 
 #include "../StridedMatrix.cuh"
+#include "Physica/Core/Exception/CUDA/CUDA.cuh"
+#include "Physica/Core/Parallel/CUDAContext.cuh"
 
 namespace Physica {
+    template<class Derived>
+    __host__ __device__ void device_obj<StridedMatrix<Derived>>::assign(this const auto& self, Matrix auto&& target) {
+        using Self = std::remove_cvref_t<decltype(self)>;
+        using Target = std::remove_cvref_t<decltype(target)>;
+        target.assert_assign(self);
+        if constexpr (host_obj::template isMinorCompact<Self, Target>() && IsHost()) {
+            void* dst = target.data_handle();
+            const void* src = self.data_handle();
+            size_t dpitch = target.getMajorStride() * sizeof(T);
+            size_t spitch = self.getMajorStride() * sizeof(T);
+            size_t maxMajor = target.getMaxMajor();
+            size_t maxMinor = target.getMaxMinor();
+            assert(self.getMajorStride() >= maxMinor && target.getMajorStride() >= maxMinor && "[Error]: Rows must not overlap");
+            check(cudaMemcpy2DAsync(dst, dpitch, src, spitch, maxMinor * sizeof(T), maxMajor, cudaMemcpyKind::cudaMemcpyDeviceToDevice, CUDAContext::getInstance()));
+        }
+        else
+            self.device_obj<LValueMatrix<Derived>>::assign(target);
+    }
+
+    template<class Derived>
+    __device__ void device_obj<StridedMatrix<Derived>>::assign(this const auto& self, Matrix auto&& target, instanceof_x<ThreadBlock> auto block) {
+        self.device_obj<LValueMatrix<Derived>>::assign(std::forward<decltype(target)>(target), block);
+    }
+
     template<class Derived>
     __host__ __device__ constexpr size_t device_obj<StridedMatrix<Derived>>::getRowStride() const noexcept {
         if constexpr (Derived::getRowStrideAtCompile() != Dynamic)
@@ -186,5 +212,18 @@ namespace Physica {
         using Self = decltype(self);
         using M = remove_device_obj<Self>::type;
         return device_obj<StridedMatrixBlock<M, Row, Col>>(std::forward<Self>(self), fromRow, rowCount, fromCol, colCount);
+    }
+
+    template<class Derived>
+    __host__ __device__ void device_obj<StridedMatrix<Derived>>::zeros() noexcept {
+        if constexpr (host_obj::template isMinorCompact<Derived, Derived>() && IsHost()) {
+            auto& self = Base::getDerived();
+            const size_t maxMajor = self.getMaxMajor();
+            const size_t maxMinor = self.getMaxMinor();
+            assert(self.getMajorStride() >= maxMinor && "[Error]: Rows must not overlap");
+            check(cudaMemset2DAsync(self.data_handle(), self.getMajorStride() * sizeof(T), 0, maxMinor * sizeof(T), maxMajor, CUDAContext::getInstance()));
+        }
+        else
+            Base::zeros();
     }
 }

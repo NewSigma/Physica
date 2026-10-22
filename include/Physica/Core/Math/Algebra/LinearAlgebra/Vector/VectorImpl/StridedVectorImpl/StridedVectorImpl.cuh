@@ -62,7 +62,7 @@ namespace Physica {
                 Base::getDerived().zero_grad();
             }
             else
-                check(cudaMemsetAsync(data_handle(), 0, Base::getLength() * sizeof(T)));
+                check(cudaMemsetAsync(data_handle(), 0, Base::getLength() * sizeof(T), CUDAContext::getInstance()));
         }
         else
             Base::zeros();

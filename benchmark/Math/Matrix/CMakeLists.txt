@@ -5,6 +5,10 @@ target_sources(Benchmark PRIVATE CompactMatrix.cpp)
 target_sources(Benchmark PRIVATE SyMV.cpp)
 target_sources(Benchmark PRIVATE Transpose.cpp)
 
+if(${PHYSICA_CUDA})
+    target_sources(Benchmark PRIVATE StridedMatrix.cu)
+endif()
+
 if(${PHYSICA_MKL} AND NOT ${PHYSICA_EmitLLVM})
     add_subdirectory(Dispatch)
     add_subdirectory(MKL)
