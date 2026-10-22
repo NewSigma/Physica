@@ -18,8 +18,10 @@
  */
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <cassert>
+#include <cstddef>
 #include <cstring>
 #include "Physica/Macro.h"
 
@@ -57,5 +59,21 @@ namespace Physica {
         memcpy(buffer.data(), (void*)a, buffer.size());
         memcpy((void*)a, (void*)b, buffer.size());
         memcpy((void*)b, buffer.data(), buffer.size());
+    }
+
+    template<class T>
+    void memswap(T* a, T* b, size_t count) noexcept {
+        assert(a != b && "[Error]: Self swap is likely a bug");
+        constexpr size_t Stride = std::max<size_t>(1, HostDevAttr::LineSizeL1D / sizeof(T));
+        constexpr size_t Size = Stride * sizeof(T);
+        alignas(std::max_align_t) std::array<std::byte, Size> buffer;
+        size_t i = 0;
+        for (; i + Stride < count; i += Stride) {
+            memcpy(buffer.data(), (void*)(a + i), Size);
+            memcpy((void*)(a + i), (void*)(b + i), Size);
+            memcpy((void*)(b + i), buffer.data(), Size);
+        }
+        for (; i < count; ++i)
+            memswap(a + i, b + i);
     }
 }

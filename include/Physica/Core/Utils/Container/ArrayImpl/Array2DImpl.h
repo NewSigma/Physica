@@ -18,7 +18,9 @@
  */
 #pragma once
 
+#include <type_traits>
 #include "Physica/Core/Parallel/Algorithm/Sequential.h"
+#include "Physica/Core/Utils/Builtin.h"
 #include "../Array2D.h"
 
 namespace Physica {
@@ -148,8 +150,11 @@ namespace Physica {
             const size_t col = getCol();
             const size_t offset1 = r1 * col;
             const size_t offset2 = r2 * col;
-            for (size_t i = 0; i < col; ++i)
-                arr[offset1 + i].swap(arr[offset2 + i]);
+            if constexpr (std::is_trivially_copyable_v<T>)
+                memswap(arr.data() + offset1, arr.data() + offset2, col);
+            else
+                for (size_t i = 0; i < col; ++i)
+                    arr[offset1 + i].swap(arr[offset2 + i]);
         }
     }
 
@@ -161,8 +166,11 @@ namespace Physica {
             const size_t row = getRow();
             const size_t offset1 = c1 * row;
             const size_t offset2 = c2 * row;
-            for (size_t i = 0; i < row; ++i)
-                arr[offset1 + i].swap(arr[offset2 + i]);
+            if constexpr (std::is_trivially_copyable_v<T>)
+                memswap(arr.data() + offset1, arr.data() + offset2, row);
+            else
+                for (size_t i = 0; i < row; ++i)
+                    arr[offset1 + i].swap(arr[offset2 + i]);
         }
         else {
             const size_t row = getRow();
