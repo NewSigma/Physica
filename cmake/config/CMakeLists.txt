@@ -1,10 +1,17 @@
 include(./PhysicaCheck.cmake)
 
-find_package(Git QUIET)
-if (${Git_FOUND})
-    execute_process(COMMAND ${GIT_EXECUTABLE} log -1 --pretty=format:%H
-                    OUTPUT_VARIABLE GIT_HASH
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+find_package(Git QUIET REQUIRED)
+execute_process(COMMAND ${GIT_EXECUTABLE} log -1 --pretty=format:%H
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                OUTPUT_VARIABLE GIT_HASH
+                ERROR_VARIABLE GIT_HASH_ERROR
+                RESULT_VARIABLE GIT_HASH_RESULT
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+if (NOT GIT_HASH_RESULT EQUAL 0)
+    message(FATAL_ERROR "Failed to read the git revision (git returned ${GIT_HASH_RESULT}): ${GIT_HASH_ERROR}")
+endif()
+if (GIT_HASH STREQUAL "")
+    message(FATAL_ERROR "Git revision is empty?")
 endif()
 
 #CheckRightShift
