@@ -1,7 +1,7 @@
 include(CTest)
 add_custom_target(Tests COMMAND ctest --parallel WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
-add_library(TestingSupport SHARED Test.cpp)
+add_library(TestingSupport STATIC Test.cpp)
 target_include_directories(TestingSupport PUBLIC ${CMAKE_SOURCE_DIR}/test)
 target_link_libraries(TestingSupport PUBLIC PhysicaCore)
 

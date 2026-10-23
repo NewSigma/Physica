@@ -18,12 +18,18 @@
  */
 #include "Physica/Core/Utils/Suspend.h"
 
-namespace Physica {
-    std::coroutine_handle<> noop_coroutine() noexcept {
+namespace {
+    const std::coroutine_handle<> NoopCoro = []() noexcept {
     #ifdef __clang__
         return std::coroutine_handle<>::from_address(__builtin_coro_noop());
     #else
         return std::noop_coroutine();
     #endif
+    }();
+}
+
+namespace Physica {
+    std::coroutine_handle<> noop_coroutine() noexcept {
+        return NoopCoro;
     }
 }
