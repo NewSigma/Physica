@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/CompactVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/StridedVector.h"
 #include "Physica/Core/Utils/Empty.h"
 
@@ -26,10 +27,24 @@ namespace Physica {
     template<class Derived> class StridedMatrix;
     template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class StridedMatrixBlock;
 
+    namespace Internal {
+        template<Matrix M, size_t Row, size_t Col>
+        __host__ __device__ consteval bool isCompactBlockVector() noexcept {
+            using M1 = std::remove_cvref_t<M>;
+            if constexpr (Row == 1)
+                return M1::getColStrideAtCompile() == 1;
+            else
+                return M1::getRowStrideAtCompile() == 1;
+        }
+    }
+
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
-    class StridedMatrixBlock<M, Row, Col> : public StridedVector<StridedMatrixBlock<M, Row, Col>> {
+    class StridedMatrixBlock<M, Row, Col>
+            : public std::conditional_t<Internal::isCompactBlockVector<M, Row, Col>(),
+                                        CompactVector<StridedMatrixBlock<M, Row, Col>>,
+                                        StridedVector<StridedMatrixBlock<M, Row, Col>>> {
         using This = StridedMatrixBlock<M, Row, Col>;
-        using Base = StridedVector<This>;
+        using Base = std::conditional_t<Internal::isCompactBlockVector<M, Row, Col>(), CompactVector<This>, StridedVector<This>>;
         using MaybeRowCount = std::conditional_t<Row == Dynamic, size_t, Empty>;
         using MaybeColCount = std::conditional_t<Col == Dynamic, size_t, Empty>;
     private:

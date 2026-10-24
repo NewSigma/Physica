@@ -19,15 +19,19 @@
 #pragma once
 
 #include "../StridedMatrix.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/CompactVector.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/StridedVector.cuh"
 #include "Physica/Core/Utils/Empty.h"
 
 namespace Physica {
     template<Matrix M, size_t Row, size_t Col> requires(Row == 1 || Col == 1)
-    class device_obj<StridedMatrixBlock<M, Row, Col>> : public device_obj<StridedVector<StridedMatrixBlock<M, Row, Col>>> {
+    class device_obj<StridedMatrixBlock<M, Row, Col>>
+            : public device_obj<std::conditional_t<Internal::isCompactBlockVector<M, Row, Col>(),
+                                                  CompactVector<StridedMatrixBlock<M, Row, Col>>,
+                                                  StridedVector<StridedMatrixBlock<M, Row, Col>>>> {
         using host_obj = StridedMatrixBlock<M, Row, Col>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<StridedVector<host_obj>>;
+        using Base = device_obj<std::conditional_t<Internal::isCompactBlockVector<M, Row, Col>(), CompactVector<host_obj>, StridedVector<host_obj>>>;
         using Ref = add_device_obj<M>::type;
         using MaybeRowCount = std::conditional_t<Row == Dynamic, size_t, Empty>;
         using MaybeColCount = std::conditional_t<Col == Dynamic, size_t, Empty>;

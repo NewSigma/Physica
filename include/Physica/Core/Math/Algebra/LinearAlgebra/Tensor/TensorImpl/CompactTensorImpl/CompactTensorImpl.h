@@ -54,7 +54,7 @@ namespace Physica {
         const auto& self = Base::getDerived();
         target.assert_assign(self);
         if constexpr (FastCopy)
-            std::memcpy(target.data(), self.data(), self.getSize() * sizeof(T));
+            self.flatten().assign(target.flatten());
         else
             Base::assign(target);
     }

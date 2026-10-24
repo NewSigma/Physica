@@ -50,6 +50,8 @@ namespace Physica {
         [[nodiscard]] T calc(const IndexType& index) const;
         /* Getters */
         [[nodiscard]] constexpr IndexType getShape() const noexcept { return shape; }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static IndexType getShapeAtCompile() noexcept;
     };
 
     template<class X>
@@ -74,6 +76,14 @@ namespace Physica {
         for (auto&& [g, f, i] : zip(global, from, index))
             g = f + i;
         return tensor.calc(global);
+    }
+
+    template<class X>
+    __host__ __device__ consteval auto TensorBlock<X>::getShapeAtCompile() noexcept -> IndexType {
+        IndexType result{};
+        for (int i = 0; i < Base::NDim; ++i)
+            result[i] = Dynamic;
+        return result;
     }
 }
 

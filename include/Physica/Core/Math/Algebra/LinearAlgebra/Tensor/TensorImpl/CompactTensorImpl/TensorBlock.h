@@ -47,6 +47,7 @@ namespace Physica {
         [[nodiscard]] auto getStrides() const noexcept;
         [[nodiscard]] auto data_handle(this auto&&) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static IndexType getShapeAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static IndexType getStrideAtCompile() noexcept;
     };
 
@@ -81,6 +82,14 @@ namespace Physica {
     template<Tensor X> requires(std::remove_cvref_t<X>::isCompact())
     auto TensorBlock<X>::data_handle(this auto&& self) noexcept {
         return self.tensor.data_ptr(self.from);
+    }
+
+    template<Tensor X> requires(std::remove_cvref_t<X>::isCompact())
+    __host__ __device__ consteval auto TensorBlock<X>::getShapeAtCompile() noexcept -> IndexType {
+        IndexType result{};
+        for (int i = 0; i < Base::NDim; ++i)
+            result[i] = Dynamic;
+        return result;
     }
 
     template<Tensor X> requires(std::remove_cvref_t<X>::isCompact())

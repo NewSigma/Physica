@@ -57,9 +57,12 @@ namespace Physica {
         StridedTensor(const This&) = default;
         StridedTensor(This&&) noexcept = default;
     private:
+        /* Getters */
         template<class Self, class Other>
         [[nodiscard]] __host__ __device__ consteval static bool isMinorCompact() noexcept;
         [[nodiscard]] __host__ __device__ constexpr static size_t getCompactMinorSize(const auto& tensor) noexcept;
+        /* Static members */
+        [[nodiscard]] constexpr static auto makeMinorFiber(auto&& tensor, const IndexType& index) noexcept;
         /* Friends */
         friend class device_obj<This>;
     };

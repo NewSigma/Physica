@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include <cstring>
 #include "../StridedMatrix.h"
 
 namespace Physica {
@@ -34,12 +33,16 @@ namespace Physica {
                 return false;
             if (self.getCol() != other.getCol())
                 return false;
-            const size_t maxMinor = self.getMaxMinor();
-            for (size_t major = 0; major < self.getMaxMajor(); ++major) {
-                const size_t r = self.rowFromMajorMinor(major, 0);
-                const size_t c = self.colFromMajorMinor(major, 0);
-                if (std::memcmp(self.data_ptr(r, c), other.data_ptr(r, c), maxMinor * sizeof(T)) != 0)
-                    return false;
+            const size_t maxMajor = self.getMaxMajor();
+            for (size_t major = 0; major < maxMajor; ++major) {
+                if constexpr (self.isRowMatrix()) {
+                    if (self.row(major) != other.row(major))
+                        return false;
+                }
+                else {
+                    if (self.col(major) != other.col(major))
+                        return false;
+                }
             }
             return true;
         }
@@ -51,13 +54,14 @@ namespace Physica {
     template<ExecutePolicy P>
     void StridedMatrix<Derived>::assign(Matrix auto&& target) const noexcept {
         if constexpr (isMinorCompact<Derived, std::remove_cvref_t<decltype(target)>>()) {
+            static_assert(!(Derived::isCompact() && target.isCompact()), "compact-compact assign should be handled by CompactMatrix::assign");
             const auto& source = Base::getDerived();
             const size_t maxMajor = target.getMaxMajor();
-            const size_t maxMinor = target.getMaxMinor();
             for (size_t major = 0; major < maxMajor; ++major) {
-                const size_t r = target.rowFromMajorMinor(major, 0);
-                const size_t c = target.colFromMajorMinor(major, 0);
-                std::memcpy(target.data_ptr(r, c), source.data_ptr(r, c), maxMinor * sizeof(typename StridedMatrix<Derived>::ScalarType));
+                if constexpr (MatrixMajor::isRowMatrix<Derived>())
+                    source.row(major).template assign<P>(target.row(major));
+                else
+                    source.col(major).template assign<P>(target.col(major));
             }
         }
         else
@@ -179,11 +183,11 @@ namespace Physica {
         if constexpr (isMinorCompact<Derived, Derived>()) {
             auto& self = Base::getDerived();
             const size_t maxMajor = self.getMaxMajor();
-            const size_t maxMinor = self.getMaxMinor();
             for (size_t major = 0; major < maxMajor; ++major) {
-                const size_t r = self.rowFromMajorMinor(major, 0);
-                const size_t c = self.colFromMajorMinor(major, 0);
-                std::memset(self.data_ptr(r, c), 0, maxMinor * sizeof(typename Base::ScalarType));
+                if constexpr (MatrixMajor::isRowMatrix<Derived>())
+                    self.row(major).zeros();
+                else
+                    self.col(major).zeros();
             }
         }
         else

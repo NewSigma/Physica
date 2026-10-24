@@ -284,7 +284,7 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    __host__ __device__ consteval auto RValueTensor<Derived, ScalarT>::getShapeAtCompile() noexcept -> IndexType {
+    __host__ __device__ consteval auto RValueTensor<Derived, ScalarT>::getShapeAtCompile() noexcept {
         return Derived::getShapeAtCompile();
     }
 

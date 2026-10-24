@@ -100,7 +100,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isStrided() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isCompact() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isSparse() noexcept;
-        [[nodiscard]] __host__ __device__ consteval static auto getShapeAtCompile() noexcept -> IndexType;
+        [[nodiscard]] __host__ __device__ consteval static auto getShapeAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getSizeAtCompile() noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Scalar auto& source) noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Tensor auto& source) noexcept;

@@ -41,6 +41,7 @@ namespace Physica {
         constexpr static int NumUnrollDefault = 8;
         constexpr static int NumUnrollGEMV = 2;
         constexpr static int ThresholdDot_MKL = 128;
+        constexpr static size_t ThresholdMemcpy = 1024 * 8;
     };
 
     class CUDADevAttr final {

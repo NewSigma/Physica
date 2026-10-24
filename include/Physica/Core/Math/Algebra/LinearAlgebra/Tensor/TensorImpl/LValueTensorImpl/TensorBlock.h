@@ -48,6 +48,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] constexpr IndexType getShape() const noexcept { return shape; }
         [[nodiscard]] auto data_ptr(this auto&&, const IndexType& index) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static IndexType getShapeAtCompile() noexcept;
     };
 
     template<Tensor X> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isCompact())
@@ -91,5 +93,13 @@ namespace Physica {
         for (auto&& [g, f, i] : zip(global, self.from, index))
             g = f + i;
         return self.tensor.data_ptr(global);
+    }
+
+    template<Tensor X> requires(std::remove_cvref_t<X>::isLValueTensor() && !std::remove_cvref_t<X>::isCompact())
+    __host__ __device__ consteval auto TensorBlock<X>::getShapeAtCompile() noexcept -> IndexType {
+        IndexType result{};
+        for (int i = 0; i < Base::NDim; ++i)
+            result[i] = Dynamic;
+        return result;
     }
 }

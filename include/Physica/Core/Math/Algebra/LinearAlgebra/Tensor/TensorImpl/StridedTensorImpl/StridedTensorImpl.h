@@ -19,7 +19,7 @@
 #pragma once
 
 #include <algorithm>
-#include <cstring>
+#include <utility>
 #include "../StridedTensor.h"
 
 namespace Physica {
@@ -49,7 +49,7 @@ namespace Physica {
             const size_t stride = std::min(getCompactMinorSize(source), getCompactMinorSize(target));
             for (size_t i = 0; i < size; i += stride) {
                 const auto indices = source.toIndexND(i);
-                std::memcpy(target.data_ptr(indices), source.data_ptr(indices), stride * sizeof(T));
+                makeMinorFiber(source, indices).assign(makeMinorFiber(target, indices));
             }
         }
         else
@@ -63,7 +63,7 @@ namespace Physica {
             const size_t size = self.getSize();
             const size_t stride = getCompactMinorSize(self);
             for (size_t i = 0; i < size; i += stride)
-                std::memset(self.data_ptr(self.toIndexND(i)), 0, stride * sizeof(T));
+                makeMinorFiber(self, self.toIndexND(i)).zeros();
         }
         else
             Base::zeros();
@@ -147,5 +147,12 @@ namespace Physica {
             result *= shape[i];
         }
         return result;
+    }
+
+    template<class Derived>
+    constexpr auto StridedTensor<Derived>::makeMinorFiber(auto&& tensor, const IndexType& index) noexcept {
+        return [&tensor, &index]<size_t... I>(std::index_sequence<I...>) {
+            return tensor.fiber(index[I]..., var());
+        }(std::make_index_sequence<NDim - 1>{});
     }
 }

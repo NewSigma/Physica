@@ -55,10 +55,9 @@ namespace Physica {
                 if constexpr (Size != Dynamic)
                     memcpy(v.data(), Base::getDerived().data(), Size * sizeof(T)); // Static memcpy
                 else {
-                    constexpr size_t Critical = 1024 * sizeof(float64); // Based on benchmark
-                    constexpr bool MaybeBenefit = Size == Dynamic || (Size * sizeof(T) > Critical);
+                    constexpr bool MaybeBenefit = Size == Dynamic || (Size * sizeof(T) > HostDevAttr::ThresholdMemcpy);
                     size_t size = Base::getLength() * sizeof(T);
-                    if (MaybeBenefit && (size > Critical))
+                    if (MaybeBenefit && (size > HostDevAttr::ThresholdMemcpy))
                         memcpy(v.data(), Base::getDerived().data(), size); // Reuse size, because v.read(data()) shows IR regression
                     else
                         Base::template assign_base<P>(v);
