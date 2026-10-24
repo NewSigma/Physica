@@ -86,10 +86,7 @@ namespace Physica {
 
     template<Tensor X> requires(std::remove_cvref_t<X>::isCompact())
     __host__ __device__ consteval auto TensorBlock<X>::getShapeAtCompile() noexcept -> IndexType {
-        IndexType result{};
-        for (int i = 0; i < Base::NDim; ++i)
-            result[i] = Dynamic;
-        return result;
+        return IndexType::zeros(Base::NDim);
     }
 
     template<Tensor X> requires(std::remove_cvref_t<X>::isCompact())

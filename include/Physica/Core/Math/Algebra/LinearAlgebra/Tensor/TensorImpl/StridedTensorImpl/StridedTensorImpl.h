@@ -108,10 +108,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ consteval auto StridedTensor<Derived>::getStrideAtCompile() noexcept -> IndexType {
-        IndexType result{};
-        for (int i = 0; i < NDim; ++i)
-            result[i] = Dynamic;
-        return result;
+        return IndexType::zeros(NDim);
     }
 
     template<class Derived>

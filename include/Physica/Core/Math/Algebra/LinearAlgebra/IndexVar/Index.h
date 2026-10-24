@@ -37,10 +37,13 @@ namespace Physica {
         /* Operators */
         constexpr This& operator=(const This&) = default;
         constexpr This& operator=(This&&) noexcept = default;
+        /* Operations */
+        using Base::zeros;
         /* Static members */
         [[nodiscard]] __host__ __device__ static size_t toIndex1D(const This& __restrict shape, const This& __restrict indices) noexcept;
         [[nodiscard]] __host__ __device__ static This toIndexND(const This& shape, size_t index) noexcept;
         [[nodiscard]] __host__ __device__ static size_t toSize(const This& shape) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr static This zeros(size_t length) noexcept;
     };
 
     template<size_t Length>
@@ -72,6 +75,16 @@ namespace Physica {
     template<size_t Length>
     __host__ __device__ size_t Index<Length>::toSize(const This& shape) noexcept {
         return std::reduce(shape.begin(), shape.end(), size_t{1}, std::multiplies<>{});
+    }
+
+    template<size_t Length>
+    __host__ __device__ constexpr auto Index<Length>::zeros(size_t length) noexcept -> This {
+        if constexpr (Length == Dynamic)
+            return This(length, size_t{0});
+        else {
+            assert(length == Length && "[Error]: Length mismatch");
+            return This{};
+        }
     }
 
     template<size_t Length>
