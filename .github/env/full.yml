@@ -2,6 +2,7 @@ name: physica
 channels:
   - conda-forge
 dependencies:
+  - libhwloc>=2.11.0
   - fftw=3.3.10=nompi_*
   - openmpi=4.1.6
   - hdf5=1.14.6=nompi_*

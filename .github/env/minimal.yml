@@ -2,5 +2,6 @@ name: physica
 channels:
   - conda-forge
 dependencies:
+  - libhwloc>=2.11.0
   - fftw=3.3.10=nompi_*
   - benchmark

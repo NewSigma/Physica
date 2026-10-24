@@ -16,6 +16,7 @@ See `.github/workflows/preset.yml` for detailed version requirements.
 
 3. Addtional libraries:
 
+[hwloc](https://www.open-mpi.org/projects/hwloc/)  
 [fftw](http://www.fftw.org)  
 [HDF5](https://www.hdfgroup.org/solutions/hdf5/) (Optional, Recommended data format)  
 [oneMKL](https://www.intel.com/) (Optional)  
