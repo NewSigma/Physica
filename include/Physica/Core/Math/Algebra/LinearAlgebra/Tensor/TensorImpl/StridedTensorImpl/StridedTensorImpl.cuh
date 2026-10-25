@@ -19,20 +19,23 @@
 #pragma once
 
 #include "../StridedTensor.cuh"
-#include "Physica/Core/Exception/CUDA/CUDA.cuh"
-#include "Physica/Core/Parallel/CUDAContext.cuh"
 
 namespace Physica {
     template<class Derived>
     __host__ __device__ void device_obj<StridedTensor<Derived>>::assign(this const auto& self, Tensor auto&& target) {
         using Self = std::remove_cvref_t<decltype(self)>;
         using Target = std::remove_cvref_t<decltype(target)>;
-        if constexpr (host_obj::template isMinorCompact<Self, Target>() && IsHost()) {
+        target.assert_assign(self);
+        // TODO: Lower this and zeros to a for loop of strided-matrix assign/zeros once a reshape/flatten-like tensor-to-matrix view (torch.reshape style) is available
+        if constexpr (host_obj::template isMinorCompact<Self, Target>()) {
+            const int minorDim = std::max(host_obj::getCompactMinorDim(self), host_obj::getCompactMinorDim(target));
             const size_t size = self.getSize();
             const size_t stride = std::min(host_obj::getCompactMinorSize(self), host_obj::getCompactMinorSize(target));
             for (size_t i = 0; i < size; i += stride) {
                 const auto indices = self.toIndexND(i);
-                check(cudaMemcpyAsync(target.data_ptr(indices), self.data_ptr(indices), stride * sizeof(T), cudaMemcpyKind::cudaMemcpyDeviceToDevice, CUDAContext::getInstance()));
+                auto src = host_obj::makeCompactBlock(self, indices, minorDim);
+                auto tgt = host_obj::makeCompactBlock(target, indices, minorDim);
+                src.flatten().assign(tgt.flatten());
             }
         }
         else
@@ -41,12 +44,15 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ void device_obj<StridedTensor<Derived>>::zeros() noexcept {
-        if constexpr (host_obj::template isMinorCompact<Derived, Derived>() && IsHost()) {
+        if constexpr (host_obj::template isMinorCompact<Derived, Derived>()) {
             auto& self = Base::getDerived();
+            const int minorDim = host_obj::getCompactMinorDim(self);
             const size_t size = self.getSize();
             const size_t stride = host_obj::getCompactMinorSize(self);
-            for (size_t i = 0; i < size; i += stride)
-                check(cudaMemsetAsync(self.data_ptr(self.toIndexND(i)), 0, stride * sizeof(T), CUDAContext::getInstance()));
+            for (size_t i = 0; i < size; i += stride) {
+                const auto indices = self.toIndexND(i);
+                host_obj::makeCompactBlock(self, indices, minorDim).flatten().zeros();
+            }
         }
         else
             Base::zeros();

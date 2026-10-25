@@ -4,6 +4,7 @@ add_subdirectory(BLAS3)
 add_subdirectory(Eigen)
 add_subdirectory(Matrix)
 add_subdirectory(MatrixDecomp)
+add_subdirectory(Tensor)
 add_subdirectory(VectorExpr)
 
 target_sources(Benchmark PRIVATE

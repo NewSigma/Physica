@@ -60,9 +60,10 @@ namespace Physica {
         /* Getters */
         template<class Self, class Other>
         [[nodiscard]] __host__ __device__ consteval static bool isMinorCompact() noexcept;
+        [[nodiscard]] __host__ __device__ constexpr static int getCompactMinorDim(const auto& tensor) noexcept;
         [[nodiscard]] __host__ __device__ constexpr static size_t getCompactMinorSize(const auto& tensor) noexcept;
         /* Static members */
-        [[nodiscard]] constexpr static auto makeMinorFiber(auto&& tensor, const IndexType& index) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr static auto makeCompactBlock(auto&& tensor, const IndexType& index, int minorDim) noexcept;
         /* Friends */
         friend class device_obj<This>;
     };

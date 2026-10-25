@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <utility>
 #include "../StridedTensor.h"
+#include "TensorFiber.h"
 
 namespace Physica {
     template<class Derived>
@@ -45,11 +46,14 @@ namespace Physica {
         using Target = std::remove_cvref_t<decltype(target)>;
         if constexpr (isMinorCompact<Derived, Target>()) {
             const auto& source = Base::getDerived();
+            const int minorDim = std::max(getCompactMinorDim(source), getCompactMinorDim(target));
             const size_t size = source.getSize();
             const size_t stride = std::min(getCompactMinorSize(source), getCompactMinorSize(target));
             for (size_t i = 0; i < size; i += stride) {
                 const auto indices = source.toIndexND(i);
-                makeMinorFiber(source, indices).assign(makeMinorFiber(target, indices));
+                auto src = makeCompactBlock(source, indices, minorDim);
+                auto tgt = makeCompactBlock(target, indices, minorDim);
+                src.flatten().assign(tgt.flatten());
             }
         }
         else
@@ -60,10 +64,13 @@ namespace Physica {
     void StridedTensor<Derived>::zeros() noexcept {
         if constexpr (isMinorCompact<Derived, Derived>()) {
             auto& self = Base::getDerived();
+            const int minorDim = getCompactMinorDim(self);
             const size_t size = self.getSize();
             const size_t stride = getCompactMinorSize(self);
-            for (size_t i = 0; i < size; i += stride)
-                makeMinorFiber(self, self.toIndexND(i)).zeros();
+            for (size_t i = 0; i < size; i += stride) {
+                const auto indices = self.toIndexND(i);
+                makeCompactBlock(self, indices, minorDim).flatten().zeros();
+            }
         }
         else
             Base::zeros();
@@ -134,22 +141,34 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ constexpr size_t StridedTensor<Derived>::getCompactMinorSize(const auto& tensor) noexcept {
+    __host__ __device__ constexpr int StridedTensor<Derived>::getCompactMinorDim(const auto& tensor) noexcept {
         const auto shape = tensor.getShape();
         const auto strides = tensor.getStrides();
+        int dim = tensor.ndim();
         size_t result = 1;
         for (int i = tensor.ndim() - 1; i >= 0; --i) {
             if (strides[i] != result)
                 break;
             result *= shape[i];
+            dim = i;
         }
+        return dim;
+    }
+
+    template<class Derived>
+    __host__ __device__ constexpr size_t StridedTensor<Derived>::getCompactMinorSize(const auto& tensor) noexcept {
+        const auto shape = tensor.getShape();
+        size_t result = 1;
+        for (int i = getCompactMinorDim(tensor); i < tensor.ndim(); ++i)
+            result *= shape[i];
         return result;
     }
 
     template<class Derived>
-    constexpr auto StridedTensor<Derived>::makeMinorFiber(auto&& tensor, const IndexType& index) noexcept {
-        return [&tensor, &index]<size_t... I>(std::index_sequence<I...>) {
-            return tensor.fiber(index[I]..., var());
-        }(std::make_index_sequence<NDim - 1>{});
+    __host__ __device__ constexpr auto StridedTensor<Derived>::makeCompactBlock(auto&& tensor, const IndexType& index, int minorDim) noexcept {
+        IndexType count = tensor.getShape();
+        for (int i = 0; i < minorDim; ++i)
+            count[i] = 1;
+        return tensor.block(index, std::move(count));
     }
 }
