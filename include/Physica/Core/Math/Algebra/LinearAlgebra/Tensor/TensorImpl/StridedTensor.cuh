@@ -58,3 +58,4 @@ namespace Physica {
 }
 
 #include "StridedTensorImpl/StridedTensorImpl.cuh"
+#include "StridedTensorImpl/TensorFiber.cuh"

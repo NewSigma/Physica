@@ -69,3 +69,4 @@ namespace Physica {
 }
 
 #include "StridedTensorImpl/StridedTensorImpl.h"
+#include "StridedTensorImpl/TensorFiber.h"

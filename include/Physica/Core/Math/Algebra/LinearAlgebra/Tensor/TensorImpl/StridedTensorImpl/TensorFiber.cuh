@@ -24,7 +24,7 @@
 #include "TensorFiber.h"
 
 namespace Physica {
-    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isCompact())
+    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isStrided())
     class device_obj<TensorFiber<X, Dim>> : public device_obj<Internal::TensorFiberBase<X, Dim>> {
         using host_obj = TensorFiber<X, Dim>;
         using This = device_obj<host_obj>;
@@ -56,7 +56,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static size_t getStrideAtCompile() noexcept;
     };
 
-    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isCompact())
+    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isStrided())
     __host__ __device__ device_obj<TensorFiber<X, Dim>>::device_obj(Ref tensor_, IndexVar auto... indices) : tensor(asStruct(tensor_)) {
         size_t i = 0;
         ([&]() {
@@ -68,24 +68,24 @@ namespace Physica {
         }(), ...);
     }
 
-    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isCompact())
+    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isStrided())
     __host__ __device__ void device_obj<TensorFiber<X, Dim>>::resize([[maybe_unused]] size_t length) {
         assert(length == getLength());
     }
 
-    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isCompact())
+    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isStrided())
     __host__ __device__ constexpr size_t device_obj<TensorFiber<X, Dim>>::getStride() const noexcept {
         return tensor.getDerived().getStride(Dim);
     }
 
-    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isCompact())
+    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isStrided())
     __host__ __device__ auto device_obj<TensorFiber<X, Dim>>::data_handle(this auto&& self) noexcept {
         auto idx = self.index;
         idx[Dim] = 0;
         return self.tensor.getDerived().data_ptr(idx);
     }
 
-    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isCompact())
+    template<Tensor X, int Dim> requires(std::remove_cvref_t<X>::isStrided())
     __host__ __device__ consteval size_t device_obj<TensorFiber<X, Dim>>::getStrideAtCompile() noexcept {
         return std::remove_cvref_t<X>::getStrideAtCompile()[Dim];
     }

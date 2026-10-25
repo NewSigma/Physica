@@ -51,6 +51,5 @@ namespace Physica {
 
 #include "CompactTensorImpl/CompactTensorImpl.cuh"
 #include "CompactTensorImpl/Flatten.cuh"
-#include "CompactTensorImpl/TensorFiber.cuh"
 #include "CompactTensorImpl/TensorSlice.cuh"
 #include "CompactTensorImpl/TensorBlock.cuh"

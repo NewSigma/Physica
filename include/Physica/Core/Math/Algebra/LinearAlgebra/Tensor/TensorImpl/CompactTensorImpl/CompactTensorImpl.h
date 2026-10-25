@@ -21,7 +21,6 @@
 #include <cstring>
 #include "../CompactTensor.h"
 #include "TensorBlock.h"
-#include "TensorFiber.h"
 #include "TensorSlice.h"
 
 namespace Physica {
