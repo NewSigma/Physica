@@ -20,18 +20,33 @@
 
 #include <cassert>
 #include <ranges>
+#include <tuple>
+#include <utility>
 #include "Physica/Core/Utils/MetaProgramming.h"
 
 namespace Physica {
     namespace Internal {
+        template<class... Ts>
+        struct zip_storage_impl {
+            using type = std::tuple<Ts...>;
+        };
+
+        template<class T1, class T2>
+        struct zip_storage_impl<T1, T2> {
+            using type = std::pair<T1, T2>;
+        };
+
+        template<class... Ts>
+        using zip_storage = zip_storage_impl<Ts...>::type;
+
         template<class Tuple, std::ranges::view... Vs>
         class common_zip_iterator {
-            static_assert(instanceof<Tuple, std::tuple>, "[Error]: Unexpected type");
+            static_assert(instanceof<Tuple, std::pair> || instanceof<Tuple, std::tuple>, "[Error]: Unexpected type");
             using This = common_zip_iterator<Tuple, Vs...>;
             using StdIterator = std::ranges::iterator_t<std::ranges::zip_view<Vs...>>;
         public:
             using iterator_concept = StdIterator::iterator_concept;
-            using value_type = StdIterator::value_type;
+            using value_type = zip_storage<std::ranges::range_value_t<Vs>...>;
             using difference_type = StdIterator::difference_type;
         private:
             Tuple current;
@@ -64,7 +79,7 @@ namespace Physica {
             friend constexpr This operator+(difference_type n, const This& ite) noexcept { return ite + n; }
             friend constexpr auto iter_move(const This& ite) noexcept {
                 return std::apply([](auto&... ites) static noexcept {
-                    return std::make_tuple(std::ranges::iter_move(ites)...);
+                    return zip_storage<decltype(std::ranges::iter_move(ites))...>(std::ranges::iter_move(ites)...);
                 }, ite.current);
             }
             friend constexpr void iter_swap(const This& lhs, const This& rhs) noexcept {
@@ -131,7 +146,7 @@ namespace Physica {
         template<class Tuple, std::ranges::view... Vs>
         constexpr auto common_zip_iterator<Tuple, Vs...>::operator*() const noexcept {
             return std::apply([](auto&... ites) static noexcept {
-                return std::tuple<decltype(*ites)...>(*ites...);
+                return zip_storage<decltype(*ites)...>(*ites...);
             }, current);
         }
 
@@ -139,7 +154,7 @@ namespace Physica {
         constexpr auto common_zip_iterator<Tuple, Vs...>::operator[](difference_type n) const noexcept {
             static_assert(std::random_access_iterator<StdIterator>, "[Error]: Unavailable");
             return std::apply([n](auto&... ites) {
-                return std::tuple<decltype(ites[n])...>(ites[n]...);
+                return zip_storage<decltype(ites[n])...>(ites[n]...);
             }, current);
         }
 
@@ -187,7 +202,7 @@ namespace Physica {
             static_assert(sizeof...(Vs) > 1, "[Error]: Unnecessary call to zip");
             using This = common_zip<Vs...>;
         private:
-            std::tuple<Vs...> views;
+            zip_storage<Vs...> views;
         public:
             constexpr explicit common_zip(Vs... views_) noexcept;
             common_zip(const This&) = default;
@@ -216,7 +231,7 @@ namespace Physica {
         template<std::ranges::view... Vs>
         constexpr auto common_zip<Vs...>::begin(this auto&& self) noexcept {
             auto current = std::apply([](auto&... views) static noexcept {
-                return std::make_tuple(std::ranges::begin(std::forward<decltype(views)>(views))...);
+                return zip_storage<decltype(std::ranges::begin(std::forward<decltype(views)>(views)))...>(std::ranges::begin(std::forward<decltype(views)>(views))...);
             }, self.views);
             return common_zip_iterator<decltype(current), Vs...>(std::move(current));
         }
@@ -227,7 +242,7 @@ namespace Physica {
                 return self.begin() + self.size();
             else {
                 auto current = std::apply([](auto&... views) static noexcept {
-                    return std::make_tuple(std::ranges::end(views)...);
+                    return zip_storage<decltype(std::ranges::end(views))...>(std::ranges::end(views)...);
                 }, self.views);
                 return common_zip_iterator<decltype(current), Vs...>(std::move(current));
             }

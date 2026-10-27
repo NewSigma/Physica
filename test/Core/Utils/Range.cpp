@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <array>
+#include <concepts>
+#include <utility>
 #include "Physica/Core/Utils/Range.h"
 #include "Physica/Core/Utils/Builtin.h"
 #include "Test.h"
@@ -41,6 +43,7 @@ int main() {
     auto view = zip(a, b);
     /* Test size */ {
         using V = decltype(view);
+        static_assert(std::same_as<std::ranges::range_value_t<V>, std::pair<int, int>>, "[Error]: Prefer std::pair to tuple2D, std::pair generally provides better codegen");
         static_assert(std::ranges::input_range<V>);
         static_assert(std::ranges::view<V>);
 
