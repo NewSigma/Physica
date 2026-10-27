@@ -71,6 +71,10 @@ jobs:
         environment-file: ${{ env.PHYSICA_SRC }}/.github/env/${{ inputs.preset }}.yml
         channels: conda-forge
 
+    - name: Install minimum CMake
+      run: |
+        conda install -y --freeze-installed "cmake=$(python3 "$PHYSICA_SRC/.github/scripts/cmake_version.py").*"
+
     - name: Configure
       run: >
         cmake --preset ${{ inputs.preset }} -S ${{ env.PHYSICA_SRC }}
