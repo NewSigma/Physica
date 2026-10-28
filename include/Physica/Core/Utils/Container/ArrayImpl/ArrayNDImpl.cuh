@@ -142,7 +142,7 @@ namespace Physica {
     __host__ __device__ constexpr size_t device_obj<ArrayND<T, Dims...>>::dim(int index) const noexcept {
         assert(0 <= index && index < NDim);
         if constexpr (StaticShape) {
-            std::array<int, NDim> buffer{Dims...};
+            Array<int, NDim> buffer{Dims...};
             return buffer[index];
         }
         else

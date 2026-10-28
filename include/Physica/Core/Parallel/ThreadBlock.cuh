@@ -19,6 +19,8 @@
 #pragma once
 
 #include <cooperative_groups.h>
+#include <cuda/std/array>
+#include <utility>
 #include "Physica/Core/Scalar/Scalar.h"
 #include "Physica/Core/Utils/Empty.h"
 #include "Physica/Macro.h"
@@ -123,8 +125,8 @@ namespace Physica {
         if constexpr (NumThread == 1)
             return x;
         else {
-            static_assert(NumThread != Dynamic, "NoImpl");
-            __shared__ std::array<T, NumThread> buffer;
+            static_assert(std::cmp_not_equal(NumThread, Dynamic), "NoImpl");
+            __shared__ cuda::std::array<T, NumThread> buffer;
             buffer[tid()] = x;
             const int numThread = getNumThread();
             sync();

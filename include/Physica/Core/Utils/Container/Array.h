@@ -19,6 +19,9 @@
 #pragma once
 
 #include <array>
+#ifdef PHYSICA_CUDA
+    #include <cuda/std/array>
+#endif
 #include "Physica/Core/Parallel/Parallel.h"
 #include "ArrayImpl/ArrayMixin.h"
 #include "Physica/CRCoro.h"
@@ -38,13 +41,18 @@ namespace Physica {
             , public CRCoro<Array<T, Length, Allocator>> {
         using This = Array<T, Length, Allocator>;
         using Base = ArrayMixin<This, Allocator>;
+    #ifdef __CUDA_ARCH__
+        using Storage = cuda::std::array<T, Length>;
+    #else
+        using Storage = std::array<T, Length>;
+    #endif
+
         static_assert(std::is_default_constructible<T>::value, "[Error]: Expect default constructible T");
         static_assert(!std::same_as<Allocator, PageLockedAllocator<T>>, "[Error]: Page locked array can not have fixed size");
-    private:
         constexpr static size_t Align = std::allocator_traits<Allocator>::Align;
-
+    private:
         // We have to use such a verbose alignment since GCC 14.2 complains Align maybe 0.
-        alignas(std::max(alignof(T), Align)) std::array<T, Length> arr;
+        alignas(std::max(alignof(T), Align)) Storage arr;
         [[no_unique_address]] Allocator alloc;
     public:
         constexpr Array() = default;

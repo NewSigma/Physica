@@ -112,6 +112,7 @@ def compile(options: dict, compilers: dict, device_only: bool):
     subprocess.run(configure, cwd=_IR_DIR, stdout=subprocess.DEVNULL, check=True)
 
     subprocess.run(["cmake", "--build", ".", "--target=Benchmark"], cwd=_IR_DIR, check=True)
+    print()
 
 
 def collect(llvm_dir: Path, device_only: bool, arch: str):
@@ -183,7 +184,7 @@ def main():
 
     clean(llvm_dir)
 
-    print("Collecting LLVM IR... ", end=" ")
+    print("Collecting LLVM IR...\n", end=" ")
     if arch == "":
         compile(options, compilers, False)
         collect(llvm_dir, False, "")
