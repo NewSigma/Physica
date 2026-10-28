@@ -18,6 +18,7 @@ jobs:
     uses: ./.github/workflows/preset.yml
     with:
       preset: full
+      features: full
       build_config: Debug
       test: true
       install: false
@@ -27,6 +28,7 @@ jobs:
     uses: ./.github/workflows/preset.yml
     with:
       preset: full
+      features: full
       build_config: Release
       test: true
       install: false

@@ -19,6 +19,7 @@
 #ifdef __linux__
 
 #include <cassert>
+#include <cstdlib>
 #include <unistd.h>
 #include <csignal>
 #include <sys/wait.h>

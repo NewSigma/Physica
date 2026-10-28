@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <exception>
 #include <concepts>
+#include <new>
 
 namespace Physica {
     /**

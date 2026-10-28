@@ -107,7 +107,9 @@ int main() {
         static_assert(std::ranges::sized_range<R>);
         static_assert(std::ranges::common_range<R>);
         static_assert(std::ranges::random_access_range<R>);
-        static_assert(std::ranges::constant_range<R>);
+        #ifdef __cpp_lib_ranges_as_const // FIXME: Drop this guard once libc++ implements std::ranges::constant_range (GH105201)
+            static_assert(std::ranges::constant_range<R>);
+        #endif
         static_assert(std::ranges::view<R>);
     });
 

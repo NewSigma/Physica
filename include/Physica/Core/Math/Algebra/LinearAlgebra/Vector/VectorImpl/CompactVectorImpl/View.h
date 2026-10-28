@@ -99,6 +99,7 @@ namespace Physica {
         [[nodiscard, gnu::always_inline]] constexpr This operator++(int) noexcept;
         [[nodiscard, gnu::always_inline]] constexpr This operator--(int) noexcept;
         [[nodiscard, gnu::always_inline]] constexpr decltype(auto) operator*() const noexcept;
+        [[nodiscard, gnu::always_inline]] constexpr pointer operator->() const noexcept;
         [[nodiscard, gnu::always_inline]] constexpr decltype(auto) operator[](difference_type n) const noexcept;
         [[nodiscard, gnu::always_inline]] constexpr bool operator==(const This& other) const noexcept;
         [[nodiscard, gnu::always_inline]] constexpr auto operator<=>(const This& other) const noexcept;
@@ -164,6 +165,12 @@ namespace Physica {
     template<Vector V>
     constexpr decltype(auto) CompactVector<Derived>::View<V>::Iterator::operator*() const noexcept {
         return *pos;
+    }
+
+    template<class Derived>
+    template<Vector V>
+    constexpr auto CompactVector<Derived>::View<V>::Iterator::operator->() const noexcept -> pointer {
+        return pos;
     }
 
     template<class Derived>

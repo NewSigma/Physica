@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Parallel/ThreadPool.h"
 #include <queue>
+#include <thread>
 #include <xmmintrin.h>
 #ifdef PHYSICA_MKL
     #include <mkl_vml.h>

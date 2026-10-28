@@ -41,6 +41,7 @@
 
 #include <concepts>
 #include <cstdint>
+#include <bit>
 #include "Physica/Core/Utils/Builtin.h"
 
 namespace Physica::Internal {

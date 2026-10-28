@@ -100,7 +100,7 @@ namespace Physica {
         using ItLHS = IteratorOrScalar<ViewLHS>::Type;
         using ItRHS = IteratorOrScalar<ViewRHS>::Type;
     public:
-        using iterator_concept = std::contiguous_iterator_tag;
+        using iterator_concept = std::random_access_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = VectorExpr<ID, LHS, RHS>::ScalarType;
         using reference = const value_type;

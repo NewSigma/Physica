@@ -23,10 +23,26 @@
       }
     },
     {
+      "name": "libcxx",
+      "inherits": "base",
+      "hidden": true,
+      "displayName": "libc++",
+      "description": "Use libc++ instead of libstdc++; benchmarks are disabled because conda's benchmark is built against libstdc++",
+      "cacheVariables": {
+        "CMAKE_CXX_FLAGS": "-Werror -mrdseed -stdlib=libc++",
+        "BUILD_BENCHMARKS": "OFF"
+      }
+    },
+    {
       "name": "minimal",
       "inherits": "base",
       "displayName": "Minimal",
       "description": "fftw only"
+    },
+    {
+      "name": "minimal-libcxx",
+      "inherits": [ "libcxx", "minimal" ],
+      "displayName": "Minimal-libc++"
     },
     {
       "name": "full",
@@ -50,6 +66,7 @@
       "cacheVariables": {
         "CMAKE_CUDA_COMPILER": "clang++-23",
         "CMAKE_CUDA_ARCHITECTURES": "89",
+        "CMAKE_CUDA_FLAGS": "-Werror -mrdseed",
         "PHYSICA_CUDA": "ON",
         "WarpSize": "32",
         "FullUnifiedSupport": "true",
@@ -61,6 +78,10 @@
     {
       "name": "minimal",
       "configurePreset": "minimal"
+    },
+    {
+      "name": "minimal-libcxx",
+      "configurePreset": "minimal-libcxx"
     },
     {
       "name": "full",

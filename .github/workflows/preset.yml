@@ -6,7 +6,11 @@ on:
       preset:
         required: true
         type: string
-        description: 'Configure preset to use (minimal, full or cuda)'
+        description: 'Configure preset to use'
+      features:
+        required: true
+        type: string
+        description: 'Dependency set, selects .github/env/<features>.yml'
       build_config:
         required: true
         type: string
@@ -64,11 +68,14 @@ jobs:
         platform: # optional, default is x64
         cc: # optional, default is 1
 
+    - name: Install libc++
+      run: sudo apt-get install -y --no-install-recommends libc++-23-dev libc++abi-23-dev
+
     - name: Install conda
       uses: conda-incubator/setup-miniconda@v4.0.1
       with:
         activate-environment: physica
-        environment-file: ${{ env.PHYSICA_SRC }}/.github/env/${{ inputs.preset }}.yml
+        environment-file: ${{ env.PHYSICA_SRC }}/.github/env/${{ inputs.features }}.yml
         channels: conda-forge
 
     - name: Install minimum CMake
@@ -112,7 +119,7 @@ jobs:
       run: |
         mkdir -p artifact
         cp -a ${{ env.PHYSICA_SRC }}/dist artifact/dist
-        cp ${{ env.PHYSICA_SRC }}/.github/env/${{ inputs.preset }}.yml artifact/physica-env.yml
+        cp ${{ env.PHYSICA_SRC }}/.github/env/${{ inputs.features }}.yml artifact/physica-env.yml
 
     - name: Upload artifact
       if: ${{ inputs.install }}

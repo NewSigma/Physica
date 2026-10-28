@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <iosfwd>
 #include "AbstractLogger.h"
 
 namespace Physica {

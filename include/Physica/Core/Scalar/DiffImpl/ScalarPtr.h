@@ -36,7 +36,7 @@ namespace Physica {
         constexpr static bool IsConst = std::is_const_v<T>;
         static_assert(!std::is_reference<T>::value);
     public:
-        using iterator_concept = std::contiguous_iterator_tag;
+        using iterator_concept = std::random_access_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = T;
         using reference = T::RefTy;

@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Logger/Logger/StdLogger.h"
+#include <ostream>
 
 using namespace Physica;
 

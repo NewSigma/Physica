@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Parallel/Task/Task.h"
+#include <utility>
 
 using namespace Physica;
 
@@ -99,7 +100,7 @@ bool Task::promise_type::done() const noexcept {
 }
 
 auto Task::promise_type::exception() noexcept -> std::exception_ptr {
-    return std::move(ex);
+    return std::exchange(ex, nullptr);
 }
 
 auto Task::promise_type::suspend_final::await_suspend(std::coroutine_handle<> self) noexcept -> std::coroutine_handle<> {

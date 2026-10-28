@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstring>
+#include <type_traits>
 #ifdef PHYSICA_CUDA
     #include <thrust/swap.h>
 #endif
@@ -307,6 +308,11 @@ namespace Physica {
         constexpr size_t Align = std::allocator_traits<Allocator>::Align;
         if constexpr (Align == Dynamic)
             return self.arr;
+        else if (std::is_constant_evaluated()) {
+            // Under constant evaluation the allocation comes from constexpr new, whose alignment may be weaker
+            // than the allocator promise. libc++ evaluates the builtin, which clang then rejects.
+            return self.arr;
+        }
         else
             return std::assume_aligned<Align, T>(self.arr);
     }
