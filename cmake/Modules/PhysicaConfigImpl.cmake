@@ -65,7 +65,8 @@ else()
 
     if(CMAKE_LINKER_TYPE MATCHES LLD)
         # Miscompiles cuda if we use --icf=all
-        add_link_options(-Wl,--icf=safe,-z,pack-relative-relocs)
+        add_link_options(-Wl,--icf=safe)
+        # TODO: Enable '-z pack-relative-relocs' by default once the widely used HPC distributions ship glibc>=2.36
     endif()
 
     if(${PHYSICA_ASAN})
