@@ -23,13 +23,15 @@
 #include "Physica/Core/Scalar/Complex.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 using T = float32;
 constexpr int N = 1024;
 
 namespace {
     template<int Major>
     void assign_base(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         auto A = device_obj<DenseMatrix<T, Major>>::template random_uniform<RandomSource>(N, N);
         auto x = device_obj<VectorND<T>>::random_uniform<RandomSource>(N);
         device_obj<VectorND<T>> y(N);
@@ -50,6 +52,8 @@ namespace {
 
     template<int Major>
     void assign_cublas(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         auto A = device_obj<DenseMatrix<T, Major>>::template random_uniform<RandomSource>(N, N);
         auto x = device_obj<VectorND<T>>::random_uniform<RandomSource>(N);
         device_obj<VectorND<T>> y(N);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,17 +22,18 @@
 #include "Benchmark.h"
 
 using namespace Physica;
+using RealType = float64;
+using ScalarType = Complex<RealType>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     void func(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         constexpr unsigned int NumSite = 10;
         constexpr unsigned int NumParticle = NumSite / 2;
         constexpr double HoppingT = 1.0;
         constexpr double RepelU = 4;
-
-        using RealType = float64;
-        using ScalarType = Complex<RealType>;
-        using RandomSource = Random<MCG>;
         using ReprType = KFermiRepr<1, NumSite, true>;
 
         const SquareLattice<1> lattice({NumSite}, 1);

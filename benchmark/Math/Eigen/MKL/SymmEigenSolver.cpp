@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,15 +21,18 @@
 #include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"
 
 using namespace Physica;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     template<bool NeedEigenVec>
     void kernel(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         using T = float64;
         const auto size = state.range(0);
         SymmEigenSolver<T> solver(size, NeedEigenVec);
 
-        auto m = MatrixND<T>::random_uniform<Random<MCG>>(size);
+        auto m = MatrixND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
             solver.compute_mkl(m);
             benchmark::DoNotOptimize(solver);

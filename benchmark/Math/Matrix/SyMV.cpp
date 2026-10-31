@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,10 +20,12 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     void kernel(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         using T = float64;
         using MatrixType = DenseSymmMatrix<T>;
         const auto size = state.range(0);

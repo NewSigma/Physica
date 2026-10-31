@@ -20,11 +20,13 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     template<Scalar T, int Major0, int Major1, int Major2>
     void gemm_micro(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         // Test that R** is the transpose of C** and no extra work is done.
         using M0 = DenseMatrix<T, Major0>;
         using M1 = DenseMatrix<T, Major1, 2, 2>;

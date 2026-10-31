@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,7 +25,7 @@
 using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 constexpr unsigned int NumSiteX = 4;
 constexpr unsigned int NumSiteY = 2;
 constexpr unsigned int NumSite = NumSiteX * NumSiteY;
@@ -35,6 +35,8 @@ constexpr double Beta = 16;
 
 namespace {
     void bench(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         using ReprType = FermiRepr<2, NumSite, true>;
         using Hamilton = HubbardMatrix<ScalarType, ReprType>;
         const SquareLattice<2> lattice({NumSiteX, NumSiteY}, 1);

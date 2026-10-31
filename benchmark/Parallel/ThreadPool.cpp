@@ -22,11 +22,13 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     // scheduling latency
     void bench_schedule(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         // Warmup
         std::ignore = Cycler::getCyclesPerSec();
         auto& pool = ThreadPool::getInstance();
@@ -46,6 +48,8 @@ namespace {
     }
 
     void bench_parallel_for1(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         // Warmup
         std::ignore = Cycler::getCyclesPerSec();
         auto& pool = ThreadPool::getInstance();
@@ -65,6 +69,8 @@ namespace {
     }
 
     void bench_parallel_for2(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         // Warmup
         std::ignore = Cycler::getCyclesPerSec();
         auto& pool = ThreadPool::getInstance();

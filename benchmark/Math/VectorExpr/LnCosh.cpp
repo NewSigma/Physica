@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,11 +21,13 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     template<Scalar T>
     void lncosh(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const VectorND<T> data = VectorND<T>::template random_uniform<RandomSource>(1024);
         auto expr = lncosh(data);
         VectorND<T> buffer(1024);

@@ -21,11 +21,13 @@
 
 using namespace Physica;
 using T = float64;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     // Baseline for mismatch
     void assign_match(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const auto size = makeMatrixSize(state.range(0), sizeof(T));
         const MatrixND<T> data = MatrixND<T>::template random_uniform<RandomSource>(size);
         MatrixND<T> buffer(size);
@@ -37,6 +39,8 @@ namespace {
     }
 
     void assign_mismatch(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const auto size = makeMatrixSize(state.range(0), sizeof(T));
         const auto data = DenseMatrix<T, MatrixMajor::Col>::template random_uniform<RandomSource>(size);
         DenseMatrix<T, MatrixMajor::Row> buffer(size);

@@ -23,7 +23,7 @@
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 using T = float32;
 
 namespace {
@@ -36,6 +36,8 @@ namespace {
 
     template<class TensorT, Slice S>
     void assign(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const size_t n = state.range(0);
         const Index3D shape{n, n, n};
         Index3D count{};

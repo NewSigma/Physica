@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,10 +20,12 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     void trans_mkl(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         using T = float64;
         using MatrixType = DenseMatrix<T, MatrixMajor::Col>;
         const size_t order = state.range(0);

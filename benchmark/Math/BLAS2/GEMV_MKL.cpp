@@ -20,11 +20,13 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     template<Scalar T, int Major>
     void gemv_mkl(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const size_t size = state.range(0);
         const auto mat = DenseMatrix<T, Major>::template random_uniform<RandomSource>(size, size);
         const auto vec = VectorND<T>::template random_uniform<RandomSource>(size);

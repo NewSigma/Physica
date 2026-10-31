@@ -20,7 +20,7 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 // Benchmark that we can recognize fma patterns
 namespace {
@@ -28,6 +28,8 @@ namespace {
 
     template<Scalar T>
     void add_scalar1(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> b = VectorND<T>::template random_uniform<RandomSource>(size);
         auto expr = hadamard(a, b) + T(0.1);
@@ -41,6 +43,8 @@ namespace {
 
     template<Scalar T>
     void add_scalar2(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> c = VectorND<T>::template random_uniform<RandomSource>(size);
         auto expr = a * T(0.1) + c;
@@ -54,6 +58,8 @@ namespace {
 
     template<Scalar T>
     void add_scalar3(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
         auto expr = a * T(0.1) + T(0.2);
         VectorND<T> buffer(size);
@@ -66,6 +72,8 @@ namespace {
 
     template<Scalar T>
     void add_scalar_inplace(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
         auto expr = a * T(0.1);
         VectorND<T> buffer(size);
@@ -78,6 +86,8 @@ namespace {
 
     template<Scalar T>
     void add_vector(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> b = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> c = VectorND<T>::template random_uniform<RandomSource>(size);
@@ -92,6 +102,8 @@ namespace {
 
     template<Scalar T>
     void add_vector_inplace(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> b = VectorND<T>::template random_uniform<RandomSource>(size);
         auto expr = hadamard(a, b);

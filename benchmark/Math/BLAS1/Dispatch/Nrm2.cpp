@@ -20,10 +20,12 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     void nrm2(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         using T = float64;
         const int64_t size = state.range(0);
         auto x = VectorND<T>::random_uniform<RandomSource>(size);

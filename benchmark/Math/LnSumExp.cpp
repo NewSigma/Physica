@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,12 +21,14 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     void lnSumExp(benchmark::State& state) {
         // Benchmark we create a temporary for lnSumExp calculation
         // This pattern is extracted from classical ising model
+        RandomSource::getInstance().reseed();
+
         using T = float32;
         const int64_t size = state.range(0);
         const T factor = 1.2;

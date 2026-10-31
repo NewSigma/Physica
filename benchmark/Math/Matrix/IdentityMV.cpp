@@ -20,10 +20,12 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     void kernel1(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         using T = float64;
         const int64_t size = state.range(0);
         const auto v1 = VectorND<T>::random_uniform<RandomSource>(size);
@@ -38,6 +40,8 @@ namespace {
     }
 
     void kernel2(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         using T = float64;
         const int64_t size = state.range(0);
         const auto v1 = VectorND<T>::random_uniform<RandomSource>(size);
@@ -52,6 +56,8 @@ namespace {
     }
 
     void kernel3(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         using T = float64;
         const int64_t size = state.range(0);
         const auto v = VectorND<T>::random_uniform<RandomSource>(size);

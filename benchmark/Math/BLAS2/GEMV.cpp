@@ -20,11 +20,13 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     template<Scalar T, int Major>
     void gemv(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const size_t size = state.range(0);
         const auto mat = DenseMatrix<T, Major>::template random_uniform<RandomSource>(size, size);
         const auto vec = VectorND<T>::template random_uniform<RandomSource>(size);
@@ -38,6 +40,8 @@ namespace {
     }
 
     void complex_real(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         using T = float64;
         using Tc = cfloat64;
         constexpr size_t size = 32;
@@ -54,6 +58,8 @@ namespace {
 
     // Benchmark we recursively lower GEMV::grad() without falling back to RValueVector::grad
     void forward2_grad(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         using T = float64;
         using dfloat = Diff<T, DiffMode::Forward, 2>;
         constexpr int Size = 32;

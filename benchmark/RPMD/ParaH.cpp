@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,7 +26,7 @@ using namespace Physica;
 using T = float32;
 using KineticModel = FreeModel<T, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 using ForceModel = SilveraGoldman<T, true>;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
@@ -48,6 +48,8 @@ namespace {
     }
 
     void bench(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         ThreadPool::numThreadRequired = 4;
         auto& pool = ThreadPool::getInstance();
         pool.restart();

@@ -127,7 +127,7 @@ namespace Physica {
 using T = float32;
 using dfloat = Diff<T, DiffMode::Reverse, 1>;
 using Dataset = Mnist::DatasetType<VectorND<T>>;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     Dataset makeDataset() {
@@ -141,6 +141,8 @@ namespace {
     }
 
     void bench(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         Dataset dataset;
         try {
             dataset = makeDataset();

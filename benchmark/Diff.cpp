@@ -20,7 +20,7 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     void forward(float64 v, float64& g) noexcept {
@@ -39,6 +39,8 @@ namespace {
 }
 
 BENCHMARK([](benchmark::State& state) {
+    RandomSource::getInstance().reseed();
+
     float64 v = float64::random_uniform<RandomSource>();
     float64 g;
     for (auto _ : state) {
@@ -47,6 +49,8 @@ BENCHMARK([](benchmark::State& state) {
     }
 })->Name("Diff forward");
 BENCHMARK([](benchmark::State& state) {
+    RandomSource::getInstance().reseed();
+
     float64 v = float64::random_uniform<RandomSource>();
     float64 g;
     for (auto _ : state) {

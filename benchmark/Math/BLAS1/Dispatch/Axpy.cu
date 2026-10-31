@@ -21,10 +21,12 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     void axpy(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         using T = float32;
         const int64_t size = state.range(0);
         auto x = device_obj<VectorND<T>>::random_uniform<RandomSource>(size);
@@ -47,6 +49,8 @@ namespace {
     }
 
     void axpy_cublas(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         using T = float32;
         const int64_t size = state.range(0);
         auto x = device_obj<VectorND<T>>::random_uniform<RandomSource>(size);

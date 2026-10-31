@@ -20,11 +20,13 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     template<Scalar T>
     void sub(benchmark::State& state) noexcept {
+        RandomSource::getInstance().reseed();
+
         const auto size = makeVectorSize(state.range(0), sizeof(T));
         const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> b = VectorND<T>::template random_uniform<RandomSource>(size);

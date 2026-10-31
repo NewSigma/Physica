@@ -20,11 +20,13 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     template<Scalar T>
     void abs(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const auto size = makeVectorSize(state.range(0), sizeof(T));
         const VectorND<T> x = VectorND<T>::template random_uniform<RandomSource>(size);
         auto expr = abs(x);
@@ -38,4 +40,4 @@ namespace {
 }
 
 BENCHMARK(abs<float32>)->Name("abs float32 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(abs<float64>)->Name("abs float32 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(abs<float64>)->Name("abs float64 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);

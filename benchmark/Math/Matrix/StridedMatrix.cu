@@ -23,7 +23,7 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<>;
+using RandomSource = Random<PCG64DXSM, std::mt19937::default_seed>;
 using T = float32;
 
 namespace {
@@ -31,6 +31,8 @@ namespace {
 
     template<Matrix M, Region R>
     void assign(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const size_t n = state.range(0);
         const size_t len = R == Region::Quarter ? n / 2 : n;
         auto src = device_obj<M>::template random_uniform<RandomSource>(n, n);

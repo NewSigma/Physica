@@ -23,7 +23,7 @@
 using namespace Physica;
 using T = float64;
 using Tc = cfloat64;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 constexpr int Dim = 2;
 constexpr T HoppingT = 1;
 constexpr T RepelU = 4;
@@ -34,6 +34,8 @@ constexpr int NumSplit = Beta.toMachine() * 8;
 
 namespace {
     void kernel(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
         const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, NumSplit);
         auto dqmc = FreqDQMC<Tc>(params, 2);

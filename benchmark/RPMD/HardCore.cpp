@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,7 +27,7 @@ using namespace Physica;
 using T = float64;
 using VectorType = VectorND<T>;
 using MatrixType = DenseMatrix<T>;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 using PDFType = ProbDistribution<T>;
 constexpr double timeStepLambda = 0.01;
 constexpr double collideFactor = 0.01;
@@ -58,6 +58,8 @@ namespace {
     }
 
     void func(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
         MDType rpmd = MDType(makeSystem(), numReplica, numReplica, temperatureT, timeStep);
         rpmd.initMomentum<KineticModel, RandomSource>();

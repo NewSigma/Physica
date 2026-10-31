@@ -20,10 +20,12 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     void lu(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         using T = float64;
         const size_t order = state.range(0);
         auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);

@@ -21,11 +21,13 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     template<Scalar T>
     void dot(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const int64_t size = state.range(0);
         const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(size);
@@ -39,6 +41,8 @@ namespace {
     }
     // Benchmark that we correct lower complex-real vector dot
     void dot_complex_real(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const VectorND<cfloat64> v1 = VectorND<cfloat64>::template random_uniform<RandomSource>(1024);
         const VectorND<float64> v2 = VectorND<float64>::template random_uniform<RandomSource>(1024);
         auto dot = Dot(v1, v2);

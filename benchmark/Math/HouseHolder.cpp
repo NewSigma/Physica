@@ -21,11 +21,13 @@
 
 using namespace Physica;
 using T = float64;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 
 namespace {
     template<bool Left>
     void kernel(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         const size_t size = state.range(0);
         auto mat = DenseMatrix<T>::template random_uniform<RandomSource>(size, size);
         const auto vec = VectorND<T>::template random_uniform<RandomSource>(size);

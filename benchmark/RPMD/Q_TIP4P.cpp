@@ -29,7 +29,7 @@ using T = float64;
 using KineticModel = FreeModel<T, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 using ForceModel = Q_TIP4P<T, Ewald<T>>;
 using ThermoType = DoubleThermo<KineticModel>;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 constexpr size_t numReplica = 32;
 constexpr size_t numContract = 8;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
@@ -100,6 +100,8 @@ namespace {
     }
 
     void bench(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         auto cell = makeSystem(2);
         ForceModel::sortPosition(cell);
         ForceModel forceModel(cell, pair_cutoff, {});

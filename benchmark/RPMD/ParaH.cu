@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,7 +25,7 @@
 using namespace Physica;
 using T = float32;
 using KineticModel = FreeModel<T, 3, Dynamic, RPMDIntegrator::Exact>;
-using RandomSource = Random<MCG>;
+using RandomSource = Random<MCG, std::mt19937::default_seed>;
 using MDType = RPMD<T, 3, Physica::Dynamic, PageLockedAllocator<T>>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
@@ -48,6 +48,8 @@ namespace {
     }
 
     void bench(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
         using ForceModel = device_obj<SilveraGoldman<T, true, true>>;
         const int numMolecular = state.range(0);
         KineticModel kineticModel(temperatureT, numReplica);
