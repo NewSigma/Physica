@@ -35,40 +35,6 @@ namespace Physica {
         MT19937,
     };
 
-    namespace Internal {
-        class PHYSICA_API RandomBase {
-            struct Private; // Do not conflict with other pointers
-        protected:
-        #ifdef PHYSICA_MKL
-            using mkl_handle = VSLStreamStatePtr;
-        #else
-            using mkl_handle = void*;
-        #endif
-
-        #ifdef PHYSICA_CUDA
-            using curand_handle = curandGenerator_t;
-        #else
-            using curand_handle = Private*;
-        #endif
-
-            SeedSequence<> seq;
-            mkl_handle pStream = nullptr;
-            [[no_unique_address]] curand_handle curand = nullptr;
-        private:
-            uint64_t seed{};
-        public:
-            RandomBase() = delete;
-            ~RandomBase();
-            /* Getters */
-            [[nodiscard]] uint64_t getSeed() const noexcept { return seed; }
-        protected:
-            RandomBase(uint64_t seed_, RandomOption option) noexcept;
-            /* Operations */
-            void reseed(RandomOption option);
-            void reseed(uint64_t seed_, RandomOption option);
-        };
-    }
-
     constexpr int rngID_MKL(RandomOption option) noexcept {
     #ifndef PHYSICA_MKL
         constexpr int VSL_BRNG_MCG31 = 0;
@@ -105,11 +71,113 @@ namespace Physica {
         else
             return 0;
     }
+
+    namespace Internal {
+        class PHYSICA_API RandomState {
+            using This = RandomState;
+            struct Private; // Do not conflict with other pointers
+        public:
+        #ifdef PHYSICA_MKL
+            using mkl_handle = VSLStreamStatePtr;
+        #else
+            using mkl_handle = void*;
+        #endif
+
+        #ifdef PHYSICA_CUDA
+            using curand_handle = curandGenerator_t;
+        #else
+            using curand_handle = Private*;
+        #endif
+        private:
+            SeedSequence<> seq;
+            mkl_handle pStream = nullptr;
+            [[no_unique_address]] curand_handle curand = nullptr;
+            uint64_t seed{};
+        public:
+            RandomState(uint64_t fixedSeed_, RandomOption option) noexcept;
+            ~RandomState();
+            /* Operations */
+            void reseed(uint64_t seed_, RandomOption option);
+            /* Getters */
+            [[nodiscard]] auto& getSequence() noexcept { return seq; }
+            [[nodiscard]] auto getMKLStream() const noexcept { return pStream; }
+            [[nodiscard]] auto getCuRANDGenerator() const noexcept { return curand; }
+            [[nodiscard]] auto getSeed() const noexcept { return seed; }
+        private:
+            RandomState(const This&) = default;
+            RandomState(This&&) noexcept = default;
+            /* Operators */
+            This& operator=(const This&) = default;
+            This& operator=(This&&) noexcept = default;
+        };
+
+        template<RandomOption> struct GeneratorImpl;
+        template<> struct GeneratorImpl<PCG32DXSM> { using Type = setseq_base<uint32_t, uint64_t, DXSM>; };
+        template<> struct GeneratorImpl<PCG64DXSM> { using Type = setseq_base<uint64_t, __uint128_t, DXSM>; };
+        template<> struct GeneratorImpl<MCG> { using Type = std::minstd_rand; };
+        template<> struct GeneratorImpl<MT19937> { using Type = std::mt19937; };
+
+        template<RandomOption Option>
+        class PHYSICA_API RandomGenerator {
+            using This = RandomGenerator<Option>;
+            using Generator = GeneratorImpl<Option>::Type;
+            using mkl_handle = RandomState::mkl_handle;
+            using curand_handle = RandomState::curand_handle;
+        public:
+            using result_type = Generator::result_type;
+
+            constexpr static bool MKL_Ready = rngID_MKL(Option) != 0;
+            constexpr static bool cuRAND_Ready = (int)rngID_cuRAND(Option) != 0;
+        private:
+            RandomState state;
+            Generator gen;
+        public:
+            RandomGenerator(uint64_t seed, RandomOption option) noexcept;
+            ~RandomGenerator() = default;
+            /* Operations */
+            void reseed(uint64_t seed_);
+
+            Array<int> random_int(size_t length, int from, int to);
+            void random_int(Array<int>& arr, int from, int to);
+            /* Operators */
+            [[nodiscard]] result_type operator()() { return gen(); }
+            [[nodiscard]] operator mkl_handle() noexcept requires(MKL_Ready);
+            [[nodiscard]] operator curand_handle() noexcept requires(cuRAND_Ready);
+            /* Getters */
+            [[nodiscard]] auto& generator() noexcept { return gen; }
+            [[nodiscard]] uint64_t getSeed() const noexcept { return state.getSeed(); }
+            /* Static members */
+            [[nodiscard]] constexpr static result_type min() { return Generator::min(); }
+            [[nodiscard]] constexpr static result_type max() { return Generator::max(); }
+        private:
+            RandomGenerator(const This&) = default;
+            RandomGenerator(This&&) noexcept = default;
+            /* Operators */
+            This& operator=(const This&) = default;
+            This& operator=(This&&) noexcept = default;
+        };
+
+        template<RandomOption Option>
+        RandomGenerator<Option>::operator mkl_handle() noexcept requires(MKL_Ready) {
+            static_assert(MKL_Ready, "[Error]: MKL does not support this RNG");
+            return state.getMKLStream();
+        }
+
+        template<RandomOption Option>
+        RandomGenerator<Option>::operator curand_handle() noexcept requires(cuRAND_Ready) {
+            static_assert(cuRAND_Ready, "[Error]: cuRAND does not support this RNG");
+            return state.getCuRANDGenerator();
+        }
+    }
     /**
      * \class Random provides a general, per-thread, reusable random generator implementation.
      * We use the same random number generator as NumPy [1].
      *
      * Note: Even if we fix the random seed, thread stealing may still break reproducibility.
+     *
+     * It inherits the generator interface from RandomGenerator, which is shared by all seeds using
+     * the same \tparam Option. What is left here is the per-seed part: the seed policy, the
+     * thread-local instance and the distributions built on top of it.
      *
      * \tparam FixedSeed:
      * Multi-threading will break reproducibility and fixing random seed is not enough.
@@ -120,41 +188,17 @@ namespace Physica {
      * [1] NumPy BitGenerators; https://numpy.org/doc/stable/reference/random/bit_generators/index.html
      */
     template<RandomOption Option = PCG64DXSM, uint64_t FixedSeed = Physica::Dynamic>
-    class PHYSICA_API Random : public Internal::RandomBase {
+    class PHYSICA_API Random : public Internal::RandomGenerator<Option> {
         using This = Random<Option, FixedSeed>;
-        using Base = Internal::RandomBase;
-        using typename Base::mkl_handle;
-        using typename Base::curand_handle;
-
-        template<RandomOption> struct GeneratorImpl;
-        template<> struct GeneratorImpl<PCG32DXSM> { using Type = Internal::setseq_base<uint32_t, uint64_t, Internal::DXSM>; };
-        template<> struct GeneratorImpl<PCG64DXSM> { using Type = Internal::setseq_base<uint64_t, __uint128_t, Internal::DXSM>; };
-        template<> struct GeneratorImpl<MCG> { using Type = std::minstd_rand; };
-        template<> struct GeneratorImpl<MT19937> { using Type = std::mt19937; };
-
-        using Generator = GeneratorImpl<Option>::Type;
+        using Base = Internal::RandomGenerator<Option>;
     public:
-        using result_type = Generator::result_type;
         constexpr static bool IsSeedFixed = Traits<This>::IsSeedFixed;
-        constexpr static bool MKL_Ready = rngID_MKL(Option) != 0;
-        constexpr static bool cuRAND_Ready = (int)rngID_cuRAND(Option) != 0;
-    private:
-        Generator gen;
     public:
         ~Random() = default;
-        /* Operators */
-        [[nodiscard]] result_type operator()() { return gen(); }
-        [[nodiscard]] operator mkl_handle() noexcept requires(MKL_Ready);
-        [[nodiscard]] operator curand_handle() noexcept requires(cuRAND_Ready);
         /* Operations */
         void reseed();
         void reseed(uint64_t seed_) requires(!IsSeedFixed);
-        /* Getters */
-        [[nodiscard]] Generator& generator() noexcept { return gen; }
         /* Static members */
-        [[nodiscard]] constexpr static result_type min() { return Generator::min(); }
-        [[nodiscard]] constexpr static result_type max() { return Generator::max(); }
-
         [[nodiscard]] static This& getInstance() noexcept;
         [[nodiscard]] static bool coin() noexcept;
         [[nodiscard]] static int select(int size) noexcept;
@@ -170,35 +214,16 @@ namespace Physica {
     };
 
     template<RandomOption Option, uint64_t FixedSeed>
-    Random<Option, FixedSeed>::Random() noexcept : Base(FixedSeed, Option) {
-        gen.seed(seq);
-    }
-
-    template<RandomOption Option, uint64_t FixedSeed>
-    Random<Option, FixedSeed>::operator mkl_handle() noexcept requires(MKL_Ready){
-        static_assert(MKL_Ready, "[Error]: MKL does not support this RNG");
-        return Base::pStream;
-    }
-
-    template<RandomOption Option, uint64_t FixedSeed>
-    Random<Option, FixedSeed>::operator curand_handle() noexcept requires(cuRAND_Ready) {
-        static_assert(cuRAND_Ready, "[Error]: cuRAND does not support this RNG");
-        return Base::curand;
-    }
+    Random<Option, FixedSeed>::Random() noexcept : Base(FixedSeed, Option) {}
 
     template<RandomOption Option, uint64_t FixedSeed>
     void Random<Option, FixedSeed>::reseed() {
-        if constexpr (IsSeedFixed)
-            Base::reseed(FixedSeed, Option);
-        else
-            Base::reseed(Option);
-        gen.seed(seq);
+        Base::reseed(Base::getSeed());
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
-    void Random<Option, FixedSeed>::reseed(uint64_t seed) requires(!IsSeedFixed) {
-        Base::reseed(seed, Option);
-        gen.seed(seq);
+    void Random<Option, FixedSeed>::reseed(uint64_t seed_) requires(!IsSeedFixed) {
+        Base::reseed(seed_);
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
@@ -220,23 +245,14 @@ namespace Physica {
 
     template<RandomOption Option, uint64_t FixedSeed>
     Array<int> Random<Option, FixedSeed>::random_int(size_t length, int from, int to) {
-        Array<int> result(length);
-        random_int(result, from, to);
-        return result;
+        return getInstance().Base::random_int(length, from, to);
     }
     /**
      * Range: [from, to]
      */
     template<RandomOption Option, uint64_t FixedSeed>
     void Random<Option, FixedSeed>::random_int(Array<int>& arr, int from, int to) {
-        assert(from <= to && to < INT_MAX);
-        if constexpr (MKL_Ready)
-            check_vsl(viRngUniform(VSL_RNG_METHOD_UNIFORM_STD, getInstance(), arr.getLength(), arr.data(), from, to + 1));
-        else {
-            std::uniform_int_distribution<int> dist(from, to);
-            for (int& i : arr)
-                i = dist(getInstance());
-        }
+        getInstance().Base::random_int(arr, from, to);
     }
 
     template<class T>

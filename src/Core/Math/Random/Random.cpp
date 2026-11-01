@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,12 +27,9 @@
 using namespace Physica;
 using namespace Physica::Internal;
 
-RandomBase::RandomBase(uint64_t seed_, RandomOption option) noexcept {
+RandomState::RandomState(uint64_t seed_, RandomOption option) noexcept : seed(seed_) {
     try {
-        if (seed_ == Dynamic)
-            reseed(option);
-        else
-            reseed(seed_, option);
+        reseed(seed_, option);
     }
     catch (std::exception& e) {
         std::cerr << std::format("RNG init failed: {}\n", e.what());
@@ -40,7 +37,7 @@ RandomBase::RandomBase(uint64_t seed_, RandomOption option) noexcept {
     }
 }
 
-RandomBase::~RandomBase() {
+RandomState::~RandomState() {
     if (pStream)
         check_vsl(vslDeleteStream(&pStream));
 #ifdef PHYSICA_CUDA
@@ -49,43 +46,83 @@ RandomBase::~RandomBase() {
 #endif
 }
 
-void RandomBase::reseed(RandomOption option) {
-    uint64_t seed{};
-    if constexpr (HostDevAttr::HasRDSEED)
-        RandomSeed::rdseed(seed);
-    else if constexpr (HostDevAttr::HasRDRAND)
-        RandomSeed::rdrand(seed);
-    else
-        seed = Cycler::now();
-    reseed(seed, option);
-}
+void RandomState::reseed(uint64_t seed_, RandomOption option) {
+    if (seed_ == Dynamic) {
+        if constexpr (HostDevAttr::HasRDSEED)
+            RandomSeed::rdseed(seed_);
+        else if constexpr (HostDevAttr::HasRDRAND)
+            RandomSeed::rdrand(seed_);
+        else
+            seed_ = Cycler::now();
+    }
 
-void RandomBase::reseed(uint64_t seed_, RandomOption option) {
     if constexpr (HasMPI())
         std::ignore = MPI::getInstance();
 
     seed = seed_;
-    seq = SeedSequence<4>({
-        static_cast<uint32_t>(seed),
-        static_cast<uint32_t>(seed >> 32UL),
-        static_cast<uint32_t>(ThreadPool::getThreadID()),
-        static_cast<uint32_t>(MPI::getRank())
-    });
+    seq = SeedSequence<4>({static_cast<uint32_t>(seed),
+                           static_cast<uint32_t>(seed >> 32UL),
+                           static_cast<uint32_t>(ThreadPool::getThreadID()),
+                           static_cast<uint32_t>(MPI::getRank()),});
 
     if constexpr (HasMKL()) {
         int id_mkl = rngID_MKL(option);
-        if (id_mkl != 0)
+        if (id_mkl != 0) {
+            if (pStream) {
+                [[maybe_unused]] auto* oldStream = std::exchange(pStream, nullptr);
+                check_vsl(vslDeleteStream(&oldStream));
+            }
             check_vsl(vslNewStream(&pStream, id_mkl, seq.generate<uint64_t>()));
+        }
     }
 
     if constexpr (HasCUDA()) {
     #ifdef PHYSICA_CUDA
         auto id_curand = rngID_cuRAND(option);
         if (id_curand != CURAND_RNG_TEST) {
+            if (curand)
+                check(curandDestroyGenerator(std::exchange(curand, nullptr)));
             check(curandCreateGenerator(&curand, id_curand));
             check(curandSetGeneratorOrdering(curand, CURAND_ORDERING_PSEUDO_DYNAMIC));
             check(curandSetPseudoRandomGeneratorSeed(curand, seq.generate<uint64_t>()));
         }
     #endif
     }
+}
+
+template<RandomOption Option>
+RandomGenerator<Option>::RandomGenerator(uint64_t seed, RandomOption option) noexcept : state(seed, option), gen(state.getSequence()) {}
+
+template<RandomOption Option>
+void RandomGenerator<Option>::reseed(uint64_t seed_) {
+    state.reseed(seed_, Option);
+    gen.seed(state.getSequence());
+}
+/**
+ * Range: [from, to]
+ */
+template<RandomOption Option>
+Array<int> RandomGenerator<Option>::random_int(size_t length, int from, int to) {
+    Array<int> result(length);
+    random_int(result, from, to);
+    return result;
+}
+
+template<RandomOption Option>
+void RandomGenerator<Option>::random_int(Array<int>& arr, int from, int to) {
+    assert(from <= to && to < INT_MAX);
+    if constexpr (MKL_Ready)
+        check_vsl(viRngUniform(VSL_RNG_METHOD_UNIFORM_STD, state.getMKLStream(), arr.getLength(), arr.data(), from, to + 1));
+    else {
+        std::uniform_int_distribution<int> dist(from, to);
+        for (int& i : arr)
+            i = dist(*this);
+    }
+}
+
+namespace Physica::Internal {
+    template class RandomGenerator<PCG32DXSM>;
+    template class RandomGenerator<PCG64DXSM>;
+    template class RandomGenerator<MCG>;
+    template class RandomGenerator<MT19937>;
 }
