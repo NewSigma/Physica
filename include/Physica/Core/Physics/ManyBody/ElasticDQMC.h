@@ -21,6 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
+#include "Physica/Core/Utils/Container/Array.h"
 #include "DQMCImpl/HubbardParams.h"
 #include "DQMCImpl/ImagKinetic.h"
 
@@ -40,6 +41,8 @@ namespace Physica {
     private:
         const Params* params;
         VectorND<Trv> rSquareOmegas;
+        VectorND<Trv> probs;
+        Array<int> sites;
         GreenPair greens;
         GreenPair buffer;
         T correction;
@@ -48,6 +51,8 @@ namespace Physica {
         SymmEigenSolver<T> eig;
 
         T lnAbsDet;
+        uint64_t numTotal = 0;
+        uint64_t numAccept = 0;
     public:
         ElasticDQMC() = delete;
         ElasticDQMC(const Params& params_, Trv freqDensity);
@@ -74,6 +79,8 @@ namespace Physica {
         [[nodiscard]] const auto& getGreens() noexcept { return greens; }
         [[nodiscard]] constexpr static Trv getSign() noexcept { return 1; }
         [[nodiscard]] constexpr static Trv getRSign() noexcept { return 1; }
+        [[nodiscard]] uint64_t getNumTotal() const noexcept { return numTotal; }
+        [[nodiscard]] uint64_t getNumAccept() const noexcept { return numAccept; }
         /* Static members */
         [[nodiscard]] static int calcFreqCutoff(Trv beta, Trv freqDensity) noexcept;
         [[nodiscard]] static T calcLocalCorrection(T beta, T repelU, T chemMu, int numFreq) noexcept;
@@ -87,6 +94,8 @@ namespace Physica {
     ElasticDQMC<T>::ElasticDQMC(const Params& params_, Trv freqDensity)
             : params(&params_)
             , rSquareOmegas(calcFreqCutoff(params_.getBeta(), freqDensity))
+            , probs(params_.getNumSite())
+            , sites(params_.getNumSite())
             , greens(2, params_.getNumSite())
             , buffer(2, params_.getNumSite())
             , correction(calcLocalCorrection(params->getBeta(), params->getRepelU(), params->getChemMu(), getNumFreq()))
@@ -97,6 +106,9 @@ namespace Physica {
             rSquareOmegas[i] = T(2 * i + 1);
         rSquareOmegas *= MathConst<T>::pi;
         rSquareOmegas = reciprocal(square(rSquareOmegas));
+
+        for (int i = 0; i < params_.getNumSite(); ++i)
+            sites[i] = i;
     }
 
     template<Scalar T>
@@ -111,17 +123,22 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     void ElasticDQMC<T>::step() {
-        const int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
-        const T save = std::exchange(actionR[site, site], randAuxField<R>());
+        std::ranges::shuffle(sites, R::getInstance());
+        probs.template random_uniform<R>();
+        for (auto [prob, site] : zip(probs, sites)) {
+            const T save = std::exchange(actionR[site, site], randAuxField<R>());
 
-        const auto lnAbsDet1 = diagonalize();
-        const bool accept = Trv::template random_uniform<R>() < exp(lnAbsDet1 - lnAbsDet);
-        if (accept) {
-            lnAbsDet = lnAbsDet1;
-            buffer.swap(greens);
+            const auto lnAbsDet1 = diagonalize();
+            const bool accept = prob < exp(lnAbsDet1 - lnAbsDet);
+            if (accept) {
+                lnAbsDet = lnAbsDet1;
+                buffer.swap(greens);
+                numAccept += 1;
+            }
+            else
+                actionR[site, site] = save;
+            numTotal += 1;
         }
-        else
-            actionR[site, site] = save;
     }
 
     template<Scalar T>
@@ -141,8 +158,12 @@ namespace Physica {
 
         actionR.swap(obj.actionR);
         eig.swap(obj.eig);
+        sites.swap(obj.sites);
+        probs.swap(obj.probs);
 
         lnAbsDet.swap(obj.lnAbsDet);
+        std::swap(numTotal, obj.numTotal);
+        std::swap(numAccept, obj.numAccept);
     }
 
     template<Scalar T>
