@@ -24,6 +24,13 @@ using namespace Physica;
 using T = float64;
 
 namespace {
+    void assign() {
+        PermMatrix<T> perm({2, 1, 3, 0});
+        perm = IdentityMatrix<T>(perm.getOrder());
+        for (size_t i = 0; i < perm.getOrder(); ++i)
+            expect(perm.getIndices()[i] == i);
+    }
+
     void mulAndInv() {
         const PermMatrix<T> perm({0, 3, 2, 1});
         const VectorND<T> v{0, 1, 2, 3};
@@ -37,16 +44,17 @@ namespace {
         expect(vectorNear(v, v1, 1E-15));
     }
 
-    void fromToMKL() {
+    void fromLAPACK() {
         PermMatrix<T> answer({2, 1, 3, 0});
-        auto result = PermMatrix<T>::fromMKL(answer.toMKL());
+        auto result = PermMatrix<T>::fromLAPACK(answer.toLAPACK<int64_t>());
         for (size_t i = 0; i < answer.getRow(); ++i)
             expect(result.getIndices()[i] == answer.getIndices()[i]);
     }
 }
 
 int main() {
+    assign();
     mulAndInv();
-    fromToMKL();
+    fromLAPACK();
     return 0;
 }

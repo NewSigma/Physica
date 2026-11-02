@@ -25,7 +25,7 @@ namespace Physica {
     template<Scalar> class LUMatrixL;
     template<Scalar, bool Pivot> class DenseLUInv;
 
-    template<Scalar T, bool Pivot>
+    template<Scalar T, bool Pivot = true>
     class DenseLU {
         using This = DenseLU;
         using Tr = T::RealType;

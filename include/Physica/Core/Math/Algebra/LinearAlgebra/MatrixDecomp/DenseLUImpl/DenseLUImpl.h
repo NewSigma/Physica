@@ -39,10 +39,13 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     void DenseLU<T, Pivot>::compute_base() {
-        decomp(working, 0);
-
-        if constexpr (Pivot)
+        if constexpr (Pivot) {
+            perm = IdentityMatrix<Tr>(getOrder());
+            decomp(working, 0);
             perm = perm.inv();
+        }
+        else
+            decomp(working, 0);
     }
 
     template<Scalar T, bool Pivot>
@@ -72,7 +75,10 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     T DenseLU<T, Pivot>::sgndet() const noexcept {
-        return unit(working.diag()).prod();
+        T result = unit(working.diag()).prod();
+        if constexpr (Pivot)
+            result *= perm.det();
+        return result;
     }
 
     template<Scalar T, bool Pivot>

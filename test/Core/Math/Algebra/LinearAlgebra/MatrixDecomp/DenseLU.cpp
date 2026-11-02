@@ -21,6 +21,7 @@
 #include "Test.h"
 
 using namespace Physica;
+using Matrix2D = DenseMatrix<float64, MatrixMajor::Col, 2, 2>;
 using Matrix3D = DenseMatrix<float64, MatrixMajor::Col, 3, 3>;
 using Matrix4D = DenseMatrix<float64, MatrixMajor::Col, 4, 4>;
 
@@ -72,10 +73,10 @@ namespace {
         using T = float64;
         using Matrix4D = DenseMatrix<T, MatrixMajor::Row, 4, 4>;
         const Matrix4D A{
-                {-0.000696013585639699,     0.816492585748236, 0.0216969440126965, -0.0884307621566726},
-                {    0.691809621910274, -0.000696013585639699,  0.131671000379563, -0.0701048797366553},
-                {  -0.0701048797366553,   -0.0884307621566726, -0.131016640264434,   0.788769710999288},
-                {    0.131671000379563,    0.0216969440126965,  0.643819646681362,  -0.131016640264434}
+            {-0.000696013585639699,     0.816492585748236, 0.0216969440126965, -0.0884307621566726},
+            {    0.691809621910274, -0.000696013585639699,  0.131671000379563, -0.0701048797366553},
+            {  -0.0701048797366553,   -0.0884307621566726, -0.131016640264434,   0.788769710999288},
+            {    0.131671000379563,    0.0216969440126965,  0.643819646681362,  -0.131016640264434},
         };
         const Vector4D<T> b{4.316511702487202E-1, 1.548712563601895E-2, 9.840637243791538E-1, 1.671684099146560E-1};
         const Vector4D<T> answer{0.06910464034803039, 0.6682416388355244, 0.5106380624075890, 1.413471488683768};
@@ -83,15 +84,39 @@ namespace {
         const Vector4D<T> result = lu.inv() * b;
         expect(vectorNear(result, answer, prec));
     }
+
+    template<bool Pivot>
+    void sgndet(const Matrix auto& source, double expected) {
+        const DenseLU<float64, Pivot> lu(source);
+        expect(scalarNear(lu.det(), float64(expected), 1E-14));
+        expect(scalarNear(lu.sgndet(), float64(expected > 0 ? 1 : -1), 1E-15));
+    }
+
+    void recompute() {
+        // Test that DenseLU can be reused without corrupting previous buffers
+        const Matrix2D mat{
+            {0, 1},
+            {1, 0},
+        };
+        DenseLU<float64, true> lu(mat.getRow());
+        Matrix2D inv;
+        for (int i = 0; i < 3; ++i) {
+            lu.compute_base(mat);
+            expect(scalarNear(lu.det(), float64(-1), 1E-15));
+            expect(scalarNear(lu.sgndet(), float64(-1), 1E-15));
+            lu.inv().assign(inv);
+            expect(matrixNear(inv, mat, 1E-15));
+        }
+    }
 }
 
 int main() {
     {
         // We know this matrix does not need pivoting
         const Matrix3D mat{
-                {2, 3,  4},
-                {1, 1,  9},
-                {1, 2, -6}
+            {2, 3,  4},
+            {1, 1,  9},
+            {1, 2, -6},
         };
         decomp<false>(mat, 1E-15);
         inverse<false>(mat, 1E-15);
@@ -99,25 +124,41 @@ int main() {
     {
         // Otherwise, always prefer pivoting
         const Matrix4D mat1{
-                {1, 2, 0, 1},
-                {0, 1, 1, 0},
-                {2, 0, 1, 1},
-                {1, 1, 0, 1}
+            {1, 2, 0, 1},
+            {0, 1, 1, 0},
+            {2, 0, 1, 1},
+            {1, 1, 0, 1},
         };
         decomp<true>(mat1, 1E-15);
         inverse<true>(mat1, 1E-14);
 
         // Partial pivoting does not work for it
         const Matrix4D mat2{
-                {1,  1,  1,  1},
-                {1,  1, -1, -1},
-                {1, -1,  1, -1},
-                {1, -1, -1,  1}
+            {1,  1,  1,  1},
+            {1,  1, -1, -1},
+            {1, -1,  1, -1},
+            {1, -1, -1,  1},
         };
         decomp<true>(mat2, 1E-15);
         inverse<true>(mat2, 1E-10);
     }
     inverseGEMV<false>(1E-11); // Precision is lower without pivoting
     inverseGEMV<true>(1E-15);
+    {
+        const Matrix2D mat3{
+            {0, 1},
+            {1, 0},
+        };
+        sgndet<true>(mat3, -1); // {0,1;1,0} needs an odd swap: catches missing perm sign
+        const Matrix4D mat1{
+            {1, 2, 0, 1},
+            {0, 1, 1, 0},
+            {2, 0, 1, 1},
+            {1, 1, 0, 1},
+        };
+        sgndet<false>(mat1, 1);
+        sgndet<true>(mat1, 1);
+    }
+    recompute();
     return 0;
 }

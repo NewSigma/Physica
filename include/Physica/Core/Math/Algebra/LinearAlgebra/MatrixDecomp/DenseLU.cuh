@@ -37,7 +37,7 @@ namespace Physica {
 
         device_obj<Array<std::byte>> deviceBuffer;
         Array<std::byte> hostBuffer;
-        device_obj<Array<int>> err = device_obj<Array<int>>(1);
+        mutable device_obj<Array<int>> err = device_obj<Array<int>>(1);
     public:
         device_obj() = default;
         device_obj(size_t size);
@@ -49,7 +49,7 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void compute(const Matrix auto& source);
-        void solve(device_obj<MatrixND<T>>& rhs);
+        void solve(device_obj<MatrixND<T>>& rhs) const;
 
         [[nodiscard]] Tr lnAbsDet() const noexcept;
         [[nodiscard]] T sgndet() const noexcept;
@@ -59,6 +59,7 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getMatrixLU() const noexcept { return working; }
+        [[nodiscard]] PermMatrix<Tr> getPerm() const;
         [[nodiscard]] size_t getOrder() const noexcept { return working.getOrder(); }
         [[nodiscard]] consteval static bool isPivot() noexcept { return Pivot; }
     };
@@ -100,16 +101,16 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    void device_obj<DenseLU<T, Pivot>>::solve(device_obj<MatrixND<T>>& rhs) {
+    void device_obj<DenseLU<T, Pivot>>::solve(device_obj<MatrixND<T>>& rhs) const {
         auto& ctx = CUDAContext::getInstance();
         constexpr auto trans = CUBLAS_OP_N;
         int64_t n = getOrder();
         int64_t nrhs = rhs.getCol();
         constexpr auto dataTypeA = DataType;
-        void* A = working.data();
+        const void* A = working.data();
         int64_t lda = n;
         constexpr auto dataTypeB = DataType;
-        int64_t* ipiv = nullptr;
+        const int64_t* ipiv = nullptr;
         if constexpr (Pivot)
             ipiv = perm.data();
         void* B = rhs.data();
@@ -125,7 +126,10 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     T device_obj<DenseLU<T, Pivot>>::sgndet() const noexcept {
-        return unit(working.diag()).prod();
+        T result = unit(working.diag()).prod();
+        if constexpr (Pivot)
+            result *= getPerm().det();
+        return result;
     }
 
     template<Scalar T, bool Pivot>
@@ -160,6 +164,12 @@ namespace Physica {
         deviceBuffer.swap(obj.deviceBuffer);
         hostBuffer.swap(obj.hostBuffer);
         err.swap(obj.err);
+    }
+
+    template<Scalar T, bool Pivot>
+    auto device_obj<DenseLU<T, Pivot>>::getPerm() const -> PermMatrix<Tr> {
+        static_assert(Pivot, "[Error]: Perm is available to PLU decomp only");
+        return PermMatrix<Tr>::fromLAPACK(perm.toHost());
     }
 }
 

@@ -434,7 +434,7 @@ namespace Physica {
         else if constexpr (Order == 3)
             return fma(calc(0, 0), fma(calc(1, 1), calc(2, 2), -calc(1, 2) * calc(2, 1)), fma(calc(0, 1), fma(calc(1, 2), calc(2, 0), -calc(1, 0) * calc(2, 2)), calc(0, 2) * fma(calc(1, 0), calc(2, 1), -calc(1, 1) * calc(2, 0))));
         else
-            return DenseLU<T, false>(Base::getDerived()).det();
+            return DenseLU<T, true>(Base::getDerived()).det();
     }
 
     template<class Derived, Scalar ScalarT>
@@ -443,15 +443,14 @@ namespace Physica {
         if constexpr (Order <= 3)
             return ln(abs(Base::getDerived().det()));
         else {
-            DenseLU<T, false> lu(Base::getDerived());
+            DenseLU<T, true> lu(Base::getDerived());
             return ln(abs(lu.getMatrixLU().diag())).sum();
         }
     }
 
     template<class Derived, Scalar ScalarT>
     auto RValueMatrix<Derived, ScalarT>::sgndet() const {
-        DenseLU<T, false> lu(Base::getDerived());
-        return unit(lu.getMatrixLU().diag()).prod();
+        return DenseLU<T, true>(Base::getDerived()).sgndet();
     }
 
     template<class Derived, Scalar ScalarT>

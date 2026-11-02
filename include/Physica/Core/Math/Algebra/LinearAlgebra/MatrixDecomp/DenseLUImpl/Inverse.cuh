@@ -54,12 +54,17 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     void device_obj<Inverse<DenseLU<T, Pivot>>>::assign(Matrix auto& target) const {
-        static_assert(!Pivot, "[Error]: No impl");
         target.assert_assign(*this);
-
-        const auto& matrixLU = lu.getMatrixLU();
-        matrixLU.tril_unit().inv().assign(target);
-        (matrixLU.triu().inv() * target).assign(target);
+        if constexpr (Pivot) {
+            target.zeros();
+            target.diag() = T(1);
+            lu.solve(target);
+        }
+        else {
+            const auto& matrixLU = lu.getMatrixLU();
+            matrixLU.tril_unit().inv().assign(target);
+            (matrixLU.triu().inv() * target).assign(target);
+        }
     }
 }
 

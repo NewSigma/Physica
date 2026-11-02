@@ -26,15 +26,18 @@ using T = float32;
 using RandomSource = Random<PCG64DXSM, 1000>;
 
 namespace {
+    template<bool Pivot>
     void decomp() {
         auto answer = MatrixND<T>::random_uniform<RandomSource>(32, 32);
         answer.diag() = T(10); // Diagonal dominance for numerical stability
-        device_obj<DenseLU<float32, false>> lu(answer.toDevice());
+        device_obj<DenseLU<float32, Pivot>> lu(answer.toDevice());
 
         auto matrixLU = lu.getMatrixLU().toHost();
         MatrixND<T> matrixL = matrixLU.tril();
         matrixL.diag() = float64(1);
         MatrixND<T> result = matrixL * matrixLU.triu();
+        if constexpr (Pivot)
+            result = MatrixND<T>(lu.getPerm() * result);
         if (!matrixNear(result, answer, 1E-3))
             exit(1);
 
@@ -47,30 +50,53 @@ namespace {
 
     void inverse() {
         auto m = device_obj<MatrixND<T>>::random_uniform<RandomSource>(32, 32);
-        auto lu = device_obj<DenseLU<float32, false>>(m);
+        auto lu = device_obj<DenseLU<float32, true>>(m);
         device_obj<MatrixND<T>> inv = lu.inv();
         device_obj<MatrixND<T>> id = inv * m;
 
         expect(matrixNear(id.toHost(), IdentityMatrix<T>(m.getRow()), 1E-4));
     }
 
-    void inverseGEMV() {
+    template<bool Pivot>
+    void inverseGEMV(double prec) {
         const auto A = MatrixND<T>::random_uniform<RandomSource>(32, 32);
         const auto b = MatrixND<T>::random_uniform<RandomSource>(32, 1);
         const VectorND<T> answer = MatrixND<T>(A.inv()) * b.col(0);
 
-        device_obj<DenseLU<float32, true>> lu(A.toDevice());
+        device_obj<DenseLU<float32, Pivot>> lu(A.toDevice());
         auto resultD = b.toDevice();
         lu.solve(resultD);
         const VectorND<T> result = resultD.toHost().col(0);
-        if (!vectorNear(result, answer, 1E-3))
+        if (!vectorNear(result, answer, prec))
             exit(1);
+    }
+
+    void sgndet() {
+        MatrixND<T> m{
+            {0, 1},
+            {1, 0},
+        };
+        device_obj<DenseLU<T, true>> lu(m.toDevice());
+        expect(lu.sgndet() == T(-1));
+        expect(m.sgndet() == T(-1));
+
+        const MatrixND<T> m1{
+            {1, 2, 0, 1},
+            {0, 1, 1, 0},
+            {2, 0, 1, 1},
+            {1, 1, 0, 1},
+        };
+        device_obj<DenseLU<T, true>> lu1(m1.toDevice());
+        expect(lu1.sgndet() == T(1));
     }
 }
 
 int main() {
-    decomp();
+    decomp<false>();
+    decomp<true>();
     inverse();
-    inverseGEMV();
+    inverseGEMV<false>(1E-3);
+    inverseGEMV<true>(1E-3);
+    sgndet();
     return 0;
 }

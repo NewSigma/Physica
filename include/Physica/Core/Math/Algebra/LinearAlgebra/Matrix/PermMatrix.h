@@ -18,7 +18,9 @@
  */
 #pragma once
 
+#include <concepts>
 #include <unordered_set>
+#include "IdentityMatrix.h"
 #include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica {
@@ -40,6 +42,7 @@ namespace Physica {
         ~PermMatrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
+        auto operator=(const instanceof_tx<IdentityMatrix> auto& identity) -> This&;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
 
@@ -48,7 +51,8 @@ namespace Physica {
 
         [[nodiscard]] PermMatrix inv() const noexcept;
         [[nodiscard]] PermMatrix transpose() const noexcept;
-        [[nodiscard]] Array<MKL_INT64> toMKL() const;
+        template<std::integral I>
+        [[nodiscard]] Array<I> toLAPACK() const;
 
         void resize(this auto&, size_t order);
         void swap_row(size_t row1, size_t row2);
@@ -59,7 +63,8 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept { return true; }
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::BothMajor; }
-        [[nodiscard]] static This fromMKL(Array<MKL_INT64> ipiv);
+        template<std::integral I>
+        [[nodiscard]] static This fromLAPACK(const Array<I>& ipiv);
     };
 
     template<Scalar T>
@@ -78,6 +83,11 @@ namespace Physica {
         }
         if (buffer.size() != indices.getLength())
             throw std::invalid_argument("[Error]: Duplicate index is not allowed");
+    }
+
+    template<Scalar T>
+    auto PermMatrix<T>::operator=(const instanceof_tx<IdentityMatrix> auto& identity) -> This& {
+        return *this = This(identity.getOrder());
     }
 
     template<Scalar T>
@@ -110,9 +120,10 @@ namespace Physica {
     }
 
     template<Scalar T>
-    Array<MKL_INT64> PermMatrix<T>::toMKL() const {
-        size_t length = indices.getLength();
-        return Array<MKL_INT64>::generate([perm = *this, length](size_t i) mutable {
+    template<std::integral I>
+    auto PermMatrix<T>::toLAPACK() const -> Array<I> {
+        const size_t length = indices.getLength();
+        return Array<I>::generate([perm = *this, length](size_t i) mutable -> I {
             for (size_t j = i; j < length; ++j) {
                 if (perm.getIndices()[j] == i) {
                     perm.swap_row(i, j);
@@ -143,9 +154,12 @@ namespace Physica {
     auto&& PermMatrix<T>::getIndices(this auto&& self) noexcept {
         return std::forward<decltype(self)>(self).indices;
     }
-
+    /**
+     * LAPACK is 1-based and ours is 0-based: ipiv[i] - 1 == indices[i]
+     */
     template<Scalar T>
-    auto PermMatrix<T>::fromMKL(Array<MKL_INT64> ipiv) -> This {
+    template<std::integral I>
+    auto PermMatrix<T>::fromLAPACK(const Array<I>& ipiv) -> This {
         auto perm = This(ipiv.getLength());
         for (size_t i = 0; i < ipiv.getLength(); ++i)
             perm.swap_row(i, ipiv[i] - 1);

@@ -32,7 +32,7 @@ namespace Physica {
         auto* a = reinterpret_cast<Tm*>(target.data_handle());
         const size_t lda = target.getMajorStride();
         if constexpr (Pivot) {
-            auto buffer = lu.getPerm().toMKL();
+            auto buffer = lu.getPerm().template toLAPACK<MKL_INT64>();
             const auto* ipiv = buffer.data();
             if constexpr (isComplex()) {
                 if constexpr (T::Prec == Float32)
