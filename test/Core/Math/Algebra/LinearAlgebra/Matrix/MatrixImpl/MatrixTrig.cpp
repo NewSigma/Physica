@@ -76,8 +76,9 @@ namespace {
     }
 
     void inverse() noexcept {
+        // Empirically I + U[0,1) keeps cond <= 14, so the fixed tolerance never has to be relaxed.
         constexpr double Prec = 1E-10;
-        const auto data = Matrix4D::template random_uniform<RandomSource>(4, 4);
+        const Matrix4D data = IdentityMatrix<T, 4>(4) + Matrix4D::template random_uniform<RandomSource>(4, 4);
         const auto check = [&](const Matrix auto& trig) {
             Matrix4D inv = trig.inv();
             Matrix4D prod = trig * inv;
@@ -95,8 +96,8 @@ namespace {
 
     void invGEMV() {
         constexpr double Prec = 1E-10;
-        const auto m = Matrix4D::random_uniform<RandomSource>(4, 4);
-        const auto v = Vector4D<T>::random_uniform<RandomSource>(4);
+        const Matrix4D m = IdentityMatrix<T, 4>(4) + Matrix4D::random_uniform<RandomSource>(4, 4);
+        Vector4D<T> v = Vector4D<T>::random_uniform<RandomSource>(4) + T(0.5); // Add 0.5 so a reference near zero inflates the error
         Vector4D<T> sol;
         const auto check = [&](const Matrix auto& trig) {
             (trig.inv() * v).assign_base(sol);
@@ -120,8 +121,8 @@ namespace {
 
     void invGEMM() {
         constexpr double Prec = 1E-10;
-        const auto rhs = Matrix4D::random_uniform<RandomSource>(4, 4);
-        const auto lhs = Matrix4D::random_uniform<RandomSource>(4, 4);
+        Matrix4D rhs = Matrix4D::random_uniform<RandomSource>(4, 4) + T(0.5);
+        Matrix4D lhs = Matrix4D::random_uniform<RandomSource>(4, 4) + T(0.5);
         Matrix4D sol, prod;
         const auto doubleProd = [&](const Matrix auto& trig) {
             sol = trig.inv() * rhs;
@@ -133,7 +134,7 @@ namespace {
             expect<RandomSource>(matrixNear(prod, lhs, Prec));
         };
 
-        const auto data = Matrix4D::random_uniform<RandomSource>(4, 4);
+        const Matrix4D data = IdentityMatrix<T, 4>(4) + Matrix4D::random_uniform<RandomSource>(4, 4);
         doubleProd(data.tril());
         doubleProd(data.triu());
         doubleProd(data.tril_unit());

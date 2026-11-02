@@ -26,6 +26,20 @@ using RandomSource = Random<MCG>;
 using M = device_obj<DenseMatrix<T, MatrixMajor::Col>>;
 
 namespace {
+    void testSize() noexcept {
+        // Test that getRow() and getCol() are correct for rectangle matrix
+        M rectangle(5, 4);
+        expect(rectangle.triu().getRow() == 4);
+        expect(rectangle.triu().getCol() == 4);
+        expect(rectangle.transpose().triu().getRow() == 4);
+        expect(rectangle.transpose().triu().getCol() == 5);
+
+        expect(rectangle.tril().getRow() == 5);
+        expect(rectangle.tril().getCol() == 4);
+        expect(rectangle.transpose().tril().getRow() == 4);
+        expect(rectangle.transpose().tril().getCol() == 4);
+    }
+
     void gemm() noexcept {
         constexpr double Prec = 1E-4;
         const M rhs = M::random_uniform<RandomSource>(4, 4);
@@ -56,32 +70,31 @@ namespace {
     void inverse() noexcept {
         constexpr double Prec = 1E-4;
         const M data = device_obj<IdentityMatrix<T, 4>>{} + M::random_uniform<RandomSource>(4, 4);
-        M inv = data.triu().inv();
-        M prod = data.triu() * inv;
-        expect<RandomSource>(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), Prec));
-
-        inv = data.tril().inv();
-        prod = data.tril() * inv;
-        expect<RandomSource>(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), Prec));
-
-        inv = data.triu_unit().inv();
-        prod = data.triu_unit() * inv;
-        expect<RandomSource>(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), Prec));
-
-        inv = data.tril_unit().inv();
-        prod = data.tril_unit() * inv;
-        expect<RandomSource>(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), Prec));
+        const auto check = [&](const Matrix auto& trig) {
+            M inv = trig.inv();
+            M prod = trig * inv;
+            expect<RandomSource>(matrixNear(prod.toHost(), IdentityMatrix<T, 4>(4), Prec));
+        };
+        check(data.triu());
+        check(data.tril());
+        check(data.triu_unit());
+        check(data.tril_unit());
+        check(data.transpose().triu());
+        check(data.transpose().tril());
+        check(data.transpose().triu_unit());
+        check(data.transpose().tril_unit());
     }
 
     void invGEMV() noexcept {
         constexpr double Prec = 1E-4;
-        using Vector = device_obj<VectorND<T>>;
+        using DVector = device_obj<VectorND<T>>;
         const M data = device_obj<IdentityMatrix<T, 4>>{} + M::random_uniform<RandomSource>(4, 4);
-        const Vector v = VectorND<T>::random_uniform<RandomSource>(4).toDevice();
-        Vector sol;
+        const VectorND<T> hostV = VectorND<T>::random_uniform<RandomSource>(4) + T(0.5); // Add 0.5 so a reference near zero inflates the error
+        const DVector v = hostV.toDevice();
+        DVector sol;
         const auto check = [&](const Matrix auto& trig) {
             sol = trig.inv() * v;
-            const Vector prod = trig * sol;
+            const DVector prod = trig * sol;
             expect<RandomSource>(vectorNear(prod.toHost(), v.toHost(), Prec));
         };
 
@@ -97,8 +110,10 @@ namespace {
 
     void invGEMM() noexcept {
         constexpr double Prec = 1E-4;
-        const M rhs = M::random_uniform<RandomSource>(4, 4);
-        const M lhs = M::random_uniform<RandomSource>(4, 4);
+        const MatrixND<T> hostRhs = MatrixND<T>::random_uniform<RandomSource>(4, 4) + T(0.5);
+        const MatrixND<T> hostLhs = MatrixND<T>::random_uniform<RandomSource>(4, 4) + T(0.5);
+        const M rhs = hostRhs.toDevice();
+        const M lhs = hostLhs.toDevice();
         M sol(4, 4);
         M prod(4, 4);
         const auto doubleProd = [&](const Matrix auto& trig) {
@@ -124,6 +139,7 @@ namespace {
 }
 
 int main() {
+    testSize();
     gemm();
     inverse();
     invGEMV();

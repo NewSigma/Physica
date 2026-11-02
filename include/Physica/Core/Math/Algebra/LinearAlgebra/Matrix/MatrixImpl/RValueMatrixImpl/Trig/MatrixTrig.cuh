@@ -52,9 +52,9 @@ namespace Physica {
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&& self) noexcept;
-        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const noexcept { return getExpr().getRow(); }
-        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const noexcept { return getExpr().getCol(); }
-        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const noexcept { return getExpr().getOrder(); }
+        [[nodiscard]] __host__ __device__ constexpr size_t getRow() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getCol() const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr size_t getOrder() const noexcept;
     };
 
     template<Matrix M, bool Upper, bool Unit>
@@ -96,6 +96,30 @@ namespace Physica {
     template<Matrix M, bool Upper, bool Unit>
     __host__ __device__ auto&& device_obj<MatrixTrig<M, Upper, Unit>>::getExpr(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived());
+    }
+
+    template<Matrix M, bool Upper, bool Unit>
+    __host__ __device__ constexpr size_t device_obj<MatrixTrig<M, Upper, Unit>>::getRow() const noexcept {
+        if constexpr (Upper)
+            return std::min(getExpr().getRow(), getExpr().getCol());
+        else
+            return getExpr().getRow();
+    }
+
+    template<Matrix M, bool Upper, bool Unit>
+    __host__ __device__ constexpr size_t device_obj<MatrixTrig<M, Upper, Unit>>::getCol() const noexcept {
+        if constexpr (Upper)
+            return getExpr().getCol();
+        else
+            return std::min(getExpr().getRow(), getExpr().getCol());
+    }
+
+    template<Matrix M, bool Upper, bool Unit>
+    __host__ __device__ constexpr size_t device_obj<MatrixTrig<M, Upper, Unit>>::getOrder() const noexcept {
+        if constexpr (Upper)
+            return getExpr().getCol();
+        else
+            return getExpr().getRow();
     }
 }
 
