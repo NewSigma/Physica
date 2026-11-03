@@ -10,7 +10,7 @@ dependencies:
   - mkl-devel=2025.0.1
   - benchmark
   - cuda-toolkit=12.8.1
-  - libcudss-dev=0.7.1.*
+  - libcudss-dev>=1.0.0.*
   - qt6-main
   - qt6-charts
   - qt6-datavis3d

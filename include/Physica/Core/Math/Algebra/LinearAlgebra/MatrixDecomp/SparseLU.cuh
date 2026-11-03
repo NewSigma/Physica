@@ -161,8 +161,11 @@ namespace Physica {
             check(cudssDataCreate(ctx, &pData));
             data.reset(pData);
         }
-        cudssAlgType_t value = CUDSS_ALG_1;
-        check(cudssConfigSet(config.get(), CUDSS_CONFIG_REORDERING_ALG, &value, sizeof(value)));
+        cudssReorderingAlg_t reordering = CUDSS_REORDERING_ALG_BTF_COLAMD;
+        check(cudssConfigSet(config.get(), CUDSS_CONFIG_REORDERING_ALG, &reordering, sizeof(reordering)));
+
+        cudssMatchingAlg_t matching = CUDSS_MATCHING_ALG_NONE;
+        check(cudssConfigSet(config.get(), CUDSS_CONFIG_MATCHING_ALG, &matching, sizeof(matching)));
     }
 
     template<Scalar T>
@@ -186,12 +189,13 @@ namespace Physica {
         auto* rowStart = spmat.getMajorStarts().data();
         auto* colIndices = spmat.getMinorIndexes().data();
         auto* values = spmat.getElements().data();
+        constexpr auto offsetType = cudaDataType::CUDA_R_64I;
         constexpr auto indexType = cudaDataType::CUDA_R_64I;
         constexpr auto valueType = CUDAContext::getDataType<T>();
         constexpr auto mtype = cudssMatrixType_t::CUDSS_MTYPE_GENERAL;
         constexpr auto mview = cudssMatrixViewType_t::CUDSS_MVIEW_FULL;
         constexpr auto indexBase = cudssIndexBase_t::CUDSS_BASE_ZERO;
-        check(cudssMatrixCreateCsr(&handle, n, n, nnz, (void*)rowStart, nullptr, (void*)colIndices, (void*)values, indexType, valueType, mtype, mview, indexBase));
+        check(cudssMatrixCreateCsr(&handle, n, n, nnz, (void*)rowStart, nullptr, (void*)colIndices, (void*)values, offsetType, indexType, valueType, mtype, mview, indexBase));
         return MatrixCUDSS(handle);
     }
 

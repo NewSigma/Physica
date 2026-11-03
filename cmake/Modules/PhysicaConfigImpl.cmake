@@ -192,6 +192,10 @@ if(${PHYSICA_CUDA})
         include_directories(SYSTEM ${CUDA_MATH_INCLUDE_DIRECTORIES})
     endif()
 
+    # cuDSS checks CMAKE_CUDA_COMPILER_VERSION and triggers a false mismatch for clang.
+    if(CMAKE_CUDA_COMPILER_ID MATCHES Clang)
+        set(CUDSS_ALLOW_CTK_MISMATCH ON)
+    endif()
     find_package(cudss REQUIRED)
 endif()
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -55,6 +55,8 @@ std::string Impl::message(int code) const {
         return "Execution failed";
     case CUDSS_STATUS_INTERNAL_ERROR:
         return "Internal error";
+    case CUDSS_STATUS_IR_FAILED:
+        return "Iterative refinement failed";
     default:
         return "Unknown error";
     }
