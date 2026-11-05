@@ -38,11 +38,10 @@ namespace Physica {
         static_assert(T::Prec == Float32, "[Info]: Suggest FP32");
     private:
         HubbardParams<Tr> params;
-        Array<device_obj<DenseLU<T, false>>, 2> lu;
+        Array<device_obj<DenseLU<T, true>>, 2> lu;
         device_obj<ActionMatrix<T>> action;
         device_obj<MatrixND<T>> forceBuffer;
         device_obj<MatrixND<T>> solBuffer;
-        Array<device_obj<MatrixND<T>>, 2> invBlockBuffer;
         HamiltonMC<Tr> hmc;
         VectorND<Tr> luPos;
         Trv correction;
@@ -95,7 +94,6 @@ namespace Physica {
         void updateLU(const Vector auto& pos);
         [[nodiscard]] Vector2D<Trv> calcDet();
         void calcGreen();
-        void calcInvBlock(const device_obj<DenseLU<T, false>>& lu, size_t offset, size_t size);
         /* Getters */
         [[nodiscard]] Trv getBetaU() const noexcept;
     };
@@ -113,10 +111,6 @@ namespace Physica {
             spinLU.resize(size);
         forceBuffer.resize(getAuxField());
         solBuffer.resize(size);
-
-        const size_t maxWidth = std::max(size_t(getNumSite()), size_t(2 * getNumFreq()));
-        for (auto& buffer : invBlockBuffer)
-            buffer.resize(size, maxWidth);
     }
 
     template<Scalar T>
@@ -132,10 +126,6 @@ namespace Physica {
             spinLU.resize(size);
         forceBuffer.resize(getAuxField());
         solBuffer.resize(size);
-
-        const size_t maxWidth = std::max(size_t(getNumSite()), size_t(2 * getNumFreq()));
-        for (auto& buffer : invBlockBuffer)
-            buffer.resize(size, maxWidth);
     }
 
     template<Scalar T>
@@ -216,11 +206,9 @@ namespace Physica {
 
         forceBuffer.zeros();
         for (int spin : {0, 1}) {
-            auto& spinLU = lu[spin];
-            int numSite = getNumSite();
-            int numFreq2 = getNumFreq() * 2;
-            for (int site = 0; site < numSite; ++site)
-                calcInvBlock(spinLU, size_t(site) * numFreq2, numFreq2);
+            const int numSite = getNumSite();
+            const int numFreq2 = getNumFreq() * 2;
+            solBuffer = lu[spin].inv();
 
             int numThread = std::min<int>(numSite, CUDADevAttr::DefaultThreadsPerBlock);
             int numBlockX = getMaxBoson();
@@ -344,24 +332,6 @@ namespace Physica {
             greensD[spin].toHostAsync(greensH[spin]);
         }
         CUDAExecutor::wait();
-    }
-
-    template<Scalar T>
-    void device_obj<FreqDQMC<T>>::calcInvBlock(const device_obj<DenseLU<T, false>>& lu, size_t offset, size_t size) {
-        assert(offset + size <= lu.getOrder());
-        const size_t order = lu.getOrder();
-        const size_t coorder = order - offset;
-        const auto block = lu.getMatrixLU().block(offset, coorder, offset, coorder);
-
-        auto rhs = invBlockBuffer[0].block(0, coorder, 0, size);
-        rhs.zeros();
-        rhs.diag() = T(1);
-
-        auto temp = invBlockBuffer[1].block(0, coorder, 0, size);
-        temp = block.tril_unit().inv() * rhs;
-        rhs = block.triu().inv() * temp;
-
-        solBuffer.block(offset, size, offset, size) = invBlockBuffer[0].block(0, size, 0, size);
     }
 
     template<Scalar T>

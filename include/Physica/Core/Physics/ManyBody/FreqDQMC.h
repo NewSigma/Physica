@@ -35,7 +35,7 @@ namespace Physica {
         using GreenPair = ImagKinetic<Tr>::GreenPair;
     private:
         HubbardParams<Tr> params;
-        Array<DenseLU<T, false>, 2> lu;
+        Array<DenseLU<T, true>, 2> lu; // Pivoting is required for fp32 det/sign stability
         ActionMatrix<T> action;
         HamiltonMC<Tr> hmc;
         VectorND<Tr> luPos;
@@ -92,7 +92,6 @@ namespace Physica {
         [[nodiscard]] Trv getBetaU() const noexcept;
         /* Static members */
         [[nodiscard]] static VectorND<Trv> makeDefaultMass(const Matrix auto& auxField);
-        [[nodiscard]] static MatrixND<T> calcInvBlock(const DenseLU<T, false>& lu, size_t offset, size_t size);
         /* Friends */
         friend class device_obj<This>;
     };
@@ -194,17 +193,22 @@ namespace Physica {
 
         const int numSite = getNumSite();
         const int numFreq2 = getNumFreq() * 2;
+        Array<MatrixND<T>, 2> invs;
+        parallel_for<P>([this, &invs](size_t spin) {
+            invs[spin].resize(lu[spin].getOrder());
+            invs[spin] = lu[spin].inv();
+        }, 2).wait();
         auto spinFs = Array<MatrixND<T>, 2>::generate([this](size_t) {
             const auto& aux = getAuxField();
             return MatrixND<T>::zeros(aux.getRow(), aux.getCol());
         });
 
-        auto task = parallel_for<P>([this, &spinFs, numFreq2](size_t index) {
+        auto task = parallel_for<P>([this, &invs, &spinFs, numFreq2](size_t index) {
             const size_t spin = index % 2;
             const size_t site = index / 2;
             const Trv factor = spin == 0 ? 1 : -1;
             auto& spinF = spinFs[spin];
-            const MatrixND<T> block = calcInvBlock(lu[spin], size_t(site) * numFreq2, numFreq2).transpose();
+            const MatrixND<T> block = invs[spin].block(site * numFreq2, numFreq2, site * numFreq2, numFreq2).transpose();
             for (int freq = 0; freq < getMaxBoson(); ++freq) {
                 if (freq == 0)
                     spinF[freq, site] = block.diag().sum().real() * factor;
@@ -312,20 +316,4 @@ namespace Physica {
         return result;
     }
 
-    template<Scalar T>
-    auto FreqDQMC<T>::calcInvBlock(const DenseLU<T, false>& lu, size_t offset, size_t size) -> MatrixND<T> {
-        assert(offset + size <= lu.getOrder());
-        const size_t order = lu.getOrder();
-        const size_t coorder = order - offset;
-        const auto block = lu.getMatrixLU().block(offset, coorder, offset, coorder);
-
-        MatrixND<T> rhs(coorder, size);
-        rhs.zeros();
-        for (size_t i = 0; i < size; ++i)
-            rhs[i, i] = T(1);
-
-        MatrixND<T> temp = block.tril_unit().inv() * rhs;
-        MatrixND<T> result = block.triu().inv() * temp;
-        return result.topRows(size);
-    }
 }
