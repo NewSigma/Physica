@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Parallel/Algorithm/Thread.h"
-#include "Physica/Core/Utils/Cycler.h"
+#include "Utils/Timer.h"
 #include "Benchmark.h"
 
 using namespace Physica;
@@ -30,18 +30,17 @@ namespace {
         RandomSource::getInstance().reseed();
 
         // Warmup
-        std::ignore = Cycler::getCyclesPerSec();
         auto& pool = ThreadPool::getInstance();
         pool.restart();
 
+        HostTimer timer;
         auto x = float64::random_uniform<RandomSource>();
         for (auto _ : state) {
-            auto from = Cycler::tic();
+            timer.tic();
             PHYSICA_BENCH(auto task = schedule<Thread>([&x]() noexcept {
                 x = reciprocal(x);
             }));
-            auto to = Cycler::toc();
-            state.SetIterationTime(Cycler::toSeconds(to - from));
+            state.SetIterationTime(timer.toc());
             task.wait();
         }
         pool.shouldExit();
@@ -51,18 +50,17 @@ namespace {
         RandomSource::getInstance().reseed();
 
         // Warmup
-        std::ignore = Cycler::getCyclesPerSec();
         auto& pool = ThreadPool::getInstance();
         pool.restart();
 
+        HostTimer timer;
         auto x = VectorND<float64>::random_uniform<RandomSource>(pool.getNumThreads());
         for (auto _ : state) {
-            auto from = Cycler::tic();
+            timer.tic();
             PHYSICA_BENCH(auto task = parallel_for<Thread>([&x](size_t i) noexcept {
                 x[i] = reciprocal(x[i]);
             }, x.getLength()));
-            auto to = Cycler::toc();
-            state.SetIterationTime(Cycler::toSeconds(to - from));
+            state.SetIterationTime(timer.toc());
             task.wait();
         }
         pool.shouldExit();
@@ -72,18 +70,17 @@ namespace {
         RandomSource::getInstance().reseed();
 
         // Warmup
-        std::ignore = Cycler::getCyclesPerSec();
         auto& pool = ThreadPool::getInstance();
         pool.restart();
 
+        HostTimer timer;
         auto x = VectorND<float64>::random_uniform<RandomSource>(1024);
         for (auto _ : state) {
-            auto from = Cycler::tic();
+            timer.tic();
             PHYSICA_BENCH(auto task = parallel_for<Thread>([&x](size_t i) noexcept {
                 x[i] = reciprocal(x[i]);
             }, x.getLength(), pool.getNumThreads()));
-            auto to = Cycler::toc();
-            state.SetIterationTime(Cycler::toSeconds(to - from));
+            state.SetIterationTime(timer.toc());
             task.wait();
         }
         pool.shouldExit();

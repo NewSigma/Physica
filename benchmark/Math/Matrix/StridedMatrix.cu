@@ -18,8 +18,8 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
 #include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Core/Parallel/CUDAEvent.cuh"
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
+#include "Utils/Timer.h"
 #include "Benchmark.h"
 
 using namespace Physica;
@@ -41,17 +41,11 @@ namespace {
         auto d = dst.block(0, len, 0, len);
         CUDAExecutor::wait();
 
-        auto tic = CUDAEvent();
-        auto toc = CUDAEvent();
+        DeviceTimer timer;
         for (auto _ : state) {
-            tic.record();
+            timer.tic();
             s.assign(d);
-            toc.record();
-            toc.wait();
-
-            float elapsedTime{};
-            cudaEventElapsedTime(&elapsedTime, tic, toc);
-            state.SetIterationTime(elapsedTime / 1000);
+            state.SetIterationTime(timer.toc());
         }
     }
 }

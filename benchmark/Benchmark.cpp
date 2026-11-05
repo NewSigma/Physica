@@ -17,11 +17,11 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cmath>
-#include <chrono>
 #include <fstream>
 #include <print>
 #include "Physica/Core/Version.h"
 #include "Physica/Config.h"
+#include "Utils/Timer.h"
 #include "Benchmark.h"
 
 using namespace benchmark;
@@ -87,14 +87,13 @@ int main(int argc, char** argv) {
         return 1;
 
     std::ofstream("Version", std::ios_base::trunc) << Physica::version();
-    auto start = std::chrono::steady_clock::now();
+    HostTimer timer;
+    timer.tic();
     {
         Reporter reporter{};
         RunSpecifiedBenchmarks(&reporter);
         Shutdown();
     }
-    auto end = std::chrono::steady_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start);
-    std::println("Elapsed time: {} Min", duration.count());
+    std::println("Elapsed time: {} Min", static_cast<int64_t>(timer.toc() / 60.0));
     return 0;
 }

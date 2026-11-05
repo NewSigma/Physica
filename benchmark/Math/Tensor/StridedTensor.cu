@@ -19,8 +19,8 @@
 #include <benchmark/benchmark.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.cuh"
 #include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Core/Parallel/CUDAEvent.cuh"
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
+#include "Utils/Timer.h"
 
 using namespace Physica;
 using RandomSource = Random<MCG, std::mt19937::default_seed>;
@@ -55,17 +55,11 @@ namespace {
         auto d = dst.block(Index3D{}, count);
         CUDAExecutor::wait();
 
-        auto tic = CUDAEvent();
-        auto toc = CUDAEvent();
+        DeviceTimer timer;
         for (auto _ : state) {
-            tic.record();
+            timer.tic();
             s.assign(d);
-            toc.record();
-            toc.wait();
-
-            float elapsedTime{};
-            cudaEventElapsedTime(&elapsedTime, tic, toc);
-            state.SetIterationTime(elapsedTime / 1000);
+            state.SetIterationTime(timer.toc());
         }
     }
 }

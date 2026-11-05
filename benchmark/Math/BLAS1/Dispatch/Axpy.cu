@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh"
-#include "Physica/Core/Parallel/CUDAEvent.cuh"
+#include "Utils/Timer.h"
 #include "Benchmark.h"
 
 using namespace Physica;
@@ -34,17 +34,11 @@ namespace {
         auto expr = x * T(2);
         CUDAExecutor::wait();
 
-        auto tic = CUDAEvent();
-        auto toc = CUDAEvent();
+        DeviceTimer timer;
         for (auto _ : state) {
-            tic.record();
+            timer.tic();
             expr.assign_add(buffer);
-            toc.record();
-
-            toc.wait();
-            float elapsedTime{};
-            cudaEventElapsedTime(&elapsedTime, tic, toc);
-            state.SetIterationTime(elapsedTime / 1000);
+            state.SetIterationTime(timer.toc());
         }
     }
 
@@ -59,17 +53,11 @@ namespace {
         expr.assign_add_cublas(buffer); // Warmup
         CUDAExecutor::wait();
 
-        auto tic = CUDAEvent();
-        auto toc = CUDAEvent();
+        DeviceTimer timer;
         for (auto _ : state) {
-            tic.record();
+            timer.tic();
             expr.assign_add_cublas(buffer);
-            toc.record();
-
-            toc.wait();
-            float elapsedTime{};
-            cudaEventElapsedTime(&elapsedTime, tic, toc);
-            state.SetIterationTime(elapsedTime / 1000);
+            state.SetIterationTime(timer.toc());
         }
     }
 }

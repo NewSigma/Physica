@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Scalar/Real.h"
 #include "Physica/Core/Math/Calculus/SpecialFunctions.h"
-#include "Physica/Core/Utils/Cycler.h"
+#include "Timer.h"
 
 namespace Physica {
     class Benchmark {
@@ -28,13 +28,13 @@ namespace Physica {
     public:
         [[nodiscard]] static std::pair<ScalarType, ScalarType> run(std::invocable auto fn, unsigned int numTest, unsigned int numSample) {
             ScalarType mean = 0, var = 0;
+            HostTimer timer;
             for (size_t i = 0; i < numTest; ++i) {
                 ScalarType temp = 0;
                 for (size_t j = 0; j < numSample; ++j) {
-                    const auto from = Cycler::tic();
+                    timer.tic();
                     fn();
-                    const auto to = Cycler::toc();
-                    temp.toNextMean(j, ScalarType(Cycler::toSeconds(to - from)));
+                    temp.toNextMean(j, ScalarType(timer.toc()));
                 }
                 var.toNextVariance(mean, i, temp);
             }
