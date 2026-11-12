@@ -21,6 +21,7 @@
 #include <functional>
 #include <numeric>
 #include "Physica/Macro.h"
+#include "Physica/Core/Utils/Builtin.h"
 #include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica {
@@ -74,7 +75,7 @@ namespace Physica {
 
     template<size_t Length>
     __host__ __device__ size_t Index<Length>::toSize(const This& shape) noexcept {
-        return std::reduce(shape.begin(), shape.end(), size_t{1}, std::multiplies<>{});
+        return std::reduce(shape.begin(), shape.end(), size_t{1}, Physica::ckd_mul);
     }
 
     template<size_t Length>

@@ -50,6 +50,16 @@ namespace Physica {
         assert(predicate && "[Error]: Bad assumption");
         [[assume(predicate)]];
     }
+    /**
+     * TODO: use std::ckd_mul once we bump to CXX26
+     */
+    [[nodiscard, gnu::always_inline]] __host__ __device__ constexpr size_t ckd_mul(size_t a, size_t b) noexcept {
+        size_t result{};
+        [[maybe_unused]] bool overflow = false;
+        overflow = __builtin_mul_overflow(a, b, &result);
+        assert(!overflow && "[Error]: Size arithmetic overflow");
+        return result;
+    }
 
     template<class T>
     void memswap(T* a, T* b) noexcept {

@@ -30,7 +30,7 @@ namespace Physica {
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
     constexpr Array2D<T, Major, Row, Col, Allocator>::Array2D(size_t row, size_t col, auto&&... args)
-            : arr(row * col, std::forward<decltype(args)>(args)...), r(row) {
+            : arr(ckd_mul(row, col), std::forward<decltype(args)>(args)...), r(row) {
         if constexpr (Row != Dynamic)
             assert(Row == row);
     }
@@ -79,7 +79,7 @@ namespace Physica {
     void Array2D<T, Major, Row, Col, Allocator>::resize(size_t row, size_t col, auto&&... args) {
         assert((Row == row || Row == Dynamic) && "[Error]: Cannot resize a fixed array");
         assert((Col == col || Col == Dynamic) && "[Error]: Cannot resize a fixed array");
-        arr.resize(row * col, std::forward<decltype(args)>(args)...);
+        arr.resize(ckd_mul(row, col), std::forward<decltype(args)>(args)...);
         r = row;
     }
 
@@ -256,7 +256,7 @@ namespace Physica {
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
     auto Array2D<T, Major, Row, Col, Allocator>::read(size_t row, size_t col, const T* __restrict p) noexcept -> This {
         This result{};
-        new (&result.arr) ArrayType::read(row * col, p);
+        new (&result.arr) ArrayType::read(ckd_mul(row, col), p);
         result.r = row;
         return result;
     }
@@ -272,7 +272,7 @@ namespace Physica {
         };
 
         if constexpr (Row == Dynamic || Col == Dynamic)
-            return This(ArrayType::template generate<P>(std::move(generator), row * col), row);
+            return This(ArrayType::template generate<P>(std::move(generator), ckd_mul(row, col)), row);
         else
             return This(ArrayType::template generate<P>(std::move(generator)), row);
     }

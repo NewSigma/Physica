@@ -25,6 +25,7 @@
 #include <utility>
 #include <limits>
 #include "Physica/Macro.h"
+#include "Physica/Core/Utils/Builtin.h"
 
 namespace Physica {
     namespace Internal {
@@ -60,7 +61,7 @@ namespace Physica {
             return std::allocator<T>().allocate(n);
         }
         else {
-            size_t size = n * sizeof(T);
+            size_t size = ckd_mul(n, sizeof(T));
             void* p{};
             if constexpr (OverAlign)
                 p = __builtin_operator_new(size, std::align_val_t(Align), std::nothrow);
@@ -88,7 +89,7 @@ namespace Physica {
     template<class T, size_t Align>
     constexpr T* HostAllocator<T, Align>::reallocate(T* p, size_t new_size, size_t old_size) noexcept {
         if constexpr (HasMimalloc())
-            return static_cast<T*>(Internal::reallocate_mimalloc(p, new_size * sizeof(T), old_size * sizeof(T), OverAlign ? Align : 0));
+            return static_cast<T*>(Internal::reallocate_mimalloc(p, ckd_mul(new_size, sizeof(T)), old_size * sizeof(T), OverAlign ? Align : 0));
         else {
             assert(new_size > 0 && "[Error]: Reject bad pattern");
             assert(p != nullptr || old_size == 0); // According to [1], the behavior is well defined now

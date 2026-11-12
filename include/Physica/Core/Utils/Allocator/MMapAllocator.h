@@ -21,6 +21,7 @@
 #include <cassert>
 #include <sys/mman.h>
 #include "Physica/Core/Exception/SystemException.h"
+#include "Physica/Core/Utils/Builtin.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
 #include "HostAllocator.h"
 
@@ -79,7 +80,7 @@ namespace Physica {
 
     template<class T, size_t Align>
     size_t MMapAllocator<T, Align>::calcSize(size_t n) noexcept {
-        size_t size = n * sizeof(T);
+        size_t size = ckd_mul(n, sizeof(T));
         if constexpr (OverAlign)
             size = (size + Align - 1) & ~(Align - 1);
         return size;
