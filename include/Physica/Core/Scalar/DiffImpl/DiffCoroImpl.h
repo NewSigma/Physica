@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include <forward_list>
 #include "DiffCoro.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
@@ -155,44 +154,5 @@ namespace Physica {
 
     inline void DiffCoro<void>::Promise::operator delete(void* p, std::align_val_t align) noexcept {
         __builtin_operator_delete(p, align);
-    }
-
-    template<class Predicate, class Operation, class Functor>
-    [[nodiscard("[Warn]: Discarding a coroutine")]] auto co_for(Predicate&& pred, Operation&& op, Functor&& func) noexcept(noexcept(func())) {
-        using Handle = std::invoke_result<Functor>::type;
-        static_assert(std::is_class<Handle>::value, "[Error]: Invalid handle type");
-        static_assert(!std::is_trivially_destructible<Handle>::value, "[Error]: Invalid handle type");
-        static_assert(std::predicate<Predicate>, "[Error]: Invalid predicate");
-
-        std::forward_list<Handle> result{};
-        for (; pred(); op())
-            result.push_front(func());
-        return result;
-    }
-
-    template<class Predicate, class FuncTrue, class FuncFalse>
-    [[nodiscard("[Warn]: Discarding a coroutine")]] auto co_if(Predicate&& pred, FuncTrue&& t, FuncFalse&& f) noexcept(noexcept(t()) && noexcept(f())) {
-        using Handle1 = std::invoke_result<FuncTrue>::type;
-        using Handle2 = std::invoke_result<FuncFalse>::type;
-        static_assert(std::is_same<Handle1, Handle2>::value, "[Error]: Inconsistent return value");
-        static_assert(std::is_class<Handle1>::value, "[Error]: Invalid handle type");
-        static_assert(!std::is_trivially_destructible<Handle1>::value, "[Error]: Invalid handle type");
-        static_assert(std::predicate<Predicate>, "[Error]: Invalid predicate");
-
-        if (pred())
-            return t();
-        return f();
-    }
-
-    template<class Predicate, class Functor>
-    [[nodiscard("[Warn]: Discarding a coroutine")]] auto co_if(Predicate&& pred, Functor&& func) noexcept(noexcept(func())) {
-        using Handle = std::invoke_result<Functor>::type;
-        static_assert(std::is_class<Handle>::value, "[Error]: Invalid handle type");
-        static_assert(!std::is_trivially_destructible<Handle>::value, "[Error]: Invalid handle type");
-        static_assert(std::predicate<Predicate>, "[Error]: Invalid predicate");
-
-        if (pred())
-            return func();
-        return Handle(nullptr);
     }
 }

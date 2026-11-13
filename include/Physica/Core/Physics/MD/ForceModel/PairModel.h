@@ -203,16 +203,17 @@ namespace Physica {
             const size_t dir2 = dof2 % 3U;
             if constexpr (ReverseDiff<T>) {
                 Tv result = 0;
-                size_t i = 0;
-                auto _ = co_for([&]{ return i < cell.getNumParticle(); }, [&]{ ++i; }, [&]() -> CoDiff<T> {
+                const Array<CoDiff<T>> fcs = Array<CoDiff<T>>::generate([&](size_t i) -> CoDiff<T> {
                     if (i == atom2)
                         return {};
-                    const size_t dof_i = Dim * i + dir2;
-                    const auto fc = forceConstImpl(cell, dof1, dof_i);
-                    result += fc;
+                    auto fc = forceConstImpl(cell, dof1, Dim * i + dir2);
+                    result += fc.value();
                     return fc;
-                });
-                std::ignore = co_yield result;
+                }, cell.getNumParticle());
+
+                auto& r = co_yield result;
+                for (size_t i = fcs.getLength(); i-- > 0;)
+                    fcs[i].reverse(r.grad());
             }
             else {
                 T result = 0;

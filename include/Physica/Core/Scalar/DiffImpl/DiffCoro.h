@@ -134,15 +134,6 @@ namespace Physica {
         void return_void() noexcept {}
         [[noreturn]] static void unhandled_exception() { throw; }
     };
-
-    template<class Predicate, class Operation, class Functor>
-    [[nodiscard("[Warn]: Discarding a coroutine")]] auto co_for(Predicate&& pred, Operation&& op, Functor&& func) noexcept(noexcept(func()));
-
-    template<class Predicate, class FuncTrue, class FuncFalse>
-    [[nodiscard("[Warn]: Discarding a coroutine")]] auto co_if(Predicate&& pred, FuncTrue&& t, FuncFalse&& f) noexcept(noexcept(t()) && noexcept(f()));
-
-    template<class Predicate, class Functor>
-    [[nodiscard("[Warn]: Discarding a coroutine")]] auto co_if(Predicate&& pred, Functor&& func) noexcept(noexcept(func()));
 }
 
 namespace Physica {

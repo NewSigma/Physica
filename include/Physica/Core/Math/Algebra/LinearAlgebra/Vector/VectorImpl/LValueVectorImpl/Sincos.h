@@ -22,21 +22,21 @@
 
 namespace Physica {
     template<Vector V1, Vector V2>
-    auto sincos(const V1& x, V2& s, V2& c) noexcept {
+    auto sincos(const V1& x, V2& s, V2& c) noexcept -> CoDiff<decltype((void)x)> requires(ReverseDiff<V1> && ReverseDiff<V2>) {
+        sincos(x.values(), s.values(), c.values());
+        co_await suspend_always{};
+        x.reverse(hadamard(c.values(), s.grads()) - hadamard(s.values(), c.grads()));
+    }
+
+    template<Vector V1, Vector V2>
+    auto sincos(const V1& x, V2&& s, V2&& c) noexcept requires(!ReverseDiff<V1>) {
         assert(x.getLength() == s.getLength() && x.getLength() == c.getLength());
         constexpr size_t Size = std::max(x.getSizeAtCompile(), s.getSizeAtCompile());
-        using ScalarType1 = V1::ScalarType;
-        using ScalarType2 = V2::ScalarType;
+        using ScalarType1 = std::remove_cvref_t<V1>::ScalarType;
+        using ScalarType2 = std::remove_cvref_t<V2>::ScalarType;
         using ScalarType = Internal::BinaryScalarOpRtnTy<ScalarType1, ScalarType2>::Type;
         using PacketType = BestPacket<ScalarType, Size>::Type;
-        if constexpr (ReverseDiff<ScalarType>) {
-            size_t i = 0;
-            auto result = co_for([&]{ return i < x.getLength(); }, [&]{ ++i; }, [&]{
-                return sincos(x.calc(i), s[i], c[i]);
-            });
-            return result;
-        }
-        else if constexpr (PacketType::size() == 1) {
+        if constexpr (PacketType::size() == 1) {
             const size_t length = x.getLength();
             auto it = zip(x.view(), s.view(), c.view()).begin();
             for (size_t i = 0; i < length; ++i) {
