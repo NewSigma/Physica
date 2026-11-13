@@ -41,7 +41,7 @@ namespace Physica {
         [[nodiscard]] consteval static bool hasFMA4() noexcept;
         /* Aliases */
         [[nodiscard]] consteval static bool support128() noexcept { return hasSSE2(); }
-        [[nodiscard]] consteval static bool support256() noexcept { return hasSSE4_2(); }
+        [[nodiscard]] consteval static bool support256() noexcept { return hasAVX(); }
         [[nodiscard]] consteval static bool support512() noexcept { return hasAVX512(); }
     };
 
@@ -100,7 +100,7 @@ namespace Physica {
     consteval bool Instruset::hasSSE4_2() noexcept {
         if constexpr (hasAVX())
             return true;
-    #ifdef __SSE_4_2__
+    #ifdef __SSE4_2__
         return true;
     #else
         return false;
@@ -110,7 +110,7 @@ namespace Physica {
     consteval bool Instruset::hasSSE4_1() noexcept {
         if constexpr (hasSSE4_2())
             return true;
-    #ifdef __SSE_4_1__
+    #ifdef __SSE4_1__
         return true;
     #else
         return false;
