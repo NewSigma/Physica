@@ -1,0 +1,42 @@
+name: Link Check
+
+on:
+  push:
+    branches: [ "Physica", "dev" ]
+  pull_request:
+    branches: [ "Physica", "dev" ]
+  schedule:
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lychee:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7.0.1
+
+    - name: Check local links
+      uses: lycheeverse/lychee-action@v2.9.0
+      with:
+        lycheeVersion: v0.24.2
+        args: --offline --config lychee.toml .
+        fail: true
+
+    - name: Check external links
+      id: external
+      uses: lycheeverse/lychee-action@v2.9.0
+      with:
+        lycheeVersion: v0.24.2
+        args: --config lychee.toml --scheme http --scheme https .
+        fail: false
+        failIfEmpty: false
+
+    - name: Report external link failures
+      if: steps.external.outputs.exit_code != 0
+      run: echo "::warning::External links are broken. See the job summary for details."

@@ -9,4 +9,4 @@ Since performance testing is highly dependent on the platform, the test results 
 
 ## References
 
-[1] Physica Benchmark Results; <https://gitee.com/newsigma/physica-benchmark/tree/main/bench/Physica/Results>
+[1] Physica Benchmark; <https://gitee.com/newsigma/physica-benchmark>
