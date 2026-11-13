@@ -144,8 +144,7 @@ int ThreadPool::numThreadRequired = 0;
 
 ThreadPool::ThreadPool(int numThreads) : queues(numThreads) {
     assert(numThreads > 0 && "[Error]: numThreads must be positive");
-    for (int i = 0; i < numThreads; ++i)
-        queues[i].thread = std::thread(&ThreadPool::workerMainLoop, this, i);
+    spawnWorkers();
 }
 
 ThreadPool::~ThreadPool() {
@@ -175,16 +174,13 @@ auto ThreadPool::steal() noexcept -> Handle {
     return nullptr;
 }
 
-void ThreadPool::shouldExit() noexcept {
+void ThreadPool::waitExit() {
     {
         auto locker = std::lock_guard(poolMutex);
         exit = true;
     }
     cond.notify_all();
-}
 
-void ThreadPool::waitExit() {
-    shouldExit();
     for (auto& queue : queues) {
         auto& thread = queue.thread;
         if (thread.joinable())
@@ -192,13 +188,15 @@ void ThreadPool::waitExit() {
     }
 }
 
-void ThreadPool::restart() {
+void ThreadPool::resize(int numThreads) {
+    assert(numThreads > 0 && "[Error]: numThreads must be positive");
+    if (numThreads == getNumThreads())
+        return;
     waitExit();
+
     exit = false;
-    const int numThread = getNumThreads();
-    queues = Array<ThreadQueue>(numThread);
-    for (int i = 0; i < numThread; ++i)
-        queues[i].thread = std::thread(&ThreadPool::workerMainLoop, this, i);
+    queues = Array<ThreadQueue>(numThreads);
+    spawnWorkers();
 }
 
 auto ThreadPool::getInstance() noexcept -> This& {
@@ -217,6 +215,12 @@ int ThreadPool::getThreadID() noexcept {
 }
 
 void ThreadPool::spin() noexcept { __builtin_ia32_pause(); }
+
+void ThreadPool::spawnWorkers() {
+    const int numThread = getNumThreads();
+    for (int i = 0; i < numThread; ++i)
+        queues[i].thread = std::thread(&ThreadPool::workerMainLoop, this, i);
+}
 
 void ThreadPool::workerMainLoop(int thread_id) noexcept {
     setThreadEnv();

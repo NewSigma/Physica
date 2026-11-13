@@ -28,10 +28,7 @@ namespace {
     // scheduling latency
     void bench_schedule(benchmark::State& state) {
         RandomSource::getInstance().reseed();
-
-        // Warmup
-        auto& pool = ThreadPool::getInstance();
-        pool.restart();
+        std::ignore = ThreadPool::getInstance();
 
         HostTimer timer;
         auto x = float64::random_uniform<RandomSource>();
@@ -43,15 +40,11 @@ namespace {
             state.SetIterationTime(timer.toc());
             task.wait();
         }
-        pool.shouldExit();
     }
 
     void bench_parallel_for1(benchmark::State& state) {
         RandomSource::getInstance().reseed();
-
-        // Warmup
         auto& pool = ThreadPool::getInstance();
-        pool.restart();
 
         HostTimer timer;
         auto x = VectorND<float64>::random_uniform<RandomSource>(pool.getNumThreads());
@@ -63,15 +56,11 @@ namespace {
             state.SetIterationTime(timer.toc());
             task.wait();
         }
-        pool.shouldExit();
     }
 
     void bench_parallel_for2(benchmark::State& state) {
         RandomSource::getInstance().reseed();
-
-        // Warmup
         auto& pool = ThreadPool::getInstance();
-        pool.restart();
 
         HostTimer timer;
         auto x = VectorND<float64>::random_uniform<RandomSource>(1024);
@@ -83,7 +72,6 @@ namespace {
             state.SetIterationTime(timer.toc());
             task.wait();
         }
-        pool.shouldExit();
     }
 }
 

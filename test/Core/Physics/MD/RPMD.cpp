@@ -139,6 +139,5 @@ int main() {
     expect(testCalcKinetic(1E-14));
     normalize_centroid();
     testMDRun();
-    ThreadPool::getInstance().shouldExit();
     return 0;
 }

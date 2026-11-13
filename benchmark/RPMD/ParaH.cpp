@@ -50,10 +50,6 @@ namespace {
     void bench(benchmark::State& state) {
         RandomSource::getInstance().reseed();
 
-        ThreadPool::numThreadRequired = 4;
-        auto& pool = ThreadPool::getInstance();
-        pool.restart();
-
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(pair_cutoff);
 
@@ -62,7 +58,6 @@ namespace {
         rpmd.initMomentum<KineticModel, RandomSource>();
         for (auto _ : state)
             PHYSICA_BENCH(rpmd.nve_step<Thread>(kineticModel, forceModel));
-        pool.shouldExit();
     }
 }
 

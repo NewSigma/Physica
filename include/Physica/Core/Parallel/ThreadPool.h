@@ -77,9 +77,8 @@ namespace Physica {
         void notify_all() noexcept;
         [[nodiscard]] Handle steal() noexcept;
 
-        void shouldExit() noexcept;
+        void resize(int numThreads);
         void waitExit();
-        void restart();
         /* Getters */
         [[nodiscard]] int getNumThreads() const noexcept { return (int)queues.getLength(); }
         /* Static Members */
@@ -90,6 +89,7 @@ namespace Physica {
     private:
         ThreadPool(int numThreads);
         /* Operations */
+        void spawnWorkers();
         void workerMainLoop(int thread_id) noexcept;
     };
 }

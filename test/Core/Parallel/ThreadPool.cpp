@@ -33,7 +33,6 @@ namespace {
     void parallel_for_test() {
         const MatrixType A = MatrixType::random_uniform<RandomSource>(4);
         ThreadPool::numThreadRequired = 4;
-        ThreadPool& pool = ThreadPool::getInstance();
 
         VectorType result_seq(4);
         parallel_for<Sequential>([&](unsigned int i) {
@@ -45,14 +44,14 @@ namespace {
             result_par[i] = A.col(i).sum();
         }, 4, 4).wait();
 
-        pool.shouldExit();
         expect(result_seq == result_par);
     }
 
-    void restart_schedule() {
+    void resize_schedule() {
         // Regression test that using noop_coroutine as the sentinel does not crash
         ThreadPool& pool = ThreadPool::getInstance();
-        pool.restart();
+        pool.resize(2);
+        expect(pool.getNumThreads() == 2);
         []() -> Task {
             // optnone is required to reproduce the crash
             auto schedule_optnone = [][[clang::optnone]]() -> Task {
@@ -63,12 +62,13 @@ namespace {
 
             co_await schedule_optnone();
         }().wait();
-        pool.shouldExit();
+        pool.resize(4);
+        expect(pool.getNumThreads() == 4);
     }
 }
 
 int main() {
     parallel_for_test();
-    restart_schedule();
+    resize_schedule();
     return 0;
 }

@@ -144,7 +144,6 @@ namespace {
                 rpmd.nvt_step<RandomSource, Thread>(thermo, kineticModel, forceModel);
             }
         }
-        ThreadPool::getInstance().shouldExit();
         expect(scalarNear(bond, ScalarType(answer), 2E-2));
     }
 }
