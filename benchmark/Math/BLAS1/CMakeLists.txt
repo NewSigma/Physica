@@ -5,13 +5,6 @@ target_sources(Benchmark PRIVATE Dot.cpp)
 target_sources(Benchmark PRIVATE Nrm2.cpp)
 target_sources(Benchmark PRIVATE Scal.cpp)
 
-if(NOT ${PHYSICA_EmitLLVM})
-    add_subdirectory(Dispatch)
-    if(${PHYSICA_MKL})
-        add_subdirectory(MKL)
-    endif()
-endif()
-
 if(${PHYSICA_CUDA})
     target_sources(Benchmark PRIVATE Axpy.cu)
 endif()

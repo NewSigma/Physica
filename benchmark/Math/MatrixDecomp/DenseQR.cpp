@@ -36,6 +36,21 @@ namespace {
             benchmark::ClobberMemory();
         }
     }
+
+#ifndef PHYSICA_EmitLLVM
+    template<Scalar T>
+    void qr_compare(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
+        const size_t order = state.range(0);
+        const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
+        DenseQR<T> qr(order, order);
+        rotate_backends(state, HostTimer{},
+                        backend<Backend::Dispatch>([&](auto&&...) -> DenseQR<T>& { qr.compute(m); return qr; }),
+                        backend<Backend::Base>([&](auto&&...) -> DenseQR<T>& { qr.compute_base(m); return qr; }),
+                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> DenseQR<T>& { qr.compute_mkl(m); return qr; }));
+    }
+#endif
 }
 
 BENCHMARK(qr)->Name("DenseQR base")
@@ -46,3 +61,7 @@ BENCHMARK(qr)->Name("DenseQR base")
     ->Arg(64)
     ->Arg(256)
     ->Arg(1024);
+
+#ifndef PHYSICA_EmitLLVM
+BENCHMARK(qr_compare<float64>)->Name("DenseQR")->UseManualTime()->Arg(4)->Arg(8)->Arg(16)->Arg(32)->Arg(64)->Arg(256)->Arg(1024);
+#endif

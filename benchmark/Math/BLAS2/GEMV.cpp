@@ -78,9 +78,31 @@ namespace {
             benchmark::ClobberMemory();
         }
     }
+
+#ifndef PHYSICA_EmitLLVM
+    template<Scalar T, int Major>
+    void gemv_compare(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
+        const size_t size = state.range(0);
+        const auto mat = DenseMatrix<T, Major>::template random_uniform<RandomSource>(size, size);
+        const auto vec = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto expr = mat * vec;
+        VectorND<T> result(size);
+        rotate_backends(state, HostTimer{},
+                        backend<Backend::Dispatch>([&](auto&&...) -> VectorND<T>& { expr.assign(result); return result; }),
+                        backend<Backend::Base>([&](auto&&...) -> VectorND<T>& { expr.assign_base(result); return result; }),
+                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> VectorND<T>& { expr.assign_mkl(result); return result; }));
+    }
+#endif
 }
 
 BENCHMARK(gemv<float64, MatrixMajor::Col>)->Name("GEMV col base")->Arg(16)->Arg(32)->Arg(512);
 BENCHMARK(gemv<float64, MatrixMajor::Row>)->Name("GEMV row base")->Arg(16)->Arg(32)->Arg(512);
 BENCHMARK(complex_real)->Name("GEMV complex-real");
 BENCHMARK(forward2_grad)->Name("GEMV forward2");
+
+#ifndef PHYSICA_EmitLLVM
+BENCHMARK(gemv_compare<float64, MatrixMajor::Col>)->Name("GEMV col")->UseManualTime()->Arg(16)->Arg(32)->Arg(512);
+BENCHMARK(gemv_compare<float64, MatrixMajor::Row>)->Name("GEMV row")->UseManualTime()->Arg(16)->Arg(32)->Arg(512);
+#endif

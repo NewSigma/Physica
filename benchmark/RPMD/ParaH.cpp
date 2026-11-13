@@ -42,19 +42,17 @@ namespace {
         MDCellType::MassVector massVec(numMolecular, mass);
         MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
-        const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
+        const double factor = (std::cbrt(double(numMolecular) * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
         cell.scale(factor);
         return RPMD<T>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
     }
 
     void bench(benchmark::State& state) {
         RandomSource::getInstance().reseed();
-
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(pair_cutoff);
 
-        const int numMolecular = state.range(0);
-        auto rpmd = makeSystem(numMolecular);
+        auto rpmd = makeSystem(state.range(0));
         rpmd.initMomentum<KineticModel, RandomSource>();
         for (auto _ : state)
             PHYSICA_BENCH(rpmd.nve_step<Thread>(kineticModel, forceModel));

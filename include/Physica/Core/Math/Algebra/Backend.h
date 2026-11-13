@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,32 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
-#include "../Exp.h"
+#pragma once
 
-using namespace Physica;
+#include <string_view>
 
-namespace {
-    template<Scalar T>
-    void exp(benchmark::State& state) {
-        const int64_t size = state.range(0);
-        const VectorND<T> data = makeData<T>(size);
-        VectorND<T> buffer(size);
-        for (auto _ : state) {
-            exp(data).assign_mkl(buffer);
-            benchmark::DoNotOptimize(buffer);
-            benchmark::ClobberMemory();
+namespace Physica {
+    enum class Backend : char {
+        Dispatch = 0,
+        Base,
+        MKL,
+        cuBLAS,
+    };
+
+    [[nodiscard]] constexpr std::string_view toString(Backend backend) noexcept {
+        switch (backend) {
+        case Backend::Dispatch:
+            return "dispatch";
+        case Backend::Base:
+            return "base";
+        case Backend::MKL:
+            return "mkl";
+        case Backend::cuBLAS:
+            return "cublas";
         }
+        return "unknown";
     }
 }
-
-BENCHMARK(exp<float32>)->Name("exp float32 mkl")
-    ->Arg(8)
-    ->Arg(64)
-    ->Arg(512)
-    ->Arg(1024);
-BENCHMARK(exp<float64>)->Name("exp float64 mkl")
-    ->Arg(8)
-    ->Arg(16)
-    ->Arg(32)
-    ->Arg(64);

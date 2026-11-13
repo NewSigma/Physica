@@ -36,6 +36,20 @@ namespace {
             benchmark::DoNotOptimize(y);
         }
     }
+
+#ifndef PHYSICA_EmitLLVM
+    template<Scalar T>
+    void nrm2_compare(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
+        const int64_t size = state.range(0);
+        auto x = VectorND<T>::template random_uniform<RandomSource>(size);
+        rotate_backends(state, HostTimer{},
+                        backend<Backend::Dispatch>([&](auto&&...) { return x.norm2(); }),
+                        backend<Backend::Base>([&](auto&&...) { return x.norm2_base(); }),
+                        backend<Backend::MKL, HasMKL()>([&](auto&&...) { return x.norm2_mkl(); }));
+    }
+#endif
 }
 
 BENCHMARK(nrm2)->Name("nrm2 base")
@@ -47,3 +61,7 @@ BENCHMARK(nrm2)->Name("nrm2 base")
     ->Arg(256)
     ->Arg(1024)
     ->Arg(16384);
+
+#ifndef PHYSICA_EmitLLVM
+BENCHMARK(nrm2_compare<float64>)->Name("nrm2")->UseManualTime()->Arg(2)->Arg(4)->Arg(8)->Arg(16)->Arg(64)->Arg(256)->Arg(1024)->Arg(16384);
+#endif

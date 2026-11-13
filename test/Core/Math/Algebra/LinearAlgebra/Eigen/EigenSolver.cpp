@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "Physica/Core/Math/Algebra/Backend.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/ForwardEigenSolver.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"

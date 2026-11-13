@@ -36,9 +36,29 @@ namespace {
             benchmark::ClobberMemory();
         }
     }
+
+#ifndef PHYSICA_EmitLLVM
+    template<Scalar T>
+    void assign_compare(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
+        const size_t order = state.range(0);
+        const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
+        auto expr = m.tril_unit();
+        MatrixND<T> buffer(order);
+        rotate_backends(state, HostTimer{},
+                        backend<Backend::Dispatch>([&](auto&&...) -> MatrixND<T>& { expr.assign(buffer); return buffer; }),
+                        backend<Backend::Base>([&](auto&&...) -> MatrixND<T>& { expr.assign_base(buffer); return buffer; }),
+                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> MatrixND<T>& { expr.assign_mkl(buffer); return buffer; }));
+    }
+#endif
 }
 
 BENCHMARK(assign)->Name("Trig assign base")
     ->Arg(256)
     ->Arg(1024)
     ->Arg(8192);
+
+#ifndef PHYSICA_EmitLLVM
+BENCHMARK(assign_compare<float64>)->Name("Trig assign")->UseManualTime()->Arg(256)->Arg(1024)->Arg(8192);
+#endif

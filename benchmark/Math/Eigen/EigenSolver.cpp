@@ -35,7 +35,26 @@ namespace {
             benchmark::ClobberMemory();
         }
     }
+
+#ifndef PHYSICA_EmitLLVM
+    template<bool NeedEigenVec>
+    void base_compare(benchmark::State& state) {
+        using T = float64;
+        const SquareLattice<1> lattice({10}, 1);
+        const DenseMatrix<T> data = TransIsingMatrix<T, 1, 10>(1, 0.01, lattice);
+        EigenSolver<T> solver(data.getRow(), NeedEigenVec);
+        rotate_backends(state, HostTimer{},
+                        backend<Backend::Dispatch>([&](auto&&...) -> EigenSolver<T>& { solver.compute(data); return solver; }),
+                        backend<Backend::Base>([&](auto&&...) -> EigenSolver<T>& { solver.compute_base(data); return solver; }),
+                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> EigenSolver<T>& { solver.compute_mkl(data); return solver; }));
+    }
+#endif
 }
 
 BENCHMARK(base<false>)->Name("EigenSolver s base");
 BENCHMARK(base<true>)->Name("EigenSolver sv base");
+
+#ifndef PHYSICA_EmitLLVM
+BENCHMARK(base_compare<false>)->Name("EigenSolver s")->UseManualTime();
+BENCHMARK(base_compare<true>)->Name("EigenSolver sv")->UseManualTime();
+#endif

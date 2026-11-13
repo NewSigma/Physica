@@ -25,11 +25,6 @@
 #include "Physica/Core/Math/Random/Random.h"
 
 namespace Physica {
-    enum class Backend : char {
-        Base,
-        MKL
-    };
-
     PHYSICA_API void expect(bool pass, std::source_location loc = std::source_location::current(), uint64_t seed = 0) noexcept;
 
     template<RNG R>

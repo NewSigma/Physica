@@ -36,6 +36,20 @@ namespace {
             benchmark::ClobberMemory();
         }
     }
+
+#ifndef PHYSICA_EmitLLVM
+    template<Scalar T>
+    void asum_compare(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
+        const int64_t size = state.range(0);
+        auto x = VectorND<T>::template random_uniform<RandomSource>(size);
+        rotate_backends(state, HostTimer{},
+                        backend<Backend::Dispatch>([&](auto&&...) { return x.norm1(); }),
+                        backend<Backend::Base>([&](auto&&...) { return x.norm1_base(); }),
+                        backend<Backend::MKL, HasMKL()>([&](auto&&...) { return x.norm1_mkl(); }));
+    }
+#endif
 }
 
 BENCHMARK(asum)->Name("asum base")
@@ -47,3 +61,7 @@ BENCHMARK(asum)->Name("asum base")
     ->Arg(256)
     ->Arg(1024)
     ->Arg(16384);
+
+#ifndef PHYSICA_EmitLLVM
+BENCHMARK(asum_compare<float64>)->Name("asum")->UseManualTime()->Arg(2)->Arg(4)->Arg(8)->Arg(16)->Arg(64)->Arg(256)->Arg(1024)->Arg(16384);
+#endif

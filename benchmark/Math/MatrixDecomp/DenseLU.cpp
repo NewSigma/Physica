@@ -36,6 +36,21 @@ namespace {
             benchmark::ClobberMemory();
         }
     }
+
+#ifndef PHYSICA_EmitLLVM
+    template<Scalar T>
+    void lu_compare(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
+        const size_t order = state.range(0);
+        const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
+        DenseLU<T, false> lu(order);
+        rotate_backends(state, HostTimer{},
+                        backend<Backend::Dispatch>([&](auto&&...) -> DenseLU<T, false>& { lu.compute(m); return lu; }),
+                        backend<Backend::Base>([&](auto&&...) -> DenseLU<T, false>& { lu.compute_base(m); return lu; }),
+                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> DenseLU<T, false>& { lu.compute_mkl(m); return lu; }));
+    }
+#endif
 }
 
 BENCHMARK(lu)->Name("DenseLU base")
@@ -46,3 +61,7 @@ BENCHMARK(lu)->Name("DenseLU base")
     ->Arg(64)
     ->Arg(256)
     ->Arg(1024);
+
+#ifndef PHYSICA_EmitLLVM
+BENCHMARK(lu_compare<float64>)->Name("DenseLU")->UseManualTime()->Arg(4)->Arg(8)->Arg(16)->Arg(32)->Arg(64)->Arg(256)->Arg(1024);
+#endif

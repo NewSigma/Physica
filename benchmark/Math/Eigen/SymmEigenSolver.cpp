@@ -38,7 +38,28 @@ namespace {
             benchmark::ClobberMemory();
         }
     }
+
+#ifndef PHYSICA_EmitLLVM
+    template<bool NeedEigenVec>
+    void base_compare(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
+        using T = float64;
+        const auto size = state.range(0);
+        SymmEigenSolver<T> solver(size, NeedEigenVec);
+        auto m = MatrixND<T>::random_uniform<RandomSource>(size);
+        rotate_backends(state, HostTimer{},
+                        backend<Backend::Dispatch>([&](auto&&...) -> SymmEigenSolver<T>& { solver.compute(m); return solver; }),
+                        backend<Backend::Base>([&](auto&&...) -> SymmEigenSolver<T>& { solver.compute_base(m); return solver; }),
+                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> SymmEigenSolver<T>& { solver.compute_mkl(m); return solver; }));
+    }
+#endif
 }
 
 BENCHMARK(base<false>)->Name("SymmEigenSolver s base")->Arg(4)->Arg(64)->Arg(1024);
 BENCHMARK(base<true>)->Name("SymmEigenSolver sv base")->Arg(4)->Arg(64)->Arg(1024);
+
+#ifndef PHYSICA_EmitLLVM
+BENCHMARK(base_compare<false>)->Name("SymmEigenSolver s")->UseManualTime()->Arg(4)->Arg(64)->Arg(1024);
+BENCHMARK(base_compare<true>)->Name("SymmEigenSolver sv")->UseManualTime()->Arg(4)->Arg(64)->Arg(1024);
+#endif

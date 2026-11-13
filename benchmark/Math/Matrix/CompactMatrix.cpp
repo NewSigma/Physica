@@ -50,7 +50,26 @@ namespace {
             benchmark::ClobberMemory();
         }
     }
+
+#ifndef PHYSICA_EmitLLVM
+    template<Scalar T>
+    void assign_mismatch_compare(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
+        const auto size = makeMatrixSize(state.range(0), sizeof(T));
+        const auto data = DenseMatrix<T, MatrixMajor::Col>::template random_uniform<RandomSource>(size);
+        DenseMatrix<T, MatrixMajor::Row> buffer(size);
+        rotate_backends(state, HostTimer{},
+                        backend<Backend::Dispatch>([&](auto&&...) -> DenseMatrix<T, MatrixMajor::Row>& { data.assign(buffer); return buffer; }),
+                        backend<Backend::Base>([&](auto&&...) -> DenseMatrix<T, MatrixMajor::Row>& { data.assign_base(buffer); return buffer; }),
+                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> DenseMatrix<T, MatrixMajor::Row>& { data.assign_mkl(buffer); return buffer; }));
+    }
+#endif
 }
 
 BENCHMARK(assign_match)->Name("Compact match")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
 BENCHMARK(assign_mismatch)->Name("Compact mismatch base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+
+#ifndef PHYSICA_EmitLLVM
+BENCHMARK(assign_mismatch_compare<float64>)->Name("Compact mismatch")->UseManualTime()->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+#endif

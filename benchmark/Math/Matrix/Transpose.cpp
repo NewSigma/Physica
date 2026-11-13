@@ -38,6 +38,23 @@ namespace {
             benchmark::ClobberMemory();
         }
     }
+
+#ifndef PHYSICA_EmitLLVM
+    template<Scalar T>
+    void trans_compare(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
+        using MatrixType = DenseMatrix<T, MatrixMajor::Col>;
+        const size_t order = state.range(0);
+        const auto m = MatrixType::template random_uniform<RandomSource>(order, order);
+        auto expr = m.transpose();
+        MatrixType buffer(order, order);
+        rotate_backends(state, HostTimer{},
+                        backend<Backend::Dispatch>([&](auto&&...) -> MatrixType& { expr.assign(buffer); return buffer; }),
+                        backend<Backend::Base>([&](auto&&...) -> MatrixType& { expr.assign_base(buffer); return buffer; }),
+                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> MatrixType& { expr.assign_mkl(buffer); return buffer; }));
+    }
+#endif
 }
 
 BENCHMARK(trans)->Name("trans base")
@@ -47,3 +64,7 @@ BENCHMARK(trans)->Name("trans base")
     ->Arg(16)
     ->Arg(32)
     ->Arg(64);
+
+#ifndef PHYSICA_EmitLLVM
+BENCHMARK(trans_compare<float64>)->Name("trans")->UseManualTime()->Arg(2)->Arg(4)->Arg(8)->Arg(16)->Arg(32)->Arg(64);
+#endif

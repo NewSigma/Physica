@@ -38,6 +38,22 @@ namespace {
             benchmark::ClobberMemory();
         }
     }
+
+#ifndef PHYSICA_EmitLLVM
+    template<Scalar T>
+    void axpy_compare(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
+        const int64_t size = state.range(0);
+        auto x = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto expr = x * T(2);
+        VectorND<T> buffer(size);
+        rotate_backends(state, HostTimer{},
+                        backend<Backend::Dispatch>([&](auto&&...) -> VectorND<T>& { expr.assign_add(buffer); return buffer; }),
+                        backend<Backend::Base>([&](auto&&...) -> VectorND<T>& { expr.assign_add_base(buffer); return buffer; }),
+                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> VectorND<T>& { expr.assign_add_mkl(buffer); return buffer; }));
+    }
+#endif
 }
 
 BENCHMARK(axpy)->Name("axpy base")
@@ -49,3 +65,7 @@ BENCHMARK(axpy)->Name("axpy base")
     ->Arg(256)
     ->Arg(1024)
     ->Arg(16384);
+
+#ifndef PHYSICA_EmitLLVM
+BENCHMARK(axpy_compare<float64>)->Name("axpy")->UseManualTime()->Arg(2)->Arg(4)->Arg(8)->Arg(16)->Arg(64)->Arg(256)->Arg(1024)->Arg(16384);
+#endif

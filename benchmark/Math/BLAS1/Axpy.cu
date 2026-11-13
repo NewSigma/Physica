@@ -41,7 +41,29 @@ namespace {
             state.SetIterationTime(timer.toc());
         }
     }
+
+#ifndef PHYSICA_EmitLLVM
+    void axpy_compare(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
+        using T = float32;
+        const int64_t size = state.range(0);
+        auto x = device_obj<VectorND<T>>::random_uniform<RandomSource>(size);
+        device_obj<VectorND<T>> buffer(size, 0);
+        auto expr = x * T(2);
+        CUDAExecutor::wait();
+
+        rotate_backends(state, DeviceTimer{},
+                        backend<Backend::Base>([&](auto&&...) { expr.assign_add_base(buffer); }),
+                        backend<Backend::Dispatch>([&](auto&&...) { expr.assign_add(buffer); }),
+                        backend<Backend::cuBLAS>([&](auto&&...) { expr.assign_add_cublas(buffer); }));
+    }
+#endif
 }
 
 constexpr int N = 1 << 20;
 BENCHMARK(axpy)->Name("axpy cuda base")->UseManualTime()->Arg(N);
+
+#ifndef PHYSICA_EmitLLVM
+BENCHMARK(axpy_compare)->Name("axpy cuda")->UseManualTime()->Arg(N);
+#endif

@@ -85,5 +85,7 @@ namespace Physica {
         check(cudaEventElapsedTime(&elapsedMs, from, to));
         return static_cast<double>(elapsedMs) * 1E-3;
     }
+#else
+    class DeviceTimer;
 #endif
 }

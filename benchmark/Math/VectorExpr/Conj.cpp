@@ -37,7 +37,28 @@ namespace {
             benchmark::ClobberMemory();
         }
     }
+
+#ifndef PHYSICA_EmitLLVM
+    template<Scalar T>
+    void conj_compare(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
+        const auto size = makeVectorSize(state.range(0), sizeof(T));
+        const VectorND<T> x = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto expr = x.conjugate();
+        VectorND<T> buffer(size);
+        rotate_backends(state, HostTimer{},
+                        backend<Backend::Dispatch>([&](auto&&...) -> VectorND<T>& { expr.assign(buffer); return buffer; }),
+                        backend<Backend::Base>([&](auto&&...) -> VectorND<T>& { expr.assign_base(buffer); return buffer; }),
+                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> VectorND<T>& { expr.assign_mkl(buffer); return buffer; }));
+    }
+#endif
 }
 
 BENCHMARK(conj<cfloat32>)->Name("conj cfloat32 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
 BENCHMARK(conj<cfloat64>)->Name("conj cfloat64 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+
+#ifndef PHYSICA_EmitLLVM
+BENCHMARK(conj_compare<cfloat32>)->Name("conj cfloat32")->UseManualTime()->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(conj_compare<cfloat64>)->Name("conj cfloat64")->UseManualTime()->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+#endif

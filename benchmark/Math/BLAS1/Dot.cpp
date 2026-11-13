@@ -53,6 +53,22 @@ namespace {
             benchmark::DoNotOptimize(dot);
         }
     }
+
+#ifndef PHYSICA_EmitLLVM
+    template<Scalar T>
+    void dot_compare(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
+        const int64_t size = state.range(0);
+        const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(size);
+        const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto op = Dot(v1, v2);
+        rotate_backends(state, HostTimer{},
+                        backend<Backend::Dispatch>([&](auto&&...) { return op.calc(); }),
+                        backend<Backend::Base>([&](auto&&...) { return op.calc_base(); }),
+                        backend<Backend::MKL, HasMKL()>([&](auto&&...) { return op.calc_mkl(); }));
+    }
+#endif
 }
 
 BENCHMARK(dot<float32>)->Name("dot base float32")
@@ -76,3 +92,13 @@ BENCHMARK(dot<cfloat64>)->Name("dot base cfloat64")
     ->Arg(1024);
 
 BENCHMARK(dot_complex_real)->Name("dot complex-real");
+
+#ifndef PHYSICA_EmitLLVM
+BENCHMARK(dot_compare<float32>)->Name("dot float32")->UseManualTime()->Arg(16)->Arg(128)->Arg(1024);
+
+BENCHMARK(dot_compare<float64>)->Name("dot float64")->UseManualTime()->Arg(16)->Arg(128)->Arg(1024);
+
+BENCHMARK(dot_compare<cfloat32>)->Name("dot cfloat32")->UseManualTime()->Arg(16)->Arg(128)->Arg(1024);
+
+BENCHMARK(dot_compare<cfloat64>)->Name("dot cfloat64")->UseManualTime()->Arg(16)->Arg(128)->Arg(1024);
+#endif

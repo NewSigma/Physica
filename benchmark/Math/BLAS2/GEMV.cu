@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <benchmark/benchmark.h>
+#include "Benchmark.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Scalar/Complex.h"
@@ -59,9 +60,29 @@ namespace {
             state.SetIterationTime(timer.toc());
         }
     }
+
+#ifndef PHYSICA_EmitLLVM
+    template<int Major>
+    void assign_compare(benchmark::State& state) {
+        RandomSource::getInstance().reseed();
+
+        auto A = device_obj<DenseMatrix<T, Major>>::template random_uniform<RandomSource>(N, N);
+        auto x = device_obj<VectorND<T>>::random_uniform<RandomSource>(N);
+        device_obj<VectorND<T>> y(N);
+
+        rotate_backends(state, DeviceTimer{},
+                        backend<Backend::Base>([&](auto&&...) { (A * x).assign_base(y); }),
+                        backend<Backend::cuBLAS>([&](auto&&...) { (A * x).assign_cublas(y); }));
+    }
+#endif
 }
 
 BENCHMARK(assign_base<MatrixMajor::Row>)->Name("GEMV cuda assign row base")->UseManualTime();
 BENCHMARK(assign_base<MatrixMajor::Col>)->Name("GEMV cuda assign col base")->UseManualTime();
 BENCHMARK(assign_cublas<MatrixMajor::Row>)->Name("GEMV cuda assign row cublas")->UseManualTime();
 BENCHMARK(assign_cublas<MatrixMajor::Col>)->Name("GEMV cuda assign col cublas")->UseManualTime();
+
+#ifndef PHYSICA_EmitLLVM
+BENCHMARK(assign_compare<MatrixMajor::Row>)->Name("GEMV cuda assign row")->UseManualTime();
+BENCHMARK(assign_compare<MatrixMajor::Col>)->Name("GEMV cuda assign col")->UseManualTime();
+#endif
