@@ -34,36 +34,8 @@ namespace {
         HostDevAttr::CacheSizeL1D * 3 / 4,
         HostDevAttr::CacheSizeL2 * 3 / 4,
         HostDevAttr::CacheSizeL3 * 3 / 4,
-        HostDevAttr::CacheSizeL3 * 6 / 5
+        HostDevAttr::CacheSizeL3 * 6 / 5,
     };
-
-    class Reporter : public ConsoleReporter {
-        using Base = ConsoleReporter;
-    public:
-        Reporter();
-        ~Reporter() = default;
-        /* Operations */
-        void PrintRunData(const Run& run) final;
-    private:
-        [[nodiscard]] static TimeUnit selectTimeUnit(const Run& r);
-    };
-
-    Reporter::Reporter() : ConsoleReporter(OutputOptions::OO_Tabular) {}
-
-    void Reporter::PrintRunData(const Run& run) {
-        auto r = run;
-        r.time_unit = selectTimeUnit(r);
-        Base::PrintRunData(r);
-    }
-
-    TimeUnit Reporter::selectTimeUnit(const Run& r) {
-        const auto time = r.GetAdjustedRealTime();
-        if (time > 1E9)
-            return kSecond;
-        if (time > 1E6)
-            return kMillisecond;
-        return time > 1E3 ? kMicrosecond : kNanosecond;
-    }
 }
 
 namespace Physica {
@@ -89,11 +61,8 @@ int main(int argc, char** argv) {
     std::ofstream("Version", std::ios_base::trunc) << Physica::version();
     HostTimer timer;
     timer.tic();
-    {
-        Reporter reporter{};
-        RunSpecifiedBenchmarks(&reporter);
-        Shutdown();
-    }
-    std::println("Elapsed time: {} Min", static_cast<int64_t>(timer.toc() / 60.0));
+    RunSpecifiedBenchmarks();
+    Shutdown();
+    std::println(stderr, "Elapsed time: {} Min", static_cast<int64_t>(timer.toc() / 60.0));
     return 0;
 }
