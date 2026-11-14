@@ -24,6 +24,7 @@ namespace Physica {
     template<Tensor X1, Tensor X2>
     class TensorExpr<ExprID::Add, X1, X2>
             : public BinaryTensorExpr<ExprID::Add, X1, X2> {
+        static_assert(canonicalized<X1, X2>());
         using Base = BinaryTensorExpr<ExprID::Add, X1, X2>;
     public:
         using typename Base::IndexType;

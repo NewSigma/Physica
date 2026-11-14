@@ -103,6 +103,7 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     class MatrixExpr<ExprID::Add, M1, M2>
             : public BinaryMatrixExpr<ExprID::Add, M1, M2> {
+        static_assert(canonicalized<M1, M2>());
         using Base = BinaryMatrixExpr<ExprID::Add, M1, M2>;
         using This = MatrixExpr<ExprID::Add, M1, M2>;
     protected:

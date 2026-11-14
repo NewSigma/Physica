@@ -82,6 +82,7 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     class MatrixExpr<ExprID::Mul, M1, M2>
             : public BinaryMatrixExpr<ExprID::Mul, M1, M2> {
+        static_assert(canonicalized<M1, M2>());
         using Base = BinaryMatrixExpr<ExprID::Mul, M1, M2>;
     public:
         using Base::isReverseDiff;

@@ -131,6 +131,7 @@ namespace Physica {
     template<Vector V1, Vector V2>
     class VectorExpr<ExprID::Add, V1, V2>
             : public BinaryVectorExpr<ExprID::Add, V1, V2> {
+        static_assert(canonicalized<V1, V2>());
         using Base = BinaryVectorExpr<ExprID::Add, V1, V2>;
     public:
         using Base::isComplex;

@@ -25,6 +25,7 @@
 namespace Physica {
     template<Vector LHS, Vector RHS>
     class Dot {
+        static_assert(canonicalized<LHS, RHS>());
         using This = Dot<LHS, RHS>;
         using T1 = std::remove_cvref_t<LHS>::ScalarType;
         using T2 = std::remove_cvref_t<RHS>::ScalarType;

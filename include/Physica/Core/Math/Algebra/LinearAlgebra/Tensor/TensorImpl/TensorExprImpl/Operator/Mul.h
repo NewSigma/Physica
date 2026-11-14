@@ -60,6 +60,7 @@ namespace Physica {
     template<Tensor X1, Tensor X2>
     class TensorExpr<ExprID::Mul, X1, X2>
             : public BinaryTensorExpr<ExprID::Mul, X1, X2> {
+        static_assert(canonicalized<X1, X2>());
         using Base = BinaryTensorExpr<ExprID::Mul, X1, X2>;
     public:
         using typename Base::IndexType;
