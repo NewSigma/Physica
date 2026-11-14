@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Scalar/Real.h"
 #include "Physica/Core/Scalar/ScalarImpl/SIMDMixin.h"
+#include "Physica/Core/Utils/Builtin.h"
 #include "Physica/Core/Utils/CUDA/device_obj.h"
 #include "Physica/Core/Utils/Empty.h"
 
@@ -221,8 +221,7 @@ namespace Physica {
 
     template<Scalar T, int Size>
     __device__ void device_obj<SIMD<T, Size>>::load(const T* p) noexcept {
-        assert(std::bit_cast<std::uintptr_t>(p) % alignof(Pack) == 0 && "[Error]: Unaligned load");
-        pack = *reinterpret_cast<const Pack*>(p);
+        pack = *reinterpret_cast<const Pack*>(assume_aligned<alignof(Pack)>(p));
     }
 
     template<Scalar T, int Size>
@@ -235,8 +234,7 @@ namespace Physica {
 
     template<Scalar T, int Size>
     __device__ void device_obj<SIMD<T, Size>>::store(T* p) const noexcept {
-        assert(std::bit_cast<std::uintptr_t>(p) % alignof(Pack) == 0 && "[Error]: Unaligned store");
-        *reinterpret_cast<Pack*>(p) = pack;
+        *reinterpret_cast<Pack*>(assume_aligned<alignof(Pack)>(p)) = pack;
     }
 
     template<Scalar T, int Size>

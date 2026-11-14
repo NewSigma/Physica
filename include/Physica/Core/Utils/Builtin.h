@@ -20,10 +20,12 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cassert>
 #include <cstddef>
 #include <cstring>
 #include <new>
+#include <memory>
 #include "Physica/Macro.h"
 
 namespace Physica {
@@ -50,6 +52,25 @@ namespace Physica {
     [[gnu::always_inline, gnu::nodebug]] __host__ __device__ inline void assume(bool predicate) noexcept {
         assert(predicate && "[Error]: Bad assumption");
         [[assume(predicate)]];
+    }
+
+    [[nodiscard]] __host__ __device__ constexpr bool isAligned(const void* ptr, size_t alignment) noexcept {
+        assert(std::has_single_bit(alignment) && "[Error]: Alignment must be a power of two");
+    #if __has_builtin(__builtin_is_aligned)
+        return __builtin_is_aligned(ptr, alignment);
+    #else
+        return (std::bit_cast<std::uintptr_t>(ptr) & (alignment - 1)) == 0;
+    #endif
+    }
+    /**
+     * Improvements:
+     * 1. std::assume_aligned provides no check even in debug builds, emit an assertion to help debugging
+     * 2. __host__ __device__ make it available in kernel functions
+     */
+    template<size_t Alignment, class T>
+    [[nodiscard]] __host__ __device__ constexpr T* assume_aligned(T* ptr) {
+        assert(isAligned(ptr, Alignment) && "[Error]: wrong assumption");
+        return std::assume_aligned<Alignment>(ptr);
     }
     /**
      * TODO: use std::ckd_mul once we bump to CXX26
