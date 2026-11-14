@@ -53,34 +53,6 @@ namespace Physica {
         swap(obj);
         return *this;
     }
-    /**
-     * The combination of __builtin_operator_new/delete with -fassume-sane-operator-new assumes that the return value of operator new is noalias,
-     * which is important because the pointer does not alias with the handles of other coroutines.
-     *
-     * This pattern arises in nested coroutines, and the key point is that the combination can facilitate the HALO optimization.
-     *
-     * Note: Inlining causes the builtin semantics to be lost. Since we consider HALO to be more worthwhile than a function call,
-     * we add noinline to the global operator new/delete replacements.
-     */
-    template<class T>
-    void* DiffCoro<T>::Promise::operator new(size_t size) noexcept {
-        return __builtin_operator_new(size, std::nothrow);
-    }
-
-    template<class T>
-    void DiffCoro<T>::Promise::operator delete(void* p) noexcept {
-        __builtin_operator_delete(p);
-    }
-
-    template<class T>
-    void* DiffCoro<T>::Promise::operator new(size_t size, std::align_val_t align) noexcept {
-        return __builtin_operator_new(size, align, std::nothrow);
-    }
-
-    template<class T>
-    void DiffCoro<T>::Promise::operator delete(void* p, std::align_val_t align) noexcept {
-        __builtin_operator_delete(p, align);
-    }
 
     template<class T>
     void DiffCoro<T>::reverse_final(auto&&... args) noexcept {
@@ -138,21 +110,5 @@ namespace Physica {
         else
             *pObj = T(std::forward<Arg>(arg).values());
         return *this;
-    }
-
-    inline void* DiffCoro<void>::Promise::operator new(size_t size) noexcept {
-        return __builtin_operator_new(size, std::nothrow);
-    }
-
-    inline void DiffCoro<void>::Promise::operator delete(void* p) noexcept {
-        __builtin_operator_delete(p);
-    }
-
-    inline void* DiffCoro<void>::Promise::operator new(size_t size, std::align_val_t align) noexcept {
-        return __builtin_operator_new(size, align, std::nothrow);
-    }
-
-    inline void DiffCoro<void>::Promise::operator delete(void* p, std::align_val_t align) noexcept {
-        __builtin_operator_delete(p, align);
     }
 }

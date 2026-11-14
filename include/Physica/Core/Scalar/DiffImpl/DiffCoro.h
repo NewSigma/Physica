@@ -20,6 +20,7 @@
 
 #include <format>
 #include <new>
+#include "Physica/Core/Utils/Builtin.h"
 #include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica {
@@ -58,7 +59,7 @@ namespace Physica {
     };
 
     template<class T>
-    class DiffCoro<T>::Promise : public suspend_always {
+    class DiffCoro<T>::Promise : public suspend_always, public BuiltinNewDelete {
         using This = Promise;
 
         T* pObj;
@@ -70,10 +71,8 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) noexcept = delete;
         This& operator=(This&&) noexcept = delete;
-        [[gnu::always_inline]] static void* operator new(size_t size) noexcept;
-        [[gnu::always_inline]] static void operator delete(void* p) noexcept;
-        [[gnu::always_inline]] static void* operator new(size_t size, std::align_val_t align) noexcept;
-        [[gnu::always_inline]] static void operator delete(void* p, std::align_val_t align) noexcept;
+        using BuiltinNewDelete::operator new;
+        using BuiltinNewDelete::operator delete;
         /* Operations */
         void listen(DiffCoro<T>& node) noexcept;
 
@@ -119,13 +118,11 @@ namespace Physica {
         DiffCoro(Promise& p) noexcept : handle(std::coroutine_handle<Promise>::from_promise(p)) {}
     };
 
-    class DiffCoro<void>::Promise {
+    class DiffCoro<void>::Promise : public BuiltinNewDelete {
     public:
         /* Operators */
-        [[gnu::always_inline]] static void* operator new(size_t size) noexcept;
-        [[gnu::always_inline]] static void operator delete(void* p) noexcept;
-        [[gnu::always_inline]] static void* operator new(size_t size, std::align_val_t align) noexcept;
-        [[gnu::always_inline]] static void operator delete(void* p, std::align_val_t align) noexcept;
+        using BuiltinNewDelete::operator new;
+        using BuiltinNewDelete::operator delete;
         /* Operations */
         auto get_return_object() noexcept { return DiffCoro<void>(*this); };
         static DiffCoro<void> get_return_object_on_allocation_failure() noexcept { unreachable("Expect coro frame is small"); }

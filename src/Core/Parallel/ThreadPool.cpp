@@ -95,13 +95,13 @@ public:
 };
 
 void ThreadPool::ThreadQueue::push(Handle handle) noexcept {
-    std::lock_guard locker(mutex);
+    std::scoped_lock locker(mutex);
     queue.push(handle);
 }
 
 auto ThreadPool::ThreadQueue::pop() noexcept -> Handle {
     Handle handle = nullptr;
-    std::lock_guard locker(mutex);
+    std::scoped_lock locker(mutex);
     if (!queue.empty()) {
         handle = queue.front();
         queue.pop();
@@ -176,7 +176,7 @@ auto ThreadPool::steal() noexcept -> Handle {
 
 void ThreadPool::waitExit() {
     {
-        auto locker = std::lock_guard(poolMutex);
+        std::scoped_lock locker(poolMutex);
         exit = true;
     }
     cond.notify_all();

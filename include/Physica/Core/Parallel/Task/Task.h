@@ -57,7 +57,7 @@ namespace Physica {
         explicit Task(std::coroutine_handle<promise_type> h_) : h(h_) {}
     };
 
-    class Task::promise_type {
+    class Task::promise_type : public BuiltinNewDelete {
         using This = promise_type;
         using Callback = void (*)(std::coroutine_handle<>);
 
@@ -74,10 +74,8 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        [[gnu::always_inline]] static void* operator new(size_t size) noexcept;
-        [[gnu::always_inline]] static void operator delete(void* p) noexcept;
-        [[gnu::always_inline]] static void* operator new(size_t size, std::align_val_t align) noexcept;
-        [[gnu::always_inline]] static void operator delete(void* p, std::align_val_t align) noexcept;
+        using BuiltinNewDelete::operator new;
+        using BuiltinNewDelete::operator delete;
         /* Operations */
         [[nodiscard]] Task get_return_object() noexcept { return Task(Handle::from_promise(*this)); }
         [[nodiscard]] static Task get_return_object_on_allocation_failure() noexcept { unreachable("Expect coro frame is small"); }
@@ -94,22 +92,6 @@ namespace Physica {
         [[nodiscard]] bool done() const noexcept;
         [[nodiscard]] auto exception() noexcept -> std::exception_ptr;
     };
-
-    inline void* Task::promise_type::operator new(size_t size) noexcept {
-        return __builtin_operator_new(size, std::nothrow);
-    }
-
-    inline void Task::promise_type::operator delete(void* p) noexcept {
-        __builtin_operator_delete(p);
-    }
-
-    inline void* Task::promise_type::operator new(size_t size, std::align_val_t align) noexcept {
-        return __builtin_operator_new(size, align, std::nothrow);
-    }
-
-    inline void Task::promise_type::operator delete(void* p, std::align_val_t align) noexcept {
-        __builtin_operator_delete(p, align);
-    }
 
     struct Task::promise_type::suspend_final : public suspend_always {
         [[nodiscard]] static auto await_suspend(std::coroutine_handle<> self) noexcept -> std::coroutine_handle<>;
