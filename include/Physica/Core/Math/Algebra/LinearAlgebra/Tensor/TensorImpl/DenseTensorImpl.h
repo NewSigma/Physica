@@ -129,9 +129,7 @@ namespace Physica {
 
     template<Scalar T, int... Dims>
     auto DenseTensor<T, Dims...>::zeros(IndexType shape) -> This {
-        auto result = This(std::move(shape));
-        result.zeros();
-        return result;
+        return This(ArrayND<T, Dims...>::zeros(std::move(shape)));
     }
 
     template<Scalar T, int... Dims>
@@ -142,9 +140,7 @@ namespace Physica {
 
     template<Scalar T, int... Dims>
     auto DenseTensor<T, Dims...>::junk(IndexType shape) -> This {
-        auto result = This(std::move(shape));
-        result.junk();
-        return result;
+        return This(ArrayND<T, Dims...>::junk(std::move(shape)));
     }
 
     template<Scalar T, int... Dims>

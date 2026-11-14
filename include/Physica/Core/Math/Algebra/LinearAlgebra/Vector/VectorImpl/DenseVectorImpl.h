@@ -142,16 +142,12 @@ namespace Physica {
 
     template<Scalar T, size_t Length, class Allocator>
     constexpr auto DenseVector<T, Length, Allocator>::zeros(size_t len) -> This {
-        This result(len);
-        result.zeros();
-        return result;
+        return This(Storage::zeros(len));
     }
 
     template<Scalar T, size_t Length, class Allocator>
     auto DenseVector<T, Length, Allocator>::junk(size_t len) -> This {
-        This result(len);
-        result.junk();
-        return result;
+        return This(Storage::junk(len));
     }
 
     template<Scalar T, size_t Length, class Allocator>

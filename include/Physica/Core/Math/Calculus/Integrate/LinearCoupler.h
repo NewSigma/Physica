@@ -69,8 +69,7 @@ namespace Physica {
     template<Scalar T>
     auto LinearCoupler<T>::forward(DNN auto& nn, VectorND<Tv>& x) const -> CoDiff<T> {
         assert(getDim() == x.getLength() && "[Error]: Dimensions do not match");
-        VectorND<Tv> xA(getDim());
-        xA.zeros();
+        auto xA = VectorND<Tv>::zeros(getDim());
         xA.head(getDim() / 2) = x.head(getDim() / 2);
         VectorND<Tv> xB = x - xA;
         auto w1 = nn.forward(xA);

@@ -125,6 +125,30 @@ namespace Physica {
     }
 
     template<class T, int Major, size_t Row, size_t Col, class Allocator>
+    constexpr auto Array2D<T, Major, Row, Col, Allocator>::zeros(size_t row, size_t col) -> This {
+        This result(row, col);
+        result.zeros();
+        return result;
+    }
+
+    template<class T, int Major, size_t Row, size_t Col, class Allocator>
+    constexpr auto Array2D<T, Major, Row, Col, Allocator>::zeros(size_t order) -> This {
+        return zeros(order, order);
+    }
+
+    template<class T, int Major, size_t Row, size_t Col, class Allocator>
+    auto Array2D<T, Major, Row, Col, Allocator>::junk(size_t row, size_t col) -> This {
+        This result(row, col);
+        result.junk();
+        return result;
+    }
+
+    template<class T, int Major, size_t Row, size_t Col, class Allocator>
+    auto Array2D<T, Major, Row, Col, Allocator>::junk(size_t order) -> This {
+        return junk(order, order);
+    }
+
+    template<class T, int Major, size_t Row, size_t Col, class Allocator>
     void Array2D<T, Major, Row, Col, Allocator>::read(const T* __restrict p) noexcept {
         arr.read(p);
     }

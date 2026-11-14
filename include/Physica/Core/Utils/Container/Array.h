@@ -98,6 +98,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr auto* data(this auto&& self) noexcept { return self.arr.data(); }
         [[nodiscard]] auto get_allocator() const noexcept { return alloc; }
         /* Static members */
+        [[nodiscard]] __host__ __device__ static This zeros(size_t length);
+        [[nodiscard]] __host__ __device__ static This junk(size_t length);
         [[nodiscard]] __host__ __device__ static This read(const T* __restrict p) noexcept;
         [[nodiscard]] __host__ __device__ static This read(size_t length, const T* __restrict p) noexcept;
         template<ExecutePolicy P = Sequential>
@@ -158,6 +160,8 @@ namespace Physica {
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ constexpr auto* data(this auto&&) noexcept;
         [[nodiscard]] constexpr auto get_allocator() const noexcept { return alloc; }
         /* Static members */
+        [[nodiscard]] constexpr static This zeros(size_t length);
+        [[nodiscard]] static This junk(size_t length);
         [[nodiscard]] static This read(size_t length, const T* __restrict p) noexcept;
         template<ExecutePolicy P = Sequential>
         [[nodiscard]] static This generate(std::invocable<size_t> auto fn, size_t length);

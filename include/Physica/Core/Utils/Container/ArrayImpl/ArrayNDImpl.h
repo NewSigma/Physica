@@ -152,6 +152,32 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
+    auto ArrayND<T, Dims...>::zeros(IndexType shape_) -> This {
+        auto result = This(std::move(shape_));
+        result.zeros();
+        return result;
+    }
+
+    template<class T, int... Dims>
+    auto ArrayND<T, Dims...>::zeros(std::same_as<size_t> auto... dims) -> This requires(sizeof...(dims) > 0) {
+        static_assert(sizeof...(dims) == NDim, "[Error]: NDim is not consistent");
+        return zeros(IndexType({dims...}));
+    }
+
+    template<class T, int... Dims>
+    auto ArrayND<T, Dims...>::junk(IndexType shape_) -> This {
+        auto result = This(std::move(shape_));
+        result.junk();
+        return result;
+    }
+
+    template<class T, int... Dims>
+    auto ArrayND<T, Dims...>::junk(std::same_as<size_t> auto... dims) -> This requires(sizeof...(dims) > 0) {
+        static_assert(sizeof...(dims) == NDim, "[Error]: NDim is not consistent");
+        return junk(IndexType({dims...}));
+    }
+
+    template<class T, int... Dims>
     auto ArrayND<T, Dims...>::read(IndexType shape_, const T* __restrict p) noexcept -> This {
         This result;
         if constexpr (!StaticShape)

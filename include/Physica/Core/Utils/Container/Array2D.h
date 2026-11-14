@@ -101,6 +101,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool empty() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return Major; }
+        [[nodiscard]] constexpr static This zeros(size_t row, size_t col);
+        [[nodiscard]] constexpr static This zeros(size_t order);
+        [[nodiscard]] static This junk(size_t row, size_t col);
+        [[nodiscard]] static This junk(size_t order);
         [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) noexcept;
         template<ExecutePolicy P = Sequential>
         [[nodiscard]] static This generate(std::invocable<size_t, size_t> auto fn, size_t row, size_t col);

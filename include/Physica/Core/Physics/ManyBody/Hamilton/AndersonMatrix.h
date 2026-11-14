@@ -133,9 +133,7 @@ namespace Physica {
 
     template<Scalar T, int NumSite, bool UseInversionSymm>
     MatrixND<T> AndersonMatrix<T, NumSite, UseInversionSymm>::makeSingleParticleMatrix() const {
-        auto result = MatrixND<T>(NumSite);
-        result.zeros();
-
+        auto result = MatrixND<T>::zeros(NumSite);
         auto diag = result.diag();
         diag[0] = -chemMu;
         diag.tail(1) = conductE;

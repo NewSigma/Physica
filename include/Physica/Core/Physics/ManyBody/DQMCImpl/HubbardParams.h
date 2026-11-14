@@ -154,8 +154,7 @@ namespace Physica {
         const auto CheckTemplateParam = HubbardMatrix<T, FermiRepr<Dim, Dynamic, false>, BC>{};
 
         const size_t numSite = lattice.getNumSuperCellSite();
-        auto result = MatrixND<T>(numSite);
-        result.zeros();
+        auto result = MatrixND<T>::zeros(numSite);
 
         using enum BoundaryCond;
         if constexpr (BC == PBC) {

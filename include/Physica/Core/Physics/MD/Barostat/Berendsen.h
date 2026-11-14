@@ -78,8 +78,7 @@ namespace Physica {
     template<Scalar T, size_t NumReplica, BaroType Type>
     auto Berendsen<T, NumReplica, Type>::makeDecayMatrix(const LatticeMatrix& stress, T pressPerDOF) -> LatticeMatrix {
         lastStress = stress;
-        LatticeMatrix result{};
-        result.zeros();
+        auto result = LatticeMatrix::zeros(Dim);
         const T centerTargetP = targetP - pressPerDOF;
         if constexpr (Type == BaroType::Anisotropic) {
             result = lastStress;

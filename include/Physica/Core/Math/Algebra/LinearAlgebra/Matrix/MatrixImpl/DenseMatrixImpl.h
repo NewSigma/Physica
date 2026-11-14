@@ -133,16 +133,12 @@ namespace Physica {
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     constexpr auto DenseMatrix<T, Major, Row, Col, Allocator>::zeros(size_t row, size_t col) -> This {
-        DenseMatrix result(row, col);
-        result.zeros();
-        return result;
+        return This(Storage::zeros(row, col));
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     auto DenseMatrix<T, Major, Row, Col, Allocator>::junk(size_t row, size_t col) -> This {
-        DenseMatrix result(row, col);
-        result.junk();
-        return result;
+        return This(Storage::junk(row, col));
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>

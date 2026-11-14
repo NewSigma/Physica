@@ -117,8 +117,7 @@ namespace Physica {
     void GEMV<M, V>::assign_add_potential(Vector auto& target) const noexcept {
         const int numSite = mat.getNumSite();
         const int numFreq2 = mat.getNumFreq() * 2;
-        auto buffer = MatrixND<T>(numFreq2);
-        buffer.zeros();
+        auto buffer = MatrixND<T>::zeros(numFreq2);
         for (int site = 0, from = 0; site < numSite; ++site) {
             int to = from + numFreq2;
             mat.assign_potential(buffer, site);

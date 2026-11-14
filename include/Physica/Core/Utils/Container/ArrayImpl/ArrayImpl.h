@@ -108,6 +108,20 @@ namespace Physica {
     }
 
     template<class T, size_t Length, class Allocator>
+    __host__ __device__ auto Array<T, Length, Allocator>::zeros(size_t length) -> This {
+        This result(length);
+        result.zeros();
+        return result;
+    }
+
+    template<class T, size_t Length, class Allocator>
+    __host__ __device__ auto Array<T, Length, Allocator>::junk(size_t length) -> This {
+        This result(length);
+        result.junk();
+        return result;
+    }
+
+    template<class T, size_t Length, class Allocator>
     template<ExecutePolicy P>
     auto Array<T, Length, Allocator>::generate(std::invocable<size_t> auto fn) -> This {
         This result{};
@@ -285,6 +299,20 @@ namespace Physica {
     void Array<T, Dynamic, Allocator>::junk() noexcept {
         static_assert(std::is_trivially_copyable<T>::value, "[Error]: junk() does not apply to non-trivial type");
         memset(data(), Base::Poison, length * sizeof(T));
+    }
+
+    template<class T, class Allocator>
+    constexpr auto Array<T, Dynamic, Allocator>::zeros(size_t length) -> This {
+        This result(length);
+        result.zeros();
+        return result;
+    }
+
+    template<class T, class Allocator>
+    auto Array<T, Dynamic, Allocator>::junk(size_t length) -> This {
+        This result(length);
+        result.junk();
+        return result;
     }
     /**
      * Helper function that communicates with C libraries.

@@ -94,6 +94,10 @@ namespace Physica {
         [[nodiscard]] consteval static bool isStaticShape() noexcept { return StaticShape; }
         [[nodiscard]] consteval static IndexType getShapeAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ static size_t toSize(const IndexType& shape) noexcept;
+        [[nodiscard]] static This zeros(IndexType shape);
+        [[nodiscard]] static This zeros(std::same_as<size_t> auto... dims) requires(sizeof...(dims) > 0);
+        [[nodiscard]] static This junk(IndexType shape);
+        [[nodiscard]] static This junk(std::same_as<size_t> auto... dims) requires(sizeof...(dims) > 0);
         [[nodiscard]] static This read(IndexType shape, const T* __restrict p) noexcept;
         /* Friends */
         friend class device_obj<This>;
