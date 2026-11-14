@@ -60,6 +60,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1.2.23
       with:
         key: ${{ inputs.preset }}-${{ inputs.build_config }}
+        max-size: 1G
 
     - name: Install clang
       uses: egor-tensin/setup-clang@v2.3
