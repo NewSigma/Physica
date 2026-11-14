@@ -28,7 +28,7 @@ namespace Physica {
     template<Scalar T>
     class PlainWaveBasis {
         using ComplexType = Complex<T>;
-        using GridType = DenseTensor<ComplexType>;
+        using GridType = DenseTensor<ComplexType, 3>;
         using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
 
         GridType coeffGrid;
@@ -53,7 +53,7 @@ namespace Physica {
         void random_normal();
         void swap(PlainWaveBasis& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const GridType& getCoeffGrid() const noexcept { return coeffGrid; }
+        [[nodiscard]] auto&& getCoeffGrid(this auto&&) noexcept;
         [[nodiscard]] size_t getNumPlainWave() const noexcept { return coeffGrid.getSize(); }
         [[nodiscard]] Index3D getShape() const noexcept { return coeffGrid.getShape(); }
         [[nodiscard]] const LatticeMatrix& getRepLattice() const noexcept { return repLatt; }
@@ -61,7 +61,7 @@ namespace Physica {
         /* Static members */
         static Index3D makeGridDim(T cutEnergy, const LatticeMatrix& repLatt);
         static Vector3D<T> makeWaveVector(const LatticeMatrix& repLatt, Index3D index, Index3D dim) noexcept;
-        static void forKInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>, Index3D> auto fn);
+        static void forKInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>> auto fn);
         static void forKIndexInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>, Index3D> auto fn);
     };
 
@@ -122,6 +122,11 @@ namespace Physica {
     }
 
     template<Scalar T>
+    auto&& PlainWaveBasis<T>::getCoeffGrid(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).coeffGrid;
+    }
+
+    template<Scalar T>
     Index3D PlainWaveBasis<T>::makeGridDim(T cutEnergy, const LatticeMatrix& repLatt) {
         constexpr double factor = 2 * PhyConst<AU>::electronMass / PhyConst<AU>::reducedPlanck / PhyConst<AU>::reducedPlanck;
         const T maxWaveVec = sqrt(T(factor) * cutEnergy);
@@ -142,7 +147,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void PlainWaveBasis<T>::forKInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>, Index3D> auto fn) {
+    void PlainWaveBasis<T>::forKInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>> auto fn) {
         forND(dim, [&repLatt, dim, fn](Index3D index) {
             fn(makeWaveVector(repLatt, index, dim));
         });

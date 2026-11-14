@@ -27,7 +27,7 @@ namespace Physica {
     class DensityGrid {
         using This = DensityGrid<T, IsSpinPolarized>;
         using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
-        using GridType = DenseTensor<T>;
+        using GridType = DenseTensor<T, 3>;
     public:
         using BasisType = PlainWaveBasis<T>;
         using KSOrbitArray = Array<SpinPair<BasisType, IsSpinPolarized>>;
@@ -69,9 +69,9 @@ namespace Physica {
         assert(T(0) <= pos[0] && pos[0] <= T(1));
         assert(T(0) <= pos[1] && pos[1] <= T(1));
         assert(T(0) <= pos[2] && pos[2] <= T(1));
-        const size_t dimX = getTotalDensity().getDimX();
-        const size_t dimY = getTotalDensity().getDimY();
-        const size_t dimZ = getTotalDensity().getDimZ();
+        const size_t dimX = getTotalDensity().dim(0);
+        const size_t dimY = getTotalDensity().dim(1);
+        const size_t dimZ = getTotalDensity().dim(2);
         const size_t nx1 = double(T(dimX) * pos[0]);
         const size_t ny1 = double(T(dimY) * pos[1]);
         const size_t nz1 = double(T(dimZ) * pos[2]);
@@ -92,14 +92,14 @@ namespace Physica {
         const T factorY1 = T(1) - factorY2;
         const T factorZ1 = T(1) - factorZ2;
         const auto& grid = densityPair[spin];
-        return grid(nx1, ny1, nz1) * (factorX1 * factorY1 * factorZ1)
-             + grid(nx2, ny1, nz1) * (factorX2 * factorY1 * factorZ1)
-             + grid(nx1, ny2, nz1) * (factorX1 * factorY2 * factorZ1)
-             + grid(nx1, ny1, nz2) * (factorX1 * factorY1 * factorZ2)
-             + grid(nx2, ny2, nz1) * (factorX2 * factorY2 * factorZ1)
-             + grid(nx2, ny1, nz2) * (factorX2 * factorY1 * factorZ2)
-             + grid(nx1, ny2, nz2) * (factorX1 * factorY2 * factorZ2)
-             + grid(nx2, ny2, nz2) * (factorX2 * factorY2 * factorZ2);
+        return grid.calc(nx1, ny1, nz1) * (factorX1 * factorY1 * factorZ1)
+             + grid.calc(nx2, ny1, nz1) * (factorX2 * factorY1 * factorZ1)
+             + grid.calc(nx1, ny2, nz1) * (factorX1 * factorY2 * factorZ1)
+             + grid.calc(nx1, ny1, nz2) * (factorX1 * factorY1 * factorZ2)
+             + grid.calc(nx2, ny2, nz1) * (factorX2 * factorY2 * factorZ1)
+             + grid.calc(nx2, ny1, nz2) * (factorX2 * factorY1 * factorZ2)
+             + grid.calc(nx1, ny2, nz2) * (factorX1 * factorY2 * factorZ2)
+             + grid.calc(nx2, ny2, nz2) * (factorX2 * factorY2 * factorZ2);
     }
 
     template<Scalar T, bool IsSpinPolarized>
@@ -132,14 +132,14 @@ namespace Physica {
         auto kernel = [this, &rho](Vector3D<T> pos, Index3D index) {
             {
                 auto& rho_up = getTotalDensity();
-                rho_up(index) = rho(SpinState::Up, pos);
+                rho_up[index] = rho(SpinState::Up, pos);
             }
             if constexpr (IsSpinPolarized) {
                 auto& rho_down = getPolarDensity();
-                rho_down(index) = rho(SpinState::Down, pos);
+                rho_down[index] = rho(SpinState::Down, pos);
             }
         };
-        DenseTensor<T>::template forPointIndexInGrid<T, true, decltype(kernel)>(getTotalDensity(), latt, kernel);
+        DenseTensor<T, 3>::template forPointIndexInGrid<T, true, decltype(kernel)>(getTotalDensity(), latt, kernel);
         {
             auto rho_up_new = getTotalDensity().flatten();
             const auto& rho_up_old = rho.getTotalDensity().flatten();

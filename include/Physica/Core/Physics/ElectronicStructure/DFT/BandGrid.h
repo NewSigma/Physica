@@ -99,8 +99,10 @@ namespace Physica {
     template<Scalar T, bool isSpinPolarized>
     void BandGrid<T, isSpinPolarized>::swap(BandGrid& __restrict band) noexcept {
         assert(this != &band && "[Error]: Self swap is likely a bug");
-        swap(kPointGrid, band.kPointGrid);
-        swap(electronCount, band.electronCount);
+        kPointGrid.swap(band.kPointGrid);
+        repLatt.swap(band.repLatt);
+        std::swap(electronCount, band.electronCount);
+        std::swap(numBand, band.numBand);
     }
 
     template<Scalar T, bool isSpinPolarized>

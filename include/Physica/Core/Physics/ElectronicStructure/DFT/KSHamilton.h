@@ -30,7 +30,7 @@ namespace Physica {
         static_assert(!IsSpinPolarized, "[Error]: Not implemented");
     public:
         using ComplexType = Complex<T>;
-        using GridType = DenseTensor<ComplexType>;
+        using GridType = DenseTensor<ComplexType, 3>;
         using StrucFactorArray = Array<GridType>;
         using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
         using BasisType = PlainWaveBasis<T>;
@@ -60,11 +60,11 @@ namespace Physica {
         void makeNearFreeHamilton(Vector3D<T> kPoint);
         void makeHamiltonWithoutXC(const DensityGrid<T, IsSpinPolarized>& densityRho, Vector3D<T> kPoint);
         void makeHamiltonWithXC(
-            const DenseTensor<T>& xcPot,
+            const DenseTensor<T, 3>& xcPot,
             const DensityGrid<T, IsSpinPolarized>& densityRho,
             Vector3D<T> kPoint);
 
-        void swap(KSHamilton& __restrict obj);
+        void swap(KSHamilton& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const CrystalCell<T>& getCrystalCell() const noexcept { return cell; }
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return cell.getLattice(); }
@@ -90,11 +90,12 @@ namespace Physica {
         const Index3D fftDim = BasisType::makeGridDim(cutEnergyRho, repLatt);
         fft_rho = FFT3D(fftDim, PlanFlag::Estimate);
         fft_xc = FFT3D(fftDim, PlanFlag::Estimate);
+        hamiltonH.resize(getNumBasis());
         makeKSpaceIonCoulomb();
     }
 
     template<Scalar T, bool IsSpinPolarized>
-    void KSHamilton<T, IsSpinPolarized>::swap(KSHamilton& __restrict obj) {
+    void KSHamilton<T, IsSpinPolarized>::swap(KSHamilton& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         hamiltonH.swap(obj.hamiltonH);
         cell.swap(obj.cell);
@@ -123,11 +124,13 @@ namespace Physica {
         makeFreeHamilton(kPoint);
 
         forND(basisDim, [this](Index3D index1) {
-            const size_t r = PeriodIndex3D(basisDim, index1).toIndex1D();
+            const size_t r = PeriodIndex3D(index1, basisDim).toIndex1D();
             forND(basisDim, [this, r, index1](Index3D index2) {
-                const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
+                const size_t c = PeriodIndex3D(index2, basisDim).toIndex1D();
+                if (r > c)
+                    return;
                 const Index3D delta = calcDeltaIndex(index1, index2, kSpaceIonCoulomb.getShape());
-                hamiltonH[r, c] += kSpaceIonCoulomb(delta);
+                hamiltonH[r, c] += kSpaceIonCoulomb[delta];
             });
         });
     }
@@ -143,20 +146,22 @@ namespace Physica {
         auto& kSpaceDensity = fft_rho.getKSpace();
         const T repVolume = reciprocal(cell.getVolume());
         forND(basisDim, [this, repVolume, &kSpaceDensity](Index3D index1) {
-            const size_t r = PeriodIndex3D(basisDim, index1).toIndex1D();
+            const size_t r = PeriodIndex3D(index1, basisDim).toIndex1D();
             forND(basisDim, [this, repVolume, r, index1, &kSpaceDensity](Index3D index2) {
                 constexpr double factor = 1 / PhyConst<AU>::vacuumDielectric;
-                const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
+                const size_t c = PeriodIndex3D(index2, basisDim).toIndex1D();
+                if (r > c)
+                    return;
                 const Index3D delta = calcDeltaIndex(index1, index2, kSpaceDensity.getShape());
-                const Vector3D<T> waveG = BasisType::makeWaveVector(repLatt, delta, basisDim);
-                hamiltonH[r, c] += T(factor) * repVolume * kSpaceDensity(delta) / waveG.squaredNorm();
+                const Vector3D<T> waveG = BasisType::makeWaveVector(repLatt, delta, kSpaceDensity.getShape());
+                hamiltonH[r, c] += T(factor) * repVolume * kSpaceDensity[delta] / waveG.squaredNorm();
             });
         });
     }
 
     template<Scalar T, bool IsSpinPolarized>
     void KSHamilton<T, IsSpinPolarized>::makeHamiltonWithXC(
-            const DenseTensor<T>& xcPot,
+            const DenseTensor<T, 3>& xcPot,
             const DensityGrid<T, IsSpinPolarized>& densityRho,
             Vector3D<T> kPoint) {
         makeHamiltonWithoutXC(densityRho, kPoint);
@@ -166,11 +171,13 @@ namespace Physica {
         auto& kSpaceXC = fft_xc.getKSpace();
         const T repVolume = reciprocal(cell.getVolume());
         forND(basisDim, [this, repVolume, &kSpaceXC](Index3D index1) {
-            const size_t r = PeriodIndex3D(basisDim, index1).toIndex1D();
+            const size_t r = PeriodIndex3D(index1, basisDim).toIndex1D();
             forND(basisDim, [this, repVolume, r, index1, &kSpaceXC](Index3D index2) {
-                const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
+                const size_t c = PeriodIndex3D(index2, basisDim).toIndex1D();
+                if (r > c)
+                    return;
                 const Index3D delta = calcDeltaIndex(index1, index2, kSpaceXC.getShape());
-                hamiltonH[r, c] += kSpaceXC(delta) * repVolume;
+                hamiltonH[r, c] += kSpaceXC[delta] * repVolume;
             });
         });
     }
@@ -187,7 +194,7 @@ namespace Physica {
             const ssize_t sIndex1 = index1[i] > basisDim[i] / 2 ? -ssize_t(basisDim[i] - index1[i]) : index1[i];
             const ssize_t sIndex2 = index2[i] > basisDim[i] / 2 ? -ssize_t(basisDim[i] - index2[i]) : index2[i];
             const ssize_t sIndex = sIndex1 - sIndex2;
-            delta[i] = sIndex > 0 ? sIndex : sIndex + ssize_t(deltaDim[i]);
+            delta[i] = sIndex >= 0 ? sIndex : sIndex + ssize_t(deltaDim[i]);
             assert(delta[i] >= 0);
             assert(delta[i] < deltaDim[i]);
         }
@@ -239,10 +246,10 @@ namespace Physica {
                 const T squaredNorm = waveK.squaredNorm();
                 const bool isNotGammaPoint = !squaredNorm.isSubNormal();
                 if (isNotGammaPoint) [[likely]]
-                    kSpaceIonCoulomb(index) += factor2 * grid(index) / squaredNorm;
+                    kSpaceIonCoulomb[index] += factor2 * grid.calc(index) / squaredNorm;
             });
             i += 1;
         }
-        kSpaceIonCoulomb[0, 0, 0] = T(0);
+        kSpaceIonCoulomb[0UZ, 0UZ, 0UZ] = T(0);
     }
 }

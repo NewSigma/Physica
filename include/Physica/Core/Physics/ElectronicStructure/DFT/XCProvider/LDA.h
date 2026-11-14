@@ -226,7 +226,7 @@ namespace Physica {
 namespace Physica {
     template<Scalar T, LDAType type, bool polarized>
     class Traits<LDA<T, type, polarized>> {
-        using GridType = DenseTensor<T>;
+        using GridType = DenseTensor<T, 3>;
     public:
         constexpr static bool IsSpinPolarized = polarized;
         constexpr static size_t NumSpin = IsSpinPolarized ? 2 : 1;

@@ -2,6 +2,8 @@ physica_add_test(GaussBase GaussBase.cpp)
 physica_add_test(HamiltonMC HamiltonMC.cpp)
 physica_add_test(IceGenerator IceGenerator.cpp)
 physica_add_test(RHFSolver RHFSolver.cpp)
+### DFT
+physica_add_test(KSSolver ElectronicStructure/DFT/KSSolver.cpp)
 
 add_subdirectory(ManyBody)
 add_subdirectory(MD)

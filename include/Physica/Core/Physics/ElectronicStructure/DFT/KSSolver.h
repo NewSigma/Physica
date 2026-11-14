@@ -39,7 +39,7 @@ namespace Physica {
         using DensityType = DensityGrid<T, IsSpinPolarized>;
         using BasisType = DensityType::BasisType;
         using KSOrbitArray = DensityType::KSOrbitArray;
-        using PotType = SpinPair<DenseTensor<T>, IsSpinPolarized>;
+        using PotType = SpinPair<DenseTensor<T, 3>, IsSpinPolarized>;
 
         using LatticeMatrix = HamiltonType::LatticeMatrix;
         using FFT3D = FFT<ComplexType, 3>;
@@ -169,24 +169,26 @@ namespace Physica {
     template<Scalar T, class XCProvider>
     template<RNG R>
     void KSSolver<T, XCProvider>::initWaveFunc(const SpinPair<BasisType, IsSpinPolarized>& initial) {
-        const ssize_t dimX = std::min(initial[SpinState::Up].getDimX(), orbits[0][SpinState::Up].getDimX());
-        const ssize_t dimY = std::min(initial[SpinState::Up].getDimY(), orbits[0][SpinState::Up].getDimY());
-        const ssize_t dimZ = std::min(initial[SpinState::Up].getDimZ(), orbits[0][SpinState::Up].getDimZ());
+        const Index3D initialShape = initial[SpinState::Up].getShape();
+        const Index3D orbitShape = orbits[0][SpinState::Up].getShape();
+        const size_t dimX = std::min(initialShape[0], orbitShape[0]);
+        const size_t dimY = std::min(initialShape[1], orbitShape[1]);
+        const size_t dimZ = std::min(initialShape[2], orbitShape[2]);
         {
             auto& waveUp = orbits[0][SpinState::Up];
-            waveUp.flatten().template random_normal<R>();
-            for (ssize_t x = -dimX; x <= dimX; ++x)
-                for (ssize_t y = -dimY; y <= dimY; ++y)
-                    for (ssize_t z = 0; z <= dimZ; ++z)
-                        waveUp(x, y, z) = initial[SpinState::Up](x, y, z);
+            waveUp.template random_normal<R>();
+            for (size_t x = 0; x < dimX; ++x)
+                for (size_t y = 0; y < dimY; ++y)
+                    for (size_t z = 0; z < dimZ; ++z)
+                        waveUp.getCoeffGrid()[x, y, z] = initial[SpinState::Up].getCoeffGrid().calc(x, y, z);
         }
         if constexpr (IsSpinPolarized) {
             auto& waveDown = orbits[0][SpinState::Down];
-            waveDown.flatten().template random_normal<R>();
-            for (ssize_t x = -dimX; x <= dimX; ++x)
-                for (ssize_t y = -dimY; y <= dimY; ++y)
-                    for (ssize_t z = 0; z <= dimZ; ++z)
-                        waveDown(x, y, z) = initial[SpinState::Down](x, y, z);
+            waveDown.template random_normal<R>();
+            for (size_t x = 0; x < dimX; ++x)
+                for (size_t y = 0; y < dimY; ++y)
+                    for (size_t z = 0; z < dimZ; ++z)
+                        waveDown.getCoeffGrid()[x, y, z] = initial[SpinState::Down].getCoeffGrid().calc(x, y, z);
         }
     }
 

@@ -107,9 +107,9 @@ namespace Physica {
             auto kernel = [&kSpace](Vector3D<T> k, Index3D index) {
                 const T kNorm = k.squaredNorm();
                 const T factor = T(amix) * std::min(kNorm / (kNorm + square(T(bmix))), T(amin));
-                kSpace(index) *= factor;
+                kSpace[index] *= factor;
             };
-            PeriodicCell<T, 3>::template forLatticeCloud<true>(kernel, kSpace.getShape(), repLatt);
+            PeriodicCell<T, 3>::template forLatticeCloud<true>(kernel, repLatt, kSpace.getShape());
             fft.invTransform();
 
             const auto& rho_old = oldDensities[0].getTotalDensity().flatten();
