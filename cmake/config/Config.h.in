@@ -26,7 +26,6 @@
 
 namespace Physica {
     [[maybe_unused]] constexpr static const char* Version = "@CMAKE_PROJECT_VERSION@";
-    [[maybe_unused]] constexpr static const char* GitHash = "@GIT_HASH@";
 
     class HostDevAttr final {
     public:

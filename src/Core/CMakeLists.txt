@@ -8,7 +8,8 @@ add_subdirectory(Physics)
 add_subdirectory(Scalar)
 add_subdirectory(Utils)
 
-target_sources(PhysicaCore PRIVATE Version.cpp)
+include(GitHash.cmake)
+target_sources(PhysicaCore PRIVATE Version.cpp ${CMAKE_CURRENT_BINARY_DIR}/GitHash.cpp)
 target_link_libraries(PhysicaCore PUBLIC Physica::Core)
 
 set_target_properties(PhysicaCore PROPERTIES

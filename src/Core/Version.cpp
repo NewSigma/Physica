@@ -36,6 +36,10 @@
 #include "Physica/Macro.h"
 #include "Physica/Core/Version.h"
 
+namespace Physica {
+    PHYSICA_API extern const char* const GitHash;
+}
+
 PHYSICA_API std::string Physica::version() {
     std::ostringstream os{};
     std::format_to(std::ostreambuf_iterator<char>(os), "Physica {}    Hash: {}\n", Version, GitHash);
