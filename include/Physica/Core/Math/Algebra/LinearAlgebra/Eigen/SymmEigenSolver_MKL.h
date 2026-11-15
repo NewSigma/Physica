@@ -37,8 +37,8 @@ namespace Physica {
         auto* a = reinterpret_cast<Tm*>(eigenvectors.data());
         auto* w = reinterpret_cast<Tm*>(eigenvalues.data());
         if constexpr (T::Prec == Float32)
-            check_lapack(LAPACKE_ssyev_64(Layout, jobz, 'U', n, a, lda, w));
+            check_lapack(LAPACKE_ssyevd_64(Layout, jobz, 'U', n, a, lda, w));
         else
-            check_lapack(LAPACKE_dsyev_64(Layout, jobz, 'U', n, a, lda, w));
+            check_lapack(LAPACKE_dsyevd_64(Layout, jobz, 'U', n, a, lda, w));
     }
 }

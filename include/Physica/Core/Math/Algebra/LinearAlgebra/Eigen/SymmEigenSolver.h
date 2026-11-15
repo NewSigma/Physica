@@ -48,6 +48,7 @@ namespace Physica {
     private:
         EigenvalueVector eigenvalues;
         EigenvectorMatrix eigenvectors;
+        bool needEigenvectors = false;
     public:
         SymmEigenSolver() = default;
         SymmEigenSolver(size_t size, bool needEigenvectors);
@@ -174,6 +175,7 @@ namespace Physica {
     template<Scalar T, size_t Order>
     void SymmEigenSolver<T, Order>::resize(size_t size, bool needEigenvectors) {
         assert((Order == Dynamic || Order == size) && "[Error]: size is not consistent");
+        this->needEigenvectors = needEigenvectors;
         eigenvalues.resize(size);
         if (needEigenvectors)
             eigenvectors.resize(size, size);
@@ -184,6 +186,7 @@ namespace Physica {
         assert(this != &solver && "[Error]: Self swap is likely a bug");
         eigenvalues.swap(solver.eigenvalues);
         eigenvectors.swap(solver.eigenvectors);
+        std::swap(needEigenvectors, solver.needEigenvectors);
     }
 
     template<Scalar T, size_t Order>
@@ -199,7 +202,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     bool SymmEigenSolver<T, Order>::getNeedEigenvectors() const noexcept {
-        return !eigenvectors.empty();
+        return needEigenvectors;
     }
     /**
      * Use wilkinson shift
