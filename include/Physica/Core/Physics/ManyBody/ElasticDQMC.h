@@ -185,6 +185,10 @@ namespace Physica {
         if (shift.isSubNormal())
             return 0; // Zero limit
 
+        const T c = beta * shift;
+        if (c.isSubNormal())
+            return 0;
+
         auto calcBetaFreq = [](int m) static noexcept {
             return Trv(2 * m + 1) * MathConst<T>::pi;
         };
@@ -192,11 +196,10 @@ namespace Physica {
         T omega2 = calcBetaFreq(numFreq + 1);
 
         auto calcPlusMinus = [=](T omega) noexcept {
-            T temp = beta * shift;
-            return Trv(-2) * (temp / (square(temp) + square(omega)));
+            return Trv(-2) * (c / (square(c) + square(omega)));
         };
         return fma(T(5), calcPlusMinus(omega2), calcPlusMinus(omega1)) / Trv(12)
-             + fma(arctan(omega2 / shift), MathConst<T>::inv_pi, unit(shift) * -0.5);
+             + fma(arctan(omega2 / c), MathConst<T>::inv_pi, unit(shift) * -0.5);
     }
 
     template<Scalar T>

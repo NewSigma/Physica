@@ -175,7 +175,7 @@ namespace Physica {
         else {
             using X = Base; // FIXME: clang 22 rejects valid
             [[maybe_unused]] auto x = sizeof(X);
-            return std::forward<Self>(self).X::transpose();
+            return std::forward<Self>(self).X::hermite();
         }
     }
 

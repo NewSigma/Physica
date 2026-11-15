@@ -64,6 +64,18 @@ namespace {
             static_assert(x.getExprID() == ExprID::Mul);
         });
     }
+
+    void hermite() {
+        // Elementwise regression test
+        using T = cfloat64;
+        using MatrixType = DenseMatrix<T, MatrixMajor::Col, 2, 2>;
+        const MatrixType mat1{{T(1, 1), T(2, 3)}, {T(4, 5), T(6, 7)}};
+        const MatrixType mat2{{T(8, 9), T(10, 11)}, {T(12, 13), T(14, 15)}};
+        const MatrixType result = (mat1 + mat2).hermite();
+        for (size_t i = 0; i < result.getRow(); ++i)
+            for (size_t j = 0; j < result.getCol(); ++j)
+                expect(result[i, j] == (mat1.calc(j, i) + mat2.calc(j, i)).conjugate());
+    }
 }
 
 int main() {
@@ -71,5 +83,6 @@ int main() {
     block1x1();
     lifetimeCXX23();
     simplify();
+    hermite();
     return 0;
 }
