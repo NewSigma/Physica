@@ -8,6 +8,7 @@ endif()
 target_sources(PhysicaCore PRIVATE
     BitArray.cpp
     Cycler.cpp
+    Memory.cpp
     NoImpl.cpp
     RingBuffer.cpp
     Suspend.cpp

@@ -13,6 +13,8 @@ if(${PHYSICA_CUDA})
 endif()
 # Parallel
 target_sources(Benchmark PRIVATE Parallel/ThreadPool.cpp)
+# Utils
+target_sources(Benchmark PRIVATE Utils/Memcpy.cpp)
 # Anonymous
 target_sources(Benchmark PRIVATE Benchmark.cpp)
 target_sources(Benchmark PRIVATE CRCoro.cpp)

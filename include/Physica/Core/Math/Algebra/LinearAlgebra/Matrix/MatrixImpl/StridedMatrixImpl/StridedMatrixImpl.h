@@ -19,6 +19,7 @@
 #pragma once
 
 #include "../StridedMatrix.h"
+#include "Physica/Core/Utils/Memory.h"
 
 namespace Physica {
     template<class Derived>
@@ -56,12 +57,22 @@ namespace Physica {
         if constexpr (isMinorCompact<Derived, std::remove_cvref_t<decltype(target)>>()) {
             static_assert(!(Derived::isCompact() && target.isCompact()), "compact-compact assign should be handled by CompactMatrix::assign");
             const auto& source = Base::getDerived();
-            const size_t maxMajor = target.getMaxMajor();
-            for (size_t major = 0; major < maxMajor; ++major) {
-                if constexpr (MatrixMajor::isRowMatrix<Derived>())
-                    source.row(major).template assign<P>(target.row(major));
-                else
-                    source.col(major).template assign<P>(target.col(major));
+            target.assert_assign(source);
+            if constexpr (P == Sequential) {
+                const size_t length = target.getMaxMinor();
+                assert(source.getMajorStride() >= length && target.getMajorStride() >= length && "[Error]: Rows must not overlap");
+                memcpy2D(target.data_handle(), target.getMajorStride() * sizeof(T),
+                         source.data_handle(), source.getMajorStride() * sizeof(T),
+                         length * sizeof(T), target.getMaxMajor());
+            }
+            else {
+                const size_t maxMajor = target.getMaxMajor();
+                for (size_t major = 0; major < maxMajor; ++major) {
+                    if constexpr (MatrixMajor::isRowMatrix<Derived>())
+                        source.row(major).template assign<P>(target.row(major));
+                    else
+                        source.col(major).template assign<P>(target.col(major));
+                }
             }
         }
         else

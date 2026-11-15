@@ -92,6 +92,7 @@ namespace Physica {
         void load(this This& self, const T* p) noexcept;
         void load(this This& self, const T* p, int n) noexcept;
         void store(T* p) const noexcept;
+        void store_nt(T* p) const noexcept;
         void store(T* p, int n) const noexcept;
         void insert(int index, const T& value);
         template<int... Order> SIMD shuffle() const;

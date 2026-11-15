@@ -165,6 +165,11 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
+    void SIMD<T, Size>::store_nt(T* p) const noexcept {
+        pack.store_nt(reinterpret_cast<T::MachineType*>(assume_aligned<alignof(Pack)>(p)));
+    }
+
+    template<Scalar T, int Size>
     void SIMD<T, Size>::insert(int index, const T& value) {
         if constexpr (isForward) {
             pack.insert(index * 2, value.value().toMachine());

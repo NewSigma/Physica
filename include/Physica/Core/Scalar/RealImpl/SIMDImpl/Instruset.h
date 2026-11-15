@@ -142,7 +142,7 @@ namespace Physica {
             return true;
     #if defined (__SSE2__) || defined (__x86_64__)
         return true;
-    #elif defined _M_IX86_FP
+    #elifdef _M_IX86_FP
         return _M_IX86_FP == 2;
     #else
         return false;
@@ -154,7 +154,7 @@ namespace Physica {
             return true;
     #ifdef __SSE__
         return true;
-    #elif defined _M_IX86_FP
+    #elifdef _M_IX86_FP
         return _M_IX86_FP == 1;
     #else
         return false;
