@@ -40,3 +40,35 @@ macro(physica_cuda_probe NAME)
         endif()
     endif()
 endmacro()
+
+macro(physica_cache_probe)
+    physica_try_run(HwlocProbe HostDevAttr/HwlocProbe.cpp)
+    if(NOT ${RUN_RESULT_VAR} EQUAL 0)
+        message(FATAL_ERROR "Cache probe failed to run (${RUN_RESULT_VAR}):\n${COMPILE_LOG}\n${RUN_OUTPUT_VAR}")
+    endif()
+    string(REGEX MATCH "L1D=([0-9]+) L2=([0-9]+) L3=([0-9]+) line=([0-9]+)" _unused "${RUN_OUTPUT_VAR}")
+
+    if("${CMAKE_MATCH_1}" STREQUAL "" OR "${CMAKE_MATCH_1}" EQUAL 0
+       OR "${CMAKE_MATCH_2}" STREQUAL "" OR "${CMAKE_MATCH_2}" EQUAL 0
+       OR "${CMAKE_MATCH_3}" STREQUAL "" OR "${CMAKE_MATCH_3}" EQUAL 0
+       OR "${CMAKE_MATCH_4}" STREQUAL "" OR "${CMAKE_MATCH_4}" EQUAL 0)
+        message(FATAL_ERROR "Cache probe output unparsable: ${RUN_OUTPUT_VAR}")
+    endif()
+
+    set(CacheSizeL1D ${CMAKE_MATCH_1} CACHE STRING "L1D data cache size in bytes")
+    set(CacheSizeL2 ${CMAKE_MATCH_2} CACHE STRING "L2 cache size in bytes")
+    set(CacheSizeL3 ${CMAKE_MATCH_3} CACHE STRING "L3 cache size in bytes")
+    set(LineSizeL1D ${CMAKE_MATCH_4} CACHE STRING "L1D cache line size in bytes")
+    mark_as_advanced(CacheSizeL1D CacheSizeL2 CacheSizeL3 LineSizeL1D)
+
+    foreach(_var CacheSizeL1D CacheSizeL2 CacheSizeL3 LineSizeL1D)
+        if("${${_var}}" STREQUAL "")
+            message(FATAL_ERROR "${_var} is neither pinned nor probed: ${RUN_OUTPUT_VAR}")
+        endif()
+
+        if(${${_var}} EQUAL 0)
+            message(FATAL_ERROR "Cache probe reported zero for ${_var}: ${RUN_OUTPUT_VAR}")
+        endif()
+    endforeach()
+    message(STATUS "CacheProbe: L1D=${CacheSizeL1D} L2=${CacheSizeL2} L3=${CacheSizeL3} line=${LineSizeL1D}")
+endmacro()

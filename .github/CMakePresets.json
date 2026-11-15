@@ -5,21 +5,27 @@
       "name": "base",
       "hidden": true,
       "displayName": "Base",
-      "description": "Common configuration, not meant to be used directly",
+      "description": "Common configuration, not meant to be used directly. The cache geometry is pinned so that the generated include/Physica/Config.h is identical on every machine, which ccache needs across CI runners; override it with -D on real hardware",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/dist",
         "CMAKE_C_COMPILER": "clang-23",
         "CMAKE_CXX_COMPILER": "clang++-23",
         "CMAKE_LINKER_TYPE": "LLD",
         "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+        "CMAKE_C_FLAGS_DEBUG": "-gline-tables-only",
+        "CMAKE_CXX_FLAGS_DEBUG": "-gline-tables-only",
+        "CMAKE_CUDA_FLAGS_DEBUG": "-gline-tables-only",
         "CMAKE_CXX_FLAGS": "-Werror -mrdseed",
         "PHYSICA_ARCH": "x86-64-v3",
         "PHYSICA_CCACHE": "ON",
         "BUILD_BENCHMARKS": "ON",
-        "BUILD_TESTS": "ON"
+        "BUILD_TESTS": "ON",
+        "CacheSizeL1D": "32768",
+        "CacheSizeL2": "1048576",
+        "CacheSizeL3": "16777216",
+        "LineSizeL1D": "64"
       }
     },
     {
