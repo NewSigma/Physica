@@ -15,6 +15,7 @@ endif()
 target_sources(Benchmark PRIVATE Parallel/ThreadPool.cpp)
 # Utils
 target_sources(Benchmark PRIVATE Utils/Memcpy.cpp)
+target_sources(Benchmark PRIVATE Utils/Memset.cpp)
 # Anonymous
 target_sources(Benchmark PRIVATE Benchmark.cpp)
 target_sources(Benchmark PRIVATE CRCoro.cpp)

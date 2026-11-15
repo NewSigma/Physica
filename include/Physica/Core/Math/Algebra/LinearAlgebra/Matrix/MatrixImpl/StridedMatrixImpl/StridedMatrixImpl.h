@@ -193,13 +193,9 @@ namespace Physica {
     void StridedMatrix<Derived>::zeros() noexcept {
         if constexpr (isMinorCompact<Derived, Derived>()) {
             auto& self = Base::getDerived();
-            const size_t maxMajor = self.getMaxMajor();
-            for (size_t major = 0; major < maxMajor; ++major) {
-                if constexpr (MatrixMajor::isRowMatrix<Derived>())
-                    self.row(major).zeros();
-                else
-                    self.col(major).zeros();
-            }
+            const size_t length = self.getMaxMinor();
+            assert(self.getMajorStride() >= length && "[Error]: Rows must not overlap");
+            memset2D(self.data_handle(), self.getMajorStride() * sizeof(T), 0, length * sizeof(T), self.getMaxMajor());
         }
         else
             Base::zeros();

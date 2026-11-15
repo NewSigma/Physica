@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <array>
 #include <cassert>
 #include <cstring>
 #include <memory>
@@ -75,6 +76,48 @@ namespace {
     #endif
     }
 
+    void memset_nt_nofence(void* dst, int value, size_t n) noexcept {
+    #ifdef PHYSICA_HAS_STREAM_NT
+        using Pack = std::conditional_t<Instruset::hasAVX512(), SIMD<float64, 8>,
+                                        std::conditional_t<Instruset::hasAVX2(), SIMD<float32, 8>, SIMD<float32, 4>>>;
+        using T = Pack::ScalarType;
+        constexpr size_t ElemBytes = sizeof(T);
+        void* aligned = dst;
+        size_t space = n;
+        if (std::align(LineSizeL1D, LineSizeL1D, aligned, space) == nullptr) {
+            std::memset(dst, value, n);
+            return;
+        }
+
+        auto* dst_bytes = static_cast<std::byte*>(dst);
+        auto* d = Physica::assume_aligned<LineSizeL1D>(static_cast<std::byte*>(aligned));
+        const size_t head = d - dst_bytes;
+        if (head)
+            std::memset(dst_bytes, value, head);
+
+        const size_t size_aligned = (n - head) & ~(LineSizeL1D - 1);
+
+        Unroller<Pack, 2> unroller{[value](size_t) noexcept {
+            alignas(alignof(Pack)) std::array<std::byte, sizeof(Pack)> buffer{};
+            std::memset(buffer.data(), value, buffer.size());
+            Pack fill;
+            fill.load(reinterpret_cast<const T*>(buffer.data()));
+            return fill;
+        }};
+        [[maybe_unused]] const size_t consumed = unroller.loop_recursive([d](Pack buffer, size_t index) noexcept {
+            const size_t offset = index * ElemBytes;
+            buffer.store_nt(reinterpret_cast<T*>(d + offset));
+            return buffer;
+        }, size_aligned / ElemBytes);
+        assert(d + consumed * ElemBytes == d + size_aligned && "[Error]: Unexpected size mismatch");
+
+        if (size_aligned < n - head)
+            std::memset(d + size_aligned, value, n - head - size_aligned);
+    #else
+        std::memset(dst, value, n);
+    #endif
+    }
+
     [[gnu::always_inline]] inline void sfence() noexcept {
     #ifdef PHYSICA_HAS_STREAM_NT
         _mm_sfence();
@@ -113,6 +156,40 @@ namespace Physica {
             for (size_t row = 0; row < numRow; ++row) {
                 for (size_t i = 0; i < length; ++i)
                     d[row * dstride + i] = s[row * sstride + i];
+            }
+        }
+    }
+
+    void memset2D(void* dst, size_t dstride, int value, size_t length, size_t numRow) noexcept {
+        assert(dstride >= length && "[Error]: Storage overlaps");
+        if (length == 0 || numRow == 0) [[unlikely]]
+            return;
+
+        const bool isCompact = dstride == length;
+        if (isCompact) [[unlikely]] { // Prefer std::memset in caller
+            std::memset(dst, value, length * numRow);
+            return;
+        }
+
+        auto* d = static_cast<std::byte*>(dst);
+    #ifdef PHYSICA_HAS_STREAM_NT
+        if (numRow * length >= HostDevAttr::ThresholdStreamNT && length >= LineSizeL1D) {
+            for (size_t row = 0; row < numRow; ++row)
+                memset_nt_nofence(d + row * dstride, value, length);
+            sfence();
+            return;
+        }
+    #endif
+
+        if (length > LineSizeL1D) {
+            for (size_t row = 0; row < numRow; ++row)
+                std::memset(d + row * dstride, value, length);
+        }
+        else {
+            const auto byte = static_cast<std::byte>(static_cast<unsigned char>(value));
+            for (size_t row = 0; row < numRow; ++row) {
+                for (size_t i = 0; i < length; ++i)
+                    d[row * dstride + i] = byte;
             }
         }
     }
