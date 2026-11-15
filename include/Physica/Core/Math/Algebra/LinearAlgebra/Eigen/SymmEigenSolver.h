@@ -72,6 +72,8 @@ namespace Physica {
         [[nodiscard]] auto&& getEigenvalues(this auto&& self) noexcept;
         [[nodiscard]] const EigenvectorMatrix& getEigenvectors() const noexcept;
         [[nodiscard]] bool getNeedEigenvectors() const noexcept;
+        /* Setters */
+        void setNeedEigenvectors(bool needEigenvectors);
     private:
         void stepQR(WorkingMatrix& working, size_t lower, size_t sub_order);
         /* Static members */
@@ -203,6 +205,13 @@ namespace Physica {
     template<Scalar T, size_t Order>
     bool SymmEigenSolver<T, Order>::getNeedEigenvectors() const noexcept {
         return needEigenvectors;
+    }
+
+    template<Scalar T, size_t Order>
+    void SymmEigenSolver<T, Order>::setNeedEigenvectors(bool needEigenvectors) {
+        this->needEigenvectors = needEigenvectors;
+        if (needEigenvectors)
+            eigenvectors.resize(eigenvalues.getLength(), eigenvalues.getLength());
     }
     /**
      * Use wilkinson shift

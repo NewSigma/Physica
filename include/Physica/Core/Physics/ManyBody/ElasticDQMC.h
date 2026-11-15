@@ -44,7 +44,6 @@ namespace Physica {
         VectorND<Trv> probs;
         Array<int> sites;
         GreenPair greens;
-        GreenPair buffer;
         T correction;
 
         MatrixND<T> actionR;
@@ -76,7 +75,9 @@ namespace Physica {
         [[nodiscard]] int getNumSite() const noexcept { return params->getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return rSquareOmegas.getLength(); }
         [[nodiscard]] int getNumSplit() const noexcept { return params->getNumSplit(); }
-        [[nodiscard]] const auto& getGreens() noexcept { return greens; }
+        [[nodiscard]] const auto& getAuxField() const noexcept { return actionR; }
+        [[nodiscard]] const auto& getGreens() const noexcept { return greens; }
+        [[nodiscard]] const auto& getLnAbsDet() const noexcept { return lnAbsDet; }
         [[nodiscard]] constexpr static Trv getSign() noexcept { return 1; }
         [[nodiscard]] constexpr static Trv getRSign() noexcept { return 1; }
         [[nodiscard]] uint64_t getNumTotal() const noexcept { return numTotal; }
@@ -88,6 +89,7 @@ namespace Physica {
         template<RNG R>
         [[nodiscard]] T randAuxField();
         [[nodiscard]] T diagonalize();
+        [[nodiscard]] T calcGreens();
     };
 
     template<Scalar T>
@@ -97,7 +99,6 @@ namespace Physica {
             , probs(params_.getNumSite())
             , sites(params_.getNumSite())
             , greens(2, params_.getNumSite())
-            , buffer(2, params_.getNumSite())
             , correction(calcLocalCorrection(params->getBeta(), params->getRepelU(), params->getChemMu(), getNumFreq()))
             , actionR(params_.getHoppingMatrix() * params_.getBeta())
             , eig(params_.getNumSite(), true) {
@@ -116,13 +117,13 @@ namespace Physica {
     void ElasticDQMC<T>::step_random() {
         for (int i = 0; i < getNumSite(); ++i)
             actionR[i, i] = randAuxField<R>();
-        lnAbsDet = diagonalize();
-        buffer.swap(greens);
+        lnAbsDet = calcGreens();
     }
 
     template<Scalar T>
     template<RNG R>
     void ElasticDQMC<T>::step() {
+        eig.setNeedEigenvectors(false);
         std::ranges::shuffle(sites, R::getInstance());
         probs.template random_uniform<R>();
         for (auto [prob, site] : zip(probs, sites)) {
@@ -132,13 +133,14 @@ namespace Physica {
             const bool accept = prob < exp(lnAbsDet1 - lnAbsDet);
             if (accept) {
                 lnAbsDet = lnAbsDet1;
-                buffer.swap(greens);
                 numAccept += 1;
             }
             else
                 actionR[site, site] = save;
             numTotal += 1;
         }
+        eig.setNeedEigenvectors(true);
+        lnAbsDet = calcGreens();
     }
 
     template<Scalar T>
@@ -208,21 +210,36 @@ namespace Physica {
 
     template<Scalar T>
     auto ElasticDQMC<T>::diagonalize() -> T {
+        const Tr shift = params->getBeta() * fma(params->getRepelU(), Tr(-0.5), params->getChemMu());
+        T lnAbsDet = 0;
+        for (int _ = 0; _ < 2; ++_) {
+            eig.compute(actionR);
+            const auto eigenvalues = VectorND<Trv>(eig.getEigenvalues());
+            lnAbsDet += ln1p_elem(square(eigenvalues - shift) * rSquareOmegas.transpose()).sum();
+            actionR.diag() = -actionR.diag();
+        }
+        const Tr betaU = params->getBeta() * params->getRepelU();
+        lnAbsDet -= softplus(lncosh(actionR.diag()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum();
+        return lnAbsDet;
+    }
+
+    template<Scalar T>
+    auto ElasticDQMC<T>::calcGreens() -> T {
+        const Tr shift = params->getBeta() * fma(params->getRepelU(), Tr(-0.5), params->getChemMu());
+        using Tf = Diff<T, DiffMode::Reverse>;
         T lnAbsDet = 0;
         for (int spin : {0, 1}) {
-            const Tr shift = params->getBeta() * fma(params->getRepelU(), Tr(-0.5), params->getChemMu());
-            using Tf = Diff<T, DiffMode::Reverse>;
             eig.compute(actionR);
             auto eigenvalues = VectorND<Tf>(eig.getEigenvalues());
             lnAbsDet += ln1p_elem(square(eigenvalues - shift) * rSquareOmegas.transpose()).sum().reverse();
             actionR.diag() = -actionR.diag();
 
-            auto& green = buffer[spin];
+            auto& green = greens[spin];
             MatrixND<T> temp = eig.getEigenvectors() * DiagMatrix<T>(eigenvalues.grads());
             green = temp * eig.getEigenvectors().transpose();
             green.diag() += Trv(0.5) + correction;
         }
-        Tr betaU = params->getBeta() * params->getRepelU();
+        const Tr betaU = params->getBeta() * params->getRepelU();
         lnAbsDet -= softplus(lncosh(actionR.diag()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum();
         return lnAbsDet;
     }
