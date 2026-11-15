@@ -52,6 +52,7 @@ namespace Physica {
         [[nodiscard]] constexpr T calc(size_t row, size_t col) const;
 
         [[nodiscard]] constexpr auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) flatten(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr size_t getRow() const noexcept { return mat.getCol(); }
@@ -72,6 +73,11 @@ namespace Physica {
     template<Matrix M>
     constexpr auto&& Transpose<M>::transpose(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
+    }
+
+    template<Matrix M>
+    decltype(auto) Transpose<M>::flatten(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).transpose().flatten();
     }
 
     template<Matrix M>
@@ -121,6 +127,7 @@ namespace Physica {
         [[nodiscard]] constexpr T calc(size_t row, size_t col) const;
 
         [[nodiscard]] constexpr auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) flatten(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
@@ -141,6 +148,11 @@ namespace Physica {
     template<Vector V>
     constexpr auto&& Transpose<V>::transpose(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
+    }
+
+    template<Vector V>
+    decltype(auto) Transpose<V>::flatten(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).transpose();
     }
 
     template<Vector V>

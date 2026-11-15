@@ -32,6 +32,7 @@ namespace Physica {
         using typename Base::Trv;
     public:
         using Base::Base;
+        using Base::isReverseDiff;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
 
@@ -40,6 +41,8 @@ namespace Physica {
 
         [[nodiscard]] auto row(this auto&&, size_t r) noexcept;
         [[nodiscard]] auto col(this auto&&, size_t c) noexcept;
+
+        [[nodiscard]] CoDiff<T> sum() const;
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
@@ -70,6 +73,24 @@ namespace Physica {
     auto MatrixExpr<ExprID::Ln1p, M>::col(this auto&& self, size_t c) noexcept {
         using Self = decltype(self);
         return ln1p(std::forward<Self>(self).getExpr().col(c));
+    }
+
+    template<Matrix M>
+    auto MatrixExpr<ExprID::Ln1p, M>::sum() const -> CoDiff<T> {
+        if constexpr (isReverseDiff())
+            return Base::sum();
+        else {
+            T result = 0;
+            if constexpr (This::isColMatrix()) {
+                for (size_t c = 0; c < Base::getCol(); ++c)
+                    result += col(c).sum();
+            }
+            else {
+                for (size_t r = 0; r < Base::getRow(); ++r)
+                    result += row(r).sum();
+            }
+            return result;
+        }
     }
 
     template<Matrix M>

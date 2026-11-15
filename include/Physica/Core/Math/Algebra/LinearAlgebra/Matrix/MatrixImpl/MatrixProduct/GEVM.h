@@ -23,7 +23,7 @@
 namespace Physica {
     template<Scalar T, size_t Order> class IdentityMatrix;
     /**
-     * \class GEVM represents a outer product expression
+     * \class GEVM represents an outer product expression
      *
      * To compute (row vector) * (matrix), users should convert it to (matrix)^T * (col vector).
      */
@@ -55,6 +55,9 @@ namespace Physica {
         [[nodiscard]] T calc(size_t row, size_t col) const;
         void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
+
+        [[nodiscard]] auto row(this auto&&, size_t r) noexcept;
+        [[nodiscard]] auto col(this auto&&, size_t c) noexcept;
 
         [[nodiscard]] CoDiff<T> sum() const;
 
@@ -128,6 +131,16 @@ namespace Physica {
             vec.reverse(grad * mat.transpose());
         if constexpr (Diffable<M>)
             mat.reverse(grad.transpose() * vec);
+    }
+
+    template<Vector V, Matrix M>
+    auto GEVM<V, M>::row(this auto&& self, size_t r) noexcept {
+        return std::forward<decltype(self)>(self).getLHS().calc(r) * std::forward<decltype(self)>(self).getRHS().flatten();
+    }
+
+    template<Vector V, Matrix M>
+    auto GEVM<V, M>::col(this auto&& self, size_t c) noexcept {
+        return std::forward<decltype(self)>(self).getLHS() * std::forward<decltype(self)>(self).getRHS().calc(0, c);
     }
 
     template<Vector V, Matrix M>

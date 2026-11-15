@@ -44,6 +44,7 @@ namespace Physica {
         void assign_mkl(Matrix auto&& target) const;
 
         [[nodiscard]] constexpr auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) flatten(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] auto grads(this auto&&) noexcept;
@@ -77,6 +78,11 @@ namespace Physica {
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
     constexpr auto&& Transpose<M>::transpose(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
+    }
+
+    template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
+    decltype(auto) Transpose<M>::flatten(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).transpose().flatten();
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
@@ -135,6 +141,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] constexpr auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) flatten(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] auto grads(this auto&&) noexcept;
@@ -152,6 +159,11 @@ namespace Physica {
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
     constexpr auto&& Transpose<V>::transpose(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
+    }
+
+    template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
+    decltype(auto) Transpose<V>::flatten(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).transpose();
     }
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())

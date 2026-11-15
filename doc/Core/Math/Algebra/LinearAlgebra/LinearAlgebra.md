@@ -122,7 +122,10 @@ template<class T>
 concept Matrix = ...;
 ```
 
-We provide four mutually exclusive concepts: `Scalar`, `Vector`, `Matrix`, and `Tensor`. For example: under this design, a `Matrix` with only one column is not considered a `Vector`, which is different from *Eigen*.
+We provide four mutually exclusive concepts: `Scalar`, `Vector`, `Matrix`, and `Tensor`. Some tradeoffs:
+
+1. Under this design, a `Matrix` with only one column is not considered a `Vector`, which is stricter than *Eigen*.
+2. As a by-product, whenever a `Vector` takes part in a matrix product, it is conventionally treated as a column vector.
 
 ## Expression templates
 
