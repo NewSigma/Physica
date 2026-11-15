@@ -20,7 +20,7 @@
 
 #include "../RValueVector.h"
 #include "Physica/Core/Math/Algebra/Canonicalization.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/Utils/Unroller.h"
+#include "Physica/Core/Utils/Unroller.h"
 
 namespace Physica {
     template<Vector LHS, Vector RHS>
@@ -139,7 +139,7 @@ namespace Physica {
         using Pack = BestPacket<T1, getSizeAtCompile()>::Type;
         using FullRealPack = Pack::FullRealType;
         const size_t length = lhs.getLength();
-        auto unroller = Unroller<Pack, HostDevAttr::NumUnrollDefault>();
+        auto unroller = Unroller<Pack, HostDevAttr::NumUnrollDefault>::zeros();
         auto view1 = lhs.view();
         auto view2 = rhs.view();
         size_t i = unroller.loop_recursive([ite1 = view1.begin(), ite2 = view2.begin()](Pack buffer, size_t index) noexcept {

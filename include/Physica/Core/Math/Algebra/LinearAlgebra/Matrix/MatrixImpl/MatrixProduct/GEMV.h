@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Utils/Unroller.h"
 #include "../RValueMatrix.h"
 
 namespace Physica {
@@ -151,7 +152,7 @@ namespace Physica {
     auto GEMV<M, V>::packet(size_t index) const noexcept {
         if constexpr (isFastPacket() && !Base::isDiffable()) {
             size_t length = vec.getLength();
-            auto unroller = Unroller<SIMD<T, Size>, HostDevAttr::NumUnrollGEMV>();
+            auto unroller = Unroller<SIMD<T, Size>, HostDevAttr::NumUnrollGEMV>::zeros();
             [[maybe_unused]] size_t i = unroller.loop_recursive([this, index](SIMD<T, Size> buffer, size_t iSize) noexcept {
                 size_t i = iSize / Size;
                 return fma(mat.col(i).template packet<Size>(index), SIMD<T, Size>(vec.calc(i)), buffer);
@@ -168,7 +169,7 @@ namespace Physica {
     auto GEMV<M, V>::packet(size_t index, size_t count) const noexcept {
         if constexpr (isFastPacket() && !Base::isDiffable()) {
             size_t length = vec.getLength();
-            auto unroller = Unroller<SIMD<T, Size>, HostDevAttr::NumUnrollGEMV>();
+            auto unroller = Unroller<SIMD<T, Size>, HostDevAttr::NumUnrollGEMV>::zeros();
             [[maybe_unused]] size_t i = unroller.loop_recursive([this, index, count](SIMD<T, Size> buffer, size_t iSize) noexcept {
                 size_t i = iSize / Size;
                 return fma(mat.col(i).template packet<Size>(index, count), SIMD<T, Size>(vec.calc(i)), buffer);

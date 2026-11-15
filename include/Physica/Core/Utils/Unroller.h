@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <span>
 #include "Physica/Core/Scalar/Scalar.h"
 #include "Physica/Core/Utils/Container/Array.h"
 
@@ -30,9 +31,9 @@ namespace Physica {
         using This = Unroller<Pack, NumUnroll>;
         static_assert(NumUnroll > 0 && (NumUnroll & (NumUnroll - 1)) == 0, "[Error]: Must be power of 2");
 
-        Array<Pack, NumUnroll> packs;
+        Array<Pack, NumUnroll> packs{};
     public:
-        Unroller();
+        Unroller() = default;
         explicit Unroller(std::invocable<size_t> auto generator);
         Unroller(const This&) = default;
         Unroller(This&&) noexcept = default;
@@ -43,14 +44,13 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] size_t loop_recursive(std::invocable<Pack, size_t> auto body, size_t length) noexcept;
         [[nodiscard]] Pack sum() noexcept;
+        /* Static members */
+        static Unroller zeros();
     private:
         [[nodiscard]] static size_t loop_recursive(std::span<Pack, NumUnroll> packs, std::invocable<Pack, size_t> auto body, size_t length, size_t consumed) noexcept;
 
         template<Packet, int> friend class Unroller;
     };
-
-    template<Packet Pack, int NumUnroll>
-    Unroller<Pack, NumUnroll>::Unroller() : This([](size_t) noexcept { return Pack::zeros(); }) {}
 
     template<Packet Pack, int NumUnroll>
     Unroller<Pack, NumUnroll>::Unroller(std::invocable<size_t> auto generator)
@@ -70,6 +70,11 @@ namespace Physica {
                 packs[j] += packs[i + j];
         }
         return packs[0];
+    }
+
+    template<Packet Pack, int NumUnroll>
+    Unroller<Pack, NumUnroll> Unroller<Pack, NumUnroll>::zeros() {
+        return This([](size_t) noexcept { return Pack::zeros(); });
     }
 
     template<Packet Pack, int NumUnroll>

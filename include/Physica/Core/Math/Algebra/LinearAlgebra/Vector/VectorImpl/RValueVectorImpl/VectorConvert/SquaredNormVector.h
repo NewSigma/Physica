@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/RValueVector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/Utils/Unroller.h"
+#include "Physica/Core/Utils/Unroller.h"
 
 namespace Physica {
     template<class V>
@@ -146,7 +146,7 @@ namespace Physica {
             assert(getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
             using PacketType = BestPacket<T, getSizeAtCompile()>::Type;
             auto view = v.view();
-            auto unroller = Unroller<PacketType, HostDevAttr::NumUnrollDefault>();
+            auto unroller = Unroller<PacketType, HostDevAttr::NumUnrollDefault>::zeros();
             size_t i = unroller.loop_recursive([ite = view.begin()](PacketType buffer, size_t index) noexcept {
                 auto pack = (ite + index).template load<PacketType::size()>();
                 return fma(pack, pack, buffer);
