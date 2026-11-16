@@ -141,7 +141,7 @@ namespace Physica {
             Vector3D<T> kPoint) {
         makeNearFreeHamilton(kPoint);
 
-        fft_rho.getRSpace().flatten() = densityRho.getTotalDensity().flatten();
+        fft_rho.getRSpace() = densityRho.getTotalDensity();
         fft_rho.transform();
         auto& kSpaceDensity = fft_rho.getKSpace();
         const T repVolume = reciprocal(cell.getVolume());
@@ -166,7 +166,7 @@ namespace Physica {
             Vector3D<T> kPoint) {
         makeHamiltonWithoutXC(densityRho, kPoint);
 
-        fft_xc.getRSpace().flatten() = xcPot.flatten();
+        fft_xc.getRSpace() = xcPot;
         fft_xc.transform();
         auto& kSpaceXC = fft_xc.getKSpace();
         const T repVolume = reciprocal(cell.getVolume());

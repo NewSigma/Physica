@@ -100,7 +100,7 @@ namespace Physica {
     void ChargeMixer<T, isSpinPolarized>::mix(size_t iteration, DensityType& result) {
         if (iteration == 0) {
             const auto& deltaRho = residules[0].getTotalDensity();
-            fft.getRSpace().flatten() = deltaRho.flatten();
+            fft.getRSpace() = deltaRho;
             fft.transform();
 
             auto& kSpace = fft.getKSpace();

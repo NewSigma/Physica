@@ -18,6 +18,9 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/StridedMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/TensorImpl/StridedTensor.h"
+
 namespace Physica {
     template<class Derived, size_t Dim> class FFTKSpace;
 
@@ -96,10 +99,10 @@ namespace Physica {
     template<class Derived>
     class FFTKSpace<Derived, 2>
             : public CRTP<FFTKSpace<Derived, 2>>
-            , public LValueMatrix<FFTKSpace<Derived, 2>> {
+            , public StridedMatrix<FFTKSpace<Derived, 2>> {
         using This = FFTKSpace<Derived, 2>;
         using Base = CRTP<This>;
-        using MatrixBase = LValueMatrix<This>;
+        using MatrixBase = StridedMatrix<This>;
     protected:
         using typename MatrixBase::T;
     public:
@@ -118,9 +121,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept;
-        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
+        [[nodiscard]] __host__ __device__ size_t getRowStride() const noexcept { return getCol(); }
+        [[nodiscard]] __host__ __device__ auto data_handle(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::Row; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getColStrideAtCompile() noexcept { return 1; }
     protected:
         FFTKSpace() = default;
         FFTKSpace(const FFTKSpace&) = default;
@@ -148,22 +153,22 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTKSpace<Derived, 2>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
-        assert(row < self.getRow());
-        assert(col < self.getCol());
-        return self.getDerived().asComplexBuffer() + row * self.getCol() + col;
+    __host__ __device__ auto FFTKSpace<Derived, 2>::data_handle(this auto&& self) noexcept {
+        return self.getDerived().asComplexBuffer();
     }
     //////////////////////////////////////////////////////////////////////
     template<class Derived>
     class FFTKSpace<Derived, 3>
             : public CRTP<FFTKSpace<Derived, 3>>
-            , public LValueTensor<FFTKSpace<Derived, 3>> {
+            , public StridedTensor<FFTKSpace<Derived, 3>> {
         using This = FFTKSpace<Derived, 3>;
         using Base = CRTP<This>;
-        using TensorBase = LValueTensor<This>;
+        using TensorBase = StridedTensor<This>;
     protected:
         using typename TensorBase::T;
     public:
+        using typename TensorBase::ScalarType;
+        using typename TensorBase::IndexType;
         ~FFTKSpace() = default;
         /* Operators */
         FFTKSpace& operator=(const FFTKSpace& obj);
@@ -181,7 +186,12 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getDimX() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getDimY() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ size_t getDimZ() const noexcept { return Base::getDerived().getKSpaceSize()[2]; }
-        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, Index3D index) noexcept;
+        [[nodiscard]] __host__ __device__ auto getStrides() const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle(this auto&& self) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticShape() noexcept { return false; }
+        [[nodiscard]] __host__ __device__ consteval static IndexType getShapeAtCompile() noexcept { return IndexType({Dynamic, Dynamic, Dynamic}); }
+        [[nodiscard]] __host__ __device__ consteval static IndexType getStrideAtCompile() noexcept;
     protected:
         FFTKSpace() = default;
         FFTKSpace(const FFTKSpace&) = default;
@@ -210,11 +220,20 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTKSpace<Derived, 3>::data_ptr(this auto&& self, Index3D index) noexcept {
-        assert(index[0] < self.getDimX());
-        assert(index[1] < self.getDimY());
-        assert(index[2] < self.getDimZ());
-        return self.getDerived().asComplexBuffer() + (index[0] * self.getDimY() + index[1]) * self.getDimZ() + index[2];
+    __host__ __device__ auto FFTKSpace<Derived, 3>::getStrides() const noexcept {
+        const size_t dimY = getDimY();
+        const size_t dimZ = getDimZ();
+        return IndexType({dimY * dimZ, dimZ, 1});
+    }
+
+    template<class Derived>
+    __host__ __device__ auto FFTKSpace<Derived, 3>::data_handle(this auto&& self) noexcept {
+        return self.getDerived().asComplexBuffer();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval auto FFTKSpace<Derived, 3>::getStrideAtCompile() noexcept -> IndexType {
+        return IndexType({Dynamic, Dynamic, 1});
     }
 }
 

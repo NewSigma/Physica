@@ -18,7 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/TensorImpl/LValueTensor.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/StridedMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/TensorImpl/StridedTensor.h"
 
 namespace Physica {
     template<class Derived, size_t Dim> class FFTRSpace;
@@ -82,12 +83,11 @@ namespace Physica {
     template<class Derived>
     class FFTRSpace<Derived, 2>
             : public CRTP<FFTRSpace<Derived, 2>>
-            , public LValueMatrix<FFTRSpace<Derived, 2>> {
+            , public StridedMatrix<FFTRSpace<Derived, 2>> {
         using This = FFTRSpace<Derived, 2>;
         using Base = CRTP<This>;
-        using MatrixBase = LValueMatrix<This>;
+        using MatrixBase = StridedMatrix<This>;
     public:
-        using typename MatrixBase::ScalarType;
         using MatrixBase::isComplex;
     public:
         ~FFTRSpace() = default;
@@ -105,9 +105,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept;
-        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
+        [[nodiscard]] __host__ __device__ size_t getRowStride() const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle(this auto&& self) noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept { return MatrixMajor::Row; }
+        [[nodiscard]] __host__ __device__ consteval static size_t getColStrideAtCompile() noexcept { return 1; }
     protected:
         FFTRSpace() = default;
         FFTRSpace(const FFTRSpace&) = default;
@@ -135,27 +137,29 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTRSpace<Derived, 2>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
-        assert(row < self.getRow());
-        assert(col < self.getCol());
-        const size_t numColumn = self.getCol();
+    __host__ __device__ size_t FFTRSpace<Derived, 2>::getRowStride() const noexcept {
+        const size_t col = getCol();
+        return isComplex() ? col : (col / 2 + 1) * 2;
+    }
+
+    template<class Derived>
+    __host__ __device__ auto FFTRSpace<Derived, 2>::data_handle(this auto&& self) noexcept {
         if constexpr (isComplex())
-            return self.getDerived().asComplexBuffer() + row * numColumn + col;
-        else {
-            const size_t shift = (numColumn / 2 + 1) * 2;
-            return self.getDerived().asRealBuffer() + row * shift + col;
-        }
+            return self.getDerived().asComplexBuffer();
+        else
+            return self.getDerived().asRealBuffer();
     }
     //////////////////////////////////////////////////////////////////////
+
     template<class Derived>
     class FFTRSpace<Derived, 3>
             : public CRTP<FFTRSpace<Derived, 3>>
-            , public LValueTensor<FFTRSpace<Derived, 3>> {
+            , public StridedTensor<FFTRSpace<Derived, 3>> {
         using This = FFTRSpace<Derived, 3>;
         using Base = CRTP<This>;
-        using TensorBase = LValueTensor<This>;
+        using TensorBase = StridedTensor<This>;
     public:
-        using typename TensorBase::ScalarType;
+        using typename TensorBase::IndexType;
         using TensorBase::isComplex;
     public:
         ~FFTRSpace() = default;
@@ -175,7 +179,12 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getDimX() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getDimY() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ size_t getDimZ() const noexcept { return Base::getDerived().getRSpaceSize()[2]; }
-        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, Index3D index) noexcept;
+        [[nodiscard]] __host__ __device__ auto getStrides() const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_handle(this auto&& self) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticShape() noexcept { return false; }
+        [[nodiscard]] __host__ __device__ consteval static IndexType getShapeAtCompile() noexcept { return IndexType({Dynamic, Dynamic, Dynamic}); }
+        [[nodiscard]] __host__ __device__ consteval static IndexType getStrideAtCompile() noexcept;
     protected:
         FFTRSpace() = default;
         FFTRSpace(const FFTRSpace&) = default;
@@ -204,16 +213,24 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTRSpace<Derived, 3>::data_ptr(this auto&& self, Index3D index) noexcept {
-        assert(index[0] < self.getDimX());
-        assert(index[1] < self.getDimY());
-        assert(index[2] < self.getDimZ());
+    __host__ __device__ auto FFTRSpace<Derived, 3>::getStrides() const noexcept {
+        const size_t dimY = getDimY();
+        const size_t dimZ = getDimZ();
+        const size_t shift = isComplex() ? dimZ : (dimZ / 2 + 1) * 2;
+        return IndexType({dimY * shift, shift, 1});
+    }
+
+    template<class Derived>
+    __host__ __device__ auto FFTRSpace<Derived, 3>::data_handle(this auto&& self) noexcept {
         if constexpr (isComplex())
-            return self.getDerived().asComplexBuffer() + (index[0] * self.getDimY() + index[1]) * self.getDimZ() + index[2];
-        else {
-            const size_t shift = (self.getDimZ() / 2 + 1) * 2;
-            return self.getDerived().asRealBuffer() + (index[0] * self.getDimY() + index[1]) * shift + index[2];
-        }
+            return self.getDerived().asComplexBuffer();
+        else
+            return self.getDerived().asRealBuffer();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval auto FFTRSpace<Derived, 3>::getStrideAtCompile() noexcept -> IndexType {
+        return IndexType({Dynamic, Dynamic, 1});
     }
 }
 
