@@ -99,3 +99,5 @@ namespace Physica {
 #include "StridedMatrixImpl/StridedMatrixImpl.h"
 #include "StridedMatrixImpl/MainDiag.h"
 #include "StridedMatrixImpl/OffsetDiag.h"
+#include "StridedMatrixImpl/MatrixConvert/RealMatrix.h"
+#include "StridedMatrixImpl/MatrixConvert/ImagMatrix.h"

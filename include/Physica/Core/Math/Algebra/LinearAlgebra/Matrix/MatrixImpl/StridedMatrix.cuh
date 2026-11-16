@@ -93,3 +93,5 @@ namespace Physica {
 #include "StridedMatrixImpl/StridedMatrixBlock.cuh"
 #include "StridedMatrixImpl/MainDiag.cuh"
 #include "StridedMatrixImpl/OffsetDiag.cuh"
+#include "StridedMatrixImpl/MatrixConvert/RealMatrix.cuh"
+#include "StridedMatrixImpl/MatrixConvert/ImagMatrix.cuh"
