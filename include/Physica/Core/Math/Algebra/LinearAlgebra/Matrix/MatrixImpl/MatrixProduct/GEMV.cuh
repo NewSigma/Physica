@@ -110,9 +110,10 @@ namespace Physica {
                       "[Error]: cuBLAS expects a contiguous minor direction");
         auto& ctx = CUDAContext::getInstance();
         ctx.setPointerMode(false);
-        constexpr auto Trans = (instanceof<M, Transpose> ^ MatrixMajor::isRowMatrix<M>()) ? CUBLAS_OP_T : CUBLAS_OP_N;
-        const size_t m = getLHS().getRow();
-        const size_t n = getLHS().getCol();
+        constexpr bool IsRowMajor = MatrixMajor::isRowMatrix<M>();
+        constexpr auto Trans = IsRowMajor ? CUBLAS_OP_T : CUBLAS_OP_N;
+        const size_t m = IsRowMajor ? getLHS().getCol() : getLHS().getRow();
+        const size_t n = IsRowMajor ? getLHS().getRow() : getLHS().getCol();
         const size_t lda = [this]() {
             if constexpr (instanceof<M, Transpose>)
                 return getLHS().transpose().getMajorStride();

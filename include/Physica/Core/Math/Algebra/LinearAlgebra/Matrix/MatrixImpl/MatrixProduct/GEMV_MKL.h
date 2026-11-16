@@ -27,7 +27,7 @@ namespace Physica {
         static_assert(std::remove_cvref_t<decltype(mat)>::getMinorStrideAtCompile() == 1,
                       "[Error]: MKL expects a contiguous minor direction");
         constexpr auto Layout = mat.getMajor() == MatrixMajor::Row ? CblasRowMajor : CblasColMajor;
-        constexpr auto Trans = instanceof<M, Transpose> ? CblasTrans : CblasNoTrans;
+        constexpr auto Trans = CblasNoTrans;
 
         const size_t m = mat.getRow();
         const size_t n = mat.getCol();
