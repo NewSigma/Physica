@@ -82,7 +82,9 @@ namespace Physica {
         using V1 = std::remove_cvref_t<V>;
         using T1 = M1::ScalarType;
         using T2 = V1::ScalarType;
-        if constexpr (std::same_as<T1, T2> && M1::isCompact() && HasMKL() && Internal::EnableLAPACK<V1, decltype(target)>::value) {
+        constexpr bool UseMKL = std::same_as<T1, T2> && M1::getMinorStrideAtCompile() == 1
+                             && HasMKL() && Internal::EnableLAPACK<V1, decltype(target)>::value;
+        if constexpr (UseMKL) {
             constexpr size_t Size = std::max(M1::getColAtCompile(), V1::getSizeAtCompile());
             constexpr size_t Threshold = 16;
             if constexpr (Size == Dynamic) {

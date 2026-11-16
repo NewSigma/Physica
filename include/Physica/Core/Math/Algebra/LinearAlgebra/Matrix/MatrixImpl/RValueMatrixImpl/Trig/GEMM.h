@@ -62,7 +62,11 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<M1, MatrixTrig> || instanceof_tx<M2, MatrixTrig>)
     void GEMM<M1, M2>::assign(Matrix auto& target) const {
-        if constexpr (HasMKL() && !T::isDiffable())
+        using Trig = std::conditional_t<TrigLHS, M1, M2>;
+        using Data = std::remove_cvref_t<decltype(std::declval<const Trig&>().getExpr())>;
+        constexpr bool UseMKL = HasMKL() && !T::isDiffable()
+                             && Data::getMinorStrideAtCompile() == 1 && target.getMinorStrideAtCompile() == 1;
+        if constexpr (UseMKL)
             assign_mkl(target);
         else
             assign_base(target);

@@ -60,6 +60,9 @@ namespace Physica {
         using Tm = decltype(std::declval<T>().toMKL());
         constexpr bool TrigLHS = instanceof_tx<M1, MatrixTrig>;
         using Trig = std::conditional_t<TrigLHS, M1, M2>;
+        using Data = std::remove_cvref_t<decltype(std::declval<const Trig&>().getExpr())>;
+        static_assert(Data::getMinorStrideAtCompile() == 1 && M::getMinorStrideAtCompile() == 1,
+                      "[Error]: cuBLAS expects a contiguous minor direction");
         constexpr auto Side = TrigLHS ? CUBLAS_SIDE_LEFT : CUBLAS_SIDE_RIGHT;
         constexpr auto TransA = MatrixMajor::isSameMajor<Trig, M>() ? CUBLAS_OP_N : CUBLAS_OP_T;
         constexpr auto UploNoTrans = Traits<Trig>::Upper ? CUBLAS_FILL_MODE_UPPER : CUBLAS_FILL_MODE_LOWER;

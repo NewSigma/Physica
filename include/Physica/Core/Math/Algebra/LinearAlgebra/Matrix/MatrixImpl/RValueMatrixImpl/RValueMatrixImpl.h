@@ -681,6 +681,11 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval size_t RValueMatrix<Derived, ScalarT>::getMinorStrideAtCompile() noexcept {
+        return Dynamic;
+    }
+
+    template<class Derived, Scalar ScalarT>
     __host__ __device__ consteval bool RValueMatrix<Derived, ScalarT>::isSparse() noexcept {
         return requires { std::declval<Derived>().getNumNonZero(); };
     }

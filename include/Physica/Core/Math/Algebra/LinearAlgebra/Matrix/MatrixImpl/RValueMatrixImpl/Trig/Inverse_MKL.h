@@ -25,6 +25,7 @@ namespace Physica {
     template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     void Inverse<M>::assign_mkl(Matrix auto& target) const {
         using Tm = decltype(std::declval<T>().toMKL());
+        static_assert(target.getMinorStrideAtCompile() == 1, "[Error]: LAPACK expects a contiguous minor direction");
         trig.assign(target);
 
         constexpr auto Layout = MatrixMajor::isRowMatrix<decltype(target)>() ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR;

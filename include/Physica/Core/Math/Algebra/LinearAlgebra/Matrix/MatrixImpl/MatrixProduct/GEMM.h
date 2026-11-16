@@ -96,7 +96,8 @@ namespace Physica {
         [[nodiscard]] consteval static bool useMicro(const Matrix auto& target) noexcept;
         [[nodiscard]] consteval static bool useMKL(const Matrix auto& target) noexcept;
         template<Matrix Target, Matrix MaybeTrans>
-        consteval static bool MatOrTransUseMKL() noexcept;
+        [[nodiscard]] consteval static bool MatOrTransUseMKL() noexcept;
+        [[nodiscard]] consteval static bool isMinorContiguous(const Matrix auto& target) noexcept;
         /* Friends */
         friend class device_obj<This>;
     };
@@ -395,7 +396,7 @@ namespace Physica {
         constexpr bool UseMKL1 = Large1 && Large2;
         constexpr bool UseMKL2 = MatOrTransUseMKL<M, T1>();
         constexpr bool UseMKL3 = MatOrTransUseMKL<M, T2>();
-        return UseMKL1 && UseMKL2 && UseMKL3;
+        return UseMKL1 && UseMKL2 && UseMKL3 && isMinorContiguous(target);
     }
 
     template<Matrix M1, Matrix M2>
@@ -405,6 +406,13 @@ namespace Physica {
             return HasMKL() && Internal::EnableLAPACK<Target, decltype(std::declval<MaybeTrans>().transpose())>::value;
         else
             return HasMKL() && Internal::EnableLAPACK<Target, MaybeTrans>::value;
+    }
+
+    template<Matrix M1, Matrix M2>
+    consteval bool GEMM<M1, M2>::isMinorContiguous(const Matrix auto& target) noexcept {
+        return std::remove_cvref_t<M1>::getMinorStrideAtCompile() == 1
+            && std::remove_cvref_t<M2>::getMinorStrideAtCompile() == 1
+            && std::remove_cvref_t<decltype(target)>::getMinorStrideAtCompile() == 1;
     }
 }
 

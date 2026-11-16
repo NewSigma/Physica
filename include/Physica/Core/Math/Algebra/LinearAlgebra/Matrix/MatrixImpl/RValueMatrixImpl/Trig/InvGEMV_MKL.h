@@ -25,6 +25,8 @@ namespace Physica {
     template<Matrix M, Vector V> requires(instanceof<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, MatrixTrig>)
     void GEMV<M, V>::assign_mkl(Vector auto& target) const {
         using Tm = decltype(std::declval<T>().toMKL());
+        using Data = std::remove_cvref_t<decltype(std::declval<const std::remove_cvref_t<M>&>().getExpr().getExpr())>;
+        static_assert(Data::getMinorStrideAtCompile() == 1, "[Error]: MKL expects a contiguous minor direction");
         rhs.assign(target);
 
         const auto& mat = inv.getExpr().getExpr();

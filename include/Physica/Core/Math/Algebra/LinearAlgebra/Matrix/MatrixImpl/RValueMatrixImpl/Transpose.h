@@ -62,6 +62,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static size_t getMinorStrideAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static int getMajor() noexcept;
     };
 
@@ -98,6 +99,11 @@ namespace Physica {
     template<Matrix M>
     __host__ __device__ consteval size_t Transpose<M>::getColAtCompile() noexcept {
         return std::remove_cvref_t<M>::getRowAtCompile();
+    }
+
+    template<Matrix M>
+    __host__ __device__ consteval size_t Transpose<M>::getMinorStrideAtCompile() noexcept {
+        return std::remove_cvref_t<M>::getMinorStrideAtCompile();
     }
 
     template<Matrix M>

@@ -24,6 +24,7 @@
 namespace Physica {
     template<Matrix M, bool Upper, bool Unit>
     void MatrixTrig<M, Upper, Unit>::assign_mkl(Matrix auto&& target) const {
+        static_assert(mat.getMinorStrideAtCompile() == 1 && target.getMinorStrideAtCompile() == 1, "[Error]: LAPACK expects a contiguous minor direction");
         using Tm = decltype(std::declval<T>().toMKL());
         target.assert_assign_lapack(mat);
         target.zeros();

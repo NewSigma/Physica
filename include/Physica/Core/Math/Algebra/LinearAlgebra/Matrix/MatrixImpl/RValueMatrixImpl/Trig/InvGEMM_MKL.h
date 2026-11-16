@@ -25,6 +25,10 @@ namespace Physica {
     void GEMM<M1, M2>::assign_mkl(Matrix auto& target) const noexcept {
         using M = std::remove_cvref_t<decltype(target)>;
         using Tm = decltype(std::declval<T>().toMKL());
+        using InvTrig = std::conditional_t<Internal::isInvTrig<M1>(), M1, M2>;
+        using Data = std::remove_cvref_t<decltype(std::declval<const InvTrig&>().getExpr().getExpr())>;
+        static_assert(Data::getMinorStrideAtCompile() == 1 && M::getMinorStrideAtCompile() == 1,
+                      "[Error]: MKL expects a contiguous minor direction");
         if constexpr (Internal::isInvTrig<M1>()) {
             if constexpr (std::same_as<std::remove_cvref_t<M2>, M>) {
                 if (&rhs != &target)

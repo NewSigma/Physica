@@ -24,6 +24,8 @@ namespace Physica {
     template<Matrix M, Vector V>
     void GEMV<M, V>::assign_mkl(Vector auto&& target) const noexcept {
         using Tm = decltype(std::declval<T>().toMKL());
+        static_assert(std::remove_cvref_t<decltype(mat)>::getMinorStrideAtCompile() == 1,
+                      "[Error]: MKL expects a contiguous minor direction");
         constexpr auto Layout = mat.getMajor() == MatrixMajor::Row ? CblasRowMajor : CblasColMajor;
         constexpr auto Trans = instanceof<M, Transpose> ? CblasTrans : CblasNoTrans;
 

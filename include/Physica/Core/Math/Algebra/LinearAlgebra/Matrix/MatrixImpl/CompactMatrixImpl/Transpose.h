@@ -64,7 +64,9 @@ namespace Physica {
     template<ExecutePolicy P>
     void Transpose<M>::assign(Matrix auto&& target) const {
         constexpr bool LargeMatrix = Base::getSizeAtCompile() == Dynamic;
-        constexpr bool UseMKL = HasMKL() && Internal::EnableLAPACK<M, decltype(target)>::value && MatrixMajor::isSameMajor<M, decltype(target)>();
+        constexpr bool UseMKL = HasMKL() && Internal::EnableLAPACK<M, decltype(target)>::value
+                             && MatrixMajor::isSameMajor<M, decltype(target)>()
+                             && target.getMinorStrideAtCompile() == 1;
         if constexpr (LargeMatrix && UseMKL) {
             if (Base::getSize() <= 16)
                 Base::template assign<P>(target);

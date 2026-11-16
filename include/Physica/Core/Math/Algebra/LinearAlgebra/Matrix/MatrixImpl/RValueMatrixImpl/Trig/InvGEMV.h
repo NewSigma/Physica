@@ -60,7 +60,9 @@ namespace Physica {
     template<Matrix M, Vector V> requires(instanceof<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, MatrixTrig>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
-        if constexpr (HasMKL() && Internal::EnableLAPACK<V, decltype(target)>::value)
+        using Data = std::remove_cvref_t<decltype(std::declval<const std::remove_cvref_t<M>&>().getExpr().getExpr())>;
+        constexpr bool UseMKL = HasMKL() && Internal::EnableLAPACK<V, decltype(target)>::value && Data::getMinorStrideAtCompile() == 1;
+        if constexpr (UseMKL)
             assign_mkl(target);
         else
             assign_base(target);

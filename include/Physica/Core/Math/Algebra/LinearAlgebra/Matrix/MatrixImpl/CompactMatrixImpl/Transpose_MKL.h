@@ -25,6 +25,7 @@ namespace Physica {
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
     void Transpose<M>::assign_mkl(Matrix auto&& target) const {
         static_assert(MatrixMajor::isSameMajor<M, decltype(target)>(), "[Error]: Cannot apply MKL to this expr");
+        static_assert(target.getMinorStrideAtCompile() == 1, "[Error]: MKL expects a contiguous minor direction");
         using Tm = decltype(std::declval<T>().toMKL());
         target.assert_assign_lapack(mat);
 

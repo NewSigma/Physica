@@ -73,7 +73,9 @@ namespace Physica {
             using V1 = std::remove_cvref_t<V>;
             using T1 = M1::ScalarType;
             using T2 = V1::ScalarType;
-            if constexpr (std::same_as<T1, T2> && M1::isCompact() && Internal::EnableLAPACK<V1, decltype(target)>::value)
+            constexpr bool UseMKL = std::same_as<T1, T2> && M1::getMinorStrideAtCompile() == 1
+                                 && Internal::EnableLAPACK<V1, decltype(target)>::value;
+            if constexpr (UseMKL)
                 assign_cublas(target);
             else
                 assign_base(target);
@@ -104,6 +106,8 @@ namespace Physica {
     template<Matrix M, Vector V>
     void device_obj<GEMV<M, V>>::assign_cublas(Vector auto& target) const {
         using Tm = decltype(std::declval<T>().toCUDA());
+        static_assert(std::remove_cvref_t<M>::getMinorStrideAtCompile() == 1,
+                      "[Error]: cuBLAS expects a contiguous minor direction");
         auto& ctx = CUDAContext::getInstance();
         ctx.setPointerMode(false);
         constexpr auto Trans = (instanceof<M, Transpose> ^ MatrixMajor::isRowMatrix<M>()) ? CUBLAS_OP_T : CUBLAS_OP_N;

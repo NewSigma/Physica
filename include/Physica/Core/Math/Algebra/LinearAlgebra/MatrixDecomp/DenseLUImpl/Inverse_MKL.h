@@ -23,6 +23,7 @@
 namespace Physica {
     template<Scalar T, bool Pivot>
     void Inverse<DenseLU<T, Pivot>>::assign_mkl(Matrix auto& target) const {
+        static_assert(target.getMinorStrideAtCompile() == 1, "[Error]: LAPACK expects a contiguous minor direction");
         using Tm = decltype(std::declval<T>().toMKL());
         constexpr int Layout = LAPACK_COL_MAJOR;
         target.assert_assign(*this);

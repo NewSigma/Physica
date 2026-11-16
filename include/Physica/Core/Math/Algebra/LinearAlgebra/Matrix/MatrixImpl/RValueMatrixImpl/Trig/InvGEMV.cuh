@@ -55,6 +55,8 @@ namespace Physica {
 
     template<Matrix M, Vector V> requires(instanceof<M, Inverse> && instanceof_tx<typename Traits<M>::ExprType, MatrixTrig>)
     void device_obj<GEMV<M, V>>::assign(Vector auto& target) const {
+        using Data = std::remove_cvref_t<decltype(std::declval<const std::remove_cvref_t<M>&>().getExpr().getExpr())>;
+        static_assert(Data::getMinorStrideAtCompile() == 1, "[Error]: cuBLAS expects a contiguous minor direction");
         assign_cublas(target);
     }
 

@@ -59,6 +59,10 @@ namespace Physica {
     void device_obj<GEMM<M1, M2>>::assign(Matrix auto& target) const {
         using Tm = decltype(std::declval<T>().toCUDA());
         using M = std::remove_cvref_t<decltype(target)>;
+        using InvTrig = std::conditional_t<Internal::isInvTrig<M1>(), M1, M2>;
+        using Data = std::remove_cvref_t<decltype(std::declval<const InvTrig&>().getExpr().getExpr())>;
+        static_assert(Data::getMinorStrideAtCompile() == 1 && M::getMinorStrideAtCompile() == 1,
+                      "[Error]: cuBLAS expects a contiguous minor direction");
         if constexpr (Internal::isInvTrig<M1>())
             getRHS().assign(target);
         else

@@ -74,6 +74,7 @@ namespace Physica {
     template<Matrix M> requires(instanceof_tx<M, MatrixTrig>)
     void device_obj<Inverse<M>>::assign_cusolver(Matrix auto& target) const {
         using Tm = decltype(std::declval<T>().toCUDA());
+        static_assert(target.getMinorStrideAtCompile() == 1, "[Error]: cuSOLVER expects a contiguous minor direction");
         getExpr().assign(target);
 
         auto& ctx = CUDAContext::getInstance();

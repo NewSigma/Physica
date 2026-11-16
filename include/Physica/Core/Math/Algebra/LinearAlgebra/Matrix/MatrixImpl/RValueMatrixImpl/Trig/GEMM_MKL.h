@@ -27,6 +27,9 @@ namespace Physica {
         using Tm = decltype(std::declval<T>().toMKL());
         constexpr bool TrigLHS = instanceof_tx<M1, MatrixTrig>;
         using Trig = std::conditional_t<TrigLHS, M1, M2>;
+        using Data = std::remove_cvref_t<decltype(std::declval<const Trig&>().getExpr())>;
+        static_assert(Data::getMinorStrideAtCompile() == 1 && M::getMinorStrideAtCompile() == 1,
+                      "[Error]: MKL expects a contiguous minor direction");
         constexpr auto Layout = MatrixMajor::isRowMatrix<M>() ? CblasRowMajor : CblasColMajor;
         constexpr auto Side = TrigLHS ? CblasLeft : CblasRight;
         constexpr auto TransTrig = MatrixMajor::isSameMajor<Trig, M>() ? CblasNoTrans : CblasTrans;

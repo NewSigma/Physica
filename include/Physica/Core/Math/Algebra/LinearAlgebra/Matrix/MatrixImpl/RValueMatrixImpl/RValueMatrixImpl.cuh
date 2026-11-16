@@ -504,6 +504,11 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
+    __host__ __device__ consteval size_t device_obj<RValueMatrix<Derived, ScalarT>>::getMinorStrideAtCompile() noexcept {
+        return Derived::getMinorStrideAtCompile();
+    }
+
+    template<class Derived, Scalar ScalarT>
     __host__ __device__ consteval bool device_obj<RValueMatrix<Derived, ScalarT>>::isSparse() noexcept {
         return Derived::isSparse();
     }
