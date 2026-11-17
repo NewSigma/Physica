@@ -295,13 +295,16 @@ namespace Physica {
 
         if constexpr (2 * Size <= MaxSize) {
             SIMD<T, 2 * Size> pack2;
-            pack2.load(pos);
+            pack2.load(pos, 2 * Size - 1);
             return gatherEvenLanes(pack2);
         }
         else {
             Pack low, high;
             low.load(pos);
-            high.load(pos + Size);
+            if constexpr (Size > 1)
+                high.load(pos + Size, Size - 1);
+            else
+                high.load(pos + Size);
             if constexpr (T::isComplex())
                 return Pack::asComplex(SIMD<Tr, 2 * Size>(gatherEvenLanes(low).asReal(), gatherEvenLanes(high).asReal()));
             else

@@ -43,6 +43,10 @@ namespace Physica {
         constexpr void assign(Vector auto&& v) const noexcept;
         void assign_mkl(Vector auto& v) const noexcept;
 
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index) const noexcept;
+        template<int Size>
+        [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
         [[nodiscard]] constexpr auto view(this auto&&) noexcept;
 
         template<size_t Length = Dynamic>
@@ -79,6 +83,20 @@ namespace Physica {
         StridedVector(const This&) = default;
         StridedVector(This&&) noexcept = default;
     };
+
+    template<class Derived>
+    template<int Size>
+    auto StridedVector<Derived>::packet(size_t index) const noexcept -> SIMD<T, Size> {
+        assert(index + Size <= Base::getLength() && "[Error]: Index out of range");
+        return (Base::getDerived().view().begin() + index).template load<Size>();
+    }
+
+    template<class Derived>
+    template<int Size>
+    auto StridedVector<Derived>::packet(size_t index, size_t count) const noexcept -> SIMD<T, Size> {
+        assert(index + count <= Base::getLength() && "[Error]: Index out of range");
+        return (Base::getDerived().view().begin() + index).template load<Size>(count);
+    }
 
     template<class Derived>
     constexpr auto StridedVector<Derived>::view(this auto&& self) noexcept {
