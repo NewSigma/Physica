@@ -348,6 +348,7 @@ namespace Physica {
     template<Scalar T, size_t Order>
     void EigenSolver<T, Order>::computeRealMatEigenvectors(WorkingMatrix& matrixT) {
         const size_t order = matrixT.getRow();
+        const Tr scale = abs_elem(matrixT).max();
         for (size_t i = order - 1; i < order; --i) {
             auto block = matrixT.topLeftCorner(i + 1, i + 1);
             if (eigenvalues[i].imag().isZero()) {
@@ -423,6 +424,18 @@ namespace Physica {
                         const T temp1 = matrixT[j, j] - eigenvalues[i].real();
                         c.real() = x * dot21 - temp1 * dot11 + eigenvalues[i].imag() * dot12;
                         c.imag() = x * dot22 - temp1 * dot12 - eigenvalues[i].imag() * dot11;
+
+                        const Tr gap = (eigenvalues[i] - eigenvalues[j]).norm();
+                        if (gap.isSubNormal()) {
+                            const bool isDegenerate = c.norm() <= (col1.tail(j + 1).norm() + col2.tail(j + 1).norm()) * square(scale) * sqrt(Tr(std::numeric_limits<Tr>::epsilon()));
+                            if (isDegenerate) {
+                                matrixT.block(j - 1, 2, i - 1, 2).zeros();
+                                j -= 1;
+                                continue;
+                            }
+                            assert(false && "[Error]: Degenerate row is inconsistent, the matrix is numerically defective");
+                        }
+
                         c /= Tc(vr, vi);
                         matrixT[j - 1, i - 1] = c.real();
                         matrixT[j - 1, i] = c.imag();
@@ -448,14 +461,24 @@ namespace Physica {
     template<Scalar T, size_t Order>
     void EigenSolver<T, Order>::computeComplexMatEigenvectors(WorkingMatrix& matrixT) {
         const size_t order = matrixT.getRow();
+        const Tr scale = abs_elem(matrixT).max();
         for (size_t i = order - 1; i < order; --i) {
             auto block = matrixT.topLeftCorner(i + 1, i + 1);
             auto col = block.col(i);
             col[i] = Tr(1);
             for (size_t j = i - 1; j < i; --j) {
-                assert(!scalarNear(eigenvalues[i], eigenvalues[j], 1E-14)); // TODO: handle degeneracy
                 auto row = block.row(j);
-                col[j] = (col.tail(j + 1) * row.tail(j + 1)) / (eigenvalues[i] - eigenvalues[j]);
+                const Tc dot = col.tail(j + 1) * row.tail(j + 1);
+                const Tc delta = eigenvalues[i] - eigenvalues[j];
+                if (delta.norm().isSubNormal()) {
+                    const bool isDegenerate = dot.norm() <= col.tail(j + 1).norm() * scale * sqrt(Tr(std::numeric_limits<Tr>::epsilon()));
+                    if (isDegenerate) {
+                        col[j] = Tc(0);
+                        continue;
+                    }
+                    assert(false && "[Error]: Degenerate row is inconsistent, the matrix is numerically defective");
+                }
+                col[j] = dot / delta;
             }
         }
     }

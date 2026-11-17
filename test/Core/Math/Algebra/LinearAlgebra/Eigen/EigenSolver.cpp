@@ -98,20 +98,20 @@ namespace {
     void testReal() {
         using M = DenseMatrix<float64, MatrixMajor::Col, 5, 5>;
         const M mat1{
-                {0.200743, 0.151314, 0.152894, 0.934051,  0.487404},
-                {0.819659, 0.434558, 0.829935, 0.837801,  0.699088},
-                {0.432202, 0.744724, 0.823444, 0.149924,   0.72579},
-                {0.315664, 0.789745, 0.892616, 0.446226, 0.0861119},
-                {0.569445, 0.734035, 0.816045, 0.538242,  0.302492}
+            {0.200743, 0.151314, 0.152894, 0.934051,  0.487404},
+            {0.819659, 0.434558, 0.829935, 0.837801,  0.699088},
+            {0.432202, 0.744724, 0.823444, 0.149924,   0.72579},
+            {0.315664, 0.789745, 0.892616, 0.446226, 0.0861119},
+            {0.569445, 0.734035, 0.816045, 0.538242,  0.302492},
         };
         eigenTest(mat1, 1E-14);
 
         const M mat2{
-                {0.502016,  0.812053, 0.0716913,  0.180531, 0.0161382},
-                { 0.54811,  0.428973,  0.997804,  0.601252, 0.0704318},
-                {0.885699, 0.0248232,  0.397405, 0.0504956,  0.423087},
-                {0.645844,  0.650145,  0.264407,  0.264864,  0.897732},
-                {0.244945,  0.716587,  0.714982,  0.228202,  0.221696}
+            {0.502016,  0.812053, 0.0716913,  0.180531, 0.0161382},
+            { 0.54811,  0.428973,  0.997804,  0.601252, 0.0704318},
+            {0.885699, 0.0248232,  0.397405, 0.0504956,  0.423087},
+            {0.645844,  0.650145,  0.264407,  0.264864,  0.897732},
+            {0.244945,  0.716587,  0.714982,  0.228202,  0.221696},
         };
         eigenTest(mat2, 1E-14);
     }
@@ -119,18 +119,17 @@ namespace {
     void testReconstruct() {
         using M = DenseMatrix<float64, MatrixMajor::Col, 3, 3>;
         const M mat1{
-                {-0.590316,  -2.19514,  -2.37463},
-                { -1.25006, -0.297493,   1.40349},
-                { 0.517063, -0.956614, -0.920775}
+            {-0.590316,  -2.19514,  -2.37463},
+            { -1.25006, -0.297493,   1.40349},
+            { 0.517063, -0.956614, -0.920775},
         };
         eigenTest(mat1, 1E-14);
         reconstructTest<M, false>(mat1, 1E-14);
 
-
         const M mat2{
-                {0.354784,  0.604092, 0.557408},
-                {0.221811,  0.484944, 0.181502},
-                {0.491429, 0.0161911, 0.772586}
+            {0.354784,  0.604092, 0.557408},
+            {0.221811,  0.484944, 0.181502},
+            {0.491429, 0.0161911, 0.772586},
         };
         eigenTest(mat2, 1E-15);
         const M mat3 = mat2 + mat2.transpose();
@@ -140,29 +139,73 @@ namespace {
     void testRowMajor() {
         using M = DenseMatrix<float64, MatrixMajor::Row, 3, 3>;
         const M mat1{
-                {-0.590316,  -2.19514,  -2.37463},
-                { -1.25006, -0.297493,   1.40349},
-                { 0.517063, -0.956614, -0.920775}
+            {-0.590316,  -2.19514,  -2.37463},
+            { -1.25006, -0.297493,   1.40349},
+            { 0.517063, -0.956614, -0.920775},
         };
         eigenTest(mat1, 1E-14);
     }
 
     void testDegeneracy() {
-        using M = DenseMatrix<float64, MatrixMajor::Col, 6, 6>;
-        const M mat1{
+        /* Exact real */ {
+            const DenseMatrix<float64, MatrixMajor::Col, 3, 3> mat1{
+                {1, 0, 0},
+                {0, 1, 0},
+                {0, 0, 2},
+            };
+            eigenTest(mat1, 1E-14);
+            const DenseMatrix<cfloat64, MatrixMajor::Col, 3, 3> cmat1 = mat1;
+            eigenTest(cmat1, 1E-14);
+        }
+        /* Near real */ {
+            const DenseMatrix<float64, MatrixMajor::Col, 2, 2> mat2{
+                {1,               1E-3},
+                {0, 1.0000000000000002},
+            };
+            eigenTest(mat2, 1E-14);
+            const DenseMatrix<cfloat64, MatrixMajor::Col, 2, 2> cmat2 = mat2;
+            eigenTest(cmat2, 1E-14);
+        }
+        /* Exact complex */ {
+            const DenseMatrix<float64, MatrixMajor::Col, 4, 4> mat3{
+                {0, -1, 0,  0},
+                {1,  0, 0,  0},
+                {0,  0, 0, -1},
+                {0,  0, 1,  0},
+            };
+            eigenTest(mat3, 1E-14);
+            const DenseMatrix<cfloat64, MatrixMajor::Col, 4, 4> cmat3 = mat3;
+            eigenTest(cmat3, 1E-14);
+        }
+        /* Near complex */ {
+            const float64 z1 = 1E-8;
+            const float64 z2 = z1 + 1E-10;
+            const float64 coupling = 1E-9;
+            const DenseMatrix<float64, MatrixMajor::Col, 5, 5> mat4{
+                {  0, z1, coupling,  0, 0},
+                {-z1,  0,        0,  0, 0},
+                {  0,  0,        0, z2, 0},
+                {  0,  0,      -z2,  0, 0},
+                {  0,  0,        0,  0, 1},
+            };
+            eigenTest(mat4, 1E-14);
+            const DenseMatrix<cfloat64, MatrixMajor::Col, 5, 5> cmat4 = mat4;
+            eigenTest(cmat4, 1E-14);
+        }
+        /* Real world */ {
+            using M = DenseMatrix<float64, MatrixMajor::Col, 6, 6>;
+            const M mat1{
                 { 0.1343184046,             0,             0, -0.1343184056,             0,             0},
                 {            0,  0.1341424528,             0,             0, -0.1341424541,             0},
                 {            0,             0,  0.1342191829,             0,             0, -0.1342191848},
                 {-0.1343184056,             0,             0,  0.1343184065,             0,             0},
                 {            0, -0.1341424541,             0,             0,  0.1341424554,             0},
-                {            0,             0, -0.1342191848,             0,             0,  0.1342191868}
-        };
-        eigenTest(mat1, 1E-15);
-
-        using ComplexMatrix = DenseMatrix<cfloat64, MatrixMajor::Col, 6, 6>;
-        const ComplexMatrix mat2 = mat1;
-        eigenTest(mat2, 1E-15);
-
+                {            0,             0, -0.1342191848,             0,             0,  0.1342191868},
+            };
+            eigenTest(mat1, 1E-15);
+            const DenseMatrix<cfloat64, MatrixMajor::Col, 6, 6> mat2 = mat1;
+            eigenTest(mat2, 1E-15);
+        }
         DenseMatrix<float64> m = TransIsingMatrix<float64, 1, 8>(1, 0.01, SquareLattice<1>({{8}, 1}));
         eigenTest(m, 1E-10);
     }
