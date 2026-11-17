@@ -64,50 +64,34 @@ namespace Physica {
     }
 
     template<FloatPrec Prec, int Size>
-    [[nodiscard]] SIMD<Real<Prec>, Size> cbrt(SIMD<Real<Prec>, Size> x) noexcept {
-        return SIMD<Real<Prec>, Size>(cbrt(x.toMachine()));
-    }
+    [[nodiscard]] PHYSICA_API auto cbrt(SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size>;
 
     template<FloatPrec Prec, int Size>
-    [[nodiscard]] auto ln(SIMD<Real<Prec>, Size> x) noexcept {
-        return SIMD<Real<Prec>, Size>(log(x.toMachine()));
-    }
+    [[nodiscard]] PHYSICA_API auto ln(SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size>;
 
     template<FloatPrec Prec, int Size>
-    [[nodiscard]] auto ln1p(SIMD<Real<Prec>, Size> x) noexcept {
-        return SIMD<Real<Prec>, Size>(log1p(x.toMachine()));
-    }
+    [[nodiscard]] PHYSICA_API auto ln1p(SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size>;
 
     template<FloatPrec Prec, int Size>
-    [[nodiscard]] auto pow(SIMD<Real<Prec>, Size> x, SIMD<Real<Prec>, Size> y) noexcept {
-        return SIMD<Real<Prec>, Size>(pow(x.toMachine(), y.toMachine()));
-    }
+    [[nodiscard]] PHYSICA_API auto exp(SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size>;
 
     template<FloatPrec Prec, int Size>
-    [[nodiscard]] auto sin(SIMD<Real<Prec>, Size> x) noexcept {
-        Internal::checkTrigonometricParam<false>(abs(x).max());
-        return SIMD<Real<Prec>, Size>(VCL::sin(x.toMachine()));
-    }
+    [[nodiscard]] PHYSICA_API auto expm1(SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size>;
 
     template<FloatPrec Prec, int Size>
-    [[nodiscard]] auto cos(SIMD<Real<Prec>, Size> x) noexcept {
-        Internal::checkTrigonometricParam<false>(abs(x).max());
-        return SIMD<Real<Prec>, Size>(VCL::cos(x.toMachine()));
-    }
+    [[nodiscard]] PHYSICA_API auto pow(SIMD<Real<Prec>, Size> x, SIMD<Real<Prec>, Size> y) noexcept -> SIMD<Real<Prec>, Size>;
 
     template<FloatPrec Prec, int Size>
-    [[nodiscard]] auto sincos(SIMD<Real<Prec>, Size> x) noexcept {
-        Internal::checkTrigonometricParam<false>(abs(x).max());
-        SIMD<Real<Prec>, Size> s, c;
-        VCL::sincos(x.toMachine(), s.toMachine(), c.toMachine());
-        return std::make_pair(s, c);
-    }
+    [[nodiscard]] PHYSICA_API auto sin(SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size>;
 
     template<FloatPrec Prec, int Size>
-    [[nodiscard]] auto tan(SIMD<Real<Prec>, Size> x) noexcept {
-        Internal::checkTrigonometricParam<false>(abs(x).max());
-        return SIMD<Real<Prec>, Size>(VCL::tan(x.toMachine()));
-    }
+    [[nodiscard]] PHYSICA_API auto cos(SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size>;
+
+    template<FloatPrec Prec, int Size>
+    [[nodiscard]] PHYSICA_API auto sincos(SIMD<Real<Prec>, Size> x) noexcept -> std::pair<SIMD<Real<Prec>, Size>, SIMD<Real<Prec>, Size>>;
+
+    template<FloatPrec Prec, int Size>
+    [[nodiscard]] PHYSICA_API auto tan(SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size>;
 
     template<FloatPrec Prec, int Size>
     [[nodiscard]] auto sec(SIMD<Real<Prec>, Size> x) noexcept {
@@ -115,24 +99,16 @@ namespace Physica {
     }
 
     template<FloatPrec Prec, int Size>
-    [[nodiscard]] auto arctan2(SIMD<Real<Prec>, Size> y, SIMD<Real<Prec>, Size> x) noexcept {
-        return VCL::atan2(y.toMachine(), x.toMachine());
-    }
+    [[nodiscard]] PHYSICA_API auto arctan2(SIMD<Real<Prec>, Size> y, SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size>;
 
     template<FloatPrec Prec, int Size>
-    [[nodiscard]] auto cosh(SIMD<Real<Prec>, Size> x) noexcept {
-        return SIMD<Real<Prec>, Size>(VCL::cosh(x.toMachine()));
-    }
+    [[nodiscard]] PHYSICA_API auto cosh(SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size>;
 
     template<FloatPrec Prec, int Size>
-    [[nodiscard]] auto sinh(SIMD<Real<Prec>, Size> x) noexcept {
-        return SIMD<Real<Prec>, Size>(VCL::sinh(x.toMachine()));
-    }
+    [[nodiscard]] PHYSICA_API auto sinh(SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size>;
 
     template<FloatPrec Prec, int Size>
-    [[nodiscard]] auto tanh(SIMD<Real<Prec>, Size> x) noexcept {
-        return SIMD<Real<Prec>, Size>(VCL::tanh(x.toMachine()));
-    }
+    [[nodiscard]] PHYSICA_API auto tanh(SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size>;
 
     template<FloatPrec Prec, int Size>
     [[nodiscard]] auto sech(SIMD<Real<Prec>, Size> x) noexcept {
@@ -140,14 +116,10 @@ namespace Physica {
     }
 
     template<FloatPrec Prec, int Size>
-    [[nodiscard]] auto arcsinh(SIMD<Real<Prec>, Size> x) noexcept {
-        return SIMD<Real<Prec>, Size>(VCL::asinh(x.toMachine()));
-    }
+    [[nodiscard]] PHYSICA_API auto arcsinh(SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size>;
 
     template<FloatPrec Prec, int Size>
-    [[nodiscard]] auto arctanh(SIMD<Real<Prec>, Size> x) noexcept {
-        return SIMD<Real<Prec>, Size>(VCL::atanh(x.toMachine()));
-    }
+    [[nodiscard]] PHYSICA_API auto arctanh(SIMD<Real<Prec>, Size> x) noexcept -> SIMD<Real<Prec>, Size>;
 
     template<FloatPrec Prec, int Size>
     [[nodiscard]] SIMD<Real<Prec>, Size> lncosh(SIMD<Real<Prec>, Size> x) noexcept {
@@ -182,5 +154,3 @@ namespace Physica {
         return VCL::round(x.toMachine());
     }
 }
-
-#include "Math/Exp.h"

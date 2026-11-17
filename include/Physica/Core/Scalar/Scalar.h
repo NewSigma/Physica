@@ -29,7 +29,7 @@
 #include "Physica/Core/Utils/Suspend.h"
 
 namespace Physica {
-    enum FloatPrec : char {
+    enum PHYSICA_API_GNU FloatPrec : char {
         Float16 = 0,
         Float32 = 1,
         Float64 = 2,
@@ -37,12 +37,12 @@ namespace Physica {
 
         Half = Float16,
         Float = Float32,
-        Double = Float64
+        Double = Float64,
     };
 
     enum class DiffMode : char {
         Forward,
-        Reverse
+        Reverse,
     };
 
     // MP = MultiPrecision

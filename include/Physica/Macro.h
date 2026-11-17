@@ -34,8 +34,10 @@
 
 #ifdef __GNUC__
     #define PHYSICA_API [[gnu::visibility("default")]]
+    #define PHYSICA_API_GNU __attribute__((visibility("default"))) // More general than PHYSICA_API
 #else
     #define PHYSICA_API __declspec(dllexport)
+    #define PHYSICA_API_GNU
     #define __restrict__ __restrict
 
     #include <BaseTsd.h>
