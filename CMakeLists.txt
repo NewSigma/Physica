@@ -10,6 +10,8 @@ if(CMAKE_SOURCE_DIR MATCHES "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "In source build is a bad practice")
 endif()
 
+include(GNUInstallDirs)
+
 message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
 #############################################Settings#############################################
 option(BUILD_TESTS "Build tests" ON)
@@ -43,7 +45,7 @@ include(PhysicaConfigImpl)
 if(RUN_CHECKS)
     add_subdirectory(cmake/config)
 endif()
-add_subdirectory(cmake/Modules)
+set(PHYSICA_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/Physica")
 ##############################################Project################################################
 if(PHYSICA_CCACHE)
     find_program(CCACHE_PROGRAM ccache)
@@ -87,7 +89,7 @@ if(BUILD_DOC)
     if(NOT PHYSICA_GUI)
         message(FATAL_ERROR "To use Physica documentation, you should enable PHYSICA_GUI.")
     endif()
-    find_package(Sphinx REQUIRED)
+    find_program(SPHINX_EXEC sphinx-build REQUIRED)
     add_custom_target(Sphinx
                       COMMAND ${SPHINX_EXEC} -b html ${CMAKE_SOURCE_DIR}/doc ${CMAKE_BINARY_DIR}/sphinx
                       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -95,9 +97,30 @@ if(BUILD_DOC)
     add_subdirectory(doc)
 endif()
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/vectorclass DESTINATION include)
-install(FILES include/Physica/Config.h DESTINATION include/Physica)
-install(FILES include/Physica/CRCoro.h DESTINATION include/Physica)
-install(FILES include/Physica/CRTP.h DESTINATION include/Physica)
-install(FILES include/Physica/Macro.h DESTINATION include/Physica)
-install(FILES include/Physica/PlainStruct.h DESTINATION include/Physica)
+##############################################Package###############################################
+include(CMakePackageConfigHelpers)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/vectorclass DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES
+            include/Physica/Config.h
+            include/Physica/CRCoro.h
+            include/Physica/CRTP.h
+            include/Physica/Macro.h
+            include/Physica/PlainStruct.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Physica)
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/PhysicaConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/PhysicaConfig.cmake"
+    INSTALL_DESTINATION "${PHYSICA_CMAKE_INSTALL_DIR}"
+    PATH_VARS CMAKE_INSTALL_INCLUDEDIR)
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/PhysicaConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion)
+install(FILES
+            "${CMAKE_CURRENT_BINARY_DIR}/PhysicaConfig.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/PhysicaConfigVersion.cmake"
+        DESTINATION "${PHYSICA_CMAKE_INSTALL_DIR}")
+
+file(GLOB PHYSICA_MODULE_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/*.cmake")
+install(FILES ${PHYSICA_MODULE_FILES} DESTINATION "${PHYSICA_CMAKE_INSTALL_DIR}/modules")

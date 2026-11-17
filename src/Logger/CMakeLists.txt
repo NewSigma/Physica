@@ -8,13 +8,14 @@ target_sources(PhysicaLogger PRIVATE
     LoggerTimer.cpp
 )
 
-target_link_libraries(PhysicaLogger PUBLIC Physica::Logger)
-
 set_target_properties(PhysicaLogger PROPERTIES
+    EXPORT_NAME Logger
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR})
 
-install(TARGETS PhysicaLogger DESTINATION lib)
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/Physica/Logger DESTINATION include/Physica)
+target_link_libraries(PhysicaLogger PUBLIC PhysicaCore)
+
+install(TARGETS PhysicaLogger EXPORT PhysicaLoggerTargets ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(DIRECTORY ${Physica_INCLUDE_DIR}/Physica/Logger DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Physica)
 
 physica_add_header_check(PhysicaLogger)
