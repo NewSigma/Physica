@@ -51,6 +51,7 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void assign(Matrix auto& target) const;
         __host__ __device__ void assign_add(Matrix auto& target) const;
+        void assign_cublas(Matrix auto& target) const;
 
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t, size_t, instanceof_x<ThreadBlock> auto) const { noImpl("GEMM.calc() is low performance and should be avoided"); }
@@ -98,6 +99,11 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
+    void device_obj<GEMM<M1, M2>>::assign_cublas(Matrix auto& target) const {
+        assign_impl_cublas<false>(target);
+    }
+
+    template<Matrix M1, Matrix M2>
     auto device_obj<GEMM<M1, M2>>::compute() const {
         using RetTy = decltype(std::declval<host_obj>().compute())::device_obj_type;
         return RetTy(*this);
@@ -141,8 +147,9 @@ namespace Physica {
         static_assert(!Diffable<This>);
         target.assert_assign(*this);
 
-        const auto op1 = isTranspose1 ? CUBLAS_OP_T : CUBLAS_OP_N;
-        const auto op2 = isTranspose2 ? CUBLAS_OP_T : CUBLAS_OP_N;
+        using M = std::remove_cvref_t<decltype(target)>;
+        constexpr auto op1 = MatrixMajor::isSameMajor<M1, M>() ? CUBLAS_OP_N : CUBLAS_OP_T;
+        constexpr auto op2 = MatrixMajor::isSameMajor<M2, M>() ? CUBLAS_OP_N : CUBLAS_OP_T;
         const size_t r = getRow();
         const size_t c = getCol();
         const Tm alpha = 1;
@@ -155,16 +162,14 @@ namespace Physica {
             beta = 0;
         const Tm* pBeta = &beta;
 
+        const size_t k = getLHS().getCol();
         const Tm* A{};
-        size_t k{};
         size_t lda{};
         if constexpr (isTranspose1) {
-            k = getLHS().getRow();
             A = (Tm*)getLHS().transpose().data_handle();
             lda = getLHS().transpose().getMajorStride();
         }
         else {
-            k = getLHS().getCol();
             A = (Tm*)getLHS().data_handle();
             lda = getLHS().getMajorStride();
         }
