@@ -3,17 +3,17 @@ include(HeaderCheck)
 
 add_subdirectory(Core)
 
-if(${PHYSICA_GUI})
+if(PHYSICA_GUI)
     add_subdirectory(Gui)
 endif()
 add_subdirectory(Logger)
 
-if(${PHYSICA_TRANSFORMS})
+if(PHYSICA_TRANSFORMS)
     add_subdirectory(Transforms)
 endif()
 
 add_executable(Physica Physica.cpp)
 target_link_libraries(Physica PhysicaCore ${GPerfTools_LIBRARY})
-if(${PHYSICA_GUI})
+if(PHYSICA_GUI)
     target_link_libraries(Physica PhysicaGui)
 endif()

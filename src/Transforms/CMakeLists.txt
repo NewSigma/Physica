@@ -1,5 +1,5 @@
 ##############################################Libs################################################
-if(NOT ${PHYSICA_LLVM})
+if(NOT PHYSICA_LLVM)
     message(FATAL_ERROR "Transforms requires LLVM package")
 endif()
 
