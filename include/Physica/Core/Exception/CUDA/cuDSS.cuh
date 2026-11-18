@@ -18,21 +18,12 @@
  */
 #pragma once
 
-#include <system_error>
 #include "Physica/Macro.h"
 
 #ifdef PHYSICA_CUDA
 #include <cudss.h>
 
 namespace Physica {
-    class PHYSICA_API cuDSSException : public std::system_error {
-    public:
-        cuDSSException(cudssStatus_t code) noexcept;
-    };
-
-    inline void check(cudssStatus_t err) {
-        if (err != CUDSS_STATUS_SUCCESS) [[unlikely]]
-            throw cuDSSException(err);
-    }
+    PHYSICA_API void check(cudssStatus_t err);
 }
 #endif

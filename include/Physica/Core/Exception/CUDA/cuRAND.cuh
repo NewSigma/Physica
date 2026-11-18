@@ -18,21 +18,12 @@
  */
 #pragma once
 
-#include <system_error>
 #include "Physica/Macro.h"
 
 #ifdef PHYSICA_CUDA
 #include <curand.h>
 
 namespace Physica {
-    class PHYSICA_API cuRANDException : public std::system_error {
-    public:
-        cuRANDException(curandStatus_t code) noexcept;
-    };
-
-    inline void check(curandStatus_t err) {
-        if (err != CURAND_STATUS_SUCCESS) [[unlikely]]
-            throw cuRANDException(err);
-    }
+    PHYSICA_API void check(curandStatus_t err);
 }
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <format>
+#include <system_error>
 #include "Physica/Core/Exception/MKL/Lapack.h"
 
 using namespace Physica;
@@ -32,9 +33,13 @@ namespace {
         Impl& operator=(const Impl&) = delete;
         Impl& operator=(Impl&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] const char* name() const noexcept override final { return "Intel MKL Lapack"; }
-        [[nodiscard]] std::string message(int code) const override final { return std::format("error code: {}", code); }
+        [[nodiscard]] const char* name() const noexcept final { return "Intel MKL Lapack"; }
+        [[nodiscard]] std::string message(int code) const final { return std::format("error code: {}", code); }
     };
 }
 
-LapackException::LapackException(int code) noexcept : std::system_error(code, Impl()) {}
+void Physica::check_lapack(int err) {
+    constinit static const Impl instance{};
+    if (err != 0) [[unlikely]]
+        throw std::system_error(err, instance);
+}

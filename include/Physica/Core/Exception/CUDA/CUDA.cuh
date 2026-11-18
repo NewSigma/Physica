@@ -18,25 +18,18 @@
  */
 #pragma once
 
-#include <system_error>
 #include "Physica/Macro.h"
 
 #ifdef PHYSICA_CUDA
 namespace Physica {
-    class PHYSICA_API CUDAException : public std::system_error {
-        using Base = std::system_error;
-    public:
-        CUDAException(cudaError_t code) noexcept;
-        /* Getters */
-        [[nodiscard]] cudaError_t code() const noexcept { return cudaError_t(Base::code().value()); }
-    };
+    PHYSICA_API [[noreturn]] void throw_cuda_error(int code);
 
     __host__ __device__ inline void check(cudaError_t err) {
         if (err != cudaSuccess) [[unlikely]] {
         #ifdef __CUDA_ARCH__
-            printf("CUDAException with code %d\n", int(err));
+            printf("CUDA error with code %d\n", int(err));
         #else
-            throw CUDAException(err);
+            throw_cuda_error(int(err));
         #endif
         }
     }

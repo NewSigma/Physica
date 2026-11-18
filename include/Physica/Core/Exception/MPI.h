@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,20 +18,8 @@
  */
 #pragma once
 
-#include <system_error>
 #include "Physica/Macro.h"
 
 namespace Physica {
-    class PHYSICA_API MPIException : public std::system_error {
-        using Base = std::system_error;
-    public:
-        MPIException(int code) noexcept;
-        /* Getters */
-        [[nodiscard]] int code() const noexcept { return Base::code().value(); }
-    };
-
-    inline void check_mpi(int err) {
-        if (err != 0) [[unlikely]]
-            throw MPIException(err);
-    }
+    PHYSICA_API void check_mpi(int err);
 }

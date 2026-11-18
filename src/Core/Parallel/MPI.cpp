@@ -19,7 +19,7 @@
 #include <iostream>
 #include <format>
 #include "Physica/Core/Parallel/MPI.h"
-#include "Physica/Core/Exception/MPIException.h"
+#include "Physica/Core/Exception/MPI.h"
 #include "Physica/Core/Utils/Builtin.h"
 #include "Physica/Core/Utils/NoImpl.h"
 #ifdef PHYSICA_MPI

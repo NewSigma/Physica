@@ -18,21 +18,12 @@
  */
 #pragma once
 
-#include <system_error>
 #include "Physica/Macro.h"
 
 #ifdef PHYSICA_CUDA
 #include <cublas_v2.h>
 
 namespace Physica {
-    class PHYSICA_API cuBLASException : public std::system_error {
-    public:
-        cuBLASException(cublasStatus_t code) noexcept;
-    };
-
-    inline void check(cublasStatus_t err) {
-        if (err != CUBLAS_STATUS_SUCCESS) [[unlikely]]
-            throw cuBLASException(err);
-    }
+    PHYSICA_API void check(cublasStatus_t err);
 }
 #endif

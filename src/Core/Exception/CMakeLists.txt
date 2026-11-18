@@ -7,5 +7,5 @@ if (${PHYSICA_MKL})
 endif()
 
 if (${PHYSICA_MPI})
-    target_sources(PhysicaCore PRIVATE MPIException.cpp)
+    target_sources(PhysicaCore PRIVATE MPI.cpp)
 endif()

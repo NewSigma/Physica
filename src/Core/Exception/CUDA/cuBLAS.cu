@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <system_error>
 #include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
 
 using namespace Physica;
@@ -36,4 +37,8 @@ namespace {
     };
 }
 
-cuBLASException::cuBLASException(cublasStatus_t code) noexcept : std::system_error(code, Impl()) {}
+void Physica::check(cublasStatus_t err) {
+    constinit static const Impl instance{};
+    if (err != CUBLAS_STATUS_SUCCESS) [[unlikely]]
+        throw std::system_error(int(err), instance);
+}

@@ -18,21 +18,12 @@
  */
 #pragma once
 
-#include <system_error>
 #include "Physica/Macro.h"
 
 #ifdef PHYSICA_CUDA
 #include <cusolverDn.h>
 
 namespace Physica {
-    class PHYSICA_API cuSolverException : public std::system_error {
-    public:
-        cuSolverException(cusolverStatus_t code) noexcept;
-    };
-
-    inline void check(cusolverStatus_t err) {
-        if (err != CUSOLVER_STATUS_SUCCESS) [[unlikely]]
-            throw cuSolverException(err);
-    }
+    PHYSICA_API void check(cusolverStatus_t err);
 }
 #endif

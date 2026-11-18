@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <format>
+#include <system_error>
 #include "Physica/Core/Exception/MKL/Pardiso.h"
 
 using namespace Physica;
@@ -37,5 +38,8 @@ namespace {
     };
 }
 
-PardisoException::PardisoException(int code) noexcept : std::system_error(code, Impl()) {}
-
+void Physica::check_pardiso(int err) {
+    constinit static const Impl instance{};
+    if (err != 0) [[unlikely]]
+        throw std::system_error(err, instance);
+}

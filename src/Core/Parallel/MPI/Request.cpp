@@ -19,7 +19,7 @@
 #include <cassert>
 #include <utility>
 #include "Physica/Core/Parallel/MPI/Request.h"
-#include "Physica/Core/Exception/MPIException.h"
+#include "Physica/Core/Exception/MPI.h"
 #ifdef PHYSICA_MPI
     #include <mpi.h>
 #endif

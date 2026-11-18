@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <system_error>
 #include "Physica/Core/Exception/CUDA/cuDSS.cuh"
-#include "Physica/Core/Utils/Builtin.h"
 
 using namespace Physica;
 
@@ -36,8 +36,6 @@ namespace {
         [[nodiscard]] std::string message(int code) const final;
     };
 }
-
-cuDSSException::cuDSSException(cudssStatus_t code) noexcept : std::system_error(code, Impl()) {}
 
 std::string Impl::message(int code) const {
     switch (cudssStatus_t(code)) {
@@ -60,4 +58,10 @@ std::string Impl::message(int code) const {
     default:
         return "Unknown error";
     }
+}
+
+void Physica::check(cudssStatus_t err) {
+    constinit static const Impl instance{};
+    if (err != CUDSS_STATUS_SUCCESS) [[unlikely]]
+        throw std::system_error(int(err), instance);
 }

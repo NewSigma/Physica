@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,26 +18,14 @@
  */
 #pragma once
 
-#include <system_error>
 #include "Physica/Macro.h"
 #ifdef PHYSICA_MKL
     #include <mkl_vsl.h>
 #endif
 
 namespace Physica {
-    class PHYSICA_API VSLException : public std::system_error {
-        using Base = std::system_error;
-    public:
-        VSLException(int code) noexcept;
-        /* Getters */
-        [[nodiscard]] int code() const noexcept { return Base::code().value(); }
-    };
-
 #ifdef PHYSICA_MKL
-    inline void check_vsl(int err) {
-        if (err != 0) [[unlikely]]
-            throw VSLException(err);
-    }
+    PHYSICA_API void check_vsl(int err);
 #else
     #define check_vsl(expr)
 #endif

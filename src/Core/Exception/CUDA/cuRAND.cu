@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <system_error>
 #include "Physica/Core/Exception/CUDA/cuRAND.cuh"
 
 using namespace Physica;
@@ -34,39 +35,43 @@ namespace {
         [[nodiscard]] const char* name() const noexcept final { return "cuRAND"; }
         [[nodiscard]] std::string message(int code) const final;
     };
+}
 
-    std::string Impl::message(int code) const {
-        switch (code) {
-        case CURAND_STATUS_SUCCESS:
-            return "No error";
-        case CURAND_STATUS_VERSION_MISMATCH:
-            return "Header file and linked library version do not match";
-        case CURAND_STATUS_NOT_INITIALIZED:
-            return "Generator not initialized";
-        case CURAND_STATUS_ALLOCATION_FAILED:
-            return "Memory allocation failed";
-        case CURAND_STATUS_TYPE_ERROR:
-            return "Generator is wrong type";
-        case CURAND_STATUS_OUT_OF_RANGE:
-            return "Argument out of range";
-        case CURAND_STATUS_LENGTH_NOT_MULTIPLE:
-            return "Length requested is not a multple of dimension";
-        case CURAND_STATUS_DOUBLE_PRECISION_REQUIRED:
-            return "GPU does not have double precision required by MRG32k3a";
-        case CURAND_STATUS_LAUNCH_FAILURE:
-            return "Kernel launch failure";
-        case CURAND_STATUS_PREEXISTING_FAILURE:
-            return "Preexisting failure on library entry";
-        case CURAND_STATUS_INITIALIZATION_FAILED:
-            return "Initialization of CUDA failed";
-        case CURAND_STATUS_ARCH_MISMATCH:
-            return "Architecture mismatch, GPU does not support requested feature";
-        case CURAND_STATUS_INTERNAL_ERROR:
-            return "Internal library error";
-        default:
-            return "Unknown error";
-        }
+std::string Impl::message(int code) const {
+    switch (code) {
+    case CURAND_STATUS_SUCCESS:
+        return "No error";
+    case CURAND_STATUS_VERSION_MISMATCH:
+        return "Header file and linked library version do not match";
+    case CURAND_STATUS_NOT_INITIALIZED:
+        return "Generator not initialized";
+    case CURAND_STATUS_ALLOCATION_FAILED:
+        return "Memory allocation failed";
+    case CURAND_STATUS_TYPE_ERROR:
+        return "Generator is wrong type";
+    case CURAND_STATUS_OUT_OF_RANGE:
+        return "Argument out of range";
+    case CURAND_STATUS_LENGTH_NOT_MULTIPLE:
+        return "Length requested is not a multple of dimension";
+    case CURAND_STATUS_DOUBLE_PRECISION_REQUIRED:
+        return "GPU does not have double precision required by MRG32k3a";
+    case CURAND_STATUS_LAUNCH_FAILURE:
+        return "Kernel launch failure";
+    case CURAND_STATUS_PREEXISTING_FAILURE:
+        return "Preexisting failure on library entry";
+    case CURAND_STATUS_INITIALIZATION_FAILED:
+        return "Initialization of CUDA failed";
+    case CURAND_STATUS_ARCH_MISMATCH:
+        return "Architecture mismatch, GPU does not support requested feature";
+    case CURAND_STATUS_INTERNAL_ERROR:
+        return "Internal library error";
+    default:
+        return "Unknown error";
     }
 }
 
-cuRANDException::cuRANDException(curandStatus_t code) noexcept : std::system_error(code, Impl()) {}
+void Physica::check(curandStatus_t err) {
+    constinit static const Impl instance{};
+    if (err != CURAND_STATUS_SUCCESS) [[unlikely]]
+        throw std::system_error(int(err), instance);
+}

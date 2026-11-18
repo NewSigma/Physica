@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Exception/MPIException.h"
-#include "Physica/Core/Parallel/MPI.h"
 #include <array>
 #include <format>
+#include <system_error>
+#include "Physica/Core/Exception/MPI.h"
+#include "Physica/Core/Parallel/MPI.h"
 #include <mpi.h>
 
 using namespace Physica;
 
 namespace {
     class Impl final : public std::error_category {
-        int rank = MPI::getRank();
     public:
         Impl() = default;
         Impl(const Impl&) = delete;
@@ -39,13 +39,17 @@ namespace {
         [[nodiscard]] const char* name() const noexcept final { return "MPI"; }
         [[nodiscard]] std::string message(int) const final;
     };
-
-    std::string Impl::message(int err) const {
-        std::array<char, MPI_MAX_ERROR_STRING> buffer{};
-        int resultlen{};
-        MPI_Error_string(err, buffer.data(), &resultlen);
-        return std::format("Rank {}: {}", rank, buffer.data());
-    }
 }
 
-MPIException::MPIException(int code) noexcept : std::system_error(code, Impl()) {}
+std::string Impl::message(int err) const {
+    std::array<char, MPI_MAX_ERROR_STRING> buffer{};
+    int resultlen{};
+    MPI_Error_string(err, buffer.data(), &resultlen);
+    return std::format("Rank {}: {}", MPI::getRank(), buffer.data());
+}
+
+void Physica::check_mpi(int err) {
+    constinit static const Impl instance{};
+    if (err != 0) [[unlikely]]
+        throw std::system_error(err, instance);
+}

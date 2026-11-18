@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,23 +18,11 @@
  */
 #pragma once
 
-#include <system_error>
 #include "Physica/Macro.h"
 #ifdef PHYSICA_MKL
     #include <mkl_lapacke.h>
 #endif
 
 namespace Physica {
-    class PHYSICA_API LapackException : public std::system_error {
-        using Base = std::system_error;
-    public:
-        LapackException(int code) noexcept;
-        /* Getters */
-        [[nodiscard]] int code() const noexcept { return Base::code().value(); }
-    };
-
-    inline void check_lapack(int err) {
-        if (err != 0) [[unlikely]]
-            throw LapackException(err);
-    }
+    PHYSICA_API void check_lapack(int err);
 }
