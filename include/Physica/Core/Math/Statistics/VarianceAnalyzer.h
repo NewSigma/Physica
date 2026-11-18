@@ -48,8 +48,11 @@ namespace Physica {
         [[nodiscard]] T calcParamR() const;
         [[nodiscard]] T calcCorrTime() const;
 
+        [[nodiscard]] constexpr auto begin(this auto&& self) noexcept { return self.data.begin(); }
+        [[nodiscard]] constexpr auto end(this auto&& self) noexcept { return self.data.end(); }
         void swap(This& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] constexpr size_t size() const noexcept { return getNumGroup(); }
         [[nodiscard]] size_t getNumGroup() const noexcept { return data.getLength(); }
         [[nodiscard]] size_t getTotalNumSample() const noexcept;
     private:
