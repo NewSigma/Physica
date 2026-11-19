@@ -28,7 +28,6 @@ namespace Physica {
     class GEMM : public RValueMatrix<GEMM<M1, M2>> {
         using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
-        constexpr static int ThresholdMKL = 32; // Based on benchmark
 
         enum class InnerDim : char {
             M,
@@ -125,7 +124,7 @@ namespace Physica {
         if constexpr (useMicro(target))
             assign_micro(target);
         else if constexpr (useMKL(target)) {
-            if (getLHS().getSize() > ThresholdMKL && getRHS().getSize() > ThresholdMKL)
+            if (getLHS().getSize() > HostDevAttr::ThresholdGEMM_MKL && getRHS().getSize() > HostDevAttr::ThresholdGEMM_MKL)
                 assign_mkl(target);
             else
                 assign_base(target);
@@ -391,8 +390,8 @@ namespace Physica {
         using M = decltype(target);
         using T1 = std::remove_cvref_t<M1>;
         using T2 = std::remove_cvref_t<M2>;
-        constexpr bool Large1 = T1::getSizeAtCompile() == Dynamic || T1::getSizeAtCompile() > ThresholdMKL;
-        constexpr bool Large2 = T2::getSizeAtCompile() == Dynamic || T2::getSizeAtCompile() > ThresholdMKL;
+        constexpr bool Large1 = T1::getSizeAtCompile() == Dynamic || T1::getSizeAtCompile() > HostDevAttr::ThresholdGEMM_MKL;
+        constexpr bool Large2 = T2::getSizeAtCompile() == Dynamic || T2::getSizeAtCompile() > HostDevAttr::ThresholdGEMM_MKL;
         constexpr bool UseMKL1 = Large1 && Large2;
         constexpr bool UseMKL2 = MatOrTransUseMKL<M, T1>();
         constexpr bool UseMKL3 = MatOrTransUseMKL<M, T2>();

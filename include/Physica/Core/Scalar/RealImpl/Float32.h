@@ -73,15 +73,15 @@ namespace Physica {
         This& operator=(This&& obj) noexcept = default;
         [[nodiscard]] __host__ __device__ constexpr bool operator==(const Real& other) const noexcept { return f == other.f; }
         [[nodiscard]] __host__ __device__ constexpr auto operator<=>(const Real& other) const noexcept;
-        [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return f; }
-        [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return f; }
+        [[nodiscard]] __host__ __device__ constexpr explicit operator float() const noexcept { return f; }
+        [[nodiscard]] __host__ __device__ constexpr explicit operator double() const noexcept { return f; }
         [[nodiscard]] __host__ __device__ constexpr Real operator+(const Real& x) const noexcept;
         [[nodiscard]] __host__ __device__ constexpr Real operator-(const Real& x) const noexcept;
         [[nodiscard]] __host__ __device__ constexpr Real operator*(const Real& x) const noexcept;
         [[nodiscard]] __host__ __device__ constexpr Real operator/(const Real& x) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr Real operator-() const noexcept { return Real(-f); }
         [[nodiscard]] __host__ __device__ Real operator<<(int i) const { return Real(std::ldexp(f, i)); }
         [[nodiscard]] __host__ __device__ Real operator>>(int i) const { return Real(std::ldexp(f, -i)); }
-        [[nodiscard]] __host__ __device__ Real operator-() const noexcept { return Real(-f); }
         friend std::istream& operator>>(std::istream& is, Real& scalar);
         /* Operations */
         [[nodiscard]] __host__ __device__ inline Real mod() const noexcept;

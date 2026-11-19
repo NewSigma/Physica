@@ -32,6 +32,23 @@ namespace {
         std::ignore = x >= y;
     }
 
+    void constant_evaluation() {
+        constexpr float64 x = 1.0;
+        constexpr float64 y = 2.5;
+        static_assert(x.toMachine() == 1.0);
+        static_assert((x + y).toMachine() == 3.5);
+        static_assert((y / x).toMachine() == 2.5);
+        static_assert(static_cast<double>(y) == 2.5);
+        static_assert(static_cast<float>(y) == 2.5F);
+        static_assert((-y).toMachine() == -2.5);
+
+        constexpr float32 z = 1.5F;
+        static_assert(z.toMachine() == 1.5F);
+        static_assert(static_cast<double>(z) == 1.5);
+        static_assert(static_cast<float>(z) == 1.5F);
+        static_assert((-z).toMachine() == -1.5F);
+    }
+
     void real() {
         // Test x.real() returns reference
         using T = float64;
@@ -78,6 +95,7 @@ int main() {
     static_assert(std::formattable<float64, char>);
     static_assert(std::same_as<std::strong_ordering, decltype(float32() <=> float32())>);
     infiniteCompare(float32(0), float64(0)); // Always x = y = 0, we make it a function to silent useless comparison warning
+    constant_evaluation();
     real();
     trig();
     subnormal<Float32>();
