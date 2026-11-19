@@ -1,0 +1,46 @@
+name: Docs
+
+on:
+  push:
+    branches: [ "Physica", "dev" ]
+    paths:
+      - 'doc/**'
+      - '.github/env/docs.yml'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    branches: [ "Physica", "dev" ]
+    paths:
+      - 'doc/**'
+      - '.github/env/docs.yml'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash -l {0}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7.0.1
+
+    - name: Install conda
+      uses: conda-incubator/setup-miniconda@v4.0.1
+      with:
+        activate-environment: physica
+        environment-file: .github/env/docs.yml
+        channels: conda-forge
+
+    - name: Build
+      run: sphinx-build -b html -W doc build/sphinx

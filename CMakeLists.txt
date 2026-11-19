@@ -91,7 +91,7 @@ if(BUILD_DOC)
     endif()
     find_program(SPHINX_EXEC sphinx-build REQUIRED)
     add_custom_target(Sphinx
-                      COMMAND ${SPHINX_EXEC} -b html ${CMAKE_SOURCE_DIR}/doc ${CMAKE_BINARY_DIR}/sphinx
+                      COMMAND ${SPHINX_EXEC} -b html -W ${CMAKE_SOURCE_DIR}/doc ${CMAKE_BINARY_DIR}/sphinx
                       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                       COMMENT "Generating documentation with Sphinx")
     add_subdirectory(doc)
