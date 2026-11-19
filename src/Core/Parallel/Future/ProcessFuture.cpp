@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <print>
 #include <future>
 #include <cassert>
 #include <csignal>
@@ -25,8 +24,7 @@
     #include <sys/wait.h>
  #endif
 #include "Physica/Core/Parallel/Future/ProcessFuture.h"
-#include "Physica/Core/Exception/SystemException.h"
-#include "Physica/Core/Utils/NoImpl.h"
+#include "Physica/Core/Exception/Syscall.h"
 
 using namespace Physica;
 
@@ -45,10 +43,7 @@ int ProcessFuture::wait() {
 #ifdef __linux__
     int status{};
     const auto endPid = waitpid(pid_t(pid), &status, 0);
-    if (endPid <= 0) {
-        std::println(stderr, "[Error]: Failed to wait for chile processes.");
-        throw SystemException();
-    }
+    check_syscall(endPid <= 0); // Failed to wait for chile processes
     finished = true;
 
     if (WIFEXITED(status))

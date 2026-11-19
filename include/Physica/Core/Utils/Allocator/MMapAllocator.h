@@ -20,7 +20,7 @@
 
 #include <cassert>
 #include <sys/mman.h>
-#include "Physica/Core/Exception/SystemException.h"
+#include "Physica/Core/Exception/Syscall.h"
 #include "Physica/Core/Utils/Builtin.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
 #include "HostAllocator.h"
@@ -57,15 +57,13 @@ namespace Physica {
         TempFile file(".MMAPXXXXXX");
         file.reserve(size);
         void* p = mmap(nullptr, size, Prot, Flag, file.getFd(), 0);
-        if (p == MAP_FAILED)
-            throw SystemException();
+        check_syscall(p == MAP_FAILED);
         return reinterpret_cast<T*>(p);
     }
 
     template<class T, size_t Align>
     void MMapAllocator<T, Align>::deallocate(T* p, size_t n) {
-        if (munmap(p, calcSize(n))) [[unlikely]]
-            throw SystemException();
+        check_syscall(munmap(p, calcSize(n)) == -1);
     }
 
     template<class T, size_t Align>

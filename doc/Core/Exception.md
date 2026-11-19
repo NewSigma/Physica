@@ -18,10 +18,9 @@ Handling errors at the top level is often more practical for complex numerical c
 For any error code type `ErrorCodeType`, `Physica::check` uses function overloading to handle it, throwing the corresponding exception object if an error occurs. The general implementation is:
 
 ``` C++
-namespace Physica {
-    inline void check(ErrorCodeType err) {
-        if (err != 0) [[unlikely]]
-            throw ExceptionType(err);
-    }
+void Physica::check_backend(int err) {
+    constinit static const ErrorCategoryImpl instance{};
+    if (err != 0) [[unlikely]]
+        throw SystemError(err, instance);
 }
 ```

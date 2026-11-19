@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,12 +18,23 @@
  */
 #pragma once
 
+#include <string>
 #include <system_error>
-#include "Physica/Macro.h"
 
 namespace Physica {
-    class PHYSICA_API SystemException : public std::system_error {
+    class SystemError : public std::system_error {
+        using This = SystemError;
+        using Base = std::system_error;
+        std::string buf;
     public:
-        SystemException() noexcept : std::system_error(errno, std::system_category()) {}
+        SystemError(int code, const std::error_category& category);
+        SystemError(const This&) = default;
+        SystemError(This&&) noexcept = default;
+        ~SystemError() noexcept override = default;
+        /* Operators */
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
+        /* Getters */
+        [[nodiscard]] const char* what() const noexcept override;
     };
 }

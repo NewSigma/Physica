@@ -22,7 +22,7 @@
 
 #include "Physica/Core/Physics/SolidState/VASP/Poscar.h"
 #include "Physica/Core/Physics/SolidState/QE/PWscfOut.h"
-#include "Physica/Core/Exception/SystemException.h"
+#include "Physica/Core/Exception/Syscall.h"
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
@@ -137,19 +137,15 @@ namespace Physica {
     template<size_t N>
     ProcessFuture QEModel<T>::run_qe(TempFile<N>& input, TempFile<N>& output) const {
         Array<int, 2> fd{};
-        if (pipe(fd.data()) == -1)
-            throw SystemException();
+        check_syscall(pipe(fd.data()) == -1);
 
         ProcessFuture future;
         future = ProcessExecutor::schedule([this, fd, &output]() {
             const int standardErr = dup(STDERR_FILENO);
-            if (dup2(output.getFd(), STDOUT_FILENO) == -1) [[unlikely]]
-                throw SystemException();
-            if (dup2(output.getFd(), STDERR_FILENO) == -1) [[unlikely]]
-                throw SystemException();
+            check_syscall(dup2(output.getFd(), STDOUT_FILENO) == -1);
+            check_syscall(dup2(output.getFd(), STDERR_FILENO) == -1);
             close(fd[1]);
-            if (dup2(fd[0], STDIN_FILENO) == -1) [[unlikely]]
-                throw SystemException();
+            check_syscall(dup2(fd[0], STDIN_FILENO) == -1);
             close(fd[0]);
             /* Execute */ {
                 constexpr int BufferSize = 16; // 16 is enough for unsigned int
@@ -172,8 +168,7 @@ namespace Physica {
         fin.seekg(0, std::ios::beg);
         Array<char> buffer(size);
         fin.read(buffer.data(), size);
-        if (write(fd[1], buffer.data(), size) == -1)
-            throw SystemException();
+        check_syscall(write(fd[1], buffer.data(), size) == -1);
         close(fd[1]);
         return future;
     }

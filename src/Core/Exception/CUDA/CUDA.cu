@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <system_error>
+#include "../SystemError.h"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 
 using namespace Physica;
@@ -39,5 +40,5 @@ namespace {
 
 void Physica::throw_cuda_error(int code) {
     constinit static const Impl instance{};
-    throw std::system_error(code, instance);
+    throw SystemError(code, instance);
 }

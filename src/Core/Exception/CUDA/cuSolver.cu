@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <system_error>
+#include "../SystemError.h"
 #include "Physica/Core/Exception/CUDA/cuSolver.cuh"
 
 using namespace Physica;
@@ -97,5 +98,5 @@ std::string Impl::message(int code) const {
 void Physica::check(cusolverStatus_t err) {
     constinit static const Impl instance{};
     if (err != CUSOLVER_STATUS_SUCCESS) [[unlikely]]
-        throw std::system_error(int(err), instance);
+        throw SystemError(int(err), instance);
 }

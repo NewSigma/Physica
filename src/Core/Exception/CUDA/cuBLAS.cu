@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <system_error>
+#include "../SystemError.h"
 #include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
 
 using namespace Physica;
@@ -40,5 +41,5 @@ namespace {
 void Physica::check(cublasStatus_t err) {
     constinit static const Impl instance{};
     if (err != CUBLAS_STATUS_SUCCESS) [[unlikely]]
-        throw std::system_error(int(err), instance);
+        throw SystemError(int(err), instance);
 }

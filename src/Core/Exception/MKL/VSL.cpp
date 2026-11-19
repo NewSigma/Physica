@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <system_error>
+#include "../SystemError.h"
 #include "Physica/Core/Exception/MKL/VSL.h"
 
 using namespace Physica;
@@ -117,5 +118,5 @@ std::string Impl::message(int code) const {
 void Physica::check_vsl(int err) {
     constinit static const Impl instance{};
     if (err != 0) [[unlikely]]
-        throw std::system_error(err, instance);
+        throw SystemError(err, instance);
 }

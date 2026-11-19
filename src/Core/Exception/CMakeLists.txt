@@ -1,3 +1,5 @@
+target_sources(PhysicaCore PRIVATE Syscall.cpp SystemError.cpp)
+
 if (${PHYSICA_CUDA})
     add_subdirectory(CUDA)
 endif()

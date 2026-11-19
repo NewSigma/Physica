@@ -21,7 +21,7 @@
 #include <array>
 #include <cstdlib>
 #include <unistd.h>
-#include "Physica/Core/Exception/SystemException.h"
+#include "Physica/Core/Exception/Syscall.h"
 
 namespace Physica {
     template<size_t N>
@@ -50,8 +50,7 @@ namespace Physica {
     TempFile<N>::TempFile(const char (&nameFmt)[N])
             : name(std::to_array(nameFmt))
             , fd(mkstemp(name.data())) {
-        if (fd == -1) [[unlikely]]
-            throw SystemException();
+        check_syscall(fd == -1);
     }
 
     template<size_t N>
@@ -72,8 +71,7 @@ namespace Physica {
 
     template<size_t N>
     void TempFile<N>::reserve(int64_t size) {
-        if (ftruncate64(fd, size))
-            throw SystemException();
+        check_syscall(ftruncate64(fd, size) == -1);
     }
 
     template<size_t N>

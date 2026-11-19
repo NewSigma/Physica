@@ -21,7 +21,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <unistd.h>
-#include "Physica/Core/Exception/SystemException.h"
+#include "Physica/Core/Exception/Syscall.h"
 
 namespace Physica {
     template<size_t N>
@@ -48,8 +48,7 @@ namespace Physica {
         for (size_t i = 0; i < N; ++i)
             name[i] = name_template[i];
         pName = mkdtemp(name);
-        if (pName == nullptr) [[unlikely]]
-            throw SystemException();
+        check_syscall(pName == nullptr);
     }
 
     template<size_t N>

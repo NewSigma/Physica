@@ -19,6 +19,8 @@
 #ifdef __linux__
 
 #include <cassert>
+#include <cerrno>
+#include <cstdio>
 #include <cstdlib>
 #include <unistd.h>
 #include <csignal>
@@ -26,7 +28,7 @@
 #include <sys/prctl.h>
 #include <sys/types.h>
 #include "Physica/Core/Parallel/SubProcess.h"
-#include "Physica/Core/Exception/SystemException.h"
+#include "Physica/Core/Exception/Syscall.h"
 
 using namespace Physica;
 
@@ -43,8 +45,7 @@ SubProcess& SubProcess::operator=(SubProcess process) noexcept {
 
 ProcessFuture SubProcess::execute() {
     pid = Handle(fork());
-    if (pid_t(pid) == -1)
-        throw SystemException();
+    check_syscall(pid_t(pid) == -1);
     if (pid_t(pid) == 0) {
         prctl(PR_SET_PDEATHSIG, SIGTERM);
         /* Set nice */ {

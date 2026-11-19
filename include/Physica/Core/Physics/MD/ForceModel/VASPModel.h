@@ -22,6 +22,7 @@
 #include <filesystem>
 #include <print>
 #include "Physica/Core/Physics/SolidState/VASP/Outcar.h"
+#include "Physica/Core/Exception/Syscall.h"
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Utils/Unix/TempDir.h"
@@ -84,8 +85,7 @@ namespace Physica {
             , numMPIProcess(numMPIProcess_) {
         const std::filesystem::path workingDirPath = workingDir.getName();
         logFd = open((workingDirPath / "log").c_str(), O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR);
-        if (logFd == -1)
-            throw SystemException();
+        check_syscall(logFd == -1);
 
         constexpr auto Overwrite = std::filesystem::copy_options::overwrite_existing;
         std::filesystem::copy_file(pathToINCAR, workingDirPath / "INCAR", Overwrite);
