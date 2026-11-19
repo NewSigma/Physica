@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <random>
 #include "Physica/Core/Math/Statistics/VarianceAnalyzer.h"
 #include <ranges>
 #include <utility>
@@ -24,6 +25,7 @@
 using namespace Physica;
 using T = float64;
 using Analyzer = VarianceAnalyzer<T>;
+using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
 namespace {
     void range() noexcept {
@@ -67,10 +69,67 @@ namespace {
         expect(scalarNear(analyzer.calcParamR(), expectedR, 1E-15));
         expect(scalarNear(analyzer.calcCorrTime(), expectedR * T(0.5), 1E-15));
     }
+
+    template<Scalar ScalarT>
+    ScalarT calcBlockError(const VarianceAnalyzer<ScalarT>& analyzer) {
+        const size_t numGroup = analyzer.getNumGroup();
+        VectorND<ScalarT> means(numGroup);
+        for (size_t g = 0; g < numGroup; ++g)
+            means[g] = analyzer[g].mean();
+        const ScalarT mean = means.mean();
+        return means.deviation(mean) / sqrt(ScalarT(numGroup));
+    }
+
+    void blocking() {
+        /* iid */ {
+            constexpr size_t numSample = 100000;
+            const auto samples = VectorND<T>::random_normal<RandomSource>(numSample);
+            const auto analyzer = Analyzer::blocking(samples);
+
+            expect(analyzer.has_value());
+            const T error = calcBlockError(*analyzer);
+            const T expected = T(1) / sqrt(T(numSample));
+            expect(error > expected * T(0.5));
+            expect(error < expected * T(2));
+        }
+        /* ar1 */ {
+            constexpr size_t numSample = 200000;
+            const auto noise = VectorND<T>::random_normal<RandomSource>(numSample);
+            VectorND<T> samples(numSample);
+            samples[0] = noise[0];
+            for (size_t i = 1; i < numSample; ++i)
+                samples[i] = T(0.9) * samples[i - 1] + noise[i];
+
+            const auto analyzer = Analyzer::blocking(samples);
+            expect(analyzer.has_value());
+            const T naive = samples.deviation(samples.mean()) / sqrt(T(numSample));
+            const T error = calcBlockError(*analyzer);
+            expect((*analyzer)[0].getLength() > 1);
+            expect(error > naive * T(1.5));
+            expect(analyzer->calcCorrTime() > T(0.5));
+        }
+        /* constant */ {
+            const VectorND<T> samples(1000, T(1));
+            const auto analyzer = Analyzer::blocking(samples);
+            expect(analyzer.has_value());
+            expect(calcBlockError(*analyzer) == T(0));
+        }
+        /* short */ {
+            constexpr size_t numSample = 100;
+            constexpr T phi = T(0.99);
+            const auto noise = VectorND<T>::random_normal<RandomSource>(numSample);
+            VectorND<T> samples(numSample);
+            samples[0] = noise[0];
+            for (size_t i = 1; i < numSample; ++i)
+                samples[i] = phi * samples[i - 1] + noise[i];
+            expect(!Analyzer::blocking(samples).has_value());
+        }
+    }
 }
 
 int main() {
     range();
     corr_convention();
+    blocking();
     return 0;
 }

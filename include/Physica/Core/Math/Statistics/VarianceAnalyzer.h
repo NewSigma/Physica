@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,9 @@
  */
 #pragma once
 
+#include <bit>
+#include <optional>
+#include <ranges>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica {
@@ -43,6 +46,7 @@ namespace Physica {
         [[nodiscard]] VectorND<T>& operator[](size_t i) noexcept { return data[i]; }
         [[nodiscard]] const VectorND<T>& operator[](size_t i) const noexcept { return data[i]; }
         /* Operations */
+        [[nodiscard]] Vector2D<T> statistics() const;
         [[nodiscard]] T calcRelationCoeff() const noexcept;
         [[nodiscard]] T calcParamF() const;
         [[nodiscard]] T calcParamR() const;
@@ -55,6 +59,8 @@ namespace Physica {
         [[nodiscard]] constexpr size_t size() const noexcept { return getNumGroup(); }
         [[nodiscard]] size_t getNumGroup() const noexcept { return data.getLength(); }
         [[nodiscard]] size_t getTotalNumSample() const noexcept;
+        /* Static members */
+        [[nodiscard]] static auto blocking(const VectorND<T>& samples) -> std::optional<This>;
     private:
         [[nodiscard]] T calcSSE() const;
         [[nodiscard]] T calcMSE() const;
@@ -67,6 +73,11 @@ namespace Physica {
     template<Scalar T>
     VarianceAnalyzer<T>::VarianceAnalyzer(size_t numGroup) : data(numGroup) {
         assert(numGroup > 1);
+    }
+
+    template<Scalar T>
+    auto VarianceAnalyzer<T>::statistics() const -> Vector2D<T> {
+        return {calcTotalMean(), sqrt(calcMSA() / T(getTotalNumSample()))};
     }
 
     template<Scalar T>
@@ -93,7 +104,7 @@ namespace Physica {
      */
     template<Scalar T>
     T VarianceAnalyzer<T>::calcCorrTime() const {
-        return calcParamR() * 0.5;
+        return calcParamR() * T(0.5);
     }
 
     template<Scalar T>
@@ -144,10 +155,69 @@ namespace Physica {
 
     template<Scalar T>
     T VarianceAnalyzer<T>::calcTotalMean() const {
+        assert(!data.empty());
         T result = 0;
         for (const auto& vec : data)
             result += vec.mean() * T(vec.getLength());
         result /= T(getTotalNumSample());
         return result;
+    }
+    /**
+     * \param samples a autocorrelated sequence
+     */
+    template<Scalar T>
+    auto VarianceAnalyzer<T>::blocking(const VectorND<T>& samples) -> std::optional<This> {
+        constexpr size_t MinBlockSize = 2;
+        struct Config {
+            size_t blockSize;
+            size_t numGroup;
+            T error;
+        };
+
+        const size_t numSample = samples.getLength();
+        assert(numSample > 1 && "[Error]: At least two samples are required");
+        const auto configs = Array<Config>::generate([&](size_t i) {
+            const size_t m = MinBlockSize << i;
+            const size_t numGroup = numSample / m;
+            VectorND<T> means(numGroup);
+            for (const size_t g : std::views::iota(0UZ, numGroup))
+                means[g] = samples.segment(g * m, (g + 1) * m).mean();
+            return Config{m, numGroup, means.deviation(means.mean()) / sqrt(T(numGroup))};
+        }, std::bit_width(numSample / (2 * MinBlockSize)));
+
+        const T z95 = T(1.96);
+        const T certify = T(0.3);
+        for (size_t i = 0; i < configs.getLength(); ++i) {
+            const auto& proposal = configs[i];
+            bool obvious = true;
+            bool verified = false;
+            for (size_t j = i + 1; j < configs.getLength(); ++j) {
+                const auto& config = configs[j];
+                if (proposal.error.isSubNormal()) [[unlikely]]
+                    obvious = config.error.isSubNormal();
+                else {
+                    const T fine = T(proposal.numGroup);
+                    const T coarse = T(config.numGroup);
+                    const T band = z95 * MathConst<T>::sqrt2 * sqrt((fine - coarse) / ((fine - T(1)) * (coarse - T(1))));
+                    bool uncertain = band > certify;
+                    if (uncertain)
+                        continue;
+                    obvious = abs(square(config.error / proposal.error) - T(1)) <= band;
+                }
+
+                verified = true;
+                if (!obvious)
+                    break;
+            }
+            if (!verified || !obvious)
+                continue;
+
+            const size_t numGroup = proposal.numGroup;
+            This result(numGroup);
+            for (size_t g = 0; g < numGroup; ++g)
+                result[g] = samples.segment(g * proposal.blockSize, (g + 1) * proposal.blockSize);
+            return result;
+        }
+        return std::nullopt;
     }
 }
