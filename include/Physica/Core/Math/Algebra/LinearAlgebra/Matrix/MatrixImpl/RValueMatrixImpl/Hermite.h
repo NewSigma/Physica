@@ -52,12 +52,16 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const { return m.calc(col, row).conjugate(); }
 
+        [[nodiscard]] decltype(auto) transpose(this auto&&) noexcept;
         [[nodiscard]] auto&& hermite(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr size_t getRow() const noexcept { return m.getCol(); }
         [[nodiscard]] constexpr size_t getCol() const noexcept { return m.getRow(); }
         [[nodiscard]] constexpr size_t getOrder() const noexcept { return m.getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSymm() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticHermite() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
@@ -70,6 +74,32 @@ namespace Physica {
     template<Matrix M>
     auto&& Hermite<M>::hermite(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.m);
+    }
+
+    template<Matrix M>
+    decltype(auto) Hermite<M>::transpose(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return propagate_rvalue_reference<Self, M>(self.m).conjugate();
+    }
+
+    template<Matrix M>
+    decltype(auto) Hermite<M>::conjugate(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (T::isComplex())
+            return propagate_rvalue_reference<Self, M>(self.m).transpose();
+        else
+            return std::forward<Self>(self);
+    }
+
+    template<Matrix M>
+    __host__ __device__ consteval bool Hermite<M>::isStaticSymm() noexcept {
+        return std::remove_cvref_t<M>::isStaticSymm();
+    }
+
+    template<Matrix M>
+    __host__ __device__ consteval bool Hermite<M>::isStaticHermite() noexcept {
+        static_assert(!std::remove_cvref_t<M>::isStaticHermite(), "[Error]: Do not construct Hermite<> for a statically hermitian matrix");
+        return false;
     }
 
     template<Matrix M>
@@ -113,7 +143,9 @@ namespace Physica {
 
         [[nodiscard]] T calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return v.calc(col).conjugate(); }
 
+        [[nodiscard]] decltype(auto) transpose(this auto&&) noexcept;
         [[nodiscard]] auto&& hermite(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] constexpr size_t getCol() const noexcept { return v.getLength(); }
@@ -136,6 +168,21 @@ namespace Physica {
     template<Vector V>
     auto&& Hermite<V>::hermite(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.v);
+    }
+
+    template<Vector V>
+    decltype(auto) Hermite<V>::transpose(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return propagate_rvalue_reference<Self, V>(self.v).conjugate();
+    }
+
+    template<Vector V>
+    decltype(auto) Hermite<V>::conjugate(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (T::isComplex())
+            return propagate_rvalue_reference<Self, V>(self.v).transpose();
+        else
+            return std::forward<Self>(self);
     }
 
     template<Vector V>

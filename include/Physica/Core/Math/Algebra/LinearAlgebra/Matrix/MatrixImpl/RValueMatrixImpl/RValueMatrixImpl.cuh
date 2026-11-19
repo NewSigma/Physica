@@ -367,11 +367,25 @@ namespace Physica {
     }
 
     template<class Derived, Scalar ScalarT>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::hermite() const noexcept {
-        if constexpr (isComplex())
-            return device_obj<Hermite<Derived>>(Base::getDerived());
+    __host__ __device__ decltype(auto) device_obj<RValueMatrix<Derived, ScalarT>>::conjugate(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (isComplex()) {
+            using M = remove_device_obj<Self>::type;
+            return device_obj<Conjugate<M>>(std::forward<Self>(self));
+        }
         else
-            return transpose();
+            return std::forward<Self>(self);
+    }
+
+    template<class Derived, Scalar ScalarT>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived, ScalarT>>::hermite(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (isComplex()) {
+            using M = remove_device_obj<Self>::type;
+            return device_obj<Hermite<M>>(std::forward<Self>(self));
+        }
+        else
+            return std::forward<Self>(self).transpose();
     }
 
     template<class Derived, Scalar ScalarT>

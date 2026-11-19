@@ -44,6 +44,8 @@ namespace Physica {
         void assign_mkl(Matrix auto&& target) const;
 
         [[nodiscard]] constexpr auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) hermite(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) flatten(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
         template<int GradOrder = 1>
@@ -54,6 +56,8 @@ namespace Physica {
         [[nodiscard]] constexpr size_t getOrder() const noexcept { return mat.getOrder(); }
         [[nodiscard]] constexpr auto data_handle(this auto&& self) noexcept;
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSymm() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticHermite() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
@@ -80,6 +84,21 @@ namespace Physica {
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
     constexpr auto&& Transpose<M>::transpose(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
+    }
+
+    template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
+    decltype(auto) Transpose<M>::conjugate(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (T::isComplex())
+            return propagate_rvalue_reference<Self, M>(self.mat).hermite();
+        else
+            return std::forward<Self>(self);
+    }
+
+    template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
+    decltype(auto) Transpose<M>::hermite(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return propagate_rvalue_reference<Self, M>(self.mat).conjugate();
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
@@ -120,6 +139,17 @@ namespace Physica {
     }
 
     template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
+    __host__ __device__ consteval bool Transpose<M>::isStaticSymm() noexcept {
+        static_assert(!std::remove_cvref_t<M>::isStaticSymm(), "[Error]: Do not construct Transpose<> for a statically symmetric matrix");
+        return false;
+    }
+
+    template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
+    __host__ __device__ consteval bool Transpose<M>::isStaticHermite() noexcept {
+        return std::remove_cvref_t<M>::isStaticHermite();
+    }
+
+    template<Matrix M> requires(std::remove_cvref_t<M>::isCompact())
     __host__ __device__ consteval bool Transpose<M>::isStaticSquare() noexcept {
         return std::remove_cvref_t<M>::isStaticSquare();
     }
@@ -143,6 +173,8 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] constexpr auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) hermite(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) flatten(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
         template<int GradOrder = 1>
@@ -161,6 +193,21 @@ namespace Physica {
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
     constexpr auto&& Transpose<V>::transpose(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
+    }
+
+    template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
+    decltype(auto) Transpose<V>::conjugate(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (T::isComplex())
+            return propagate_rvalue_reference<Self, V>(self.vec).hermite();
+        else
+            return std::forward<Self>(self);
+    }
+
+    template<Vector V> requires(std::remove_cvref_t<V>::isCompact())
+    decltype(auto) Transpose<V>::hermite(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return propagate_rvalue_reference<Self, V>(self.vec).conjugate();
     }
 
     template<Vector V> requires(std::remove_cvref_t<V>::isCompact())

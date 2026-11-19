@@ -50,7 +50,9 @@ namespace Physica {
         template<int Size>
         [[nodiscard]] SIMD<T, Size> packet(size_t index, size_t count) const noexcept;
 
+        [[nodiscard]] decltype(auto) transpose(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) hermite(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr size_t getLength() const noexcept { return vec.getLength(); }
@@ -77,8 +79,20 @@ namespace Physica {
     }
 
     template<Vector V>
+    decltype(auto) Conjugate<V>::transpose(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return propagate_rvalue_reference<Self, V>(self.vec).hermite();
+    }
+
+    template<Vector V>
     decltype(auto) Conjugate<V>::conjugate(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
+    }
+
+    template<Vector V>
+    decltype(auto) Conjugate<V>::hermite(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return propagate_rvalue_reference<Self, V>(self.vec).transpose();
     }
 
     template<Vector V>

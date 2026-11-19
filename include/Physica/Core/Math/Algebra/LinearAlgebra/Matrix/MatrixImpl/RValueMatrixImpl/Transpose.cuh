@@ -53,6 +53,8 @@ namespace Physica {
         void reverse(const Vector auto& grad) const noexcept;
 
         [[nodiscard]] __host__ __device__ auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) conjugate(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) hermite(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr size_t getRow() const noexcept { return transpose().getCol(); }
@@ -74,6 +76,20 @@ namespace Physica {
     template<Matrix M>
     __host__ __device__ auto&& device_obj<Transpose<M>>::transpose(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.mat.getDerived());
+    }
+
+    template<Matrix M>
+    __host__ __device__ decltype(auto) device_obj<Transpose<M>>::conjugate(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (T::isComplex())
+            return std::forward<Self>(self).transpose().hermite();
+        else
+            return std::forward<Self>(self);
+    }
+
+    template<Matrix M>
+    __host__ __device__ decltype(auto) device_obj<Transpose<M>>::hermite(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).transpose().conjugate();
     }
 
     template<Matrix M>
@@ -108,6 +124,8 @@ namespace Physica {
         void reverse(const Vector auto& grad) const noexcept;
 
         [[nodiscard]] __host__ __device__ auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) conjugate(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) hermite(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
@@ -130,6 +148,20 @@ namespace Physica {
     template<Vector V>
     __host__ __device__ auto&& device_obj<Transpose<V>>::transpose(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.vec.getDerived());
+    }
+
+    template<Vector V>
+    __host__ __device__ decltype(auto) device_obj<Transpose<V>>::conjugate(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (T::isComplex())
+            return std::forward<Self>(self).transpose().hermite();
+        else
+            return std::forward<Self>(self);
+    }
+
+    template<Vector V>
+    __host__ __device__ decltype(auto) device_obj<Transpose<V>>::hermite(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).transpose().conjugate();
     }
 
     template<Vector V>

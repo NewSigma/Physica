@@ -48,6 +48,8 @@ namespace Physica {
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
 
+        [[nodiscard]] __host__ __device__ decltype(auto) transpose(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) conjugate(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto&& hermite(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
@@ -62,6 +64,20 @@ namespace Physica {
     template<Matrix M>
     __device__ auto device_obj<Hermite<M>>::calc(size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> T {
         return hermite().calc(col, row, block).conjugate();
+    }
+
+    template<Matrix M>
+    __host__ __device__ decltype(auto) device_obj<Hermite<M>>::transpose(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).hermite().conjugate();
+    }
+
+    template<Matrix M>
+    __host__ __device__ decltype(auto) device_obj<Hermite<M>>::conjugate(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (T::isComplex())
+            return std::forward<Self>(self).hermite().transpose();
+        else
+            return std::forward<Self>(self);
     }
 
     template<Matrix M>
@@ -98,6 +114,8 @@ namespace Physica {
         using Base::calc;
         [[nodiscard]] __device__ T calc([[maybe_unused]] size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const;
 
+        [[nodiscard]] __host__ __device__ decltype(auto) transpose(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) conjugate(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto&& hermite(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
@@ -119,6 +137,20 @@ namespace Physica {
     __device__ auto device_obj<Hermite<V>>::calc([[maybe_unused]] size_t row, size_t col, instanceof_x<ThreadBlock> auto block) const -> T {
         assert(row == 0);
         return hermite().calc(col, block).conjugate();
+    }
+
+    template<Vector V>
+    __host__ __device__ decltype(auto) device_obj<Hermite<V>>::transpose(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).hermite().conjugate();
+    }
+
+    template<Vector V>
+    __host__ __device__ decltype(auto) device_obj<Hermite<V>>::conjugate(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (T::isComplex())
+            return std::forward<Self>(self).hermite().transpose();
+        else
+            return std::forward<Self>(self);
     }
 
     template<Vector V>

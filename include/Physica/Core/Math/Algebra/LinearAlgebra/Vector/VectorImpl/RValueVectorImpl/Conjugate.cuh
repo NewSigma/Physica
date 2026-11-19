@@ -44,7 +44,9 @@ namespace Physica {
         using Base::calc;
         [[nodiscard]] __device__ T calc(size_t index, instanceof_x<ThreadBlock> auto block) const;
 
+        [[nodiscard]] __host__ __device__ decltype(auto) transpose(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ decltype(auto) conjugate(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) hermite(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto values(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return conjugate().getLength(); }
@@ -56,8 +58,18 @@ namespace Physica {
     }
 
     template<Vector V>
+    __host__ __device__ decltype(auto) device_obj<Conjugate<V>>::transpose(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).conjugate().hermite();
+    }
+
+    template<Vector V>
     __host__ __device__ decltype(auto) device_obj<Conjugate<V>>::conjugate(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), Ref>(self.vec.getDerived());
+    }
+
+    template<Vector V>
+    __host__ __device__ decltype(auto) device_obj<Conjugate<V>>::hermite(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).conjugate().transpose();
     }
 
     template<Vector V>

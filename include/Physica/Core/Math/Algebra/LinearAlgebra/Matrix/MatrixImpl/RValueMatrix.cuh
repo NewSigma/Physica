@@ -94,7 +94,8 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ auto inv(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto transpose(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ auto hermite() const noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) conjugate(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto hermite(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto flatten() const noexcept;
 
         [[nodiscard]] __host__ __device__ decltype(auto) reals(this auto&&) noexcept;
@@ -162,6 +163,7 @@ namespace Physica {
 #include "RValueMatrixImpl/MainDiag.cuh"
 #include "RValueMatrixImpl/OffsetDiag.cuh"
 #include "RValueMatrixImpl/Transpose.cuh"
+#include "RValueMatrixImpl/Conjugate.cuh"
 #include "RValueMatrixImpl/Hermite.cuh"
 #include "RValueMatrixImpl/Convert/MatrixConvert.cuh"
 #include "MatrixProduct/GEMM.cuh"

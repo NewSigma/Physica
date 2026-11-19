@@ -52,6 +52,8 @@ namespace Physica {
         [[nodiscard]] constexpr T calc(size_t row, size_t col) const;
 
         [[nodiscard]] constexpr auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) hermite(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) flatten(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
@@ -59,6 +61,8 @@ namespace Physica {
         [[nodiscard]] constexpr size_t getCol() const noexcept { return mat.getRow(); }
         [[nodiscard]] constexpr size_t getOrder() const noexcept { return mat.getOrder(); }
         /* Static members */
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticSymm() noexcept;
+        [[nodiscard]] __host__ __device__ consteval static bool isStaticHermite() noexcept;
         [[nodiscard]] __host__ __device__ consteval static bool isStaticSquare() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getRowAtCompile() noexcept;
         [[nodiscard]] __host__ __device__ consteval static size_t getColAtCompile() noexcept;
@@ -77,6 +81,21 @@ namespace Physica {
     }
 
     template<Matrix M>
+    decltype(auto) Transpose<M>::conjugate(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (T::isComplex())
+            return propagate_rvalue_reference<Self, M>(self.mat).hermite();
+        else
+            return std::forward<Self>(self);
+    }
+
+    template<Matrix M>
+    decltype(auto) Transpose<M>::hermite(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return propagate_rvalue_reference<Self, M>(self.mat).conjugate();
+    }
+
+    template<Matrix M>
     decltype(auto) Transpose<M>::flatten(this auto&& self) noexcept {
         return std::forward<decltype(self)>(self).transpose().flatten();
     }
@@ -84,6 +103,17 @@ namespace Physica {
     template<Matrix M>
     auto Transpose<M>::values(this auto&& self) noexcept {
         return std::forward<decltype(self)>(self).transpose().values().transpose();
+    }
+
+    template<Matrix M>
+    __host__ __device__ consteval bool Transpose<M>::isStaticSymm() noexcept {
+        static_assert(!std::remove_cvref_t<M>::isStaticSymm(), "[Error]: Do not construct Transpose<> for a statically symmetric matrix");
+        return false;
+    }
+
+    template<Matrix M>
+    __host__ __device__ consteval bool Transpose<M>::isStaticHermite() noexcept {
+        return std::remove_cvref_t<M>::isStaticHermite();
     }
 
     template<Matrix M>
@@ -133,6 +163,8 @@ namespace Physica {
         [[nodiscard]] constexpr T calc(size_t row, size_t col) const;
 
         [[nodiscard]] constexpr auto&& transpose(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
+        [[nodiscard]] decltype(auto) hermite(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) flatten(this auto&&) noexcept;
         [[nodiscard]] auto values(this auto&&) noexcept;
         /* Getters */
@@ -154,6 +186,21 @@ namespace Physica {
     template<Vector V>
     constexpr auto&& Transpose<V>::transpose(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), V>(self.vec);
+    }
+
+    template<Vector V>
+    decltype(auto) Transpose<V>::conjugate(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (T::isComplex())
+            return propagate_rvalue_reference<Self, V>(self.vec).hermite();
+        else
+            return std::forward<Self>(self);
+    }
+
+    template<Vector V>
+    decltype(auto) Transpose<V>::hermite(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return propagate_rvalue_reference<Self, V>(self.vec).conjugate();
     }
 
     template<Vector V>
