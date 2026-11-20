@@ -142,7 +142,8 @@ namespace Physica {
         constexpr bool isTranspose1 = instanceof<M1, Transpose>;
         constexpr bool isTranspose2 = instanceof<M2, Transpose>;
         static_assert(IsDeviceMatrix, "[Error]: Fixed matrix is on host, pass it to device before calling cuBLAS");
-        static_assert(MatrixMajor::isColMatrix<M1>() && MatrixMajor::isColMatrix<M2>(), "[Error]: cuBLAS uses column major");
+        static_assert((MatrixMajor::isColMatrix<M1>() || isTranspose1) && (MatrixMajor::isColMatrix<M2>() || isTranspose2),
+                      "[Error]: cuBLAS uses column major");
         static_assert(host_obj::isMinorContiguous(target), "[Error]: cuBLAS expects a contiguous minor direction");
         static_assert(!Diffable<This>);
         target.assert_assign(*this);
@@ -152,14 +153,10 @@ namespace Physica {
         constexpr auto op2 = MatrixMajor::isSameMajor<M2, M>() ? CUBLAS_OP_N : CUBLAS_OP_T;
         const size_t r = getRow();
         const size_t c = getCol();
-        const Tm alpha = 1;
+        const Tm alpha = T(1).toCUDA();
         const Tm* pAlpha = &alpha;
 
-        Tm beta;
-        if constexpr (AssignAdd)
-            beta = 1;
-        else
-            beta = 0;
+        const Tm beta = (AssignAdd ? T(1) : T(0)).toCUDA();
         const Tm* pBeta = &beta;
 
         const size_t k = getLHS().getCol();
@@ -194,13 +191,23 @@ namespace Physica {
 
         auto& ctx = CUDAContext::getInstance();
         ctx.setPointerMode(false);
-        if constexpr (T::Prec == Float16)
-            check(cublasHgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, lda, B, ldb, pBeta, C, ldc));
-        else if constexpr (T::Prec == Float32)
-            check(cublasSgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, lda, B, ldb, pBeta, C, ldc));
+        if constexpr (T::isComplex()) {
+            if constexpr (T::Prec == Float32)
+                check(cublasCgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, lda, B, ldb, pBeta, C, ldc));
+            else {
+                static_assert(T::Prec == Float64, "[Error]: Unknown ScalarType");
+                check(cublasZgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, lda, B, ldb, pBeta, C, ldc));
+            }
+        }
         else {
-            static_assert(T::Prec == Float64, "[Error]: Unknown ScalarType");
-            check(cublasDgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, lda, B, ldb, pBeta, C, ldc));
+            if constexpr (T::Prec == Float16)
+                check(cublasHgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, lda, B, ldb, pBeta, C, ldc));
+            else if constexpr (T::Prec == Float32)
+                check(cublasSgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, lda, B, ldb, pBeta, C, ldc));
+            else {
+                static_assert(T::Prec == Float64, "[Error]: Unknown ScalarType");
+                check(cublasDgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, lda, B, ldb, pBeta, C, ldc));
+            }
         }
     }
 }
