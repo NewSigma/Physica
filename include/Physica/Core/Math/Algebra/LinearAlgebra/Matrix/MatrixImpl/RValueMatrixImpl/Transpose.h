@@ -51,6 +51,9 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] constexpr T calc(size_t row, size_t col) const;
 
+        void reverse(const Matrix auto& grad) const noexcept;
+        using Base::reverse;
+
         [[nodiscard]] constexpr auto&& transpose(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) hermite(this auto&&) noexcept;
@@ -73,6 +76,12 @@ namespace Physica {
     template<Matrix M>
     constexpr auto Transpose<M>::calc(size_t row, size_t col) const -> T {
         return mat.calc(col, row);
+    }
+
+    template<Matrix M>
+    void Transpose<M>::reverse(const Matrix auto& grad) const noexcept {
+        static_assert(Base::isReverseDiff());
+        mat.reverse(grad.transpose());
     }
 
     template<Matrix M>

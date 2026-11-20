@@ -115,7 +115,7 @@ namespace Physica {
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
         static_assert(Diffable<M1> && !Diffable<M2>, "[Error]: Not implemented");
-        lhs.reverse(divide_elem(grad, rhs));
+        lhs.reverse(divide_elem(grad, rhs.values()));
     }
 
     template<Matrix M1, Matrix M2>

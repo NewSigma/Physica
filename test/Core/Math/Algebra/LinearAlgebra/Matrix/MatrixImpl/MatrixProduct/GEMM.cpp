@@ -44,10 +44,23 @@ namespace {
         c = a * b;
         expect<RandomSource>(matrixNear(c.values(), MatrixND<T>(a.values() * b.values()), 1E-13));
     }
+
+    void reverse() {
+        using T = float64;
+        using M = DenseMatrix<Diff<T, DiffMode::Reverse, 1>>;
+        const M a = M::random_uniform<RandomSource>(4, 4);
+        const M b = M::random_uniform<RandomSource>(4, 4);
+        const DenseMatrix<T> grad = DenseMatrix<T>::random_uniform<RandomSource>(4, 4);
+        auto expr = a * b;
+        expr.reverse(grad);
+        expect<RandomSource>(matrixNear(a.grads(), grad * b.values().transpose(), 1E-14));
+        expect<RandomSource>(matrixNear(b.grads(), a.values().transpose() * grad, 1E-14));
+    }
 }
 
 int main() {
     simple2D();
     forward();
+    reverse();
     return 0;
 }

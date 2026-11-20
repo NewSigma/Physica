@@ -128,9 +128,9 @@ namespace Physica {
     void GEVM<V, M>::reverse(const Matrix auto& grad) const noexcept {
         static_assert(Base::isReverseDiff());
         if constexpr (Diffable<V>)
-            vec.reverse(grad * mat.transpose());
+            vec.reverse(grad * mat.values().transpose());
         if constexpr (Diffable<M>)
-            mat.reverse(grad.transpose() * vec);
+            mat.reverse(grad.transpose() * vec.values());
     }
 
     template<Vector V, Matrix M>

@@ -174,6 +174,7 @@ namespace Physica {
     template<class Derived, Scalar ScalarT>
     void RValueMatrix<Derived, ScalarT>::reverse(this const auto& self, const Matrix auto& grad) noexcept {
         static_assert(isReverseDiff());
+        static_assert(!Diffable<decltype(grad)>, "[Error]: The gradient of reverse diff must be a plain value");
         self.grads().assert_assign(grad);
         if constexpr (MatrixMajor::isSameMajor<decltype(self), decltype(grad)>())
             self.flatten().reverse(grad.flatten());
@@ -191,6 +192,7 @@ namespace Physica {
     template<class Derived, Scalar ScalarT>
     void RValueMatrix<Derived, ScalarT>::reverse(this const auto& self, const Matrix auto&, const Matrix auto& grad) noexcept {
         static_assert(isReverseDiff());
+        static_assert(!Diffable<decltype(grad)>, "[Error]: The gradient of reverse diff must be a plain value");
         self.reverse(grad);
     }
 
