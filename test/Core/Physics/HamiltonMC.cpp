@@ -34,7 +34,7 @@ namespace {
     void initialize() {
         // Test that temperature is not fixed
         using KineticModel = OpenModel<T, 1, 1>;
-        constexpr size_t numSample = 1024;
+        constexpr size_t numSample = 16384; // standard error is 1 / sqrt(numSample); P(fail) < 1E-9
         auto hmc = HamiltonMC<T>({1, 1});
         auto& root = hmc.getRoot();
         T mean = 0;
@@ -43,7 +43,7 @@ namespace {
             root.template initMomentum<KineticModel, RandomSource>();
             var.toNextVariance(mean, i, root.template calcTemperature<KineticModel>());
         }
-        expect<RandomSource>(scalarNear(mean, T(1), 0.1));
+        expect<RandomSource>(scalarNear(mean, T(1), 0.05));
         expect<RandomSource>(var > std::numeric_limits<T>::epsilon());
     }
 
