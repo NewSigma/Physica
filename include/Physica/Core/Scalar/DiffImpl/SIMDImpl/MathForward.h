@@ -63,6 +63,24 @@ namespace Physica {
     }
 
     template<Packet T>
+    [[nodiscard]] T relu(const T& x) noexcept requires(ForwardDiff<T>) {
+        using Grad = T::GradType;
+        return T(relu(x.value()), Grad::select(x.value().isPositive(), x.grad(), Grad(0)));
+    }
+
+    template<Packet T>
+    [[nodiscard]] T sqrt(const T& x) noexcept requires(ForwardDiff<T>) {
+        using Grad = T::GradType;
+        return T(sqrt(x.value()), Grad(0.5) * x.grad() * reciprocal(sqrt(x.value())));
+    }
+
+    template<Packet T>
+    [[nodiscard]] T cbrt(const T& x) noexcept requires(ForwardDiff<T>) {
+        using Grad = T::GradType;
+        return T(cbrt(x.value()), Grad(1.0 / 3) * x.grad() * reciprocal(square(cbrt(x.value()))));
+    }
+
+    template<Packet T>
     [[nodiscard]] T ln(const T& x) noexcept requires(ForwardDiff<T>) {
         using Grad = T::GradType;
         return T(ln(x.value()), x.grad() / Grad(x));
@@ -85,6 +103,47 @@ namespace Physica {
     [[nodiscard]] T expm1(const T& x) noexcept requires(ForwardDiff<T>) {
         using Grad = T::GradType;
         return T(expm1(x.value()), exp(Grad(x)) * x.grad());
+    }
+
+    template<Packet T, Scalar U>
+    [[nodiscard]] T pow(const T& x, const U& n) noexcept requires(ForwardDiff<T>) {
+        using Grad = T::GradType;
+        return T(pow(x.value(), n), x.grad() * Grad(n) * pow(x.value(), Grad(n) - 1));
+    }
+
+    template<Packet T1, Packet T2>
+    [[nodiscard]] T1 pow(const T1& x, const T2& y) noexcept requires(ForwardDiff<T1> && ForwardDiff<T2>) {
+        const auto v = pow(x.value(), y.value());
+        return T1(v, y.value() * reciprocal(x.value()) * x.grad() + v * ln(x.value()) * y.grad());
+    }
+
+    template<Packet T>
+    [[nodiscard]] T sin(const T& x) noexcept requires(ForwardDiff<T>) {
+        return T(sin(x.value()), cos(x.value()) * x.grad());
+    }
+
+    template<Packet T>
+    [[nodiscard]] T cos(const T& x) noexcept requires(ForwardDiff<T>) {
+        return T(cos(x.value()), -sin(x.value()) * x.grad());
+    }
+
+    template<Packet T>
+    [[nodiscard]] std::pair<T, T> sincos(const T& x) noexcept requires(ForwardDiff<T>) {
+        const auto s = sin(x.value());
+        const auto c = cos(x.value());
+        return {T(s, c * x.grad()), T(c, -s * x.grad())};
+    }
+
+    template<Packet T>
+    [[nodiscard]] T tan(const T& x) noexcept requires(ForwardDiff<T>) {
+        using Grad = T::GradType;
+        const auto v = tan(x.value());
+        return T(v, (Grad(1) + square(v)) * x.grad());
+    }
+
+    template<Packet T>
+    [[nodiscard]] T sec(const T& x) noexcept requires(ForwardDiff<T>) {
+        return reciprocal(cos(x));
     }
 
     template<Packet T>
@@ -138,5 +197,10 @@ namespace Physica {
         using Grad = T::GradType;
         const Grad y = sigmoid(Grad(x));
         return T(sigmoid(x.value()), (y - square(y)) * x.grad());
+    }
+
+    template<Packet T>
+    [[nodiscard]] T softplus(const T& x) noexcept requires(ForwardDiff<T>) {
+        return T(softplus(x.value()), sigmoid(x.value()) * x.grad());
     }
 }

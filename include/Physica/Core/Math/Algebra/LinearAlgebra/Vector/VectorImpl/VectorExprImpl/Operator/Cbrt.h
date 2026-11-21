@@ -49,19 +49,13 @@ namespace Physica {
     template<Vector V>
     template<int Size>
     auto VectorExpr<ExprID::Cbrt, V>::operator()(std::random_access_iterator auto input) noexcept -> SIMD<T, Size> {
-        SIMD<T, Size> result = input.template load<Size>();
-        for (int i = 0; i < Size; ++i)
-            result.insert(i, cbrt(result[i]));
-        return result;
+        return cbrt(input.template load<Size>());
     }
 
     template<Vector V>
     template<int Size>
     auto VectorExpr<ExprID::Cbrt, V>::operator()(std::random_access_iterator auto input, size_t count) noexcept -> SIMD<T, Size> {
-        SIMD<T, Size> result = input.template load<Size>(count);
-        for (size_t i = 0; i < count; ++i)
-            result.insert(i, cbrt(result[i]));
-        return result;
+        return cbrt(input.template load<Size>(count));
     }
 
     template<Vector V>

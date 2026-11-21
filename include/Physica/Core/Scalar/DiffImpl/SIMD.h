@@ -110,6 +110,9 @@ namespace Physica {
         void swap(SIMD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] FullRealType asReal() const noexcept;
+        [[nodiscard]] BoolSIMDType isZero() const noexcept { return values.isZero(); }
+        [[nodiscard]] BoolSIMDType isPositive() const noexcept { return values.isPositive(); }
+        [[nodiscard]] BoolSIMDType isNegative() const noexcept { return values.isNegative(); }
         [[nodiscard]] auto& value(this auto&& self) noexcept { return self.values; }
         [[nodiscard]] auto& grad(this auto&& self) noexcept { return self.grads; }
         template<int MaskOrder>

@@ -44,6 +44,32 @@ namespace {
         });
     }
 
+    void forward_unary() {
+        using V = VectorND<Diff<float64, DiffMode::Forward>>;
+        auto v = V::random_uniform<RandomSource>(16);
+        const auto check = [&](const auto& in, const auto& func) {
+            V out = func(in);
+            for (size_t i = 0; i < in.getLength(); ++i) {
+                Diff<float64, DiffMode::Forward> x(in.calc(i));
+                const auto ref = func(x);
+                const auto got = out.calc(i);
+                expect<RandomSource>(scalarNear(got.value(), ref.value(), 1E-8));
+                expect<RandomSource>(scalarNear(got.grad(), ref.grad(), 1E-8));
+            }
+        };
+        check(v, [](const auto& x) { return sin(x); });
+        check(v, [](const auto& x) { return cos(x); });
+        check(v, [](const auto& x) { return tan(x); });
+        check(v, [](const auto& x) { return sec(x); });
+        check(v, [](const auto& x) { return sqrt(x); });
+        check(v, [](const auto& x) { return cbrt(x); });
+        check(v, [](const auto& x) { return pow(x, float64(3)); });
+        check(v, [](const auto& x) { return relu(x); });
+        check(v, [](const auto& x) { return softplus(x); });
+        check(v, [](const auto& x) { return sigmoid(x); });
+        check(v, [](const auto& x) { return ln(x + float64(1)); });
+    }
+
     void reverse() {
         using VectorType = VectorND<Diff<float64, DiffMode::Reverse, 1>>;
         auto v = VectorType::random_uniform<RandomSource>(16);
@@ -156,6 +182,7 @@ namespace {
 int main() {
     struct_bind();
     forward();
+    forward_unary();
     reverse();
     reverse_sum_unary();
     reverse_softmax_sum();
