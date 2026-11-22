@@ -39,11 +39,13 @@ namespace Physica {
             size_t majorStrideC = 0;
             bool transA = false;
             bool transB = false;
+            bool transC = false;
         };
     private:
         PointerTable ptrs;
         Shape shape;
     public:
+        BatchedGEMM() = default;
         BatchedGEMM(const Matrix auto& a, const Matrix auto& b, Matrix auto& c, size_t batchSize);
         BatchedGEMM(const Matrix auto& a, const Matrix auto& b, Matrix auto& c, PointerTable ptrs_);
         BatchedGEMM(const This&) = default;
@@ -58,6 +60,8 @@ namespace Physica {
         void compute_base(T alpha, T beta) noexcept;
         void compute_mkl(T alpha, T beta) noexcept;
 
+        void reshape(const Matrix auto& a, const Matrix auto& b, Matrix auto& c);
+        void resize(size_t batchSize);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getPointers() const noexcept { return ptrs; }
@@ -70,16 +74,16 @@ namespace Physica {
     };
 
     template<Scalar T>
-    BatchedGEMM<T>::BatchedGEMM(const Matrix auto& a, const Matrix auto& b, Matrix auto& c, size_t batchSize)
-            : ptrs(3, batchSize)
-            , shape(makeShape(a, b, c)) {
-        assert(batchSize != 0 && "[Error]: Batch size must not be zero");
+    BatchedGEMM<T>::BatchedGEMM(const Matrix auto& a, const Matrix auto& b, Matrix auto& c, size_t batchSize) {
+        reshape(a, b, c);
+        resize(batchSize);
     }
 
     template<Scalar T>
     BatchedGEMM<T>::BatchedGEMM(const Matrix auto& a, const Matrix auto& b, Matrix auto& c, PointerTable ptrs_)
             : BatchedGEMM(a, b, c, ptrs_.getCol()) {
-        ptrs = std::move(ptrs_);
+        for (size_t i = 0; i < ptrs_.getCol(); ++i)
+            batch(i, {ptrs_[0, i], ptrs_[1, i], ptrs_[2, i]});
     }
 
     template<Scalar T>
@@ -90,8 +94,8 @@ namespace Physica {
 
     template<Scalar T>
     void BatchedGEMM<T>::batch(size_t index, Array<T*, 3> handles) noexcept {
-        ptrs[0, index] = handles[0];
-        ptrs[1, index] = handles[1];
+        ptrs[0, index] = handles[shape.transC ? 1 : 0];
+        ptrs[1, index] = handles[shape.transC ? 0 : 1];
         ptrs[2, index] = handles[2];
     }
 
@@ -109,6 +113,18 @@ namespace Physica {
     }
 
     template<Scalar T>
+    void BatchedGEMM<T>::reshape(const Matrix auto& a, const Matrix auto& b, Matrix auto& c) {
+        shape = makeShape(a, b, c);
+    }
+
+    template<Scalar T>
+    void BatchedGEMM<T>::resize(size_t batchSize) {
+        assert(batchSize != 0 && "[Error]: Batch size must not be zero");
+        if (getBatchSize() != batchSize)
+            ptrs.resize(3, batchSize);
+    }
+
+    template<Scalar T>
     void BatchedGEMM<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(shape, obj.shape);
@@ -123,33 +139,48 @@ namespace Physica {
         static_assert(A::isStrided(), "[Error]: The operands must be strided matrices");
         static_assert(B::isStrided(), "[Error]: The operands must be strided matrices");
         static_assert(C::isStrided(), "[Error]: The operands must be strided matrices");
-        constexpr bool TransA = instanceof<remove_device_obj_t<A>, Transpose>;
-        constexpr bool TransB = instanceof<remove_device_obj_t<B>, Transpose>;
-        static_assert(!instanceof<remove_device_obj_t<C>, Transpose>, "[Error]: The target must not be transposed");
+        static_assert(A::getMinorStrideAtCompile() == 1
+                   && B::getMinorStrideAtCompile() == 1
+                   && C::getMinorStrideAtCompile() == 1,
+                      "[Error]: BLAS expects a contiguous minor direction");
+        constexpr bool IsTransposeA = instanceof<remove_device_obj_t<A>, Transpose>;
+        constexpr bool IsTransposeB = instanceof<remove_device_obj_t<B>, Transpose>;
+        constexpr bool TransC = MatrixMajor::isRowMatrix<remove_device_obj_t<C>>();
 
         auto&& storageA = [&]() -> decltype(auto) {
-            if constexpr (TransA)
+            if constexpr (IsTransposeA)
                 return std::forward<decltype(a)>(a).transpose();
             else
                 return std::forward<decltype(a)>(a);
         }();
         auto&& storageB = [&]() -> decltype(auto) {
-            if constexpr (TransB)
+            if constexpr (IsTransposeB)
                 return std::forward<decltype(b)>(b).transpose();
             else
                 return std::forward<decltype(b)>(b);
         }();
-        auto&& storageC = std::forward<decltype(c)>(c);
 
         Shape result{};
-        result.row = a.getRow();
-        result.inner = a.getCol();
-        result.col = c.getCol();
-        result.majorStrideA = storageA.getMajorStride();
-        result.majorStrideB = storageB.getMajorStride();
-        result.majorStrideC = storageC.getMajorStride();
-        result.transA = TransA;
-        result.transB = TransB;
+        if constexpr (TransC) {
+            result.row = c.getCol();
+            result.col = c.getRow();
+            result.inner = a.getCol();
+            result.transA = MatrixMajor::isColMatrix<B>();
+            result.transB = MatrixMajor::isColMatrix<A>();
+            result.majorStrideA = storageB.getMajorStride();
+            result.majorStrideB = storageA.getMajorStride();
+        }
+        else {
+            result.row = a.getRow();
+            result.inner = a.getCol();
+            result.col = c.getCol();
+            result.transA = MatrixMajor::isRowMatrix<A>();
+            result.transB = MatrixMajor::isRowMatrix<B>();
+            result.majorStrideA = storageA.getMajorStride();
+            result.majorStrideB = storageB.getMajorStride();
+        }
+        result.majorStrideC = c.getMajorStride();
+        result.transC = TransC;
         return result;
     }
 }

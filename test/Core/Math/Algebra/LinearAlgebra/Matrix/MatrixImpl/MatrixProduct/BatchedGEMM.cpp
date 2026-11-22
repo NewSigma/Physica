@@ -23,30 +23,48 @@
 using namespace Physica;
 using RandomSource = Random<>;
 
+namespace {
+    template<int MajorA, int MajorB, int MajorC>
+    void gemm() {
+        using T = float32;
+        const size_t batch = 3, row = 7, col = 5, inner = 6;
+        using MatA = DenseMatrix<T, MajorA>;
+        using MatB = DenseMatrix<T, MajorB>;
+        using MatC = DenseMatrix<T, MajorC>;
+        auto a = MatA::template random_uniform<RandomSource>(row, batch * inner);
+        auto b = MatB::template random_uniform<RandomSource>(inner, batch * col);
+        auto c = MatC::template random_uniform<RandomSource>(row, batch * col);
+
+        MatC answer(row, batch * col);
+        for (size_t s = 0; s < batch; ++s) {
+            auto answerBlock = answer.block(0, row, s * col, col);
+            answerBlock = a.block(0, row, s * inner, inner) * b.block(0, inner, s * col, col);
+        }
+
+        auto aFirst = a.block(0, row, 0, inner);
+        auto bFirst = b.block(0, inner, 0, col);
+        auto cFirst = c.block(0, row, 0, col);
+        BatchedGEMM<T> batchedGemm(aFirst, bFirst, cFirst, batch);
+        for (size_t s = 0; s < batch; ++s)
+            batchedGemm.batch(s, {a.block(0, row, s * inner, inner).data_handle(),
+                                  b.block(0, inner, s * col, col).data_handle(),
+                                  c.block(0, row, s * col, col).data_handle(),});
+
+        if constexpr (HasMKL()) {
+            batchedGemm.compute(T(1), T(0));
+            expect<RandomSource>(matrixNear(c, answer, 1E-4));
+        }
+    }
+}
+
 int main() {
-    using T = float32;
-    const size_t batch = 3, row = 7, col = 5, inner = 6;
-    const T alpha(1), beta(0);
-    auto a = MatrixND<T>::template random_uniform<RandomSource>(row, batch * inner);
-    auto b = MatrixND<T>::template random_uniform<RandomSource>(inner, batch * col);
-    auto c = MatrixND<T>::template random_uniform<RandomSource>(row, batch * col);
-
-    MatrixND<T> answer(row, batch * col);
-    for (size_t s = 0; s < batch; ++s) {
-        auto answerBlock = answer.block(0, row, s * col, col);
-        answerBlock = a.block(0, row, s * inner, inner) * b.block(0, inner, s * col, col);
-    }
-
-    auto aFirst = a.block(0, row, 0, inner);
-    auto bFirst = b.block(0, inner, 0, col);
-    auto cFirst = c.block(0, row, 0, col);
-    BatchedGEMM<T> gemm(aFirst, bFirst, cFirst, batch);
-    for (size_t s = 0; s < batch; ++s)
-        gemm.batch(s, {a.data() + s * row * inner, b.data() + s * inner * col, c.data() + s * row * col});
-
-    if constexpr (HasMKL()) {
-        gemm.compute(alpha, beta);
-        expect<RandomSource>(matrixNear(c, answer, 1E-4));
-    }
+    gemm<MatrixMajor::Row, MatrixMajor::Row, MatrixMajor::Row>();
+    gemm<MatrixMajor::Row, MatrixMajor::Row, MatrixMajor::Col>();
+    gemm<MatrixMajor::Row, MatrixMajor::Col, MatrixMajor::Row>();
+    gemm<MatrixMajor::Row, MatrixMajor::Col, MatrixMajor::Col>();
+    gemm<MatrixMajor::Col, MatrixMajor::Row, MatrixMajor::Row>();
+    gemm<MatrixMajor::Col, MatrixMajor::Row, MatrixMajor::Col>();
+    gemm<MatrixMajor::Col, MatrixMajor::Col, MatrixMajor::Row>();
+    gemm<MatrixMajor::Col, MatrixMajor::Col, MatrixMajor::Col>();
     return 0;
 }

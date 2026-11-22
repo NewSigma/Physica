@@ -37,6 +37,7 @@ namespace Physica {
         device_obj<PointerTable> d_ptrs;
         bool sync = false;
     public:
+        device_obj() = default;
         device_obj(const Matrix auto& a, const Matrix auto& b, Matrix auto& c, size_t batchSize);
         device_obj(const Matrix auto& a, const Matrix auto& b, Matrix auto& c, PointerTable ptrs);
         device_obj(const This&) = default;
@@ -50,20 +51,19 @@ namespace Physica {
         void compute(T alpha = T(1), T beta = T(0));
         void compute_cublas(T alpha, T beta);
 
+        void reshape(const Matrix auto& a, const Matrix auto& b, Matrix auto& c);
+        void resize(size_t batchSize);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getPointers() const noexcept { return ptrs; }
         [[nodiscard]] const auto& getShape() const noexcept { return shape; }
         [[nodiscard]] size_t getBatchSize() const noexcept { return ptrs.getCol(); }
-    private:
-        [[nodiscard]] static auto makeShape(const Matrix auto& a, const Matrix auto& b, Matrix auto& c) -> typename host_obj::Shape;
     };
 
     template<Scalar T>
-    device_obj<BatchedGEMM<T>>::device_obj(const Matrix auto& a, const Matrix auto& b, Matrix auto& c, size_t batchSize)
-            : shape(makeShape(a, b, c)) {
-        assert(batchSize != 0 && "[Error]: Batch size must not be zero");
-        ptrs.resize(3, batchSize);
+    device_obj<BatchedGEMM<T>>::device_obj(const Matrix auto& a, const Matrix auto& b, Matrix auto& c, size_t batchSize) {
+        reshape(a, b, c);
+        resize(batchSize);
     }
 
     template<Scalar T>
@@ -81,8 +81,8 @@ namespace Physica {
 
     template<Scalar T>
     void device_obj<BatchedGEMM<T>>::batch(size_t index, Array<T*, 3> handles) noexcept {
-        ptrs[0, index] = handles[0];
-        ptrs[1, index] = handles[1];
+        ptrs[0, index] = handles[shape.transC ? 1 : 0];
+        ptrs[1, index] = handles[shape.transC ? 0 : 1];
         ptrs[2, index] = handles[2];
         sync = false;
     }
@@ -136,6 +136,21 @@ namespace Physica {
     }
 
     template<Scalar T>
+    void device_obj<BatchedGEMM<T>>::reshape(const Matrix auto& a, const Matrix auto& b, Matrix auto& c) {
+        shape = host_obj::makeShape(a, b, c);
+    }
+
+    template<Scalar T>
+    void device_obj<BatchedGEMM<T>>::resize(size_t batchSize) {
+        assert(batchSize != 0 && "[Error]: Batch size must not be zero");
+        if (getBatchSize() != batchSize) {
+            ptrs.resize(3, batchSize);
+            d_ptrs.resize(3, batchSize);
+            sync = false;
+        }
+    }
+
+    template<Scalar T>
     void device_obj<BatchedGEMM<T>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(shape, obj.shape);
@@ -144,22 +159,4 @@ namespace Physica {
         std::swap(sync, obj.sync);
     }
 
-    template<Scalar T>
-    auto device_obj<BatchedGEMM<T>>::makeShape(const Matrix auto& a, const Matrix auto& b, Matrix auto& c) -> typename host_obj::Shape {
-        using A = std::remove_cvref_t<decltype(a)>;
-        using B = std::remove_cvref_t<decltype(b)>;
-        using C = std::remove_cvref_t<decltype(c)>;
-        constexpr bool TransA = instanceof<remove_device_obj_t<A>, Transpose>;
-        constexpr bool TransB = instanceof<remove_device_obj_t<B>, Transpose>;
-        if constexpr (TransA)
-            static_assert(MatrixMajor::isColMatrix<std::remove_cvref_t<decltype(std::declval<const A&>().transpose())>>(), "[Error]: cuBLAS uses column major");
-        else
-            static_assert(MatrixMajor::isColMatrix<A>(), "[Error]: cuBLAS uses column major");
-        if constexpr (TransB)
-            static_assert(MatrixMajor::isColMatrix<std::remove_cvref_t<decltype(std::declval<const B&>().transpose())>>(), "[Error]: cuBLAS uses column major");
-        else
-            static_assert(MatrixMajor::isColMatrix<B>(), "[Error]: cuBLAS uses column major");
-        static_assert(MatrixMajor::isColMatrix<C>(), "[Error]: cuBLAS uses column major");
-        return host_obj::makeShape(a, b, c);
-    }
 }
