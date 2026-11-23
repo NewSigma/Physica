@@ -190,7 +190,7 @@ namespace Physica {
     decltype(auto) RValueTensor<Derived, ScalarT>::values(this auto&& self) noexcept {
         using Self = decltype(self);
         if constexpr (isDiffable())
-            return ValueVector<Self>(std::forward<Self>(self));
+            return ValueTensor<Self>(std::forward<Self>(self));
         else
             return std::forward<Self>(self);
     }
@@ -199,7 +199,7 @@ namespace Physica {
     template<int GradOrder>
     auto RValueTensor<Derived, ScalarT>::grads(this auto&& self) noexcept {
         using Self = decltype(self);
-        return GradTensor<Derived, GradOrder>(std::forward<Self>(self));
+        return GradTensor<Self, GradOrder>(std::forward<Self>(self));
     }
 
     template<class Derived, Scalar ScalarT>

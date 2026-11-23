@@ -105,6 +105,7 @@ namespace Physica {
     template<Scalar T, int... Dims>
     class Traits<DenseTensor<T, Dims...>> {
         static_assert(sizeof...(Dims) > 0, "[Error]: Dims is not specified");
+        static_assert(!Diffable<T>, "[Error]: Use diffable tensor instead");
     public:
         using ScalarType = T;
         constexpr static int NDim = ArrayND<T, Dims...>::NDim;

@@ -52,6 +52,7 @@ namespace Physica {
         IndexType index;
     public:
         TensorSlice(X&& tensor, IndexVar auto... indices);
+        TensorSlice(X&& tensor, IndexType index);
         TensorSlice(const This&) = default;
         TensorSlice(This&&) noexcept = default;
         ~TensorSlice() = default;
@@ -60,6 +61,10 @@ namespace Physica {
         /* Operations */
         using Base::resize;
         void resize(size_t row, size_t col);
+
+        [[nodiscard]] auto values(this auto&& self) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] auto grads(this auto&& self) noexcept;
         /* Getters */
         [[nodiscard]] constexpr size_t getRow() const noexcept { return tensor.dim(DimR); }
         [[nodiscard]] constexpr size_t getCol() const noexcept { return tensor.dim(DimC); }
@@ -85,6 +90,26 @@ namespace Physica {
             }
             i += 1;
         }(), ...);
+    }
+
+    template<Tensor X, int DimR, int DimC> requires(std::remove_cvref_t<X>::isCompact())
+    TensorSlice<X, DimR, DimC>::TensorSlice(X&& tensor_, IndexType index_)
+            : tensor(std::forward<X>(tensor_)), index(std::move(index_)) {}
+
+    template<Tensor X, int DimR, int DimC> requires(std::remove_cvref_t<X>::isCompact())
+    auto TensorSlice<X, DimR, DimC>::values(this auto&& self) noexcept {
+        auto&& v = propagate_rvalue_reference<decltype(self), X>(self.tensor).values();
+        using X1 = decltype(v);
+        return TensorSlice<X1, DimR, DimC>(std::forward<X1>(v), self.index);
+    }
+
+    template<Tensor X, int DimR, int DimC> requires(std::remove_cvref_t<X>::isCompact())
+    template<int GradOrder>
+    auto TensorSlice<X, DimR, DimC>::grads(this auto&& self) noexcept {
+        static_assert(Base::isDiffable(), "[Error]: Non-differentiable tensor has no grads");
+        auto&& g = propagate_rvalue_reference<decltype(self), X>(self.tensor).template grads<GradOrder>();
+        using X1 = decltype(g);
+        return TensorSlice<X1, DimR, DimC>(std::forward<X1>(g), self.index);
     }
 
     template<Tensor X, int DimR, int DimC> requires(std::remove_cvref_t<X>::isCompact())

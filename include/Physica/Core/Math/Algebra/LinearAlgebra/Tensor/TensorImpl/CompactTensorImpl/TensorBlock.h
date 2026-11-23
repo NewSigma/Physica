@@ -42,6 +42,8 @@ namespace Physica {
         using Base::resize;
         void resize(IndexType size);
         [[nodiscard]] auto values(this auto&&) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr IndexType getShape() const noexcept { return shape; }
         [[nodiscard]] auto getStrides() const noexcept;
@@ -72,6 +74,15 @@ namespace Physica {
         auto&& v = propagate_rvalue_reference<decltype(self), X>(self.tensor).values();
         using X1 = decltype(v);
         return TensorBlock<X1>(std::forward<X1>(v), self.from, self.shape);
+    }
+
+    template<Tensor X> requires(std::remove_cvref_t<X>::isCompact())
+    template<int GradOrder>
+    auto TensorBlock<X>::grads(this auto&& self) noexcept {
+        static_assert(Base::isDiffable(), "[Error]: Non-differentiable tensor has no grads");
+        auto&& g = propagate_rvalue_reference<decltype(self), X>(self.tensor).template grads<GradOrder>();
+        using X1 = decltype(g);
+        return TensorBlock<X1>(std::forward<X1>(g), self.from, self.shape);
     }
 
     template<Tensor X> requires(std::remove_cvref_t<X>::isCompact())
