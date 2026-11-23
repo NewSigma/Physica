@@ -42,6 +42,13 @@ namespace {
                                   cDevice.block(0, row, s * col, col).data_handle(),});
         batchedGemm.compute(T(1), T(0));
         expect<RandomSource>(matrixNear(cDevice.toHost(), answer, 1E-4));
+
+        const std::ptrdiff_t strideA = a.block(0, row, inner, inner).data_handle() - a.block(0, row, 0, inner).data_handle();
+        const std::ptrdiff_t strideB = b.block(0, inner, col, col).data_handle() - b.block(0, inner, 0, col).data_handle();
+        const std::ptrdiff_t strideC = c.block(0, row, col, col).data_handle() - c.block(0, row, 0, col).data_handle();
+        cDevice.junk();
+        batchedGemm.compute(strideA, strideB, strideC, T(1), T(0));
+        expect<RandomSource>(matrixNear(cDevice.toHost(), answer, 1E-4));
     }
 }
 

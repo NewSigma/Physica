@@ -41,6 +41,13 @@ namespace {
         if constexpr (HasMKL()) {
             batchedGemm.compute(T(1), T(0));
             expect<RandomSource>(matrixNear(c, answer, 1E-4));
+
+            const std::ptrdiff_t strideA = a.block(0, row, inner, inner).data_handle() - aFirst.data_handle();
+            const std::ptrdiff_t strideB = b.block(0, inner, col, col).data_handle() - bFirst.data_handle();
+            const std::ptrdiff_t strideC = c.block(0, row, col, col).data_handle() - cFirst.data_handle();
+            c.junk();
+            batchedGemm.compute(strideA, strideB, strideC, T(1), T(0));
+            expect<RandomSource>(matrixNear(c, answer, 1E-4));
         }
     }
 }

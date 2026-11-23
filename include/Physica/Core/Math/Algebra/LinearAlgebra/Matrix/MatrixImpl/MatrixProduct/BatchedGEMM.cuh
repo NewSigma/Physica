@@ -37,7 +37,9 @@ namespace Physica {
         void batch(size_t index, Array<T*, 3> handles) noexcept;
 
         void compute(T alpha = T(1), T beta = T(0));
+        void compute(std::ptrdiff_t strideA, std::ptrdiff_t strideB, std::ptrdiff_t strideC, T alpha = T(1), T beta = T(0));
         void compute_cublas(T alpha, T beta);
+        void compute_cublas(std::ptrdiff_t strideA, std::ptrdiff_t strideB, std::ptrdiff_t strideC, T alpha, T beta);
 
         void reshape(const Matrix auto& a, const Matrix auto& b, Matrix auto& c);
         void resize(size_t batchSize);
@@ -78,6 +80,12 @@ namespace Physica {
     template<Scalar T>
     void device_obj<BatchedGEMM<T>>::compute(T alpha, T beta) {
         compute_cublas(alpha, beta);
+    }
+
+    template<Scalar T>
+    void device_obj<BatchedGEMM<T>>::compute(std::ptrdiff_t strideA, std::ptrdiff_t strideB, std::ptrdiff_t strideC, T alpha, T beta) {
+        assert(getBatchSize() != 0 && "[Error]: Batch size must not be zero");
+        compute_cublas(strideA, strideB, strideC, alpha, beta);
     }
 
     template<Scalar T>
@@ -124,10 +132,49 @@ namespace Physica {
     }
 
     template<Scalar T>
+    void device_obj<BatchedGEMM<T>>::compute_cublas(std::ptrdiff_t strideA, std::ptrdiff_t strideB, std::ptrdiff_t strideC, T alpha_, T beta_) {
+        using Tm = decltype(std::declval<T>().toCUDA());
+        auto& ctx = CUDAContext::getInstance();
+        ctx.setPointerMode(false);
+        const Tm alpha = alpha_.toCUDA();
+        const Tm beta = beta_.toCUDA();
+        const auto opA = shape.transA ? CUBLAS_OP_T : CUBLAS_OP_N;
+        const auto opB = shape.transB ? CUBLAS_OP_T : CUBLAS_OP_N;
+        const int64_t m = int64_t(shape.row);
+        const int64_t n = int64_t(shape.col);
+        const int64_t k = int64_t(shape.inner);
+        const int64_t lda = int64_t(shape.majorStrideA);
+        const int64_t ldb = int64_t(shape.majorStrideB);
+        const int64_t ldc = int64_t(shape.majorStrideC);
+        const int64_t batchCount = int64_t(getBatchSize());
+        const auto* aData = reinterpret_cast<const Tm*>(ptrs[0, 0]);
+        const auto* bData = reinterpret_cast<const Tm*>(ptrs[1, 0]);
+        auto* cData = reinterpret_cast<Tm*>(ptrs[2, 0]);
+        const auto sa = static_cast<long long>(shape.transC ? strideB : strideA);
+        const auto sb = static_cast<long long>(shape.transC ? strideA : strideB);
+        const auto sc = static_cast<long long>(strideC);
+        if constexpr (T::isComplex()) {
+            if constexpr (T::Prec == Float32)
+                check(cublasCgemmStridedBatched_64(ctx, opA, opB, m, n, k, (const cuComplex*)&alpha, (const cuComplex*)aData, lda, sa, (const cuComplex*)bData, ldb, sb, (const cuComplex*)&beta, (cuComplex*)cData, ldc, sc, batchCount));
+            else {
+                static_assert(T::Prec == Float64, "[Error]: Unknown ScalarType");
+                check(cublasZgemmStridedBatched_64(ctx, opA, opB, m, n, k, (const cuDoubleComplex*)&alpha, (const cuDoubleComplex*)aData, lda, sa, (const cuDoubleComplex*)bData, ldb, sb, (const cuDoubleComplex*)&beta, (cuDoubleComplex*)cData, ldc, sc, batchCount));
+            }
+        }
+        else {
+            if constexpr (T::Prec == Float32)
+                check(cublasSgemmStridedBatched_64(ctx, opA, opB, m, n, k, (const float*)&alpha, (const float*)aData, lda, sa, (const float*)bData, ldb, sb, (const float*)&beta, (float*)cData, ldc, sc, batchCount));
+            else {
+                static_assert(T::Prec == Float64, "[Error]: Unknown ScalarType");
+                check(cublasDgemmStridedBatched_64(ctx, opA, opB, m, n, k, (const double*)&alpha, (const double*)aData, lda, sa, (const double*)bData, ldb, sb, (const double*)&beta, (double*)cData, ldc, sc, batchCount));
+            }
+        }
+    }
+
+    template<Scalar T>
     void device_obj<BatchedGEMM<T>>::reshape(const Matrix auto& a, const Matrix auto& b, Matrix auto& c) {
         shape = host_obj::makeShape(a, b, c);
     }
-
     template<Scalar T>
     void device_obj<BatchedGEMM<T>>::resize(size_t batchSize) {
         assert(batchSize != 0 && "[Error]: Batch size must not be zero");

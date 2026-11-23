@@ -45,8 +45,10 @@ namespace Physica {
         void batch(size_t index, Array<T*, 3> handles) noexcept;
 
         void compute(T alpha = T(1), T beta = T(0));
+        void compute(std::ptrdiff_t strideA, std::ptrdiff_t strideB, std::ptrdiff_t strideC, T alpha = T(1), T beta = T(0));
         void compute_base(T alpha, T beta) noexcept;
         void compute_mkl(T alpha, T beta) noexcept;
+        void compute_mkl(std::ptrdiff_t strideA, std::ptrdiff_t strideB, std::ptrdiff_t strideC, T alpha, T beta) noexcept;
 
         void reshape(const Matrix auto& a, const Matrix auto& b, Matrix auto& c);
         void resize(size_t batchSize);
@@ -57,6 +59,7 @@ namespace Physica {
         [[nodiscard]] const auto& getShape() const noexcept { return shape; }
     private:
         [[nodiscard]] static auto makeShape(const Matrix auto& a, const Matrix auto& b, Matrix auto& c) -> Shape;
+        [[nodiscard]] bool isPackedStrided(std::ptrdiff_t strideA, std::ptrdiff_t strideB, std::ptrdiff_t strideC) const noexcept;
         /* Friends */
         friend class device_obj<This>;
     };
@@ -98,6 +101,31 @@ namespace Physica {
     template<Scalar T>
     void BatchedGEMM<T>::compute_base(T, T) noexcept {
         noImpl("No host batched GEMM support");
+    }
+
+    template<Scalar T>
+    void BatchedGEMM<T>::compute(std::ptrdiff_t strideA, std::ptrdiff_t strideB, std::ptrdiff_t strideC, T alpha, T beta) {
+        const size_t batchSize = getBatchSize();
+        assert(batchSize != 0 && "[Error]: Batch size must not be zero");
+        if constexpr (HasMKL() && !T::isDiffable() && (T::Prec == Float32 || T::Prec == Float64)) {
+            if (!isPackedStrided(strideA, strideB, strideC)) {
+                // MKL does not support; fallback to pointer table
+                T* const first = ptrs[0, 0];
+                T* const second = ptrs[1, 0];
+                T* const baseA = shape.transC ? second : first;
+                T* const baseB = shape.transC ? first : second;
+                T* const baseC = ptrs[2, 0];
+                for (size_t index = 0; index < batchSize; ++index) {
+                    const auto offset = std::ptrdiff_t(index);
+                    batch(index, {baseA + offset * strideA, baseB + offset * strideB, baseC + offset * strideC});
+                }
+                compute_mkl(alpha, beta);
+                return;
+            }
+            compute_mkl(strideA, strideB, strideC, alpha, beta);
+        }
+        else
+            noImpl("No host strided batched GEMM support");
     }
 
     template<Scalar T>
@@ -170,6 +198,17 @@ namespace Physica {
         result.majorStrideC = c.getMajorStride();
         result.transC = TransC;
         return result;
+    }
+
+    template<Scalar T>
+    auto BatchedGEMM<T>::isPackedStrided(std::ptrdiff_t strideA, std::ptrdiff_t strideB, std::ptrdiff_t strideC) const noexcept -> bool {
+        const std::ptrdiff_t stridea = shape.transC ? strideB : strideA;
+        const std::ptrdiff_t strideb = shape.transC ? strideA : strideB;
+        const std::ptrdiff_t colsA = shape.transA ? shape.row : shape.inner;
+        const std::ptrdiff_t colsB = shape.transB ? shape.inner : shape.col;
+        return stridea >= std::ptrdiff_t(shape.majorStrideA * colsA)
+            && strideb >= std::ptrdiff_t(shape.majorStrideB * colsB)
+            && strideC >= std::ptrdiff_t(shape.majorStrideC * shape.col);
     }
 }
 
