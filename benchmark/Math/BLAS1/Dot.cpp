@@ -64,9 +64,9 @@ namespace {
         const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(size);
         auto op = Dot(v1, v2);
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>([&](auto&&...) { return op.calc(); }),
-                        backend<Backend::Base>([&](auto&&...) { return op.calc_base(); }),
-                        backend<Backend::MKL, HasMKL()>([&](auto&&...) { return op.calc_mkl(); }));
+                        backend([&](auto&&...) { return op.calc_base(); }, "base"),
+                        backend<HasMKL()>([&](auto&&...) { return op.calc_mkl(); }, "mkl"),
+                        backend([&](auto&&...) { return op.calc(); }, "dispatch"));
     }
 #endif
 }

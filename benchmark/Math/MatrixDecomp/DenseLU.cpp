@@ -46,9 +46,9 @@ namespace {
         const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
         DenseLU<T, false> lu(order);
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>([&](auto&&...) -> DenseLU<T, false>& { lu.compute(m); return lu; }),
-                        backend<Backend::Base>([&](auto&&...) -> DenseLU<T, false>& { lu.compute_base(m); return lu; }),
-                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> DenseLU<T, false>& { lu.compute_mkl(m); return lu; }));
+                        backend([&](auto&&...) -> DenseLU<T, false>& { lu.compute_base(m); return lu; }, "base"),
+                        backend<HasMKL()>([&](auto&&...) -> DenseLU<T, false>& { lu.compute_mkl(m); return lu; }, "mkl"),
+                        backend([&](auto&&...) -> DenseLU<T, false>& { lu.compute(m); return lu; }, "dispatch"));
     }
 #endif
 }

@@ -48,9 +48,9 @@ namespace {
         auto lu = DenseLU<T, false>(m);
         auto inv = lu.inv();
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>([&](auto&&...) -> MatrixND<T>& { inv.assign(m); return m; }),
-                        backend<Backend::Base>([&](auto&&...) -> MatrixND<T>& { inv.assign_base(m); return m; }),
-                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> MatrixND<T>& { inv.assign_mkl(m); return m; }));
+                        backend([&](auto&&...) -> MatrixND<T>& { inv.assign_base(m); return m; }, "base"),
+                        backend<HasMKL()>([&](auto&&...) -> MatrixND<T>& { inv.assign_mkl(m); return m; }, "mkl"),
+                        backend([&](auto&&...) -> MatrixND<T>& { inv.assign(m); return m; }, "dispatch"));
     }
 #endif
 }

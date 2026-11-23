@@ -49,9 +49,9 @@ namespace {
         auto expr = x * T(2);
         VectorND<T> buffer(size);
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>([&](auto&&...) -> VectorND<T>& { expr.assign_add(buffer); return buffer; }),
-                        backend<Backend::Base>([&](auto&&...) -> VectorND<T>& { expr.assign_add_base(buffer); return buffer; }),
-                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> VectorND<T>& { expr.assign_add_mkl(buffer); return buffer; }));
+                        backend([&](auto&&...) -> VectorND<T>& { expr.assign_add_base(buffer); return buffer; }, "base"),
+                        backend<HasMKL()>([&](auto&&...) -> VectorND<T>& { expr.assign_add_mkl(buffer); return buffer; }, "mkl"),
+                        backend([&](auto&&...) -> VectorND<T>& { expr.assign_add(buffer); return buffer; }, "dispatch"));
     }
 #endif
 }

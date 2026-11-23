@@ -47,9 +47,9 @@ namespace {
         auto expr = m.tril_unit();
         MatrixND<T> buffer(order);
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>([&](auto&&...) -> MatrixND<T>& { expr.assign(buffer); return buffer; }),
-                        backend<Backend::Base>([&](auto&&...) -> MatrixND<T>& { expr.assign_base(buffer); return buffer; }),
-                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> MatrixND<T>& { expr.assign_mkl(buffer); return buffer; }));
+                        backend([&](auto&&...) -> MatrixND<T>& { expr.assign_base(buffer); return buffer; }, "base"),
+                        backend<HasMKL()>([&](auto&&...) -> MatrixND<T>& { expr.assign_mkl(buffer); return buffer; }, "mkl"),
+                        backend([&](auto&&...) -> MatrixND<T>& { expr.assign(buffer); return buffer; }, "dispatch"));
     }
 #endif
 }

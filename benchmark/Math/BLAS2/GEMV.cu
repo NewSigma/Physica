@@ -71,8 +71,8 @@ namespace {
         device_obj<VectorND<T>> y(N);
 
         rotate_backends(state, DeviceTimer{},
-                        backend<Backend::Base>([&](auto&&...) { (A * x).assign_base(y); }),
-                        backend<Backend::cuBLAS>([&](auto&&...) { (A * x).assign_cublas(y); }));
+                        backend([&](auto&&...) { (A * x).assign_base(y); }, "base"),
+                        backend([&](auto&&...) { (A * x).assign_cublas(y); }, "cublas"));
     }
 #endif
 }

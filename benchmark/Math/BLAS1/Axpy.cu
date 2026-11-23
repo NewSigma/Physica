@@ -54,9 +54,9 @@ namespace {
         CUDAExecutor::wait();
 
         rotate_backends(state, DeviceTimer{},
-                        backend<Backend::Base>([&](auto&&...) { expr.assign_add_base(buffer); }),
-                        backend<Backend::Dispatch>([&](auto&&...) { expr.assign_add(buffer); }),
-                        backend<Backend::cuBLAS>([&](auto&&...) { expr.assign_add_cublas(buffer); }));
+                        backend([&](auto&&...) { expr.assign_add_base(buffer); }, "base"),
+                        backend([&](auto&&...) { expr.assign_add_cublas(buffer); }, "cublas"),
+                        backend([&](auto&&...) { expr.assign_add(buffer); }, "dispatch"));
     }
 #endif
 }

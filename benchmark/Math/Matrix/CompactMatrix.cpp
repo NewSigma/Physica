@@ -60,9 +60,9 @@ namespace {
         const auto data = DenseMatrix<T, MatrixMajor::Col>::template random_uniform<RandomSource>(size);
         DenseMatrix<T, MatrixMajor::Row> buffer(size);
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>([&](auto&&...) -> DenseMatrix<T, MatrixMajor::Row>& { data.assign(buffer); return buffer; }),
-                        backend<Backend::Base>([&](auto&&...) -> DenseMatrix<T, MatrixMajor::Row>& { data.assign_base(buffer); return buffer; }),
-                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> DenseMatrix<T, MatrixMajor::Row>& { data.assign_mkl(buffer); return buffer; }));
+                        backend([&](auto&&...) -> DenseMatrix<T, MatrixMajor::Row>& { data.assign_base(buffer); return buffer; }, "base"),
+                        backend<HasMKL()>([&](auto&&...) -> DenseMatrix<T, MatrixMajor::Row>& { data.assign_mkl(buffer); return buffer; }, "mkl"),
+                        backend([&](auto&&...) -> DenseMatrix<T, MatrixMajor::Row>& { data.assign(buffer); return buffer; }, "dispatch"));
     }
 #endif
 }

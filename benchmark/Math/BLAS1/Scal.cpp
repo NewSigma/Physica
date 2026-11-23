@@ -54,9 +54,9 @@ namespace {
             return alpha;
         };
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>([&](auto&&...) -> VectorND<T>& { (x * factor()).assign(x); return x; }),
-                        backend<Backend::Base>([&](auto&&...) -> VectorND<T>& { (x * factor()).assign_base(x); return x; }),
-                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> VectorND<T>& { (x * factor()).assign_mkl(x); return x; }));
+                        backend([&](auto&&...) -> VectorND<T>& { (x * factor()).assign_base(x); return x; }, "base"),
+                        backend<HasMKL()>([&](auto&&...) -> VectorND<T>& { (x * factor()).assign_mkl(x); return x; }, "mkl"),
+                        backend([&](auto&&...) -> VectorND<T>& { (x * factor()).assign(x); return x; }, "dispatch"));
     }
 #endif
 }

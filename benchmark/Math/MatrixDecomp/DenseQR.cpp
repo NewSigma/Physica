@@ -46,9 +46,9 @@ namespace {
         const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
         DenseQR<T> qr(order, order);
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>([&](auto&&...) -> DenseQR<T>& { qr.compute(m); return qr; }),
-                        backend<Backend::Base>([&](auto&&...) -> DenseQR<T>& { qr.compute_base(m); return qr; }),
-                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> DenseQR<T>& { qr.compute_mkl(m); return qr; }));
+                        backend([&](auto&&...) -> DenseQR<T>& { qr.compute_base(m); return qr; }, "base"),
+                        backend<HasMKL()>([&](auto&&...) -> DenseQR<T>& { qr.compute_mkl(m); return qr; }, "mkl"),
+                        backend([&](auto&&...) -> DenseQR<T>& { qr.compute(m); return qr; }, "dispatch"));
     }
 #endif
 }

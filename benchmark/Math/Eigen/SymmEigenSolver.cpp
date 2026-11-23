@@ -49,9 +49,9 @@ namespace {
         SymmEigenSolver<T> solver(size, NeedEigenVec);
         auto m = MatrixND<T>::random_uniform<RandomSource>(size);
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>([&](auto&&...) -> SymmEigenSolver<T>& { solver.compute(m); return solver; }),
-                        backend<Backend::Base>([&](auto&&...) -> SymmEigenSolver<T>& { solver.compute_base(m); return solver; }),
-                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> SymmEigenSolver<T>& { solver.compute_mkl(m); return solver; }));
+                        backend([&](auto&&...) -> SymmEigenSolver<T>& { solver.compute_base(m); return solver; }, "base"),
+                        backend<HasMKL()>([&](auto&&...) -> SymmEigenSolver<T>& { solver.compute_mkl(m); return solver; }, "mkl"),
+                        backend([&](auto&&...) -> SymmEigenSolver<T>& { solver.compute(m); return solver; }, "dispatch"));
     }
 #endif
 }

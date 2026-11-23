@@ -77,9 +77,9 @@ namespace {
         auto expr = m1 * m2;
         M0 result(m, n);
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>([&](auto&&...) -> M0& { expr.assign(result); return result; }),
-                        backend<Backend::Base>([&](auto&&...) -> M0& { expr.assign_base(result); return result; }),
-                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> M0& { expr.assign_mkl(result); return result; }));
+                        backend([&](auto&&...) -> M0& { expr.assign_base(result); return result; }, "base"),
+                        backend<HasMKL()>([&](auto&&...) -> M0& { expr.assign_mkl(result); return result; }, "mkl"),
+                        backend([&](auto&&...) -> M0& { expr.assign(result); return result; }, "dispatch"));
     }
 #endif
 }

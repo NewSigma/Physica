@@ -50,9 +50,9 @@ namespace {
         auto expr = m.transpose();
         MatrixType buffer(order, order);
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>([&](auto&&...) -> MatrixType& { expr.assign(buffer); return buffer; }),
-                        backend<Backend::Base>([&](auto&&...) -> MatrixType& { expr.assign_base(buffer); return buffer; }),
-                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> MatrixType& { expr.assign_mkl(buffer); return buffer; }));
+                        backend([&](auto&&...) -> MatrixType& { expr.assign_base(buffer); return buffer; }, "base"),
+                        backend<HasMKL()>([&](auto&&...) -> MatrixType& { expr.assign_mkl(buffer); return buffer; }, "mkl"),
+                        backend([&](auto&&...) -> MatrixType& { expr.assign(buffer); return buffer; }, "dispatch"));
     }
 #endif
 }

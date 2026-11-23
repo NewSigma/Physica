@@ -37,18 +37,18 @@ namespace {
         const int value = int(state.range(3));
         auto dst = Buffer::junk(size);
 
-        auto dispatch = [&](auto&&...) -> std::byte* {
-            PHYSICA_BENCH(memset2D(dst.data(), stride, value, length, numRow));
-            return dst.data();
-        };
         auto base = [&](auto&&...) -> std::byte* {
             for (size_t row = 0; row < numRow; ++row)
                 std::memset(dst.data() + row * stride, value, length);
             return dst.data();
         };
+        auto dispatch = [&](auto&&...) -> std::byte* {
+            PHYSICA_BENCH(memset2D(dst.data(), stride, value, length, numRow));
+            return dst.data();
+        };
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>(dispatch),
-                        backend<Backend::Base>(base));
+                        backend(base, "base"),
+                        backend(dispatch, "dispatch"));
     }
 #endif
 }

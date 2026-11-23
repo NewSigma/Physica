@@ -45,9 +45,9 @@ namespace {
         const int64_t size = state.range(0);
         auto x = VectorND<T>::template random_uniform<RandomSource>(size);
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>([&](auto&&...) { return x.norm1(); }),
-                        backend<Backend::Base>([&](auto&&...) { return x.norm1_base(); }),
-                        backend<Backend::MKL, HasMKL()>([&](auto&&...) { return x.norm1_mkl(); }));
+                        backend([&](auto&&...) { return x.norm1_base(); }, "base"),
+                        backend<HasMKL()>([&](auto&&...) { return x.norm1_mkl(); }, "mkl"),
+                        backend([&](auto&&...) { return x.norm1(); }, "dispatch"));
     }
 #endif
 }

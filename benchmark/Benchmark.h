@@ -21,12 +21,12 @@
 #include <array>
 #include <concepts>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <utility>
 #include <benchmark/benchmark.h>
 #include "Utils/Timer.h"
-#include "Physica/Core/Math/Algebra/Backend.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Utils/Builtin.h"
 #include "Physica/Core/Utils/Empty.h"
@@ -37,17 +37,16 @@ namespace Physica {
     size_t makeMatrixSize(int64_t level, size_t sizeElem) noexcept;
 
     namespace Internal {
-        template<Backend B, std::invocable F>
+        template<class F>
         struct BackendEntry {
-            constexpr static Backend Kind = B;
-
             F fn;
+            std::string_view name;
         };
 
         constexpr auto toTuple(auto&& entry) {
-            using Entry = decltype(entry);
-            if constexpr (instanceof_x<Entry, BackendEntry>)
-                return std::make_tuple(std::forward<Entry>(entry));
+            using Entry = std::remove_cvref_t<decltype(entry)>;
+            if constexpr (instanceof<Entry, BackendEntry>)
+                return std::make_tuple(std::forward<decltype(entry)>(entry));
             else
                 return std::tuple<>{};
         }
@@ -75,10 +74,10 @@ namespace Physica {
         }
     }
 
-    template<Backend B, bool Enabled = true>
-    constexpr auto backend(std::invocable auto fn) {
+    template<bool Enabled = true>
+    constexpr auto backend(std::invocable auto fn, std::string_view name) {
         if constexpr (Enabled)
-            return Internal::BackendEntry<B, decltype(fn)>{fn};
+            return Internal::BackendEntry<decltype(fn)>{fn, name};
         else
             return Empty{};
     }
@@ -88,20 +87,6 @@ namespace Physica {
         using Tuple = std::remove_cvref_t<decltype(fns)>;
         constexpr size_t NumBackends = std::tuple_size_v<Tuple>;
         static_assert(2 <= NumBackends, "[Error]: rotate_backends needs at least two backends");
-
-        constexpr size_t BaseIdx = [NumBackends]<size_t... I>(std::index_sequence<I...>) consteval noexcept {
-            constexpr std::array<Backend, NumBackends> kinds{std::tuple_element_t<I, Tuple>::Kind...};
-            for (size_t i = 0; i < NumBackends; ++i)
-                if (kinds[i] == Backend::Base)
-                    return i;
-            return NumBackends;
-        }(std::make_index_sequence<NumBackends>{});
-        static_assert(BaseIdx != NumBackends, "[Error]: A Base backend is required as reference");
-
-        const auto names = []<size_t... I>(std::index_sequence<I...>) {
-            return std::array{std::string(toString(std::tuple_element_t<I, Tuple>::Kind))...};
-        }(std::make_index_sequence<NumBackends>{});
-
         DenseVector<float64, NumBackends> sums{};
         size_t rotation = 0;
         for (auto _ : state) {
@@ -117,11 +102,18 @@ namespace Physica {
 
             state.SetIterationTime(ns.sum().toMachine() * 1E-9);
         }
+
+        const auto names = [&fns]<size_t... I>(std::index_sequence<I...>) {
+            return std::array<std::string_view, NumBackends>{std::get<I>(fns).name...};
+        }(std::make_index_sequence<NumBackends>{});
+
         const double inv = 1.0 / double(state.iterations());
         for (size_t j = 0; j < NumBackends; ++j) {
-            state.counters[names[j] + "_ns"] = benchmark::Counter((sums[j] * inv).toMachine());
-            if (j != BaseIdx)
-                state.counters[names[j] + "_speedup"] = benchmark::Counter((sums[BaseIdx] / sums[j]).toMachine());
+            constexpr size_t ReferenceIdx = 0;
+            const std::string name(names[j]);
+            state.counters[name + "_ns"] = benchmark::Counter((sums[j] * inv).toMachine());
+            if (j != ReferenceIdx)
+                state.counters[name + "_speedup"] = benchmark::Counter((sums[ReferenceIdx] / sums[j]).toMachine());
         }
     }
 }

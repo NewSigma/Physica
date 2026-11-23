@@ -46,9 +46,9 @@ namespace {
         auto x = VectorND<T>::template random_uniform<RandomSource>(size);
         VectorND<T> y(size);
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>([&](auto&&...) -> VectorND<T>& { x.assign(y); return y; }),
-                        backend<Backend::Base>([&](auto&&...) -> VectorND<T>& { x.assign_base(y); return y; }),
-                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> VectorND<T>& { x.assign_mkl(y); return y; }));
+                        backend([&](auto&&...) -> VectorND<T>& { x.assign_base(y); return y; }, "base"),
+                        backend<HasMKL()>([&](auto&&...) -> VectorND<T>& { x.assign_mkl(y); return y; }, "mkl"),
+                        backend([&](auto&&...) -> VectorND<T>& { x.assign(y); return y; }, "dispatch"));
     }
 #endif
 }

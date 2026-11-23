@@ -44,9 +44,9 @@ namespace {
         const DenseMatrix<T> data = TransIsingMatrix<T, 1, 10>(1, 0.01, lattice);
         EigenSolver<T> solver(data.getRow(), NeedEigenVec);
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>([&](auto&&...) -> EigenSolver<T>& { solver.compute(data); return solver; }),
-                        backend<Backend::Base>([&](auto&&...) -> EigenSolver<T>& { solver.compute_base(data); return solver; }),
-                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> EigenSolver<T>& { solver.compute_mkl(data); return solver; }));
+                        backend([&](auto&&...) -> EigenSolver<T>& { solver.compute_base(data); return solver; }, "base"),
+                        backend<HasMKL()>([&](auto&&...) -> EigenSolver<T>& { solver.compute_mkl(data); return solver; }, "mkl"),
+                        backend([&](auto&&...) -> EigenSolver<T>& { solver.compute(data); return solver; }, "dispatch"));
     }
 #endif
 }

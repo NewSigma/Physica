@@ -37,18 +37,18 @@ namespace {
         auto src = Buffer::junk(size);
         auto dst = Buffer::junk(size);
 
-        auto dispatch = [&](auto&&...) -> std::byte* {
-            memcpy2D(dst.data(), stride, src.data(), stride, length, numRow);
-            return dst.data();
-        };
         auto base = [&](auto&&...) -> std::byte* {
             for (size_t row = 0; row < numRow; ++row)
                 std::memcpy(dst.data() + row * stride, src.data() + row * stride, length);
             return dst.data();
         };
+        auto dispatch = [&](auto&&...) -> std::byte* {
+            memcpy2D(dst.data(), stride, src.data(), stride, length, numRow);
+            return dst.data();
+        };
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>(dispatch),
-                        backend<Backend::Base>(base));
+                        backend(base, "base"),
+                        backend(dispatch, "dispatch"));
     }
 #endif
 }

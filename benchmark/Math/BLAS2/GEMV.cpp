@@ -90,9 +90,9 @@ namespace {
         auto expr = mat * vec;
         VectorND<T> result(size);
         rotate_backends(state, HostTimer{},
-                        backend<Backend::Dispatch>([&](auto&&...) -> VectorND<T>& { expr.assign(result); return result; }),
-                        backend<Backend::Base>([&](auto&&...) -> VectorND<T>& { expr.assign_base(result); return result; }),
-                        backend<Backend::MKL, HasMKL()>([&](auto&&...) -> VectorND<T>& { expr.assign_mkl(result); return result; }));
+                        backend([&](auto&&...) -> VectorND<T>& { expr.assign_base(result); return result; }, "base"),
+                        backend<HasMKL()>([&](auto&&...) -> VectorND<T>& { expr.assign_mkl(result); return result; }, "mkl"),
+                        backend([&](auto&&...) -> VectorND<T>& { expr.assign(result); return result; }, "dispatch"));
     }
 #endif
 }

@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include <string_view>
-
 namespace Physica {
     enum class Backend : char {
         Dispatch = 0,
@@ -27,18 +25,4 @@ namespace Physica {
         MKL,
         cuBLAS,
     };
-
-    [[nodiscard]] constexpr std::string_view toString(Backend backend) noexcept {
-        switch (backend) {
-        case Backend::Dispatch:
-            return "dispatch";
-        case Backend::Base:
-            return "base";
-        case Backend::MKL:
-            return "mkl";
-        case Backend::cuBLAS:
-            return "cublas";
-        }
-        return "unknown";
-    }
 }
