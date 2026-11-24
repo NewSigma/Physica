@@ -21,7 +21,6 @@ It is also an open source platform that maintains scientific code and related da
 - [Features](#features)
 - [Usage](#usage)
 - [Maintainers](#maintainers)
-- [Contributing](#contributing)
 - [License](#license)
 
 ## Features
@@ -40,24 +39,6 @@ Refer to [Install.md](doc/Install.md) for a detailed guide on using *Physica*.
 ## Maintainers
 
 Weibo He (<NewSigma@163.com>)  
-
-## Contributing
-
-Feel free to dive in! Open an issue or submit PRs.
-
-### Something you can do
-
-1.Test it on your machine and report bugs.  
-
-2.Tell us new features you want.  
-
-3.Fix bugs, add new features, tests and examples.  
-
-4.Reproduce papers and contribute your results to the community  
-
-5.Improve the documentation.  
-
-### Contributors
 
 ## License
 

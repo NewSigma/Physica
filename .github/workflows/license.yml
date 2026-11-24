@@ -1,0 +1,26 @@
+# This file is part of Physica.
+#
+# SPDX-FileCopyrightText: 2026 Weibo He
+# SPDX-License-Identifier: GPL-3.0-or-later
+name: license
+
+on:
+  push:
+    branches: [ "Physica", "dev" ]
+  pull_request:
+    branches: [ "Physica", "dev" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  license:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+    - uses: actions/checkout@v7.0.1
+
+    - name: Check REUSE compliance
+      uses: fsfe/reuse-action@v6.0.0
