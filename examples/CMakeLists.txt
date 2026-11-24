@@ -1,3 +1,7 @@
+# This file is part of Physica.
+#
+# SPDX-FileCopyrightText: 2020-2026 Weibo He
+# SPDX-License-Identifier: GPL-3.0-or-later
 function(physica_add_example NAME SOURCES)
     add_executable(Example-${NAME})
     target_sources(Example-${NAME} PRIVATE ${SOURCES} ${ARGN})

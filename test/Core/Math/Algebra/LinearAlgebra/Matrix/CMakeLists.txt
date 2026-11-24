@@ -1,3 +1,7 @@
+# This file is part of Physica.
+#
+# SPDX-FileCopyrightText: 2024-2026 Weibo He
+# SPDX-License-Identifier: GPL-3.0-or-later
 physica_add_test(MatrixExp MatrixFunc/MatrixExp.cpp)
 physica_add_test(MatrixPow MatrixFunc/MatrixPow.cpp)
 

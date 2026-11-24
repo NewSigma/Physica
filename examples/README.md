@@ -1,3 +1,10 @@
+<!--
+This file is part of Physica.
+
+SPDX-FileCopyrightText: 2024-2026 Weibo He
+SPDX-License-Identifier: GFDL-1.3-no-invariants-or-later
+-->
+
 # Physica Examples
 
 *Physica Examples* is designed to
@@ -9,4 +16,4 @@ Reproducibility is a key challenge in scientific computing, particularly since m
 
 ## License
 
-Data in this folder is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License ([CC BY-SA 4.0](LICENSE)).
+Data in this folder is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License ([CC BY-SA 4.0](../LICENSES/CC-BY-SA-4.0.txt)).

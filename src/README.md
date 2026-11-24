@@ -1,16 +1,10 @@
 <!--
-Copyright 2025-2026 Weibo He.
-
 This file is part of Physica.
 
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.3
-or any later version published by the Free Software Foundation;
-with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
-
-You should have received a copy of the GNU Free Documentation License
-along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+SPDX-FileCopyrightText: 2025-2026 Weibo He
+SPDX-License-Identifier: GFDL-1.3-no-invariants-or-later
 -->
+
 # Project structure
 
 $\quad$The project structure is often the first aspect users encounter when engaging with open-source software. A clean and goal-oriented project organization is as crucial as well-designed and well-documented code. The top-level directory structure of *Physica* follows conventions commonly adopted by open-source C++ projects, consisting of the following directories: `3rdparty`, `benchmark`, `doc`, `examples`, `include`, `src`, and `test`. Within *Physica*, the secondary structure is organized modularly. The modules included in *Physica* are listed in the following table:

@@ -1,3 +1,7 @@
+# This file is part of Physica.
+#
+# SPDX-FileCopyrightText: 2026 Weibo He
+# SPDX-License-Identifier: GPL-3.0-or-later
 function(physica_collect_headers OUT_VAR)
     file(GLOB_RECURSE headers CONFIGURE_DEPENDS ${Physica_INCLUDE_DIR}/Physica/*.h)
     list(FILTER headers EXCLUDE REGEX "/[^/]*Impl[^/]*/")

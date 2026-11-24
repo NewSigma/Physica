@@ -1,3 +1,7 @@
+# This file is part of Physica.
+#
+# SPDX-FileCopyrightText: 2026 Weibo He
+# SPDX-License-Identifier: GPL-3.0-or-later
 find_package(Git QUIET REQUIRED)
 execute_process(COMMAND ${GIT_EXECUTABLE} log -1 --pretty=format:%H
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}

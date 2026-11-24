@@ -1,3 +1,7 @@
+# This file is part of Physica.
+#
+# SPDX-FileCopyrightText: 2024-2026 Weibo He
+# SPDX-License-Identifier: GPL-3.0-or-later
 physica_add_test(Contract IndexVar/Contract.cpp)
 
 physica_add_test(EigenSolver Eigen/EigenSolver.cpp)

@@ -1,4 +1,7 @@
-
+# This file is part of Physica.
+#
+# SPDX-FileCopyrightText: 2024-2025 Weibo He
+# SPDX-License-Identifier: GPL-3.0-or-later
 # Analyser
 physica_add_example(Correlation Analyser/Correlation.cpp)
 physica_add_example(RDF Analyser/RDF.cpp)

@@ -1,3 +1,10 @@
+<!--
+This file is part of Physica.
+
+SPDX-FileCopyrightText: 2020-2026 Weibo He
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # Physica
 
 [![License](https://img.shields.io/badge/License-GPL_3.0-blue.svg)](https://opensource.org/license/gpl-3-0) [![Linux](https://img.shields.io/badge/os-Linux-green.svg)](https://shields.io/)
