@@ -1,7 +1,7 @@
 # This file is part of Physica.
 #
 # SPDX-FileCopyrightText: 2024-2026 Weibo He
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 find_path(FFTW3_INCLUDE_DIRS fftw3.h HINTS ${FFTW3_ROOT})
 find_library(FFTW3_LIBRARY fftw3 HINTS ${FFTW3_ROOT})
 find_library(FFTW3f_LIBRARY fftw3f HINTS ${FFTW3_ROOT})

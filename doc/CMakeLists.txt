@@ -1,7 +1,7 @@
 # This file is part of Physica.
 #
 # SPDX-FileCopyrightText: 2024-2025 Weibo He
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Doc-* target generates diagrams
 function(physica_add_doc NAME SOURCES)
     add_executable(Doc-${NAME})

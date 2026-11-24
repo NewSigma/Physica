@@ -31,7 +31,7 @@
  * Modified from the Random-Number Utilities (randutils)
  *
  * SPDX-FileCopyrightText: 2025-2026 Weibo He
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: MPL-2.0
  */
 #pragma once
 

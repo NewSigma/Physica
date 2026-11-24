@@ -1,7 +1,7 @@
 # This file is part of Physica.
 #
 # SPDX-FileCopyrightText: 2024-2025 Weibo He
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 find_path(FFI_INCLUDE_DIR ffi.h)
 find_library(FFI_LIBRARY NAMES libffi_pic.a libffi.a)
 

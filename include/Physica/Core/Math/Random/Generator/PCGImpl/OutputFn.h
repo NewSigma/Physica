@@ -23,7 +23,7 @@
  * Modified from the PCG Random Number Generation for C++ Library
  *
  * SPDX-FileCopyrightText: 2025 Weibo He
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: MPL-2.0
  */
 #pragma once
 

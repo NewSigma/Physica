@@ -2,7 +2,7 @@
  * This file is part of Physica.
  *
  * SPDX-FileCopyrightText: 2022-2026 Weibo He
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: MPL-2.0
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"

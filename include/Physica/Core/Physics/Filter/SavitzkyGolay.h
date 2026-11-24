@@ -2,7 +2,7 @@
  * This file is part of Physica.
  *
  * SPDX-FileCopyrightText: 2022-2024 Weibo He
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: MPL-2.0
  */
 #pragma once
 

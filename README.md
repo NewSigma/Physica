@@ -2,12 +2,12 @@
 This file is part of Physica.
 
 SPDX-FileCopyrightText: 2020-2026 Weibo He
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MPL-2.0
 -->
 
 # Physica
 
-[![License](https://img.shields.io/badge/License-GPL_3.0-blue.svg)](https://opensource.org/license/gpl-3-0) [![Linux](https://img.shields.io/badge/os-Linux-green.svg)](https://shields.io/)
+[![License](https://img.shields.io/badge/License-MPL_2.0-blue.svg)](https://opensource.org/license/mpl-2-0) [![Linux](https://img.shields.io/badge/os-Linux-green.svg)](https://shields.io/)
 
 *Physica* is a high-performance and scalable C++ template library, dedicated to providing a rapid iteration platform for new algorithms. It provides the following two main features:
 
@@ -42,4 +42,4 @@ Weibo He (<NewSigma@163.com>)
 
 ## License
 
-[GPLv3](LICENSE) © Weibo He
+[MPL-2.0](LICENSE) © Weibo He

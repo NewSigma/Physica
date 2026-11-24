@@ -28,7 +28,7 @@
  * Modified from the Vector Class Library
  *
  * SPDX-FileCopyrightText: 2022 Weibo He
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: MPL-2.0
  */
 #ifndef VECTORMATH_TRIG_H
 #define VECTORMATH_TRIG_H  1

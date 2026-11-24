@@ -1,7 +1,7 @@
 # This file is part of Physica.
 #
 # SPDX-FileCopyrightText: 2026 Weibo He
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 physica_add_test(CompactVector CompactVector.cpp)
 physica_add_test(Covariance Covariance.cpp)
 physica_add_test(DenseVector DenseVector.cpp)

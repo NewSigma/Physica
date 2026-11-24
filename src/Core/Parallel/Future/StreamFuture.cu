@@ -2,7 +2,7 @@
  * This file is part of Physica.
  *
  * SPDX-FileCopyrightText: 2023-2024 Weibo He
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: MPL-2.0
  */
 #include "Physica/Core/Parallel/Future/StreamFuture.cuh"
 #include "Physica/Core/Parallel/CUDAContext.cuh"
