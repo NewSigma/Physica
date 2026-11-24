@@ -23,6 +23,10 @@ It is specified that header files have the extension `.h` and source files have 
 
 All header files should use `#pragma once` to avoid multiple inclusions; the use of `#define` for this purpose is prohibited.
 
+### Defining Functions in Header Files
+
+A function may be defined at its declaration, including within a class declaration, only if the definition fits on a single line. Longer definitions shall be placed in the corresponding `.cpp` file, or, when they must stay in the header (templates, `constexpr` functions, etc.), outside the class declaration or in a separate `XxxImpl.h` included at the end of the header. This is stricter than [1], which allows definitions of up to about 10 lines.
+
 ## Scoping
 
 ### namespace
