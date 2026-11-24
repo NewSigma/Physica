@@ -57,11 +57,10 @@ namespace {
         const SquareLattice<Dim> lattice({numSite}, 1);
         const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, 1);
         auto dqmc = device_obj<FreqDQMC<Tc>>(params, freqDensity);
+        dqmc.getHMC().setTimeStep(StepSize);
         dqmc.step_for<RandomSource>(1);
 
         auto& engine = dqmc.getHMC().getRoot();
-        engine.setTimeStep(StepSize);
-
         using Kinetic = OpenModel<T, 1, 1>;
         auto kinetic = Kinetic(1, 1);
         engine.template initMomentum<Kinetic, RandomSource>();
@@ -84,6 +83,7 @@ namespace {
         const SquareLattice<Dim> lattice({NumSite}, 1);
         const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, chemMu, 1);
         auto dqmc = device_obj<FreqDQMC<Tc>>(params, FreqDensity);
+        dqmc.getHMC().setTimeStep(T(1));
         dqmc.step_random<RandomSource>();
         dqmc.step<RandomSource>();
 
@@ -102,6 +102,7 @@ namespace {
             HubbardParams<T> params(HoppingT, RepelU, lattice, beta, RepelU * 0.5, 1);
 
             auto dqmc = device_obj<FreqDQMC<Tc>>(params, 1);
+            dqmc.getHMC().setTimeStep(T(1));
             dqmc.step_random<RandomSource>();
             dqmc.step<RandomSource>();
             expect<RandomSource>(dqmc.calcBerry().isZero());
@@ -118,6 +119,7 @@ namespace {
             const T chemMu = T::random_uniform<RandomSource>() * 8 - 4;
             HubbardParams<T> params(HoppingT, RepelU, lattice, beta, RepelU * 0.5 + chemMu, 1);
             auto dqmc = device_obj<FreqDQMC<Tc>>(params, 1);
+            dqmc.getHMC().setTimeStep(T(1));
             dqmc.step_random<RandomSource>();
             dqmc.step<RandomSource>();
             expect<RandomSource>(dqmc.calcBerry().isZero()); // Berry is trivially zero if beta is zero

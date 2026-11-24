@@ -24,6 +24,8 @@ namespace Physica {
         using KineticModel = OpenModel<T, 1, 1>;
         using Tr = T::RealType;
         using Trv = Tr::ValueType;
+        constexpr static int DefaultNumWarmup = 1000;
+
         struct Proposal {
             VectorND<T> sample;
             Trv potential;
@@ -44,6 +46,7 @@ namespace Physica {
 
         VectorND<T> sample;
         Trv samplePot = Trv::nan();
+        Trv timeStep = Trv::nan();
         Trv energyF;
         Trv energyR;
         Trv upperE;
@@ -57,7 +60,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = default;
         /* Operations */
         template<RNG R, ExecutePolicy P = Sequential>
-        VectorND<Trv> warmup(int numWarmup, auto&& forceModel);
+        VectorND<Trv> warmup(auto&& forceModel, int numWarmup = DefaultNumWarmup);
         template<RNG R, ExecutePolicy P = Sequential>
         Trv step(auto&& forceModel);
         template<RNG R, ExecutePolicy P = Sequential>
@@ -68,12 +71,15 @@ namespace Physica {
         [[nodiscard]] auto& getRoot() noexcept { return root; }
         [[nodiscard]] size_t getDOF() const noexcept { return root.getDOF(); }
         [[nodiscard]] Trv getTargetR() const noexcept { return targetR; }
+        [[nodiscard]] Trv getTimeStep() const noexcept { return timeStep; }
         [[nodiscard]] const auto& getSample() const noexcept { return sample; }
         /* Setters */
         void setInitPosition(VectorND<T> init) noexcept;
-        void setTimeStep(Trv timestep) noexcept;
+        void setTimeStep(Trv step) noexcept;
     private:
-        template<RNG R, ExecutePolicy P = Sequential>
+        template<RNG R, ExecutePolicy P>
+        Trv step_impl(auto&& forceModel);
+        template<RNG R, ExecutePolicy P>
         void initTimeStep(auto& forceModel);
         template<RNG R, ExecutePolicy P>
         [[nodiscard]] Proposal visit(int height, auto& forceModel);
@@ -106,41 +112,50 @@ namespace Physica {
      */
     template<Scalar T>
     template<RNG R, ExecutePolicy P>
-    auto HamiltonMC<T>::warmup(int numWarmup, auto&& forceModel) -> VectorND<Trv> {
+    auto HamiltonMC<T>::warmup(auto&& forceModel, int numWarmup) -> VectorND<Trv> {
         initTimeStep<R, P>(forceModel);
 
         VectorND<Trv> lnTimeSteps(numWarmup);
-        Trv initialMu = ln(Trv(10) * root.getTimeStep());
+        Trv initialMu = ln(Trv(10) * timeStep);
         Trv lnConjTimeStep = 0;
         Trv weightAcceptR = 0;
         for (int i = 1; i <= numWarmup; ++i) {
             constexpr Trv Gamma = 0.05;
             constexpr Trv Kappa = 0.75;
             constexpr int Shift = 10;
-            Trv acceptR = step<R, P>(forceModel);
+            Trv acceptR = step_impl<R, P>(forceModel);
             Trv factor = reciprocal(Trv(i + Shift));
             weightAcceptR = fma(factor, targetR - acceptR, (Trv(1) - factor) * weightAcceptR);
 
             Trv m = Trv(i);
             Trv lnTimeStep = initialMu - weightAcceptR * sqrt(m) / Gamma;
-            root.setTimeStep(exp(lnTimeStep));
+            timeStep = exp(lnTimeStep);
 
             factor = pow(m, -Kappa);
             lnConjTimeStep = fma(factor, lnTimeStep, (Trv(1) - factor) * lnConjTimeStep);
             lnTimeSteps[i - 1] = lnConjTimeStep;
         }
-        root.setTimeStep(exp(lnConjTimeStep));
+        setTimeStep(exp(lnConjTimeStep));
         return lnTimeSteps;
+    }
+
+    template<Scalar T>
+    template<RNG R, ExecutePolicy P>
+    auto HamiltonMC<T>::step(auto&& forceModel) -> Trv {
+        if (!timeStep.isFinite()) [[unlikely]]
+            warmup<R, P>(forceModel);
+        return step_impl<R, P>(forceModel);
     }
     /**
      * Algo. 3 of [1]
      */
     template<Scalar T>
     template<RNG R, ExecutePolicy P>
-    auto HamiltonMC<T>::step(auto&& forceModel) -> Trv {
+    auto HamiltonMC<T>::step_impl(auto&& forceModel) -> Trv {
         sample.assign(root.getPhaseMatrix().col(0).tail(getDOF()));
         root.template initMomentum<KineticModel, R>();
         root.template updateForce<P>(forceModel);
+        root.setTimeStep(timeStep);
         nodeF = root;
         nodeR = root;
         if (!samplePot.isFinite())
@@ -214,8 +229,10 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void HamiltonMC<T>::setTimeStep(Trv timestep) noexcept {
-        root.setTimeStep(timestep);
+    void HamiltonMC<T>::setTimeStep(Trv step) noexcept {
+        assert(step.isPositive());
+        timeStep = step;
+        root.setTimeStep(step);
     }
     /**
      * Algo. 4 of [1]
@@ -227,9 +244,9 @@ namespace Physica {
         const Trv e0 = root.template calcClassicalInternalEnergy<P>(forceModel);
 
         Trv prev = 0;
-        Trv timestep = 1;
+        Trv step = 1;
         while (true) {
-            root.setTimeStep(timestep);
+            root.setTimeStep(step);
             nodeF = root;
             nodeF.template nve_step<P>(kinetic, forceModel);
             Trv e = nodeF.template calcClassicalInternalEnergy<P>(forceModel);
@@ -239,8 +256,11 @@ namespace Physica {
                 break;
 
             prev = factor;
-            timestep *= factor;
+            step *= factor;
+            if (!step.isFinite() || !step.isPositive()) [[unlikely]]
+                throw BadConvergenceException("[Error]: Time step adaptation diverged");
         }
+        timeStep = step;
     }
     /**
      * Visit the balanced tree of height \param height; moving in the \param forward direction.

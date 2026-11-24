@@ -65,8 +65,6 @@ int main(int argc, char** argv) {
     VectorND<T> x(N), y(N);
     {
         auto hmc = HamiltonMC<T>({1, 1});
-        hmc.warmup<RandomSource>(1000, ProbHamiltion{});
-
         T acceptM, acceptV;
         auto p = Array<Vector2D<T>>::generate([&](size_t i) {
             auto acc = hmc.step<RandomSource>(ProbHamiltion{});

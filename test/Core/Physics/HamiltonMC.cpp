@@ -16,6 +16,7 @@ namespace {
     void empty() {
         // Test that HMC does not get stuck on an empty model
         auto hmc = HamiltonMC<T>({1, 1});
+        hmc.setTimeStep(T(1));
         hmc.step<RandomSource>(EmptyForceModel<T, 1>{});
     }
 
