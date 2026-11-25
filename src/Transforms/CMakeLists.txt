@@ -22,3 +22,9 @@ add_llvm_pass_plugin(PhysicaTransforms
 )
 
 target_include_directories(PhysicaTransforms SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
+
+add_custom_target(_PhysicaTransformsReady DEPENDS $<TARGET_FILE:PhysicaTransforms>)
+
+add_library(PhysicaTransformsPlugin INTERFACE)
+add_dependencies(PhysicaTransformsPlugin _PhysicaTransformsReady)
+target_compile_options(PhysicaTransformsPlugin INTERFACE $<BUILD_INTERFACE:-fpass-plugin=$<TARGET_FILE:PhysicaTransforms>>)

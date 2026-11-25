@@ -5,16 +5,17 @@
 include(HeaderCheck)
 
 set(PHYSICA_COMPONENTS Core Logger)
+
+if(PHYSICA_TRANSFORMS)
+    add_subdirectory(Transforms)
+endif()
+
 add_subdirectory(Core)
 add_subdirectory(Logger)
 
 if(PHYSICA_GUI)
     add_subdirectory(Gui)
     list(APPEND PHYSICA_COMPONENTS Gui)
-endif()
-
-if(PHYSICA_TRANSFORMS)
-    add_subdirectory(Transforms)
 endif()
 
 add_executable(Physica Physica.cpp)

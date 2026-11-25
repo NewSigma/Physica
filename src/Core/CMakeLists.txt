@@ -67,7 +67,7 @@ if(PHYSICA_MIMALLOC)
 endif()
 
 if(PHYSICA_TRANSFORMS)
-    target_compile_options(PhysicaCore INTERFACE $<BUILD_INTERFACE:-fpass-plugin=$<TARGET_FILE:PhysicaTransforms>>)
+    target_link_libraries(PhysicaCore INTERFACE $<BUILD_INTERFACE:PhysicaTransformsPlugin>)
 endif()
 
 install(TARGETS PhysicaCore EXPORT PhysicaCoreTargets ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
