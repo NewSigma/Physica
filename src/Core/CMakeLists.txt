@@ -24,7 +24,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
     target_compile_definitions(PhysicaCore PUBLIC _USE_MATH_DEFINES NOMINMAX)
 endif()
 
-target_include_directories(PhysicaCore PUBLIC $<BUILD_INTERFACE:${Physica_INCLUDE_DIR}> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_include_directories(PhysicaCore PUBLIC
+    $<BUILD_INTERFACE:${Physica_INCLUDE_DIR}>
+    $<BUILD_INTERFACE:${Physica_GENERATED_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_link_libraries(PhysicaCore PUBLIC pthread)
 target_link_libraries(PhysicaCore PRIVATE FFTW3::fftw3 FFTW3::fftw3f)
 

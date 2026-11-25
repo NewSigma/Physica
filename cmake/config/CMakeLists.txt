@@ -28,4 +28,5 @@ if(${PHYSICA_CUDA})
 endif()
 
 message(STATUS)
-configure_file(Config.h.in ${CMAKE_SOURCE_DIR}/include/Physica/Config.h)
+file(MAKE_DIRECTORY ${Physica_GENERATED_INCLUDE_DIR}/Physica)
+configure_file(Config.h.in ${Physica_GENERATED_INCLUDE_DIR}/Physica/Config.h)

@@ -44,6 +44,8 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 if(CMAKE_BUILD_TYPE MATCHES Debug)
     set(PHYSICA_TRANSFORMS OFF CACHE BOOL "Enable custom LLVM passes" FORCE)
 endif()
+set(Physica_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
+set(Physica_GENERATED_INCLUDE_DIR "${CMAKE_BINARY_DIR}/include")
 include(PhysicaConfigImpl)
 
 if(RUN_CHECKS)
@@ -65,9 +67,9 @@ if(PHYSICA_CCACHE)
     endif()
 endif()
 
-set(Physica_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
 include_directories(SYSTEM 3rdparty)
 include_directories(${Physica_INCLUDE_DIR})
+include_directories(${Physica_GENERATED_INCLUDE_DIR})
 add_subdirectory(src)
 
 if(BUILD_TESTS)
@@ -105,7 +107,7 @@ endif()
 include(CMakePackageConfigHelpers)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/vectorclass DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES
-            include/Physica/Config.h
+            ${Physica_GENERATED_INCLUDE_DIR}/Physica/Config.h
             include/Physica/CRCoro.h
             include/Physica/CRTP.h
             include/Physica/Macro.h

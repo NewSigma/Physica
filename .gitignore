@@ -8,6 +8,5 @@
 build
 dist
 temp
-include/Physica/Config.h
 
 *.pyc
