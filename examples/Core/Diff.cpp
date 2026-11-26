@@ -6,8 +6,11 @@
  */
 #include <print>
 #include "Physica/Core/Scalar/Diff.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 
 using namespace Physica;
+using T = float64;
+using dfloat = Diff<T, DiffMode::Reverse>;
 
 namespace {
     float64 forward() noexcept {
@@ -27,11 +30,26 @@ namespace {
         } // Pop compute graph node, propagate grads
         return x.grad(); // x receives grad
     }
+
+    void linalg() {
+        MatrixND<dfloat> A{{1, 2}, {-1, 1}};
+        VectorND<dfloat> x{1, 1};
+        VectorND<dfloat> b{-1, -0.5};
+
+        auto y = relu(A * x + b);
+        auto loss = square(y).sum();
+        loss.reverse_final(); // Immediate propagation without waiting for y to be destroyed
+
+        std::println("dL/dA =\n{}", A.grads());
+        std::println("dL/dx = {}", x.grads());
+        std::println("dL/db = {}", b.grads());
+    }
 }
 /**
  * We demonstrate basic concepts of automatic differentiation implemented in Physica.
  */
 int main() {
-    std::println("{} = {}", forward(), reverse());
+    std::println("{} = {}\n", forward(), reverse());
+    linalg();
     return 0;
 }

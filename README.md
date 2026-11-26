@@ -9,28 +9,43 @@ SPDX-License-Identifier: MPL-2.0
 
 [![License](https://img.shields.io/badge/License-MPL_2.0-blue.svg)](https://opensource.org/license/mpl-2-0) [![Linux](https://img.shields.io/badge/os-Linux-green.svg)](https://shields.io/)
 
-*Physica* is a high-performance and scalable C++ template library, dedicated to providing a rapid iteration platform for new algorithms. It provides the following two main features:
+*Physica* is a high-performance and scalable C++ template library, dedicated to providing a rapid-iteration platform for new algorithms.
 
-- Differentiable linear algebra library that leverages SIMD and GPU acceleration
-- Domain specific composable modules for computational physics
+It is inspired by [*Eigen*](https://eigen.tuxfamily.org) but integrates differentiation, tensor expressions and GPU execution into a uniform type system. This makes it elegant to write a numerical algorithm, differentiate it, and parallelize it.
 
-It is also an open source platform that maintains scientific code and related data. We expect it as a platform and not just a software, to promote the development of open science. The open source community continuously ensures that the results remain readable, reproducible and reliable.
+## Why Physica
 
-## Table of Contents
+- **Multilinear algebra**: `Scalar`, `Vector`, `Matrix` and `Tensor` are distinct concepts with expression support.
+- **Expression templates**: `A * x + b` remains a lazy expression, enabling operator fusion and compile-time expression transformations.
+- **Automatic differentiation**: forward- and reverse-mode automatic differentiation are available for scalars, vectors, matrices and tensors, not as an external layer.
+- **GPU execution**: host and device objects share the same interface via `device_obj<T>` and `toDevice()`.
+- **Lifetime safety**: expression nodes own their rvalue operands, avoiding the dangling pitfalls of traditional expression templates.
+- **Native scientific computing**: ODE/PDE, statistics, optimization and computational physics components build on the same foundation.
 
-- [Features](#features)
-- [Usage](#usage)
-- [Maintainers](#maintainers)
-- [License](#license)
+## Quickstart
 
-## Features
+The following example computes `ReLU(Ax + b)` and propagates the gradient of `loss` back to `A`, `x` and `b`:
 
-- Operator fusion using expression templates for both CPU and GPU  
-- Coroutine based automatic differentiation implementation  
-- Basic math library: Provides commonly used functions such as ODE, PDE, special functions, optimization, statistics, etc.
-- Template meta algorithm: optimal algorithm and parallelism strategy selection at compiling time
-- Multi-threads, MPI and CUDA parallel support
-- 2D and 3D plotting support
+```cpp
+using T = float64;
+using dfloat = Diff<T, DiffMode::Reverse>;
+
+int main() {
+    MatrixND<dfloat> A{{1, 2}, {-1, 1}};
+    VectorND<dfloat> x{1, 1};
+    VectorND<dfloat> b{-1, -0.5};
+
+    auto y = relu(A * x + b);
+    auto loss = square(y).sum();
+    loss.reverse_final();
+
+    std::println("dL/dA =\n{}", A.grads());
+    std::println("dL/dx = {}", x.grads());
+    std::println("dL/db = {}", b.grads());
+}
+```
+
+The complete example is available at [`examples/Core/Diff.cpp`](examples/Core/Diff.cpp).
 
 ## Usage
 
